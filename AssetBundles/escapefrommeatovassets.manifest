@@ -1,0 +1,73 @@
+ManifestFileVersion: 0
+CRC: 205855455
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 656cb3f80c13b35d86cc2fd9088afb98
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 2bce1e8bbcae8ab59bd0c196dda62391
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+- Class: 114
+  Script: {fileID: 1980459831, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+- Class: 114
+  Script: {fileID: -619905303, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+- Class: 114
+  Script: {fileID: 1301386320, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+- Class: 114
+  Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+- Class: 114
+  Script: {fileID: 1077351063, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+- Class: 114
+  Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 128
+  Script: {instanceID: 0}
+- Class: 135
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 222
+  Script: {instanceID: 0}
+- Class: 223
+  Script: {instanceID: 0}
+- Class: 224
+  Script: {instanceID: 0}
+Assets:
+- Assets/MeatovMansion.prefab
+- Assets/MeatovMenu.prefab
+- Assets/Prefabs/Item1.prefab
+- Assets/MeatovBase.prefab
+- Assets/MeatovPointable.prefab
+- Assets/Prefabs/QuickBeltSlot.prefab
+- Assets/Prefabs/Item0.prefab
+- Assets/Thumbnail.png
+- Assets/Prefabs/Item2.prefab
+- Assets/Prefabs/Item1Configuration.prefab
+Dependencies: []
