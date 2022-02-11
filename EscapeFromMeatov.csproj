@@ -61,6 +61,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EFM_AreaProduction.cs" />
+    <Compile Include="EFM_AreasDB.cs" />
+    <Compile Include="EFM_BaseAreaManager.cs" />
     <Compile Include="EFM_Base_Manager.cs" />
     <Compile Include="EFM_CustomItemWrapper.cs" />
     <Compile Include="EFM_EquipmentSlot.cs" />
@@ -68,7 +71,9 @@
     <Compile Include="EFM_Manager.cs" />
     <Compile Include="EFM_Menu_Manager.cs" />
     <Compile Include="EFM_OtherInteractable.cs" />
+    <Compile Include="EFM_PointableButton.cs" />
     <Compile Include="EFM_Raid_Manager.cs" />
+    <Compile Include="EFM_TraderStatus.cs" />
     <Compile Include="EscapeFromMeatov.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

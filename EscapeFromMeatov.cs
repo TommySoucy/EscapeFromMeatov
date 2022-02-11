@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Valve.Newtonsoft.Json;
 using UnityEngine.Audio;
 using static FistVR.SM;
+using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
@@ -24,12 +25,13 @@ namespace EFM
         // Constants
         public static readonly float headshotDamageMultiplier = 1.2f;
         public static readonly float handDamageResist = 0.5f;
-        public static readonly float[] sizeVolumes = { 1, 2, 4, 0, 8}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
+        public static readonly float[] sizeVolumes = { 1, 2, 5, 30, 0, 50}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
 
         // Live data
         public static Mod instance;
         public static AssetBundle assetsBundle;
         public static AssetBundle sceneBundle;
+        public static AssetBundle baseBundle;
         public static MainMenuSceneDef sceneDef;
         public static List<GameObject> securedObjects;
         public static int saveSlotIndex = -1;
@@ -48,9 +50,17 @@ namespace EFM
         public static GameObject scenePrefab_Base;
         public static GameObject mainMenuPointable;
         public static GameObject quickBeltSlotPrefab;
+        public static GameObject rectQuickBeltSlotPrefab;
         public static Material quickSlotHoverMaterial;
         public static Material quickSlotConstantMaterial;
         public static List<GameObject> itemPrefabs;
+
+        // DB
+        public static EFM_AreasDB areasDB;
+        public static JObject localDB;
+        public static Dictionary<string, string> itemMap;
+        public static JObject[] traderBaseDB;
+        public static JObject globalDB;
 
         // Config settings
 
@@ -64,7 +74,8 @@ namespace EFM
             Rig = 2,
             ArmoredRig = 3,
             Helmet = 4,
-            Backpack = 5
+            Backpack = 5,
+            Container = 6 // TODO: Implement container item type, should be exactly like backpack, but not necessarily multiple models AND CANT be equipped
         }
 
         public void Awake()
@@ -77,7 +88,7 @@ namespace EFM
 
             LoadConfig();
 
-            LoadAssets();
+            LoadDB();
 
             DoPatching();
 
@@ -99,22 +110,31 @@ namespace EFM
 
                 if (Input.GetKeyDown(KeyCode.U))
                 {
-                    GameObject armoredRig = itemPrefabs[1];
+                    GameObject armoredRig = itemPrefabs[375];
                     GameObject armoredRigObject = GameObject.Instantiate(armoredRig, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.5f, Quaternion.identity);
                     FVRObject armoredRigObjectWrapper = armoredRigObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    armoredRigObjectWrapper.ItemID = "1";
+                    armoredRigObjectWrapper.ItemID = "375";
                     if (GameObject.Find("MeatovBase") != null)
                     {
                         armoredRigObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
                     }
 
-                    GameObject cube = itemPrefabs[0];
-                    GameObject cubeObject = GameObject.Instantiate(cube, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.55f, Quaternion.identity);
-                    FVRObject cubeObjectWrapper = cubeObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    cubeObjectWrapper.ItemID = "0";
+                    GameObject basicArmoredRig = itemPrefabs[1];
+                    GameObject basicArmoredRigObject = GameObject.Instantiate(basicArmoredRig, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.7f, Quaternion.identity);
+                    FVRObject basicArmoredRigObjectWrapper = basicArmoredRigObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
+                    basicArmoredRigObjectWrapper.ItemID = "1";
                     if (GameObject.Find("MeatovBase") != null)
                     {
-                        cubeObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
+                        basicArmoredRigObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
+                    }
+
+                    GameObject battery = itemPrefabs[5];
+                    GameObject batteryObject = GameObject.Instantiate(battery, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward, Quaternion.identity);
+                    FVRObject batteryObjectWrapper = batteryObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
+                    batteryObjectWrapper.ItemID = "5";
+                    if (GameObject.Find("MeatovBase") != null)
+                    {
+                        batteryObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
                     }
 
                     GameObject pack = itemPrefabs[2];
@@ -134,15 +154,6 @@ namespace EFM
                     {
                         m1911MagObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
                     }
-
-                    //GameObject pumpkin = IM.OD["BodyPillow"].GetGameObject();
-                    //GameObject pumpkinObject = GameObject.Instantiate(pumpkin, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.2f, Quaternion.identity);
-                    //FVRObject pumpkinObjectWrapper = pumpkinObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    //pumpkinObjectWrapper.ItemID = "BodyPillow";
-                    //if (GameObject.Find("MeatovBase") != null)
-                    //{
-                    //    pumpkinObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    //}
                 }
 
                 if (Input.GetKeyDown(KeyCode.P))
@@ -316,6 +327,8 @@ namespace EFM
                     {
                         continue;
                     }
+
+                    // TODO
                 }
 
                 Logger.LogInfo("Configs loaded");
@@ -324,19 +337,22 @@ namespace EFM
             catch (Exception ex) { Logger.LogInfo("Couldn't read EscapeFromMeatovConfig.txt, using default settings instead. Error: " + ex.Message); }
         }
 
-        private void LoadAssets()
+        public void LoadAssets()
         {
+            LogInfo("Loading assets and scene bundles");
             // Load mod's AssetBundle
             assetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovAssets.ab");
             sceneBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovScene.ab");
 
+            LogInfo("Loading Main assets");
             // Load assets
             scenePrefab_Menu = assetsBundle.LoadAsset<GameObject>("MeatovMenu");
-            scenePrefab_Base = assetsBundle.LoadAsset<GameObject>("MeatovBase");
             sceneDefImage = assetsBundle.LoadAsset<Sprite>("Tumbnail");
             mainMenuPointable = assetsBundle.LoadAsset<GameObject>("MeatovPointable");
             quickBeltSlotPrefab = assetsBundle.LoadAsset<GameObject>("QuickBeltSlot");
+            rectQuickBeltSlotPrefab = assetsBundle.LoadAsset<GameObject>("RectQuickBeltSlot");
 
+            LogInfo("Loading item prefabs...");
             // Load custom item prefabs
             otherActiveSlots = new List<List<FVRQuickBeltSlot>>();
             itemPrefabs = new List<GameObject>();
@@ -346,6 +362,7 @@ namespace EFM
             quickSlotConstantMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Renderer>().material;
             for (int i = 0, rigIndex = 0; i < defaultItemsData.ItemDefaults.Count; ++i)
             {
+                LogInfo("\tLoading Item"+i);
                 GameObject itemPrefab = assetsBundle.LoadAsset<GameObject>("Item"+i);
                 itemPrefab.name = defaultItemsData.ItemDefaults[i].DefaultPhysicalObject.DefaultObjectWrapper.DisplayName;
 
@@ -446,6 +463,14 @@ namespace EFM
                 customItemWrapper.itemType = (ItemType)defaultItemsData.ItemDefaults[i].ItemType;
                 customItemWrapper.volumes = defaultItemsData.ItemDefaults[i].Volumes.ToArray();
 
+                // Fill customItemWrapper Colliders
+                List<Collider> colliders = new List<Collider>();
+                foreach(Transform collider in itemPrefab.transform.GetChild(0).GetChild(itemPrefab.transform.GetChild(0).childCount - 1))
+                {
+                    colliders.Add(collider.GetComponent<Collider>());
+                }
+                customItemWrapper.colliders = colliders.ToArray();
+
                 // Add an EFM_OtherInteractable to each child under Interactives recursively and add them to interactiveSets
                 List<GameObject> interactiveSets = new List<GameObject>();
                 foreach(Transform interactive in itemPrefab.transform.GetChild(3))
@@ -474,12 +499,14 @@ namespace EFM
                 // Rig
                 if (defaultItemsData.ItemDefaults[i].ItemType == 2 || defaultItemsData.ItemDefaults[i].ItemType == 3)
                 {
+                    LogInfo("\t\tIs rig");
                     // Setup the slots for the player rig config and the rig config
                     int slotCount = 0;
                     GameObject quickBeltConfiguration = assetsBundle.LoadAsset<GameObject>("Item"+i+"Configuration");
                     customItemWrapper.rigSlots = new List<FVRQuickBeltSlot>();
-                    for (int j = 0; j < quickBeltConfiguration.transform.childCount; ++j) 
+                    for (int j = 0; j < quickBeltConfiguration.transform.childCount; ++j)
                     {
+                        LogInfo("\t\tLoading rig slot "+j);
                         GameObject slotObject = quickBeltConfiguration.transform.GetChild(j).gameObject;
                         slotObject.tag = "QuickbeltSlot";
                         slotObject.SetActive(false); // Just so Awake() isn't called until we've set slot components fields
@@ -488,12 +515,15 @@ namespace EFM
                         slotObject.tag = "QuickbeltSlot";
                         slotObject.SetActive(false);
 
+                        string[] splitSlotName = slotObject.name.Split('_');
+                        FVRQuickBeltSlot.QuickbeltSlotShape slotShape = splitSlotName[1].Contains("Rect") ? FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear : FVRQuickBeltSlot.QuickbeltSlotShape.Sphere;
+
                         FVRQuickBeltSlot slotComponent = slotObject.AddComponent<FVRQuickBeltSlot>();
                         slotComponent.QuickbeltRoot = slotObject.transform;
                         slotComponent.HoverGeo = slotObject.transform.GetChild(0).GetChild(0).gameObject;
                         slotComponent.HoverGeo.SetActive(false);
                         slotComponent.PoseOverride = slotObject.transform.GetChild(0).GetChild(2);
-                        slotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Sphere;
+                        slotComponent.Shape = slotShape;
 
                         FVRQuickBeltSlot rigSlotComponent = rigSlotObject.AddComponent<FVRQuickBeltSlot>();
                         customItemWrapper.rigSlots.Add(rigSlotComponent);
@@ -501,8 +531,8 @@ namespace EFM
                         rigSlotComponent.HoverGeo = rigSlotObject.transform.GetChild(0).GetChild(0).gameObject;
                         rigSlotComponent.HoverGeo.SetActive(false);
                         rigSlotComponent.PoseOverride = rigSlotObject.transform.GetChild(0).GetChild(2);
-                        rigSlotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Sphere;
-                        switch (slotObject.name.Split('_')[0])
+                        rigSlotComponent.Shape = slotShape;
+                        switch (splitSlotName[0])
                         {
                             case "Small":
                                 slotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.Small;
@@ -530,11 +560,11 @@ namespace EFM
                         slotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
                         rigSlotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
 
-                        // Set slot sphere materials
+                        // Set slot glow materials
                         slotObject.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().material = quickSlotHoverMaterial;
                         slotObject.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().material = quickSlotConstantMaterial;
 
-                        // Set slot sphere materials
+                        // Set slot glow materials
                         rigSlotComponent.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().material = quickSlotHoverMaterial;
                         rigSlotComponent.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().material = quickSlotConstantMaterial;
 
@@ -585,8 +615,59 @@ namespace EFM
             firstCustomConfigIndex = customQuickBeltConfigurations.Count;
             customQuickBeltConfigurations.AddRange(rigConfigurations);
             ManagerSingleton<GM>.Instance.QuickbeltConfigurations = customQuickBeltConfigurations.ToArray();
+        }
 
-            // TODO: Had to initialize something here i think, but forgot what
+        private void LoadDB()
+        {
+            areasDB = JsonConvert.DeserializeObject<EFM_AreasDB>(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/areas.json"));
+            localDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/local.json"));
+            ParseItemMap();
+            traderBaseDB = new JObject[8];
+            for(int i=0; i < 8; ++i)
+            {
+                string traderID = EFM_TraderStatus.IndexToID(i);
+                traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/base.json"));
+            }
+            globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/globals.json"));
+        }
+
+
+
+        private void ParseItemMap()
+        {
+            itemMap = new Dictionary<string, string>();
+
+            try
+            {
+                string[] lines = System.IO.File.ReadAllLines("BepinEx/Plugins/EscapeFromMeatov/itemMap.txt");
+
+                foreach (string line in lines)
+                {
+                    if (line.Length == 0 || line[0] == '#')
+                    {
+                        continue;
+                    }
+
+                    string trimmedLine = line.Trim();
+                    string[] tokens = trimmedLine.Split(':');
+
+                    if (tokens.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (itemMap.ContainsKey(tokens[0]))
+                    {
+                        Logger.LogError("Key: " + tokens[0] + ":"+tokens[1]+" already exists in itemMap!");
+                    }
+                    else
+                    {
+                        itemMap.Add(tokens[0], tokens[1]);
+                    }
+                }
+            }
+            catch (FileNotFoundException ex) { Logger.LogInfo("Couldn't find itemMap.txt. Error: " + ex.Message); }
+            catch (Exception ex) { Logger.LogInfo("Couldn't read itemMap.txt. Error: " + ex.Message); }
         }
 
         private GameObject MakeItemInteractiveSet(Transform root, FVRPhysicalObject itemPhysicalObject)
@@ -729,10 +810,16 @@ namespace EFM
             pointableInstance.MaxPointingRange = 16;
             currentPointable.transform.position = new Vector3(-12.14f, 9.5f, 4.88f);
             currentPointable.transform.rotation = Quaternion.Euler(0, 300, 0);
+
+            // Set LOD bias to default
+            QualitySettings.lodBias = 2;
         }
 
         private void LoadMeatov()
         {
+            // Set LOD bias
+            QualitySettings.lodBias = 5;
+
             // Instantiate scene prefab
             GameObject prefabInstance = Instantiate<GameObject>(scenePrefab_Menu);
             prefabInstance.name = scenePrefab_Menu.name;
@@ -786,6 +873,12 @@ namespace EFM
             Mod.instance.LogInfo("load level prefix called with levelname: "+levelName);
             if (levelName.Equals("EscapeFromMeatovScene"))
             {
+                if (Mod.scenePrefab_Menu == null)
+                {
+                    Mod.instance.LogInfo("Opening meatov scene but assets not loaded yet, loading assets first...");
+                    Mod.instance.LoadAssets();
+                }
+
                 if (Mod.securedObjects == null)
                 {
                     Mod.securedObjects = new List<GameObject>();

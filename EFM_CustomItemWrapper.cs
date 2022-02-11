@@ -10,6 +10,7 @@ namespace EFM
 		public FVRPhysicalObject physicalObject;
 
         public Mod.ItemType itemType;
+		public Collider[] colliders;
 
 		// Equipment
 		// 0: Open (Model should be as orginal in tarkov), 1: ClosedFull (Closed but only folded to the point that any container/armor is not folded), 2: ClosedEmpty (Folded and flattened as much as is realistic)
@@ -79,6 +80,8 @@ namespace EFM
 						case Mod.ItemType.ArmoredRig:
 						case Mod.ItemType.Rig:
 						case Mod.ItemType.Backpack:
+						case Mod.ItemType.BodyArmor:
+						case Mod.ItemType.Container: 
 							ToggleMode(true, hand.IsThisTheRightHand);
 							break;
 						default:
@@ -104,6 +107,7 @@ namespace EFM
 								case Mod.ItemType.Rig:
 								case Mod.ItemType.Backpack:
 								case Mod.ItemType.BodyArmor:
+								case Mod.ItemType.Container:
 									ToggleMode(true, hand.IsThisTheRightHand);
 									break;
 								default:
@@ -127,6 +131,7 @@ namespace EFM
 
 		public void ToggleMode(bool inHand, bool isRightHand = false)
         {
+			//TODO: Implement toggling mode for container type item and also go impement save and load system
 			open = !open;
             if (open)
             {
@@ -276,5 +281,16 @@ namespace EFM
 			mainContainer.SetActive(open);
 			itemObjectsRoot.gameObject.SetActive(open);
 		}
+
+		private void OnCollisionEnter(Collision col)
+        {
+			if (col.collider.gameObject.tag.Equals("C", System.StringComparison.OrdinalIgnoreCase))
+            {
+				foreach (Collider c in colliders) 
+				{
+					Physics.IgnoreCollision(c, col.collider);
+				}
+            }
+        }
     }
 }

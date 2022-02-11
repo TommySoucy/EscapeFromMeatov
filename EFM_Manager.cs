@@ -6,7 +6,7 @@ using Valve.Newtonsoft.Json;
 
 namespace EFM
 {
-    abstract class EFM_Manager : MonoBehaviour
+    public abstract class EFM_Manager : MonoBehaviour
     {
         public bool init;
 
@@ -45,6 +45,17 @@ namespace EFM
 
         public static void LoadBase(GameObject caller, int slotIndex = -1, bool latest = false)
         {
+            Mod.instance.LogInfo("Loadbase called");
+            // Load base asset bundle
+            if (Mod.scenePrefab_Base == null)
+            {
+                Mod.instance.LogInfo("base null, loading bundle from file for first time");
+                Mod.baseBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovHideout.ab");
+                Mod.instance.LogInfo("Loaded hideout bunble from file, loading hideout prefab");
+                Mod.scenePrefab_Base = Mod.baseBundle.LoadAsset<GameObject>("Hideout");
+                Mod.instance.LogInfo("Loaded hideout prefab");
+            }
+
             if (availableSaveFiles == null)
             {
                 availableSaveFiles = new List<int>();
@@ -93,14 +104,20 @@ namespace EFM
 
             GameObject baseObject = Instantiate<GameObject>(Mod.scenePrefab_Base);
             baseObject.name = Mod.scenePrefab_Base.name;
-            baseObject.transform.position = Vector3.down * 50; // Move base 50 meters down because it will not be destroyed while in raid and we dont want it in the way
 
             EFM_Base_Manager baseManager = baseObject.AddComponent<EFM_Base_Manager>();
             baseManager.data = loadedData;
             baseManager.Init();
 
             Transform spawnPoint = baseObject.transform.GetChild(baseObject.transform.childCount - 1).GetChild(0);
+            Mod.instance.LogInfo("Base loaded and initialized, TPing player to spawnPoint: " + spawnPoint.position.x + "," + spawnPoint.position.y + "," + spawnPoint.position.z);
             GM.CurrentMovementManager.TeleportToPoint(spawnPoint.position, true, spawnPoint.rotation.eulerAngles);
+
+            // Unload base asset bundle
+            if (Mod.baseBundle != null)
+            {
+                Mod.baseBundle.Unload(false);
+            }
 
             Destroy(caller);
         }
