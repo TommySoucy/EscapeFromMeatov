@@ -1,0 +1,60 @@
+{
+  "maps": [
+    {
+      "extractions": [
+        {
+          "times": [],
+          "itemRequirements": [],
+          "equipmentRequirements": [],
+          "itemBlacklist": [],
+          "equipmentBlacklist": []
+        },
+        {
+          "times": [],
+          "itemRequirements": [],
+          "equipmentRequirements": [],
+          "itemBlacklist": [],
+          "equipmentBlacklist": []
+        },
+        {
+          "times": [],
+          "itemRequirements": [],
+          "equipmentRequirements": [],
+          "itemBlacklist": [],
+          "equipmentBlacklist": []
+        },
+        {
+          "times": [],
+          "itemRequirements": [],
+          "equipmentRequirements": [],
+          "itemBlacklist": [],
+          "equipmentBlacklist": []
+        },
+        {
+          "times": [],
+          "itemRequirements": [],
+          "equipmentRequirements": [],
+          "itemBlacklist": [],
+          "equipmentBlacklist": []
+        },
+        {
+          "times": [],
+          "itemRequirements": [],
+          "equipmentRequirements": [],
+          "itemBlacklist": [],
+          "equipmentBlacklist": []
+        },
+        {
+          "times": [],
+          "itemRequirements": [],
+          "equipmentRequirements": [],
+          "itemBlacklist": [],
+          "equipmentBlacklist": []
+        }
+      ],
+      "otherDetails": [
+        {}
+      ]
+    }
+  ]
+}
