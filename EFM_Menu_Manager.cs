@@ -8,18 +8,20 @@ namespace EFM
     {
         private Button[][] buttons;
         private Transform canvas;
+        private AudioSource clickAudio;
 
         public override void InitUI()
         {
             buttons = new Button[2][];
-            buttons[0] = new Button[3];
+            buttons[0] = new Button[4];
             buttons[1] = new Button[7];
 
             // Fetch buttons
-            canvas = GameObject.Find("MeatovMenu").transform.GetChild(0).GetChild(0);
+            canvas = GameObject.Find("Menu").transform.GetChild(0).GetChild(0);
             buttons[0][0] = canvas.GetChild(0).GetChild(1).GetComponent<Button>(); // New Game
             buttons[0][1] = canvas.GetChild(0).GetChild(2).GetComponent<Button>(); // Continue
             buttons[0][2] = canvas.GetChild(0).GetChild(3).GetComponent<Button>(); // Load
+            buttons[0][3] = canvas.GetChild(0).GetChild(4).GetComponent<Button>(); // Back
 
             buttons[1][0] = canvas.GetChild(1).GetChild(1).GetComponent<Button>(); // Load Slot 0
             buttons[1][1] = canvas.GetChild(1).GetChild(2).GetComponent<Button>(); // Load Slot 1
@@ -29,18 +31,25 @@ namespace EFM
             buttons[1][5] = canvas.GetChild(1).GetChild(6).GetComponent<Button>(); // Load Auto save
             buttons[1][6] = canvas.GetChild(1).GetChild(7).GetComponent<Button>(); // Load Back
 
-            // Create an FVRPointableButton for each button
+            // Fetch audio sources
+            AudioSource hoverAudio = canvas.transform.GetChild(4).GetComponent<AudioSource>();
+            clickAudio = canvas.transform.GetChild(5).GetComponent<AudioSource>();
+
+            // Create an EFM_PointableButton for each button
             for (int i = 0; i < buttons.Length; ++i)
             {
                 for (int j = 0; j < buttons[i].Length; ++j)
                 {
-                    FVRPointableButton pointableButton = buttons[i][j].gameObject.AddComponent<FVRPointableButton>();
+                    EFM_PointableButton pointableButton = buttons[i][j].gameObject.AddComponent<EFM_PointableButton>();
+
                     pointableButton.SetButton();
-                    pointableButton.SetText();
-                    pointableButton.SetRenderer();
-                    pointableButton.ColorSelected = Color.white;
-                    pointableButton.ColorUnselected = Color.white;
-                    pointableButton.MaxPointingRange = 10;
+                    pointableButton.MaxPointingRange = 5;
+                    pointableButton.hoverGraphics = new GameObject[2];
+                    pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+                    pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+                    pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+                    pointableButton.toggleTextColor = true;
+                    pointableButton.hoverSound = hoverAudio;
                 }
             }
 
@@ -48,6 +57,7 @@ namespace EFM
             buttons[0][0].onClick.AddListener(OnNewGameClicked);
             buttons[0][1].onClick.AddListener(OnContinueClicked);
             buttons[0][2].onClick.AddListener(OnLoadClicked);
+            buttons[0][3].onClick.AddListener(OnMainBackClicked);
 
             buttons[1][0].onClick.AddListener(() => { OnLoadSlotClicked(0); });
             buttons[1][1].onClick.AddListener(() => { OnLoadSlotClicked(1); });
@@ -74,29 +84,41 @@ namespace EFM
 
         public void OnNewGameClicked()
         {
-            LoadBase(gameObject);
+            LoadBase();
+            clickAudio.Play();
         }
 
         public void OnContinueClicked()
         {
-            LoadBase(gameObject, -1, true);
+            LoadBase(-1, true);
+            clickAudio.Play();
         }
 
         public void OnLoadClicked()
         {
             canvas.GetChild(0).gameObject.SetActive(false);
             canvas.GetChild(1).gameObject.SetActive(true);
+            clickAudio.Play();
         }
 
         public void OnLoadSlotClicked(int slotIndex)
         {
-            LoadBase(gameObject, slotIndex);
+            LoadBase(slotIndex);
+            clickAudio.Play();
         }
 
         public void OnBackClicked()
         {
             canvas.GetChild(1).gameObject.SetActive(false);
             canvas.GetChild(0).gameObject.SetActive(true);
+            clickAudio.Play();
+        }
+
+        public void OnMainBackClicked()
+        {
+            Mod.menuBundle.Unload(true);
+            Mod.baseBundle.Unload(true);
+            clickAudio.Play();
         }
     }
 }

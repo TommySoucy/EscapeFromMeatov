@@ -43,7 +43,7 @@ namespace EFM
                 float minSalesSum = ((int)traderBase["loyaltyLevels"][i]["minSalesSum"]);
                 float minStanding = ((int)traderBase["loyaltyLevels"][i]["minStanding"]);
 
-                if(baseManager.data.level < minLevel || salesSum < minSalesSum || standing < minStanding)
+                if((int)baseManager.data["level"] < minLevel || salesSum < minSalesSum || standing < minStanding)
                 {
                     return i + 1;
                 }

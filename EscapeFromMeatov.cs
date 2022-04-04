@@ -11,6 +11,7 @@ using Valve.Newtonsoft.Json;
 using UnityEngine.Audio;
 using static FistVR.SM;
 using Valve.Newtonsoft.Json.Linq;
+using Valve.VR;
 
 namespace EFM
 {
@@ -30,12 +31,12 @@ namespace EFM
         // Live data
         public static Mod instance;
         public static AssetBundle assetsBundle;
-        public static AssetBundle sceneBundle;
+        public static AssetBundle menuBundle;
+        public static AssetBundle baseAssetsBundle;
         public static AssetBundle baseBundle;
         public static MainMenuSceneDef sceneDef;
         public static List<GameObject> securedObjects;
         public static int saveSlotIndex = -1;
-        public static DefaultItemData defaultItemsData;
         public static int currentQuickBeltConfiguration = -1;
         public static int firstCustomConfigIndex = -1;
         public static List<EFM_EquipmentSlot> equipmentSlots;
@@ -43,29 +44,64 @@ namespace EFM
         public static EFM_Hand rightHand;
         public static EFM_Hand leftHand;
         public static List<List<FVRQuickBeltSlot>> otherActiveSlots;
+        public static int chosenCharIndex;
+        public static int chosenMapIndex;
+        public static int chosenTimeIndex;
+        public static EFM_Base_Manager.FinishRaidState raidState;
+        public static bool justFinishedRaid;
+        public static bool grillHouseSecure;
+        public static bool isGrillhouse;
+
+        // Player
+        public static float[] health; // 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
+        public static float hydration = 100;
+        public static float maxHydration = 100;
+        public static float energy = 100;
+        public static float maxEnergy = 100;
+        public static float stamina = 100;
+        public static float maxStamina = 100;
+        public static float currentMaxStamina = 100;
+        public static EFM_Skill[] skills;
+        public static float level = 1;
+        public static float sprintStaminaDrain = 4.1f;
+        public static float overweightStaminaDrain = 4f;
+        public static float staminaRestoration = 4.4f;
+        public static float jumpStaminaDrain = 16;
+        public static float currentStaminaEffect = 0;
+        public static float weightLimit = 55;
+        public static float currentWeightLimit = 55;
 
         // Assets
+        public static bool assetLoaded;
         public static Sprite sceneDefImage;
         public static GameObject scenePrefab_Menu;
-        public static GameObject scenePrefab_Base;
         public static GameObject mainMenuPointable;
         public static GameObject quickBeltSlotPrefab;
         public static GameObject rectQuickBeltSlotPrefab;
         public static Material quickSlotHoverMaterial;
         public static Material quickSlotConstantMaterial;
         public static List<GameObject> itemPrefabs;
+        public static GameObject doorLeftPrefab;
+        public static GameObject doorRightPrefab;
+        public static GameObject doorDoublePrefab;
+        public static bool initDoors = true;
+        public static Dictionary<string, Sprite> itemIcons;
 
         // DB
-        public static EFM_AreasDB areasDB;
+        public static JObject areasDB;
         public static JObject localDB;
         public static Dictionary<string, string> itemMap;
         public static JObject[] traderBaseDB;
         public static JObject globalDB;
+        public static JObject mapData;
+        public static JObject[] locationsDB;
+        public static JObject defaultItemsData;
+        public static Dictionary<string, EFM_VanillaItemDescriptor> vanillaItems;
 
         // Config settings
 
         // DEBUG
-        private bool debug;
+        public bool debug;
 
         public enum ItemType
         {
@@ -75,7 +111,20 @@ namespace EFM
             ArmoredRig = 3,
             Helmet = 4,
             Backpack = 5,
-            Container = 6 // TODO: Implement container item type, should be exactly like backpack, but not necessarily multiple models AND CANT be equipped
+            Container = 6, 
+            Pouch = 7, 
+            AmmoBox = 8,
+            Money = 9,
+            Consumable = 10, 
+            Key = 11 // TODO Implement, need to make all keys like h3vr keys so they can be used in doors
+        }
+
+        public enum ItemRarity
+        {
+            Common,
+            Rare,
+            Superrare,
+            Not_exist
         }
 
         public void Awake()
@@ -105,7 +154,13 @@ namespace EFM
             {
                 if (Input.GetKeyDown(KeyCode.L))
                 {
-                    SteamVR_LoadLevel.Begin("EscapeFromMeatovScene", false, 0.5f, 0f, 0f, 0f, 1f);
+                    SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
+                }
+
+                if (Input.GetKeyDown(KeyCode.P))
+                {
+                    // Loads new game
+                    EFM_Manager.LoadBase();
                 }
 
                 if (Input.GetKeyDown(KeyCode.U))
@@ -156,27 +211,20 @@ namespace EFM
                     }
                 }
 
-                if (Input.GetKeyDown(KeyCode.P))
-                {
-                    // Loads new game
-                    EFM_Manager.LoadBase(GameObject.Find("MeatovMenu"));
-                }
-
                 if (Input.GetKeyDown(KeyCode.N))
                 {
-                    GM.CurrentPlayerBody.ConfigureQuickbelt(11);
+                    SteamVR_LoadLevel.Begin("Grillhouse_2Story", false, 0.5f, 0f, 0f, 0f, 1f);
                 }
 
                 if (Input.GetKeyDown(KeyCode.H))
                 {
                     FieldInfo genericPoolField = typeof(SM).GetField("m_pool_generic", BindingFlags.NonPublic | BindingFlags.Instance);
                     Logger.LogInfo("Generic pool null?: "+(genericPoolField.GetValue(ManagerSingleton<SM>.Instance) == null));
-
                 }
 
                 if (Input.GetKeyDown(KeyCode.O))
                 {
-                    GameObject.Find("MeatovBase").GetComponent<EFM_Base_Manager>().OnConfirmRaidClicked();
+                    GameObject.Find("Hideout").GetComponent<EFM_Base_Manager>().OnConfirmRaidClicked();
                 }
 
                 if (Input.GetKeyDown(KeyCode.M))
@@ -240,7 +288,12 @@ namespace EFM
 
                 if (Input.GetKeyDown(KeyCode.I))
                 {
-                    EFM_Manager.LoadBase(GameObject.Find("MeatovMenu"), 0);
+                    EFM_Manager.LoadBase(0);
+                }
+
+                if (Input.GetKeyDown(KeyCode.Keypad1))
+                {
+                    DumpLayers();
                 }
             }
         }
@@ -342,11 +395,10 @@ namespace EFM
             LogInfo("Loading assets and scene bundles");
             // Load mod's AssetBundle
             assetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovAssets.ab");
-            sceneBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovScene.ab");
+            menuBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovMenu.ab");
 
             LogInfo("Loading Main assets");
             // Load assets
-            scenePrefab_Menu = assetsBundle.LoadAsset<GameObject>("MeatovMenu");
             sceneDefImage = assetsBundle.LoadAsset<Sprite>("Tumbnail");
             mainMenuPointable = assetsBundle.LoadAsset<GameObject>("MeatovPointable");
             quickBeltSlotPrefab = assetsBundle.LoadAsset<GameObject>("QuickBeltSlot");
@@ -356,62 +408,85 @@ namespace EFM
             // Load custom item prefabs
             otherActiveSlots = new List<List<FVRQuickBeltSlot>>();
             itemPrefabs = new List<GameObject>();
-            defaultItemsData = JsonConvert.DeserializeObject<DefaultItemData>(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DefaultItemData.txt"));
+            itemIcons = new Dictionary<string, Sprite>();
+            defaultItemsData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DefaultItemData.txt"));
             List<GameObject> rigConfigurations = new List<GameObject>();
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
             quickSlotConstantMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Renderer>().material;
-            for (int i = 0, rigIndex = 0; i < defaultItemsData.ItemDefaults.Count; ++i)
+            for (int i = 0, rigIndex = 0; i < ((JArray)defaultItemsData["ItemDefaults"]).Count; ++i)
             {
                 LogInfo("\tLoading Item"+i);
                 GameObject itemPrefab = assetsBundle.LoadAsset<GameObject>("Item"+i);
-                itemPrefab.name = defaultItemsData.ItemDefaults[i].DefaultPhysicalObject.DefaultObjectWrapper.DisplayName;
+                itemPrefab.name = defaultItemsData["ItemDefaults"][i]["DefaultPhysicalObject"]["DefaultObjectWrapper"]["DisplayName"].ToString();
 
                 itemPrefabs.Add(itemPrefab);
 
+                Sprite itemIcon = assetsBundle.LoadAsset<Sprite>("Item"+i+"_Icon");
+                itemIcons.Add(i.ToString(), itemIcon);
+
+                int itemType = ((int)defaultItemsData["ItemDefaults"][i]["ItemType"]);
+
                 // Create an FVRPhysicalObject and FVRObject to fill with the item's default data
-                FVRPhysicalObject itemPhysicalObject = itemPrefab.AddComponent<FVRPhysicalObject>();
+                FVRPhysicalObject itemPhysicalObject = null;
+                if (itemType == 8) // Ammo box needs to be magazine
+                {
+                    itemPhysicalObject = itemPrefab.AddComponent<FVRFireArmMagazine>();
+                }
+                else if(itemType == 11)
+                {
+                    itemPhysicalObject = itemPrefab.AddComponent<LockKey>();
+                }
+                else
+                {
+                    itemPhysicalObject = itemPrefab.AddComponent<FVRPhysicalObject>();
+                }
                 FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper = ScriptableObject.CreateInstance<FVRObject>();
 
-                DefaultPhysicalObject defaultPhysicalObject = defaultItemsData.ItemDefaults[i].DefaultPhysicalObject;
-                itemPhysicalObject.SpawnLockable = defaultPhysicalObject.SpawnLockable;
-                itemPhysicalObject.Harnessable = defaultPhysicalObject.Harnessable;
-                itemPhysicalObject.HandlingReleaseIntoSlotSound = (HandlingReleaseIntoSlotType)defaultPhysicalObject.HandlingReleaseIntoSlotSound;
-                itemPhysicalObject.Size = (FVRPhysicalObject.FVRPhysicalObjectSize)defaultPhysicalObject.Size;
-                itemPhysicalObject.QBSlotType = (FVRQuickBeltSlot.QuickbeltSlotType)defaultPhysicalObject.QBSlotType;
-                itemPhysicalObject.DoesReleaseOverrideVelocity = defaultPhysicalObject.DoesReleaseOverrideVelocity;
-                itemPhysicalObject.DoesReleaseAddVelocity = defaultPhysicalObject.DoesReleaseAddVelocity;
-                itemPhysicalObject.ThrowVelMultiplier = defaultPhysicalObject.ThrowVelMultiplier;
-                itemPhysicalObject.ThrowAngMultiplier = defaultPhysicalObject.ThrowAngMultiplier;
-                itemPhysicalObject.MoveIntensity = defaultPhysicalObject.MoveIntensity;
-                itemPhysicalObject.RotIntensity = defaultPhysicalObject.RotIntensity;
-                itemPhysicalObject.UsesGravity = defaultPhysicalObject.UsesGravity;
-                itemPhysicalObject.DistantGrabbable = defaultPhysicalObject.DistantGrabbable;
-                itemPhysicalObject.IsDebug = defaultPhysicalObject.IsDebug;
-                itemPhysicalObject.IsAltHeld = defaultPhysicalObject.IsAltHeld;
-                itemPhysicalObject.IsKinematicLocked = defaultPhysicalObject.IsKinematicLocked;
-                itemPhysicalObject.DoesQuickbeltSlotFollowHead = defaultPhysicalObject.DoesQuickbeltSlotFollowHead;
-                itemPhysicalObject.IsPickUpLocked = defaultPhysicalObject.IsPickUpLocked;
-                itemPhysicalObject.OverridesObjectToHand = (FVRPhysicalObject.ObjectToHandOverrideMode)defaultPhysicalObject.OverridesObjectToHand;
+                JToken defaultPhysicalObject = defaultItemsData["ItemDefaults"][i]["DefaultPhysicalObject"];
+                itemPhysicalObject.SpawnLockable = (bool)defaultPhysicalObject["SpawnLockable"];
+                itemPhysicalObject.Harnessable = (bool)defaultPhysicalObject["Harnessable"];
+                itemPhysicalObject.HandlingReleaseIntoSlotSound = (HandlingReleaseIntoSlotType)((int)defaultPhysicalObject["HandlingReleaseIntoSlotSound"]);
+                itemPhysicalObject.Size = (FVRPhysicalObject.FVRPhysicalObjectSize)((int)defaultPhysicalObject["Size"]);
+                itemPhysicalObject.QBSlotType = (FVRQuickBeltSlot.QuickbeltSlotType)((int)defaultPhysicalObject["QBSlotType"]);
+                itemPhysicalObject.DoesReleaseOverrideVelocity = (bool)defaultPhysicalObject["DoesReleaseOverrideVelocity"];
+                itemPhysicalObject.DoesReleaseAddVelocity = (bool)defaultPhysicalObject["DoesReleaseAddVelocity"];
+                itemPhysicalObject.ThrowVelMultiplier = (float)defaultPhysicalObject["ThrowVelMultiplier"];
+                itemPhysicalObject.ThrowAngMultiplier = (float)defaultPhysicalObject["ThrowAngMultiplier"];
+                itemPhysicalObject.MoveIntensity = (float)defaultPhysicalObject["MoveIntensity"];
+                itemPhysicalObject.RotIntensity = (float)defaultPhysicalObject["RotIntensity"];
+                itemPhysicalObject.UsesGravity = (bool)defaultPhysicalObject["UsesGravity"];
+                itemPhysicalObject.DistantGrabbable = (bool)defaultPhysicalObject["DistantGrabbable"];
+                itemPhysicalObject.IsDebug = (bool)defaultPhysicalObject["IsDebug"];
+                itemPhysicalObject.IsAltHeld = (bool)defaultPhysicalObject["IsAltHeld"];
+                itemPhysicalObject.IsKinematicLocked = (bool)defaultPhysicalObject["IsKinematicLocked"];
+                itemPhysicalObject.DoesQuickbeltSlotFollowHead = (bool)defaultPhysicalObject["DoesQuickbeltSlotFollowHead"];
+                itemPhysicalObject.IsPickUpLocked = (bool)defaultPhysicalObject["IsPickUpLocked"];
+                itemPhysicalObject.OverridesObjectToHand = (FVRPhysicalObject.ObjectToHandOverrideMode)((int)defaultPhysicalObject["OverridesObjectToHand"]);
                 itemPhysicalObject.PoseOverride = itemPrefab.transform.GetChild(1);
+                if (!itemPhysicalObject.PoseOverride.gameObject.activeSelf)
+                {
+                    itemPhysicalObject.PoseOverride = null;
+                }
                 itemPhysicalObject.QBPoseOverride = itemPrefab.transform.GetChild(2);
+                itemPhysicalObject.UseGrabPointChild = true; // Makes sure the item will be held where the player grabs it instead of at pose override
 
-                DefaultObjectWrapper defaultObjectWrapper = defaultPhysicalObject.DefaultObjectWrapper;
+                JToken defaultObjectWrapper = defaultPhysicalObject["DefaultObjectWrapper"];
                 itemObjectWrapper.ItemID = i.ToString();
-                itemObjectWrapper.DisplayName = defaultObjectWrapper.DisplayName;
-                itemObjectWrapper.Category = (FVRObject.ObjectCategory)defaultObjectWrapper.Category;
-                itemObjectWrapper.Mass = defaultObjectWrapper.Mass;
-                itemObjectWrapper.MagazineCapacity = defaultObjectWrapper.MagazineCapacity;
-                itemObjectWrapper.RequiresPicatinnySight = defaultObjectWrapper.RequiresPicatinnySight;
-                itemObjectWrapper.TagEra = (FVRObject.OTagEra)defaultObjectWrapper.TagEra;
-                itemObjectWrapper.TagSet = (FVRObject.OTagSet)defaultObjectWrapper.TagSet;
-                itemObjectWrapper.TagFirearmSize = (FVRObject.OTagFirearmSize)defaultObjectWrapper.TagFirearmSize;
-                itemObjectWrapper.TagFirearmAction = (FVRObject.OTagFirearmAction)defaultObjectWrapper.TagFirearmAction;
-                itemObjectWrapper.TagFirearmRoundPower = (FVRObject.OTagFirearmRoundPower)defaultObjectWrapper.TagFirearmRoundPower;
-                itemObjectWrapper.TagFirearmCountryOfOrigin = (FVRObject.OTagFirearmCountryOfOrigin)defaultObjectWrapper.TagFirearmCountryOfOrigin;
-                if (defaultObjectWrapper.TagFirearmFiringModes != null && defaultObjectWrapper.TagFirearmFiringModes.Count > 0)
+                itemObjectWrapper.DisplayName = defaultObjectWrapper["DisplayName"].ToString();
+                itemObjectWrapper.Category = (FVRObject.ObjectCategory)((int)defaultObjectWrapper["Category"]);
+                itemObjectWrapper.Mass = itemPrefab.GetComponent<Rigidbody>().mass;
+                itemObjectWrapper.MagazineCapacity = (int)defaultObjectWrapper["MagazineCapacity"];
+                itemObjectWrapper.RequiresPicatinnySight = (bool)defaultObjectWrapper["RequiresPicatinnySight"];
+                itemObjectWrapper.TagEra = (FVRObject.OTagEra)(int)defaultObjectWrapper["TagEra"];
+                itemObjectWrapper.TagSet = (FVRObject.OTagSet)(int)defaultObjectWrapper["TagSet"];
+                itemObjectWrapper.TagFirearmSize = (FVRObject.OTagFirearmSize)(int)defaultObjectWrapper["TagFirearmSize"];
+                itemObjectWrapper.TagFirearmAction = (FVRObject.OTagFirearmAction)(int)defaultObjectWrapper["TagFirearmAction"];
+                itemObjectWrapper.TagFirearmRoundPower = (FVRObject.OTagFirearmRoundPower)(int)defaultObjectWrapper["TagFirearmRoundPower"];
+                itemObjectWrapper.TagFirearmCountryOfOrigin = (FVRObject.OTagFirearmCountryOfOrigin)(int)defaultObjectWrapper["TagFirearmCountryOfOrigin"];
+                if (defaultObjectWrapper["TagFirearmFiringModes"] != null && ((JArray)defaultObjectWrapper["TagFirearmFiringModes"]).Count > 0)
                 {
                     List<FVRObject.OTagFirearmFiringMode> newTagFirearmFiringModes = new List<FVRObject.OTagFirearmFiringMode>();
-                    foreach (int e in defaultObjectWrapper.TagFirearmFiringModes)
+                    foreach (int e in defaultObjectWrapper["TagFirearmFiringModes"])
                     {
                         newTagFirearmFiringModes.Add((FVRObject.OTagFirearmFiringMode)e);
                     }
@@ -421,10 +496,10 @@ namespace EFM
                 {
                     itemObjectWrapper.TagFirearmFiringModes = null;
                 }
-                if (defaultObjectWrapper.TagFirearmFeedOption != null && defaultObjectWrapper.TagFirearmFeedOption.Count > 0)
+                if (defaultObjectWrapper["TagFirearmFeedOption"] != null && ((JArray)defaultObjectWrapper["TagFirearmFeedOption"]).Count > 0)
                 {
                     List<FVRObject.OTagFirearmFeedOption> newTagFirearmFeedOption = new List<FVRObject.OTagFirearmFeedOption>();
-                    foreach (int e in defaultObjectWrapper.TagFirearmFeedOption)
+                    foreach (int e in defaultObjectWrapper["TagFirearmFeedOption"])
                     {
                         newTagFirearmFeedOption.Add((FVRObject.OTagFirearmFeedOption)e);
                     }
@@ -434,10 +509,10 @@ namespace EFM
                 {
                     itemObjectWrapper.TagFirearmFeedOption = null;
                 }
-                if (defaultObjectWrapper.TagFirearmMounts != null && defaultObjectWrapper.TagFirearmMounts.Count > 0)
+                if (defaultObjectWrapper["TagFirearmMounts"] != null && ((JArray)defaultObjectWrapper["TagFirearmMounts"]).Count > 0)
                 {
                     List<FVRObject.OTagFirearmMount> newTagFirearmMounts = new List<FVRObject.OTagFirearmMount>();
-                    foreach (int e in defaultObjectWrapper.TagFirearmMounts)
+                    foreach (int e in defaultObjectWrapper["TagFirearmMounts"])
                     {
                         newTagFirearmMounts.Add((FVRObject.OTagFirearmMount)e);
                     }
@@ -447,21 +522,27 @@ namespace EFM
                 {
                     itemObjectWrapper.TagFirearmMounts = null;
                 }
-                itemObjectWrapper.TagAttachmentMount = (FVRObject.OTagFirearmMount)defaultObjectWrapper.TagAttachmentMount;
-                itemObjectWrapper.TagAttachmentFeature = (FVRObject.OTagAttachmentFeature)defaultObjectWrapper.TagAttachmentFeature;
-                itemObjectWrapper.TagMeleeStyle = (FVRObject.OTagMeleeStyle)defaultObjectWrapper.TagMeleeStyle;
-                itemObjectWrapper.TagMeleeHandedness = (FVRObject.OTagMeleeHandedness)defaultObjectWrapper.TagMeleeHandedness;
-                itemObjectWrapper.TagPowerupType = (FVRObject.OTagPowerupType)defaultObjectWrapper.TagPowerupType;
-                itemObjectWrapper.TagThrownType = (FVRObject.OTagThrownType)defaultObjectWrapper.TagThrownType;
-                itemObjectWrapper.MagazineType = (FireArmMagazineType)defaultObjectWrapper.MagazineType;
-                itemObjectWrapper.CreditCost = defaultObjectWrapper.CreditCost;
-                itemObjectWrapper.OSple = defaultObjectWrapper.OSple;
+                itemObjectWrapper.TagAttachmentMount = (FVRObject.OTagFirearmMount)((int)defaultObjectWrapper["TagAttachmentMount"]);
+                itemObjectWrapper.TagAttachmentFeature = (FVRObject.OTagAttachmentFeature)((int)defaultObjectWrapper["TagAttachmentFeature"]);
+                itemObjectWrapper.TagMeleeStyle = (FVRObject.OTagMeleeStyle)((int)defaultObjectWrapper["TagMeleeStyle"]);
+                itemObjectWrapper.TagMeleeHandedness = (FVRObject.OTagMeleeHandedness)((int)defaultObjectWrapper["TagMeleeHandedness"]);
+                itemObjectWrapper.TagPowerupType = (FVRObject.OTagPowerupType)((int)defaultObjectWrapper["TagPowerupType"]);
+                itemObjectWrapper.TagThrownType = (FVRObject.OTagThrownType)((int)defaultObjectWrapper["TagThrownType"]);
+                itemObjectWrapper.MagazineType = (FireArmMagazineType)((int)defaultObjectWrapper["MagazineType"]);
+                itemObjectWrapper.CreditCost = (int)defaultObjectWrapper["CreditCost"]; // TODO: Make this dependent on tarkov data, otherwise take defaultObjectWrapper.CreditCost
+                itemObjectWrapper.OSple = (bool)defaultObjectWrapper["OSple"];
 
                 // Add custom item wrapper
                 EFM_CustomItemWrapper customItemWrapper = itemPrefab.AddComponent<EFM_CustomItemWrapper>();
+                customItemWrapper.ID = i.ToString();
                 customItemWrapper.physicalObject = itemPhysicalObject;
-                customItemWrapper.itemType = (ItemType)defaultItemsData.ItemDefaults[i].ItemType;
-                customItemWrapper.volumes = defaultItemsData.ItemDefaults[i].Volumes.ToArray();
+                customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
+                customItemWrapper.volumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
+                customItemWrapper.parent = defaultItemsData["ItemDefaults"][i]["parent"].ToString();
+                if(defaultItemsData["ItemDefaults"][i]["MaxAmount"] != null)
+                {
+                    customItemWrapper.maxAmount = (int)defaultItemsData["ItemDefaults"][i]["MaxAmount"];
+                }
 
                 // Fill customItemWrapper Colliders
                 List<Collider> colliders = new List<Collider>();
@@ -488,16 +569,16 @@ namespace EFM
                 customItemWrapper.models = models.ToArray();
 
                 // Armor
-                if (defaultItemsData.ItemDefaults[i].ItemType == 1 || defaultItemsData.ItemDefaults[i].ItemType == 3)
+                if (itemType == 1 || itemType == 3)
                 {
-                    customItemWrapper.coverage = defaultItemsData.ItemDefaults[i].ArmorAndRigProperties.Coverage;
-                    customItemWrapper.damageResist = defaultItemsData.ItemDefaults[i].ArmorAndRigProperties.DamageResist;
-                    customItemWrapper.maxArmor = defaultItemsData.ItemDefaults[i].ArmorAndRigProperties.Armor;
+                    customItemWrapper.coverage = (float)defaultItemsData["ItemDefaults"][i]["ArmorAndRigProperties"]["Coverage"];
+                    customItemWrapper.damageResist = (float)defaultItemsData["ItemDefaults"][i]["ArmorAndRigProperties"]["DamageResist"];
+                    customItemWrapper.maxArmor = (float)defaultItemsData["ItemDefaults"][i]["ArmorAndRigProperties"]["Armor"];
                     customItemWrapper.armor = customItemWrapper.maxArmor;
                 }
 
                 // Rig
-                if (defaultItemsData.ItemDefaults[i].ItemType == 2 || defaultItemsData.ItemDefaults[i].ItemType == 3)
+                if (itemType == 2 || itemType == 3)
                 {
                     LogInfo("\t\tIs rig");
                     // Setup the slots for the player rig config and the rig config
@@ -586,7 +667,7 @@ namespace EFM
                 }
 
                 // Backpack
-                if (defaultItemsData.ItemDefaults[i].ItemType == 5)
+                if (itemType == 5)
                 {
                     // Set MainContainer renderers and their material
                     GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
@@ -600,14 +681,215 @@ namespace EFM
                         mainContainerRenderers[mainContainerRenderers.Count - 1].material = quickSlotConstantMaterial;
                     }
                     customItemWrapper.mainContainerRenderers = mainContainerRenderers.ToArray();
-
-                    customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
-                    customItemWrapper.maxVolume = defaultItemsData.ItemDefaults[i].BackpackProperties.MaxVolume;
-
+                    
+                    // Set pose overrides
                     customItemWrapper.rightHandPoseOverride = itemPhysicalObject.PoseOverride;
-                    customItemWrapper.leftHandPoseOverride = itemPhysicalObject.PoseOverride.GetChild(0);
+                    if (customItemWrapper.rightHandPoseOverride != null)
+                    {
+                        customItemWrapper.leftHandPoseOverride = itemPhysicalObject.PoseOverride.GetChild(0);
+                    }
+
+                    // Set backpack settings
+                    customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
+                    customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["BackpackProperties"]["MaxVolume"];
+
+                    // Set filter lists
+                    SetFilterListsFor(customItemWrapper, i);
+                }
+
+                // Container
+                if(itemType == 6)
+                {
+                    // Set MainContainer renderers and their material
+                    GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
+                    customItemWrapper.mainContainer = mainContainer;
+                    Renderer[] mainContainerRenderer = new Renderer[1];
+                    mainContainerRenderer[0] = mainContainer.GetComponent<Renderer>();
+                    mainContainerRenderer[0].material = quickSlotConstantMaterial;
+                    customItemWrapper.mainContainerRenderers = mainContainerRenderer;
+
+                    // Set container settings
+                    customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
+                    customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
+
+                    // Set filter lists
+                    SetFilterListsFor(customItemWrapper, i);
+                }
+
+                // Pouch
+                if(itemType == 7)
+                {
+                    // Set MainContainer renderers and their material
+                    GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
+                    customItemWrapper.mainContainer = mainContainer;
+                    Renderer[] mainContainerRenderer = new Renderer[1];
+                    mainContainerRenderer[0] = mainContainer.GetComponent<Renderer>();
+                    mainContainerRenderer[0].material = quickSlotConstantMaterial;
+                    customItemWrapper.mainContainerRenderers = mainContainerRenderer;
+
+                    // Set pouch settings
+                    customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
+                    customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
+
+                    // Set filter lists
+                    SetFilterListsFor(customItemWrapper, i);
+                }
+
+                // Ammobox
+                if(itemType == 8)
+                {
+                    FVRFireArmMagazine fireArmMagazine = (FVRFireArmMagazine)itemPhysicalObject;
+                    fireArmMagazine.MagazineType = FireArmMagazineType.mNone;
+                    fireArmMagazine.RoundEjectionPos = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
+                    fireArmMagazine.RoundType = (FireArmRoundType)Enum.Parse(typeof(FireArmRoundType), defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundType"].ToString());
+                    fireArmMagazine.m_capacity = (int)defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["maxStack"];
+                    fireArmMagazine.m_numRounds = 0;
+
+                    FVRFireArmMagazineReloadTrigger reloadTrigger = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1).gameObject.AddComponent<FVRFireArmMagazineReloadTrigger>();
+                    reloadTrigger.Magazine = fireArmMagazine;
+                }
+
+                // Money
+                if (itemType == 9)
+                {
+                    // Add stacktriggers
+                    Transform triggerRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
+                    customItemWrapper.stackTriggers = new GameObject[3];
+                    for(int j=0; j < 3; ++j)
+                    {
+                        GameObject triggerObject = triggerRoot.GetChild(j).gameObject;
+                        EFM_StackTrigger currentStackTrigger = triggerObject.AddComponent<EFM_StackTrigger>();
+                        currentStackTrigger.stackableWrapper = customItemWrapper;
+
+                        customItemWrapper.stackTriggers[j] = triggerObject;
+                    }
+
+                    // Set stack defaults
+                    customItemWrapper.maxStack = (int)defaultItemsData["ItemDefaults"][i]["stackMaxSize"];
+                    customItemWrapper.stack = 1;
+                }
+
+                // Consumable
+                if (itemType == 10)
+                {
+                    // Set use time
+                    customItemWrapper.useTime = (float)defaultItemsData["ItemDefaults"][i]["useTime"];
+
+                    // Set amount rate
+                    if(defaultItemsData["ItemDefaults"][i]["hpResourceRate"] != null)
+                    {
+                        customItemWrapper.amountRate = (float)defaultItemsData["ItemDefaults"][i]["hpResourceRate"];
+                    }
+
+                    // Set effects
+                    customItemWrapper.consumeEffects = new List<EFM_Effect_Consumable>();
+                    if (defaultItemsData["ItemDefaults"][i]["effects_damage"] != null)
+                    {
+                        // Damage effects
+                        Dictionary<string, JToken> damageEffects = defaultItemsData["ItemDefaults"][i]["effects_damage"].ToObject<Dictionary<string, JToken>>();
+                        foreach (KeyValuePair<string, JToken> damageEntry in damageEffects)
+                        {
+                            EFM_Effect_Consumable consumableEffect = new EFM_Effect_Consumable();
+                            customItemWrapper.consumeEffects.Add(consumableEffect);
+                            consumableEffect.delay = (float)damageEntry.Value["delay"];
+                            consumableEffect.duration = (float)damageEntry.Value["duration"];
+                            if(damageEntry.Value["cost"] != null)
+                            {
+                                consumableEffect.cost = (int)damageEntry.Value["cost"];
+                            }
+                            switch (damageEntry.Key)
+                            {
+                                case "RadExposure":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.RadExposure;
+                                    break;
+                                case "Pain":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Pain;
+                                    break;
+                                case "Contusion":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Contusion;
+                                    consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                                    break;
+                                case "Intoxication":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Intoxication;
+                                    consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                                    break;
+                                case "LightBleeding":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.LightBleeding;
+                                    consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                                    break;
+                                case "Fracture":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Fracture;
+                                    consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                                    break;
+                                case "DestroyedPart":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.DestroyedPart;
+                                    consumableEffect.healthPenaltyMax = (float)damageEntry.Value["healthPenaltyMax"];
+                                    consumableEffect.healthPenaltyMin = (float)damageEntry.Value["healthPenaltyMin"];
+                                    break;
+                                case "HeavyBleeding":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.HeavyBleeding;
+                                    consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                                    break;
+                            }
+                        }
+                    }
+
+                    if (defaultItemsData["ItemDefaults"][i]["effects_health"] != null)
+                    {
+                        // Health effects
+                        Dictionary<string, JToken> healthEffects = defaultItemsData["ItemDefaults"][i]["effects_health"].ToObject<Dictionary<string, JToken>>();
+                        foreach (KeyValuePair<string, JToken> healthEntry in healthEffects)
+                        {
+                            EFM_Effect_Consumable consumableEffect = new EFM_Effect_Consumable();
+                            customItemWrapper.consumeEffects.Add(consumableEffect);
+                            consumableEffect.value = (float)healthEntry.Value["value"];
+                            switch (healthEntry.Key)
+                            {
+                                case "Hydration":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Hydration;
+                                    break;
+                                case "Energy":
+                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Energy;
+                                    break;
+                            }
+                        }
+                    }
+
+                    // Set buffs
+                    customItemWrapper.effects = new List<EFM_Effect_Buff>();
+                    if (defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"] != null) 
+                    {
+                        JArray buffs = (JArray)globalDB["config"]["Health"]["Stimulator"]["Buffs"][defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"].ToString()];
+                        foreach(JToken buff in buffs)
+                        {
+                            EFM_Effect_Buff currentBuff = new EFM_Effect_Buff();
+                            currentBuff.effectType = (EFM_Effect.EffectType)Enum.Parse(typeof(EFM_Effect.EffectType), buff["BuffType"].ToString());
+                            currentBuff.chance = (float)buff["Chance"];
+                            currentBuff.delay = (float)buff["Delay"];
+                            currentBuff.duration = (float)buff["Duration"];
+                            currentBuff.value = (float)buff["Value"];
+                            currentBuff.absolute = (bool)buff["Absolute"];
+                            if (currentBuff.effectType == EFM_Effect.EffectType.SkillRate)
+                            {
+                                currentBuff.skillIndex = Mod.SkillNameToIndex(buff["SkillName"].ToString());
+                            }
+                        }
+                    }
+                }
+
+                // Key
+                if (itemType == 11)
+                {
+                    // Make sure keys use the poseoverride when grabbing
+                    itemPhysicalObject.UseGrabPointChild = false;
+
+                    // Setup lock key script
+                    LockKey lockKey = (LockKey)itemPhysicalObject;
+                    lockKey.KeyTipPoint = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                 }
             }
+
+            SetVanillaItems();
 
             // Add custom quick belt configs we made to GM's array of quick belt configurations
             List<GameObject> customQuickBeltConfigurations = new List<GameObject>();
@@ -617,9 +899,37 @@ namespace EFM
             ManagerSingleton<GM>.Instance.QuickbeltConfigurations = customQuickBeltConfigurations.ToArray();
         }
 
+        private void SetFilterListsFor(EFM_CustomItemWrapper customItemWrapper, int index)
+        {
+            customItemWrapper.whiteList = new List<string>();
+            customItemWrapper.blackList = new List<string>();
+            foreach (JToken whiteListElement in defaultItemsData["ItemDefaults"][index]["ContainerProperties"]["WhiteList"])
+            {
+                if (itemMap.ContainsKey(whiteListElement.ToString()))
+                {
+                    customItemWrapper.whiteList.Add(itemMap[whiteListElement.ToString()]);
+                }
+                else
+                {
+                    customItemWrapper.whiteList.Add(whiteListElement.ToString());
+                }
+            }
+            foreach (JToken blackListElement in defaultItemsData["ItemDefaults"][index]["ContainerProperties"]["BlackList"])
+            {
+                if (itemMap.ContainsKey(blackListElement.ToString()))
+                {
+                    customItemWrapper.blackList.Add(itemMap[blackListElement.ToString()]);
+                }
+                else
+                {
+                    customItemWrapper.blackList.Add(blackListElement.ToString());
+                }
+            }
+        }
+
         private void LoadDB()
         {
-            areasDB = JsonConvert.DeserializeObject<EFM_AreasDB>(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/areas.json"));
+            areasDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/areas.json"));
             localDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/local.json"));
             ParseItemMap();
             traderBaseDB = new JObject[8];
@@ -629,9 +939,66 @@ namespace EFM
                 traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/base.json"));
             }
             globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/globals.json"));
+            mapData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/EscapeFromMeatovMapData.txt"));
+            locationsDB = new JObject[9];
+            string[] locationFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/Locations/");
+            for (int i = 0; i < locationFiles.Length; ++i)
+            {
+                locationsDB[i] = JObject.Parse(File.ReadAllText(locationFiles[i]));
+            }
         }
 
+        private void SetVanillaItems()
+        {
+            vanillaItems = new Dictionary<string, EFM_VanillaItemDescriptor>();
+            JArray vanillaItemsRaw = (JArray)defaultItemsData["VanillaItems"];
 
+            foreach(JToken vanillaItemRaw in vanillaItemsRaw)
+            {
+                string H3ID = vanillaItemRaw["H3ID"].ToString();
+                GameObject itemPrefab = IM.OD[H3ID].GetGameObject();
+                EFM_VanillaItemDescriptor descriptor = itemPrefab.AddComponent<EFM_VanillaItemDescriptor>();
+                descriptor.H3ID = vanillaItemRaw["H3ID"].ToString();
+                descriptor.tarkovID = vanillaItemRaw["TarkovID"].ToString();
+                descriptor.description = vanillaItemRaw["Description"].ToString();
+                descriptor.lootExperience = (float)vanillaItemRaw["LootExperience"];
+                descriptor.rarity = ItemRarityStringToEnum(vanillaItemRaw["Rarity"].ToString());
+                descriptor.spawnChance = (float)vanillaItemRaw["SpawnChance"];
+                descriptor.creditCost = (int)vanillaItemRaw["CreditCost"];
+                descriptor.parent = vanillaItemRaw["parent"].ToString();
+                vanillaItems.Add(descriptor.H3ID, descriptor);
+            }
+
+            // Get all item spawner object defs
+            UnityEngine.Object[] array = Resources.LoadAll("ItemSpawnerDefinitions", typeof(ItemSpawnerObjectDefinition));
+            foreach(ItemSpawnerObjectDefinition def in array)
+            {
+                // Check if our vanilla items contain the ItemID of this object
+                FVRPhysicalObject physObj = def.Prefab.GetComponentInChildren<FVRPhysicalObject>();
+                if (physObj != null && vanillaItems.ContainsKey(physObj.ObjectWrapper.ItemID) && !itemIcons.ContainsKey(physObj.ObjectWrapper.ItemID))
+                {
+                    // Add the sprite
+                    itemIcons.Add(physObj.ObjectWrapper.ItemID, def.Sprite);
+                }
+            }
+        }
+
+        private static ItemRarity ItemRarityStringToEnum(string name)
+        {
+            switch (name)
+            {
+                case "Common":
+                    return ItemRarity.Common;
+                case "Rare":
+                    return ItemRarity.Rare;
+                case "Superrare":
+                    return ItemRarity.Superrare;
+                case "Not_exist":
+                    return ItemRarity.Not_exist;
+                default:
+                    return ItemRarity.Not_exist;
+            }
+        }
 
         private void ParseItemMap()
         {
@@ -745,6 +1112,54 @@ namespace EFM
 
             harmony.Patch(handTriggerExitPatchOriginal, new HarmonyMethod(handTriggerExitPatchPrefix));
 
+            // KeyForwardBackPatch
+            MethodInfo keyForwardBackPatchOriginal = typeof(SideHingedDestructibleDoorDeadBoltKey).GetMethod("KeyForwardBack", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo keyForwardBackPatchPrefix = typeof(KeyForwardBackPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(keyForwardBackPatchOriginal, new HarmonyMethod(keyForwardBackPatchPrefix));
+
+            // UpdateDisplayBasedOnTypePatch
+            MethodInfo updateDisplayBasedOnTypePatchOriginal = typeof(SideHingedDestructibleDoorDeadBoltKey).GetMethod("UpdateDisplayBasedOnType", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo updateDisplayBasedOnTypePatchPrefix = typeof(UpdateDisplayBasedOnTypePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(updateDisplayBasedOnTypePatchOriginal, new HarmonyMethod(updateDisplayBasedOnTypePatchPrefix));
+
+            // DoorInitPatch
+            MethodInfo doorInitPatchOriginal = typeof(SideHingedDestructibleDoor).GetMethod("Init", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo doorInitPatchPrefix = typeof(DoorInitPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(doorInitPatchOriginal, new HarmonyMethod(doorInitPatchPrefix));
+
+            // DeadBoltAwakePatch
+            MethodInfo deadBoltAwakePatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("Awake", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo deadBoltAwakePatchPostfix = typeof(DeadBoltAwakePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(deadBoltAwakePatchOriginal, null, new HarmonyMethod(deadBoltAwakePatchPostfix));
+
+            // DeadBoltFVRFixedUpdatePatch
+            MethodInfo deadBoltFVRFixedUpdatePatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("FVRFixedUpdate", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo deadBoltFVRFixedUpdatePatchPostfix = typeof(DeadBoltFVRFixedUpdatePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(deadBoltFVRFixedUpdatePatchOriginal, null, new HarmonyMethod(deadBoltFVRFixedUpdatePatchPostfix));
+
+            // InteractiveSetAllLayersPatch
+            MethodInfo interactiveSetAllLayersPatchOriginal = typeof(FVRInteractiveObject).GetMethod("SetAllCollidersToLayer", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo interactiveSetAllLayersPatchPrefix = typeof(InteractiveSetAllLayersPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(interactiveSetAllLayersPatchOriginal, new HarmonyMethod(interactiveSetAllLayersPatchPrefix));
+
+            //// DeadBoltPatch
+            //MethodInfo deadBoltPatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("TurnBolt", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo deadBoltPatchPrefix = typeof(DeadBoltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            //harmony.Patch(deadBoltPatchOriginal, new HarmonyMethod(deadBoltPatchPrefix));
+
+            //// DeadBoltLastHandPatch
+            //MethodInfo deadBoltLastHandPatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("SetStartingLastHandForward", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo deadBoltLastHandPatchPrefix = typeof(DeadBoltLastHandPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            //harmony.Patch(deadBoltLastHandPatchOriginal, new HarmonyMethod(deadBoltLastHandPatchPrefix));
+
             //// DequeueAndPlayDebugPatch
             //MethodInfo dequeueAndPlayDebugPatchOriginal = typeof(AudioSourcePool).GetMethod("DequeueAndPlay", BindingFlags.NonPublic | BindingFlags.Instance);
             //MethodInfo dequeueAndPlayDebugPatchPrefix = typeof(DequeueAndPlayDebugPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -772,17 +1187,33 @@ namespace EFM
 
         private void Init()
         {
+            // Setup player data
+            health = new float[7];
+
             // Subscribe to events
             SceneManager.sceneLoaded += OnSceneLoaded;
+            SteamVR_Events.Loading.Listen(OnSceneLoadedVR);
 
             // Create scene def
             sceneDef = new MainMenuSceneDef();
             sceneDef.name = "MeatovSceneScreen";
-            sceneDef.SceneName = "EscapeFromMeatovScene";
+            sceneDef.SceneName = "MeatovMenuScene";
             sceneDef.Name = "Escape from Meatov";
             sceneDef.Desciption = "Enter Meatov, loot, attempt escape. Upgrade your base, complete quests, trade, and go again. Good luck.";
             sceneDef.Image = sceneDefImage;
             sceneDef.Type = "Escape";
+        }
+
+        public void OnSceneLoadedVR(bool loading)
+        {
+            if (!loading && isGrillhouse && grillHouseSecure)
+            {
+                isGrillhouse = false;
+                Mod.instance.LogInfo("proxying through grillhouse");
+                LoadLevelBeginPatch.secureObjects();
+                grillHouseSecure = false;
+                SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
+            }
         }
 
         public void OnSceneLoaded(Scene loadedScene, LoadSceneMode loadedSceneMode)
@@ -792,17 +1223,48 @@ namespace EFM
             {
                 LoadMainMenu();
             }
-            else if (loadedScene.name.Equals("EscapeFromMeatovScene"))
+            else if (loadedScene.name.Equals("MeatovMenuScene"))
             {
                 UnsecureObjects();
                 LoadMeatov();
+            }
+            else if (loadedScene.name.Equals("Grillhouse_2Story"))
+            {
+                if (grillHouseSecure)
+                {
+                    isGrillhouse = true;
+                }
+            }
+            else if (loadedScene.name.Equals("MeatovHideoutScene"))
+            {
+                UnsecureObjects();
+
+                GameObject baseRoot = GameObject.Find("Hideout");
+
+                EFM_Base_Manager baseManager = baseRoot.AddComponent<EFM_Base_Manager>();
+                baseManager.data = EFM_Manager.loadedData;
+                baseManager.Init();
+
+                Transform spawnPoint = baseRoot.transform.GetChild(baseRoot.transform.childCount - 1).GetChild(0);
+                GM.CurrentMovementManager.TeleportToPoint(spawnPoint.position, true, spawnPoint.rotation.eulerAngles);
+            }
+            else if (loadedScene.name.Equals("MeatovFactoryScene") /*|| other raid scenes*/)
+            {
+                UnsecureObjects();
+
+                GameObject raidRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
+
+                EFM_Raid_Manager raidManager = raidRoot.AddComponent<EFM_Raid_Manager>();
+                raidManager.Init();
+
+                GM.CurrentMovementManager.TeleportToPoint(raidManager.spawnPoint.position, true, raidManager.spawnPoint.rotation.eulerAngles);
             }
         }
 
         private void LoadMainMenu()
         {
             // Create a MainMenuScenePointable for our level
-            GameObject currentPointable = Instantiate<GameObject>(mainMenuPointable);
+            GameObject currentPointable = Instantiate<GameObject>(mainMenuPointable); // TODO: This does not exist yet anymore because we made it so assets are all loaded when we load meatov menu. So we have to make a specific asset bundle just to have the H3VR main menu button assets taht we can load at game start
             currentPointable.name = mainMenuPointable.name;
             MainMenuScenePointable pointableInstance = currentPointable.AddComponent<MainMenuScenePointable>();
             pointableInstance.Def = sceneDef;
@@ -820,16 +1282,15 @@ namespace EFM
             // Set LOD bias
             QualitySettings.lodBias = 5;
 
-            // Instantiate scene prefab
-            GameObject prefabInstance = Instantiate<GameObject>(scenePrefab_Menu);
-            prefabInstance.name = scenePrefab_Menu.name;
+            // Get root
+            GameObject menuRoot = GameObject.Find("Menu");
 
             // TP Player
-            Transform spawnPoint = prefabInstance.transform.GetChild(prefabInstance.transform.childCount - 1).GetChild(0);
+            Transform spawnPoint = menuRoot.transform.GetChild(menuRoot.transform.childCount - 1).GetChild(0);
             GM.CurrentMovementManager.TeleportToPoint(spawnPoint.position, true, spawnPoint.rotation.eulerAngles);
 
             // Init menu
-            EFM_Menu_Manager menuManager = prefabInstance.AddComponent<EFM_Menu_Manager>();
+            EFM_Menu_Manager menuManager = menuRoot.AddComponent<EFM_Menu_Manager>();
             menuManager.Init();
         }
 
@@ -862,82 +1323,261 @@ namespace EFM
         {
             Logger.LogInfo(info);
         }
+
+        public static int SkillNameToIndex(string name)
+        {
+            switch (name)
+            {
+                case "Endurance":
+                    return 0;
+                case "Strength":
+                    return 1;
+                case "Vitality":
+                    return 2;
+                case "Health":
+                    return 3;
+                case "StressResistance":
+                    return 4;
+                case "Metabolism":
+                    return 5;
+                case "Immunity":
+                    return 6;
+                case "Perception":
+                    return 7;
+                case "Intellect":
+                    return 8;
+                case "Attention":
+                    return 9;
+                case "Charisma":
+                    return 10;
+                case "Memory":
+                    return 11;
+                case "Pistols":
+                    return 12;
+                case "Revolvers":
+                    return 13;
+                case "SMG":
+                    return 14;
+                case "Assault":
+                    return 15;
+                case "Shotgun":
+                    return 16;
+                case "Sniper":
+                    return 17;
+                case "LMG":
+                    return 18;
+                case "HMG":
+                    return 19;
+                case "Launcher":
+                    return 20;
+                case "AttachedLauncher":
+                    return 21;
+                case "Throwing":
+                    return 22;
+                case "Melee":
+                    return 23;
+                case "DMR":
+                    return 24;
+                case "RecoilControl":
+                    return 25;
+                case "AimDrills":
+                    return 26;
+                case "Troubleshooting":
+                    return 27;
+                case "Surgery":
+                    return 28;
+                case "CovertMovement":
+                    return 29;
+                case "Search":
+                    return 30;
+                case "MagDrills":
+                    return 31;
+                case "Sniping":
+                    return 32;
+                case "ProneMovement":
+                    return 33;
+                case "FieldMedicine":
+                    return 34;
+                case "FirstAid":
+                    return 35;
+                case "LightVests":
+                    return 36;
+                case "HeavyVests":
+                    return 37;
+                case "WeaponModding":
+                    return 38;
+                case "AdvancedModding":
+                    return 39;
+                case "NightOps":
+                    return 40;
+                case "SilentOps":
+                    return 41;
+                case "Lockpicking":
+                    return 42;
+                case "WeaponTreatment":
+                    return 43;
+                case "FreeTrading":
+                    return 44;
+                case "Auctions":
+                    return 45;
+                case "Cleanoperations":
+                    return 46;
+                case "Barter":
+                    return 47;
+                case "Shadowconnections":
+                    return 48;
+                case "Taskperformance":
+                    return 49;
+                case "Crafting":
+                    return 50;
+                case "HideoutManagement":
+                    return 51;
+                case "WeaponSwitch":
+                    return 52;
+                case "EquipmentManagement":
+                    return 53;
+                case "AKSystems":
+                    return 54;
+                case "AssaultOperations":
+                    return 55;
+                case "Authority":
+                    return 56;
+                case "HeavyCaliber":
+                    return 57;
+                case "RawPower":
+                    return 58;
+                case "ARSystems":
+                    return 59;
+                case "DeepWeaponModding":
+                    return 60;
+                case "LongRangeOptics":
+                    return 61;
+                case "Negotiations":
+                    return 62;
+                case "Tactics":
+                    return 63;
+                default:
+                    Mod.instance.LogError("SkillNameToIndex received name: "+name);
+                    return 0;
+            }
+        }
     }
 
     #region GamePatches
     // Patches SteamVR_LoadLevel.Begin() So we can keep certain objects from main menu since we don't have them in the mod scene by default
     class LoadLevelBeginPatch
     {
-        static void Prefix(string levelName)
+        static void Prefix(ref string levelName)
         {
             Mod.instance.LogInfo("load level prefix called with levelname: "+levelName);
-            if (levelName.Equals("EscapeFromMeatovScene"))
+
+            if (levelName.Equals("MeatovMenuScene"))
             {
-                if (Mod.scenePrefab_Menu == null)
+                if (SceneManager.GetActiveScene().name.Equals("MainMenu3"))
                 {
-                    Mod.instance.LogInfo("Opening meatov scene but assets not loaded yet, loading assets first...");
-                    Mod.instance.LoadAssets();
+                    Mod.instance.LogInfo("need to proxy through grillhouse");
+                    Mod.initDoors = false;
+                    levelName = "Grillhouse_2Story";
+                    Mod.grillHouseSecure = true;
                 }
-
-                if (Mod.securedObjects == null)
+                else
                 {
-                    Mod.securedObjects = new List<GameObject>();
+                    Mod.instance.LogInfo("proxied through grillhouse if was necessary, now loading meatov menu");
+                    if (!Mod.assetLoaded)
+                    {
+                        Mod.instance.LogInfo("Opening meatov scene but assets not loaded yet, loading assets first...");
+                        Mod.instance.LoadAssets();
+                        Mod.assetLoaded = true;
+                    }
+
+                    secureObjects();
                 }
-                Mod.securedObjects.Clear();
+            }
+            else if (levelName.Equals("MeatovHideoutScene") ||
+                     levelName.Equals("MeatovFactoryScene") /*|| other raid scenes*/)
+            {
+                secureObjects();
+            }
+        }
 
-                Mod.instance.LogInfo("\tSecuring cam rig");
-                // Secure the cameraRig
-                GameObject cameraRig = GameObject.Find("[CameraRig]Fixed");
-                Mod.securedObjects.Add(cameraRig);
-                GameObject.DontDestroyOnLoad(cameraRig);
+        public static void secureObjects()
+        {
+            if (Mod.securedObjects == null)
+            {
+                Mod.securedObjects = new List<GameObject>();
+            }
+            Mod.securedObjects.Clear();
 
-                Mod.instance.LogInfo("\tSecuring scenesettings");
-                // Secure sceneSettings
-                GameObject sceneSettings = GameObject.Find("[SceneSettings]");
-                Mod.securedObjects.Add(sceneSettings);
-                GameObject.DontDestroyOnLoad(sceneSettings);
+            Mod.instance.LogInfo("\tSecuring cam rig");
+            // Secure the cameraRig
+            GameObject cameraRig = GameObject.Find("[CameraRig]Fixed");
+            Mod.securedObjects.Add(cameraRig);
+            GameObject.DontDestroyOnLoad(cameraRig);
 
-                Mod.instance.LogInfo("\tSecuring scenesettings");
-                // Secure Pooled sources
-                FVRPooledAudioSource[] pooledAudioSources = FindObjectsOfTypeIncludingDisabled<FVRPooledAudioSource>();
-                foreach (FVRPooledAudioSource pooledAudioSource in pooledAudioSources)
-                {
-                    Mod.securedObjects.Add(pooledAudioSource.gameObject);
-                    GameObject.DontDestroyOnLoad(pooledAudioSource.gameObject);
-                }
+            Mod.instance.LogInfo("\tSecuring scenesettings");
+            // Secure sceneSettings
+            GameObject sceneSettings = GameObject.Find("[SceneSettings_ModBlank_Simple]");
+            Mod.securedObjects.Add(sceneSettings);
+            GameObject.DontDestroyOnLoad(sceneSettings);
 
-                Mod.instance.LogInfo("\tSecuring grabbity sphere");
-                // Secure grabbity spheres
-                FVRViveHand rightViveHand = cameraRig.transform.GetChild(0).gameObject.GetComponent<FVRViveHand>();
-                FVRViveHand leftViveHand = cameraRig.transform.GetChild(1).gameObject.GetComponent<FVRViveHand>();
-                Mod.securedObjects.Add(rightViveHand.Grabbity_HoverSphere.gameObject);
-                Mod.securedObjects.Add(rightViveHand.Grabbity_GrabSphere.gameObject);
-                GameObject.DontDestroyOnLoad(rightViveHand.Grabbity_HoverSphere.gameObject);
-                GameObject.DontDestroyOnLoad(rightViveHand.Grabbity_GrabSphere.gameObject);
-                Mod.securedObjects.Add(leftViveHand.Grabbity_HoverSphere.gameObject);
-                Mod.securedObjects.Add(leftViveHand.Grabbity_GrabSphere.gameObject);
-                GameObject.DontDestroyOnLoad(leftViveHand.Grabbity_HoverSphere.gameObject);
-                GameObject.DontDestroyOnLoad(leftViveHand.Grabbity_GrabSphere.gameObject);
+            Mod.instance.LogInfo("\tSecuring audio pools");
+            // Secure Pooled sources
+            FVRPooledAudioSource[] pooledAudioSources = FindObjectsOfTypeIncludingDisabled<FVRPooledAudioSource>();
+            foreach (FVRPooledAudioSource pooledAudioSource in pooledAudioSources)
+            {
+                Mod.securedObjects.Add(pooledAudioSource.gameObject);
+                GameObject.DontDestroyOnLoad(pooledAudioSource.gameObject);
+            }
 
-                Mod.instance.LogInfo("\tSecuring movementmanager");
-                // Secure MovementManager objects
-                Mod.securedObjects.Add(GM.CurrentMovementManager.MovementRig.gameObject);
-                GameObject.DontDestroyOnLoad(GM.CurrentMovementManager.MovementRig.gameObject);
-                GameObject touchPadArrows = (GameObject)(typeof(FVRMovementManager).GetField("m_touchpadArrows", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-                Mod.securedObjects.Add(touchPadArrows);
-                GameObject.DontDestroyOnLoad(touchPadArrows);
-                GameObject joystickTPArrows = (GameObject)(typeof(FVRMovementManager).GetField("m_joystickTPArrows", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-                Mod.securedObjects.Add(joystickTPArrows);
-                GameObject.DontDestroyOnLoad(joystickTPArrows);
-                GameObject twinStickArrowsLeft = (GameObject)(typeof(FVRMovementManager).GetField("m_twinStickArrowsLeft", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-                Mod.securedObjects.Add(twinStickArrowsLeft);
-                GameObject.DontDestroyOnLoad(twinStickArrowsLeft);
-                GameObject twinStickArrowsRight = (GameObject)(typeof(FVRMovementManager).GetField("m_twinStickArrowsRight", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-                Mod.securedObjects.Add(twinStickArrowsRight);
-                GameObject.DontDestroyOnLoad(twinStickArrowsRight);
-                GameObject floorHelper = (GameObject)(typeof(FVRMovementManager).GetField("m_floorHelper", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
-                Mod.securedObjects.Add(floorHelper);
-                GameObject.DontDestroyOnLoad(floorHelper);
+            Mod.instance.LogInfo("\tSecuring grabbity sphere");
+            // Secure grabbity spheres
+            FVRViveHand rightViveHand = cameraRig.transform.GetChild(0).gameObject.GetComponent<FVRViveHand>();
+            FVRViveHand leftViveHand = cameraRig.transform.GetChild(1).gameObject.GetComponent<FVRViveHand>();
+            Mod.securedObjects.Add(rightViveHand.Grabbity_HoverSphere.gameObject);
+            Mod.securedObjects.Add(rightViveHand.Grabbity_GrabSphere.gameObject);
+            GameObject.DontDestroyOnLoad(rightViveHand.Grabbity_HoverSphere.gameObject);
+            GameObject.DontDestroyOnLoad(rightViveHand.Grabbity_GrabSphere.gameObject);
+            Mod.securedObjects.Add(leftViveHand.Grabbity_HoverSphere.gameObject);
+            Mod.securedObjects.Add(leftViveHand.Grabbity_GrabSphere.gameObject);
+            GameObject.DontDestroyOnLoad(leftViveHand.Grabbity_HoverSphere.gameObject);
+            GameObject.DontDestroyOnLoad(leftViveHand.Grabbity_GrabSphere.gameObject);
+
+            Mod.instance.LogInfo("\tSecuring movementmanager");
+            // Secure MovementManager objects
+            Mod.securedObjects.Add(GM.CurrentMovementManager.MovementRig.gameObject);
+            GameObject.DontDestroyOnLoad(GM.CurrentMovementManager.MovementRig.gameObject);
+            GameObject touchPadArrows = (GameObject)(typeof(FVRMovementManager).GetField("m_touchpadArrows", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
+            Mod.securedObjects.Add(touchPadArrows);
+            GameObject.DontDestroyOnLoad(touchPadArrows);
+            GameObject joystickTPArrows = (GameObject)(typeof(FVRMovementManager).GetField("m_joystickTPArrows", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
+            Mod.securedObjects.Add(joystickTPArrows);
+            GameObject.DontDestroyOnLoad(joystickTPArrows);
+            GameObject twinStickArrowsLeft = (GameObject)(typeof(FVRMovementManager).GetField("m_twinStickArrowsLeft", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
+            Mod.securedObjects.Add(twinStickArrowsLeft);
+            GameObject.DontDestroyOnLoad(twinStickArrowsLeft);
+            GameObject twinStickArrowsRight = (GameObject)(typeof(FVRMovementManager).GetField("m_twinStickArrowsRight", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
+            Mod.securedObjects.Add(twinStickArrowsRight);
+            GameObject.DontDestroyOnLoad(twinStickArrowsRight);
+            GameObject floorHelper = (GameObject)(typeof(FVRMovementManager).GetField("m_floorHelper", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(GM.CurrentMovementManager));
+            Mod.securedObjects.Add(floorHelper);
+            GameObject.DontDestroyOnLoad(floorHelper);
+
+            Mod.instance.LogInfo("Securing copies of door instances if necessary");
+            if (Mod.doorLeftPrefab == null)
+            {
+                // Secure doors
+                Mod.doorLeftPrefab = GameObject.Instantiate(GameObject.Find("Door_KnobBolt_Left_Cherry"));
+                Mod.doorLeftPrefab.SetActive(false);
+                Mod.doorLeftPrefab.name = "Door_KnobBolt_Left_Cherry";
+                GameObject.DontDestroyOnLoad(Mod.doorLeftPrefab);
+                Mod.doorRightPrefab = GameObject.Instantiate(GameObject.Find("Door_KnobBolt_Right_Cherry"));
+                Mod.doorRightPrefab.SetActive(false);
+                Mod.doorRightPrefab.name = "Door_KnobBolt_Right_Cherry";
+                GameObject.DontDestroyOnLoad(Mod.doorRightPrefab);
+                Mod.doorDoublePrefab = GameObject.Instantiate(GameObject.Find("Door_KnobBolt_Double_Cherry"));
+                Mod.doorDoublePrefab.SetActive(false);
+                Mod.doorDoublePrefab.name = "Door_KnobBolt_Double_Cherry";
+                GameObject.DontDestroyOnLoad(Mod.doorDoublePrefab);
             }
         }
 
@@ -962,16 +1602,25 @@ namespace EFM
     {
         static void Postfix(FVRViveHand hand, ref FVRInteractiveObject __instance)
         {
-            // Whenever we drop an item, we want to make sure equip slots on this hand are active
-            for (int i = (hand.IsThisTheRightHand ? 0 : 3); i < (hand.IsThisTheRightHand ? 4 : 8); ++i)
+            Mod.instance.LogInfo("endInteract postfix called, hand null?: "+(hand == null));
+            // Whenever we drop an item, we want to make sure equip slots on this hand are active if they exist
+            if (Mod.equipmentSlots != null)
             {
-                Mod.equipmentSlots[i].gameObject.SetActive(true);
+                for (int i = (hand.IsThisTheRightHand ? 0 : 3); i < (hand.IsThisTheRightHand ? 4 : 8); ++i)
+                {
+                    Mod.equipmentSlots[i].gameObject.SetActive(true);
+                }
             }
+            Mod.instance.LogInfo("0");
 
-            if (__instance is FVRPhysicalObject && (__instance as FVRPhysicalObject).QuickbeltSlot != null)
+            // Stop here if dropping in a quick belt slot or if this is a door
+            if ((__instance is FVRPhysicalObject && (__instance as FVRPhysicalObject).QuickbeltSlot != null) ||
+                CheckIfDoorUpwards(__instance.gameObject, 3))
             {
+                Mod.instance.LogInfo("Dropping item in qs or is door part");
                 return;
             }
+            Mod.instance.LogInfo("1");
 
             if (__instance is FVRAlternateGrip)
             {
@@ -991,20 +1640,41 @@ namespace EFM
             }
         }
 
+        private static bool CheckIfDoorUpwards(GameObject go, int steps)
+        {
+            if(go.GetComponent<SideHingedDestructibleDoor>() != null ||
+               go.GetComponent<SideHingedDestructibleDoorHandle>() != null ||
+               go.GetComponent<SideHingedDestructibleDoorDeadBolt>() != null)
+            {
+                return true;
+            }
+            else if(steps == 0 || go.transform.parent == null)
+            {
+                return false;
+            }
+            else
+            {
+                return CheckIfDoorUpwards(go.transform.parent.gameObject, steps - 1);
+            }
+        }
+
         private static void DropItem(FVRViveHand hand, FVRPhysicalObject primary)
         {
-            EFM_CustomItemWrapper collidingBackpackWrapper = null;
-            if (hand.IsThisTheRightHand)
+            EFM_CustomItemWrapper collidingContainerWrapper = null;
+            if (Mod.rightHand != null)
             {
-                collidingBackpackWrapper = Mod.rightHand.collidingBackpackWrapper;
-            }
-            else // Left hand
-            {
-                collidingBackpackWrapper = Mod.leftHand.collidingBackpackWrapper;
+                if (hand.IsThisTheRightHand)
+                {
+                    collidingContainerWrapper = Mod.rightHand.collidingContainerWrapper;
+                }
+                else // Left hand
+                {
+                    collidingContainerWrapper = Mod.leftHand.collidingContainerWrapper;
+                }
             }
 
             EFM_CustomItemWrapper heldCustomItemWrapper = primary.GetComponent<EFM_CustomItemWrapper>();
-            if (collidingBackpackWrapper != null && (heldCustomItemWrapper == null || !heldCustomItemWrapper.Equals(collidingBackpackWrapper)))
+            if (collidingContainerWrapper != null && (heldCustomItemWrapper == null || !heldCustomItemWrapper.Equals(collidingContainerWrapper)))
             {
                 // Get item volume
                 float volumeToUse = 0;
@@ -1017,52 +1687,8 @@ namespace EFM
                     volumeToUse = Mod.sizeVolumes[(int)primary.Size];
                 }
 
-                // Check if volume fits in bag
-                if (collidingBackpackWrapper.containingVolume + volumeToUse <= collidingBackpackWrapper.maxVolume)
-                {
-                    // Attach item to backpack
-                    // Set all non trigger colliders that are on default layer to trigger so they dont collide with bag
-                    Collider[] cols = primary.gameObject.GetComponentsInChildren<Collider>(true);
-                    if(collidingBackpackWrapper.resetColPairs == null)
-                    {
-                        collidingBackpackWrapper.resetColPairs = new List<EFM_CustomItemWrapper.ResetColPair>();
-                    }
-                    EFM_CustomItemWrapper.ResetColPair resetColPair = null;
-                    foreach (Collider col in cols)
-                    {
-                        if (col.gameObject.layer == 0)
-                        {
-                            col.isTrigger = true;
-
-                            // Create new resetColPair for each collider so we can reset those specific ones to non-triggers when taken out of the backpack
-                            if (resetColPair == null)
-                            {
-                                resetColPair = new EFM_CustomItemWrapper.ResetColPair();
-                                resetColPair.physObj = primary;
-                                resetColPair.colliders = new List<Collider>();
-                            }
-                            resetColPair.colliders.Add(col);
-                        }
-                    }
-                    if(resetColPair != null)
-                    {
-                        collidingBackpackWrapper.resetColPairs.Add(resetColPair);
-                    }
-                    primary.SetParentage(collidingBackpackWrapper.itemObjectsRoot);
-                    primary.RootRigidbody.isKinematic = true;
-
-                    // Add volume to backpack
-                    EFM_CustomItemWrapper primaryWrapper = primary.gameObject.GetComponent<EFM_CustomItemWrapper>();
-                    if (primaryWrapper != null)
-                    {
-                        collidingBackpackWrapper.containingVolume += primaryWrapper.volumes[primaryWrapper.mode];
-                    }
-                    else
-                    {
-                        collidingBackpackWrapper.containingVolume += Mod.sizeVolumes[(int)primary.Size];
-                    }
-                }
-                else
+                // Check if volume fits in container
+                if (!collidingContainerWrapper.AddItemToContainer(primary))
                 {
                     // Drop item in world
                     GameObject meatovBase = GameObject.Find("MeatovBase");
@@ -1075,10 +1701,16 @@ namespace EFM
             else
             {
                 // Drop item in world
-                GameObject meatovBase = GameObject.Find("MeatovBase");
-                if (meatovBase != null)
+                GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
+                EFM_Base_Manager baseManager = sceneRoot.GetComponent<EFM_Base_Manager>();
+                EFM_Raid_Manager raidManager = sceneRoot.GetComponent<EFM_Raid_Manager>();
+                if(baseManager != null)
                 {
-                    primary.SetParentage(meatovBase.transform.GetChild(2));
+                    primary.SetParentage(sceneRoot.transform.GetChild(2));
+                }
+                else if(raidManager != null)
+                {
+                    primary.SetParentage(sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2));
                 }
             }
         }
@@ -1180,7 +1812,7 @@ namespace EFM
             }
 
             // Check other active slots if it is not equip slot
-            if (equipmentSlotIndex == -1)
+            if (equipmentSlotIndex == -1 && Mod.otherActiveSlots != null)
             {
                 for (int setIndex = 0; setIndex < Mod.otherActiveSlots.Count; ++setIndex)
                 {
@@ -1241,6 +1873,9 @@ namespace EFM
                                         break;
                                     case Mod.ItemType.Rig:
                                         compatible = !EFM_EquipmentSlot.wearingRig && !EFM_EquipmentSlot.wearingArmoredRig;
+                                        break;
+                                    case Mod.ItemType.Pouch:
+                                        compatible = !EFM_EquipmentSlot.wearingPouch;
                                         break;
                                     default:
                                         break;
@@ -1415,6 +2050,7 @@ namespace EFM
     }
 
     // Patches FVRPhysicalObject.BeginInteraction() in order to know if we have begun interacting with a rig from an equipment slot
+    // Also to give player the loot experience in case they haven't picked it up before
     class BeginInteractionPatch
     {
         static void Prefix(FVRViveHand hand, ref FVRPhysicalObject __instance)
@@ -1446,24 +2082,26 @@ namespace EFM
                 }
             }
 
-            // Check if in backpack
+            // Check if in container
             if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
             {
-                EFM_CustomItemWrapper backpackItemWrapper = __instance.transform.parent.parent.GetComponent<EFM_CustomItemWrapper>();
-                if(backpackItemWrapper != null && backpackItemWrapper.itemType == Mod.ItemType.Backpack)
+                EFM_CustomItemWrapper containerItemWrapper = __instance.transform.parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                if(containerItemWrapper != null && (containerItemWrapper.itemType == Mod.ItemType.Backpack || 
+                                                    containerItemWrapper.itemType == Mod.ItemType.Container || 
+                                                    containerItemWrapper.itemType == Mod.ItemType.Pouch))
                 {
-                    backpackItemWrapper.containingVolume -= customItemWrapper != null ? customItemWrapper.volumes[customItemWrapper.mode]: Mod.sizeVolumes[(int)__instance.Size];
+                    containerItemWrapper.containingVolume -= customItemWrapper != null ? customItemWrapper.volumes[customItemWrapper.mode]: Mod.sizeVolumes[(int)__instance.Size];
 
-                    // Reset cols of item so that they are non trigger again and can collide with the world and the bag
-                    for(int i = backpackItemWrapper.resetColPairs.Count - 1; i >= 0; --i)
+                    // Reset cols of item so that they are non trigger again and can collide with the world and the container
+                    for(int i = containerItemWrapper.resetColPairs.Count - 1; i >= 0; --i)
                     {
-                        if (backpackItemWrapper.resetColPairs[i].physObj.Equals(__instance))
+                        if (containerItemWrapper.resetColPairs[i].physObj.Equals(__instance))
                         {
-                            foreach(Collider col in backpackItemWrapper.resetColPairs[i].colliders)
+                            foreach(Collider col in containerItemWrapper.resetColPairs[i].colliders)
                             {
                                 col.isTrigger = false;
                             }
-                            backpackItemWrapper.resetColPairs.RemoveAt(i);
+                            containerItemWrapper.resetColPairs.RemoveAt(i);
                             break;
                         }
                     }
@@ -1568,7 +2206,7 @@ namespace EFM
     // This completely replaces the original 
     class HandTestColliderPatch
     {
-        static bool Prefix(Collider collider, bool isEnter, bool isPalm, ref FVRViveHand __instance)
+        static bool Prefix(Collider collider, bool isEnter, bool isPalm, ref FVRViveHand.HandState ___m_state, ref bool ___m_isClosestInteractableInPalm, ref FVRViveHand __instance)
         {
             FVRInteractiveObject interactiveObject = collider.gameObject.GetComponent<FVRInteractiveObject>();
             EFM_OtherInteractable otherInteractable = collider.gameObject.GetComponent<EFM_OtherInteractable>();
@@ -1589,12 +2227,8 @@ namespace EFM
                 return false;
             }
 
-            FieldInfo stateField = typeof(FVRViveHand).GetField("m_state", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if ((FVRViveHand.HandState)stateField.GetValue(__instance) == FVRViveHand.HandState.Empty && interactiveObjectToUse != null)
+            if (___m_state == FVRViveHand.HandState.Empty && interactiveObjectToUse != null)
             {
-                FieldInfo isClosestInteractableInPalmField = typeof(FVRViveHand).GetField("m_isClosestInteractableInPalm", BindingFlags.NonPublic | BindingFlags.Instance);
-
                 FVRInteractiveObject component2 = interactiveObjectToUse;
                 if (component2 != null && component2.IsInteractable() && !component2.IsSelectionRestricted())
                 {
@@ -1605,11 +2239,11 @@ namespace EFM
                         __instance.ClosestPossibleInteractable = component2;
                         if (num < num2)
                         {
-                            isClosestInteractableInPalmField.SetValue(__instance, false);
+                            ___m_isClosestInteractableInPalm = false;
                         }
                         else
                         {
-                            isClosestInteractableInPalmField.SetValue(__instance, true);
+                            ___m_isClosestInteractableInPalm = true;
                         }
                     }
                     else if (__instance.ClosestPossibleInteractable != component2)
@@ -1621,14 +2255,14 @@ namespace EFM
                         {
                             flag = false;
                         }
-                        if (flag && num2 < num4 && (bool)isClosestInteractableInPalmField.GetValue(__instance))
+                        if (flag && num2 < num4 && ___m_isClosestInteractableInPalm)
                         {
-                            isClosestInteractableInPalmField.SetValue(__instance, true);
+                            ___m_isClosestInteractableInPalm = true;
                             __instance.ClosestPossibleInteractable = component2;
                         }
                         else if (!flag && num < num3)
                         {
-                            isClosestInteractableInPalmField.SetValue(__instance, false);
+                            ___m_isClosestInteractableInPalm = false;
                             __instance.ClosestPossibleInteractable = component2;
                         }
                     }
@@ -1658,6 +2292,213 @@ namespace EFM
                 {
                     __instance.ClosestPossibleInteractable = null;
                     isClosestInteractableInPalmField.SetValue(__instance, false);
+                }
+            }
+
+            return false;
+        }
+    }
+
+    // Patches SideHingedDestructibleDoorDeadBoltKey.KeyForwardBack to bypass H3VR key type functionality and to make sure it uses correct key prefab
+    // This completely replaces the original
+    class KeyForwardBackPatch
+    {
+        static bool Prefix(float ___distBetween, ref float ___m_keyLerp, ref SideHingedDestructibleDoorDeadBoltKey __instance)
+        {
+            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+
+            Vector3 pos = __instance.m_hand.Input.Pos;
+            Vector3 vector = pos - __instance.KeyIn.position;
+            Vector3 vector2 = Vector3.ProjectOnPlane(vector, __instance.DeadBolt.Mount.up);
+            vector2 = Vector3.ProjectOnPlane(vector2, __instance.DeadBolt.Mount.right);
+            Vector3 a = __instance.KeyIn.position + vector2;
+            float num = Vector3.Distance(a, pos);
+            float num2 = Vector3.Distance(a, __instance.KeyIn.position);
+            float num3 = Vector3.Distance(a, __instance.KeyOut.position);
+            if (num3 <= ___distBetween && num2 <= ___distBetween)
+            {
+                float num4 = (___distBetween - num3) / ___distBetween;
+                // Use object ID instead of type
+                if (/*__instance.m_insertedType != __instance.KeyType*/ !doorWrapper.keyID.Equals(__instance.KeyFO))
+                {
+                    num4 = Mathf.Clamp(num4, 0.7f, 1f);
+                    if (num4 <= 0.71f && (double)___m_keyLerp > 0.711)
+                    {
+                        SM.PlayCoreSound(FVRPooledAudioType.Generic, __instance.AudEvent_KeyStop, __instance.transform.position);
+                    }
+                }
+                if (num4 < 0.3f)
+                {
+                    if (___m_keyLerp >= 0.3f)
+                    {
+                        SM.PlayCoreSound(FVRPooledAudioType.Generic, __instance.AudEvent_KeyInsert, __instance.transform.position);
+                    }
+                    num4 = 0f;
+                }
+                __instance.transform.position = Vector3.Lerp(__instance.KeyIn.position, __instance.KeyOut.position, num4);
+                ___m_keyLerp = num4;
+            }
+            else if (num2 > ___distBetween && num2 > num3 && __instance.DeadBolt.m_timeSinceKeyInOut > 1f)
+            {
+                __instance.DeadBolt.m_timeSinceKeyInOut = 0f;
+                FVRViveHand hand = __instance.m_hand;
+                // Use correct key item prefab
+                GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(int.TryParse(__instance.KeyFO, out int result) ? Mod.itemPrefabs[result] : IM.OD[__instance.KeyFO].GetGameObject(), __instance.transform.position, __instance.transform.rotation);
+                LockKey component = gameObject.GetComponent<LockKey>();
+                ___m_keyLerp = 1f;
+                __instance.ForceBreakInteraction();
+                component.BeginInteraction(hand);
+                hand.CurrentInteractable = component;
+                SM.PlayCoreSound(FVRPooledAudioType.Generic, __instance.AudEvent_KeyExtract, __instance.transform.position);
+                __instance.DeadBolt.SetKeyState(false);
+            }
+            else if (num > ___distBetween)
+            {
+                __instance.ForceBreakInteraction();
+            }
+
+            return false;
+        }
+    }
+
+    // Patches SideHingedDestructibleDoorDeadBoltKey.UpdateDisplayBasedOnType to make sure it uses correct key prefab
+    // This completely replaces the original
+    class UpdateDisplayBasedOnTypePatch
+    {
+        static bool Prefix(ref SideHingedDestructibleDoorDeadBoltKey __instance)
+        {
+            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+
+            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(int.TryParse(__instance.KeyFO, out int result) ? Mod.itemPrefabs[result] : IM.OD[__instance.KeyFO].GetGameObject(), __instance.transform.position, __instance.transform.rotation);
+            LockKey component = gameObject.GetComponent<LockKey>();
+            __instance.KeyMesh.mesh = component.KeyMesh.mesh;
+            __instance.TagMesh.mesh = component.TagMesh.mesh;
+
+            return false;
+        }
+    }
+
+    // Patches SideHingedDestructibleDoor.Init to prevent door initialization when using grillhouse ones
+    class DoorInitPatch
+    {
+        static bool Prefix(ref SideHingedDestructibleDoor __instance)
+        {
+            if (!Mod.initDoors)
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    // Patches SideHingedDestructibleDoorDeadBolt.TurnBolt to make sure we need to rotate the hand the right way if flipped
+    // This completely replaces the original
+    class DeadBoltPatch
+    {
+        static bool Prefix(Vector3 upVec, ref Vector3 ___lastHandForward, ref float ___m_curRot, ref SideHingedDestructibleDoorDeadBolt __instance)
+        {
+            // First check if lock is flipped
+            Vector3 dirVecToUse = __instance.Mount.forward;
+            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            if(doorWrapper != null && doorWrapper.flipLock)
+            {
+                dirVecToUse *= -1; // Negate forward vector
+            }
+
+            Vector3 lhs = Vector3.ProjectOnPlane(upVec, dirVecToUse);
+            Vector3 rhs = Vector3.ProjectOnPlane(___lastHandForward, dirVecToUse);
+            float num = Mathf.Atan2(Vector3.Dot(dirVecToUse, Vector3.Cross(lhs, rhs)), Vector3.Dot(lhs, rhs)) * 57.29578f;
+            ___m_curRot -= num;
+            ___m_curRot = Mathf.Clamp(___m_curRot, __instance.MinRot, __instance.MaxRot);
+            ___lastHandForward = lhs;
+
+            return false;
+        }
+    }
+
+    // Patches SideHingedDestructibleDoorDeadBolt.SetStartingLastHandForward to make sure we need to rotate the hand the right way if flipped
+    // This completely replaces the original
+    class DeadBoltLastHandPatch
+    {
+        static bool Prefix(Vector3 upVec, ref Vector3 ___lastHandForward, ref SideHingedDestructibleDoorDeadBolt __instance)
+        {
+            // First check if lock is flipped
+            Vector3 dirVecToUse = __instance.Mount.forward;
+            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            if(doorWrapper != null && doorWrapper.flipLock)
+            {
+                dirVecToUse *= -1; // Negate forward vector
+            }
+
+            ___lastHandForward = Vector3.ProjectOnPlane(upVec, dirVecToUse);
+
+            return false;
+        }
+    }
+
+    // Patches SideHingedDestructibleDoorDeadBolt.Awake to set correct vizRot if lock is flipped
+    class DeadBoltAwakePatch
+    {
+        static void Postfix(ref float ___m_vizRot, ref SideHingedDestructibleDoorDeadBolt __instance)
+        {
+            // First check if lock is flipped
+            float yAngleToUse = 0;
+            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            if (doorWrapper != null && doorWrapper.flipLock)
+            {
+                yAngleToUse = 180;
+            }
+
+            __instance.transform.localEulerAngles = new Vector3(0f, yAngleToUse, ___m_vizRot);
+
+        }
+    }
+
+    // Patches SideHingedDestructibleDoorDeadBolt.FVRFixedUpdate to set correct vizRot if lock is flipped
+    class DeadBoltFVRFixedUpdatePatch
+    {
+        static void Postfix(ref float ___m_vizRot, ref SideHingedDestructibleDoorDeadBolt __instance)
+        {
+            // First check if lock is flipped
+            float yAngleToUse = 0;
+            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            if(doorWrapper != null && doorWrapper.flipLock)
+            {
+                yAngleToUse = 180;
+            }
+
+            __instance.transform.localEulerAngles = new Vector3(0f, yAngleToUse, ___m_vizRot);
+        }
+    }
+
+    // Patches FVRInteractiveObject.SetAllCollidersToLayer to make sure it doesn't set the layer of GOs with layer already set to NonBlockingSmoke
+    // because layer is used by open backpacks and rigs in order to prevent items from colliding with them so its easier to put items in the container
+    // This completely replaces the original
+    class InteractiveSetAllLayersPatch
+    {
+        static bool Prefix(bool triggersToo, string layerName, ref Collider[] ___m_colliders, ref FVRInteractiveObject __instance)
+        {
+            if (triggersToo)
+            {
+                foreach (Collider collider in ___m_colliders)
+                {
+                    if (collider != null)
+                    {
+                        collider.gameObject.layer = LayerMask.NameToLayer(layerName);
+                    }
+                }
+            }
+            else
+            {
+                int nonBlockingSmokeLayer = LayerMask.NameToLayer("NonBlockingSmoke");
+                foreach (Collider collider2 in ___m_colliders)
+                {
+                    // Also check current layer so we dont set it to default if NonBlockingSmoke
+                    if (collider2 != null && !collider2.isTrigger && collider2.gameObject.layer != nonBlockingSmokeLayer)
+                    {
+                        collider2.gameObject.layer = LayerMask.NameToLayer(layerName);
+                    }
                 }
             }
 

@@ -15,6 +15,8 @@ namespace EFM
         public static bool wearingArmoredRig;
         public static bool wearingBackpack;
         public static EFM_CustomItemWrapper currentBackpack;
+        public static bool wearingPouch;
+        public static EFM_CustomItemWrapper currentPouch;
 
         public static void WearEquipment(EFM_CustomItemWrapper customItemWrapper)
         {
@@ -68,6 +70,15 @@ namespace EFM
                             // TODO: Set backpack inactive
                             // TODO: Equip it physically if necessary
                             wearingBackpack = true;
+                            currentBackpack = customItemWrapper;
+                        }
+                        break;
+                    case Mod.ItemType.Pouch:
+                        if (!wearingPouch)
+                        {
+                            // TODO: Set Pouch inactive
+                            wearingPouch = true;
+                            currentPouch = customItemWrapper;
                         }
                         break;
                     default:
@@ -133,6 +144,12 @@ namespace EFM
                         // TODO: Set backpack active or change its model? so that it shows properly in the slot
                         // TODO: Remove it physically if necessary
                         wearingBackpack = false;
+                        currentBackpack = null;
+                        break;
+                    case Mod.ItemType.Pouch:
+                        // TODO: Set Pouch active so that it shows properly in the slot
+                        wearingPouch = false;
+                        currentPouch = null;
                         break;
                     default:
                         Mod.instance.LogError("This object has invalid item type");
@@ -193,11 +210,13 @@ namespace EFM
             wearingBodyArmor = false;
             wearingRig = false;
             wearingBackpack = false;
+            wearingPouch = false;
 
             currentHelmet = null;
             currentArmor = null;
             currentRig = null;
             currentBackpack = null;
+            currentPouch = null;
         }
     }
 }

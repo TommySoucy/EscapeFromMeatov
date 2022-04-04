@@ -7,10 +7,10 @@ namespace EFM
     public class EFM_Hand : MonoBehaviour
     {
         public EFM_Hand otherHand;
-        public EFM_CustomItemWrapper collidingBackpackWrapper;
+        public EFM_CustomItemWrapper collidingContainerWrapper;
         public bool hoverValid;
         private List<Collider> colliders;
-        private FVRViveHand fvrHand;
+        public FVRViveHand fvrHand;
 
         private void Awake()
         {
@@ -35,74 +35,127 @@ namespace EFM
             if (mainContainerTransform != null)
             {
                 EFM_CustomItemWrapper customItemWrapper = mainContainerTransform.parent.GetComponent<EFM_CustomItemWrapper>();
-                if (customItemWrapper != null && customItemWrapper.itemType == Mod.ItemType.Backpack)
+                if (customItemWrapper != null && 
+                    (customItemWrapper.itemType == Mod.ItemType.Backpack ||
+                     customItemWrapper.itemType == Mod.ItemType.Container ||
+                     customItemWrapper.itemType == Mod.ItemType.Pouch))
                 {
-                    collidingBackpackWrapper = customItemWrapper;
+                    collidingContainerWrapper = customItemWrapper;
                     colliders.Add(collider);
                 }
             }
-        }
 
-        private void OnTriggerStay(Collider collider)
-        {
-            if(collidingBackpackWrapper != null)
+            // Set container hovered is necessary
+            if (collidingContainerWrapper != null)
             {
-                // Verify backpack mode
-                if (collidingBackpackWrapper.mainContainer.activeSelf)
+                // Verify container mode
+                if (collidingContainerWrapper.mainContainer.activeSelf)
                 {
-                    // Set material, if this hand is also holding something that fits in the pack, set the material to hovered
+                    // Set material, if this hand is also holding something that fits in the container, set the material to hovered
                     if (fvrHand.CurrentInteractable != null && fvrHand.CurrentInteractable is FVRPhysicalObject)
                     {
                         float volumeToUse = 0;
+                        string IDToUse = "";
+                        string parentToUse = "";
                         FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;
                         EFM_CustomItemWrapper heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<EFM_CustomItemWrapper>();
+                        EFM_VanillaItemDescriptor heldVanillaItemDescriptor = fvrHand.CurrentInteractable.GetComponent<EFM_VanillaItemDescriptor>();
                         if (heldCustomItemWrapper != null)
                         {
                             volumeToUse = heldCustomItemWrapper.volumes[heldCustomItemWrapper.mode];
+
+                            IDToUse = heldCustomItemWrapper.ID;
+                            parentToUse = heldCustomItemWrapper.parent;
                         }
                         else
                         {
                             volumeToUse = Mod.sizeVolumes[(int)physicalObject.Size];
+
+                            if (heldVanillaItemDescriptor != null)
+                            {
+                                IDToUse = heldVanillaItemDescriptor.H3ID;
+                                parentToUse = heldVanillaItemDescriptor.parent;
+                            }
+                            else
+                            {
+                                Mod.instance.LogError("Non described item held in hand while entering container!");
+                                return;
+                            }
                         }
 
                         // Check if volume fits in bag
-                        if (collidingBackpackWrapper.containingVolume + volumeToUse <= collidingBackpackWrapper.maxVolume)
+                        if (collidingContainerWrapper.containingVolume + volumeToUse <= collidingContainerWrapper.maxVolume)
                         {
-                            hoverValid = true;
-                            collidingBackpackWrapper.SetBackpackHovered(true);
+                            // Also check if the container can contain the item through filters
+                            if (collidingContainerWrapper.whiteList != null)
+                            {
+                                // If whitelist includes item and blacklist doesn't
+                                if ((collidingContainerWrapper.whiteList.Contains("54009119af1c881c07000029") || // This ID indicates any item
+                                    collidingContainerWrapper.whiteList.Contains(heldCustomItemWrapper.parent) || // The ID of the item's category
+                                    collidingContainerWrapper.whiteList.Contains(heldCustomItemWrapper.ID)) && // The ID of the item
+                                    (!collidingContainerWrapper.blackList.Contains(heldCustomItemWrapper.ID) &&
+                                    !collidingContainerWrapper.blackList.Contains(heldCustomItemWrapper.parent))) 
+                                {
+                                    hoverValid = true;
+                                    collidingContainerWrapper.SetContainerHovered(true);
+                                }
+                            }
+                            else
+                            {
+                                hoverValid = true;
+                                collidingContainerWrapper.SetContainerHovered(true);
+                            }
                         }
                         else if (!otherHand.hoverValid)
                         {
                             hoverValid = false;
-                            collidingBackpackWrapper.SetBackpackHovered(false);
+                            collidingContainerWrapper.SetContainerHovered(false);
                         }
                     }
                     else if (!otherHand.hoverValid)
                     {
                         hoverValid = false;
-                        collidingBackpackWrapper.SetBackpackHovered(false);
+                        collidingContainerWrapper.SetContainerHovered(false);
                     }
                 }
                 else // Backpack closed
                 {
                     hoverValid = false;
-                    collidingBackpackWrapper.SetBackpackHovered(false);
-                    collidingBackpackWrapper = null;
+                    collidingContainerWrapper.SetContainerHovered(false);
+                    collidingContainerWrapper = null;
+                }
+            }
+        }
+
+        private void OnTriggerStay()
+        {
+            // Check if dropped the held item
+            if (collidingContainerWrapper != null)
+            {
+                // Verify container mode
+                if (collidingContainerWrapper.mainContainer.activeSelf)
+                {
+                    // Set material in case the hand dropped what it had
+                    if (fvrHand.CurrentInteractable == null)
+                    {
+                        hoverValid = false;
+                        collidingContainerWrapper.SetContainerHovered(false);
+                    }
                 }
             }
         }
 
         private void OnTriggerExit(Collider collider)
         {
-            if(collidingBackpackWrapper != null && colliders.Remove(collider) && colliders.Count > 0)
+            if(collidingContainerWrapper != null && colliders.Remove(collider) && colliders.Count > 0)
             {
                 if (!otherHand.hoverValid)
                 {
                     hoverValid = false;
-                    collidingBackpackWrapper.SetBackpackHovered(false);
+                    collidingContainerWrapper.SetContainerHovered(false);
                 }
 
-                collidingBackpackWrapper = null;
+                collidingContainerWrapper = null;
             }
         }
     }

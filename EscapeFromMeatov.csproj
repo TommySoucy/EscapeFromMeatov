@@ -66,14 +66,21 @@
     <Compile Include="EFM_BaseAreaManager.cs" />
     <Compile Include="EFM_Base_Manager.cs" />
     <Compile Include="EFM_CustomItemWrapper.cs" />
+    <Compile Include="EFM_DoorLockChecker.cs" />
+    <Compile Include="EFM_DoorWrapper.cs" />
+    <Compile Include="EFM_Effect.cs" />
     <Compile Include="EFM_EquipmentSlot.cs" />
     <Compile Include="EFM_Hand.cs" />
+    <Compile Include="EFM_HoverScroll.cs" />
     <Compile Include="EFM_Manager.cs" />
     <Compile Include="EFM_Menu_Manager.cs" />
     <Compile Include="EFM_OtherInteractable.cs" />
     <Compile Include="EFM_PointableButton.cs" />
     <Compile Include="EFM_Raid_Manager.cs" />
+    <Compile Include="EFM_Skill.cs" />
+    <Compile Include="EFM_StackTrigger.cs" />
     <Compile Include="EFM_TraderStatus.cs" />
+    <Compile Include="EFM_VanillaItemDescriptor.cs" />
     <Compile Include="EscapeFromMeatov.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

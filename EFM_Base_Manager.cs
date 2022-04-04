@@ -6,6 +6,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json;
+using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
@@ -31,6 +32,7 @@ namespace EFM
         private Text chosenCharacter;
         private Text chosenMap;
         private Text chosenTime;
+        private AudioSource clickAudio;
 
         // Assets
         public static GameObject areaCanvasPrefab; // AreaCanvas
@@ -62,22 +64,19 @@ namespace EFM
         public static Dictionary<string, Sprite> bonusIcons;
         public static Sprite[] skillIcons;
 
-        public SaveData data;
+        public JToken data;
 
         public int chosenCharIndex = -1;
         public int chosenMapIndex = -1;
         public int chosenTimeIndex = -1;
 
-        public static float time;
+        public float time;
         private bool cancelRaidLoad;
         private bool loadingRaid;
-        private bool loadingMap;
         private bool countdownDeploy;
         private float deployTimer;
-        private float deployTime = 10;
-        private Transform raidSpawnPoint;
+        private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         AssetBundleCreateRequest currentRaidBundleRequest;
-        AssetBundleRequest currentRaidMapRequest;
         public List<EFM_BaseAreaManager> baseAreaManagers;
         public Dictionary<string, int> baseInventory;
         public Dictionary<string, List<GameObject>> baseInventoryObjects;
@@ -94,7 +93,7 @@ namespace EFM
             if (cancelRaidLoad)
             {
                 loadingRaid = false;
-                loadingMap = false;
+                countdownDeploy = false;
 
                 // Wait until the raid map is done loading before unloading it
                 if (currentRaidBundleRequest.isDone)
@@ -121,46 +120,8 @@ namespace EFM
 
                 if (deployTimer <= 0)
                 {
-                    GM.CurrentMovementManager.TeleportToPoint(raidSpawnPoint.position, true, raidSpawnPoint.rotation.eulerAngles);
+                    SteamVR_LoadLevel.Begin("Meatov"+ chosenMap.text+ "Scene", false, 0.5f, 0f, 0f, 0f, 1f);
                     countdownDeploy = false;
-                }
-            }
-            else if (loadingMap)
-            {
-                if (currentRaidMapRequest.isDone)
-                {
-                    if (currentRaidMapRequest.asset != null)
-                    {
-                        // Instantiate map asset
-                        GameObject map = Instantiate<GameObject>(currentRaidMapRequest.allAssets[0] as GameObject);
-                        map.name = currentRaidMapRequest.asset.name;
-
-                        raidCountdownTitle.text = "Initializing map 3/3";
-                        raidCountdown.text = string.Empty;
-
-                        EFM_Raid_Manager raidManager = map.AddComponent<EFM_Raid_Manager>();
-                        raidManager.baseManager = this;
-                        raidManager.Init();
-
-                        raidSpawnPoint = raidManager.spawnPoint;
-                        countdownDeploy = true;
-
-                        deployTimer = deployTime;
-                        raidCountdownTitle.text = "Deploying in:";
-
-                        currentRaidBundleRequest.assetBundle.Unload(false);
-                        loadingMap = false;
-                    }
-                    else
-                    {
-                        Mod.instance.LogError("Could not load raid map, cancelling");
-                        cancelRaidLoad = true;
-                    }
-                }
-                else
-                {
-                    raidCountdownTitle.text = "Loading map 2/3:";
-                    raidCountdown.text = (currentRaidMapRequest.progress * 100).ToString() + "%";
                 }
             }
             else if (loadingRaid)
@@ -170,9 +131,11 @@ namespace EFM
                     if(currentRaidBundleRequest.assetBundle != null)
                     {
                         // Load the asset of the map
-                        currentRaidMapRequest = currentRaidBundleRequest.assetBundle.LoadAllAssetsAsync<GameObject>();
-                        loadingMap = true;
+                        // currentRaidMapRequest = currentRaidBundleRequest.assetBundle.LoadAllAssetsAsync<GameObject>();
+                        deployTimer = deployTime;
+
                         loadingRaid = false;
+                        countdownDeploy = true;
                     }
                     else
                     {
@@ -182,7 +145,7 @@ namespace EFM
                 }
                 else
                 {
-                    raidCountdownTitle.text = "Loading assetbundle 1/3:";
+                    raidCountdownTitle.text = "Loading map:";
                     raidCountdown.text = (currentRaidBundleRequest.progress * 100).ToString() + "%";
                 }
             }
@@ -209,20 +172,31 @@ namespace EFM
 
         public override void Init()
         {
-            SetupPlayerRig();
+            // Don't want to setup player rig if just got out of raid
+            if (!Mod.justFinishedRaid)
+            {
+                SetupPlayerRig();
+            }
 
             ProcessData();
+
+            if (Mod.justFinishedRaid)
+            {
+                FinishRaid(Mod.raidState); // This will save on autosave
+            }
 
             InitUI();
 
             InitTime();
+
+            Mod.justFinishedRaid = false;
 
             init = true;
         }
 
         private void SetupPlayerRig()
         {
-            Mod.instance.LogInfo("0");
+            Mod.instance.LogInfo("Setup player rig called");
             // Add equipment slots
             // Clear any previously existing ones
             if (Mod.equipmentSlots != null)
@@ -257,6 +231,7 @@ namespace EFM
 
                         EFM_EquipmentSlot slotComponent = slotObject.AddComponent<EFM_EquipmentSlot>();
                         Mod.equipmentSlots.Add(slotComponent);
+                        Mod.instance.LogInfo("created equip slot x:"+x+",y:"+y);
                         slotComponent.QuickbeltRoot = slotObject.transform;
                         slotComponent.HoverGeo = slotObject.transform.GetChild(0).GetChild(0).gameObject;
                         slotComponent.HoverGeo.SetActive(false);
@@ -294,13 +269,16 @@ namespace EFM
             if (data == null)
             {
                 // TODO: This is a new game, so we need to spawn starting equipement in the base and story/tutorial UI
-                data = new SaveData();
-                data.level = 1;
-                data.skills = new List<SavedSkill>();
-                for(int i=0; i < 52; ++i)
-                {
-                    data.skills.Add(new SavedSkill());
-                }
+                data = new JObject();
+                Mod.level = 1;
+                Mod.skills = new EFM_Skill[64];
+                Mod.health = new float[7];
+                Mod.hydration = 100;
+                Mod.energy = 100;
+
+                // Spawn standard edition starting items
+                GameObject.Instantiate(Mod.itemPrefabs[25], new Vector3(0,0,-1.2f), Quaternion.identity, transform.GetChild(transform.childCount - 2));
+                GameObject.Instantiate(Mod.itemPrefabs[407], transform.GetChild(transform.childCount - 2));
 
                 // Instantiate areas
                 baseAreaManagers = new List<EFM_BaseAreaManager>();
@@ -309,7 +287,7 @@ namespace EFM
                     EFM_BaseAreaManager currentBaseAreaManager = transform.GetChild(1).GetChild(i).gameObject.AddComponent<EFM_BaseAreaManager>();
                     currentBaseAreaManager.baseManager = this;
                     currentBaseAreaManager.areaIndex = i;
-                    currentBaseAreaManager.level = 0;
+                    currentBaseAreaManager.level = i == 3 ? 1 : 0; // Stash starts at level 1
                     currentBaseAreaManager.constructing = false;
                     currentBaseAreaManager.constructTime = 0;
 
@@ -325,14 +303,40 @@ namespace EFM
                     traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true);
                 }
 
+                UpdateBaseInventory();
+
                 return;
+            }
+
+            // Load player status
+            Mod.level = (float)data["level"];
+            Mod.health = data["health"].ToObject<float[]>();
+            Mod.hydration = (float)data["hydration"];
+            Mod.maxHydration = (float)data["maxHydration"];
+            Mod.energy = (float)data["energy"];
+            Mod.maxEnergy = (float)data["maxEnergy"];
+            Mod.stamina = (float)data["stamina"];
+            Mod.maxStamina = (float)data["maxStamina"];
+            Mod.skills = new EFM_Skill[64];
+            for(int i=0; i<64; ++i)
+            {
+                Mod.skills[i].progress = (float)data["skills"][i]["progress"];
+                Mod.skills[i].currentProgress = (float)data["skills"][i]["currentProgress"];
             }
 
             // Instantiate items
             Transform itemsRoot = transform.GetChild(2);
-            for (int i = 0; i < data.items.Count; ++i)
+            JArray loadedItems = (JArray)data["items"];
+            for (int i = 0; i < loadedItems.Count; ++i)
             {
-                SavedItem item = data.items[i];
+                JToken item = loadedItems[i];
+
+                // If just finished raid, skip any items that are on player since we want to keep what player found in raid
+                if (Mod.justFinishedRaid && ((int)item["PhysicalObject"]["equipSlot"] != -1 || (int)item["PhysicalObject"]["heldMode"] != 0 || (int)item["PhysicalObject"]["m_quickBeltSlot"] != -1))
+                {
+                    continue;
+                }
+
                 LoadSavedItem(itemsRoot, item);
             }
             // Count each type of item we have
@@ -345,15 +349,17 @@ namespace EFM
                 EFM_BaseAreaManager currentBaseAreaManager = transform.GetChild(1).GetChild(i).gameObject.AddComponent<EFM_BaseAreaManager>();
                 currentBaseAreaManager.baseManager = this;
                 currentBaseAreaManager.areaIndex = i;
-                if (data.areas != null)
+                if (data["areas"] != null)
                 {
-                    currentBaseAreaManager.level = data.areas[i].level;
-                    currentBaseAreaManager.constructing = data.areas[i].constructing;
-                    currentBaseAreaManager.constructTime = data.areas[i].constructTime;
-                    if (data.areas[i].slots != null)
+                    JArray loadedAreas = (JArray)data["areas"];
+                    currentBaseAreaManager.level = (int)loadedAreas[i]["level"];
+                    currentBaseAreaManager.constructing = (bool)loadedAreas[i]["constructing"];
+                    currentBaseAreaManager.constructTime = (float)loadedAreas[i]["constructTime"];
+                    if (loadedAreas[i]["slots"] != null)
                     {
                         currentBaseAreaManager.slotItems = new List<GameObject>();
-                        foreach (SavedItem item in data.areas[i].slots)
+                        JArray loadedAreaSlot = (JArray)loadedAreas[i]["slots"];
+                        foreach (JToken item in loadedAreaSlot)
                         {
                             if (item == null)
                             {
@@ -375,7 +381,7 @@ namespace EFM
 
             // Load trader statuses
             traderStatuses = new EFM_TraderStatus[8];
-            if(data.traderStatuses == null)
+            if(data["traderStatuses"] == null)
             {
                 for(int i=0; i < 8; i++)
                 {
@@ -384,9 +390,10 @@ namespace EFM
             }
             else
             {
+                JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
                 for (int i = 0; i < 8; i++)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, data.traderStatuses[i].salesSum, data.traderStatuses[i].standing, data.traderStatuses[i].unlocked);
+                    traderStatuses[i] = new EFM_TraderStatus(this, i, (float)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"]);
                 }
             }
         }
@@ -436,12 +443,12 @@ namespace EFM
             }
         }
 
-        private GameObject LoadSavedItem(Transform parent, SavedItem item)
+        private GameObject LoadSavedItem(Transform parent, JToken item)
         {
-            Mod.instance.LogInfo("Loading item "+item.PhysicalObject.ObjectWrapper.ItemID+", on parent "+parent.name);
+            Mod.instance.LogInfo("Loading item "+item["PhysicalObject"]["ObjectWrapper"]["ItemID"] +", on parent "+parent.name);
             int parsedID = -1;
             GameObject prefabToUse = null;
-            if (int.TryParse(item.PhysicalObject.ObjectWrapper.ItemID, out parsedID))
+            if (int.TryParse(item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString(), out parsedID))
             {
                 // Custom item, fetch from our own assets
                 prefabToUse = Mod.itemPrefabs[parsedID];
@@ -449,7 +456,7 @@ namespace EFM
             else
             {
                 // Vanilla item, fetch from game assets
-                prefabToUse = IM.OD[item.PhysicalObject.ObjectWrapper.ItemID].GetGameObject();
+                prefabToUse = IM.OD[item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString()].GetGameObject();
             }
 
             GameObject itemObject = Instantiate<GameObject>(prefabToUse, parent);
@@ -461,14 +468,14 @@ namespace EFM
             // Fill data
 
             // PhysicalObject
-            itemPhysicalObject.m_isSpawnLock = item.PhysicalObject.m_isSpawnLock;
-            itemPhysicalObject.m_isHardnessed = item.PhysicalObject.m_isHarnessed;
-            itemPhysicalObject.IsKinematicLocked = item.PhysicalObject.IsKinematicLocked;
-            itemPhysicalObject.IsInWater = item.PhysicalObject.IsInWater;
-            AddAttachments(itemPhysicalObject, item.PhysicalObject);
-            if (item.PhysicalObject.heldMode != 0)
+            itemPhysicalObject.m_isSpawnLock = (bool)item["PhysicalObject"]["m_isSpawnLock"];
+            itemPhysicalObject.m_isHardnessed = (bool)item["PhysicalObject"]["m_isHarnessed"];
+            itemPhysicalObject.IsKinematicLocked = (bool)item["PhysicalObject"]["IsKinematicLocked"];
+            itemPhysicalObject.IsInWater = (bool)item["PhysicalObject"]["IsInWater"];
+            AddAttachments(itemPhysicalObject, item["PhysicalObject"]);
+            if ((int)item["PhysicalObject"]["heldMode"] != 0)
             {
-                FVRViveHand hand = (item.PhysicalObject.heldMode == 1 ? GM.CurrentPlayerBody.RightHand : GM.CurrentPlayerBody.LeftHand).GetComponentInChildren<FVRViveHand>();
+                FVRViveHand hand = ((int)item["PhysicalObject"]["heldMode"] == 1 ? GM.CurrentPlayerBody.RightHand : GM.CurrentPlayerBody.LeftHand).GetComponentInChildren<FVRViveHand>();
                 hand.CurrentInteractable = itemPhysicalObject;
                 FieldInfo handStateField = typeof(FVRViveHand).GetField("m_state", BindingFlags.NonPublic | BindingFlags.Instance);
                 handStateField.SetValue(hand, FVRViveHand.HandState.GripInteracting);
@@ -477,7 +484,7 @@ namespace EFM
             Mod.instance.LogInfo("Filled physical object data");
 
             // ObjectWrapper
-            itemObjectWrapper.ItemID = item.PhysicalObject.ObjectWrapper.ItemID;
+            itemObjectWrapper.ItemID = item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString();
 
             // Firearm
             if (itemPhysicalObject is FVRFireArm)
@@ -486,21 +493,20 @@ namespace EFM
                 Mod.instance.LogInfo("loading firearm " + firearmPhysicalObject.name);
 
                 // Build and load flagDict from saved lists
-                if (item.PhysicalObject.flagDictKeys != null && item.PhysicalObject.flagDictKeys.Count > 0)
+                if (item["PhysicalObject"]["flagDictKeys"] != null)
                 {
+                    JObject loadedFlagDict = (JObject)item["PhysicalObject"]["flagDictKeys"];
                     Dictionary<string, string> flagDict = new Dictionary<string, string>();
-                    for (int j = 0; j < item.PhysicalObject.flagDictKeys.Count; ++j)
-                    {
-                        flagDict.Add(item.PhysicalObject.flagDictKeys[j], item.PhysicalObject.flagDictValues[j]);
-                    }
+                    flagDict = loadedFlagDict.ToObject<Dictionary<string, string>>();
                     firearmPhysicalObject.ConfigureFromFlagDic(flagDict);
                 }
 
                 // Chambers
                 List<FireArmRoundClass> newLoadedRoundsInChambers = new List<FireArmRoundClass>();
-                if (item.PhysicalObject.loadedRoundsInChambers != null && item.PhysicalObject.loadedRoundsInChambers.Count > 0)
+                if (item["PhysicalObject"]["loadedRoundsInChambers"] != null && ((JArray)item["PhysicalObject"]["loadedRoundsInChambers"]).Count > 0)
                 {
-                    foreach (int round in item.PhysicalObject.loadedRoundsInChambers)
+                    JArray loadedLRIC = ((JArray)item["PhysicalObject"]["loadedRoundsInChambers"]);
+                    foreach (int round in loadedLRIC)
                     {
                         newLoadedRoundsInChambers.Add((FireArmRoundClass)round);
                     }
@@ -508,11 +514,11 @@ namespace EFM
                 }
 
                 // Magazine/Clip
-                if (item.PhysicalObject.ammoContainer != null)
+                if (item["PhysicalObject"]["ammoContainer"] != null)
                 {
                     int parsedContainerID = -1;
                     GameObject containerPrefabToUse = null;
-                    if (int.TryParse(item.PhysicalObject.ammoContainer.itemID, out parsedContainerID))
+                    if (int.TryParse(item["PhysicalObject"]["ammoContainer"]["itemID"].ToString(), out parsedContainerID))
                     {
                         // Custom mag, fetch from our own assets
                         containerPrefabToUse = Mod.itemPrefabs[parsedContainerID];
@@ -520,7 +526,7 @@ namespace EFM
                     else
                     {
                         // Vanilla mag, fetch from game assets
-                        containerPrefabToUse = IM.OD[item.PhysicalObject.ammoContainer.itemID].GetGameObject();
+                        containerPrefabToUse = IM.OD[item["PhysicalObject"]["ammoContainer"]["itemID"].ToString()].GetGameObject();
                     }
 
                     GameObject containerObject = Instantiate<GameObject>(containerPrefabToUse);
@@ -535,10 +541,10 @@ namespace EFM
 
                         FVRFireArmClip clipPhysicalObject = containerPhysicalObject as FVRFireArmClip;
 
-                        if (item.PhysicalObject.ammoContainer.loadedRoundsInContainer != null)
+                        if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
                         {
                             List<FireArmRoundClass> newLoadedRoundsInClip = new List<FireArmRoundClass>();
-                            foreach (int round in item.PhysicalObject.ammoContainer.loadedRoundsInContainer)
+                            foreach (int round in item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"])
                             {
                                 newLoadedRoundsInClip.Add((FireArmRoundClass)round);
                             }
@@ -566,11 +572,11 @@ namespace EFM
                         containerObject.transform.position = gunMagTransform.position;
                         containerObject.transform.rotation = gunMagTransform.rotation;
 
-                        if (item.PhysicalObject.ammoContainer.loadedRoundsInContainer != null)
+                        if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
                         {
                             Mod.instance.LogInfo("\t\tmag has rounds list");
                             List<FireArmRoundClass> newLoadedRoundsInMag = new List<FireArmRoundClass>();
-                            foreach (int round in item.PhysicalObject.ammoContainer.loadedRoundsInContainer)
+                            foreach (int round in item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"])
                             {
                                 newLoadedRoundsInMag.Add((FireArmRoundClass)round);
                             }
@@ -594,10 +600,10 @@ namespace EFM
             {
                 FVRFireArmMagazine magPhysicalObject = (itemPhysicalObject as FVRFireArmMagazine);
 
-                if (item.PhysicalObject.loadedRoundsInContainer != null)
+                if (item["PhysicalObject"]["loadedRoundsInContainer"] != null)
                 {
                     List<FireArmRoundClass> newLoadedRoundsInMag = new List<FireArmRoundClass>();
-                    foreach (int round in item.PhysicalObject.loadedRoundsInContainer)
+                    foreach (int round in item["PhysicalObject"]["loadedRoundsInContainer"])
                     {
                         newLoadedRoundsInMag.Add((FireArmRoundClass)round);
                     }
@@ -615,10 +621,10 @@ namespace EFM
             {
                 FVRFireArmClip clipPhysicalObject = (itemPhysicalObject as FVRFireArmClip);
 
-                if (item.PhysicalObject.loadedRoundsInContainer != null)
+                if (item["PhysicalObject"]["loadedRoundsInContainer"] != null)
                 {
                     List<FireArmRoundClass> newLoadedRoundsInClip = new List<FireArmRoundClass>();
-                    foreach (int round in item.PhysicalObject.loadedRoundsInContainer)
+                    foreach (int round in item["PhysicalObject"]["loadedRoundsInContainer"])
                     {
                         newLoadedRoundsInClip.Add((FireArmRoundClass)round);
                     }
@@ -636,11 +642,12 @@ namespace EFM
             {
                 Speedloader SLPhysicalObject = (itemPhysicalObject as Speedloader);
 
-                if (item.PhysicalObject.loadedRoundsInContainer != null)
+                if (item["PhysicalObject"]["loadedRoundsInContainer"] != null)
                 {
-                    for (int j = 0; j < item.PhysicalObject.loadedRoundsInContainer.Count; ++j)
+                    JArray loadedRIC = (JArray)item["PhysicalObject"]["loadedRoundsInContainer"];
+                    for (int j = 0; j < loadedRIC.Count; ++j)
                     {
-                        int currentRound = item.PhysicalObject.loadedRoundsInContainer[j];
+                        int currentRound = (int)loadedRIC[j];
                         SpeedloaderChamber currentChamber = SLPhysicalObject.Chambers[j];
 
                         if (currentRound > 0)
@@ -672,32 +679,35 @@ namespace EFM
             EFM_CustomItemWrapper customItemWrapper = itemObject.GetComponent<EFM_CustomItemWrapper>();
             if (customItemWrapper != null)
             {
-                customItemWrapper.itemType = (Mod.ItemType)item.itemType;
-                Mod.instance.LogInfo("Has custom item wrapper with type: "+((Mod.ItemType)item.itemType));
+                customItemWrapper.itemType = (Mod.ItemType)(int)item["itemType"];
+                customItemWrapper.amount = (int)item["amount"];
+                customItemWrapper.looted = (bool)item["looted"];
+                Mod.instance.LogInfo("Has custom item wrapper with type: "+((Mod.ItemType)(int)item["itemType"]));
 
                 // Armor
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.BodyArmor)
                 {
                     Mod.instance.LogInfo("is armor");
-                    customItemWrapper.armor = item.PhysicalObject.armor;
-                    customItemWrapper.maxArmor = item.PhysicalObject.maxArmor;
+                    customItemWrapper.armor = (float)item["PhysicalObject"]["armor"];
+                    customItemWrapper.maxArmor = (float)item["PhysicalObject"]["maxArmor"];
                 }
 
                 // Rig
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
                 {
                     Mod.instance.LogInfo("is rig");
-                    if (item.PhysicalObject.quickBeltSlotContents != null)
+                    if (item["PhysicalObject"]["quickBeltSlotContents"] != null)
                     {
-                        for (int j = 0; j < item.PhysicalObject.quickBeltSlotContents.Count; ++j)
+                        JArray loadedQBContents = (JArray)item["PhysicalObject"]["quickBeltSlotContents"];
+                        for (int j = 0; j < loadedQBContents.Count; ++j)
                         {
-                            if (item.PhysicalObject.quickBeltSlotContents[j] == null)
+                            if (loadedQBContents[j] == null)
                             {
                                 customItemWrapper.itemsInSlots[j] = null;
                             }
                             else
                             {
-                                customItemWrapper.itemsInSlots[j] = LoadSavedItem(customItemWrapper.itemObjectsRoot, item.PhysicalObject.quickBeltSlotContents[j]);
+                                customItemWrapper.itemsInSlots[j] = LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedQBContents[j]);
                             }
                         }
                     }
@@ -707,19 +717,75 @@ namespace EFM
                 if (customItemWrapper.itemType == Mod.ItemType.Backpack)
                 {
                     Mod.instance.LogInfo("is backpack");
-                    if (item.PhysicalObject.backpackContents != null)
+                    if (item["PhysicalObject"]["backpackContents"] != null)
                     {
-                        for (int j = 0; j < item.PhysicalObject.backpackContents.Count; ++j)
+                        JArray loadedBPContents = (JArray)item["PhysicalObject"]["backpackContents"];
+                        for (int j = 0; j < loadedBPContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.itemObjectsRoot, item.PhysicalObject.backpackContents[j]);
+                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedBPContents[j]);
                         }
                     }
                 }
 
-                // Equip the item if it has an equip slot
-                if(item.PhysicalObject.equipSlot != -1)
+                // Container
+                if (customItemWrapper.itemType == Mod.ItemType.Container)
                 {
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[item.PhysicalObject.equipSlot];
+                    Mod.instance.LogInfo("is container");
+                    if (item["PhysicalObject"]["containerContents"] != null)
+                    {
+                        JArray loadedContainerContents = (JArray)item["PhysicalObject"]["containerContents"];
+                        for (int j = 0; j < loadedContainerContents.Count; ++j)
+                        {
+                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedContainerContents[j]);
+                        }
+                    }
+                }
+
+                // Pouch
+                if (customItemWrapper.itemType == Mod.ItemType.Pouch)
+                {
+                    Mod.instance.LogInfo("is Pouch");
+                    if (item["PhysicalObject"]["containerContents"] != null)
+                    {
+                        JArray loadedPouchContents = (JArray)item["PhysicalObject"]["containerContents"];
+                        for (int j = 0; j < loadedPouchContents.Count; ++j)
+                        {
+                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedPouchContents[j]);
+                        }
+                    }
+                }
+
+                // AmmoBox
+                //if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                //{
+                //    Mod.instance.LogInfo("is ammo box");
+                //}
+
+                // Money
+                if (customItemWrapper.itemType == Mod.ItemType.Money)
+                {
+                    Mod.instance.LogInfo("is money");
+
+                    customItemWrapper.stack = (int)item["stack"];
+                    customItemWrapper.UpdateStackModel();
+                }
+
+                // Consumable
+                //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
+                //{
+                //    Mod.instance.LogInfo("is Consumable");
+                //}
+
+                // Key
+                //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
+                //{
+                //    Mod.instance.LogInfo("is Consumable");
+                //}
+
+                // Equip the item if it has an equip slot
+                if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                {
+                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[(int)item["PhysicalObject"]["equipSlot"]];
                     itemPhysicalObject.SetQuickBeltSlot(equipSlot);
                     itemPhysicalObject.SetParentage(equipSlot.QuickbeltRoot);
 
@@ -740,27 +806,35 @@ namespace EFM
                 }
             }
 
+            // Vanilla item
+            EFM_VanillaItemDescriptor vanillaItemDescriptor = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+            if(vanillaItemDescriptor != null)
+            {
+                vanillaItemDescriptor.looted = (bool)item["looted"];
+            }
+
             // GameObject
-            itemObject.transform.localPosition = new Vector3(item.PhysicalObject.positionX, item.PhysicalObject.positionY, item.PhysicalObject.positionZ);
-            itemObject.transform.localRotation = Quaternion.Euler(new Vector3(item.PhysicalObject.rotationX, item.PhysicalObject.rotationY, item.PhysicalObject.rotationZ));
+            itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
+            itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
 
             return itemObject;
         }
 
-        private void AddAttachments(FVRPhysicalObject physicalObject, PhysicalObject loadedPhysicalObject)
+        private void AddAttachments(FVRPhysicalObject physicalObject, JToken loadedPhysicalObject)
         {
-            if(loadedPhysicalObject.AttachmentsList == null)
+            if(loadedPhysicalObject["AttachmentsList"] == null)
             {
                 return;
             }
 
             Transform root = physicalObject.transform;
-            for (int i = 0; i < loadedPhysicalObject.AttachmentsList.Count; ++i)
+            JArray loadedAttachmentsList = ((JArray)loadedPhysicalObject["AttachmentsList"]);
+            for (int i = 0; i < loadedAttachmentsList.Count; ++i)
             {
-                PhysicalObject currentPhysicalObject = loadedPhysicalObject.AttachmentsList[i];
+                JToken currentPhysicalObject = loadedAttachmentsList[i];
                 int parsedID = -1;
                 GameObject prefabToUse = null;
-                if (int.TryParse(currentPhysicalObject.ObjectWrapper.ItemID, out parsedID))
+                if (int.TryParse(currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString(), out parsedID))
                 {
                     // Custom item, fetch from our own assets
                     prefabToUse = Mod.itemPrefabs[parsedID];
@@ -768,7 +842,7 @@ namespace EFM
                 else
                 {
                     // Vanilla item, fetch from game assets
-                    prefabToUse = IM.OD[currentPhysicalObject.ObjectWrapper.ItemID].GetGameObject();
+                    prefabToUse = IM.OD[currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString()].GetGameObject();
                 }
 
                 GameObject itemObject = Instantiate<GameObject>(prefabToUse, root);
@@ -778,24 +852,24 @@ namespace EFM
 
                 // Fill data
                 // GameObject
-                itemObject.transform.localPosition = new Vector3(currentPhysicalObject.positionX, currentPhysicalObject.positionY, currentPhysicalObject.positionZ);
-                itemObject.transform.localRotation = Quaternion.Euler(new Vector3(currentPhysicalObject.rotationX, currentPhysicalObject.rotationY, currentPhysicalObject.rotationZ));
+                itemObject.transform.localPosition = new Vector3((float)currentPhysicalObject["positionX"], (float)currentPhysicalObject["positionY"], (float)currentPhysicalObject["positionZ"]);
+                itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)currentPhysicalObject["rotationX"], (float)currentPhysicalObject["rotationY"], (float)currentPhysicalObject["rotationZ"]));
 
                 // PhysicalObject
-                itemPhysicalObject.m_isSpawnLock = currentPhysicalObject.m_isSpawnLock;
-                itemPhysicalObject.m_isHardnessed = currentPhysicalObject.m_isHarnessed;
-                itemPhysicalObject.IsKinematicLocked = currentPhysicalObject.IsKinematicLocked;
-                itemPhysicalObject.IsInWater = currentPhysicalObject.IsInWater;
+                itemPhysicalObject.m_isSpawnLock = (bool)currentPhysicalObject["m_isSpawnLock"];
+                itemPhysicalObject.m_isHardnessed = (bool)currentPhysicalObject["m_isHarnessed"];
+                itemPhysicalObject.IsKinematicLocked = (bool)currentPhysicalObject["IsKinematicLocked"];
+                itemPhysicalObject.IsInWater = (bool)currentPhysicalObject["IsInWater"];
                 AddAttachments(itemPhysicalObject, currentPhysicalObject);
                 FVRFireArmAttachment itemAttachment = itemPhysicalObject as FVRFireArmAttachment;
-                itemAttachment.AttachToMount(physicalObject.AttachmentMounts[currentPhysicalObject.mountIndex], false);
+                itemAttachment.AttachToMount(physicalObject.AttachmentMounts[(int)currentPhysicalObject["mountIndex"]], false);
                 if(itemAttachment is Suppressor)
                 {
                     (itemAttachment as Suppressor).AutoMountWell();
                 }
                 
                 // ObjectWrapper
-                itemObjectWrapper.ItemID = currentPhysicalObject.ObjectWrapper.ItemID;
+                itemObjectWrapper.ItemID = currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString();
             }
         }
 
@@ -850,18 +924,25 @@ namespace EFM
 
             buttons[7][0] = canvas.GetChild(7).GetChild(1).GetComponent<Button>(); // Loading Cancel
 
+            // Fetch audio sources
+            AudioSource hoverAudio = canvas.transform.GetChild(10).GetComponent<AudioSource>();
+            clickAudio = canvas.transform.GetChild(11).GetComponent<AudioSource>();
+
             // Create an FVRPointableButton for each button
             for (int i = 0; i < buttons.Length; ++i)
             {
                 for (int j = 0; j < buttons[i].Length; ++j)
                 {
-                    FVRPointableButton pointableButton = buttons[i][j].gameObject.AddComponent<FVRPointableButton>();
+                    EFM_PointableButton pointableButton = buttons[i][j].gameObject.AddComponent<EFM_PointableButton>();
+
                     pointableButton.SetButton();
-                    pointableButton.SetText();
-                    pointableButton.SetRenderer();
-                    pointableButton.ColorSelected = Color.white;
-                    pointableButton.ColorUnselected = Color.white;
-                    pointableButton.MaxPointingRange = 10;
+                    pointableButton.MaxPointingRange = 5;
+                    pointableButton.hoverGraphics = new GameObject[2];
+                    pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+                    pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+                    pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+                    pointableButton.toggleTextColor = true;
+                    pointableButton.hoverSound = hoverAudio;
                 }
             }
 
@@ -925,164 +1006,174 @@ namespace EFM
             chosenTime = canvas.GetChild(6).GetChild(5).GetComponentInChildren<Text>();
 
             // Areas
-            if(areaCanvasPrefab == null)
+            if (areaCanvasPrefab == null)
             {
                 Mod.instance.LogInfo("Area canvas not initialized, initializing all area UI and prepping...");
 
                 // Load prefabs and assets
-                areaCanvasPrefab = Mod.baseBundle.LoadAsset<GameObject>("AreaCanvas");
-                areaCanvasBottomButtonPrefab = Mod.baseBundle.LoadAsset<GameObject>("AreaCanvasBottomButton");
-                areaRequirementPrefab = Mod.baseBundle.LoadAsset<GameObject>("AreaRequirement");
-                itemRequirementPrefab = Mod.baseBundle.LoadAsset<GameObject>("ItemRequirement");
-                skillRequirementPrefab = Mod.baseBundle.LoadAsset<GameObject>("SkillRequirement");
-                traderRequirementPrefab = Mod.baseBundle.LoadAsset<GameObject>("TraderRequirement");
-                areaRequirementsPrefab = Mod.baseBundle.LoadAsset<GameObject>("AreaRequirements");
-                itemRequirementsPrefab = Mod.baseBundle.LoadAsset<GameObject>("ItemRequirements");
-                skillRequirementsPrefab = Mod.baseBundle.LoadAsset<GameObject>("SkillRequirements");
-                traderRequirementsPrefab = Mod.baseBundle.LoadAsset<GameObject>("TraderRequirements");
-                bonusPrefab = Mod.baseBundle.LoadAsset<GameObject>("Bonus");
-                areaBackgroundNormalSprite = Mod.baseBundle.LoadAsset<Sprite>("area_icon_default_back");
-                areaBackgroundLockedSprite = Mod.baseBundle.LoadAsset<Sprite>("area_icon_locked_back");
-                areaBackgroundAvailableSprite = Mod.baseBundle.LoadAsset<Sprite>("area_icon_default_back_green");
-                areaBackgroundEliteSprite = Mod.baseBundle.LoadAsset<Sprite>("area_icon_elite_back");
-                areaStatusIconUpgrading = Mod.baseBundle.LoadAsset<Sprite>("icon_status_upgrading");
-                areaStatusIconConstructing = Mod.baseBundle.LoadAsset<Sprite>("icon_status_constructing");
-                areaStatusIconLocked = Mod.baseBundle.LoadAsset<Sprite>("icon_lock");
-                areaStatusIconUnlocked = Mod.baseBundle.LoadAsset<Sprite>("icon_status_unlocked");
-                areaStatusIconReadyUpgrade = Mod.baseBundle.LoadAsset<Sprite>("icon_status_ready_to_upgrade");
-                areaStatusIconProducing = Mod.baseBundle.LoadAsset<Sprite>("icon_status_producing");
-                areaStatusIconOutOfFuel = Mod.baseBundle.LoadAsset<Sprite>("icon_out_of_fuel");
-                requirementFulfilled = Mod.baseBundle.LoadAsset<Sprite>("icon_requirement_fulfilled");
-                requirementLocked = Mod.baseBundle.LoadAsset<Sprite>("icon_requirement_locked");
+                areaCanvasPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaCanvas");
+                areaCanvasBottomButtonPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaCanvasBottomButton");
+                areaRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaRequirement");
+                itemRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("ItemRequirement");
+                skillRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("SkillRequirement");
+                traderRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("TraderRequirement");
+                areaRequirementsPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaRequirements");
+                itemRequirementsPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("ItemRequirements");
+                skillRequirementsPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("SkillRequirements");
+                traderRequirementsPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("TraderRequirements");
+                bonusPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("Bonus");
+                areaBackgroundNormalSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("area_icon_default_back");
+                areaBackgroundLockedSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("area_icon_locked_back");
+                areaBackgroundAvailableSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("area_icon_default_back_green");
+                areaBackgroundEliteSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("area_icon_elite_back");
+                areaStatusIconUpgrading = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_upgrading");
+                areaStatusIconConstructing = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_constructing");
+                areaStatusIconLocked = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_lock");
+                areaStatusIconUnlocked = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_unlocked");
+                areaStatusIconReadyUpgrade = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_ready_to_upgrade");
+                areaStatusIconProducing = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_producing");
+                areaStatusIconOutOfFuel = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_out_of_fuel");
+                requirementFulfilled = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_requirement_fulfilled");
+                Mod.instance.LogInfo("requirementFulfilled null?: "+(requirementFulfilled == null));
+                requirementLocked = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_requirement_locked");
+                Mod.instance.LogInfo("requirementLocked null?: " + (requirementLocked == null));
+                Mod.instance.LogInfo("All asset names:");
+
+                string[] allNames = Mod.baseAssetsBundle.GetAllAssetNames();
+                foreach(string name in allNames)
+                {
+                    Mod.instance.LogInfo(name);
+                    if (name.Contains("locked"))
+                    {
+                        Mod.instance.LogInfo("\tCONTAINS LOCKED");
+                    }
+                }
                 traderAvatars = new Sprite[8];
-                traderAvatars[0] = Mod.baseBundle.LoadAsset<Sprite>("avatar_russian_small");
-                traderAvatars[0] = Mod.baseBundle.LoadAsset<Sprite>("avatar_therapist_small");
-                traderAvatars[0] = Mod.baseBundle.LoadAsset<Sprite>("avatar_fence_small");
-                traderAvatars[0] = Mod.baseBundle.LoadAsset<Sprite>("avatar_ah_small");
-                traderAvatars[0] = Mod.baseBundle.LoadAsset<Sprite>("avatar_peacekeeper_small");
-                traderAvatars[0] = Mod.baseBundle.LoadAsset<Sprite>("avatar_tech_small");
-                traderAvatars[0] = Mod.baseBundle.LoadAsset<Sprite>("avatar_ragman_small");
-                traderAvatars[0] = Mod.baseBundle.LoadAsset<Sprite>("avatar_jaeger_small");
+                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_russian_small");
+                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_therapist_small");
+                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_fence_small");
+                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_ah_small");
+                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_peacekeeper_small");
+                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_tech_small");
+                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_ragman_small");
+                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_jaeger_small");
                 areaIcons = new Sprite[22];
-                areaIcons[0] = Mod.baseBundle.LoadAsset<Sprite>("icon_vents");
-                areaIcons[1] = Mod.baseBundle.LoadAsset<Sprite>("icon_security");
-                areaIcons[2] = Mod.baseBundle.LoadAsset<Sprite>("icon_watercloset");
-                areaIcons[3] = Mod.baseBundle.LoadAsset<Sprite>("icon_stash");
-                areaIcons[4] = Mod.baseBundle.LoadAsset<Sprite>("icon_generators");
-                areaIcons[5] = Mod.baseBundle.LoadAsset<Sprite>("icon_heating");
-                areaIcons[6] = Mod.baseBundle.LoadAsset<Sprite>("icon_rain_collector");
-                areaIcons[7] = Mod.baseBundle.LoadAsset<Sprite>("icon_medstation");
-                areaIcons[8] = Mod.baseBundle.LoadAsset<Sprite>("icon_kitchen");
-                areaIcons[9] = Mod.baseBundle.LoadAsset<Sprite>("icon_restplace");
-                areaIcons[10] = Mod.baseBundle.LoadAsset<Sprite>("icon_workbench");
-                areaIcons[11] = Mod.baseBundle.LoadAsset<Sprite>("icon_intelligence_center");
-                areaIcons[12] = Mod.baseBundle.LoadAsset<Sprite>("icon_shooting_range");
-                areaIcons[13] = Mod.baseBundle.LoadAsset<Sprite>("icon_library");
-                areaIcons[14] = Mod.baseBundle.LoadAsset<Sprite>("icon_scav_case");
-                areaIcons[15] = Mod.baseBundle.LoadAsset<Sprite>("icon_illumination");
-                areaIcons[16] = Mod.baseBundle.LoadAsset<Sprite>("icon_placeoffame");
-                areaIcons[17] = Mod.baseBundle.LoadAsset<Sprite>("icon_afu");
-                areaIcons[18] = Mod.baseBundle.LoadAsset<Sprite>("icon_solarpower");
-                areaIcons[19] = Mod.baseBundle.LoadAsset<Sprite>("icon_boozegen");
-                areaIcons[20] = Mod.baseBundle.LoadAsset<Sprite>("icon_bitcionfarm");
-                areaIcons[21] = Mod.baseBundle.LoadAsset<Sprite>("icon_christmas_illumination");
+                areaIcons[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_vents");
+                areaIcons[1] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_security");
+                areaIcons[2] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_watercloset");
+                areaIcons[3] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_stash");
+                areaIcons[4] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_generators");
+                areaIcons[5] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_heating");
+                areaIcons[6] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_rain_collector");
+                areaIcons[7] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_medstation");
+                areaIcons[8] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_kitchen");
+                areaIcons[9] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_restplace");
+                areaIcons[10] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_workbench");
+                areaIcons[11] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_intelligence_center");
+                areaIcons[12] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_shooting_range");
+                areaIcons[13] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_library");
+                areaIcons[14] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_scav_case");
+                areaIcons[15] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_illumination");
+                areaIcons[16] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_placeoffame");
+                areaIcons[17] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_afu");
+                areaIcons[18] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_solarpower");
+                areaIcons[19] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_boozegen");
+                areaIcons[20] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_bitcoinfarm");
+                areaIcons[21] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_christmas_illumination");
                 bonusIcons = new Dictionary<string, Sprite>();
-                bonusIcons.Add("ExperienceRate", Mod.baseBundle.LoadAsset<Sprite>("icon_exp_small"));
-                bonusIcons.Add("HealthRegeneration", Mod.baseBundle.LoadAsset<Sprite>("icon_medical"));
-                bonusIcons.Add("/files/Hideout/icon_hideout_createitem_meds.png", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_createitem_meds"));
-                bonusIcons.Add("/files/Hideout/icon_hideout_videocardslots.png", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_videocardslots"));
-                bonusIcons.Add("/files/Hideout/icon_hideout_createitem_bitcoin.png", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_createitem_bitcoin"));
-                bonusIcons.Add("/files/Hideout/icon_hideout_unlocked.png", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_unlocked"));
-                bonusIcons.Add("FuelConsumption", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_fuelconsumption"));
-                bonusIcons.Add("/files/Hideout/icon_hideout_fuelslots.png", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_fuelslots"));
-                bonusIcons.Add("EnergyRegeneration", Mod.baseBundle.LoadAsset<Sprite>("icon_info_energy"));
-                bonusIcons.Add("HydrationRegeneration", Mod.baseBundle.LoadAsset<Sprite>("icon_info_hydration"));
-                bonusIcons.Add("/files/Hideout/icon_hideout_shootingrangeunlock.png", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_shootingrangeunlock"));
-                bonusIcons.Add("DebuffEndDelay", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_skillboost"));
-                bonusIcons.Add("UnlockWeaponModification", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_weaponmodunlock"));
-                bonusIcons.Add("SkillGroupLevelingBoost", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_skillboost"));
-                bonusIcons.Add("AdditionalSlots", Mod.baseBundle.LoadAsset<Sprite>("skills_grid_icon"));
-                bonusIcons.Add("StashSize", Mod.baseBundle.LoadAsset<Sprite>("skills_grid_icon"));
-                bonusIcons.Add("/files/Hideout/icon_hideout_scavitem.png", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_scavitem"));
-                bonusIcons.Add("ScavCooldownTimer", Mod.baseBundle.LoadAsset<Sprite>("icon_time"));
-                bonusIcons.Add("InsuranceReturnTime", Mod.baseBundle.LoadAsset<Sprite>("icon_time"));
-                bonusIcons.Add("QuestMoneyReward", Mod.baseBundle.LoadAsset<Sprite>("icon_info_money"));
-                bonusIcons.Add("RagfairCommission", Mod.baseBundle.LoadAsset<Sprite>("icon_info_money"));
-                bonusIcons.Add("/files/Hideout/icon_hideout_createitem_generic.png", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_createitem_generic"));
-                bonusIcons.Add("MaximumEnergyReserve", Mod.baseBundle.LoadAsset<Sprite>("icon_hideout_batterycharge"));
+                bonusIcons.Add("ExperienceRate", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_exp_small"));
+                bonusIcons.Add("HealthRegeneration", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_medical"));
+                bonusIcons.Add("/files/Hideout/icon_hideout_createitem_meds.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_createitem_meds"));
+                bonusIcons.Add("/files/Hideout/icon_hideout_videocardslots.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_videocardslots"));
+                bonusIcons.Add("/files/Hideout/icon_hideout_createitem_bitcoin.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_createitem_bitcoin"));
+                bonusIcons.Add("/files/Hideout/icon_hideout_unlocked.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_unlocked"));
+                bonusIcons.Add("FuelConsumption", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_fuelconsumption"));
+                bonusIcons.Add("/files/Hideout/icon_hideout_fuelslots.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_fuelslots"));
+                bonusIcons.Add("EnergyRegeneration", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_energy"));
+                bonusIcons.Add("HydrationRegeneration", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_hydration"));
+                bonusIcons.Add("/files/Hideout/icon_hideout_shootingrangeunlock.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_shootingrangeunlock"));
+                bonusIcons.Add("DebuffEndDelay", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_skillboost"));
+                bonusIcons.Add("UnlockWeaponModification", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_weaponmodunlock"));
+                bonusIcons.Add("SkillGroupLevelingBoost", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_skillboost"));
+                bonusIcons.Add("AdditionalSlots", Mod.baseAssetsBundle.LoadAsset<Sprite>("skills_grid_icon"));
+                bonusIcons.Add("StashSize", Mod.baseAssetsBundle.LoadAsset<Sprite>("skills_grid_icon"));
+                bonusIcons.Add("/files/Hideout/icon_hideout_scavitem.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_scavitem"));
+                bonusIcons.Add("ScavCooldownTimer", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_time"));
+                bonusIcons.Add("InsuranceReturnTime", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_time"));
+                bonusIcons.Add("QuestMoneyReward", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money"));
+                bonusIcons.Add("RagfairCommission", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money"));
+                bonusIcons.Add("/files/Hideout/icon_hideout_createitem_generic.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_createitem_generic"));
+                bonusIcons.Add("MaximumEnergyReserve", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_batterycharge"));
                 skillIcons = new Sprite[64];
-                skillIcons[0] = Mod.baseBundle.LoadAsset<Sprite>("skill_physical_endurance");
-                skillIcons[1] = Mod.baseBundle.LoadAsset<Sprite>("skill_physical_strength");
-                skillIcons[2] = Mod.baseBundle.LoadAsset<Sprite>("skill_physical_vitality");
-                skillIcons[3] = Mod.baseBundle.LoadAsset<Sprite>("skill_physical_health");
-                skillIcons[4] = Mod.baseBundle.LoadAsset<Sprite>("skill_mental_stressresistance");
-                skillIcons[5] = Mod.baseBundle.LoadAsset<Sprite>("skill_physical_metabolism");
-                skillIcons[6] = Mod.baseBundle.LoadAsset<Sprite>("skill_physical_immunity");
-                skillIcons[7] = Mod.baseBundle.LoadAsset<Sprite>("skill_mental_perception");
-                skillIcons[8] = Mod.baseBundle.LoadAsset<Sprite>("skill_mental_intellect");
-                skillIcons[9] = Mod.baseBundle.LoadAsset<Sprite>("skill_mental_attention");
-                skillIcons[10] = Mod.baseBundle.LoadAsset<Sprite>("skill_mental_charisma");
-                skillIcons[11] = Mod.baseBundle.LoadAsset<Sprite>("skill_mental_memory");
-                skillIcons[12] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_pistols");
-                skillIcons[13] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_revolvers");
-                skillIcons[14] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_smgs");
-                skillIcons[15] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_assaultrifles");
-                skillIcons[16] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_shotguns");
-                skillIcons[17] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_sniperrifles");
-                skillIcons[18] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_lmgs");
-                skillIcons[19] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_hmgs");
-                skillIcons[20] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_launchers");
-                skillIcons[21] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_ugls");
-                skillIcons[22] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_grenades");
-                skillIcons[23] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_melee");
-                skillIcons[24] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_dmrs");
-                skillIcons[25] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_recoilcontrol");
-                skillIcons[26] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_weapondrawing");
-                skillIcons[27] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_troubleshooting");
-                skillIcons[28] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_surgery");
-                skillIcons[29] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_covertmovement");
-                skillIcons[30] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_search");
-                skillIcons[31] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_magdrills");
-                skillIcons[32] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_sniping");
-                skillIcons[33] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_pronemovement");
-                skillIcons[34] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_fieldmedical");
-                skillIcons[35] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_basicmedical");
-                skillIcons[36] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_lightarmor");
-                skillIcons[37] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_heavyarmor");
-                skillIcons[38] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_basicweaponmodding");
-                skillIcons[39] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_advancedweaponmodding");
-                skillIcons[40] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_nightoperations");
-                skillIcons[41] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_silentoperations");
-                skillIcons[42] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_lockpicking");
-                skillIcons[43] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_weapontreatment");
-                skillIcons[44] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_freetrading");
-                skillIcons[45] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_auctions");
-                skillIcons[46] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_cleanoperations");
-                skillIcons[47] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_barter");
-                skillIcons[48] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_shadowconnections");
-                skillIcons[49] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_taskperformance");
-                skillIcons[50] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_crafting");
-                skillIcons[51] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_hideoutmanagement");
-                skillIcons[52] = Mod.baseBundle.LoadAsset<Sprite>("skill_combat_weaponswitch");
-                skillIcons[53] = Mod.baseBundle.LoadAsset<Sprite>("skill_practical_equipmentmanagement");
-                skillIcons[54] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_bear_aksystems");
-                skillIcons[55] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_bear_assaultoperations");
-                skillIcons[56] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_bear_authority");
-                skillIcons[57] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_bear_heavycaliber");
-                skillIcons[58] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_bear_rawpower");
-                skillIcons[59] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_usec_arsystems");
-                skillIcons[60] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_usec_deepweaponmodding");
-                skillIcons[61] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_usec_longrangeoptics");
-                skillIcons[62] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_usec_negotiations");
-                skillIcons[63] = Mod.baseBundle.LoadAsset<Sprite>("skill_special_usec_tactics");
+                skillIcons[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_endurance");
+                skillIcons[1] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_strength");
+                skillIcons[2] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_vitality");
+                skillIcons[3] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_health");
+                skillIcons[4] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_stressresistance");
+                skillIcons[5] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_metabolism");
+                skillIcons[6] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_immunity");
+                skillIcons[7] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_perception");
+                skillIcons[8] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_intellect");
+                skillIcons[9] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_attention");
+                skillIcons[10] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_charisma");
+                skillIcons[11] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_memory");
+                skillIcons[12] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_pistols");
+                skillIcons[13] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_revolvers");
+                skillIcons[14] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_smgs");
+                skillIcons[15] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_assaultrifles");
+                skillIcons[16] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_shotguns");
+                skillIcons[17] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_sniperrifles");
+                skillIcons[18] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_lmgs");
+                skillIcons[19] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_hmgs");
+                skillIcons[20] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_launchers");
+                skillIcons[21] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_ugls");
+                skillIcons[22] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_grenades");
+                skillIcons[23] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_melee");
+                skillIcons[24] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_dmrs");
+                skillIcons[25] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_recoilcontrol");
+                skillIcons[26] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_weapondrawing");
+                skillIcons[27] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_troubleshooting");
+                skillIcons[28] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_surgery");
+                skillIcons[29] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_covertmovement");
+                skillIcons[30] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_search");
+                skillIcons[31] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_magdrills");
+                skillIcons[32] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_sniping");
+                skillIcons[33] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_pronemovement");
+                skillIcons[34] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_fieldmedical");
+                skillIcons[35] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_basicmedical");
+                skillIcons[36] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_lightarmor");
+                skillIcons[37] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_heavyarmor");
+                skillIcons[38] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_basicweaponmodding");
+                skillIcons[39] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_advancedweaponmodding");
+                skillIcons[40] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_nightoperations");
+                skillIcons[41] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_silentoperations");
+                skillIcons[42] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_lockpicking");
+                skillIcons[43] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_weapontreatment");
+                skillIcons[44] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_freetrading");
+                skillIcons[45] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_auctions");
+                skillIcons[46] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_cleanoperations");
+                skillIcons[47] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_barter");
+                skillIcons[48] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_shadowconnections");
+                skillIcons[49] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_taskperformance");
+                skillIcons[50] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_crafting");
+                skillIcons[51] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_hideoutmanagement");
+                skillIcons[52] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_weaponswitch");
+                skillIcons[53] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_equipmentmanagement");
+                skillIcons[54] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_aksystems");
+                skillIcons[55] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_assaultoperations");
+                skillIcons[56] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_authority");
+                skillIcons[57] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_heavycaliber");
+                skillIcons[58] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_rawpower");
+                skillIcons[59] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_arsystems");
+                skillIcons[60] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_deepweaponmodding");
+                skillIcons[61] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_longrangeoptics");
+                skillIcons[62] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_negotiations");
+                skillIcons[63] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_tactics");
 
                 // Prep prefabs
                 Mod.instance.LogInfo("All area UI loaded, prepping...");
 
                 // AreaCanvasPrefab
-                EFM_BaseAreaManager areaManager = areaCanvasPrefab.AddComponent<EFM_BaseAreaManager>();
-                areaManager.buttonClickSound = areaCanvasPrefab.transform.GetChild(3).GetComponent<AudioSource>();
-
                 GameObject summaryButtonObject = areaCanvasPrefab.transform.GetChild(0).GetChild(2).gameObject;
                 EFM_PointableButton summaryPointableButton = summaryButtonObject.AddComponent<EFM_PointableButton>();
                 summaryPointableButton.SetButton();
@@ -1098,6 +1189,36 @@ namespace EFM
                 fullClosePointableButton.MaxPointingRange = 30;
                 fullClosePointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
 
+                GameObject middleHoverScrollUpObject = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(2).gameObject;
+                GameObject middleHoverScrollDownObject = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(3).gameObject;
+                EFM_HoverScroll middleHoverScrollUp = middleHoverScrollUpObject.AddComponent<EFM_HoverScroll>();
+                EFM_HoverScroll middleHoverScrollDown = middleHoverScrollDownObject.AddComponent<EFM_HoverScroll>();
+                middleHoverScrollUp.MaxPointingRange = 30;
+                middleHoverScrollUp.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+                middleHoverScrollUp.scrollbar = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
+                middleHoverScrollUp.other = middleHoverScrollDown;
+                middleHoverScrollUp.up = true;
+                middleHoverScrollUp.rate = 0.5f;
+                middleHoverScrollDown.MaxPointingRange = 30;
+                middleHoverScrollDown.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+                middleHoverScrollDown.scrollbar = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
+                middleHoverScrollDown.other = middleHoverScrollUp;
+                middleHoverScrollDown.rate = 0.5f;
+
+                GameObject middle2HoverScrollUpObject = areaCanvasPrefab.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject;
+                GameObject middle2HoverScrollDownObject = areaCanvasPrefab.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(3).gameObject;
+                EFM_HoverScroll middle2HoverScrollUp = middle2HoverScrollUpObject.AddComponent<EFM_HoverScroll>();
+                EFM_HoverScroll middle2HoverScrollDown = middle2HoverScrollDownObject.AddComponent<EFM_HoverScroll>();
+                middle2HoverScrollUp.MaxPointingRange = 30;
+                middle2HoverScrollUp.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+                middle2HoverScrollUp.scrollbar = areaCanvasPrefab.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
+                middle2HoverScrollUp.other = middle2HoverScrollDown;
+                middle2HoverScrollUp.up = true;
+                middle2HoverScrollDown.MaxPointingRange = 30;
+                middle2HoverScrollDown.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+                middle2HoverScrollDown.scrollbar = areaCanvasPrefab.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
+                middle2HoverScrollDown.other = middle2HoverScrollUp;
+
                 // AreaCanvasBottomButtonPrefab
                 EFM_PointableButton bottomPointableButton = areaCanvasBottomButtonPrefab.AddComponent<EFM_PointableButton>();
                 bottomPointableButton.SetButton();
@@ -1110,11 +1231,22 @@ namespace EFM
                 Mod.instance.LogInfo("Area UI prepped");
             }
 
+            // Unload base assets bundle without unloading loaded assets, if necessary
+            if (Mod.baseAssetsBundle != null)
+            {
+                Mod.baseAssetsBundle.Unload(false);
+            }
+
             Mod.instance.LogInfo("Initializing area managers");
             // Init all area managers after UI is prepped
             for (int i = 0; i < 22; ++i)
             {
                 baseAreaManagers[i].Init();
+            }
+
+            if (Mod.justFinishedRaid)
+            {
+                // TODO: Display raid results on UI
             }
         }
 
@@ -1136,49 +1268,44 @@ namespace EFM
         {
             canvas.GetChild(0).gameObject.SetActive(false);
             canvas.GetChild(2).gameObject.SetActive(true);
+            clickAudio.Play();
         }
 
         public void OnSaveSlotClicked(int slotIndex)
         {
+            clickAudio.Play();
             Mod.saveSlotIndex = slotIndex;
             SaveBase();
         }
 
         public void OnLoadClicked()
         {
+            clickAudio.Play();
             canvas.GetChild(0).gameObject.SetActive(false);
             canvas.GetChild(1).gameObject.SetActive(true);
         }
 
         public void OnLoadSlotClicked(int slotIndex)
         {
+            clickAudio.Play();
             ResetPlayerRig();
-            LoadBase(gameObject, slotIndex);
+            LoadBase(slotIndex);
         }
 
         public void OnRaidClicked()
         {
+            clickAudio.Play();
             canvas.GetChild(0).gameObject.SetActive(false);
             canvas.GetChild(3).gameObject.SetActive(true);
         }
 
         public void OnBackClicked(int backIndex)
         {
+            clickAudio.Play();
             switch (backIndex)
             {
                 case 0:
-                    GameObject menuObject = Instantiate<GameObject>(Mod.scenePrefab_Menu);
-                    menuObject.name = Mod.scenePrefab_Menu.name;
-
-                    EFM_Menu_Manager menuManager = menuObject.AddComponent<EFM_Menu_Manager>();
-                    menuManager.Init();
-
-                    Transform spawnPoint = menuObject.transform.GetChild(menuObject.transform.childCount - 1).GetChild(0);
-                    GM.CurrentMovementManager.TeleportToPoint(spawnPoint.position, true, spawnPoint.rotation.eulerAngles);
-
-                    // Unload base
-                    ResetPlayerRig();
-                    Destroy(gameObject);
+                    SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
                     break;
                 case 1:
                 case 2:
@@ -1199,6 +1326,8 @@ namespace EFM
 
         public void OnCharClicked(int charIndex)
         {
+            clickAudio.Play();
+
             chosenCharIndex = charIndex;
 
             // Update chosen char text
@@ -1210,6 +1339,8 @@ namespace EFM
 
         public void OnMapClicked(int mapIndex)
         {
+            clickAudio.Play();
+
             chosenMapIndex = mapIndex;
 
             // Update chosen map text
@@ -1228,13 +1359,18 @@ namespace EFM
 
         public void OnTimeClicked(int timeIndex)
         {
+            clickAudio.Play();
+
             chosenTimeIndex = timeIndex;
+            Mod.chosenTimeIndex = chosenTimeIndex;
             canvas.GetChild(5).gameObject.SetActive(false);
             canvas.GetChild(6).gameObject.SetActive(true);
         }
 
         public void OnConfirmRaidClicked()
         {
+            clickAudio.Play();
+
             canvas.GetChild(6).gameObject.SetActive(false);
             canvas.GetChild(7).gameObject.SetActive(true);
 
@@ -1246,12 +1382,20 @@ namespace EFM
                     currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
                     break;
                 default:
+                    loadingRaid = true;
+                    chosenMapIndex = 0;
+                    chosenCharIndex = 0;
+                    chosenTimeIndex = 0;
+                    chosenMap.text = "Factory";
+                    currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
                     break;
             }
         }
 
         public void OnCancelRaidLoadClicked()
         {
+            clickAudio.Play();
+
             cancelRaidLoad = true;
         }
 
@@ -1273,71 +1417,76 @@ namespace EFM
 
         private void SaveBase()
         {
-            // Update time
-            data.time = GetTimeSeconds();
+            JToken saveObject = data;
 
-            // Save areas
-            if (data.areas == null)
+            // Write time
+            saveObject["time"] = GetTimeSeconds();
+
+            // Write player status
+            saveObject["health"] = JArray.FromObject(Mod.health);
+            saveObject["hydration"] = Mod.hydration;
+            saveObject["maxHydration"] = Mod.maxHydration;
+            saveObject["energy"] = Mod.energy;
+            saveObject["maxEnergy"] = Mod.maxEnergy;
+            saveObject["stamina"] = Mod.stamina;
+            saveObject["maxStamina"] = Mod.maxStamina;
+            saveObject["level"] = Mod.level;
+
+            // Write skills
+            saveObject["skills"] = new JArray();
+            for(int i=0; i < 64; ++i)
             {
-                data.areas = new List<SavedArea>();
+                ((JArray)saveObject["skills"]).Add(new JObject());
+                saveObject["skills"][i]["progress"] = Mod.skills[i].progress;
+                saveObject["skills"][i]["currentProgress"] = Mod.skills[i].currentProgress;
             }
-            else
-            {
-                data.areas.Clear();
-            }
+
+            // Write areas
+            JArray savedAreas = new JArray();
+            saveObject["areas"] = savedAreas;
             for (int i = 0; i < baseAreaManagers.Count; ++i)
             {
-                SavedArea currentSavedArea = new SavedArea();
-                currentSavedArea.level = baseAreaManagers[i].level;
-                currentSavedArea.constructing = baseAreaManagers[i].constructing;
-                currentSavedArea.constructTime = baseAreaManagers[i].constructTime;
+
+                JToken currentSavedArea = new JObject();
+                currentSavedArea["level"] = baseAreaManagers[i].level;
+                currentSavedArea["constructing"] = baseAreaManagers[i].constructing;
+                currentSavedArea["constructTime"] = baseAreaManagers[i].constructTime;
                 if(baseAreaManagers[i].slotItems != null)
                 {
-                    currentSavedArea.slots = new List<SavedItem>();
+                    JArray slots = new JArray();
+                    currentSavedArea["slots"] = slots;
                     foreach(GameObject slotItem in baseAreaManagers[i].slotItems)
                     {
                         if(slotItem == null)
                         {
-                            currentSavedArea.slots.Add(null);
+                            slots.Add(null);
                         }
                         else
                         {
-                            SaveItem(currentSavedArea.slots, slotItem.transform);
+                            SaveItem(slots, slotItem.transform);
                         }
                     }
                 }
-                data.areas.Add(currentSavedArea);
+                savedAreas.Add(currentSavedArea);
             }
 
             // Save trader statuses
-            if (data.traderStatuses == null)
-            {
-                data.traderStatuses = new List<SavedTraderStatus>();
-            }
-            else
-            {
-                data.traderStatuses.Clear();
-            }
+            JArray savedTraderStatuses = new JArray();
+            saveObject["traderStatuses"] = savedTraderStatuses;
             for(int i=0; i<8; ++i)
             {
-                SavedTraderStatus currentSavedTraderStatus = new SavedTraderStatus();
-                currentSavedTraderStatus.id = traderStatuses[i].id;
-                currentSavedTraderStatus.salesSum = traderStatuses[i].salesSum;
-                currentSavedTraderStatus.standing = traderStatuses[i].standing;
-                currentSavedTraderStatus.unlocked = traderStatuses[i].unlocked;
+                JToken currentSavedTraderStatus = new JObject();
+                currentSavedTraderStatus["id"] = traderStatuses[i].id;
+                currentSavedTraderStatus["salesSum"] = traderStatuses[i].salesSum;
+                currentSavedTraderStatus["standing"] = traderStatuses[i].standing;
+                currentSavedTraderStatus["unlocked"] = traderStatuses[i].unlocked;
 
-                data.traderStatuses.Add(currentSavedTraderStatus);
+                savedTraderStatuses.Add(currentSavedTraderStatus);
             }
 
             // Reset save data item list
-            if (data.items == null)
-            {
-                data.items = new List<SavedItem>();
-            }
-            else
-            {
-                data.items.Clear();
-            }
+            JArray saveItems = new JArray();
+            saveObject["items"] = saveItems;
 
             // Save loose items
             Transform itemsRoot = transform.GetChild(2);
@@ -1346,7 +1495,7 @@ namespace EFM
             Mod.instance.LogInfo("Saving items on items root");
             for (int i = 0; i < itemsRoot.childCount; ++i)
             {
-                SaveItem(data.items, itemsRoot.GetChild(i));
+                SaveItem(saveItems, itemsRoot.GetChild(i));
             }
 
             // Save items in hands
@@ -1354,40 +1503,39 @@ namespace EFM
             FVRViveHand leftHand = GM.CurrentPlayerBody.LeftHand.GetComponentInChildren<FVRViveHand>();
             if (rightHand.CurrentInteractable != null)
             {
-                SaveItem(data.items, rightHand.CurrentInteractable.transform, rightHand);
+                SaveItem(saveItems, rightHand.CurrentInteractable.transform, rightHand);
             }
             if (leftHand.CurrentInteractable != null)
             {
-                SaveItem(data.items, leftHand.CurrentInteractable.transform, leftHand);
+                SaveItem(saveItems, leftHand.CurrentInteractable.transform, leftHand);
             }
 
             // Save equipment
             Mod.instance.LogInfo("Saving equipment");
             if (EFM_EquipmentSlot.currentRig != null)
             {
-                SaveItem(data.items, EFM_EquipmentSlot.currentRig.transform);
+                SaveItem(saveItems, EFM_EquipmentSlot.currentRig.transform);
             }
             if (EFM_EquipmentSlot.currentHelmet != null)
             {
-                SaveItem(data.items, EFM_EquipmentSlot.currentHelmet.transform);
+                SaveItem(saveItems, EFM_EquipmentSlot.currentHelmet.transform);
             }
             if (EFM_EquipmentSlot.currentArmor != null && (EFM_EquipmentSlot.currentRig == null || EFM_EquipmentSlot.currentRig.itemType != Mod.ItemType.ArmoredRig))
             {
-                SaveItem(data.items, EFM_EquipmentSlot.currentArmor.transform);
+                SaveItem(saveItems, EFM_EquipmentSlot.currentArmor.transform);
             }
             if (EFM_EquipmentSlot.currentBackpack != null)
             {
-                SaveItem(data.items, EFM_EquipmentSlot.currentBackpack.transform);
+                SaveItem(saveItems, EFM_EquipmentSlot.currentBackpack.transform);
             }
 
-            // Save base areas
-            Mod.instance.LogInfo("Saving equipment");
-
+            // Replace data
+            data = saveObject;
 
             SaveDataToFile();
         }
 
-        private void SaveItem(List<SavedItem> listToAddTo, Transform item, FVRViveHand hand = null, int quickBeltSlotIndex = -1)
+        private void SaveItem(JArray listToAddTo, Transform item, FVRViveHand hand = null, int quickBeltSlotIndex = -1)
         {
             if(item == null)
             {
@@ -1395,9 +1543,9 @@ namespace EFM
             }
             Mod.instance.LogInfo("Saving item " + item.name);
 
-            SavedItem savedItem = new SavedItem();
-            savedItem.PhysicalObject = new PhysicalObject();
-            savedItem.PhysicalObject.ObjectWrapper = new ObjectWrapper();
+            JToken savedItem = new JObject();
+            savedItem["PhysicalObject"] = new JObject();
+            savedItem["PhysicalObject"]["ObjectWrapper"] = new JObject();
 
             // Get correct item is held and set heldMode
             FVRPhysicalObject itemPhysicalObject = null;
@@ -1412,13 +1560,13 @@ namespace EFM
                     {
                         Mod.instance.LogInfo("\t\tItem in right hand or different from other hand's item");
                         itemPhysicalObject = (hand.CurrentInteractable as FVRAlternateGrip).PrimaryObject;
-                        savedItem.PhysicalObject.heldMode = hand.IsThisTheRightHand ? 1 : 2;
+                        savedItem["PhysicalObject"]["heldMode"] = hand.IsThisTheRightHand ? 1 : 2;
                     }
                     else
                     {
                         Mod.instance.LogInfo("\t\tItem not right hand or same as other hand's item");
                         itemPhysicalObject = item.GetComponentInChildren<FVRPhysicalObject>();
-                        savedItem.PhysicalObject.heldMode = 0;
+                        savedItem["PhysicalObject"]["heldMode"] = 0;
                     }
                 }
                 else
@@ -1428,39 +1576,39 @@ namespace EFM
                     {
                         Mod.instance.LogInfo("\t\tItem in right hand or different from other hand's item");
                         itemPhysicalObject = hand.CurrentInteractable as FVRPhysicalObject;
-                        savedItem.PhysicalObject.heldMode = hand.IsThisTheRightHand ? 1 : 2;
+                        savedItem["PhysicalObject"]["heldMode"] = hand.IsThisTheRightHand ? 1 : 2;
                     }
                     else
                     {
                         Mod.instance.LogInfo("\t\tItem not right hand or same as other hand's item");
                         itemPhysicalObject = item.GetComponentInChildren<FVRPhysicalObject>();
-                        savedItem.PhysicalObject.heldMode = 0;
+                        savedItem["PhysicalObject"]["heldMode"] = 0;
                     }
                 }
             }
             else
             {
                 itemPhysicalObject = item.GetComponentInChildren<FVRPhysicalObject>();
-                savedItem.PhysicalObject.heldMode = 0;
+                savedItem["PhysicalObject"]["heldMode"] = 0;
             }
             FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
 
             // Fill PhysicalObject
-            savedItem.PhysicalObject.positionX = item.localPosition.x;
-            savedItem.PhysicalObject.positionY = item.localPosition.y;
-            savedItem.PhysicalObject.positionZ = item.localPosition.z;
-            savedItem.PhysicalObject.rotationX = item.localRotation.eulerAngles.x;
-            savedItem.PhysicalObject.rotationY = item.localRotation.eulerAngles.y;
-            savedItem.PhysicalObject.rotationZ = item.localRotation.eulerAngles.z;
-            savedItem.PhysicalObject.m_isSpawnLock = itemPhysicalObject.m_isSpawnLock;
-            savedItem.PhysicalObject.m_isHarnessed = itemPhysicalObject.m_isHardnessed;
-            savedItem.PhysicalObject.IsKinematicLocked = itemPhysicalObject.IsKinematicLocked;
-            savedItem.PhysicalObject.IsInWater = itemPhysicalObject.IsInWater;
-            SaveAttachments(itemPhysicalObject, savedItem.PhysicalObject);
-            savedItem.PhysicalObject.m_quickBeltSlot = quickBeltSlotIndex;
+            savedItem["PhysicalObject"]["positionX"] = item.localPosition.x;
+            savedItem["PhysicalObject"]["positionY"] = item.localPosition.y;
+            savedItem["PhysicalObject"]["positionZ"] = item.localPosition.z;
+            savedItem["PhysicalObject"]["rotationX"] = item.localRotation.eulerAngles.x;
+            savedItem["PhysicalObject"]["rotationY"] = item.localRotation.eulerAngles.y;
+            savedItem["PhysicalObject"]["rotationZ"] = item.localRotation.eulerAngles.z;
+            savedItem["PhysicalObject"]["m_isSpawnLock"] = itemPhysicalObject.m_isSpawnLock;
+            savedItem["PhysicalObject"]["m_isHarnessed"] = itemPhysicalObject.m_isHardnessed;
+            savedItem["PhysicalObject"]["IsKinematicLocked"] = itemPhysicalObject.IsKinematicLocked;
+            savedItem["PhysicalObject"]["IsInWater"] = itemPhysicalObject.IsInWater;
+            SaveAttachments(itemPhysicalObject, savedItem["PhysicalObject"]);
+            savedItem["PhysicalObject"]["m_quickBeltSlot"] = quickBeltSlotIndex;
 
             // Fill ObjectWrapper
-            savedItem.PhysicalObject.ObjectWrapper.ItemID = itemObjectWrapper.ItemID;
+            savedItem["PhysicalObject"]["ObjectWrapper"]["ItemID"] = itemObjectWrapper.ItemID;
 
             // Firearm
             if (itemPhysicalObject is FVRFireArm)
@@ -1471,35 +1619,23 @@ namespace EFM
                 Dictionary<string, string> flagDict = firearmPhysicalObject.GetFlagDic();
                 if (flagDict != null && flagDict.Count > 0)
                 {
-                    List<string> flagDictKeys = new List<string>();
-                    List<string> flagDictValues = new List<string>();
+                    JToken saveFlagDict = new JObject();
+                    savedItem["PhysicalObject"]["flagDict"] = saveFlagDict;
                     foreach (KeyValuePair<string, string> flagDictEntry in flagDict)
                     {
-                        flagDictKeys.Add(flagDictEntry.Key);
-                        flagDictValues.Add(flagDictEntry.Value);
+                        saveFlagDict[flagDictEntry.Key] = flagDictEntry.Value;
                     }
-                    savedItem.PhysicalObject.flagDictKeys = flagDictKeys;
-                    savedItem.PhysicalObject.flagDictValues = flagDictValues;
-                }
-                else
-                {
-                    savedItem.PhysicalObject.flagDictKeys = null;
-                    savedItem.PhysicalObject.flagDictValues = null;
                 }
 
                 // Chambers
                 if (firearmPhysicalObject.GetChamberRoundList() != null && firearmPhysicalObject.GetChamberRoundList().Count > 0)
                 {
-                    List<int> newLoadedRoundsInChambers = new List<int>();
+                    JArray saveLoadedRounds = new JArray();
+                    savedItem["PhysicalObject"]["loadedRoundsInChambers"] = saveLoadedRounds;
                     foreach (FireArmRoundClass round in firearmPhysicalObject.GetChamberRoundList())
                     {
-                        newLoadedRoundsInChambers.Add((int)round);
+                        saveLoadedRounds.Add((int)round);
                     }
-                    savedItem.PhysicalObject.loadedRoundsInChambers = newLoadedRoundsInChambers;
-                }
-                else
-                {
-                    savedItem.PhysicalObject.loadedRoundsInChambers = null;
                 }
 
                 // Magazine/Clip
@@ -1507,12 +1643,12 @@ namespace EFM
                 {
                     if (firearmPhysicalObject.Clip != null)
                     {
-                        savedItem.PhysicalObject.ammoContainer = new AmmoContainer();
-                        savedItem.PhysicalObject.ammoContainer.itemID = firearmPhysicalObject.Clip.ObjectWrapper.ItemID;
+                        savedItem["PhysicalObject"]["ammoContainer"] = new JObject();
+                        savedItem["PhysicalObject"]["ammoContainer"]["itemID"] = firearmPhysicalObject.Clip.ObjectWrapper.ItemID;
 
                         if (firearmPhysicalObject.Clip.HasARound())
                         {
-                            List<int> newLoadedRoundsInClip = new List<int>();
+                            JArray newLoadedRoundsInClip = new JArray();
                             foreach (FVRFireArmClip.FVRLoadedRound round in firearmPhysicalObject.Clip.LoadedRounds)
                             {
                                 if (round == null)
@@ -1524,26 +1660,18 @@ namespace EFM
                                     newLoadedRoundsInClip.Add((int)round.LR_Class);
                                 }
                             }
-                            savedItem.PhysicalObject.ammoContainer.loadedRoundsInContainer = newLoadedRoundsInClip;
+                            savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInClip;
                         }
-                        else
-                        {
-                            savedItem.PhysicalObject.ammoContainer.loadedRoundsInContainer = null;
-                        }
-                    }
-                    else
-                    {
-                        savedItem.PhysicalObject.ammoContainer = null;
                     }
                 }
                 else if (firearmPhysicalObject.Magazine != null)
                 {
-                    savedItem.PhysicalObject.ammoContainer = new AmmoContainer();
-                    savedItem.PhysicalObject.ammoContainer.itemID = firearmPhysicalObject.Magazine.ObjectWrapper.ItemID;
+                    savedItem["PhysicalObject"]["ammoContainer"] = new JObject();
+                    savedItem["PhysicalObject"]["ammoContainer"]["itemID"] = firearmPhysicalObject.Magazine.ObjectWrapper.ItemID;
 
                     if (firearmPhysicalObject.Magazine.HasARound() && firearmPhysicalObject.Magazine.LoadedRounds != null)
                     {
-                        List<int> newLoadedRoundsInMag = new List<int>();
+                        JArray newLoadedRoundsInMag = new JArray();
                         foreach (FVRLoadedRound round in firearmPhysicalObject.Magazine.LoadedRounds)
                         {
                             if (round == null)
@@ -1555,16 +1683,8 @@ namespace EFM
                                 newLoadedRoundsInMag.Add((int)round.LR_Class);
                             }
                         }
-                        savedItem.PhysicalObject.ammoContainer.loadedRoundsInContainer = newLoadedRoundsInMag;
+                        savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInMag;
                     }
-                    else
-                    {
-                        savedItem.PhysicalObject.ammoContainer.loadedRoundsInContainer = null;
-                    }
-                }
-                else
-                {
-                    savedItem.PhysicalObject.ammoContainer = null;
                 }
             }
             else if (itemPhysicalObject is FVRFireArmMagazine)
@@ -1572,7 +1692,7 @@ namespace EFM
                 FVRFireArmMagazine magPhysicalObject = (itemPhysicalObject as FVRFireArmMagazine);
                 if (magPhysicalObject.HasARound())
                 {
-                    List<int> newLoadedRoundsInMag = new List<int>();
+                    JArray newLoadedRoundsInMag = new JArray();
                     foreach (FVRLoadedRound round in magPhysicalObject.LoadedRounds)
                     {
                         if (round == null)
@@ -1584,11 +1704,7 @@ namespace EFM
                             newLoadedRoundsInMag.Add((int)round.LR_Class);
                         }
                     }
-                    savedItem.PhysicalObject.loadedRoundsInContainer = newLoadedRoundsInMag;
-                }
-                else
-                {
-                    savedItem.PhysicalObject.loadedRoundsInContainer = null;
+                    savedItem["PhysicalObject"]["loadedRoundsInContainer"] = newLoadedRoundsInMag;
                 }
             }
             else if (itemPhysicalObject is FVRFireArmClip)
@@ -1596,7 +1712,7 @@ namespace EFM
                 FVRFireArmClip clipPhysicalObject = (itemPhysicalObject as FVRFireArmClip);
                 if (clipPhysicalObject.HasARound())
                 {
-                    List<int> newLoadedRoundsInClip = new List<int>();
+                    JArray newLoadedRoundsInClip = new JArray();
                     foreach (FVRFireArmClip.FVRLoadedRound round in clipPhysicalObject.LoadedRounds)
                     {
                         if (round == null)
@@ -1608,20 +1724,15 @@ namespace EFM
                             newLoadedRoundsInClip.Add((int)round.LR_Class);
                         }
                     }
-                    savedItem.PhysicalObject.loadedRoundsInContainer = newLoadedRoundsInClip;
+                    savedItem["PhysicalObject"]["loadedRoundsInContainer"] = newLoadedRoundsInClip;
                 }
-                else
-                {
-                    savedItem.PhysicalObject.loadedRoundsInContainer = null;
-                }
-
             }
             else if (itemPhysicalObject is Speedloader)
             {
                 Speedloader SLPhysicalObject = (itemPhysicalObject as Speedloader);
                 if (SLPhysicalObject.Chambers != null)
                 {
-                    List<int> newLoadedRoundsInSL = new List<int>();
+                    JArray newLoadedRoundsInSL = new JArray();
                     foreach (SpeedloaderChamber chamber in SLPhysicalObject.Chambers)
                     {
                         if (chamber.IsLoaded)
@@ -1640,11 +1751,7 @@ namespace EFM
                             newLoadedRoundsInSL.Add(-1); // -1 means not loaded
                         }
                     }
-                    savedItem.PhysicalObject.loadedRoundsInContainer = newLoadedRoundsInSL;
-                }
-                else
-                {
-                    savedItem.PhysicalObject.loadedRoundsInContainer = null;
+                    savedItem["PhysicalObject"]["loadedRoundsInContainer"] = newLoadedRoundsInSL;
                 }
             }
 
@@ -1652,8 +1759,10 @@ namespace EFM
             EFM_CustomItemWrapper customItemWrapper = itemPhysicalObject.gameObject.GetComponentInChildren<EFM_CustomItemWrapper>();
             if (customItemWrapper != null)
             {
-                savedItem.itemType = (int)customItemWrapper.itemType;
-                savedItem.PhysicalObject.equipSlot = -1;
+                savedItem["itemType"] = (int)customItemWrapper.itemType;
+                savedItem["PhysicalObject"]["equipSlot"] = -1;
+                savedItem["amount"] = customItemWrapper.amount;
+                savedItem["looted"] = customItemWrapper.looted;
 
                 // Armor
                 if(customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.BodyArmor)
@@ -1671,14 +1780,14 @@ namespace EFM
                                 EFM_CustomItemWrapper equipCustomItemWrapper = Mod.equipmentSlots[i].CurObject.GetComponent<EFM_CustomItemWrapper>();
                                 if (equipCustomItemWrapper != null && equipCustomItemWrapper.Equals(customItemWrapper))
                                 {
-                                    savedItem.PhysicalObject.equipSlot = i;
+                                    savedItem["PhysicalObject"]["equipSlot"] = i;
                                     break;
                                 }
                             }
                         }
                     }
-                    savedItem.PhysicalObject.armor = customItemWrapper.armor;
-                    savedItem.PhysicalObject.maxArmor = customItemWrapper.maxArmor;
+                    savedItem["PhysicalObject"]["armor"] = customItemWrapper.armor;
+                    savedItem["PhysicalObject"]["maxArmor"] = customItemWrapper.maxArmor;
                 }
 
                 // Rig
@@ -1695,25 +1804,26 @@ namespace EFM
                                 EFM_CustomItemWrapper equipCustomItemWrapper = Mod.equipmentSlots[i].CurObject.GetComponent<EFM_CustomItemWrapper>();
                                 if (equipCustomItemWrapper != null && equipCustomItemWrapper.Equals(customItemWrapper))
                                 {
-                                    savedItem.PhysicalObject.equipSlot = i;
+                                    savedItem["PhysicalObject"]["equipSlot"] = i;
                                     break;
                                 }
                             }
                         }
                     }
-                    if(savedItem.PhysicalObject.quickBeltSlotContents == null)
+                    if(savedItem["PhysicalObject"]["quickBeltSlotContents"] == null)
                     {
-                        savedItem.PhysicalObject.quickBeltSlotContents = new List<SavedItem>();
+                        savedItem["PhysicalObject"]["quickBeltSlotContents"] = new JArray();
                     }
-                    for(int i=0; i < customItemWrapper.itemsInSlots.Length; ++i)
+                    JArray saveQBContents = (JArray)savedItem["PhysicalObject"]["quickBeltSlotContents"];
+                    for (int i=0; i < customItemWrapper.itemsInSlots.Length; ++i)
                     {
                         if(customItemWrapper.itemsInSlots[i] == null)
                         {
-                            savedItem.PhysicalObject.quickBeltSlotContents.Add(null);
+                            saveQBContents.Add(null);
                         }
                         else
                         {
-                            SaveItem(savedItem.PhysicalObject.quickBeltSlotContents, customItemWrapper.itemsInSlots[i].transform, null, i);
+                            SaveItem(saveQBContents, customItemWrapper.itemsInSlots[i].transform, null, i);
                         }
                     }
                 }
@@ -1737,83 +1847,171 @@ namespace EFM
                                 if (equipCustomItemWrapper != null && equipCustomItemWrapper.Equals(customItemWrapper))
                                 {
                                     Mod.instance.LogInfo("in slot " + i);
-                                    savedItem.PhysicalObject.equipSlot = i;
+                                    savedItem["PhysicalObject"]["equipSlot"] = i;
                                     break;
                                 }
                             }
                         }
                     }
-                    if(savedItem.PhysicalObject.quickBeltSlotContents == null)
+                    if(savedItem["PhysicalObject"]["backpackContents"] == null)
                     {
-                        savedItem.PhysicalObject.backpackContents = new List<SavedItem>();
+                        savedItem["PhysicalObject"]["backpackContents"] = new JArray();
                     }
-                    for(int i=0; i < customItemWrapper.itemObjectsRoot.childCount; ++i)
+                    JArray saveBPContents = (JArray)savedItem["PhysicalObject"]["backpackContents"];
+                    for (int i=0; i < customItemWrapper.itemObjectsRoot.childCount; ++i)
                     {
                         Mod.instance.LogInfo("Item in backpack " + i + ": "+ customItemWrapper.itemObjectsRoot.GetChild(i).name);
-                        SaveItem(savedItem.PhysicalObject.backpackContents, customItemWrapper.itemObjectsRoot.GetChild(i));
+                        SaveItem(saveBPContents, customItemWrapper.itemObjectsRoot.GetChild(i));
                     }
                 }
+
+                // Container
+                if (customItemWrapper.itemType == Mod.ItemType.Container)
+                {
+                    Mod.instance.LogInfo("Item is container");
+
+                    if (savedItem["PhysicalObject"]["containerContents"] == null)
+                    {
+                        savedItem["PhysicalObject"]["containerContents"] = new JArray();
+                    }
+                    JArray saveContainerContents = (JArray)savedItem["PhysicalObject"]["containerContents"];
+                    for (int i = 0; i < customItemWrapper.itemObjectsRoot.childCount; ++i)
+                    {
+                        Mod.instance.LogInfo("Item in container " + i + ": " + customItemWrapper.itemObjectsRoot.GetChild(i).name);
+                        SaveItem(saveContainerContents, customItemWrapper.itemObjectsRoot.GetChild(i));
+                    }
+                }
+
+                // Pouch
+                if (customItemWrapper.itemType == Mod.ItemType.Backpack)
+                {
+                    Mod.instance.LogInfo("Item is pouch");
+
+                    // If this is an equipment piece we are currently wearing
+                    if (EFM_EquipmentSlot.currentPouch != null && EFM_EquipmentSlot.currentPouch.Equals(customItemWrapper))
+                    {
+                        Mod.instance.LogInfo("is equipped");
+                        // Find its equip slot index
+                        //TODO: for all wore items we could keep equip slot in customitemwrapper since all equppable items are custom
+                        for (int i = 0; i < Mod.equipmentSlots.Count; ++i)
+                        {
+                            if (Mod.equipmentSlots[i].CurObject != null)
+                            {
+                                EFM_CustomItemWrapper equipCustomItemWrapper = Mod.equipmentSlots[i].CurObject.GetComponent<EFM_CustomItemWrapper>();
+                                if (equipCustomItemWrapper != null && equipCustomItemWrapper.Equals(customItemWrapper))
+                                {
+                                    Mod.instance.LogInfo("in slot " + i);
+                                    savedItem["PhysicalObject"]["equipSlot"] = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (savedItem["PhysicalObject"]["containerContents"] == null)
+                    {
+                        savedItem["PhysicalObject"]["containerContents"] = new JArray();
+                    }
+                    JArray savePouchContents = (JArray)savedItem["PhysicalObject"]["containerContents"];
+                    for (int i = 0; i < customItemWrapper.itemObjectsRoot.childCount; ++i)
+                    {
+                        Mod.instance.LogInfo("Item in pouch " + i + ": " + customItemWrapper.itemObjectsRoot.GetChild(i).name);
+                        SaveItem(savePouchContents, customItemWrapper.itemObjectsRoot.GetChild(i));
+                    }
+                }
+
+                // AmmoBox
+                //if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                //{
+                //    Mod.instance.LogInfo("Item is ammo box");
+                //}
+
+                // Money
+                if(customItemWrapper.itemType == Mod.ItemType.Money)
+                {
+                    Mod.instance.LogInfo("Item is money");
+
+                    savedItem["stack"] = customItemWrapper.stack;
+                }
+
+                // Consumable
+                //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
+                //{
+                //    Mod.instance.LogInfo("Item is Consumable");
+                //}
+
+                // Key
+                //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
+                //{
+                //    Mod.instance.LogInfo("is Consumable");
+                //}
+            }
+
+            // Vanilla items
+            EFM_VanillaItemDescriptor vanillaItemDescriptor = itemPhysicalObject.gameObject.GetComponentInChildren<EFM_VanillaItemDescriptor>();
+            if (vanillaItemDescriptor != null)
+            {
+                savedItem["looted"] = vanillaItemDescriptor.looted;
             }
 
             listToAddTo.Add(savedItem);
         }
 
-        private void SaveAttachments(FVRPhysicalObject physicalObject, PhysicalObject itemPhysicalObject)
+        private void SaveAttachments(FVRPhysicalObject physicalObject, JToken itemPhysicalObject)
         {
             // We want to save attachments curently physically present on physicalObject into the save data itemPhysicalObject
             for (int i = 0; i < physicalObject.Attachments.Count; ++i)
             {
-                PhysicalObject newPhysicalObject = new PhysicalObject();
-                if(itemPhysicalObject.AttachmentsList == null)
+                JToken newPhysicalObject = new JObject();
+                if(itemPhysicalObject["AttachmentsList"] == null)
                 {
-                    itemPhysicalObject.AttachmentsList = new List<PhysicalObject>();
+                    itemPhysicalObject["AttachmentsList"] = new JArray();
                 }
-                itemPhysicalObject.AttachmentsList.Add(newPhysicalObject);
+                ((JArray)itemPhysicalObject["AttachmentsList"]).Add(newPhysicalObject);
 
                 FVRPhysicalObject currentPhysicalObject = physicalObject.Attachments[i];
                 Transform currentTransform = currentPhysicalObject.transform;
 
-                newPhysicalObject.ObjectWrapper = new ObjectWrapper();
+                newPhysicalObject["ObjectWrapper"] = new JObject();
 
                 // Fill PhysicalObject
-                newPhysicalObject.positionX = currentTransform.localPosition.x;
-                newPhysicalObject.positionY = currentTransform.localPosition.y;
-                newPhysicalObject.positionZ = currentTransform.localPosition.z;
-                newPhysicalObject.rotationX = currentTransform.localRotation.eulerAngles.x;
-                newPhysicalObject.rotationY = currentTransform.localRotation.eulerAngles.y;
-                newPhysicalObject.rotationZ = currentTransform.localRotation.eulerAngles.z;
-                newPhysicalObject.m_isSpawnLock = currentPhysicalObject.m_isSpawnLock;
-                newPhysicalObject.m_isHarnessed = currentPhysicalObject.m_isHardnessed;
-                newPhysicalObject.IsKinematicLocked = currentPhysicalObject.IsKinematicLocked;
-                newPhysicalObject.IsInWater = currentPhysicalObject.IsInWater;
+                newPhysicalObject["positionX"] = currentTransform.localPosition.x;
+                newPhysicalObject["positionY"] = currentTransform.localPosition.y;
+                newPhysicalObject["positionZ"] = currentTransform.localPosition.z;
+                newPhysicalObject["rotationX"] = currentTransform.localRotation.eulerAngles.x;
+                newPhysicalObject["rotationY"] = currentTransform.localRotation.eulerAngles.y;
+                newPhysicalObject["rotationZ"] = currentTransform.localRotation.eulerAngles.z;
+                newPhysicalObject["m_isSpawnLock"] = currentPhysicalObject.m_isSpawnLock;
+                newPhysicalObject["m_isHarnessed"] = currentPhysicalObject.m_isHardnessed;
+                newPhysicalObject["IsKinematicLocked"] = currentPhysicalObject.IsKinematicLocked;
+                newPhysicalObject["IsInWater"] = currentPhysicalObject.IsInWater;
                 SaveAttachments(currentPhysicalObject, newPhysicalObject);
-                newPhysicalObject.mountIndex = physicalObject.AttachmentMounts.IndexOf((currentPhysicalObject as FVRFireArmAttachment).curMount);
+                newPhysicalObject["mountIndex"] = physicalObject.AttachmentMounts.IndexOf((currentPhysicalObject as FVRFireArmAttachment).curMount);
 
                 // Fill ObjectWrapper
-                newPhysicalObject.ObjectWrapper.ItemID = currentPhysicalObject.ObjectWrapper.ItemID;
+                newPhysicalObject["ObjectWrapper"]["ItemID"] = currentPhysicalObject.ObjectWrapper.ItemID;
             }
         }
 
         public void FinishRaid(FinishRaidState state)
         {
             // Increment raid counters
-            ++data.totalRaidCount;
+            data["totalRaidCount"] = (int)data["totalRaidCount"] + 1;
             switch (state)
             {
                 case FinishRaidState.RunThrough:
-                    ++data.runThroughRaidCount;
-                    ++data.survivedRaidCount;
+                    data["runThroughRaidCount"] = (int)data["runThroughRaidCount"] + 1;
+                    data["survivedRaidCount"] = (int)data["survivedRaidCount"] + 1;
                     break;
                 case FinishRaidState.Survived:
-                    ++data.survivedRaidCount;
+                    data["survivedRaidCount"] = (int)data["survivedRaidCount"] + 1;
                     break;
                 case FinishRaidState.MIA:
-                    ++data.MIARaidCount;
-                    ++data.failedRaidCount;
+                    data["MIARaidCount"] = (int)data["MIARaidCount"] + 1;
+                    data["failedRaidCount"] = (int)data["failedRaidCount"] + 1;
                     break;
                 case FinishRaidState.KIA:
-                    ++data.KIARaidCount;
-                    ++data.failedRaidCount;
+                    data["KIARaidCount"] = (int)data["KIARaidCount"] + 1;
+                    data["failedRaidCount"] = (int)data["failedRaidCount"] + 1;
                     break;
                 default:
                     break;
@@ -1826,103 +2024,7 @@ namespace EFM
 
         private void SaveDataToFile()
         {
-            File.WriteAllText("BepInEx/Plugins/EscapeFromMeatov/" + (Mod.saveSlotIndex == 5 ? "AutoSave" : "Slot" + Mod.saveSlotIndex) + ".sav", JsonConvert.SerializeObject(data));
+            File.WriteAllText("BepInEx/Plugins/EscapeFromMeatov/" + (Mod.saveSlotIndex == 5 ? "AutoSave" : "Slot" + Mod.saveSlotIndex) + ".sav", data.ToString());
         }
-    }
-
-    // Save data class
-    public class SaveData
-    {
-        public long time { get; set; }
-        public int level { get; set; }
-        public int totalRaidCount { get; set; }
-        public int survivedRaidCount { get; set; }
-        public int runThroughRaidCount { get; set; }
-        public int failedRaidCount { get; set; }
-        public int MIARaidCount { get; set; }
-        public int KIARaidCount { get; set; }
-        public List<SavedItem> items { get; set; }
-        public List<SavedArea> areas { get; set; }
-        public List<SavedTraderStatus> traderStatuses { get; set; }
-        public List<SavedSkill> skills { get; set; }
-    }
-
-    public class ObjectWrapper
-    {
-        public string ItemID { get; set; }
-    }
-
-    public class PhysicalObject
-    {
-        public ObjectWrapper ObjectWrapper { get; set; }
-        public float positionX { get; set; }
-        public float positionY { get; set; }
-        public float positionZ { get; set; }
-        public float rotationX { get; set; }
-        public float rotationY { get; set; }
-        public float rotationZ { get; set; }
-        public bool m_isSpawnLock { get; set; }
-        public bool m_isHarnessed { get; set; }
-        public bool IsKinematicLocked { get; set; }
-        public bool IsInWater { get; set; }
-        public List<PhysicalObject> AttachmentsList { get; set; }
-        public int m_quickBeltSlot { get; set; }
-        public int heldMode { get; set; } // 0: not held, 1: held in right, 2: held in left
-
-        // Attachment specific
-        public int mountIndex { get; set; }
-
-        // Firearm specific
-        public List<int> loadedRoundsInChambers { get; set; }
-        public AmmoContainer ammoContainer {get; set;}
-        public List<string> flagDictKeys { get; set; }
-        public List<string> flagDictValues { get; set; }
-
-        // Equipment specific
-        public int equipSlot { get; set; }
-
-        // Ammo container specific (Magazine, Clip, or Speedloader)
-        public List<int> loadedRoundsInContainer { get; set; }
-
-        // Bodyarmor and rig specific
-        public List<SavedItem> quickBeltSlotContents { get; set; }
-        public float maxArmor { get; set; }
-        public float armor { get; set; }
-
-        // Backpack specific
-        public List<SavedItem> backpackContents { get; set; }
-    }
-
-    public class AmmoContainer
-    {
-        public string itemID { get; set; }
-        public List<int> loadedRoundsInContainer { get; set; }
-    }
-
-    public class SavedItem
-    {
-        public int itemType { get; set; }
-        public PhysicalObject PhysicalObject { get; set; }
-    }
-
-    public class SavedArea
-    {
-        public int level { get; set; }
-        public bool constructing { get; set; }
-        public float constructTime { get; set; } // What time the cunstruction has started so we can check how long it has been since then and decide if it is done
-        public List<SavedItem> slots { get; set; } // Slots that could contain items, like generator that could have gas cans
-    }
-
-    public class SavedTraderStatus
-    {
-        public string id { get; set; }
-        public float salesSum { get; set; }
-        public float standing { get; set; }
-        public bool unlocked { get; set; }
-    }
-
-    public class SavedSkill
-    {
-        public float progress { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Valve.Newtonsoft.Json;
+using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
@@ -10,8 +11,11 @@ namespace EFM
     {
         public bool init;
 
+        public static bool hideoutLoaded;
         public static int meatovTimeMultiplier = 7;
         public static List<int> availableSaveFiles;
+
+        public static JObject loadedData;
 
         public virtual void Init()
         {
@@ -43,17 +47,18 @@ namespace EFM
             }
         }
 
-        public static void LoadBase(GameObject caller, int slotIndex = -1, bool latest = false)
+        public static void LoadBase(int slotIndex = -1, bool latest = false)
         {
             Mod.instance.LogInfo("Loadbase called");
             // Load base asset bundle
-            if (Mod.scenePrefab_Base == null)
+            if (!hideoutLoaded)
             {
                 Mod.instance.LogInfo("base null, loading bundle from file for first time");
-                Mod.baseBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovHideout.ab");
+                Mod.baseAssetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovHideoutAssets.ab");
                 Mod.instance.LogInfo("Loaded hideout bunble from file, loading hideout prefab");
-                Mod.scenePrefab_Base = Mod.baseBundle.LoadAsset<GameObject>("Hideout");
+                Mod.baseBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovHideout.ab");
                 Mod.instance.LogInfo("Loaded hideout prefab");
+                hideoutLoaded = true;
             }
 
             if (availableSaveFiles == null)
@@ -76,7 +81,7 @@ namespace EFM
             }
 
             // Get save data
-            SaveData loadedData = null;
+            loadedData = null;
             if (slotIndex == -1)
             {
                 if (latest)
@@ -84,8 +89,8 @@ namespace EFM
                     long currentLatestTime = 0;
                     for (int i = 0; i < availableSaveFiles.Count; ++i)
                     {
-                        SaveData current = JsonConvert.DeserializeObject<SaveData>(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/" + (i == 5 ? "AutoSave" : "Slot" + availableSaveFiles[i]) + ".sav"));
-                        long saveTime = current.time;
+                        JObject current = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/" + (i == 5 ? "AutoSave" : "Slot" + availableSaveFiles[i]) + ".sav"));
+                        long saveTime = (long)current["time"];
                         if (saveTime > currentLatestTime)
                         {
                             currentLatestTime = saveTime;
@@ -98,122 +103,13 @@ namespace EFM
             }
             else
             {
-                loadedData = JsonConvert.DeserializeObject<SaveData>(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/" + (slotIndex == 5 ? "AutoSave" : "Slot" + slotIndex) + ".sav"));
+                loadedData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/" + (slotIndex == 5 ? "AutoSave" : "Slot" + slotIndex) + ".sav"));
                 Mod.saveSlotIndex = slotIndex;
             }
 
-            GameObject baseObject = Instantiate<GameObject>(Mod.scenePrefab_Base);
-            baseObject.name = Mod.scenePrefab_Base.name;
-
-            EFM_Base_Manager baseManager = baseObject.AddComponent<EFM_Base_Manager>();
-            baseManager.data = loadedData;
-            baseManager.Init();
-
-            Transform spawnPoint = baseObject.transform.GetChild(baseObject.transform.childCount - 1).GetChild(0);
-            Mod.instance.LogInfo("Base loaded and initialized, TPing player to spawnPoint: " + spawnPoint.position.x + "," + spawnPoint.position.y + "," + spawnPoint.position.z);
-            GM.CurrentMovementManager.TeleportToPoint(spawnPoint.position, true, spawnPoint.rotation.eulerAngles);
-
-            // Unload base asset bundle
-            if (Mod.baseBundle != null)
-            {
-                Mod.baseBundle.Unload(false);
-            }
-
-            Destroy(caller);
+            SteamVR_LoadLevel.Begin("MeatovHideoutScene", false, 0.5f, 0f, 0f, 0f, 1f);
         }
 
         public abstract void InitUI();
-    }
-
-    // Items data
-    public class DefaultObjectWrapper
-    {
-        public string DisplayName { get; set; }
-        public int Category { get; set; }
-        public float Mass { get; set; }
-        public int MagazineCapacity { get; set; }
-        public bool RequiresPicatinnySight { get; set; }
-        public int TagEra { get; set; }
-        public int TagSet { get; set; }
-        public int TagFirearmSize { get; set; }
-        public int TagFirearmAction { get; set; }
-        public int TagFirearmRoundPower { get; set; }
-        public int TagFirearmCountryOfOrigin { get; set; }
-        public int TagFirearmFirstYear { get; set; }
-        public List<int> TagFirearmFiringModes { get; set; }
-        public List<int> TagFirearmFeedOption { get; set; }
-        public List<int> TagFirearmMounts { get; set; }
-        public int TagAttachmentMount { get; set; }
-        public int TagAttachmentFeature { get; set; }
-        public int TagMeleeStyle { get; set; }
-        public int TagMeleeHandedness { get; set; }
-        public int TagPowerupType { get; set; }
-        public int TagThrownType { get; set; }
-        public int TagThrownDamageType { get; set; }
-        public int MagazineType { get; set; }
-        public List<ObjectWrapper> CompatibleMagazines { get; set; } // TODO
-        public List<ObjectWrapper> CompatibleClips { get; set; } // TODO
-        public List<ObjectWrapper> CompatibleSpeedLoaders { get; set; } // TODO
-        public List<ObjectWrapper> CompatibleSingleRounds { get; set; } // TODO
-        public List<ObjectWrapper> BespokeAttachments { get; set; } // TODO
-        public List<ObjectWrapper> RequiredSecondaryPieces { get; set; } // TODO
-        public int MinCapacityRelated { get; set; } // TODO -1
-        public int MaxCapacityRelated { get; set; } // TODO -1
-        public int CreditCost { get; set; }
-        public bool OSple { get; set; }
-    }
-
-    public class DefaultPhysicalObject
-    {
-        public DefaultObjectWrapper DefaultObjectWrapper { get; set; }
-        public bool SpawnLockable { get; set; }
-        public bool Harnessable { get; set; }
-        public int HandlingReleaseIntoSlotSound { get; set; }
-        public int Size { get; set; }
-        public int QBSlotType { get; set; }
-        public bool DoesReleaseOverrideVelocity { get; set; }
-        public bool DoesReleaseAddVelocity { get; set; }
-        public float ThrowVelMultiplier { get; set; }
-        public float ThrowAngMultiplier { get; set; }
-        public float MoveIntensity { get; set; }
-        public float RotIntensity { get; set; }
-        public bool UsesGravity { get; set; }
-        public bool DistantGrabbable { get; set; }
-        public bool IsDebug { get; set; }
-        public bool IsAltHeld { get; set; }
-        public bool IsKinematicLocked { get; set; }
-        public bool DoesQuickbeltSlotFollowHead { get; set; }
-        public bool IsPickUpLocked { get; set; }
-        public int OverridesObjectToHand { get; set; }
-    }
-
-    public class ArmorAndRigProperties
-    {
-        public float Coverage { get; set; }
-        public float DamageResist { get; set; }
-        public float Armor { get; set; }
-    }
-
-    public class BackpackProperties
-    {
-        public float MaxVolume { get; set; }
-    }
-
-    public class ItemDefaults
-    {
-        public int ItemType { get; set; }
-        public List<float> Volumes { get; set; }
-        public DefaultPhysicalObject DefaultPhysicalObject { get; set; }
-
-        // Specific to armor and rigs
-        public ArmorAndRigProperties ArmorAndRigProperties { get; set; }
-
-        // Specific to Backpacks
-        public BackpackProperties BackpackProperties { get; set; }
-    }
-
-    public class DefaultItemData
-    {
-        public List<ItemDefaults> ItemDefaults { get; set; }
     }
 }

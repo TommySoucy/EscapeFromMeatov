@@ -23,7 +23,7 @@ namespace EFM
 			{
 				foreach (GameObject hoverGraphic in hoverGraphics)
 				{
-					hoverGraphic.SetActive(true);
+					hoverGraphic.SetActive(!hoverGraphic.activeSelf);
 				}
 			}
 			if(buttonText != null && toggleTextColor)
@@ -42,7 +42,7 @@ namespace EFM
 			{
 				foreach (GameObject hoverGraphic in hoverGraphics)
 				{
-					hoverGraphic.SetActive(false);
+					hoverGraphic.SetActive(!hoverGraphic.activeSelf);
 				}
 			}
 			if (buttonText != null && toggleTextColor)
