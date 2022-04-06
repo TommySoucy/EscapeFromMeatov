@@ -11,7 +11,6 @@ namespace EFM
 
 		public Mod.ItemType itemType;
 		public Collider[] colliders;
-		public bool stackable; // TODO: Set this at object init from default item data
 		public string parent;
 		public string ID;
 		public bool looted;
@@ -812,6 +811,7 @@ namespace EFM
 
 				effect.value = buff.value;
 				effect.timer = buff.duration;
+				effect.hasTimer = buff.duration > 0;
 				effect.delay = buff.delay;
 
 				EFM_Effect.effects.Add(effect);
@@ -822,22 +822,6 @@ namespace EFM
 						// Set effect
 						effect.skillIndex = buff.skillIndex;
 						effect.value = Mod.skills[buff.skillIndex].progress + buff.value * 100;
-
-						// TODO: Initial application should be done when effect delay reaches 0 or less
-						//if (buff.value > 0)
-						//{
-						//	if (Mod.skills[buff.skillIndex].progress + buff.value * 100 > Mod.skills[buff.skillIndex].currentProgress)
-						//	{
-						//		Mod.skills[buff.skillIndex].currentProgress = Mod.skills[buff.skillIndex].progress + buff.value * 100;
-						//	}
-						//}
-						//else
-						//{
-						//	if (Mod.skills[buff.skillIndex].progress + buff.value * 100 < Mod.skills[buff.skillIndex].currentProgress)
-						//	{
-						//		Mod.skills[buff.skillIndex].currentProgress = Mod.skills[buff.skillIndex].progress + buff.value * 100;
-						//	}
-						//}
 						break;
 					case EFM_Effect.EffectType.MaxStamina:
 						effect.value = Mod.maxStamina + buff.value;

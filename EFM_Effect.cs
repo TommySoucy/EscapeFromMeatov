@@ -32,6 +32,11 @@ namespace EFM
             LightBleeding, // Causes negative healthrate in each bodypart
             HeavyBleeding, // Causes negative healthrate in each bodypart
             Fracture, // Causes pain
+            Dehydration, // Causes damage
+            HeavyDehydration, // Causes more damage
+            Fatigue, // Cant sprint
+            HeavyFatigue, // Cant sprint, cause damage
+            OverweightFatigue, // Causes EnergyRate
 
             RadExposure,
             Intoxication,
@@ -41,6 +46,7 @@ namespace EFM
 
         public bool active = false;
         public float timer = 0;
+        public bool hasTimer = false;
         public float inactiveTimer = 0;
         public float delay = 0;
         public float healthLoopTime = 60;
@@ -52,17 +58,11 @@ namespace EFM
         public float audioVolumeMultiplier = 1.0f;
         public float healExperience = 0;
         public int removePrice = 0;
-        public float drunkness = 0;
-        public float headDamage = 0;
-        public float chestDamage = 0;
-        public float stomachDamage = 0;
-        public float leftArmDamage = 0;
-        public float rightArmDamage = 0;
-        public float leftLegDamage = 0;
-        public float rightLegDamage = 0;
         public int partIndex = -1; // 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
         public int skillIndex = -1;
         public float value;
+        public List<EFM_Effect> caused = new List<EFM_Effect>();
+        public bool nonLethal = false;
     }
 
     public class EFM_Effect_Buff

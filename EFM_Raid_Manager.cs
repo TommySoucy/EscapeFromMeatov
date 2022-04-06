@@ -24,8 +24,13 @@ namespace EFM
         public Light sun;
         public float time;
 
+        private float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
+        private float[] currentHealthRates;
+        private float[] currentNonLethalHealthRates;
         private float energyLoop = 0;
         private float hydrationLoop = 0;
+        private float currentEnergyRate = 0;
+        private float currentHydrationRate = 0;
 
         private void Update()
         {
@@ -53,7 +58,666 @@ namespace EFM
                 // TODO: update extraction timer display (disable it)
             }
 
+            UpdateEffects();
+
             UpdateSun();
+        }
+
+        private void UpdateEffects()
+        {
+            // Count down timer on all effects, only apply rates, if part is bleeding we dont want to heal it so set to false
+            for (int i = EFM_Effect.effects.Count; i >= 0; --i)
+            {
+                if (EFM_Effect.effects.Count == 0)
+                {
+                    break;
+                }
+                else if (i >= EFM_Effect.effects.Count)
+                {
+                    continue;
+                }
+
+                EFM_Effect effect = EFM_Effect.effects[i];
+                if (effect.active)
+                {
+                    if (effect.hasTimer)
+                    {
+                        effect.timer -= Time.deltaTime;
+                        if (effect.timer <= 0)
+                        {
+                            effect.active = false;
+
+                            // Unapply effect
+                            switch (effect.effectType)
+                            {
+                                case EFM_Effect.EffectType.SkillRate:
+                                    Mod.skills[effect.skillIndex].currentProgress -= effect.value;
+                                    break;
+                                case EFM_Effect.EffectType.EnergyRate:
+                                    currentEnergyRate -= effect.value;
+                                    break;
+                                case EFM_Effect.EffectType.HydrationRate:
+                                    currentHydrationRate -= effect.value;
+                                    break;
+                                case EFM_Effect.EffectType.MaxStamina:
+                                    Mod.currentMaxStamina -= effect.value;
+                                    break;
+                                case EFM_Effect.EffectType.StaminaRate:
+                                    Mod.currentStaminaEffect -= effect.value;
+                                    break;
+                                case EFM_Effect.EffectType.HandsTremor:
+                                    // TODO: Stop tremors if there are no other tremor effects
+                                    break;
+                                case EFM_Effect.EffectType.QuantumTunnelling:
+                                    // TODO: Stop QuantumTunnelling if there are no other tunnelling effects
+                                    break;
+                                case EFM_Effect.EffectType.HealthRate:
+                                    float[] arrayToUse = effect.nonLethal ? currentNonLethalHealthRates : currentHealthRates;
+                                    if (effect.partIndex == -1)
+                                    {
+                                        for (int j = 0; j < 7; ++j)
+                                        {
+                                            arrayToUse[j] -= effect.value / 7;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        arrayToUse[effect.partIndex] -= effect.value;
+                                    }
+                                    break;
+                                case EFM_Effect.EffectType.RemoveAllBloodLosses:
+                                    // Reactivate all bleeding 
+                                    // Not necessary because when we disabled them we used the disable timer
+                                    break;
+                                case EFM_Effect.EffectType.Contusion:
+                                    bool otherContusions = false;
+                                    foreach(EFM_Effect contusionEffectCheck in EFM_Effect.effects)
+                                    {
+                                        if(contusionEffectCheck.active && contusionEffectCheck.effectType == EFM_Effect.EffectType.Contusion)
+                                        {
+                                            otherContusions = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!otherContusions)
+                                    {
+                                        // Enable haptic feedback
+                                        GM.Options.ControlOptions.HapticsState = ControlOptions.HapticsMode.Enabled;
+                                        // TODO: also set volume to full
+                                    }
+                                    break;
+                                case EFM_Effect.EffectType.WeightLimit:
+                                    Mod.currentWeightLimit -= effect.value;
+                                    break;
+                                case EFM_Effect.EffectType.DamageModifier:
+                                    Mod.currentDamageModifier -= effect.value;
+                                    break;
+                                case EFM_Effect.EffectType.Pain:
+                                    // Remove all tremors caused by this pain and disable tremors if no other tremors active
+                                    foreach (EFM_Effect causedEffect in effect.caused)
+                                    {
+                                        EFM_Effect.effects.Remove(causedEffect);
+                                    }
+                                    bool hasPainTremors = false;
+                                    foreach (EFM_Effect effectCheck in EFM_Effect.effects)
+                                    {
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
+                                        {
+                                            hasPainTremors = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!hasPainTremors)
+                                    {
+                                        // TODO: Disable tremors
+                                    }
+                                    break;
+                                case EFM_Effect.EffectType.StomachBloodloss:
+                                    --Mod.stomachBloodLossCount;
+                                    break;
+                                case EFM_Effect.EffectType.UnknownToxin:
+                                    // Remove all effects caused by this toxin
+                                    foreach (EFM_Effect causedEffect in effect.caused)
+                                    {
+                                        if (causedEffect.effectType == EFM_Effect.EffectType.HealthRate)
+                                        {
+                                            for (int j = 0; j < 7; ++j)
+                                            {
+                                                currentHealthRates[j] -= causedEffect.value / 7;
+                                            }
+                                        }
+                                        // Could go two layers deep
+                                        foreach (EFM_Effect causedCausedEffect in effect.caused)
+                                        {
+                                            EFM_Effect.effects.Remove(causedCausedEffect);
+                                        }
+                                        EFM_Effect.effects.Remove(causedEffect);
+                                    }
+                                    bool hasToxinTremors = false;
+                                    foreach (EFM_Effect effectCheck in EFM_Effect.effects)
+                                    {
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
+                                        {
+                                            hasToxinTremors = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!hasToxinTremors)
+                                    {
+                                        // TODO: Disable tremors
+                                    }
+                                    break;
+                                case EFM_Effect.EffectType.BodyTemperature:
+                                    Mod.temperatureOffset -= effect.value;
+                                    break;
+                                case EFM_Effect.EffectType.Antidote:
+                                    // Will remove toxin on activation, does nothing after
+                                    break;
+                                case EFM_Effect.EffectType.LightBleeding:
+                                case EFM_Effect.EffectType.HeavyBleeding:
+                                    // Remove all effects caused by this bleeding
+                                    foreach (EFM_Effect causedEffect in effect.caused)
+                                    {
+                                        if (causedEffect.effectType == EFM_Effect.EffectType.HealthRate)
+                                        {
+                                            currentNonLethalHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                        }
+                                        else // Energy rate
+                                        {
+                                            currentEnergyRate -= causedEffect.value;
+                                        }
+                                        EFM_Effect.effects.Remove(causedEffect);
+                                    }
+                                    break;
+                                case EFM_Effect.EffectType.Fracture:
+                                    // Remove all effects caused by this fracture
+                                    foreach (EFM_Effect causedEffect in effect.caused)
+                                    {
+                                        // Could go two layers deep
+                                        foreach (EFM_Effect causedCausedEffect in effect.caused)
+                                        {
+                                            EFM_Effect.effects.Remove(causedCausedEffect);
+                                        }
+                                        EFM_Effect.effects.Remove(causedEffect);
+                                    }
+                                    bool hasFractureTremors = false;
+                                    foreach (EFM_Effect effectCheck in EFM_Effect.effects)
+                                    {
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
+                                        {
+                                            hasFractureTremors = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!hasFractureTremors)
+                                    {
+                                        // TODO: Disable tremors
+                                    }
+                                    break;
+                            }
+
+                            EFM_Effect.effects.RemoveAt(i);
+
+                            continue;
+                        }
+                    }
+                }
+                else
+                {
+                    bool effectJustActivated = false;
+                    if (effect.delay > 0)
+                    {
+                        effect.delay -= Time.deltaTime;
+                    }
+                    else if (effect.inactiveTimer <= 0)
+                    {
+                        effect.active = true;
+                        effectJustActivated = true;
+                    }
+                    if (effect.inactiveTimer > 0)
+                    {
+                        effect.inactiveTimer -= Time.deltaTime;
+                    }
+                    else if (effect.delay <= 0)
+                    {
+                        effect.active = true;
+                        effectJustActivated = true;
+                    }
+
+                    // Apply effect if it just started being active
+                    if (effectJustActivated)
+                    {
+                        switch (effect.effectType)
+                        {
+                            case EFM_Effect.EffectType.SkillRate:
+                                Mod.skills[effect.skillIndex].currentProgress += effect.value;
+                                break;
+                            case EFM_Effect.EffectType.EnergyRate:
+                                currentEnergyRate += effect.value;
+                                break;
+                            case EFM_Effect.EffectType.HydrationRate:
+                                currentHydrationRate += effect.value;
+                                break;
+                            case EFM_Effect.EffectType.MaxStamina:
+                                Mod.currentMaxStamina += effect.value;
+                                break;
+                            case EFM_Effect.EffectType.StaminaRate:
+                                Mod.currentStaminaEffect += effect.value;
+                                break;
+                            case EFM_Effect.EffectType.HandsTremor:
+                                // TODO: Begin tremors if there isnt already another active one
+                                break;
+                            case EFM_Effect.EffectType.QuantumTunnelling:
+                                // TODO: Begin quantumtunneling if there isnt already another active one
+                                break;
+                            case EFM_Effect.EffectType.HealthRate:
+                                float[] arrayToUse = effect.nonLethal ? currentNonLethalHealthRates : currentHealthRates;
+                                if (effect.partIndex == -1)
+                                {
+                                    for (int j = 0; j < 7; ++j)
+                                    {
+                                        arrayToUse[j] += effect.value / 7;
+                                    }
+                                }
+                                else
+                                {
+                                    arrayToUse[effect.partIndex] += effect.value;
+                                }
+                                break;
+                            case EFM_Effect.EffectType.RemoveAllBloodLosses:
+                                // Deactivate all bleeding using disable timer
+                                foreach (EFM_Effect bleedEffect in EFM_Effect.effects)
+                                {
+                                    if (bleedEffect.effectType == EFM_Effect.EffectType.LightBleeding || bleedEffect.effectType == EFM_Effect.EffectType.HeavyBleeding)
+                                    {
+                                        bleedEffect.active = false;
+                                        bleedEffect.inactiveTimer = effect.timer;
+
+                                        // Unapply the healthrate caused by this bleed
+                                        EFM_Effect causedHealthRate = bleedEffect.caused[0];
+                                        if (causedHealthRate.nonLethal)
+                                        {
+                                            currentNonLethalHealthRates[causedHealthRate.partIndex] -= causedHealthRate.value;
+                                        }
+                                        else
+                                        {
+                                            currentHealthRates[causedHealthRate.partIndex] -= causedHealthRate.value;
+                                        }
+                                        EFM_Effect causedEnergyRate = bleedEffect.caused[1];
+                                        currentEnergyRate -= causedEnergyRate.value;
+                                        bleedEffect.caused.Clear();
+                                        EFM_Effect.effects.Remove(causedHealthRate);
+                                        EFM_Effect.effects.Remove(causedEnergyRate);
+                                    }
+                                }
+                                break;
+                            case EFM_Effect.EffectType.Contusion:
+                                // Disable haptic feedback
+                                GM.Options.ControlOptions.HapticsState = ControlOptions.HapticsMode.Disabled;
+                                // TODO: also set volume to 0.33 * volume
+                                break;
+                            case EFM_Effect.EffectType.WeightLimit:
+                                Mod.currentWeightLimit += effect.value;
+                                break;
+                            case EFM_Effect.EffectType.DamageModifier:
+                                Mod.currentDamageModifier += effect.value;
+                                break;
+                            case EFM_Effect.EffectType.Pain:
+                                // Add a tremor effect
+                                EFM_Effect newTremor = new EFM_Effect();
+                                newTremor.effectType = EFM_Effect.EffectType.HandsTremor;
+                                newTremor.delay = 5;
+                                newTremor.hasTimer = effect.hasTimer;
+                                newTremor.timer = effect.timer;
+                                EFM_Effect.effects.Add(newTremor);
+                                effect.caused.Add(newTremor);
+                                break;
+                            case EFM_Effect.EffectType.StomachBloodloss:
+                                ++Mod.stomachBloodLossCount;
+                                break;
+                            case EFM_Effect.EffectType.UnknownToxin:
+                                // Add a pain effect
+                                EFM_Effect newToxinPain = new EFM_Effect();
+                                newToxinPain.effectType = EFM_Effect.EffectType.Pain;
+                                newToxinPain.delay = 5;
+                                newToxinPain.hasTimer = effect.hasTimer;
+                                newToxinPain.timer = effect.timer;
+                                newToxinPain.partIndex = 0;
+                                EFM_Effect.effects.Add(newToxinPain);
+                                effect.caused.Add(newToxinPain);
+                                // Add a health rate effect
+                                EFM_Effect newToxinHealthRate = new EFM_Effect();
+                                newToxinHealthRate.effectType = EFM_Effect.EffectType.HealthRate;
+                                newToxinHealthRate.delay = 5;
+                                newToxinHealthRate.value = -25;
+                                newToxinHealthRate.hasTimer = effect.hasTimer;
+                                newToxinHealthRate.timer = effect.timer;
+                                EFM_Effect.effects.Add(newToxinHealthRate);
+                                effect.caused.Add(newToxinHealthRate);
+                                break;
+                            case EFM_Effect.EffectType.BodyTemperature:
+                                Mod.temperatureOffset += effect.value;
+                                break;
+                            case EFM_Effect.EffectType.Antidote:
+                                // Will remove toxin on ativation, does nothing after
+                                for (int j = EFM_Effect.effects.Count; j >= 0; --j)
+                                {
+                                    if (EFM_Effect.effects[j].effectType == EFM_Effect.EffectType.UnknownToxin)
+                                    {
+                                        EFM_Effect.effects.RemoveAt(j);
+                                        break;
+                                    }
+                                }
+                                break;
+                            case EFM_Effect.EffectType.LightBleeding:
+                                // Add a health rate effect
+                                EFM_Effect newLightBleedingHealthRate = new EFM_Effect();
+                                newLightBleedingHealthRate.effectType = EFM_Effect.EffectType.HealthRate;
+                                newLightBleedingHealthRate.delay = 5;
+                                newLightBleedingHealthRate.value = -8;
+                                newLightBleedingHealthRate.hasTimer = effect.hasTimer;
+                                newLightBleedingHealthRate.timer = effect.timer;
+                                newLightBleedingHealthRate.partIndex = effect.partIndex;
+                                newLightBleedingHealthRate.nonLethal = true;
+                                EFM_Effect.effects.Add(newLightBleedingHealthRate);
+                                effect.caused.Add(newLightBleedingHealthRate);
+                                // Add a energy rate effect
+                                EFM_Effect newLightBleedingEnergyRate = new EFM_Effect();
+                                newLightBleedingEnergyRate.effectType = EFM_Effect.EffectType.EnergyRate;
+                                newLightBleedingEnergyRate.delay = 5;
+                                newLightBleedingEnergyRate.value = -5;
+                                newLightBleedingEnergyRate.hasTimer = effect.hasTimer;
+                                newLightBleedingEnergyRate.timer = effect.timer;
+                                newLightBleedingEnergyRate.partIndex = effect.partIndex;
+                                EFM_Effect.effects.Add(newLightBleedingEnergyRate);
+                                effect.caused.Add(newLightBleedingEnergyRate);
+                                break;
+                            case EFM_Effect.EffectType.HeavyBleeding:
+                                // Add a health rate effect
+                                EFM_Effect newHeavyBleedingHealthRate = new EFM_Effect();
+                                newHeavyBleedingHealthRate.effectType = EFM_Effect.EffectType.HealthRate;
+                                newHeavyBleedingHealthRate.delay = 5;
+                                newHeavyBleedingHealthRate.value = -13.5f;
+                                newHeavyBleedingHealthRate.hasTimer = effect.hasTimer;
+                                newHeavyBleedingHealthRate.timer = effect.timer;
+                                newHeavyBleedingHealthRate.nonLethal = true;
+                                EFM_Effect.effects.Add(newHeavyBleedingHealthRate);
+                                effect.caused.Add(newHeavyBleedingHealthRate);
+                                // Add a energy rate effect
+                                EFM_Effect newHeavyBleedingEnergyRate = new EFM_Effect();
+                                newHeavyBleedingEnergyRate.effectType = EFM_Effect.EffectType.EnergyRate;
+                                newHeavyBleedingEnergyRate.delay = 5;
+                                newHeavyBleedingEnergyRate.value = -6;
+                                newHeavyBleedingEnergyRate.hasTimer = effect.hasTimer;
+                                newHeavyBleedingEnergyRate.timer = effect.timer;
+                                newHeavyBleedingEnergyRate.partIndex = effect.partIndex;
+                                EFM_Effect.effects.Add(newHeavyBleedingEnergyRate);
+                                effect.caused.Add(newHeavyBleedingEnergyRate);
+                                break;
+                            case EFM_Effect.EffectType.Fracture:
+                                // Add a pain effect
+                                EFM_Effect newFracturePain = new EFM_Effect();
+                                newFracturePain.effectType = EFM_Effect.EffectType.Pain;
+                                newFracturePain.delay = 5;
+                                newFracturePain.hasTimer = effect.hasTimer;
+                                newFracturePain.timer = effect.timer;
+                                EFM_Effect.effects.Add(newFracturePain);
+                                effect.caused.Add(newFracturePain);
+                                break;
+                            case EFM_Effect.EffectType.Dehydration:
+                                // Add a HealthRate effect
+                                EFM_Effect newDehydrationHealthRate = new EFM_Effect();
+                                newDehydrationHealthRate.effectType = EFM_Effect.EffectType.HealthRate;
+                                newDehydrationHealthRate.value = -60;
+                                newDehydrationHealthRate.delay = 5;
+                                newDehydrationHealthRate.hasTimer = false;
+                                EFM_Effect.effects.Add(newDehydrationHealthRate);
+                                effect.caused.Add(newDehydrationHealthRate);
+                                break;
+                            case EFM_Effect.EffectType.HeavyDehydration:
+                                // Add a HealthRate effect
+                                EFM_Effect newHeavyDehydrationHealthRate = new EFM_Effect();
+                                newHeavyDehydrationHealthRate.effectType = EFM_Effect.EffectType.HealthRate;
+                                newHeavyDehydrationHealthRate.value = -350;
+                                newHeavyDehydrationHealthRate.delay = 5;
+                                newHeavyDehydrationHealthRate.hasTimer = false;
+                                EFM_Effect.effects.Add(newHeavyDehydrationHealthRate);
+                                effect.caused.Add(newHeavyDehydrationHealthRate);
+                                break;
+                            case EFM_Effect.EffectType.Fatigue:
+                                Mod.fatigue = true;
+                                break;
+                            case EFM_Effect.EffectType.HeavyFatigue:
+                                // Add a HealthRate effect
+                                EFM_Effect newHeavyFatigueHealthRate = new EFM_Effect();
+                                newHeavyFatigueHealthRate.effectType = EFM_Effect.EffectType.HealthRate;
+                                newHeavyFatigueHealthRate.value = -30;
+                                newHeavyFatigueHealthRate.delay = 5;
+                                newHeavyFatigueHealthRate.hasTimer = false;
+                                EFM_Effect.effects.Add(newHeavyFatigueHealthRate);
+                                effect.caused.Add(newHeavyFatigueHealthRate);
+                                break;
+                            case EFM_Effect.EffectType.OverweightFatigue:
+                                // Add a EnergyRate effect
+                                EFM_Effect newOverweightFatigueEnergyRate = new EFM_Effect();
+                                newOverweightFatigueEnergyRate.effectType = EFM_Effect.EffectType.EnergyRate;
+                                newOverweightFatigueEnergyRate.value = -4;
+                                newOverweightFatigueEnergyRate.delay = 5;
+                                newOverweightFatigueEnergyRate.hasTimer = false;
+                                EFM_Effect.effects.Add(newOverweightFatigueEnergyRate);
+                                effect.caused.Add(newOverweightFatigueEnergyRate);
+                                break;
+                        }
+                    }
+                }
+            }
+
+            // Apply lethal health rates
+            for (int i = 0; i < 7; ++i)
+            {
+                if(Mod.health[i] == 0)
+                {
+                    // Apply currentHealthRates[i] to other parts
+                    for (int j = 0; j < 7; ++j)
+                    {
+                        if (j != i)
+                        {
+                            Mod.health[j] = Mathf.Clamp(Mod.health[j] + currentHealthRates[i] * (Time.deltaTime / 60) / 6, 1, maxHealth[j]);
+                        }
+                    }
+                }
+                else
+                {
+                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + currentHealthRates[i] * (Time.deltaTime / 60), 1, maxHealth[i]);
+
+                    if (Mod.health[i] == 0 && (i == 0 || i == 1))
+                    {
+                        // TODO: Kill player
+                    }
+                }
+            }
+
+            // Apply nonlethal health rates
+            for (int i = 0; i < 7; ++i)
+            {
+                if(Mod.health[i] == 0)
+                {
+                    // Apply currentNonLethalHealthRates[i] to other parts
+                    for (int j = 0; j < 7; ++j)
+                    {
+                        if (j != i)
+                        {
+                            Mod.health[j] = Mathf.Clamp(Mod.health[j] + currentNonLethalHealthRates[i] * (Time.deltaTime / 60) / 6, 1, maxHealth[j]);
+                        }
+                    }
+                }
+                else
+                {
+                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + currentNonLethalHealthRates[i] * (Time.deltaTime / 60), 1, maxHealth[i]);
+                }
+            }
+
+            Mod.hydration = Mathf.Clamp(Mod.hydration + currentHydrationRate * (Time.deltaTime / 60), 0, Mod.maxHydration);
+            if(Mod.hydration == 0)
+            {
+                if (Mod.dehydrationEffect == null)
+                {
+                    // Add a heavyDehydration effect
+                    EFM_Effect newHeavyDehydration = new EFM_Effect();
+                    newHeavyDehydration.effectType = EFM_Effect.EffectType.HeavyDehydration;
+                    newHeavyDehydration.delay = 5;
+                    newHeavyDehydration.hasTimer = false;
+                    EFM_Effect.effects.Add(newHeavyDehydration);
+                    Mod.dehydrationEffect = newHeavyDehydration;
+                }
+                else if(Mod.dehydrationEffect.effectType == EFM_Effect.EffectType.Dehydration)
+                {
+                    // Disable the other dehydration before adding a new one
+                    if(Mod.dehydrationEffect.caused.Count > 0)
+                    {
+                        for (int j = 0; j < 7; ++j)
+                        {
+                            currentHealthRates[j] -= Mod.dehydrationEffect.caused[0].value / 7;
+                        }
+                        EFM_Effect.effects.Remove(Mod.dehydrationEffect.caused[0]);
+                    }
+                    EFM_Effect.effects.Remove(Mod.dehydrationEffect);
+
+                    // Add a heavyDehydration effect
+                    EFM_Effect newHeavyDehydration = new EFM_Effect();
+                    newHeavyDehydration.effectType = EFM_Effect.EffectType.HeavyDehydration;
+                    newHeavyDehydration.hasTimer = false;
+                    EFM_Effect.effects.Add(newHeavyDehydration);
+                    Mod.dehydrationEffect = newHeavyDehydration;
+                }
+            }
+            else if(Mod.hydration < 20)
+            {
+                if (Mod.dehydrationEffect == null)
+                {
+                    // Add a dehydration effect
+                    EFM_Effect newDehydration = new EFM_Effect();
+                    newDehydration.effectType = EFM_Effect.EffectType.Dehydration;
+                    newDehydration.delay = 5;
+                    newDehydration.hasTimer = false;
+                    EFM_Effect.effects.Add(newDehydration);
+                    Mod.dehydrationEffect = newDehydration;
+                }
+                else if(Mod.dehydrationEffect.effectType == EFM_Effect.EffectType.HeavyDehydration)
+                {
+                    // Disable the other dehydration before adding a new one
+                    if (Mod.dehydrationEffect.caused.Count > 0)
+                    {
+                        for (int j = 0; j < 7; ++j)
+                        {
+                            currentHealthRates[j] -= Mod.dehydrationEffect.caused[0].value / 7;
+                        }
+                        EFM_Effect.effects.Remove(Mod.dehydrationEffect.caused[0]);
+                    }
+                    EFM_Effect.effects.Remove(Mod.dehydrationEffect);
+
+                    // Add a dehydration effect
+                    EFM_Effect newDehydration = new EFM_Effect();
+                    newDehydration.effectType = EFM_Effect.EffectType.Dehydration;
+                    newDehydration.hasTimer = false;
+                    EFM_Effect.effects.Add(newDehydration);
+                    Mod.dehydrationEffect = newDehydration;
+                }
+            }
+            else // Hydrated
+            {
+                // Remove any dehydration effect
+                if(Mod.dehydrationEffect != null)
+                {
+                    // Disable 
+                    if (Mod.dehydrationEffect.caused.Count > 0)
+                    {
+                        for (int j = 0; j < 7; ++j)
+                        {
+                            currentHealthRates[j] -= Mod.dehydrationEffect.caused[0].value / 7;
+                        }
+                        EFM_Effect.effects.Remove(Mod.dehydrationEffect.caused[0]);
+                    }
+                    EFM_Effect.effects.Remove(Mod.dehydrationEffect);
+                }
+            }
+
+            Mod.energy = Mathf.Clamp(Mod.energy + currentEnergyRate * (Time.deltaTime / 60), 0, Mod.maxEnergy);
+            if (Mod.energy == 0)
+            {
+                if (Mod.fatigueEffect == null)
+                {
+                    // Add a heavyFatigue effect
+                    EFM_Effect newHeavyFatigue = new EFM_Effect();
+                    newHeavyFatigue.effectType = EFM_Effect.EffectType.HeavyFatigue;
+                    newHeavyFatigue.delay = 5;
+                    newHeavyFatigue.hasTimer = false;
+                    EFM_Effect.effects.Add(newHeavyFatigue);
+                    Mod.fatigueEffect = newHeavyFatigue;
+                }
+                else if (Mod.fatigueEffect.effectType == EFM_Effect.EffectType.Fatigue)
+                {
+                    // Disable the other fatigue before adding a new one
+                    EFM_Effect.effects.Remove(Mod.dehydrationEffect);
+
+                    // Add a heavyFatigue effect
+                    EFM_Effect newHeavyFatigue = new EFM_Effect();
+                    newHeavyFatigue.effectType = EFM_Effect.EffectType.HeavyFatigue;
+                    newHeavyFatigue.hasTimer = false;
+                    EFM_Effect.effects.Add(newHeavyFatigue);
+                    Mod.dehydrationEffect = newHeavyFatigue;
+                }
+            }
+            else if (Mod.energy < 20)
+            {
+                if (Mod.fatigueEffect == null)
+                {
+                    // Add a fatigue effect
+                    EFM_Effect newFatigue = new EFM_Effect();
+                    newFatigue.effectType = EFM_Effect.EffectType.Fatigue;
+                    newFatigue.delay = 5;
+                    newFatigue.hasTimer = false;
+                    EFM_Effect.effects.Add(newFatigue);
+                    Mod.fatigueEffect = newFatigue;
+                }
+                else if (Mod.fatigueEffect.effectType == EFM_Effect.EffectType.HeavyFatigue)
+                {
+                    // Disable the other fatigue before adding a new one
+                    if (Mod.dehydrationEffect.caused.Count > 0)
+                    {
+                        for (int j = 0; j < 7; ++j)
+                        {
+                            currentHealthRates[j] -= Mod.fatigueEffect.caused[0].value / 7;
+                        }
+                        EFM_Effect.effects.Remove(Mod.fatigueEffect.caused[0]);
+                    }
+                    EFM_Effect.effects.Remove(Mod.fatigueEffect);
+
+                    // Add a fatigue effect
+                    EFM_Effect newFatigue = new EFM_Effect();
+                    newFatigue.effectType = EFM_Effect.EffectType.Fatigue;
+                    newFatigue.hasTimer = false;
+                    EFM_Effect.effects.Add(newFatigue);
+                    Mod.dehydrationEffect = newFatigue;
+                }
+            }
+            else // Energized
+            {
+                // Remove any fatigue effect
+                if (Mod.fatigueEffect != null)
+                {
+                    // Disable 
+                    if (Mod.fatigueEffect.caused.Count > 0)
+                    {
+                        for (int j = 0; j < 7; ++j)
+                        {
+                            currentHealthRates[j] -= Mod.fatigueEffect.caused[0].value / 7;
+                        }
+                        EFM_Effect.effects.Remove(Mod.fatigueEffect.caused[0]);
+                    }
+                    EFM_Effect.effects.Remove(Mod.fatigueEffect);
+                }
+            }
         }
 
         private void FixedUpdate()
@@ -116,6 +780,12 @@ namespace EFM
 
         public override void Init()
         {
+            // Init player state
+            currentHealthRates = new float[7];
+
+            // Init effects that were already active before the raid to make sure their effects are applied
+            InitEffects();
+
             Mod.instance.LogInfo("Raid init called");
             currentManager = this;
 
@@ -398,7 +1068,7 @@ namespace EFM
 
                     // Check for stack
                     int amountToSpawn = items[i]["upd"] == null ? 1 : items[i]["upd"]["StackObjectCount"] == null ? 1 : (int)items[i]["upd"]["StackObjectCount"];
-                    bool stackable = itemWrapper != null && itemWrapper.stackable;
+                    bool stackable = itemWrapper != null && itemWrapper.maxStack > 1;
 
                     // Spawn item(s)
                     if (!stackable)
@@ -453,7 +1123,7 @@ namespace EFM
 
                     // Check for stack
                     int amountToSpawn = items[i]["upd"] == null ? 1 : items[i]["upd"]["StackObjectCount"] == null ? 1 : (int)items[i]["upd"]["StackObjectCount"];
-                    bool stackable = itemWrapper != null && itemWrapper.stackable;
+                    bool stackable = itemWrapper != null && itemWrapper.maxStack > 1;
 
                     // Spawn item(s)
                     if (!stackable)
@@ -502,6 +1172,31 @@ namespace EFM
             inRaid = true;
 
             init = true;
+        }
+
+        public void InitEffects()
+        {
+            foreach(EFM_Effect effect in EFM_Effect.effects)
+            {
+                if (effect.active)
+                {
+                    switch (effect.effectType)
+                    {
+                        case EFM_Effect.EffectType.EnergyRate:
+                            currentEnergyRate += effect.value;
+                            break;
+                        case EFM_Effect.EffectType.HydrationRate:
+                            currentHydrationRate += effect.value;
+                            break;
+                        case EFM_Effect.EffectType.HealthRate:
+                            for (int j = 0; j < 7; ++j)
+                            {
+                                currentHealthRates[j] += effect.value / 7;
+                            }
+                            break;
+                    }
+                }
+            }
         }
 
         private int GetLocationDataIndex(int chosenMapIndex)

@@ -70,6 +70,13 @@ namespace EFM
         public static float currentStaminaEffect = 0;
         public static float weightLimit = 55;
         public static float currentWeightLimit = 55;
+        public static float currentDamageModifier = 1;
+        public static int stomachBloodLossCount = 0; // If this is 0, in hideout we will regen health otherwise not, in raid we will multiply energy and hydration rate by 5
+        public static float temperatureOffset = 0;
+        public static bool fatigue = false;
+        public static EFM_Effect dehydrationEffect;
+        public static EFM_Effect fatigueEffect;
+        public static EFM_Effect overweightFatigueEffect;
 
         // Assets
         public static bool assetLoaded;
