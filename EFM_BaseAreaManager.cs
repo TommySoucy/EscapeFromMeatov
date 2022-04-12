@@ -546,6 +546,19 @@ namespace EFM
 
         public void SetRequirements(Transform parentRequirementsPanel, bool middle, JToken requirements)
         {
+            if (Mod.requiredPerArea == null)
+            {
+                Mod.requiredPerArea = new Dictionary<string, int>[22];
+            }
+            if (Mod.requiredPerArea[areaIndex] == null)
+            {
+                Mod.requiredPerArea[areaIndex] = new Dictionary<string, int>();
+            }
+            else
+            {
+                Mod.requiredPerArea[areaIndex].Clear();
+            }
+
             Mod.instance.LogInfo("set requirements called with list of "+((JArray)requirements).Count+" requirements");
             if (requirements != null && ((JArray)requirements).Count > 0)
             {
@@ -685,12 +698,28 @@ namespace EFM
                                 int itemAmountNeeded = (int)requirement["count"];
                                 int itemAmountInInventory = 0;
                                 Mod.instance.LogInfo("\t\t base manager null?: "+(baseManager == null));
-                                Mod.instance.LogInfo("\t\t base inventory null?: "+(baseManager.baseInventory == null));
-                                if (baseManager.baseInventory.ContainsKey(Mod.itemMap[itemTemplateID]))
+                                Mod.instance.LogInfo("\t\t base inventory null?: "+(Mod.baseInventory == null));
+                                string actualID = Mod.itemMap[itemTemplateID];
+                                if (Mod.baseInventory.ContainsKey(actualID))
                                 {
                                     Mod.instance.LogInfo("\t\t\t0");
-                                    itemAmountInInventory = baseManager.baseInventory[Mod.itemMap[itemTemplateID]];
+                                    itemAmountInInventory = Mod.baseInventory[actualID];
                                 }
+                                if (Mod.playerInventory.ContainsKey(actualID))
+                                {
+                                    Mod.instance.LogInfo("\t\t\t0");
+                                    itemAmountInInventory = Mod.playerInventory[actualID];
+                                }
+
+                                if (Mod.requiredPerArea[areaIndex].ContainsKey(actualID))
+                                {
+                                    Mod.requiredPerArea[areaIndex][actualID] = itemAmountNeeded;
+                                }
+                                else
+                                {
+                                    Mod.requiredPerArea[areaIndex].Add(actualID, itemAmountNeeded);
+                                }
+
                                 Mod.instance.LogInfo("\t\t0");
                                 itemRequirement.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = Mathf.Min(itemAmountNeeded, itemAmountInInventory).ToString() + "/" + itemAmountNeeded; // Area level
 
@@ -972,7 +1001,7 @@ namespace EFM
                         }
 
                         int itemAmountNeeded = (int)requirement["count"];
-                        int itemAmountInInventory = baseManager.baseInventory.ContainsKey(itemID) ? baseManager.baseInventory[itemID] : 0;
+                        int itemAmountInInventory = (Mod.baseInventory.ContainsKey(itemID) ? Mod.baseInventory[itemID] : 0) + (Mod.playerInventory.ContainsKey(itemID) ? Mod.playerInventory[itemID] : 0);
 
                         return itemAmountInInventory >= itemAmountNeeded;
                     }
@@ -1042,7 +1071,7 @@ namespace EFM
                             }
 
                             int itemAmountNeeded = (int)requirement["count"];
-                            int itemAmountInInventory = baseManager.baseInventory[itemID];
+                            int itemAmountInInventory = (Mod.baseInventory.ContainsKey(itemID) ? Mod.baseInventory[itemID] : 0) + (Mod.playerInventory.ContainsKey(itemID) ? Mod.playerInventory[itemID] : 0);
 
                             if(itemAmountInInventory < itemAmountNeeded)
                             {
@@ -1117,16 +1146,52 @@ namespace EFM
                 if (requirement["type"].ToString().Equals("Item"))
                 {
                     string actualID = Mod.itemMap[requirement["templateId"].ToString()];
-                    baseManager.baseInventory[actualID] = baseManager.baseInventory[actualID] - (int)requirement["count"];
-                    List<GameObject> objectList = baseManager.baseInventoryObjects[actualID];
-                    for (int i = objectList.Count - 1, j = (int)requirement["count"]; i >= 0 && j > 0; --i, --j)
+                    int amountToRemove = (int)requirement["count"];
+                    int amountToRemoveFromBase = 0;
+                    int amountToRemoveFromPlayer = 0;
+                    if (Mod.baseInventory.ContainsKey(actualID))
                     {
-                        GameObject toDestroy = objectList[objectList.Count - 1];
-                        objectList.RemoveAt(objectList.Count - 1);
-                        Destroy(toDestroy);
+                        if(Mod.baseInventory[actualID] >= amountToRemove)
+                        {
+                            amountToRemoveFromBase = amountToRemove;
+                        }
+                        else
+                        {
+                            amountToRemoveFromBase = Mod.baseInventory[actualID];
+                            amountToRemoveFromPlayer = amountToRemove - Mod.baseInventory[actualID];
+                        }
+                    }
+                    else
+                    {
+                        amountToRemoveFromPlayer = amountToRemove;
+                    }
+                    if (amountToRemoveFromBase > 0)
+                    {
+                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - amountToRemoveFromBase;
+                        List<GameObject> objectList = baseManager.baseInventoryObjects[actualID];
+                        for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i, --j)
+                        {
+                            GameObject toDestroy = objectList[objectList.Count - 1];
+                            objectList.RemoveAt(objectList.Count - 1);
+                            Destroy(toDestroy);
+                        }
+                    }
+                    if (amountToRemoveFromPlayer > 0)
+                    {
+                        // TODO: Check if destroying the objects is enough or if we need to do things like set the QB slot current object to null or something
+                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - amountToRemoveFromPlayer;
+                        List<GameObject> objectList = Mod.playerInventoryObjects[actualID];
+                        for (int i = objectList.Count - 1, j = amountToRemoveFromPlayer; i >= 0 && j > 0; --i, --j)
+                        {
+                            GameObject toDestroy = objectList[objectList.Count - 1];
+                            objectList.RemoveAt(objectList.Count - 1);
+                            Destroy(toDestroy);
+                        }
                     }
                 }
             }
+            // Remove required for area entry
+            Mod.requiredPerArea[areaIndex] = null;
 
             if ((int)Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["constructionTime"] == 0)
             {

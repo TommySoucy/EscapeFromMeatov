@@ -6,8 +6,8 @@ namespace EFM
 {
     public class EFM_EquipmentSlot : FVRQuickBeltSlot
     {
-        public static bool wearingHelmet;
-        public static EFM_CustomItemWrapper currentHelmet;
+        public static bool wearingHeadwear;
+        public static EFM_CustomItemWrapper currentHeadwear;
         public static bool wearingBodyArmor;
         public static EFM_CustomItemWrapper currentArmor;
         public static bool wearingRig;
@@ -17,6 +17,12 @@ namespace EFM
         public static EFM_CustomItemWrapper currentBackpack;
         public static bool wearingPouch;
         public static EFM_CustomItemWrapper currentPouch;
+        public static bool wearingEarpiece;
+        public static EFM_CustomItemWrapper currentEarpiece;
+        public static bool wearingFaceCover;
+        public static EFM_CustomItemWrapper currentFaceCover;
+        public static bool wearingEyewear;
+        public static EFM_CustomItemWrapper currentEyewear;
 
         public static void WearEquipment(EFM_CustomItemWrapper customItemWrapper)
         {
@@ -32,17 +38,16 @@ namespace EFM
                 switch (customItemWrapper.itemType)
                 {
                     case Mod.ItemType.Helmet:
-                        if (!wearingHelmet)
+                    case Mod.ItemType.Headwear:
+                        if (!wearingHeadwear)
                         {
-                            // TODO: Equip it physically if necessary
-                            wearingHelmet = true;
-                            currentHelmet = customItemWrapper;
+                            wearingHeadwear = true;
+                            currentHeadwear = customItemWrapper;
                         }
                         break;
                     case Mod.ItemType.Rig:
                         if (!wearingRig && !wearingArmoredRig)
                         {
-                            // TODO: Equip it physically if necessary
                             EquipRig(customItemWrapper);
                             wearingRig = true;
                         }
@@ -50,7 +55,6 @@ namespace EFM
                     case Mod.ItemType.BodyArmor:
                         if (!wearingBodyArmor)
                         {
-                            // TODO: Equip it physically if necessary
                             wearingBodyArmor = true;
                             currentArmor = customItemWrapper;
                         }
@@ -58,7 +62,6 @@ namespace EFM
                     case Mod.ItemType.ArmoredRig:
                         if (!wearingArmoredRig && !wearingRig)
                         {
-                            // TODO: Equip it physically if necessary
                             EquipRig(customItemWrapper);
                             wearingArmoredRig = true;
                             currentArmor = customItemWrapper;
@@ -67,8 +70,6 @@ namespace EFM
                     case Mod.ItemType.Backpack:
                         if (!wearingBackpack)
                         {
-                            // TODO: Set backpack inactive
-                            // TODO: Equip it physically if necessary
                             wearingBackpack = true;
                             currentBackpack = customItemWrapper;
                         }
@@ -76,9 +77,29 @@ namespace EFM
                     case Mod.ItemType.Pouch:
                         if (!wearingPouch)
                         {
-                            // TODO: Set Pouch inactive
                             wearingPouch = true;
                             currentPouch = customItemWrapper;
+                        }
+                        break;
+                    case Mod.ItemType.Earpiece:
+                        if (!wearingEarpiece)
+                        {
+                            wearingEarpiece = true;
+                            currentEarpiece = customItemWrapper;
+                        }
+                        break;
+                    case Mod.ItemType.FaceCover:
+                        if (!wearingFaceCover)
+                        {
+                            wearingFaceCover = true;
+                            currentFaceCover = customItemWrapper;
+                        }
+                        break;
+                    case Mod.ItemType.Eyewear:
+                        if (!wearingEyewear)
+                        {
+                            wearingEyewear = true;
+                            currentEyewear = customItemWrapper;
                         }
                         break;
                     default:
@@ -100,12 +121,11 @@ namespace EFM
                 switch (customItemWrapper.itemType)
                 {
                     case Mod.ItemType.Helmet:
-                        // TODO: Remove it physically if necessary
-                        wearingHelmet = false;
-                        currentHelmet = null;
+                    case Mod.ItemType.Headwear:
+                        wearingHeadwear = false;
+                        currentHeadwear = null;
                         break;
                     case Mod.ItemType.Rig:
-                        // TODO: Remove it physically if necessary
                         // Transfer item objects from config to the rig object
                         for (int i=0; i < customItemWrapper.itemsInSlots.Length; ++i)
                         {
@@ -120,12 +140,10 @@ namespace EFM
                         currentRig = null; // This needs to be done after ConfigureQuickbelt(-1) because it is used in it
                         break;
                     case Mod.ItemType.BodyArmor:
-                        // TODO: Remove it physically if necessary
                         wearingBodyArmor = false;
                         currentArmor = null;
                         break;
                     case Mod.ItemType.ArmoredRig:
-                        // TODO: Remove it physically if necessary
                         // Transfer item objects from config to the rig object
                         for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
                         {
@@ -141,15 +159,24 @@ namespace EFM
                         currentArmor = null;
                         break;
                     case Mod.ItemType.Backpack:
-                        // TODO: Set backpack active or change its model? so that it shows properly in the slot
-                        // TODO: Remove it physically if necessary
                         wearingBackpack = false;
                         currentBackpack = null;
                         break;
                     case Mod.ItemType.Pouch:
-                        // TODO: Set Pouch active so that it shows properly in the slot
                         wearingPouch = false;
                         currentPouch = null;
+                        break;
+                    case Mod.ItemType.Earpiece:
+                        wearingEarpiece = false;
+                        currentEarpiece = null;
+                        break;
+                    case Mod.ItemType.FaceCover:
+                        wearingFaceCover = false;
+                        currentFaceCover = null;
+                        break;
+                    case Mod.ItemType.Eyewear:
+                        wearingEyewear = false;
+                        currentEyewear = null;
                         break;
                     default:
                         Mod.instance.LogError("This object has invalid item type");
@@ -164,7 +191,7 @@ namespace EFM
 
         private static void EquipRig(EFM_CustomItemWrapper customItemWrapper)
         {
-            Mod.instance.LogInfo("EquipRig called with item name: "+customItemWrapper.name);
+            Mod.instance.LogInfo("EquipRig called with item name: "+customItemWrapper.itemName);
 
             // Load the config
             GM.CurrentPlayerBody.ConfigureQuickbelt(customItemWrapper.configurationIndex);
@@ -174,7 +201,7 @@ namespace EFM
             {
                 if (customItemWrapper.itemsInSlots[i] != null)
                 {
-                    Mod.instance.LogInfo("Item in slot "+i+" not null: " + customItemWrapper.name);
+                    Mod.instance.LogInfo("Item in slot "+i+" not null: " + customItemWrapper.itemName);
                     FVRPhysicalObject physicalObject = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
                     physicalObject.SetQuickBeltSlot(GM.CurrentPlayerBody.QuickbeltSlots[i]);
                     physicalObject.SetParentage(GM.CurrentPlayerBody.QuickbeltSlots[i].gameObject.transform);
@@ -205,18 +232,20 @@ namespace EFM
 
         public static void Clear()
         {
-            wearingHelmet = false;
+            wearingHeadwear = false;
             wearingArmoredRig = false;
             wearingBodyArmor = false;
             wearingRig = false;
             wearingBackpack = false;
             wearingPouch = false;
 
-            currentHelmet = null;
+            currentHeadwear = null;
             currentArmor = null;
             currentRig = null;
             currentBackpack = null;
             currentPouch = null;
         }
+
+        public Mod.ItemType equipmentType;
     }
 }

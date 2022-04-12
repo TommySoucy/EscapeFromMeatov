@@ -66,6 +66,8 @@
     <Compile Include="EFM_BaseAreaManager.cs" />
     <Compile Include="EFM_Base_Manager.cs" />
     <Compile Include="EFM_CustomItemWrapper.cs" />
+    <Compile Include="EFM_Describable.cs" />
+    <Compile Include="EFM_DescriptionManager.cs" />
     <Compile Include="EFM_DoorLockChecker.cs" />
     <Compile Include="EFM_DoorWrapper.cs" />
     <Compile Include="EFM_Effect.cs" />
@@ -75,6 +77,7 @@
     <Compile Include="EFM_Manager.cs" />
     <Compile Include="EFM_Menu_Manager.cs" />
     <Compile Include="EFM_OtherInteractable.cs" />
+    <Compile Include="EFM_PlayerStatusManager.cs" />
     <Compile Include="EFM_PointableButton.cs" />
     <Compile Include="EFM_Raid_Manager.cs" />
     <Compile Include="EFM_Skill.cs" />

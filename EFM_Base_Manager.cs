@@ -78,7 +78,6 @@ namespace EFM
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         AssetBundleCreateRequest currentRaidBundleRequest;
         public List<EFM_BaseAreaManager> baseAreaManagers;
-        public Dictionary<string, int> baseInventory;
         public Dictionary<string, List<GameObject>> baseInventoryObjects;
         public EFM_TraderStatus[] traderStatuses;
         public float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
@@ -129,6 +128,7 @@ namespace EFM
 
                 if (deployTimer <= 0)
                 {
+                    Mod.currentLocationIndex = 2;
                     SteamVR_LoadLevel.Begin("Meatov"+ chosenMap.text+ "Scene", false, 0.5f, 0f, 0f, 0f, 1f);
                     countdownDeploy = false;
                 }
@@ -644,6 +644,8 @@ namespace EFM
 
         public override void Init()
         {
+            Mod.currentBaseManager = this;
+
             // Don't want to setup player rig if just got out of raid
             if (!Mod.justFinishedRaid)
             {
@@ -678,64 +680,26 @@ namespace EFM
         private void SetupPlayerRig()
         {
             Mod.instance.LogInfo("Setup player rig called");
-            // Add equipment slots
-            // Clear any previously existing ones
-            if (Mod.equipmentSlots != null)
-            {
-                for(int i=0; i < Mod.equipmentSlots.Count; ++i)
-                {
-                    if (Mod.equipmentSlots[i] != null)
-                    {
-                        Destroy(Mod.equipmentSlots[i].gameObject);
-                    }
-                }
-                Mod.equipmentSlots.Clear();
-            }
-            else
-            {
-                Mod.equipmentSlots = new List<EFM_EquipmentSlot>();
-            }
-            List<GameObject> slotObjects = new List<GameObject>();
-            for (int side = 0; side < 2; ++side)
-            {
-                for (int x = 0; x < 2; ++x)
-                {
-                    for (int y = 0; y < 2; ++y)
-                    {
-                        GameObject slotObject = Instantiate(Mod.quickBeltSlotPrefab, side == 0 ? GM.CurrentPlayerBody.RightHand : GM.CurrentPlayerBody.LeftHand);
-                        slotObject.tag = "QuickbeltSlot";
-                        slotObject.transform.localPosition = new Vector3((x - 0.5f) * 0.1f, 0, (y - 2.5f) * 0.1f);
-                        slotObject.transform.localRotation = Quaternion.identity;
-                        slotObject.name = "EquipmentSlot" + (side == 0 ? "Right" : "Left");
-                        slotObject.SetActive(false); // Just so Awake() isn't called until we've set slot components fields
-                        slotObjects.Add(slotObject);
 
-                        EFM_EquipmentSlot slotComponent = slotObject.AddComponent<EFM_EquipmentSlot>();
-                        Mod.equipmentSlots.Add(slotComponent);
-                        Mod.instance.LogInfo("created equip slot x:"+x+",y:"+y);
-                        slotComponent.QuickbeltRoot = slotObject.transform;
-                        slotComponent.HoverGeo = slotObject.transform.GetChild(0).GetChild(0).gameObject;
-                        slotComponent.HoverGeo.SetActive(false);
-                        slotComponent.PoseOverride = slotObject.transform.GetChild(0).GetChild(2);
-                        slotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Sphere;
-                        slotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
-                        slotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
-
-                        slotComponent.HoverGeo.transform.localScale = Vector3.one * 0.1f;
-                        slotObject.transform.GetChild(0).GetChild(1).localScale = Vector3.one * 0.1f;
-                        slotComponent.PoseOverride.transform.localScale = Vector3.one * 0.1f;
-                        slotComponent.PoseOverride.transform.localRotation = Quaternion.Euler(270, -90, -90);
-
-                        // Set slot sphere materials
-                        slotObject.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().material = Mod.quickSlotHoverMaterial;
-                        slotObject.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().material = Mod.quickSlotConstantMaterial;
-                    }
-                }
-            }
-            foreach (GameObject slotObject in slotObjects)
-            {
-                slotObject.SetActive(true);
-            }
+            // TODO: Setup player UI, attaching all to camrig so it gets secured with the other stuff while switching scenes
+            // Player status
+            Mod.playerStatusUI = Instantiate(Mod.playerStatusUIPrefab, GM.CurrentPlayerRoot);
+            Mod.playerStatusManager = Mod.playerStatusUI.AddComponent<EFM_PlayerStatusManager>();
+            Mod.playerStatusManager.Init();
+            // Consumable indicator
+            Mod.consumeUI = Instantiate(Mod.consumeUIPrefab, GM.CurrentPlayerRoot);
+            Mod.consumeUIText = Mod.consumeUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
+            // Extraction UI
+            Mod.extractionUI = Instantiate(Mod.extractionUIPrefab, GM.CurrentPlayerRoot);
+            Mod.extractionUIText = Mod.consumeUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
+            Mod.extractionUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+            // ItemDescription UIs
+            Mod.leftDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerRoot);
+            Mod.leftDescriptionManager = Mod.leftDescriptionUI.AddComponent<EFM_DescriptionManager>();
+            Mod.leftDescriptionManager.Init();
+            Mod.rightDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerRoot);
+            Mod.rightDescriptionManager = Mod.rightDescriptionUI.AddComponent<EFM_DescriptionManager>();
+            Mod.rightDescriptionManager.Init();
 
             // Add our own hand component to each hand
             Mod.rightHand = GM.CurrentPlayerBody.RightHand.gameObject.AddComponent<EFM_Hand>();
@@ -749,7 +713,7 @@ namespace EFM
             // Check if we have loaded data
             if (data == null)
             {
-                // TODO: This is a new game, so we need to spawn starting equipement in the base and story/tutorial UI
+                // TODO: This is a new game, so we need to spawn story/tutorial UI
                 data = new JObject();
                 Mod.level = 1;
                 Mod.skills = new EFM_Skill[64];
@@ -758,8 +722,116 @@ namespace EFM
                 Mod.energy = 100;
 
                 // Spawn standard edition starting items
-                GameObject.Instantiate(Mod.itemPrefabs[25], new Vector3(0,0,-1.2f), Quaternion.identity, transform.GetChild(transform.childCount - 2));
-                GameObject.Instantiate(Mod.itemPrefabs[407], transform.GetChild(transform.childCount - 2));
+                Transform itemRoot = transform.GetChild(transform.childCount - 2);
+                GameObject.Instantiate(Mod.itemPrefabs[199], new Vector3(0.782999f, 0.6760001f, 6.609f), Quaternion.Euler(0f, 37.55229f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(16.685f, 0.405f, -2.755f), Quaternion.Euler(328.4395f, 270.6471f, 2.003955E-06f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(8.198049f, 0.4181025f, -6.029191f), Quaternion.Euler(346.8106f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(-4.905951f, 0.4161026f, 23.27681f), Quaternion.Euler(348.9087f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.007049f, 0.5902026f, 3.70981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.007049f, 0.5902026f, 3.64581f), Quaternion.Euler(0f, 5.83668f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(0.9946489f, 0.5902026f, 3.578609f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.004449f, 0.5902026f, 3.49771f), Quaternion.Euler(0f, 323.5824f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.084949f, 0.5902026f, 3.58231f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.145749f, 0.6102026f, 3.68561f), Quaternion.Euler(0f, 0f, 86.27259f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.117249f, 0.5902026f, 3.39831f), Quaternion.Euler(0f, 350.4561f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.117249f, 1.496603f, 3.39831f), Quaternion.Euler(0f, 350.4561f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.049649f, 1.496603f, 3.63981f), Quaternion.Euler(0f, 221.015f, 180f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(0.9520493f, 0.2060025f, 4.07481f), Quaternion.Euler(0f, 54.43977f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-4.89295f, 0.02490258f, -7.48019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-4.825951f, 0.02490258f, -7.42929f), Quaternion.Euler(0f, 56.71285f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(16.25405f, 0.02390254f, -1.25619f), Quaternion.Euler(0f, 51.82084f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.582951f, 0.07820261f, 1.22981f), Quaternion.Euler(0f, 51.82084f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.651051f, 0.07820261f, 1.23771f), Quaternion.Euler(0f, 117.0799f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.61725f, 0.1157026f, 1.23901f), Quaternion.Euler(0f, 106.7499f, 0f), itemRoot);
+                GameObject.Instantiate(IM.OD["PinnedGrenadeXM84"].GetGameObject(), new Vector3(-0.04095078f, 0.4530027f, 4.52161f), Quaternion.Euler(0f, 0f, 271.3958f), itemRoot);
+                GameObject.Instantiate(IM.OD["PinnedGrenadeXM84"].GetGameObject(), new Vector3(-0.2619514f, 0.4481025f, 4.35781f), Quaternion.Euler(359.111f, 39.55607f, 271.0761f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[608], new Vector3(-3.854952f, 0.1344025f, 0.6271096f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[608], new Vector3(13.58705f, 0.08240259f, -2.68019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(13.41505f, 0.1511025f, -0.4421903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(13.46805f, 0.1511025f, -0.2891903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(16.04205f, 0.05110264f, -1.50819f), Quaternion.Euler(45f, 27.66409f, 270.0001f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(-3.742851f, 0.1030025f, 0.8398097f), Quaternion.Euler(45f, 27.66409f, 270.0001f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(11.52605f, 0.1997025f, -2.04419f), Quaternion.Euler(0f, 10.17791f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(8.865049f, 0.5168025f, -4.50319f), Quaternion.Euler(0f, 10.17791f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(8.865049f, 0.5331025f, -4.43109f), Quaternion.Euler(14.04671f, 10.49514f, 2.574447f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(11.78305f, 0.1993027f, -2.02819f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(-4.93795f, 0.07120264f, 1.75981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(-4.906952f, 0.07120264f, 1.86681f), Quaternion.Euler(0f, 21.25007f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(11.44805f, 0.1927025f, -1.02219f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(11.40375f, 0.1927025f, -1.12049f), Quaternion.Euler(0f, 7.272392f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(12.21005f, 0.1927025f, -1.70619f), Quaternion.Euler(0f, 29.66055f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(16.37205f, 0.04950261f, -1.18019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(11.35405f, 0.04950261f, -2.26519f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(-4.762951f, 0.1073025f, 1.95981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(-4.830952f, 0.1073025f, 2.08881f), Quaternion.Euler(0f, 0f, 270.0742f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[628], new Vector3(-4.569649f, 0.0717026f, 1.841403f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[628], new Vector3(-4.73295f, 0.8293025f, 10.27161f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(0.3083f, 0.1314001f, 32.8823f), Quaternion.Euler(0f, 333.2294f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(-4.58f, 0.1506f, 1.13f), Quaternion.Euler(0f, 7.700641f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(11.6359f, 0.2268f, -1.4793f), Quaternion.Euler(0f, 7.700641f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[656], new Vector3(-0.6802502f, 0.3907025f, 3.97801f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[63], new Vector3(2.551049f, 0.2303026f, -5.279191f), Quaternion.Euler(0f, 302.7106f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[513], new Vector3(14.11435f, 0.3618026f, -0.3831904f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[594], new Vector3(13.90705f, 0.01460254f, -1.54019f), Quaternion.Euler(0f, 324.3596f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[93], new Vector3(0.9440489f, 0.00280261f, 15.13881f), Quaternion.Euler(0f, 327.9549f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[92], new Vector3(0.9536486f, 0.03980255f, 15.15481f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(-4.80595f, 0.01010263f, -7.312191f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(-0.6729507f, 0.3903027f, 4.17981f), Quaternion.Euler(0f, 314.1891f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(11.68705f, 0.1943026f, -1.87019f), Quaternion.Euler(0f, 68.00121f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(11.74695f, 0.1985025f, -1.77169f), Quaternion.Euler(0f, 30.20087f, 0f), itemRoot);
+                GameObject.Instantiate(IM.OD["CombatKnife"].GetGameObject(), new Vector3(-3.296951f, 0.03210258f, 0.4808097f), Quaternion.Euler(358.7422f, 318.3018f, 270.2902f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[568], new Vector3(16.10405f, 0.08310258f, -2.71819f), Quaternion.Euler(0f, 0f, 291.3354f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[567], new Vector3(0.6410007f, 0.03299999f, 15.506f), Quaternion.Euler(0f, 0f, 90f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[586], new Vector3(14.22805f, 0.03710258f, -0.2551903f), Quaternion.Euler(0f, 292.561f, 270f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[436], new Vector3(-4.393351f, 0.1706026f, 0.6231097f), Quaternion.Euler(270f, 271.9656f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[436], new Vector3(0.8820486f, 1.820103f, 4.05281f), Quaternion.Euler(272.9363f, 269.8858f, 89.99997f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[413], new Vector3(1.112049f, 0.1021026f, -1.00119f), Quaternion.Euler(82.1389f, 122.4497f, 8.344072f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[510], new Vector3(16.28405f, -0.04089737f, -2.97019f), Quaternion.Euler(270f, 261.68f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[511], new Vector3(12.28205f, -0.02909744f, -0.5291904f), Quaternion.Euler(270f, 299.4444f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[480], new Vector3(-6.411951f, 0.3561025f, -5.55619f), Quaternion.Euler(272.2496f, 4.349851E-05f, 160.9452f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[518], new Vector3(11.73005f, 0.06210256f, -4.120191f), Quaternion.Euler(0f, 49.91647f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[514], new Vector3(-4.182951f, 0.1709025f, 11.94181f), Quaternion.Euler(319.921f, 331.6011f, 3.973541f), itemRoot);
+                GameObject.Instantiate(IM.OD["MP5A4"].GetGameObject(), new Vector3(0.7950497f, 0.6081026f, 7.395809f), Quaternion.Euler(0f, 26.78772f, 270f), itemRoot);
+                GameObject.Instantiate(IM.OD["PP19Vityaz"].GetGameObject(), new Vector3(-0.3019505f, 0.1272025f, 3.753809f), Quaternion.Euler(0.1332195f, 79.69434f, 89.81905f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineMp530rndStraight"].GetGameObject(), new Vector3(0.2940483f, 0.4071026f, 4.71781f), Quaternion.Euler(0.1332366f, 104.3259f, 89.81904f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineMp530rndStraight"].GetGameObject(), new Vector3(0.3930492f, 0.4071026f, 4.71281f), Quaternion.Euler(0.08480537f, 90.13348f, 89.79189f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineMp530rndStraight"].GetGameObject(), new Vector3(0.5190487f, 0.4071026f, 4.64981f), Quaternion.Euler(0.1998774f, 130.7681f, 89.8973f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazinePP19Vityaz30rnd"].GetGameObject(), new Vector3(0.4270496f, 0.1021026f, 4.14481f), Quaternion.Euler(0.1820061f, 122.0492f, 89.86818f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazinePP19Vityaz30rnd"].GetGameObject(), new Vector3(0.3400497f, 0.1021026f, 4.13681f), Quaternion.Euler(0.1820061f, 122.0492f, 89.86818f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazinePP19Vityaz30rnd"].GetGameObject(), new Vector3(0.2160492f, 0.1021026f, 4.06881f), Quaternion.Euler(0.08534154f, 90.28258f, 89.79212f), itemRoot);
+                GameObject.Instantiate(IM.OD["M9A3"].GetGameObject(), new Vector3(11.14705f, 0.2051027f, -1.68719f), Quaternion.Euler(0.08534154f, 90.28258f, 89.79212f), itemRoot);
+                GameObject.Instantiate(IM.OD["CZ75Shadow"].GetGameObject(), new Vector3(15.75105f, 0.03310263f, -1.46119f), Quaternion.Euler(0.2009627f, 184.5467f, 90.10056f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(11.16405f, 0.2041025f, -1.83819f), Quaternion.Euler(0.02504972f, 74.36313f, 89.77668f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(11.22505f, 0.2041025f, -1.89619f), Quaternion.Euler(0.002482774f, 68.59618f, 89.7753f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(10.98705f, 0.2051027f, -1.68019f), Quaternion.Euler(359.7862f, 355.9008f, 89.93082f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(11.21405f, 0.2051027f, -1.50319f), Quaternion.Euler(359.776f, 333.3978f, 90.0179f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(11.30105f, 0.2051027f, -1.38819f), Quaternion.Euler(359.794f, 314.4457f, 90.08968f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(15.89105f, 0.03310263f, -1.35319f), Quaternion.Euler(0.1624631f, 201.6643f, 90.15526f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(15.87605f, 0.03310263f, -1.22519f), Quaternion.Euler(0.1624631f, 201.6643f, 90.15526f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(16.01305f, 0.03210258f, -1.44519f), Quaternion.Euler(0.126526f, 213.6976f, 90.18571f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(16.03705f, 0.03210258f, -1.57219f), Quaternion.Euler(0.1118922f, 218.1005f, 90.19489f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(16.33705f, 0.03110254f, -1.62219f), Quaternion.Euler(0.2137769f, 140.0049f, 89.93072f), itemRoot);
+                GameObject.Instantiate(IM.OD["M4A1Classic"].GetGameObject(), new Vector3(8.036049f, 0.4011025f, -4.61919f), Quaternion.Euler(0.06372909f, 231.488f, 90.21549f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineStanag2"].GetGameObject(), new Vector3(7.859049f, 0.4021025f, -4.53319f), Quaternion.Euler(0.05014384f, 235.0685f, 90.21905f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineStanag2"].GetGameObject(), new Vector3(7.761049f, 0.4021025f, -4.608191f), Quaternion.Euler(0.01802146f, 243.3631f, 90.22398f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineStanag2"].GetGameObject(), new Vector3(8.064049f, 0.4021025f, -4.38819f), Quaternion.Euler(359.7971f, 312.504f, 90.0966f), itemRoot);
+                GameObject.Instantiate(IM.OD["AK74N"].GetGameObject(), new Vector3(7.153049f, 0.4011025f, -5.07319f), Quaternion.Euler(359.9211f, 268.5323f, 90.21038f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineAK74N"].GetGameObject(), new Vector3(7.389049f, 0.4011025f, -4.85919f), Quaternion.Euler(359.9642f, 257.1226f, 90.22184f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineAK74N"].GetGameObject(), new Vector3(7.376049f, 0.4011025f, -4.76219f), Quaternion.Euler(0.009509331f, 245.5376f, 90.2245f), itemRoot);
+                GameObject.Instantiate(IM.OD["MagazineAK74N"].GetGameObject(), new Vector3(7.210049f, 0.4011025f, -4.81319f), Quaternion.Euler(359.8211f, 300.7395f, 90.13593f), itemRoot);
+                GameObject.Instantiate(IM.OD["PinnedGrenadeM67"].GetGameObject(), new Vector3(-0.3319511f, 0.4461026f, 4.372809f), Quaternion.Euler(359.4122f, 24.90105f, 271.266f), itemRoot);
+                GameObject.Instantiate(IM.OD["PinnedGrenadeF1Russia"].GetGameObject(), new Vector3(-0.3249512f, 0.4461026f, 4.47281f), Quaternion.Euler(359.9848f, 0.6241663f, 271.3957f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[711], new Vector3(-3.788952f, 0.03410256f, 1.97721f), Quaternion.Euler(0f, 348.3584f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[706], new Vector3(10.97705f, 0.04020262f, -1.23219f), Quaternion.Euler(0f, 97.96564f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(7.163049f, 0.03710258f, -4.63719f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(4.257049f, 0.3941026f, -5.22419f), Quaternion.Euler(0f, 70.93663f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(4.222049f, 0.3941026f, -5.41819f), Quaternion.Euler(90f, 102f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.5500488f, 0.03410256f, 33.48181f), Quaternion.Euler(0f, 343.748f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.8410492f, 0.1321025f, 33.00081f), Quaternion.Euler(0f, 93.00641f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[633], new Vector3(-0.3458996f, 0.09630001f, 32.2702f), Quaternion.Euler(332.3804f, 73.96642f, 1.927157E-06f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[633], new Vector3(-0.2215977f, 0.03030002f, 32.30628f), Quaternion.Euler(0f, 345.1047f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[182], new Vector3(14.78605f, 0.002902627f, -0.4561903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                GameObject.Instantiate(Mod.itemPrefabs[180], new Vector3(-8.410952f, 0.01550257f, -7.51019f), Quaternion.Euler(0f, 56.62873f, 0f), itemRoot);
 
                 // Instantiate areas
                 baseAreaManagers = new List<EFM_BaseAreaManager>();
@@ -776,7 +848,7 @@ namespace EFM
                 }
 
                 // Instantiate other
-                baseInventory = new Dictionary<string, int>();
+                Mod.baseInventory = new Dictionary<string, int>();
                 baseInventoryObjects = new Dictionary<string, List<GameObject>>();
                 traderStatuses = new EFM_TraderStatus[8];
                 for (int i = 0; i < 8; i++)
@@ -790,7 +862,7 @@ namespace EFM
             }
 
             // Load player status
-            Mod.level = (float)data["level"];
+            Mod.level = (int)data["level"];
             Mod.health = data["health"].ToObject<float[]>();
             Mod.hydration = (float)data["hydration"];
             Mod.maxHydration = (float)data["maxHydration"];
@@ -881,13 +953,13 @@ namespace EFM
 
         public void UpdateBaseInventory()
         {
-            if(baseInventory == null)
+            if(Mod.baseInventory == null)
             {
-                baseInventory = new Dictionary<string, int>();
+                Mod.baseInventory = new Dictionary<string, int>();
                 baseInventoryObjects = new Dictionary<string, List<GameObject>>();
             }
 
-            baseInventory.Clear();
+            Mod.baseInventory.Clear();
             baseInventoryObjects.Clear();
 
             Transform itemsRoot = transform.GetChild(2);
@@ -900,21 +972,20 @@ namespace EFM
 
         private void AddToBaseInventory(Transform item)
         {
-            // TODO: Check for stack in stackable items
+            EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
-            if (baseInventory.ContainsKey(itemID))
+            if (Mod.baseInventory.ContainsKey(itemID))
             {
-                baseInventory[itemID] += 1;
+                Mod.baseInventory[itemID] += customItemWrapper != null ? customItemWrapper.stack : 1;
                 baseInventoryObjects[itemID].Add(item.gameObject);
             }
             else
             {
-                baseInventory.Add(itemID, 1);
+                Mod.baseInventory.Add(itemID, customItemWrapper != null ? customItemWrapper.stack : 1);
                 baseInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
             }
 
             // Check for more items that may be contained inside this one
-            EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             if(customItemWrapper != null && customItemWrapper.itemObjectsRoot != null)
             {
                 foreach (Transform innerItem in customItemWrapper.itemObjectsRoot)
@@ -924,7 +995,7 @@ namespace EFM
             }
         }
 
-        private GameObject LoadSavedItem(Transform parent, JToken item)
+        private GameObject LoadSavedItem(Transform parent, JToken item, int locationIndex = -1)
         {
             Mod.instance.LogInfo("Loading item "+item["PhysicalObject"]["ObjectWrapper"]["ItemID"] +", on parent "+parent.name);
             int parsedID = -1;
@@ -1163,6 +1234,12 @@ namespace EFM
                 customItemWrapper.itemType = (Mod.ItemType)(int)item["itemType"];
                 customItemWrapper.amount = (int)item["amount"];
                 customItemWrapper.looted = (bool)item["looted"];
+                customItemWrapper.insured = (bool)item["insured"];
+                if(locationIndex != -1)
+                {
+                    customItemWrapper.takeCurrentLocation = false;
+                    customItemWrapper.locationIndex = locationIndex;
+                }
                 Mod.instance.LogInfo("Has custom item wrapper with type: "+((Mod.ItemType)(int)item["itemType"]));
 
                 // Armor
@@ -1171,12 +1248,25 @@ namespace EFM
                     Mod.instance.LogInfo("is armor");
                     customItemWrapper.armor = (float)item["PhysicalObject"]["armor"];
                     customItemWrapper.maxArmor = (float)item["PhysicalObject"]["maxArmor"];
+
+                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    {
+                        customItemWrapper.takeCurrentLocation = false;
+                        customItemWrapper.locationIndex = 0;
+                    }
                 }
 
                 // Rig
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
                 {
                     Mod.instance.LogInfo("is rig");
+
+                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    {
+                        customItemWrapper.takeCurrentLocation = false;
+                        customItemWrapper.locationIndex = 0;
+                    }
+
                     if (item["PhysicalObject"]["quickBeltSlotContents"] != null)
                     {
                         JArray loadedQBContents = (JArray)item["PhysicalObject"]["quickBeltSlotContents"];
@@ -1188,7 +1278,7 @@ namespace EFM
                             }
                             else
                             {
-                                customItemWrapper.itemsInSlots[j] = LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedQBContents[j]);
+                                customItemWrapper.itemsInSlots[j] = LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedQBContents[j], customItemWrapper.locationIndex);
                             }
                         }
                     }
@@ -1198,12 +1288,19 @@ namespace EFM
                 if (customItemWrapper.itemType == Mod.ItemType.Backpack)
                 {
                     Mod.instance.LogInfo("is backpack");
+
+                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    {
+                        customItemWrapper.takeCurrentLocation = false;
+                        customItemWrapper.locationIndex = 0;
+                    }
+
                     if (item["PhysicalObject"]["backpackContents"] != null)
                     {
                         JArray loadedBPContents = (JArray)item["PhysicalObject"]["backpackContents"];
                         for (int j = 0; j < loadedBPContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedBPContents[j]);
+                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedBPContents[j], customItemWrapper.locationIndex);
                         }
                     }
                 }
@@ -1212,12 +1309,19 @@ namespace EFM
                 if (customItemWrapper.itemType == Mod.ItemType.Container)
                 {
                     Mod.instance.LogInfo("is container");
+
+                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    {
+                        customItemWrapper.takeCurrentLocation = false;
+                        customItemWrapper.locationIndex = 0;
+                    }
+
                     if (item["PhysicalObject"]["containerContents"] != null)
                     {
                         JArray loadedContainerContents = (JArray)item["PhysicalObject"]["containerContents"];
                         for (int j = 0; j < loadedContainerContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedContainerContents[j]);
+                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedContainerContents[j], customItemWrapper.locationIndex);
                         }
                     }
                 }
@@ -1226,12 +1330,19 @@ namespace EFM
                 if (customItemWrapper.itemType == Mod.ItemType.Pouch)
                 {
                     Mod.instance.LogInfo("is Pouch");
+
+                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    {
+                        customItemWrapper.takeCurrentLocation = false;
+                        customItemWrapper.locationIndex = 0;
+                    }
+
                     if (item["PhysicalObject"]["containerContents"] != null)
                     {
                         JArray loadedPouchContents = (JArray)item["PhysicalObject"]["containerContents"];
                         for (int j = 0; j < loadedPouchContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedPouchContents[j]);
+                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedPouchContents[j], customItemWrapper.locationIndex);
                         }
                     }
                 }
@@ -1258,14 +1369,64 @@ namespace EFM
                 //}
 
                 // Key
-                //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
+                //if (customItemWrapper.itemType == Mod.ItemType.Key)
                 //{
-                //    Mod.instance.LogInfo("is Consumable");
+                //    Mod.instance.LogInfo("is Key");
                 //}
+
+                // Earpiece
+                if (customItemWrapper.itemType == Mod.ItemType.Earpiece)
+                {
+                    Mod.instance.LogInfo("is Earpiece");
+
+                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    {
+                        customItemWrapper.takeCurrentLocation = false;
+                        customItemWrapper.locationIndex = 0;
+                    }
+                }
+
+                // Face Cover
+                if (customItemWrapper.itemType == Mod.ItemType.FaceCover)
+                {
+                    Mod.instance.LogInfo("is Face Cover");
+
+                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    {
+                        customItemWrapper.takeCurrentLocation = false;
+                        customItemWrapper.locationIndex = 0;
+                    }
+                }
+
+                // Eyewear
+                if (customItemWrapper.itemType == Mod.ItemType.Eyewear)
+                {
+                    Mod.instance.LogInfo("is Eyewear");
+
+                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    {
+                        customItemWrapper.takeCurrentLocation = false;
+                        customItemWrapper.locationIndex = 0;
+                    }
+                }
+
+                // Headwear
+                if (customItemWrapper.itemType == Mod.ItemType.Headwear)
+                {
+                    Mod.instance.LogInfo("is Headwear");
+
+                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    {
+                        customItemWrapper.takeCurrentLocation = false;
+                        customItemWrapper.locationIndex = 0;
+                    }
+                }
 
                 // Equip the item if it has an equip slot
                 if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                 {
+                    customItemWrapper.takeCurrentLocation = false;
+
                     FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[(int)item["PhysicalObject"]["equipSlot"]];
                     itemPhysicalObject.SetQuickBeltSlot(equipSlot);
                     itemPhysicalObject.SetParentage(equipSlot.QuickbeltRoot);
@@ -1287,12 +1448,17 @@ namespace EFM
                 }
             }
 
-            // Vanilla item
-            //EFM_VanillaItemDescriptor vanillaItemDescriptor = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
-            //if(vanillaItemDescriptor != null)
-            //{
-            //    vanillaItemDescriptor.looted = (bool)item["looted"];
-            //}
+            EFM_VanillaItemDescriptor vanillaItemDescriptor = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+            if (vanillaItemDescriptor != null)
+            {
+                if (locationIndex != -1)
+                {
+                    vanillaItemDescriptor.takeCurrentLocation = false;
+                    vanillaItemDescriptor.locationIndex = locationIndex;
+                }
+                vanillaItemDescriptor.looted = (bool)item["looted"];
+                vanillaItemDescriptor.insured = (bool)item["insured"];
+            }
 
             // GameObject
             itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
@@ -1888,11 +2054,9 @@ namespace EFM
             {
                 if (Mod.equipmentSlots[i] != null)
                 {
-                    // Unlike normal rig slots, items in equip slots are parented to their slots, so the destruction of slot will destroy the item
-                    Destroy(Mod.equipmentSlots[i].gameObject);
+                    Destroy(Mod.equipmentSlots[i].CurObject.gameObject);
                 }
             }
-            Mod.equipmentSlots.Clear();
             GM.CurrentPlayerBody.ConfigureQuickbelt(-2); // -2 in order to detroy the objects on belt as well
         }
 
@@ -1993,21 +2157,12 @@ namespace EFM
 
             // Save equipment
             Mod.instance.LogInfo("Saving equipment");
-            if (EFM_EquipmentSlot.currentRig != null)
+            foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
             {
-                SaveItem(saveItems, EFM_EquipmentSlot.currentRig.transform);
-            }
-            if (EFM_EquipmentSlot.currentHelmet != null)
-            {
-                SaveItem(saveItems, EFM_EquipmentSlot.currentHelmet.transform);
-            }
-            if (EFM_EquipmentSlot.currentArmor != null && (EFM_EquipmentSlot.currentRig == null || EFM_EquipmentSlot.currentRig.itemType != Mod.ItemType.ArmoredRig))
-            {
-                SaveItem(saveItems, EFM_EquipmentSlot.currentArmor.transform);
-            }
-            if (EFM_EquipmentSlot.currentBackpack != null)
-            {
-                SaveItem(saveItems, EFM_EquipmentSlot.currentBackpack.transform);
+                if (equipSlot.CurObject != null)
+                {
+                    SaveItem(saveItems, equipSlot.CurObject.transform);
+                }
             }
 
             // Replace data
@@ -2243,9 +2398,11 @@ namespace EFM
                 savedItem["itemType"] = (int)customItemWrapper.itemType;
                 savedItem["PhysicalObject"]["equipSlot"] = -1;
                 savedItem["amount"] = customItemWrapper.amount;
+                savedItem["looted"] = customItemWrapper.looted;
+                savedItem["insured"] = customItemWrapper.insured;
 
                 // Armor
-                if(customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.BodyArmor)
+                if (customItemWrapper.itemType == Mod.ItemType.BodyArmor)
                 {
                     Mod.instance.LogInfo("Item is armor");
 
@@ -2253,42 +2410,19 @@ namespace EFM
                     if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.Equals(customItemWrapper))
                     {
                         // Find its equip slot index
-                        for(int i=0; i < Mod.equipmentSlots.Count; ++i)
-                        {
-                            if (Mod.equipmentSlots[i].CurObject != null)
-                            {
-                                EFM_CustomItemWrapper equipCustomItemWrapper = Mod.equipmentSlots[i].CurObject.GetComponent<EFM_CustomItemWrapper>();
-                                if (equipCustomItemWrapper != null && equipCustomItemWrapper.Equals(customItemWrapper))
-                                {
-                                    savedItem["PhysicalObject"]["equipSlot"] = i;
-                                    break;
-                                }
-                            }
-                        }
+                        savedItem["PhysicalObject"]["equipSlot"] = 1;
                     }
                     savedItem["PhysicalObject"]["armor"] = customItemWrapper.armor;
                     savedItem["PhysicalObject"]["maxArmor"] = customItemWrapper.maxArmor;
                 }
 
                 // Rig
-                if(customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
+                if(customItemWrapper.itemType == Mod.ItemType.Rig)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentRig != null && EFM_EquipmentSlot.currentRig.Equals(customItemWrapper))
                     {
-                        // Find its equip slot index
-                        for (int i = 0; i < Mod.equipmentSlots.Count; ++i)
-                        {
-                            if (Mod.equipmentSlots[i].CurObject != null)
-                            {
-                                EFM_CustomItemWrapper equipCustomItemWrapper = Mod.equipmentSlots[i].CurObject.GetComponent<EFM_CustomItemWrapper>();
-                                if (equipCustomItemWrapper != null && equipCustomItemWrapper.Equals(customItemWrapper))
-                                {
-                                    savedItem["PhysicalObject"]["equipSlot"] = i;
-                                    break;
-                                }
-                            }
-                        }
+                        savedItem["PhysicalObject"]["equipSlot"] = 6;
                     }
                     if(savedItem["PhysicalObject"]["quickBeltSlotContents"] == null)
                     {
@@ -2308,6 +2442,34 @@ namespace EFM
                     }
                 }
 
+                // ArmoredRig
+                if(customItemWrapper.itemType == Mod.ItemType.ArmoredRig)
+                {
+                    // If this is an equipment piece we are currently wearing
+                    if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.Equals(customItemWrapper))
+                    {
+                        savedItem["PhysicalObject"]["equipSlot"] = 1;
+                    }
+                    if(savedItem["PhysicalObject"]["quickBeltSlotContents"] == null)
+                    {
+                        savedItem["PhysicalObject"]["quickBeltSlotContents"] = new JArray();
+                    }
+                    JArray saveQBContents = (JArray)savedItem["PhysicalObject"]["quickBeltSlotContents"];
+                    for (int i=0; i < customItemWrapper.itemsInSlots.Length; ++i)
+                    {
+                        if(customItemWrapper.itemsInSlots[i] == null)
+                        {
+                            saveQBContents.Add(null);
+                        }
+                        else
+                        {
+                            SaveItem(saveQBContents, customItemWrapper.itemsInSlots[i].transform, null, i);
+                        }
+                    }
+                    savedItem["PhysicalObject"]["armor"] = customItemWrapper.armor;
+                    savedItem["PhysicalObject"]["maxArmor"] = customItemWrapper.maxArmor;
+                }
+
                 // Backpack
                 if(customItemWrapper.itemType == Mod.ItemType.Backpack)
                 {
@@ -2316,22 +2478,7 @@ namespace EFM
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentBackpack != null && EFM_EquipmentSlot.currentBackpack.Equals(customItemWrapper))
                     {
-                        Mod.instance.LogInfo("is equipped");
-                        // Find its equip slot index
-                        //TODO: for all wore items we could keep equip slot in customitemwrapper since all equppable items are custom
-                        for (int i = 0; i < Mod.equipmentSlots.Count; ++i)
-                        {
-                            if (Mod.equipmentSlots[i].CurObject != null)
-                            {
-                                EFM_CustomItemWrapper equipCustomItemWrapper = Mod.equipmentSlots[i].CurObject.GetComponent<EFM_CustomItemWrapper>();
-                                if (equipCustomItemWrapper != null && equipCustomItemWrapper.Equals(customItemWrapper))
-                                {
-                                    Mod.instance.LogInfo("in slot " + i);
-                                    savedItem["PhysicalObject"]["equipSlot"] = i;
-                                    break;
-                                }
-                            }
-                        }
+                        savedItem["PhysicalObject"]["equipSlot"] = 0;
                     }
                     if(savedItem["PhysicalObject"]["backpackContents"] == null)
                     {
@@ -2370,22 +2517,7 @@ namespace EFM
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentPouch != null && EFM_EquipmentSlot.currentPouch.Equals(customItemWrapper))
                     {
-                        Mod.instance.LogInfo("is equipped");
-                        // Find its equip slot index
-                        //TODO: for all wore items we could keep equip slot in customitemwrapper since all equppable items are custom
-                        for (int i = 0; i < Mod.equipmentSlots.Count; ++i)
-                        {
-                            if (Mod.equipmentSlots[i].CurObject != null)
-                            {
-                                EFM_CustomItemWrapper equipCustomItemWrapper = Mod.equipmentSlots[i].CurObject.GetComponent<EFM_CustomItemWrapper>();
-                                if (equipCustomItemWrapper != null && equipCustomItemWrapper.Equals(customItemWrapper))
-                                {
-                                    Mod.instance.LogInfo("in slot " + i);
-                                    savedItem["PhysicalObject"]["equipSlot"] = i;
-                                    break;
-                                }
-                            }
-                        }
+                        savedItem["PhysicalObject"]["equipSlot"] = 7;
                     }
                     if (savedItem["PhysicalObject"]["containerContents"] == null)
                     {
@@ -2399,6 +2531,60 @@ namespace EFM
                     }
                 }
 
+                // Helmet
+                if (customItemWrapper.itemType == Mod.ItemType.Helmet)
+                {
+                    Mod.instance.LogInfo("Item is Helmet");
+
+                    // If this is an equipment piece we are currently wearing
+                    if (EFM_EquipmentSlot.currentHeadwear != null && EFM_EquipmentSlot.currentHeadwear.Equals(customItemWrapper))
+                    {
+                        // Find its equip slot index
+                        savedItem["PhysicalObject"]["equipSlot"] = 3;
+                    }
+                    savedItem["PhysicalObject"]["armor"] = customItemWrapper.armor;
+                    savedItem["PhysicalObject"]["maxArmor"] = customItemWrapper.maxArmor;
+                }
+
+                // Earpiece
+                if (customItemWrapper.itemType == Mod.ItemType.Earpiece)
+                {
+                    Mod.instance.LogInfo("Item is Earpiece");
+
+                    // If this is an equipment piece we are currently wearing
+                    if (EFM_EquipmentSlot.currentEarpiece != null && EFM_EquipmentSlot.currentEarpiece.Equals(customItemWrapper))
+                    {
+                        // Find its equip slot index
+                        savedItem["PhysicalObject"]["equipSlot"] = 2;
+                    }
+                }
+
+                // FaceCover
+                if (customItemWrapper.itemType == Mod.ItemType.FaceCover)
+                {
+                    Mod.instance.LogInfo("Item is FaceCover");
+
+                    // If this is an equipment piece we are currently wearing
+                    if (EFM_EquipmentSlot.currentFaceCover != null && EFM_EquipmentSlot.currentFaceCover.Equals(customItemWrapper))
+                    {
+                        // Find its equip slot index
+                        savedItem["PhysicalObject"]["equipSlot"] = 4;
+                    }
+                }
+
+                // Eyewear
+                if (customItemWrapper.itemType == Mod.ItemType.Eyewear)
+                {
+                    Mod.instance.LogInfo("Item is eyewear");
+
+                    // If this is an equipment piece we are currently wearing
+                    if (EFM_EquipmentSlot.currentEyewear != null && EFM_EquipmentSlot.currentEyewear.Equals(customItemWrapper))
+                    {
+                        // Find its equip slot index
+                        savedItem["PhysicalObject"]["equipSlot"] = 5;
+                    }
+                }
+
                 // AmmoBox
                 //if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
                 //{
@@ -2406,7 +2592,7 @@ namespace EFM
                 //}
 
                 // Money
-                if(customItemWrapper.itemType == Mod.ItemType.Money)
+                if (customItemWrapper.itemType == Mod.ItemType.Money)
                 {
                     Mod.instance.LogInfo("Item is money");
 
@@ -2431,6 +2617,7 @@ namespace EFM
             if (vanillaItemDescriptor != null)
             {
                 savedItem["looted"] = vanillaItemDescriptor.looted;
+                savedItem["insured"] = vanillaItemDescriptor.insured;
             }
 
             listToAddTo.Add(savedItem);
@@ -2505,6 +2692,11 @@ namespace EFM
         private void SaveDataToFile()
         {
             File.WriteAllText("BepInEx/Plugins/EscapeFromMeatov/" + (Mod.saveSlotIndex == 5 ? "AutoSave" : "Slot" + Mod.saveSlotIndex) + ".sav", data.ToString());
+        }
+
+        private void SetupPlayerStatus()
+        {
+
         }
     }
 }

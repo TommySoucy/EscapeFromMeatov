@@ -50,6 +50,9 @@ namespace EFM
         public static void LoadBase(int slotIndex = -1, bool latest = false)
         {
             Mod.instance.LogInfo("Loadbase called");
+
+            Mod.currentLocationIndex = 1;
+
             // Load base asset bundle
             if (!hideoutLoaded)
             {

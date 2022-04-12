@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace EFM
 {
-	public class EFM_CustomItemWrapper : MonoBehaviour
+	public class EFM_CustomItemWrapper : MonoBehaviour, EFM_Describable
 	{
 		public FVRPhysicalObject physicalObject;
 
@@ -14,6 +14,25 @@ namespace EFM
 		public string parent;
 		public string ID;
 		public bool looted;
+		public int lootExperience;
+		public string itemName;
+		public string description;
+		private DescriptionPack descriptionPack;
+		public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
+		public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid. This is to keep track of where an item is in general
+		public EFM_DescriptionManager descriptionManager; // The current description manager displaying this item's description
+		private bool _insured;
+		public bool insured 
+		{
+			get { return _insured; }
+            set { 
+				_insured = value;
+				if (descriptionManager != null)
+				{
+					descriptionManager.SetDescriptionPack();
+				}
+			}
+		}
 
 		// Equipment
 		// 0: Open (Model should be as orginal in tarkov), 1: ClosedFull (Closed but only folded to the point that any container/armor is not folded), 2: ClosedEmpty (Folded and flattened as much as is realistic)
@@ -21,6 +40,12 @@ namespace EFM
 		public GameObject[] models;
 		public GameObject[] interactiveSets;
 		public float[] volumes;
+
+		// Helmet
+		public bool blocksEarpiece;
+		public bool blocksEyewear;
+		public bool blocksFaceCover;
+		public bool blocksHeadwear;
 
 		// Armor
 		public bool broken;
@@ -46,7 +71,18 @@ namespace EFM
 		public GameObject mainContainer;
 		public Renderer[] mainContainerRenderers;
 		public float maxVolume;
-		public float containingVolume;
+		private float _containingVolume;
+		public float containingVolume 
+		{ 
+			get { return _containingVolume; }
+			set {
+				_containingVolume = value;
+				if (descriptionManager != null)
+				{
+					descriptionManager.SetDescriptionPack();
+				}
+			}
+		}
 		public class ResetColPair
 		{
 			public FVRPhysicalObject physObj;
@@ -61,23 +97,34 @@ namespace EFM
 
 		// Stack
 		private int _stack;
-		public int stack {
-			set { _stack = value; UpdateStackModel(); }
-			get { return _stack; } 
+		public int stack
+		{
+			get { return _stack; }
+			set { 
+				_stack = value;
+				UpdateStackModel();
+				if (descriptionManager != null)
+				{
+					descriptionManager.SetDescriptionPack();
+				}
+			}
 		}
 		public int maxStack;
 		public GameObject[] stackTriggers;
 
-		private void Update()
-		{
-			if (physicalObject.m_hand != null)
-			{
-				TakeInput();
-			}
-		}
-
 		// Amount
-		public int amount;
+		private int _amount;
+		public int amount 
+		{ 
+			get { return _amount; } 
+			set {
+				_amount = value;
+				if(descriptionManager != null)
+                {
+					descriptionManager.SetDescriptionPack();
+                }
+			} 
+		}
 		public int maxAmount;
 
 		// Consumable
@@ -88,6 +135,29 @@ namespace EFM
 		private float consumableTimer;
 		private bool validConsumePress;
         public int targettedPart = -1;
+
+		private void Start()
+		{
+			if (takeCurrentLocation)
+			{
+				locationIndex = Mod.currentLocationIndex;
+			}
+
+			descriptionPack = new DescriptionPack();
+			descriptionPack.isCustom = true;
+			descriptionPack.customItem = this;
+			descriptionPack.name = itemName;
+			descriptionPack.description = description;
+			descriptionPack.icon = Mod.itemIcons[ID];
+		}
+
+		private void Update()
+		{
+			if (physicalObject.m_hand != null)
+			{
+				TakeInput();
+			}
+		}
 
 		public void SetContainerHovered(bool hovered)
 		{
@@ -232,10 +302,25 @@ namespace EFM
 							switch (itemType)
 							{
 								case Mod.ItemType.Consumable:
-									// Increment timer
-									consumableTimer += Time.deltaTime;
-									// TODO: Update UI depending on timer/usetime with an current amount/total so we know exactly how much we use if applicable
-									validConsumePress = true;
+									bool otherHandConsuming = false;
+                                    if (!validConsumePress)
+                                    {
+										otherHandConsuming = hand.OtherHand.GetComponent<EFM_Hand>().consuming;
+                                    }
+									if (!otherHandConsuming)
+									{
+										hand.GetComponent<EFM_Hand>().consuming = true;
+
+										// Increment timer
+										consumableTimer += Time.deltaTime;
+
+										float use = consumableTimer / useTime;
+										Mod.consumeUIText.text = ((int)(use * amountRate)).ToString() + "/" + amountRate;
+										Mod.consumeUI.transform.position = hand.transform.position;
+										Mod.consumeUI.transform.rotation = hand.transform.rotation;
+										Mod.consumeUI.SetActive(true);
+										validConsumePress = true;
+									}
 									break;
 								default:
 									break;
@@ -245,6 +330,9 @@ namespace EFM
                         {
 							// Cancel consumable timer
 							consumableTimer = 0;
+							validConsumePress = false;
+							hand.GetComponent<EFM_Hand>().consuming = false;
+							Mod.consumeUI.SetActive(false);
 						}
 					}
 				}
@@ -256,8 +344,10 @@ namespace EFM
                     if (validConsumePress)
                     {
 						validConsumePress = false;
+						hand.GetComponent<EFM_Hand>().consuming = false;
+						Mod.consumeUI.SetActive(false);
 
-						if(amountRate == -1)
+						if (amountRate == -1)
                         {
 							if(maxAmount > 0)
 							{
@@ -855,11 +945,11 @@ namespace EFM
 				else if (itemType == Mod.ItemType.Backpack)
 				{
 					SetMode(0);
-					SetContainerOpen(true, inHand, isRightHand);
+					SetContainerOpen(true, isRightHand);
 				}
 				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
 				{
-					SetContainerOpen(true, inHand, isRightHand);
+					SetContainerOpen(true, isRightHand);
 				}
 			}
 			else
@@ -887,7 +977,7 @@ namespace EFM
 				else if (itemType == Mod.ItemType.Backpack)
 				{
 					SetMode(containingVolume > 0 ? 1 : 2);
-					SetContainerOpen(false, inHand, isRightHand);
+					SetContainerOpen(false, isRightHand);
 				}
 				else if (itemType == Mod.ItemType.BodyArmor)
 				{
@@ -895,7 +985,7 @@ namespace EFM
 				}
 				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
 				{
-					SetContainerOpen(false, inHand, isRightHand);
+					SetContainerOpen(false, isRightHand);
 				}
 			}
 		}
@@ -920,20 +1010,16 @@ namespace EFM
 					interactiveSets[i].SetActive(i == index);
 				}
 			}
+
+			if (descriptionManager != null)
+			{
+				descriptionManager.SetDescriptionPack();
+			}
 		}
 
 		private void OpenRig(bool processslots, bool isRightHand = false)
 		{
 			configurationRoot.gameObject.SetActive(true);
-
-			if (processslots)
-			{
-				// Deactivate equip slots on that hand so they dont interfere with rig's
-				for (int i = (isRightHand ? 0 : 3); i < (isRightHand ? 4 : 8); ++i)
-				{
-					Mod.equipmentSlots[i].gameObject.SetActive(false);
-				}
-			}
 
 			// Set active slots
 			Mod.otherActiveSlots.Add(rigSlots);
@@ -974,15 +1060,6 @@ namespace EFM
 		{
 			configurationRoot.gameObject.SetActive(false);
 
-			if (processslots)
-			{
-				// Activate equip slots on that hand in case they were disabled when rig was open
-				for (int i = (isRightHand ? 0 : 3); i < (isRightHand ? 4 : 8); ++i)
-				{
-					Mod.equipmentSlots[i].gameObject.SetActive(true);
-				}
-			}
-
 			// Remove from other active slots
 			Mod.otherActiveSlots.RemoveAt(activeSlotsSetIndex);
 
@@ -998,17 +1075,8 @@ namespace EFM
 			GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
 		}
 
-		private void SetContainerOpen(bool open, bool processslots, bool isRightHand = false)
+		private void SetContainerOpen(bool open, bool isRightHand = false)
 		{
-			if (processslots)
-			{
-				// Deactivate equip slots on that hand so they dont interfere with container
-				for (int i = (isRightHand ? 0 : 3); i < (isRightHand ? 4 : 8); ++i)
-				{
-					Mod.equipmentSlots[i].gameObject.SetActive(!open);
-				}
-			}
-
 			mainContainer.SetActive(open);
 			itemObjectsRoot.gameObject.SetActive(open);
 		}
@@ -1028,6 +1096,39 @@ namespace EFM
 			{
 				SetMode(2);
 			}
+        }
+	
+		public DescriptionPack GetDescriptionPack()
+        {
+			descriptionPack.amount = Mod.baseInventory[ID] + Mod.playerInventory[ID];
+			for(int i=0; i < 22; ++i)
+			{
+				if (Mod.requiredPerArea[i] != null && Mod.requiredPerArea[i].ContainsKey(ID)) 
+				{
+					descriptionPack.amountRequired += Mod.requiredPerArea[i][ID];
+					descriptionPack.amountRequiredPerArea[i] = Mod.requiredPerArea[i][ID];
+
+                }
+                else
+				{
+					descriptionPack.amountRequiredPerArea[i] = 0;
+				}
+			}
+			descriptionPack.onWishlist = Mod.wishList.Contains(ID);
+			descriptionPack.insured = insured;
+			if (maxStack > 1)
+			{
+				descriptionPack.stack = stack;
+				descriptionPack.maxStack = maxStack;
+			}
+			else if(maxAmount > 0)
+			{
+				descriptionPack.stack = amount;
+				descriptionPack.maxStack = maxAmount;
+			}
+			descriptionPack.amountRequiredQuest = Mod.requiredForQuest[ID];
+
+			return descriptionPack;
         }
 	}
 }

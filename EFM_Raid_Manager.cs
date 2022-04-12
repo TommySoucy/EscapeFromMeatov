@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -27,27 +28,52 @@ namespace EFM
         private float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
         private float[] currentHealthRates;
         private float[] currentNonLethalHealthRates;
-        private float energyLoop = 0;
-        private float hydrationLoop = 0;
         private float currentEnergyRate = 0;
         private float currentHydrationRate = 0;
+
+        private List<GameObject> extractionCards;
 
         private void Update()
         {
             if(currentExtraction != null && currentExtraction.active)
             {
-                inExtractionLastFrame = true;
-
-                extractionTimer += UnityEngine.Time.deltaTime;
-
-                // TODO: update extraction timer display (also enable it if necessary)
-
-                if(extractionTimer >= extractionTime)
+                string missingRequirement = currentExtraction.extraction.RequirementsMet();
+                if (missingRequirement.Equals("none") || missingRequirement.Equals(""))
                 {
-                    Mod.justFinishedRaid = true;
-                    Mod.raidState = EFM_Base_Manager.FinishRaidState.Survived; // TODO: Will have to call with runthrough if exp is less than threshold
+                    // Make sure the requirement text is disabled if 
+                    if(missingRequirement.Equals("none"))
+                    {
+                        currentExtraction.extraction.card.transform.GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
+                    }
 
-                    EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
+                    inExtractionLastFrame = true;
+
+                    extractionTimer += UnityEngine.Time.deltaTime;
+
+                    if (!Mod.extractionUI.activeSelf)
+                    {
+                        Mod.extractionUI.SetActive(true);
+                    }
+                    Mod.extractionUI.transform.localPosition = GM.CurrentPlayerBody.Head.localPosition;
+                    Mod.extractionUI.transform.GetChild(0).localPosition = Vector3.forward;
+                    Mod.extractionUIText.text = "Extraction in " + Mathf.Min(0, extractionTime - extractionTimer);
+
+                    if (extractionTimer >= extractionTime)
+                    {
+                        Mod.justFinishedRaid = true;
+                        Mod.raidState = EFM_Base_Manager.FinishRaidState.Survived; // TODO: Will have to call with runthrough if exp is less than threshold
+                        //TODO: Give experience depending on raid state
+
+                        EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
+                    }
+                }
+                else
+                {
+                    // Update extraction card requirement text with requirement of this extract
+                    currentExtraction.extraction.card.transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
+                    Text requirementText = currentExtraction.extraction.card.transform.GetChild(0).GetChild(1).GetComponent<Text>();
+                    requirementText.color = Color.red;
+                    requirementText.text = missingRequirement;
                 }
             }
             else if (inExtractionLastFrame)
@@ -55,7 +81,7 @@ namespace EFM
                 extractionTimer = 0;
                 inExtractionLastFrame = false;
 
-                // TODO: update extraction timer display (disable it)
+                Mod.extractionUI.SetActive(false);
             }
 
             UpdateEffects();
@@ -782,6 +808,7 @@ namespace EFM
         {
             // Init player state
             currentHealthRates = new float[7];
+            currentNonLethalHealthRates = new float[7];
 
             // Init effects that were already active before the raid to make sure their effects are applied
             InitEffects();
@@ -854,6 +881,24 @@ namespace EFM
             else
             {
                 Mod.instance.LogError("No minimum extraction found");
+            }
+
+            // Init extraction cards
+            Transform extractionParent = Mod.playerStatusUI.transform.GetChild(0).GetChild(9);
+            extractionCards = new List<GameObject>();
+            for(int i=0; i < possibleExtractions.Count; ++i)
+            {
+                GameObject currentExtractionCard = Instantiate(Mod.extractionCardPrefab, extractionParent);
+                extractionCards.Add(currentExtractionCard);
+
+                currentExtractionCard.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = String.Format("EXFIL{0:00} {1}", i, possibleExtractions[i].name);
+                if(possibleExtractions[i].times != null && possibleExtractions[i].times.Count > 0||
+                   possibleExtractions[i].raidTimes != null && possibleExtractions[i].raidTimes.Count > 0)
+                {
+                    currentExtractionCard.transform.GetChild(1).GetChild(0).gameObject.SetActive(true);
+                }
+
+                possibleExtractions[i].card = currentExtractionCard;
             }
 
             // Initialize doors
@@ -1419,7 +1464,6 @@ namespace EFM
             Mod.instance.LogInfo("Trigger enter called on "+gameObject.name+": "+collider.name);
             if (EFM_Raid_Manager.currentManager.currentExtraction == null)
             {
-                // TODO: Check if player, if it is, set EFM_Raid_Manager.currentManager.currentExtraction = this if we dont already have a player collider and add this player collider to the list
                 if (collider.gameObject.name.Equals("Controller (left)") ||
                    collider.gameObject.name.Equals("Controller (left)") ||
                    collider.gameObject.name.Equals("Hitbox_Neck") ||
@@ -1464,6 +1508,108 @@ namespace EFM
         public List<string> equipmentBlacklist;
         public int role;
         public bool accessRequirement;
+        public GameObject card;
+
+        public string RequirementsMet()
+        {
+            if((itemRequirements == null || itemRequirements.Count == 0) &&
+               (itemBlacklist == null || itemBlacklist.Count == 0) &&
+               (equipmentRequirements == null || equipmentRequirements.Count == 0) &&
+               (equipmentBlacklist == null || equipmentBlacklist.Count == 0))
+            {
+                return "";
+            }
+
+            // Item requirements
+            foreach(string id in itemRequirements)
+            {
+                if (!Mod.playerInventory.ContainsKey(id))
+                {
+                    if(int.TryParse(id, out int result))
+                    {
+                        return "Need " + Mod.itemPrefabs[result].name;
+                    }
+                    else
+                    {
+                        return "Need " + IM.OD[id].name;
+                    }
+                }
+            }
+
+            // Item blacklist
+            foreach(string id in itemBlacklist)
+            {
+                if (Mod.playerInventory.ContainsKey(id))
+                {
+                    if(int.TryParse(id, out int result))
+                    {
+                        return "Can't have " + Mod.itemPrefabs[result].name;
+                    }
+                    else
+                    {
+                        return "Can't have " + IM.OD[id].name;
+                    }
+                }
+            }
+
+            // Equipment requirements
+            foreach(string id in equipmentRequirements)
+            {
+                bool found = false;
+                for(int i=0; i < Mod.equipmentSlots.Count; ++i)
+                {
+                    if (Mod.equipmentSlots[i].CurObject.ObjectWrapper.ItemID.Equals(id))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    if (int.TryParse(id, out int result))
+                    {
+                        return "Need " + Mod.itemPrefabs[result].name + " equipped";
+                    }
+                    else
+                    {
+                        return "Need " + IM.OD[id].name + " equipped";
+                    }
+                }
+            }
+
+            // Equipment blacklist
+            foreach(string id in equipmentBlacklist)
+            {
+                for(int i=0; i < Mod.equipmentSlots.Count; ++i)
+                {
+                    if (Mod.equipmentSlots[i].CurObject.ObjectWrapper.ItemID.Equals(id))
+                    {
+                        if (int.TryParse(id, out int result))
+                        {
+                            return "Can't have " + Mod.itemPrefabs[result].name + " equipped";
+                        }
+                        else
+                        {
+                            return "Can't have " + IM.OD[id].name + " equipped";
+                        }
+                    }
+                }
+                if (id.Equals("5448e53e4bdc2d60728b4567")) // Backpack
+                {
+                    return "Can't have a backpack equipped";
+                }
+                else if (id.Equals("5448e54d4bdc2dcc718b4568")) // Armor
+                {
+                    return "Can't have body armor equipped";
+                }
+                //else if (id.Equals("57bef4c42459772e8d35a53b")) // Armored equip
+                //{
+                //    return "Can't have armored rig equipped";
+                //}
+            }
+
+            return "";
+        }
     }
 
     public class TimeInterval

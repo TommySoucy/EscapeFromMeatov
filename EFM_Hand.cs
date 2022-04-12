@@ -11,6 +11,8 @@ namespace EFM
         public bool hoverValid;
         private List<Collider> colliders;
         public FVRViveHand fvrHand;
+        public bool consuming;
+        public GameObject currentHeldItem;
 
         private void Awake()
         {
