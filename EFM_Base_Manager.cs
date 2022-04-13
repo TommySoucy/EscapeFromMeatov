@@ -694,10 +694,10 @@ namespace EFM
             Mod.extractionUIText = Mod.consumeUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
             Mod.extractionUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
             // ItemDescription UIs
-            Mod.leftDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerRoot);
+            Mod.leftDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
             Mod.leftDescriptionManager = Mod.leftDescriptionUI.AddComponent<EFM_DescriptionManager>();
             Mod.leftDescriptionManager.Init();
-            Mod.rightDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerRoot);
+            Mod.rightDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
             Mod.rightDescriptionManager = Mod.rightDescriptionUI.AddComponent<EFM_DescriptionManager>();
             Mod.rightDescriptionManager.Init();
 

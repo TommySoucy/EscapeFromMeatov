@@ -10,6 +10,7 @@ namespace EFM
     public class EFM_DescriptionManager : MonoBehaviour
     {
         public DescriptionPack descriptionPack;
+        public bool isFull;
 
         public Image summaryIcon;
         public Text summaryAmountStackText;
@@ -244,6 +245,14 @@ namespace EFM
                 }
                 compatibleAmmoText.text = compatibleAmmoString;
             }
+        }
+
+        public void OpenFull()
+        {
+            isFull = true;
+            transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
+            transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
+            transform.parent = null;
         }
 
         public void OnExitClick()
