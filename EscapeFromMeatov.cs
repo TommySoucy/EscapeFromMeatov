@@ -83,6 +83,7 @@ namespace EFM
         public static float maxEnergy = 100;
         public static Text energyText;
         public static Text energyDeltaText;
+        public static float staminaTimer = 0;
         public static float stamina = 100;
         public static float maxStamina = 100;
         public static float currentMaxStamina = 100;
@@ -94,6 +95,7 @@ namespace EFM
         public static float staminaRestoration = 4.4f;
         public static float jumpStaminaDrain = 16;
         public static float currentStaminaEffect = 0;
+        public static float weight = 0;
         public static float weightLimit = 55;
         public static float currentWeightLimit = 55;
         public static float currentDamageModifier = 1;
@@ -112,6 +114,7 @@ namespace EFM
         public static EFM_DescriptionManager leftDescriptionManager;
         public static GameObject rightDescriptionUI;
         public static EFM_DescriptionManager rightDescriptionManager;
+        public static GameObject staminaBarUI;
 
         // Assets
         public static bool assetLoaded;
@@ -134,6 +137,7 @@ namespace EFM
         public static GameObject consumeUIPrefab;
         public static GameObject itemDescriptionUIPrefab;
         public static GameObject neededForPrefab;
+        public static GameObject staminaBarPrefab;
 
         // DB
         public static JObject areasDB;
@@ -458,6 +462,7 @@ namespace EFM
             extractionCardPrefab = assetsBundle.LoadAsset<GameObject>("ExtractionCard");
             itemDescriptionUIPrefab = assetsBundle.LoadAsset<GameObject>("ItemDescriptionUI");
             neededForPrefab = assetsBundle.LoadAsset<GameObject>("NeededForText");
+            staminaBarPrefab = assetsBundle.LoadAsset<GameObject>("StaminaBar");
 
             LogInfo("Loading item prefabs...");
             // Load custom item prefabs
@@ -1353,6 +1358,18 @@ namespace EFM
             MethodInfo clipUpdateInteractionPatchTranspiler = typeof(ClipUpdateInteractionPatch).GetMethod("Transpiler", BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(clipUpdateInteractionPatchOriginal, null, new HarmonyMethod(clipUpdateInteractionPatchPostfix), new HarmonyMethod(clipUpdateInteractionPatchTranspiler));
+
+            // MovementManagerJumpPatch
+            MethodInfo movementManagerJumpPatchOriginal = typeof(FVRMovementManager).GetMethod("Jump", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo movementManagerJumpPatchPrefix = typeof(MovementManagerJumpPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(movementManagerJumpPatchOriginal, new HarmonyMethod(movementManagerJumpPatchPrefix));
+
+            // MovementManagerTwinstickPatch
+            MethodInfo movementManagerTwinstickPatchOriginal = typeof(FVRMovementManager).GetMethod("HandUpdateTwinstick", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo movementManagerTwinstickPatchTranspiler = typeof(MovementManagerUpdatePatch).GetMethod("Transpiler", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(movementManagerTwinstickPatchOriginal, null, null, new HarmonyMethod(movementManagerTwinstickPatchTranspiler));
 
             //// DeadBoltPatch
             //MethodInfo deadBoltPatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("TurnBolt", BindingFlags.Public | BindingFlags.Instance);
@@ -4512,6 +4529,103 @@ namespace EFM
 
                 latestEjectedRound = null;
             }
+        }
+    }
+    
+    // Patches FVRMovementManager.Jump to make it use stamina or to prevent it altogether if not enough stamina
+    // This completely replaces the original
+    class MovementManagerJumpPatch
+    {
+        static bool Prefix(ref bool ___m_armSwingerGrounded, ref bool ___m_twoAxisGrounded, ref Vector3 ___m_armSwingerVelocity,
+                           ref Vector3 ___m_twoAxisVelocity, ref FVRMovementManager __instance)
+        {
+            // Return if not enough stamina
+            if(Mod.stamina < Mod.jumpStaminaDrain)
+            {
+                return false;
+            }
+
+            if (__instance.Mode == FVRMovementManager.MovementMode.Armswinger && !___m_armSwingerGrounded)
+            {
+                return false;
+            }
+            if ((__instance.Mode == FVRMovementManager.MovementMode.SingleTwoAxis || __instance.Mode == FVRMovementManager.MovementMode.TwinStick) && !___m_twoAxisGrounded)
+            {
+                return false;
+            }
+            __instance.DelayGround(0.1f);
+            float num = 0f;
+            switch (GM.Options.SimulationOptions.PlayerGravityMode)
+            {
+                case SimulationOptions.GravityMode.Realistic:
+                    num = 7.1f;
+                    break;
+                case SimulationOptions.GravityMode.Playful:
+                    num = 5f;
+                    break;
+                case SimulationOptions.GravityMode.OnTheMoon:
+                    num = 3f;
+                    break;
+                case SimulationOptions.GravityMode.None:
+                    num = 0.001f;
+                    break;
+            }
+            num *= 0.65f;
+            if (__instance.Mode == FVRMovementManager.MovementMode.Armswinger)
+            {
+                __instance.DelayGround(0.25f);
+                ___m_armSwingerVelocity.y = Mathf.Clamp(___m_armSwingerVelocity.y, 0f, ___m_armSwingerVelocity.y);
+                ___m_armSwingerVelocity.y = num;
+                ___m_armSwingerGrounded = false;
+            }
+            else if (__instance.Mode == FVRMovementManager.MovementMode.SingleTwoAxis || __instance.Mode == FVRMovementManager.MovementMode.TwinStick)
+            {
+                __instance.DelayGround(0.25f);
+                ___m_twoAxisVelocity.y = Mathf.Clamp(___m_twoAxisVelocity.y, 0f, ___m_twoAxisVelocity.y);
+                ___m_twoAxisVelocity.y = num;
+                ___m_twoAxisGrounded = false;
+            }
+
+            // Use stamina
+            Mod.stamina = Mathf.Max(Mod.stamina - Mod.jumpStaminaDrain, 0);
+            Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
+
+            return false;
+        }
+    }
+
+    // Patches FVRMovementManager.HandUpdateTwinstick to prevent sprinting in case of lack of stamina
+    class MovementManagerUpdatePatch
+    {
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
+            int v6Count = 0;
+            for (int i = 0; i < instructionList.Count; ++i)
+            {
+                CodeInstruction instruction = instructionList[i];
+                if (instruction.operand.ToString().Equals("V_6"))
+                {
+                    ++v6Count;
+                }
+                if(v6Count == 4)
+                {
+                    if(instruction.opcode == OpCodes.Ldc_I4_1 && 
+                       instructionList[i + 1].opcode == OpCodes.Stfld && instructionList[i + 1].operand.ToString().Equals("bool FistVR.FVRMovementManager::m_sprintingEngaged"))
+                    {
+                        // Loads stamina on stack
+                        instructionList[i - 1].opcode = OpCodes.Ldsfld;
+                        instructionList[i - 1].operand = AccessTools.Field(typeof(Mod), "stamina");
+
+                        // Loads 0 on stack
+                        instruction.opcode = OpCodes.Ldc_I4_0;
+
+                        // Puts 1 on stack if stamina > 0
+                        instructionList.Insert(i + 1, new CodeInstruction(OpCodes.Cgt));
+                    }
+                }
+            }
+            return instructionList;
         }
     }
     #endregion

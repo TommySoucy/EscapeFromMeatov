@@ -161,6 +161,54 @@ namespace EFM
             {
                 transform.position = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * -0.3f;
             }
+
+            Vector3 movementVector = (Vector3)typeof(FVRMovementManager).GetField("m_twoAxisVelocity").GetValue(GM.CurrentMovementManager);
+            bool sprintEngaged = (bool)typeof(FVRMovementManager).GetField("m_sprintingEngaged").GetValue(GM.CurrentMovementManager);
+            if (sprintEngaged)
+            {
+                // Reset stamina timer
+                Mod.staminaTimer = 2;
+
+                float currentStaminaDrain = Mod.sprintStaminaDrain * Time.deltaTime;
+
+                if(Mod.weight > Mod.currentWeightLimit)
+                {
+                    currentStaminaDrain += Mod.overweightStaminaDrain * Time.deltaTime;
+                }
+
+                Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
+
+                Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
+
+                //if(Mod.stamina == 0)
+                //{
+                    // Dont need to do anything here, here movement manager, we will patch to make sure that sprint is disengaged when we reach 0 stamina
+                //}
+            }
+            else if(movementVector.magnitude > 0 && Mod.weight > Mod.currentWeightLimit)
+            {
+                // Reset stamina timer
+                Mod.staminaTimer = 2;
+
+                float currentStaminaDrain = Mod.overweightStaminaDrain * Time.deltaTime;
+
+                Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
+
+                Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
+            }
+            else // Not using stamina
+            {
+                if(Mod.staminaTimer > 0)
+                {
+                    Mod.staminaTimer -= Time.deltaTime;
+                }
+                else
+                {
+                    Mod.stamina = Mathf.Min(Mod.stamina + Mod.staminaRestoration * Time.deltaTime, Mod.currentMaxStamina);
+
+                    Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
+                }
+            }
         }
 
         private void OnExitClick()

@@ -40,6 +40,7 @@ namespace EFM
         public Text compatibleAmmoText;
 
         private AudioSource buttonClickAudio;
+        private List<GameObject> areaNeededForTexts;
 
         public void Init()
         {
@@ -199,6 +200,47 @@ namespace EFM
             if (descriptionPack.amountRequired > 0)
             {
                 fullNeededForTotalText.text = "Total: (" + descriptionPack.amount + "/" + descriptionPack.amountRequired + ")";
+                if(descriptionPack.amount >= descriptionPack.amountRequired)
+                {
+                    fullNeededForTotalText.color = Color.green;
+                }
+                else
+                {
+                    fullNeededForTotalText.color = Color.blue;
+                }
+            }
+            if (areaNeededForTexts == null)
+            {
+                areaNeededForTexts = new List<GameObject>();
+            }
+            else
+            {
+                for(int i= areaNeededForTexts.Count-1; i>=0; --i)
+                {
+                    Destroy(areaNeededForTexts[i]);
+                }
+                areaNeededForTexts.Clear();
+            }
+            for (int i = 0; i < 22; ++i)
+            {
+                if(descriptionPack.amountRequiredPerArea[i] > 0)
+                {
+                    // For each area that requires this item we want to add a NeededForText instance and set its text and color correctly
+                    // Also keep a reference to these texts so we can remove them easily when updating the UI
+                    GameObject neededForInstance = Instantiate(Mod.neededForPrefab, transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0));
+                    neededForInstance.transform.SetSiblingIndex(6);
+                    Text neededForInstanceText = neededForInstance.transform.GetChild(0).GetComponent<Text>();
+                    neededForInstanceText.text = "- " + Mod.localDB["interface"]["hideout_area_" + i + "_name"].ToString() + "("+ descriptionPack.amount+ "/"+ descriptionPack.amountRequiredPerArea[i] + ")";
+                    if (descriptionPack.amount >= descriptionPack.amountRequiredPerArea[i])
+                    {
+                        neededForInstanceText.color = Color.green;
+                    }
+                    else
+                    {
+                        neededForInstanceText.color = Color.blue;
+                    }
+                    areaNeededForTexts.Add(neededForInstance);
+                }
             }
             fullInsuredIcon.SetActive(descriptionPack.insured);
             fullInsuredBorder.SetActive(descriptionPack.insured);

@@ -56,7 +56,7 @@ namespace EFM
                     }
                     Mod.extractionUI.transform.localPosition = GM.CurrentPlayerBody.Head.localPosition;
                     Mod.extractionUI.transform.GetChild(0).localPosition = Vector3.forward;
-                    Mod.extractionUIText.text = "Extraction in " + Mathf.Min(0, extractionTime - extractionTimer);
+                    Mod.extractionUIText.text = "Extraction in " + Mathf.Max(0, extractionTime - extractionTimer);
 
                     if (extractionTimer >= extractionTime)
                     {

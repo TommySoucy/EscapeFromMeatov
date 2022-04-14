@@ -700,6 +700,11 @@ namespace EFM
             Mod.rightDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
             Mod.rightDescriptionManager = Mod.rightDescriptionUI.AddComponent<EFM_DescriptionManager>();
             Mod.rightDescriptionManager.Init();
+            // Stamina bar
+            Mod.staminaBarUI = Instantiate(Mod.staminaBarPrefab, GM.CurrentPlayerBody.Head);
+            Mod.extractionUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+            Mod.extractionUI.transform.localPosition = new Vector3(0, -0.4f, 0.6f);
+            Mod.extractionUI.transform.localScale = Vector3.one * 0.01f;
 
             // Add our own hand component to each hand
             Mod.rightHand = GM.CurrentPlayerBody.RightHand.gameObject.AddComponent<EFM_Hand>();
