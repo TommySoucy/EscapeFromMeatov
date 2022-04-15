@@ -20,6 +20,7 @@ namespace EFM
         public string parent; // The parent ID of this item, the category this item is really
         public bool looted; // Whether this item has been looted before
         public string itemName;
+        public FVRPhysicalObject physObj; // Reference to the physical object of this item
         public int compatibilityValue; // 0: Does not need mag or round, 1: Needs mag, 2: Needs round, 3: Needs both
         public bool usesMags; // Could be clip
         public bool usesAmmoContainers; // Could be internal mag or revolver
@@ -43,6 +44,19 @@ namespace EFM
                 }
             }
         }
+        private float _currentWeight; // Includes attachments and ammo containers attached to this item
+        public float currentWeight
+        {
+            get { return _currentWeight; }
+            set
+            {
+                _currentWeight = value;
+                if (descriptionManager != null)
+                {
+                    descriptionManager.SetDescriptionPack();
+                }
+            }
+        }
 
         public void Start()
         {
@@ -57,6 +71,80 @@ namespace EFM
             descriptionPack.name = itemName;
             descriptionPack.description = description;
             descriptionPack.icon = Mod.itemIcons[H3ID];
+
+            // Set the reference to the physical object
+            physObj = gameObject.GetComponent<FVRPhysicalObject>();
+
+            // Set init weight
+            SetCurrentWeight(this);
+        }
+
+        public static float SetCurrentWeight(EFM_VanillaItemDescriptor item)
+        {
+            if(item == null)
+            {
+                return 0;
+            }
+
+            item.currentWeight = item.physObj.RootRigidbody.mass;
+
+            if (item.physObj is FVRFireArm)
+            {
+                FVRFireArm asFireArm = (FVRFireArm)item.physObj;
+
+                // Considering 0.015g per round
+                item.currentWeight += 0.015f * asFireArm.GetChamberRoundList().Count;
+
+                // Ammo container
+                if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
+                {
+                    item.currentWeight += SetCurrentWeight(asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>());
+                }
+                else if (asFireArm.UsesClips && asFireArm.Clip != null)
+                {
+                    item.currentWeight += SetCurrentWeight(asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>());
+                }
+
+                // Attachments
+                if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
+                {
+                    foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
+                    {
+                        item.currentWeight += SetCurrentWeight(attachment.GetComponent<EFM_VanillaItemDescriptor>());
+                    }
+                }
+            }
+            else if (item.physObj is FVRFireArmAttachment)
+            {
+                FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)item.physObj;
+
+                if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
+                {
+                    foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
+                    {
+                        item.currentWeight += SetCurrentWeight(attachment.GetComponent<EFM_VanillaItemDescriptor>());
+                    }
+                }
+            }
+            else if (item.physObj is FVRFireArmMagazine)
+            {
+                FVRFireArmMagazine asFireArmMagazine = (FVRFireArmMagazine)item.physObj;
+
+                item.currentWeight += 0.015f * asFireArmMagazine.m_numRounds;
+            }
+            else if (item.physObj is FVRFireArmClip)
+            {
+                FVRFireArmClip asFireArmClip = (FVRFireArmClip)item.physObj;
+
+                item.currentWeight += 0.015f * asFireArmClip.m_numRounds;
+            }
+            else if(item.GetComponentInChildren<M203>() != null)
+            {
+                M203 m203 = item.GetComponentInChildren<M203>();
+                item.currentWeight += m203.Chamber.IsFull ? 0.1f : 0;
+            }
+
+            return item.currentWeight;
         }
 
         public DescriptionPack GetDescriptionPack()
@@ -117,6 +205,8 @@ namespace EFM
                     descriptionPack.compatibleAmmo = new Dictionary<string, int>();
                 }
             }
+            descriptionPack.weight = physObj.RootRigidbody.mass;
+            descriptionPack.volume = Mod.sizeVolumes[(int)physObj.Size];
             descriptionPack.amountRequiredQuest = Mod.requiredForQuest[H3ID];
 
             return descriptionPack;

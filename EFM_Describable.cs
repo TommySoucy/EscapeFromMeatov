@@ -21,12 +21,16 @@ namespace EFM
         public Sprite icon;
         public int stack = -1;
         public int maxStack = -1;
+        public float containingVolume = -1;
+        public float maxVolume = -1;
         public int amount;
         public int amountRequired;
         public bool onWishlist;
         public int[] amountRequiredPerArea = new int[22];
         public int amountRequiredQuest;
         public bool insured;
+        public float weight;
+        public float volume;
         public Dictionary<string, int> compatibleAmmoContainers;
         public Dictionary<string, int> compatibleAmmo;
     }

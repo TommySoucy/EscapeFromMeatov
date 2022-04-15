@@ -13,14 +13,14 @@ namespace EFM
     {
         private bool init;
 
-        private Text[] partHealthTexts;
-        private Image[] partHealthImages;
-        private Text healthText;
-        private Text healthDeltaText;
-        private Text hydrationText;
-        private Text hydrationDeltaText;
-        private Text energyText;
-        private Text energyDeltaText;
+        public Text[] partHealthTexts;
+        public Image[] partHealthImages;
+        public Text healthText;
+        public Text healthDeltaText;
+        public Text hydrationText;
+        public Text hydrationDeltaText;
+        public Text energyText;
+        public Text energyDeltaText;
         private Text weightText;
 
         private AudioSource buttonClickAudio;
@@ -162,6 +162,11 @@ namespace EFM
                 transform.position = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * -0.3f;
             }
 
+            UpdateStamina();
+        }
+
+        private void UpdateStamina()
+        {
             Vector3 movementVector = (Vector3)typeof(FVRMovementManager).GetField("m_twoAxisVelocity").GetValue(GM.CurrentMovementManager);
             bool sprintEngaged = (bool)typeof(FVRMovementManager).GetField("m_sprintingEngaged").GetValue(GM.CurrentMovementManager);
             if (sprintEngaged)
@@ -171,7 +176,7 @@ namespace EFM
 
                 float currentStaminaDrain = Mod.sprintStaminaDrain * Time.deltaTime;
 
-                if(Mod.weight > Mod.currentWeightLimit)
+                if (Mod.weight > Mod.currentWeightLimit)
                 {
                     currentStaminaDrain += Mod.overweightStaminaDrain * Time.deltaTime;
                 }
@@ -182,10 +187,10 @@ namespace EFM
 
                 //if(Mod.stamina == 0)
                 //{
-                    // Dont need to do anything here, here movement manager, we will patch to make sure that sprint is disengaged when we reach 0 stamina
+                // Dont need to do anything here, here movement manager, we will patch to make sure that sprint is disengaged when we reach 0 stamina
                 //}
             }
-            else if(movementVector.magnitude > 0 && Mod.weight > Mod.currentWeightLimit)
+            else if (movementVector.magnitude > 0 && Mod.weight > Mod.currentWeightLimit)
             {
                 // Reset stamina timer
                 Mod.staminaTimer = 2;
@@ -196,9 +201,14 @@ namespace EFM
 
                 Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
             }
+            else if(Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100 * 20)
+            {
+                // Reset stamina timer to prevent stamina regen even while not moving if we are 20% above max weight
+                Mod.staminaTimer = 2;
+            }
             else // Not using stamina
             {
-                if(Mod.staminaTimer > 0)
+                if (Mod.staminaTimer > 0)
                 {
                     Mod.staminaTimer -= Time.deltaTime;
                 }
@@ -209,6 +219,50 @@ namespace EFM
                     Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
                 }
             }
+
+            // If reach 0 stamina due to being overweight, activate overweight fatigue effect
+            if (Mod.stamina == 0 && Mod.weight > Mod.currentWeightLimit)
+            {
+                // TODO: maybe keep whether we have overweight fatigue as a bool in effects so we dont have to check the whole list every frame
+                bool found = false;
+                foreach (EFM_Effect effect in EFM_Effect.effects)
+                {
+                    if (effect.effectType == EFM_Effect.EffectType.OverweightFatigue)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    EFM_Effect newEffect = new EFM_Effect();
+                    newEffect.effectType = EFM_Effect.EffectType.OverweightFatigue;
+                    EFM_Effect.effects.Add(newEffect);
+
+                    // Activate overweight fatigue icon
+                    transform.GetChild(0).GetChild(2).GetChild(9).gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < EFM_Effect.effects.Count; ++i)
+                {
+                    if (EFM_Effect.effects[i].effectType == EFM_Effect.EffectType.OverweightFatigue)
+                    {
+                        // The overweight fatigue could also have caused an energy rate effect, need to remove that too
+                        if (EFM_Effect.effects[i].caused.Count > 0)
+                        {
+                            EFM_Effect.effects.Remove(EFM_Effect.effects[i].caused[0]);
+                        }
+                        EFM_Effect.effects.RemoveAt(i);
+
+                        // Deactivate overweight fatigue icon
+                        transform.GetChild(0).GetChild(2).GetChild(9).gameObject.SetActive(false);
+
+                        break;
+                    }
+                }
+            }
         }
 
         private void OnExitClick()
@@ -216,6 +270,35 @@ namespace EFM
             buttonClickAudio.Play();
             transform.GetChild(0).gameObject.SetActive(false);
             transform.GetChild(1).gameObject.SetActive(false);
+        }
+
+        public void UpdateWeight()
+        {
+            weightText.text = Mod.weight.ToString() + "/ " + Mod.currentWeightLimit;
+            if(Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100 * 20) // Current weight limit + 20%
+            {
+                weightText.color = Color.red;
+
+                // Enable hard overweight icon, disable overweight icon
+                transform.GetChild(0).GetChild(2).GetChild(7).gameObject.SetActive(true);
+                transform.GetChild(0).GetChild(2).GetChild(6).gameObject.SetActive(false);
+            }
+            else if(Mod.weight > Mod.currentWeightLimit)
+            {
+                weightText.color = Color.yellow;
+
+                // Enable overweight icon, disable hard overweight icon
+                transform.GetChild(0).GetChild(2).GetChild(6).gameObject.SetActive(true);
+                transform.GetChild(0).GetChild(2).GetChild(7).gameObject.SetActive(false);
+            }
+            else
+            {
+                weightText.color = Color.white;
+
+                // Disable overweight icons
+                transform.GetChild(0).GetChild(2).GetChild(6).gameObject.SetActive(false);
+                transform.GetChild(0).GetChild(2).GetChild(7).gameObject.SetActive(false);
+            }
         }
     }
 }

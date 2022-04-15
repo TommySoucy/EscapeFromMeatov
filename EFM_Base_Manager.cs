@@ -209,9 +209,17 @@ namespace EFM
                                     break;
                                 case EFM_Effect.EffectType.HandsTremor:
                                     // TODO: Stop tremors if there are not other tremor effects
+                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                    {
+                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.QuantumTunnelling:
                                     // TODO: Stop QuantumTunnelling
+                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
+                                    {
+                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(false);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.HealthRate:
                                     if (effect.partIndex == -1)
@@ -245,6 +253,10 @@ namespace EFM
                                         // Enable haptic feedback
                                         GM.Options.ControlOptions.HapticsState = ControlOptions.HapticsMode.Enabled;
                                         // TODO: also set volume to full
+                                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.activeSelf)
+                                        {
+                                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(false);
+                                        }
                                     }
                                     break;
                                 case EFM_Effect.EffectType.WeightLimit:
@@ -271,10 +283,23 @@ namespace EFM
                                     if (!hasPainTremors)
                                     {
                                         // TODO: Disable tremors
+                                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                        {
+                                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                                        }
+                                    }
+
+                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
+                                    {
+                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(false);
                                     }
                                     break;
                                 case EFM_Effect.EffectType.StomachBloodloss:
                                     --Mod.stomachBloodLossCount;
+                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
+                                    {
+                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(false);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.UnknownToxin:
                                     // Remove all effects caused by this toxin
@@ -306,6 +331,15 @@ namespace EFM
                                     if (!hasToxinTremors)
                                     {
                                         // TODO: Disable tremors
+                                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                        {
+                                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                                        }
+                                    }
+
+                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.activeSelf)
+                                    {
+                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(false);
                                     }
                                     break;
                                 case EFM_Effect.EffectType.BodyTemperature:
@@ -328,6 +362,16 @@ namespace EFM
                                             currentEnergyRate -= causedEffect.value;
                                         }
                                         EFM_Effect.effects.Remove(causedEffect);
+                                    }
+
+                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
+                                    {
+                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(false);
+                                    }
+
+                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
+                                    {
+                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
                                     }
                                     break;
                                 case EFM_Effect.EffectType.Fracture:
@@ -353,6 +397,15 @@ namespace EFM
                                     if (!hasFractureTremors)
                                     {
                                         // TODO: Disable tremors
+                                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                        {
+                                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                                        }
+                                    }
+
+                                    if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.activeSelf)
+                                    {
+                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.SetActive(true);
                                     }
                                     break;
                             }
@@ -414,9 +467,17 @@ namespace EFM
                                 break;
                             case EFM_Effect.EffectType.HandsTremor:
                                 // TODO: Begin tremors if there isnt already another active one
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.QuantumTunnelling:
                                 // TODO: Begin quantumtunneling if there isnt already another active one
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.HealthRate:
                                 if (effect.partIndex == -1)
@@ -446,6 +507,10 @@ namespace EFM
                                 // Disable haptic feedback
                                 GM.Options.ControlOptions.HapticsState = ControlOptions.HapticsMode.Disabled;
                                 // TODO: also set volume to 0.33 * volume
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.WeightLimit:
                                 Mod.currentWeightLimit += effect.value;
@@ -462,9 +527,18 @@ namespace EFM
                                 newTremor.timer = effect.timer;
                                 EFM_Effect.effects.Add(newTremor);
                                 effect.caused.Add(newTremor);
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.StomachBloodloss:
                                 ++Mod.stomachBloodLossCount;
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.UnknownToxin:
                                 // Add a pain effect
@@ -485,6 +559,11 @@ namespace EFM
                                 newToxinHealthRate.timer = effect.timer;
                                 EFM_Effect.effects.Add(newToxinHealthRate);
                                 effect.caused.Add(newToxinHealthRate);
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.BodyTemperature:
                                 Mod.temperatureOffset += effect.value;
@@ -522,6 +601,11 @@ namespace EFM
                                 newLightBleedingEnergyRate.partIndex = effect.partIndex;
                                 EFM_Effect.effects.Add(newLightBleedingEnergyRate);
                                 effect.caused.Add(newLightBleedingEnergyRate);
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.HeavyBleeding:
                                 // Add a health rate effect
@@ -544,6 +628,11 @@ namespace EFM
                                 newHeavyBleedingEnergyRate.partIndex = effect.partIndex;
                                 EFM_Effect.effects.Add(newHeavyBleedingEnergyRate);
                                 effect.caused.Add(newHeavyBleedingEnergyRate);
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.Fracture:
                                 // Add a pain effect
@@ -554,6 +643,11 @@ namespace EFM
                                 newFracturePain.timer = effect.timer;
                                 EFM_Effect.effects.Add(newFracturePain);
                                 effect.caused.Add(newFracturePain);
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.Dehydration:
                                 // Add a HealthRate effect
@@ -564,6 +658,11 @@ namespace EFM
                                 newDehydrationHealthRate.hasTimer = false;
                                 EFM_Effect.effects.Add(newDehydrationHealthRate);
                                 effect.caused.Add(newDehydrationHealthRate);
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.HeavyDehydration:
                                 // Add a HealthRate effect
@@ -574,9 +673,19 @@ namespace EFM
                                 newHeavyDehydrationHealthRate.hasTimer = false;
                                 EFM_Effect.effects.Add(newHeavyDehydrationHealthRate);
                                 effect.caused.Add(newHeavyDehydrationHealthRate);
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.Fatigue:
                                 Mod.fatigue = true;
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.HeavyFatigue:
                                 // Add a HealthRate effect
@@ -587,6 +696,11 @@ namespace EFM
                                 newHeavyFatigueHealthRate.hasTimer = false;
                                 EFM_Effect.effects.Add(newHeavyFatigueHealthRate);
                                 effect.caused.Add(newHeavyFatigueHealthRate);
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.SetActive(true);
+                                }
                                 break;
                             case EFM_Effect.EffectType.OverweightFatigue:
                                 // Add a EnergyRate effect
@@ -597,6 +711,11 @@ namespace EFM
                                 newOverweightFatigueEnergyRate.hasTimer = false;
                                 EFM_Effect.effects.Add(newOverweightFatigueEnergyRate);
                                 effect.caused.Add(newOverweightFatigueEnergyRate);
+
+                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(9).gameObject.activeSelf)
+                                {
+                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(9).gameObject.SetActive(true);
+                                }
                                 break;
                         }
                     }
@@ -604,22 +723,109 @@ namespace EFM
             }
 
             // Apply health, energy, and hydration rates
+            float healthDelta = 0;
+            float health = 0;
             for (int i = 0; i < 7; ++i)
             {
                 if (heal[i] && currentHealthRates[i] > 0)
                 {
+                    float currentHealthDelta = currentHealthRates[i];
                     Mod.health[i] = Mathf.Clamp(Mod.health[i] + currentHealthRates[i] * (Time.deltaTime / 60), 1, maxHealth[i]);
+
+                    healthDelta += currentHealthDelta;
+                    health += Mod.health[i];
                 }
+                Mod.playerStatusManager.partHealthTexts[i].text = Mod.health[i].ToString() + "/" + maxHealth[i];
+                Mod.playerStatusManager.partHealthImages[i].color = Color.Lerp(Color.red, Color.white, Mod.health[i] / maxHealth[i]);
             }
+            if (healthDelta != 0)
+            {
+                if (!Mod.playerStatusManager.healthDeltaText.gameObject.activeSelf)
+                {
+                    Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(true);
+                }
+                Mod.playerStatusManager.healthDeltaText.text = (healthDelta >= 0 ? "+ " : "- ") + healthDelta + "/min";
+            }
+            else if(Mod.playerStatusManager.healthDeltaText.gameObject.activeSelf)
+            {
+                Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(false);
+            }
+            Mod.playerStatusManager.healthText.text = health.ToString() + "/440";
 
             if (currentHydrationRate > 0)
             {
                 Mod.hydration = Mathf.Clamp(Mod.hydration + currentHydrationRate * (Time.deltaTime / 60), 0, Mod.maxHydration);
+
+                if (!Mod.playerStatusManager.hydrationDeltaText.gameObject.activeSelf)
+                {
+                    Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(true);
+                }
+                Mod.playerStatusManager.hydrationDeltaText.text = (currentHydrationRate >= 0 ? "+ " : "- ") + currentHydrationRate + "/min";
+            }
+            else if (Mod.playerStatusManager.hydrationDeltaText.gameObject.activeSelf)
+            {
+                Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(false);
+            }
+            Mod.playerStatusManager.hydrationText.text = Mod.hydration.ToString() + "/" + Mod.maxHydration;
+            if(Mod.hydration > 20)
+            {
+                // Remove any dehydration effect
+                if (Mod.dehydrationEffect != null)
+                {
+                    // Disable 
+                    if (Mod.dehydrationEffect.caused.Count > 0)
+                    {
+                        for (int j = 0; j < 7; ++j)
+                        {
+                            currentHealthRates[j] -= Mod.dehydrationEffect.caused[0].value / 7;
+                        }
+                        EFM_Effect.effects.Remove(Mod.dehydrationEffect.caused[0]);
+                    }
+                    EFM_Effect.effects.Remove(Mod.dehydrationEffect);
+                }
+
+                if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.activeSelf)
+                {
+                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.SetActive(false);
+                }
             }
 
             if (currentEnergyRate > 0)
             {
                 Mod.energy = Mathf.Clamp(Mod.energy + currentEnergyRate * (Time.deltaTime / 60), 0, Mod.maxEnergy);
+
+                if (!Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
+                {
+                    Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(true);
+                }
+                Mod.playerStatusManager.energyDeltaText.text = (currentEnergyRate >= 0 ? "+ " : "- ") + currentEnergyRate + "/min";
+            }
+            else if (Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
+            {
+                Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(false);
+            }
+            Mod.playerStatusManager.energyText.text = Mod.energy.ToString() + "/" + Mod.maxEnergy;
+            if(Mod.energy > 20)
+            {
+                // Remove any fatigue effect
+                if (Mod.fatigueEffect != null)
+                {
+                    // Disable 
+                    if (Mod.fatigueEffect.caused.Count > 0)
+                    {
+                        for (int j = 0; j < 7; ++j)
+                        {
+                            currentHealthRates[j] -= Mod.fatigueEffect.caused[0].value / 7;
+                        }
+                        EFM_Effect.effects.Remove(Mod.fatigueEffect.caused[0]);
+                    }
+                    EFM_Effect.effects.Remove(Mod.fatigueEffect);
+                }
+
+                if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.activeSelf)
+                {
+                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.SetActive(false);
+                }
             }
         }
 

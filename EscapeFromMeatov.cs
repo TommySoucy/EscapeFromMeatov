@@ -95,9 +95,7 @@ namespace EFM
         public static float staminaRestoration = 4.4f;
         public static float jumpStaminaDrain = 16;
         public static float currentStaminaEffect = 0;
-        public static float weight = 0;
         public static float weightLimit = 55;
-        public static float currentWeightLimit = 55;
         public static float currentDamageModifier = 1;
         public static int stomachBloodLossCount = 0; // If this is 0, in hideout we will regen health otherwise not, in raid we will multiply energy and hydration rate by 5
         public static float temperatureOffset = 0;
@@ -105,7 +103,6 @@ namespace EFM
         public static EFM_Effect dehydrationEffect;
         public static EFM_Effect fatigueEffect;
         public static EFM_Effect overweightFatigueEffect;
-        public static Text weightText;
         public static GameObject consumeUI;
         public static Text consumeUIText;
         public static GameObject extractionUI;
@@ -115,6 +112,32 @@ namespace EFM
         public static GameObject rightDescriptionUI;
         public static EFM_DescriptionManager rightDescriptionManager;
         public static GameObject staminaBarUI;
+        private static float _weight = 0;
+        public static float weight
+        {
+            set
+            {
+                _weight = value;
+                playerStatusManager.UpdateWeight();
+            }
+            get
+            {
+                return _weight;
+            }
+        }
+        private static float _currentWeightLimit = 55;
+        public static float currentWeightLimit
+        {
+            set
+            {
+                _currentWeightLimit = value;
+                playerStatusManager.UpdateWeight();
+            }
+            get
+            {
+                return _currentWeightLimit;
+            }
+        }
 
         // Assets
         public static bool assetLoaded;
@@ -595,7 +618,6 @@ namespace EFM
                 // Add custom item wrapper
                 EFM_CustomItemWrapper customItemWrapper = itemPrefab.AddComponent<EFM_CustomItemWrapper>();
                 customItemWrapper.ID = i.ToString();
-                customItemWrapper.physicalObject = itemPhysicalObject;
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 customItemWrapper.volumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
                 customItemWrapper.parent = defaultItemsData["ItemDefaults"][i]["parent"].ToString();
@@ -760,6 +782,7 @@ namespace EFM
                     }
 
                     // Set backpack settings
+                    customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponent<Text>();
                     customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["BackpackProperties"]["MaxVolume"];
 
@@ -779,6 +802,7 @@ namespace EFM
                     customItemWrapper.mainContainerRenderers = mainContainerRenderer;
 
                     // Set container settings
+                    customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponent<Text>();
                     customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
 
@@ -798,6 +822,7 @@ namespace EFM
                     customItemWrapper.mainContainerRenderers = mainContainerRenderer;
 
                     // Set pouch settings
+                    customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponent<Text>();
                     customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
 
@@ -1371,6 +1396,114 @@ namespace EFM
 
             harmony.Patch(movementManagerTwinstickPatchOriginal, null, null, new HarmonyMethod(movementManagerTwinstickPatchTranspiler));
 
+            // ChamberSetRoundPatch
+            MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo chamberSetRoundPatchPrefix = typeof(ChamberSetRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
+
+            // MagRemoveRoundPatch
+            MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo magRemoveRoundPatchPrefix = typeof(MagRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo magRemoveRoundPatchPostfix = typeof(MagRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(magRemoveRoundPatchOriginal, new HarmonyMethod(magRemoveRoundPatchPrefix), new HarmonyMethod(magRemoveRoundPatchPostfix));
+
+            // MagRemoveRoundBoolPatch
+            MethodInfo magRemoveRoundBoolPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
+            MethodInfo magRemoveRoundBoolPatchPrefix = typeof(MagRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo magRemoveRoundBoolPatchPostfix = typeof(MagRemoveRoundBoolPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(magRemoveRoundBoolPatchOriginal, new HarmonyMethod(magRemoveRoundBoolPatchPrefix), new HarmonyMethod(magRemoveRoundBoolPatchPostfix));
+
+            // MagRemoveRoundIntPatch
+            MethodInfo magRemoveRoundIntPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(int) }, null);
+            MethodInfo magRemoveRoundIntPatchPrefix = typeof(MagRemoveRoundIntPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo magRemoveRoundIntPatchPostfix = typeof(MagRemoveRoundIntPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(magRemoveRoundIntPatchOriginal, new HarmonyMethod(magRemoveRoundIntPatchPrefix), new HarmonyMethod(magRemoveRoundIntPatchPostfix));
+
+            // ClipRemoveRoundPatch
+            MethodInfo clipRemoveRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo clipRemoveRoundPatchPrefix = typeof(ClipRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo clipRemoveRoundPatchPostfix = typeof(ClipRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(clipRemoveRoundPatchOriginal, new HarmonyMethod(clipRemoveRoundPatchPrefix), new HarmonyMethod(clipRemoveRoundPatchPostfix));
+
+            // ClipRemoveRoundBoolPatch
+            MethodInfo clipRemoveRoundBoolPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
+            MethodInfo clipRemoveRoundBoolPatchPrefix = typeof(ClipRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo clipRemoveRoundBoolPatchPostfix = typeof(ClipRemoveRoundBoolPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(clipRemoveRoundBoolPatchOriginal, new HarmonyMethod(clipRemoveRoundBoolPatchPrefix), new HarmonyMethod(clipRemoveRoundBoolPatchPostfix));
+
+            // ClipRemoveRoundClassPatch
+            MethodInfo clipRemoveRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRoundReturnClass", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo clipRemoveRoundClassPatchPrefix = typeof(ClipRemoveRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo clipRemoveRoundClassPatchPostfix = typeof(ClipRemoveRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(clipRemoveRoundClassPatchOriginal, new HarmonyMethod(clipRemoveRoundClassPatchPrefix), new HarmonyMethod(clipRemoveRoundClassPatchPostfix));
+
+            // FireArmLoadMagPatch
+            MethodInfo fireArmLoadMagPatchOriginal = typeof(FVRFireArm).GetMethod("LoadMag", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo fireArmLoadMagPatchPrefix = typeof(FireArmLoadMagPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(fireArmLoadMagPatchOriginal, new HarmonyMethod(fireArmLoadMagPatchPrefix));
+
+            // FireArmEjectMagPatch
+            MethodInfo fireArmEjectMagPatchOriginal = typeof(FVRFireArm).GetMethod("EjectMag", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo fireArmEjectMagPatchPrefix = typeof(FireArmEjectMagPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(fireArmEjectMagPatchOriginal, new HarmonyMethod(fireArmEjectMagPatchPrefix));
+
+            // FireArmLoadClipPatch
+            MethodInfo fireArmLoadClipPatchOriginal = typeof(FVRFireArm).GetMethod("LoadClip", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo fireArmLoadClipPatchPrefix = typeof(FireArmLoadClipPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(fireArmLoadClipPatchOriginal, new HarmonyMethod(fireArmLoadClipPatchPrefix));
+
+            // FireArmEjectClipPatch
+            MethodInfo fireArmEjectClipPatchOriginal = typeof(FVRFireArm).GetMethod("EjectClip", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo fireArmEjectClipPatchPrefix = typeof(FireArmEjectClipPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(fireArmEjectClipPatchOriginal, new HarmonyMethod(fireArmEjectClipPatchPrefix));
+
+            // MagAddRoundPatch
+            MethodInfo magAddRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool) }, null);
+            MethodInfo magAddRoundPatchPrefix = typeof(MagAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(magAddRoundPatchOriginal, new HarmonyMethod(magAddRoundPatchPrefix));
+
+            // MagAddRoundClassPatch
+            MethodInfo magAddRoundClassPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
+            MethodInfo magAddRoundClassPatchPrefix = typeof(MagAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(magAddRoundClassPatchOriginal, new HarmonyMethod(magAddRoundClassPatchPrefix));
+
+            // ClipAddRoundPatch
+            MethodInfo clipAddRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool) }, null);
+            MethodInfo clipAddRoundPatchPrefix = typeof(ClipAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(clipAddRoundPatchOriginal, new HarmonyMethod(clipAddRoundPatchPrefix));
+
+            // ClipAddRoundClassPatch
+            MethodInfo clipAddRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
+            MethodInfo clipAddRoundClassPatchPrefix = typeof(ClipAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(clipAddRoundClassPatchOriginal, new HarmonyMethod(clipAddRoundClassPatchPrefix));
+
+            // AttachmentMountRegisterPatch
+            MethodInfo attachmentMountRegisterPatchOriginal = typeof(FVRFireArmAttachmentMount).GetMethod("RegisterAttachment", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo attachmentMountRegisterPatchPrefix = typeof(AttachmentMountRegisterPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(attachmentMountRegisterPatchOriginal, new HarmonyMethod(attachmentMountRegisterPatchPrefix));
+
+            // AttachmentMountDeRegisterPatch
+            MethodInfo attachmentMountDeRegisterPatchOriginal = typeof(FVRFireArmAttachmentMount).GetMethod("DeRegisterAttachment", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo attachmentMountDeRegisterPatchPrefix = typeof(AttachmentMountDeRegisterPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(attachmentMountDeRegisterPatchOriginal, new HarmonyMethod(attachmentMountDeRegisterPatchPrefix));
+
             //// DeadBoltPatch
             //MethodInfo deadBoltPatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("TurnBolt", BindingFlags.Public | BindingFlags.Instance);
             //MethodInfo deadBoltPatchPrefix = typeof(DeadBoltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -1854,354 +1987,178 @@ namespace EFM
             if ((__instance is FVRPhysicalObject && (__instance as FVRPhysicalObject).QuickbeltSlot != null))
             {
                 Mod.instance.LogInfo("Dropping item in qs");
-                // Find Custom item wrapper or vanilla item descriptor to take the location index from
-                Transform currentParent = (__instance as FVRPhysicalObject).QuickbeltSlot.transform.parent;
-                for (int i=0; i < 5; ++i) // Go five parents high
+                // This is only relevant in the case where the QB slot is on a loose rig in base or raid
+                EFM_CustomItemWrapper customItemWrapper = (__instance as FVRPhysicalObject).QuickbeltSlot.transform.parent.parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                if(customItemWrapper != null)
                 {
-                    EFM_CustomItemWrapper customItemWrapper = currentParent.GetComponent<EFM_CustomItemWrapper>();
-                    EFM_VanillaItemDescriptor vanillaItemDescriptor = currentParent.GetComponent<EFM_VanillaItemDescriptor>();
-                    if(customItemWrapper != null)
+                    EFM_CustomItemWrapper heldCustomItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
+                    EFM_VanillaItemDescriptor heldVanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                    if(heldCustomItemWrapper != null)
                     {
-                        EFM_CustomItemWrapper heldCustomItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
-                        EFM_VanillaItemDescriptor heldVanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                        if(heldCustomItemWrapper != null)
+                        BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, heldCustomItemWrapper, null);
+
+                        // Update lists
+                        if (customItemWrapper.locationIndex == 1)
                         {
-                            BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, heldCustomItemWrapper, null);
-
-                            // Update lists
-                            if (customItemWrapper.locationIndex == 1)
+                            // Was on player
+                            Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
+                            if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
                             {
-                                // Was on player
-                                Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
-                                if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
-                                {
-                                    Mod.playerInventory.Remove(heldCustomItemWrapper.ID);
-                                }
-                                Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Remove(heldCustomItemWrapper.gameObject);
-                                if (Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Count == 0)
-                                {
-                                    Mod.playerInventoryObjects.Remove(heldCustomItemWrapper.ID);
-                                }
-
-                                // Now in hideout
-                                if (Mod.baseInventory.ContainsKey(heldCustomItemWrapper.ID))
-                                {
-                                    Mod.baseInventory[heldCustomItemWrapper.ID] += heldCustomItemWrapper.stack;
-                                }
-                                else
-                                {
-                                    Mod.baseInventory.Add(heldCustomItemWrapper.ID, heldCustomItemWrapper.stack);
-                                }
-                                if (Mod.currentBaseManager.baseInventoryObjects.ContainsKey(heldCustomItemWrapper.ID))
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects[heldCustomItemWrapper.ID].Add(heldCustomItemWrapper.gameObject);
-                                }
-                                else
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects.Add(heldCustomItemWrapper.ID, new List<GameObject>());
-                                    Mod.currentBaseManager.baseInventoryObjects[heldCustomItemWrapper.ID].Add(heldCustomItemWrapper.gameObject);
-                                }
+                                Mod.playerInventory.Remove(heldCustomItemWrapper.ID);
                             }
-                            else if (customItemWrapper.locationIndex == 2)
+                            Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Remove(heldCustomItemWrapper.gameObject);
+                            if (Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Count == 0)
                             {
-                                // Was on player
-                                Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
-                                if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
-                                {
-                                    Mod.playerInventory.Remove(heldCustomItemWrapper.ID);
-                                }
-                                Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Remove(heldCustomItemWrapper.gameObject);
-                                if (Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Count == 0)
-                                {
-                                    Mod.playerInventoryObjects.Remove(heldCustomItemWrapper.ID);
-                                }
+                                Mod.playerInventoryObjects.Remove(heldCustomItemWrapper.ID);
+                            }
+
+                            // Now in hideout
+                            if (Mod.baseInventory.ContainsKey(heldCustomItemWrapper.ID))
+                            {
+                                Mod.baseInventory[heldCustomItemWrapper.ID] += heldCustomItemWrapper.stack;
+                            }
+                            else
+                            {
+                                Mod.baseInventory.Add(heldCustomItemWrapper.ID, heldCustomItemWrapper.stack);
+                            }
+                            if (Mod.currentBaseManager.baseInventoryObjects.ContainsKey(heldCustomItemWrapper.ID))
+                            {
+                                Mod.currentBaseManager.baseInventoryObjects[heldCustomItemWrapper.ID].Add(heldCustomItemWrapper.gameObject);
+                            }
+                            else
+                            {
+                                Mod.currentBaseManager.baseInventoryObjects.Add(heldCustomItemWrapper.ID, new List<GameObject>());
+                                Mod.currentBaseManager.baseInventoryObjects[heldCustomItemWrapper.ID].Add(heldCustomItemWrapper.gameObject);
                             }
                         }
-                        else if (heldVanillaItemDescriptor)
+                        else if (customItemWrapper.locationIndex == 2)
                         {
-                            BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, null, heldVanillaItemDescriptor);
-
-                            // Update lists
-                            if (customItemWrapper.locationIndex == 1)
+                            // Was on player
+                            Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
+                            if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
                             {
-                                // Was on player
-                                Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
-                                if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
-                                {
-                                    Mod.playerInventory.Remove(heldVanillaItemDescriptor.H3ID);
-                                }
-                                Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
-                                if (Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Count == 0)
-                                {
-                                    Mod.playerInventoryObjects.Remove(heldVanillaItemDescriptor.H3ID);
-                                }
-
-                                // Now in hideout
-                                if (Mod.baseInventory.ContainsKey(heldVanillaItemDescriptor.H3ID))
-                                {
-                                    Mod.baseInventory[heldVanillaItemDescriptor.H3ID] += 1;
-                                }
-                                else
-                                {
-                                    Mod.baseInventory.Add(heldVanillaItemDescriptor.H3ID, 1);
-                                }
-                                if (Mod.currentBaseManager.baseInventoryObjects.ContainsKey(heldVanillaItemDescriptor.H3ID))
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects[heldVanillaItemDescriptor.H3ID].Add(heldVanillaItemDescriptor.gameObject);
-                                }
-                                else
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects.Add(heldVanillaItemDescriptor.H3ID, new List<GameObject>());
-                                    Mod.currentBaseManager.baseInventoryObjects[heldVanillaItemDescriptor.H3ID].Add(heldVanillaItemDescriptor.gameObject);
-                                }
+                                Mod.playerInventory.Remove(heldCustomItemWrapper.ID);
                             }
-                            else if (customItemWrapper.locationIndex == 2)
+                            Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Remove(heldCustomItemWrapper.gameObject);
+                            if (Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Count == 0)
                             {
-                                // Was on player
-                                Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
-                                if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
-                                {
-                                    Mod.playerInventory.Remove(heldVanillaItemDescriptor.H3ID);
-                                }
-                                Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
-                                if (Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Count == 0)
-                                {
-                                    Mod.playerInventoryObjects.Remove(heldVanillaItemDescriptor.H3ID);
-                                }
-
-                                // MagazinesByType/ClipsbyType
-                                if (__instance is FVRFireArmMagazine)
-                                {
-                                    FVRFireArmMagazine asMag = __instance as FVRFireArmMagazine;
-                                    Mod.magazinesByType[asMag.MagazineType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] -= 1;
-                                    if(Mod.magazinesByType[asMag.MagazineType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] == 0)
-                                    {
-                                        Mod.magazinesByType[asMag.MagazineType].Remove((__instance as FVRPhysicalObject).ObjectWrapper.DisplayName);
-
-                                        if(Mod.magazinesByType[asMag.MagazineType].Count == 0)
-                                        {
-                                            Mod.magazinesByType.Remove(asMag.MagazineType);
-                                        }
-                                    }
-
-                                    foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                                    {
-                                        descManager.SetDescriptionPack();
-                                    }
-                                }
-                                else if (__instance is FVRFireArmClip)
-                                {
-                                    FVRFireArmClip asClip = __instance as FVRFireArmClip;
-                                    Mod.clipsByType[asClip.ClipType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] -= 1;
-                                    if (Mod.clipsByType[asClip.ClipType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] == 0)
-                                    {
-                                        Mod.clipsByType[asClip.ClipType].Remove((__instance as FVRPhysicalObject).ObjectWrapper.DisplayName);
-
-                                        if (Mod.clipsByType[asClip.ClipType].Count == 0)
-                                        {
-                                            Mod.clipsByType.Remove(asClip.ClipType);
-                                        }
-                                    }
-
-                                    foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                                    {
-                                        descManager.SetDescriptionPack();
-                                    }
-                                }
-                                else if(__instance is FVRFireArmRound)
-                                {
-                                    FVRFireArmRound asRound = __instance as FVRFireArmRound;
-                                    Mod.roundsByType[asRound.RoundType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] -= 1;
-                                    if (Mod.roundsByType[asRound.RoundType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] == 0)
-                                    {
-                                        Mod.roundsByType[asRound.RoundType].Remove((__instance as FVRPhysicalObject).ObjectWrapper.DisplayName);
-
-                                        if (Mod.roundsByType[asRound.RoundType].Count == 0)
-                                        {
-                                            Mod.roundsByType.Remove(asRound.RoundType);
-                                        }
-                                    }
-
-                                    foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                                    {
-                                        descManager.SetDescriptionPack();
-                                    }
-                                }
+                                Mod.playerInventoryObjects.Remove(heldCustomItemWrapper.ID);
                             }
                         }
-                        return;
                     }
-                    else if(vanillaItemDescriptor != null)
+                    else if (heldVanillaItemDescriptor)
                     {
-                        EFM_CustomItemWrapper heldCustomItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
-                        EFM_VanillaItemDescriptor heldVanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                        if (heldCustomItemWrapper != null)
+                        BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, null, heldVanillaItemDescriptor);
+
+                        // Update lists
+                        if (customItemWrapper.locationIndex == 1)
                         {
-                            BeginInteractionPatch.SetItemLocationIndex(vanillaItemDescriptor.locationIndex, heldCustomItemWrapper, null);
-
-                            // Update lists
-                            if (vanillaItemDescriptor.locationIndex == 1)
+                            // Was on player
+                            Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
+                            if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
                             {
-                                // Was on player
-                                Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
-                                if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
+                                Mod.playerInventory.Remove(heldVanillaItemDescriptor.H3ID);
+                            }
+                            Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
+                            if (Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Count == 0)
+                            {
+                                Mod.playerInventoryObjects.Remove(heldVanillaItemDescriptor.H3ID);
+                            }
+
+                            // Now in hideout
+                            if (Mod.baseInventory.ContainsKey(heldVanillaItemDescriptor.H3ID))
+                            {
+                                Mod.baseInventory[heldVanillaItemDescriptor.H3ID] += 1;
+                            }
+                            else
+                            {
+                                Mod.baseInventory.Add(heldVanillaItemDescriptor.H3ID, 1);
+                            }
+                            if (Mod.currentBaseManager.baseInventoryObjects.ContainsKey(heldVanillaItemDescriptor.H3ID))
+                            {
+                                Mod.currentBaseManager.baseInventoryObjects[heldVanillaItemDescriptor.H3ID].Add(heldVanillaItemDescriptor.gameObject);
+                            }
+                            else
+                            {
+                                Mod.currentBaseManager.baseInventoryObjects.Add(heldVanillaItemDescriptor.H3ID, new List<GameObject>());
+                                Mod.currentBaseManager.baseInventoryObjects[heldVanillaItemDescriptor.H3ID].Add(heldVanillaItemDescriptor.gameObject);
+                            }
+                        }
+                        else if (customItemWrapper.locationIndex == 2)
+                        {
+                            // Was on player
+                            Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
+                            if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
+                            {
+                                Mod.playerInventory.Remove(heldVanillaItemDescriptor.H3ID);
+                            }
+                            Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
+                            if (Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Count == 0)
+                            {
+                                Mod.playerInventoryObjects.Remove(heldVanillaItemDescriptor.H3ID);
+                            }
+
+                            // MagazinesByType/ClipsbyType
+                            if (__instance is FVRFireArmMagazine)
+                            {
+                                FVRFireArmMagazine asMag = __instance as FVRFireArmMagazine;
+                                Mod.magazinesByType[asMag.MagazineType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] -= 1;
+                                if(Mod.magazinesByType[asMag.MagazineType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] == 0)
                                 {
-                                    Mod.playerInventory.Remove(heldCustomItemWrapper.ID);
-                                }
-                                Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Remove(heldCustomItemWrapper.gameObject);
-                                if (Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Count == 0)
-                                {
-                                    Mod.playerInventoryObjects.Remove(heldCustomItemWrapper.ID);
+                                    Mod.magazinesByType[asMag.MagazineType].Remove((__instance as FVRPhysicalObject).ObjectWrapper.DisplayName);
+
+                                    if(Mod.magazinesByType[asMag.MagazineType].Count == 0)
+                                    {
+                                        Mod.magazinesByType.Remove(asMag.MagazineType);
+                                    }
                                 }
 
-                                // Now in hideout
-                                if (Mod.baseInventory.ContainsKey(heldCustomItemWrapper.ID))
+                                foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
                                 {
-                                    Mod.baseInventory[heldCustomItemWrapper.ID] += heldCustomItemWrapper.stack;
-                                }
-                                else
-                                {
-                                    Mod.baseInventory.Add(heldCustomItemWrapper.ID, heldCustomItemWrapper.stack);
-                                }
-                                if (Mod.currentBaseManager.baseInventoryObjects.ContainsKey(heldCustomItemWrapper.ID))
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects[heldCustomItemWrapper.ID].Add(heldCustomItemWrapper.gameObject);
-                                }
-                                else
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects.Add(heldCustomItemWrapper.ID, new List<GameObject>());
-                                    Mod.currentBaseManager.baseInventoryObjects[heldCustomItemWrapper.ID].Add(heldCustomItemWrapper.gameObject);
+                                    descManager.SetDescriptionPack();
                                 }
                             }
-                            else if (vanillaItemDescriptor.locationIndex == 2)
+                            else if (__instance is FVRFireArmClip)
                             {
-                                // Was on player
-                                Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
-                                if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
+                                FVRFireArmClip asClip = __instance as FVRFireArmClip;
+                                Mod.clipsByType[asClip.ClipType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] -= 1;
+                                if (Mod.clipsByType[asClip.ClipType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] == 0)
                                 {
-                                    Mod.playerInventory.Remove(heldCustomItemWrapper.ID);
+                                    Mod.clipsByType[asClip.ClipType].Remove((__instance as FVRPhysicalObject).ObjectWrapper.DisplayName);
+
+                                    if (Mod.clipsByType[asClip.ClipType].Count == 0)
+                                    {
+                                        Mod.clipsByType.Remove(asClip.ClipType);
+                                    }
                                 }
-                                Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Remove(heldCustomItemWrapper.gameObject);
-                                if (Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Count == 0)
+
+                                foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
                                 {
-                                    Mod.playerInventoryObjects.Remove(heldCustomItemWrapper.ID);
+                                    descManager.SetDescriptionPack();
+                                }
+                            }
+                            else if(__instance is FVRFireArmRound)
+                            {
+                                FVRFireArmRound asRound = __instance as FVRFireArmRound;
+                                Mod.roundsByType[asRound.RoundType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] -= 1;
+                                if (Mod.roundsByType[asRound.RoundType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] == 0)
+                                {
+                                    Mod.roundsByType[asRound.RoundType].Remove((__instance as FVRPhysicalObject).ObjectWrapper.DisplayName);
+
+                                    if (Mod.roundsByType[asRound.RoundType].Count == 0)
+                                    {
+                                        Mod.roundsByType.Remove(asRound.RoundType);
+                                    }
+                                }
+
+                                foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
+                                {
+                                    descManager.SetDescriptionPack();
                                 }
                             }
                         }
-                        else if (heldVanillaItemDescriptor)
-                        {
-                            BeginInteractionPatch.SetItemLocationIndex(vanillaItemDescriptor.locationIndex, null, heldVanillaItemDescriptor);
-
-                            // Update lists
-                            if (vanillaItemDescriptor.locationIndex == 1)
-                            {
-                                // Was on player
-                                Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
-                                if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
-                                {
-                                    Mod.playerInventory.Remove(heldVanillaItemDescriptor.H3ID);
-                                }
-                                Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
-                                if (Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Count == 0)
-                                {
-                                    Mod.playerInventoryObjects.Remove(heldVanillaItemDescriptor.H3ID);
-                                }
-
-                                // Now in hideout
-                                if (Mod.baseInventory.ContainsKey(heldVanillaItemDescriptor.H3ID))
-                                {
-                                    Mod.baseInventory[heldVanillaItemDescriptor.H3ID] += 1;
-                                }
-                                else
-                                {
-                                    Mod.baseInventory.Add(heldVanillaItemDescriptor.H3ID, 1);
-                                }
-                                if (Mod.currentBaseManager.baseInventoryObjects.ContainsKey(heldVanillaItemDescriptor.H3ID))
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects[heldVanillaItemDescriptor.H3ID].Add(heldVanillaItemDescriptor.gameObject);
-                                }
-                                else
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects.Add(heldVanillaItemDescriptor.H3ID, new List<GameObject>());
-                                    Mod.currentBaseManager.baseInventoryObjects[heldVanillaItemDescriptor.H3ID].Add(heldVanillaItemDescriptor.gameObject);
-                                }
-                            }
-                            else if (vanillaItemDescriptor.locationIndex == 2)
-                            {
-                                // Was on player
-                                Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
-                                if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
-                                {
-                                    Mod.playerInventory.Remove(heldVanillaItemDescriptor.H3ID);
-                                }
-                                Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
-                                if (Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Count == 0)
-                                {
-                                    Mod.playerInventoryObjects.Remove(heldVanillaItemDescriptor.H3ID);
-                                }
-
-                                // MagazinesByType/ClipsbyType
-                                if (__instance is FVRFireArmMagazine)
-                                {
-                                    FVRFireArmMagazine asMag = __instance as FVRFireArmMagazine;
-                                    Mod.magazinesByType[asMag.MagazineType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] -= 1;
-                                    if (Mod.magazinesByType[asMag.MagazineType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] == 0)
-                                    {
-                                        Mod.magazinesByType[asMag.MagazineType].Remove((__instance as FVRPhysicalObject).ObjectWrapper.DisplayName);
-
-                                        if (Mod.magazinesByType[asMag.MagazineType].Count == 0)
-                                        {
-                                            Mod.magazinesByType.Remove(asMag.MagazineType);
-                                        }
-                                    }
-
-                                    foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                                    {
-                                        descManager.SetDescriptionPack();
-                                    }
-                                }
-                                else if (__instance is FVRFireArmClip)
-                                {
-                                    FVRFireArmClip asClip = __instance as FVRFireArmClip;
-                                    Mod.clipsByType[asClip.ClipType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] -= 1;
-                                    if (Mod.clipsByType[asClip.ClipType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] == 0)
-                                    {
-                                        Mod.clipsByType[asClip.ClipType].Remove((__instance as FVRPhysicalObject).ObjectWrapper.DisplayName);
-
-                                        if (Mod.clipsByType[asClip.ClipType].Count == 0)
-                                        {
-                                            Mod.clipsByType.Remove(asClip.ClipType);
-                                        }
-                                    }
-
-                                    foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                                    {
-                                        descManager.SetDescriptionPack();
-                                    }
-                                }
-                                else if (__instance is FVRFireArmRound)
-                                {
-                                    FVRFireArmRound asRound = __instance as FVRFireArmRound;
-                                    Mod.roundsByType[asRound.RoundType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] -= 1;
-                                    if (Mod.roundsByType[asRound.RoundType][(__instance as FVRPhysicalObject).ObjectWrapper.DisplayName] == 0)
-                                    {
-                                        Mod.roundsByType[asRound.RoundType].Remove((__instance as FVRPhysicalObject).ObjectWrapper.DisplayName);
-
-                                        if (Mod.roundsByType[asRound.RoundType].Count == 0)
-                                        {
-                                            Mod.roundsByType.Remove(asRound.RoundType);
-                                        }
-                                    }
-
-                                    foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                                    {
-                                        descManager.SetDescriptionPack();
-                                    }
-                                }
-                            }
-                        }
-                        return;
                     }
+                    return;
                 }
                 return;
             }
@@ -2281,13 +2238,14 @@ namespace EFM
                 // Check if volume fits in container
                 if (collidingContainerWrapper.AddItemToContainer(primary))
                 {
-                    //TODO: Set location index to container's and update lists accordingly
                     if(collidingContainerWrapper.locationIndex == 1)
                     {
                         BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor);
 
                         if(heldCustomItemWrapper != null)
                         {
+                            collidingContainerWrapper.currentWeight += heldCustomItemWrapper.currentWeight;
+
                             // Was on player
                             Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
                             if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
@@ -2321,6 +2279,8 @@ namespace EFM
                         }
                         else
                         {
+                            collidingContainerWrapper.currentWeight += heldVanillaItemDescriptor.currentWeight;
+
                             // Was on player
                             Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
                             if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
@@ -2359,6 +2319,8 @@ namespace EFM
 
                         if (heldCustomItemWrapper != null)
                         {
+                            collidingContainerWrapper.currentWeight += heldCustomItemWrapper.currentWeight;
+
                             // Was on player
                             Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
                             if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
@@ -2373,6 +2335,8 @@ namespace EFM
                         }
                         else
                         {
+                            collidingContainerWrapper.currentWeight += heldVanillaItemDescriptor.currentWeight;
+
                             // Was on player
                             Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
                             if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
@@ -2470,6 +2434,8 @@ namespace EFM
                 // Update lists
                 if (heldCustomItemWrapper != null)
                 {
+                    Mod.weight -= heldCustomItemWrapper.currentWeight;
+
                     // Was on player
                     Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
                     if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
@@ -2503,6 +2469,8 @@ namespace EFM
                 }
                 else
                 {
+                    Mod.weight -= heldVanillaItemDescriptor.currentWeight;
+
                     // Was on player
                     Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
                     if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
@@ -2544,6 +2512,8 @@ namespace EFM
                 // Update lists
                 if (heldCustomItemWrapper != null)
                 {
+                    Mod.weight -= heldCustomItemWrapper.currentWeight;
+
                     // Was on player
                     Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
                     if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
@@ -2558,6 +2528,8 @@ namespace EFM
                 }
                 else
                 {
+                    Mod.weight -= heldVanillaItemDescriptor.currentWeight;
+
                     // Was on player
                     Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
                     if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
@@ -2934,6 +2906,12 @@ namespace EFM
                     {
                         EFM_CustomItemWrapper equipmentItemWrapper = EFM_EquipmentSlot.currentRig;
                         equipmentItemWrapper.itemsInSlots[slotIndex] = __instance.gameObject;
+
+                        // Update rig weight
+                        equipmentItemWrapper.currentWeight += __instance.RootRigidbody.mass;
+
+                        foundSlot = true;
+                        break;
                     }
                 }
 
@@ -2966,6 +2944,10 @@ namespace EFM
                             if (customItemWrapper.rigSlots[slotIndex].Equals(slot))
                             {
                                 customItemWrapper.itemsInSlots[slotIndex] = __instance.gameObject;
+
+                                // Update rig weight
+                                customItemWrapper.currentWeight += __instance.RootRigidbody.mass;
+
                                 return;
                             }
                         }
@@ -3225,6 +3207,8 @@ namespace EFM
                                                     containerItemWrapper.itemType == Mod.ItemType.Container || 
                                                     containerItemWrapper.itemType == Mod.ItemType.Pouch))
                 {
+                    containerItemWrapper.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : vanillaItemDescriptor.currentWeight;
+
                     containerItemWrapper.containingVolume -= customItemWrapper != null ? customItemWrapper.volumes[customItemWrapper.mode]: Mod.sizeVolumes[(int)__instance.Size];
 
                     // Reset cols of item so that they are non trigger again and can collide with the world and the container
@@ -3248,6 +3232,17 @@ namespace EFM
         {
             if(customItemWrapper != null)
             {
+                if(customItemWrapper.locationIndex == 0 && locationIndex != 0)
+                {
+                    // Taken out of player inventory
+                    Mod.weight -= customItemWrapper.currentWeight;
+                }
+                else if(customItemWrapper.locationIndex != 0 && locationIndex == 0)
+                {
+                    // Added to player inventory
+                    Mod.weight += customItemWrapper.currentWeight;
+                }
+
                 customItemWrapper.locationIndex = locationIndex;
 
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
@@ -3267,7 +3262,58 @@ namespace EFM
             }
             else
             {
+                if (vanillaItemDescriptor.locationIndex == 0 && locationIndex != 0)
+                {
+                    // Taken out of player inventory
+                    Mod.weight -= vanillaItemDescriptor.currentWeight;
+                }
+                else if (vanillaItemDescriptor.locationIndex != 0 && locationIndex == 0)
+                {
+                    // Added to player inventory
+                    Mod.weight += vanillaItemDescriptor.currentWeight;
+                }
+
                 vanillaItemDescriptor.locationIndex = locationIndex;
+
+                FVRPhysicalObject physObj = vanillaItemDescriptor.GetComponent<FVRPhysicalObject>();
+                if(physObj != null)
+                {
+                    if(physObj is FVRFireArm)
+                    {
+                        FVRFireArm asFireArm = (FVRFireArm)physObj;
+
+                        // Ammo container
+                        if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
+                        {
+                            asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>().locationIndex = locationIndex;
+                        }
+                        else if(asFireArm.UsesClips && asFireArm.Clip != null)
+                        {
+                            asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>().locationIndex = locationIndex;
+                        }
+
+                        // Attachments
+                        if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
+                        {
+                            foreach(FVRFireArmAttachment attachment in asFireArm.Attachments)
+                            {
+                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>());
+                            }
+                        }
+                    }
+                    else if(physObj is FVRFireArmAttachment)
+                    {
+                        FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)physObj;
+
+                        if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
+                        {
+                            foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
+                            {
+                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>());
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -4322,8 +4368,8 @@ namespace EFM
         {
             List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
             List<CodeInstruction> toInsert = new List<CodeInstruction>();
-            toInsert.Add(new CodeInstruction(OpCodes.Stloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
-            toInsert.Add(new CodeInstruction(OpCodes.Ldloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
+            toInsert.Add(new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
+            toInsert.Add(new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
 
             for (int i = 0; i < instructionList.Count; ++i)
             {
@@ -4431,8 +4477,8 @@ namespace EFM
         {
             List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
             List<CodeInstruction> toInsert = new List<CodeInstruction>();
-            toInsert.Add(new CodeInstruction(OpCodes.Stloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
-            toInsert.Add(new CodeInstruction(OpCodes.Ldloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
+            toInsert.Add(new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
+            toInsert.Add(new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
 
             for (int i = 0; i < instructionList.Count; ++i)
             {
@@ -4626,6 +4672,378 @@ namespace EFM
                 }
             }
             return instructionList;
+        }
+    }
+
+    // Patches FVRFireArmChamber.SetRound to keep track of weight in chamber
+    class ChamberSetRoundPatch
+    {
+        static void Prefix(ref FVRFireArmRound round, ref FVRFireArmChamber __instance)
+        {
+            if (__instance.IsFull && round == null)
+            {
+                EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
+                VID.currentWeight -= 0.015f;
+                if(VID.locationIndex == 0)
+                {
+                    Mod.weight -= 0.015f;
+                }
+            }
+            else
+            {
+                EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
+                VID.currentWeight += 0.015f;
+                if (VID.locationIndex == 0)
+                {
+                    Mod.weight += 0.015f;
+                }
+            }
+        }
+    }
+
+    // Patches FVRFireArmMagazine.RemoveRound() to keep track of weight of ammo in mag
+    class MagRemoveRoundPatch
+    {
+        static int preNumRounds = 0;
+
+        static void Prefix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
+        {
+            preNumRounds = ___m_numRounds;
+        }
+
+        static void Postfix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
+        {
+            int postNumRounds = ___m_numRounds;
+
+            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+        }
+    }
+
+    // Patches FVRFireArmMagazine.RemoveRound(bool) to keep track of weight of ammo in mag
+    // TODO: See if this could be used to do what we do in MagazineUpdateInteractionPatch instead
+    class MagRemoveRoundBoolPatch
+    {
+        static int preNumRounds = 0;
+
+        static void Prefix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
+        {
+            preNumRounds = ___m_numRounds;
+        }
+
+        static void Postfix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
+        {
+            int postNumRounds = ___m_numRounds;
+
+            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+        }
+    }
+
+    // Patches FVRFireArmMagazine.RemoveRound(int) to keep track of weight of ammo in mag
+    class MagRemoveRoundIntPatch
+    {
+        static int preNumRounds = 0;
+
+        static void Prefix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
+        {
+            preNumRounds = ___m_numRounds;
+        }
+
+        static void Postfix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
+        {
+            int postNumRounds = ___m_numRounds;
+
+            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+        }
+    }
+
+    // Patches FVRFireArmClip.RemoveRound() to keep track of weight of ammo in clip
+    class ClipRemoveRoundPatch
+    {
+        static int preNumRounds = 0;
+
+        static void Prefix(int ___m_numRounds, ref FVRFireArmClip __instance)
+        {
+            preNumRounds = ___m_numRounds;
+        }
+
+        static void Postfix(int ___m_numRounds, ref FVRFireArmClip __instance)
+        {
+            int postNumRounds = ___m_numRounds;
+
+            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+        }
+    }
+
+    // Patches FVRFireArmClip.RemoveRound(bool) to keep track of weight of ammo in clip
+    // TODO: See if this could be used to do what we do in ClipUpdateInteractionPatch instead
+    class ClipRemoveRoundBoolPatch
+    {
+        static int preNumRounds = 0;
+
+        static void Prefix(int ___m_numRounds, ref FVRFireArmClip __instance)
+        {
+            preNumRounds = ___m_numRounds;
+        }
+
+        static void Postfix(int ___m_numRounds, ref FVRFireArmClip __instance)
+        {
+            int postNumRounds = ___m_numRounds;
+
+            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+        }
+    }
+
+    // Patches FVRFireArmClip.RemoveRoundReturnClass to keep track of weight of ammo in clip
+    class ClipRemoveRoundClassPatch
+    {
+        static int preNumRounds = 0;
+
+        static void Prefix(int ___m_numRounds, ref FVRFireArmClip __instance)
+        {
+            preNumRounds = ___m_numRounds;
+        }
+
+        static void Postfix(int ___m_numRounds, ref FVRFireArmClip __instance)
+        {
+            int postNumRounds = ___m_numRounds;
+
+            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+        }
+    }
+
+    // Patches FVRFireArm.LoadMag to keep track of weight of mag on firearm and its location index
+    class FireArmLoadMagPatch
+    {
+        static void Prefix(FVRFireArmMagazine mag, ref FVRFireArm __instance)
+        {
+            if(__instance.Magazine == null && mag != null)
+            {
+                EFM_VanillaItemDescriptor magVID = mag.GetComponent<EFM_VanillaItemDescriptor>();
+                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                fireArmVID.currentWeight += magVID.currentWeight;
+
+                if(fireArmVID.locationIndex == 0)
+                {
+                    // If went from outside player inventory into player inventory
+                    if (magVID.locationIndex != 0)
+                    {
+                        Mod.weight += magVID.currentWeight;
+
+                        BeginInteractionPatch.SetItemLocationIndex(0, null, magVID);
+                    }
+                }
+                else // Fire arm not on player
+                {
+                    // If went from player inventory to outside player inventory
+                    if (magVID.locationIndex == 0)
+                    {
+                        Mod.weight -= magVID.currentWeight;
+
+                        BeginInteractionPatch.SetItemLocationIndex(fireArmVID.locationIndex, null, magVID);
+                    }
+                }
+            }
+        }
+    }
+
+    // Patches FVRFireArm.EjectMag to keep track of weight of mag on firearm and its location index
+    class FireArmEjectMagPatch
+    {
+        static void Prefix(ref FVRFireArm __instance)
+        {
+            if(__instance.Magazine != null)
+            {
+                EFM_VanillaItemDescriptor magVID = __instance.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
+                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                fireArmVID.currentWeight -= magVID.currentWeight;
+
+                if(fireArmVID.locationIndex == 0)
+                {
+                    // Went from player to out of player
+                    if (__instance.Magazine.m_hand == null)
+                    {
+                        Mod.weight -= magVID.currentWeight;
+
+                        BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, magVID);
+                    }
+                }
+                else
+                {
+                    // Went from out of player to player
+                    if (__instance.Magazine.m_hand != null)
+                    {
+                        Mod.weight += magVID.currentWeight;
+
+                        BeginInteractionPatch.SetItemLocationIndex(0, null, magVID);
+                    }
+                }
+            }
+        }
+    }
+
+    // Patches FVRFireArm.LoadClip to keep track of weight of clip on firearm and its location index
+    class FireArmLoadClipPatch
+    {
+        static void Prefix(FVRFireArmClip clip, ref FVRFireArm __instance)
+        {
+            if(__instance.Clip == null && clip != null)
+            {
+                EFM_VanillaItemDescriptor clipVID = clip.GetComponent<EFM_VanillaItemDescriptor>();
+                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                fireArmVID.currentWeight += clipVID.currentWeight;
+
+                if(fireArmVID.locationIndex == 0)
+                {
+                    // If went from outside player inventory into player inventory
+                    if (clipVID.locationIndex != 0)
+                    {
+                        Mod.weight += clipVID.currentWeight;
+
+                        BeginInteractionPatch.SetItemLocationIndex(0, null, clipVID);
+                    }
+                }
+                else // Fire arm not on player
+                {
+                    // If went from player inventory to outside player inventory
+                    if (clipVID.locationIndex == 0)
+                    {
+                        Mod.weight -= clipVID.currentWeight;
+
+                        BeginInteractionPatch.SetItemLocationIndex(fireArmVID.locationIndex, null, clipVID);
+                    }
+                }
+            }
+        }
+    }
+
+    // Patches FVRFireArm.EjectClip to keep track of weight of clip on firearm and its location index
+    class FireArmEjectClipPatch
+    {
+        static void Prefix(ref FVRFireArm __instance)
+        {
+            if(__instance.Clip != null)
+            {
+                EFM_VanillaItemDescriptor clipVID = __instance.Clip.GetComponent<EFM_VanillaItemDescriptor>();
+                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                fireArmVID.currentWeight -= clipVID.currentWeight;
+
+                if(fireArmVID.locationIndex == 0)
+                {
+                    // Went from player to out of player
+                    if (__instance.Clip.m_hand == null)
+                    {
+                        Mod.weight -= clipVID.currentWeight;
+
+                        BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, clipVID);
+                    }
+                }
+                else
+                {
+                    // Went from out of player to player
+                    if (__instance.Clip.m_hand != null)
+                    {
+                        Mod.weight += clipVID.currentWeight;
+
+                        BeginInteractionPatch.SetItemLocationIndex(0, null, clipVID);
+                    }
+                }
+            }
+        }
+    }
+
+    // Patches FVRFirearmMagazine.AddRound(Round) to keep track of weight
+    class MagAddRoundPatch
+    {
+        static void Prefix(ref FVRFireArmMagazine __instance)
+        {
+            if(__instance.m_numRounds < __instance.m_capacity)
+            {
+                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
+            }
+        }
+    }
+
+    // Patches FVRFirearmMagazine.AddRound(Class) to keep track of weight
+    class MagAddRoundClassPatch
+    {
+        static void Prefix(ref FVRFireArmMagazine __instance)
+        {
+            if(__instance.m_numRounds < __instance.m_capacity)
+            {
+                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
+            }
+        }
+    }
+
+    // Patches FVRFirearmClip.AddRound(Round) to keep track of weight
+    class ClipAddRoundPatch
+    {
+        static void Prefix(ref FVRFireArmClip __instance)
+        {
+            if(__instance.m_numRounds < __instance.m_capacity)
+            {
+                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
+            }
+        }
+    }
+
+    // Patches FVRFirearmClip.AddRound(Class) to keep track of weight
+    class ClipAddRoundClassPatch
+    {
+        static void Prefix(ref FVRFireArmClip __instance)
+        {
+            if(__instance.m_numRounds < __instance.m_capacity)
+            {
+                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
+            }
+        }
+    }
+
+    // Patches FVRFireArmAttachmentMount.RegisterAttachment to keep track of weight
+    // This completely replaces the original
+    class AttachmentMountRegisterPatch
+    {
+        static bool Prefix(FVRFireArmAttachment attachment, ref HashSet<FVRFireArmAttachment> ___AttachmentsHash, ref FVRFireArmAttachmentMount __instance)
+        {
+            if (___AttachmentsHash.Add(attachment))
+            {
+                __instance.AttachmentsList.Add(attachment);
+                if (__instance.HasHoverDisablePiece && __instance.DisableOnHover.activeSelf)
+                {
+                    __instance.DisableOnHover.SetActive(false);
+                }
+
+                // Add weight to parent
+                EFM_VanillaItemDescriptor parentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
+                EFM_VanillaItemDescriptor attachmentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
+                parentVID.currentWeight += attachmentVID.currentWeight;
+
+                BeginInteractionPatch.SetItemLocationIndex(parentVID.locationIndex, null, attachmentVID);
+            }
+
+            return false;
+        }
+    }
+
+    // Patches FVRFireArmAttachmentMount.DeRegisterAttachment to keep track of weight
+    // This completely replaces the original
+    class AttachmentMountDeRegisterPatch
+    {
+        static bool Prefix(FVRFireArmAttachment attachment, ref HashSet<FVRFireArmAttachment> ___AttachmentsHash, ref FVRFireArmAttachmentMount __instance)
+        {
+            if (___AttachmentsHash.Remove(attachment))
+            {
+                __instance.AttachmentsList.Remove(attachment);
+
+                // Add weight to parent
+                EFM_VanillaItemDescriptor parentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
+                EFM_VanillaItemDescriptor attachmentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
+                parentVID.currentWeight -= attachmentVID.currentWeight;
+
+                BeginInteractionPatch.SetItemLocationIndex(0, null, attachmentVID);
+            }
+
+            return false;
         }
     }
     #endregion

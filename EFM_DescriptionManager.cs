@@ -20,6 +20,8 @@ namespace EFM
         public GameObject summaryInsuredIcon;
         public GameObject summaryInsuredBorder;
         public GameObject[] summaryNeededIcons = new GameObject[4]; // Quest, AreaFulfilled, AreaRequired, Wish 
+        public Text summaryWeightText;
+        public Text summaryVolumeText;
 
         public Image fullIcon;
         public Text fullAmountStackText;
@@ -38,6 +40,7 @@ namespace EFM
         public GameObject compatibleAmmoTitle;
         public GameObject compatibleAmmo;
         public Text compatibleAmmoText;
+        public Text propertiesText;
 
         private AudioSource buttonClickAudio;
         private List<GameObject> areaNeededForTexts;
@@ -56,6 +59,8 @@ namespace EFM
             summaryNeededIcons[1] = summaryElements.GetChild(0).GetChild(3).GetChild(1).gameObject;
             summaryNeededIcons[2] = summaryElements.GetChild(0).GetChild(3).GetChild(2).gameObject;
             summaryNeededIcons[3] = summaryElements.GetChild(0).GetChild(3).GetChild(3).gameObject;
+            summaryWeightText = summaryElements.GetChild(1).GetChild(3).GetChild(0).GetComponent<Text>();
+            summaryVolumeText = summaryElements.GetChild(1).GetChild(4).GetChild(0).GetComponent<Text>();
 
             Transform fullContent = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             fullIcon = fullContent.GetChild(1).GetComponent<Image>();
@@ -78,6 +83,7 @@ namespace EFM
             compatibleAmmoTitle = fullContent.GetChild(10).gameObject;
             compatibleAmmo = fullContent.GetChild(11).gameObject;
             compatibleAmmoText = fullContent.GetChild(11).GetChild(0).GetComponent<Text>();
+            propertiesText = fullContent.GetChild(2).GetChild(0).GetComponent<Text>();
 
             // Set exit button
             EFM_PointableButton exitButton = transform.GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_PointableButton>();
@@ -141,10 +147,32 @@ namespace EFM
 
             // Summary
             summaryIcon.sprite = descriptionPack.icon;
-            if (descriptionPack.maxStack != -1) 
+            if (descriptionPack.isCustom)
             {
-                summaryAmountStackText.gameObject.SetActive(true);
-                summaryAmountStackText.text = descriptionPack.stack.ToString() + "/" + descriptionPack.maxStack;
+                if (descriptionPack.customItem.itemType == Mod.ItemType.Money)
+                {
+                    summaryAmountStackText.gameObject.SetActive(true);
+                    summaryAmountStackText.text = descriptionPack.stack.ToString();
+                }
+                else if (descriptionPack.customItem.itemType == Mod.ItemType.Consumable)
+                {
+                    summaryAmountStackText.gameObject.SetActive(true);
+                    summaryAmountStackText.text = descriptionPack.stack.ToString() + "/" + descriptionPack.maxStack;
+                }
+                else if (descriptionPack.customItem.itemType == Mod.ItemType.Backpack || descriptionPack.customItem.itemType == Mod.ItemType.Container || descriptionPack.customItem.itemType == Mod.ItemType.Pouch)
+                {
+                    summaryAmountStackText.gameObject.SetActive(true);
+                    summaryAmountStackText.text = descriptionPack.containingVolume.ToString() + "/" + descriptionPack.maxVolume;
+                }
+                else if (descriptionPack.customItem.itemType == Mod.ItemType.AmmoBox)
+                {
+                    summaryAmountStackText.gameObject.SetActive(true);
+                    summaryAmountStackText.text = descriptionPack.stack.ToString() + "/" + descriptionPack.maxStack;
+                }
+                else
+                {
+                    summaryAmountStackText.gameObject.SetActive(false);
+                }
             }
             else
             {
@@ -181,6 +209,8 @@ namespace EFM
                 summaryNeededIcons[2].SetActive(false);
             }
             summaryNeededIcons[3].SetActive(descriptionPack.onWishlist);
+            summaryWeightText.text = descriptionPack.weight.ToString();
+            summaryVolumeText.text = descriptionPack.volume.ToString();
 
             // Full
             fullIcon.sprite = descriptionPack.icon;
@@ -287,6 +317,7 @@ namespace EFM
                 }
                 compatibleAmmoText.text = compatibleAmmoString;
             }
+            propertiesText.text = "Weight: " + descriptionPack.weight + "kg, Volume: " + descriptionPack.volume;
         }
 
         public void OpenFull()

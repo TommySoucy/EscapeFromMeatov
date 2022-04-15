@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace EFM
 {
 	public class EFM_CustomItemWrapper : MonoBehaviour, EFM_Describable
 	{
-		public FVRPhysicalObject physicalObject;
+		public FVRPhysicalObject physObj;
 
 		public Mod.ItemType itemType;
 		public Collider[] colliders;
@@ -33,10 +34,38 @@ namespace EFM
 				}
 			}
 		}
+		private float _currentWeight; // Includes attachments and ammo containers attached to this item
+		public float currentWeight
+		{
+			get { return _currentWeight; }
+			set
+			{
+				_currentWeight = value;
+				if (descriptionManager != null)
+				{
+					descriptionManager.SetDescriptionPack();
+				}
+			}
+		}
 
 		// Equipment
 		// 0: Open (Model should be as orginal in tarkov), 1: ClosedFull (Closed but only folded to the point that any container/armor is not folded), 2: ClosedEmpty (Folded and flattened as much as is realistic)
-		public int mode;
+		private int _mode;
+		public int mode
+		{
+			set
+			{
+				_mode = value;
+				if (descriptionManager != null)
+				{
+					descriptionManager.SetDescriptionPack();
+				}
+			} 
+			get
+            {
+				return _mode;
+            }
+		}
 		public GameObject[] models;
 		public GameObject[] interactiveSets;
 		public float[] volumes;
@@ -70,6 +99,7 @@ namespace EFM
 		// Backpacks, Containers, Pouches
 		public GameObject mainContainer;
 		public Renderer[] mainContainerRenderers;
+		public Text volumeIndicator;
 		public float maxVolume;
 		private float _containingVolume;
 		public float containingVolume 
@@ -81,6 +111,7 @@ namespace EFM
 				{
 					descriptionManager.SetDescriptionPack();
 				}
+				volumeIndicator.text = _containingVolume.ToString() +"/"+maxVolume;
 			}
 		}
 		public class ResetColPair
@@ -149,11 +180,74 @@ namespace EFM
 			descriptionPack.name = itemName;
 			descriptionPack.description = description;
 			descriptionPack.icon = Mod.itemIcons[ID];
+
+			physObj = gameObject.GetComponent<FVRPhysicalObject>();
+
+			SetCurrentWeight(this);
+		}
+
+		public static float SetCurrentWeight(EFM_CustomItemWrapper item)
+		{
+			if (item == null)
+			{
+				return 0;
+			}
+
+			item.currentWeight = item.physObj.RootRigidbody.mass;
+
+			if (item.itemType == Mod.ItemType.Rig || item.itemType == Mod.ItemType.ArmoredRig)
+			{
+				foreach (GameObject containedItem in item.itemsInSlots) 
+				{
+					if(containedItem != null)
+                    {
+						EFM_CustomItemWrapper containedItemCIW = containedItem.GetComponent<EFM_CustomItemWrapper>();
+						EFM_VanillaItemDescriptor containedItemVID = containedItem.GetComponent<EFM_VanillaItemDescriptor>();
+						if(containedItemCIW != null)
+                        {
+							item.currentWeight += SetCurrentWeight(containedItemCIW);
+                        }
+                        else
+                        {
+							item.currentWeight += EFM_VanillaItemDescriptor.SetCurrentWeight(containedItemVID);
+                        }
+                    }
+				}
+			}
+			else if(item.itemType == Mod.ItemType.Backpack || item.itemType == Mod.ItemType.Container || item.itemType == Mod.ItemType.Pouch)
+			{
+				foreach (Transform containedItem in item.itemObjectsRoot)
+				{
+					if (containedItem != null)
+					{
+						EFM_CustomItemWrapper containedItemCIW = containedItem.GetComponent<EFM_CustomItemWrapper>();
+						EFM_VanillaItemDescriptor containedItemVID = containedItem.GetComponent<EFM_VanillaItemDescriptor>();
+						if (containedItemCIW != null)
+						{
+							item.currentWeight += SetCurrentWeight(containedItemCIW);
+						}
+						else
+						{
+							item.currentWeight += EFM_VanillaItemDescriptor.SetCurrentWeight(containedItemVID);
+						}
+					}
+				}
+			}
+			else if(item.itemType == Mod.ItemType.AmmoBox)
+            {
+				FVRFireArmMagazine magazine = item.GetComponent<FVRFireArmMagazine>();
+				if (magazine != null)
+				{
+					item.currentWeight += 0.015f * magazine.m_numRounds;
+				}
+            }
+
+			return item.currentWeight;
 		}
 
 		private void Update()
 		{
-			if (physicalObject.m_hand != null)
+			if (physObj.m_hand != null)
 			{
 				TakeInput();
 			}
@@ -243,7 +337,7 @@ namespace EFM
 
 		private void TakeInput()
 		{
-			FVRViveHand hand = physicalObject.m_hand;
+			FVRViveHand hand = physObj.m_hand;
 			if (hand.IsInStreamlinedMode)
 			{
 				if (hand.Input.AXButtonPressed)
@@ -1116,16 +1210,28 @@ namespace EFM
 			}
 			descriptionPack.onWishlist = Mod.wishList.Contains(ID);
 			descriptionPack.insured = insured;
-			if (maxStack > 1)
+			if(itemType == Mod.ItemType.Money)
 			{
 				descriptionPack.stack = stack;
-				descriptionPack.maxStack = maxStack;
 			}
-			else if(maxAmount > 0)
+			else if(itemType == Mod.ItemType.Consumable)
 			{
 				descriptionPack.stack = amount;
 				descriptionPack.maxStack = maxAmount;
 			}
+			else if(itemType == Mod.ItemType.Backpack || itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
+			{
+				descriptionPack.containingVolume = containingVolume;
+				descriptionPack.maxVolume = maxVolume;
+			}
+			else if(itemType == Mod.ItemType.AmmoBox)
+			{
+				FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
+				descriptionPack.stack = asMagazine.m_numRounds;
+				descriptionPack.maxStack = asMagazine.m_capacity;
+			}
+			descriptionPack.weight = currentWeight;
+			descriptionPack.volume = volumes[mode];
 			descriptionPack.amountRequiredQuest = Mod.requiredForQuest[ID];
 
 			return descriptionPack;
