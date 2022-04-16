@@ -41,6 +41,8 @@ namespace EFM
         public GameObject compatibleAmmo;
         public Text compatibleAmmoText;
         public Text propertiesText;
+        public EFM_HoverScroll upHoverScroll;
+        public EFM_HoverScroll downHoverScroll;
 
         private AudioSource buttonClickAudio;
         private List<GameObject> areaNeededForTexts;
@@ -92,6 +94,22 @@ namespace EFM
             exitButton.hoverSound = transform.GetChild(0).GetChild(1).GetChild(3).GetComponent<AudioSource>();
             buttonClickAudio = transform.GetChild(0).GetChild(1).GetChild(4).GetComponent<AudioSource>();
             exitButton.Button.onClick.AddListener(() => { OnExitClick(); });
+
+            // Set hover scrolls
+            upHoverScroll = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_HoverScroll>();
+            downHoverScroll = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_HoverScroll>();
+            upHoverScroll.MaxPointingRange = 30;
+            upHoverScroll.hoverSound = exitButton.hoverSound;
+            upHoverScroll.scrollbar = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
+            upHoverScroll.other = downHoverScroll;
+            upHoverScroll.up = true;
+            upHoverScroll.rate = 0.5f;
+            downHoverScroll.MaxPointingRange = 30;
+            downHoverScroll.hoverSound = exitButton.hoverSound;
+            downHoverScroll.scrollbar = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
+            downHoverScroll.other = upHoverScroll;
+            downHoverScroll.up = false;
+            downHoverScroll.rate = 0.5f;
 
             // Inactive by default
             gameObject.SetActive(false);
@@ -213,6 +231,7 @@ namespace EFM
             summaryVolumeText.text = descriptionPack.volume.ToString();
 
             // Full
+            float descriptionHeight = 615; // Top and bottom padding (25+25) + Icon (300) + Icon spacing (20) + Needed for title (55) + Spacing (20) + Desc. title (55) + Spacing (20) + Name spacing (20) + Properties (55) + Spacing (20)
             fullIcon.sprite = descriptionPack.icon;
             if (descriptionPack.maxStack != -1)
             {
@@ -224,11 +243,30 @@ namespace EFM
                 fullAmountStackText.gameObject.SetActive(false);
             }
             fullNameText.text = descriptionPack.name;
-            fullNeededForNone.SetActive(descriptionPack.amountRequired == 0);
-            fullWishlist.SetActive(descriptionPack.onWishlist);
-            fullNeededForTotal.SetActive(descriptionPack.amountRequired > 0);
+            descriptionHeight += fullNameText.rectTransform.sizeDelta.y;
+            if(descriptionPack.amountRequired == 0)
+            {
+                descriptionHeight += 47;
+                fullNeededForNone.SetActive(true);
+            }
+            else
+            {
+                fullNeededForNone.SetActive(false);
+            }
+            if(descriptionPack.onWishlist)
+            {
+                descriptionHeight += 47;
+                fullWishlist.SetActive(true);
+            }
+            else
+            {
+                fullWishlist.SetActive(false);
+            }
             if (descriptionPack.amountRequired > 0)
             {
+                descriptionHeight += 47;
+                fullNeededForTotal.SetActive(true);
+
                 fullNeededForTotalText.text = "Total: (" + descriptionPack.amount + "/" + descriptionPack.amountRequired + ")";
                 if(descriptionPack.amount >= descriptionPack.amountRequired)
                 {
@@ -238,6 +276,10 @@ namespace EFM
                 {
                     fullNeededForTotalText.color = Color.blue;
                 }
+            }
+            else
+            {
+                fullNeededForTotal.SetActive(false);
             }
             if (areaNeededForTexts == null)
             {
@@ -270,6 +312,7 @@ namespace EFM
                         neededForInstanceText.color = Color.blue;
                     }
                     areaNeededForTexts.Add(neededForInstance);
+                    descriptionHeight += 47;
                 }
             }
             fullInsuredIcon.SetActive(descriptionPack.insured);
@@ -293,31 +336,59 @@ namespace EFM
             }
             fullNeededIcons[3].SetActive(descriptionPack.onWishlist);
             fullDescriptionText.text = descriptionPack.description;
+            descriptionHeight += fullDescriptionText.rectTransform.sizeDelta.y;
             bool addCompatibleMags = descriptionPack.compatibleAmmoContainers != null && descriptionPack.compatibleAmmoContainers.Count > 0;
-            compatibleMagsTitle.SetActive(addCompatibleMags);
-            compatibleMags.SetActive(addCompatibleMags);
             if (addCompatibleMags)
             {
+                compatibleMagsTitle.SetActive(true);
+                descriptionHeight += 55;
+                compatibleMags.SetActive(true);
+
                 string compatibleAmmoContainersString = "";
                 foreach (KeyValuePair<string, int> ammoContainer in descriptionPack.compatibleAmmoContainers)
                 {
                     compatibleAmmoContainersString += "- "+ammoContainer.Key +" ("+ammoContainer.Value+")\n";
                 }
                 compatibleMagsText.text = compatibleAmmoContainersString;
+                descriptionHeight += compatibleMagsText.rectTransform.sizeDelta.y;
+            }
+            else
+            {
+                compatibleMagsTitle.SetActive(false);
+                compatibleMags.SetActive(false);
             }
             bool addCompatibleAmmo = descriptionPack.compatibleAmmo != null && descriptionPack.compatibleAmmo.Count > 0;
-            compatibleAmmoTitle.SetActive(addCompatibleAmmo);
-            compatibleAmmo.SetActive(addCompatibleAmmo);
             if (addCompatibleAmmo)
             {
+                compatibleAmmoTitle.SetActive(true);
+                descriptionHeight += 55;
+                compatibleAmmo.SetActive(true);
+
                 string compatibleAmmoString = "";
                 foreach (KeyValuePair<string, int> ammo in descriptionPack.compatibleAmmo)
                 {
                     compatibleAmmoString += "- "+ammo.Key +" ("+ammo.Value+")\n";
                 }
                 compatibleAmmoText.text = compatibleAmmoString;
+                descriptionHeight += compatibleAmmoText.rectTransform.sizeDelta.y;
+            }
+            else
+            {
+                compatibleAmmoTitle.SetActive(false);
+                compatibleAmmo.SetActive(false);
             }
             propertiesText.text = "Weight: " + descriptionPack.weight + "kg, Volume: " + descriptionPack.volume;
+
+            // Set hoverscrolls depending on description height
+            if(descriptionHeight > 1000)
+            {
+                downHoverScroll.gameObject.SetActive(true); // Only down should be activated at first
+
+                // We want to move set amount every second, we know the height = 1 so if want to move half of height per second,
+                // we want to move at rate of amount we want/height, this will give us a fraction of scroll bar to move per second
+                downHoverScroll.rate = 500 / descriptionHeight;
+                upHoverScroll.rate = 500 / descriptionHeight;
+            }
         }
 
         public void OpenFull()
