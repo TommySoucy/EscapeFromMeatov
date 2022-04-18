@@ -62,6 +62,9 @@ namespace EFM
         public static Dictionary<FireArmMagazineType, Dictionary<string, int>> magazinesByType;
         public static Dictionary<FireArmClipType, Dictionary<string, int>> clipsByType;
         public static Dictionary<FireArmRoundType, Dictionary<string, int>> roundsByType;
+        public static Dictionary<string, List<string>> itemsByParents;
+        public static List<string> usedRoundIDs;
+        public static Dictionary<string, int> ammoBoxByAmmoID;
         public static Dictionary<string, int> requiredForQuest;
         public static List<EFM_DescriptionManager> activeDescriptions;
 
@@ -171,8 +174,10 @@ namespace EFM
         public static JArray XPPerLevel;
         public static JObject mapData;
         public static JObject[] locationsDB;
+        public static JArray lootContainerDB;
         public static JObject defaultItemsData;
         public static Dictionary<string, EFM_VanillaItemDescriptor> vanillaItems;
+        public static Dictionary<string, JObject> lootContainersByName; 
 
         // Config settings
 
@@ -197,6 +202,8 @@ namespace EFM
             FaceCover = 13,
             Eyewear = 14,
             Headwear = 15,
+
+            LootContainer = 16
         }
 
         public enum ItemRarity
@@ -624,6 +631,8 @@ namespace EFM
                 customItemWrapper.itemName = itemObjectWrapper.DisplayName;
                 customItemWrapper.description = defaultItemsData["ItemDefaults"][i]["description"].ToString();
                 customItemWrapper.lootExperience = (int)defaultItemsData["ItemDefaults"][i]["lootExperience"];
+                customItemWrapper.spawnChance = (float)defaultItemsData["ItemDefaults"][i]["spawnChance"];
+                customItemWrapper.rarity = ItemRarityStringToEnum(defaultItemsData["ItemDefaults"][i]["rarity"].ToString());
                 if (defaultItemsData["ItemDefaults"][i]["MaxAmount"] != null)
                 {
                     customItemWrapper.maxAmount = (int)defaultItemsData["ItemDefaults"][i]["MaxAmount"];
@@ -634,6 +643,15 @@ namespace EFM
                     customItemWrapper.blocksEyewear = (bool)defaultItemsData["ItemDefaults"][i]["BlocksEyewear"];
                     customItemWrapper.blocksFaceCover = (bool)defaultItemsData["ItemDefaults"][i]["BlocksFaceCover"];
                     customItemWrapper.blocksHeadwear = (bool)defaultItemsData["ItemDefaults"][i]["BlocksHeadwear"];
+                }
+
+                if (itemsByParents.ContainsKey(customItemWrapper.parent))
+                {
+                    itemsByParents[customItemWrapper.parent].Add(customItemWrapper.ID);
+                }
+                else
+                {
+                    itemsByParents.Add(customItemWrapper.parent, new List<string>() { customItemWrapper.ID });
                 }
 
                 // Fill customItemWrapper Colliders
@@ -833,15 +851,29 @@ namespace EFM
                 // Ammobox
                 if(itemType == 8)
                 {
-                    FVRFireArmMagazine fireArmMagazine = (FVRFireArmMagazine)itemPhysicalObject;
-                    fireArmMagazine.MagazineType = FireArmMagazineType.mNone;
-                    fireArmMagazine.RoundEjectionPos = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
-                    fireArmMagazine.RoundType = (FireArmRoundType)Enum.Parse(typeof(FireArmRoundType), defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundType"].ToString());
-                    fireArmMagazine.m_capacity = (int)defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["maxStack"];
-                    fireArmMagazine.m_numRounds = 0;
+                    if (!defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundType"].ToString().Equals("none"))
+                    {
+                        FVRFireArmMagazine fireArmMagazine = (FVRFireArmMagazine)itemPhysicalObject;
+                        fireArmMagazine.MagazineType = FireArmMagazineType.mNone;
+                        fireArmMagazine.RoundEjectionPos = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
+                        fireArmMagazine.RoundType = (FireArmRoundType)Enum.Parse(typeof(FireArmRoundType), defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundType"].ToString());
+                        fireArmMagazine.m_capacity = (int)defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["maxStack"];
+                        fireArmMagazine.m_numRounds = 0;
 
-                    FVRFireArmMagazineReloadTrigger reloadTrigger = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1).gameObject.AddComponent<FVRFireArmMagazineReloadTrigger>();
-                    reloadTrigger.Magazine = fireArmMagazine;
+                        FVRFireArmMagazineReloadTrigger reloadTrigger = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1).gameObject.AddComponent<FVRFireArmMagazineReloadTrigger>();
+                        reloadTrigger.Magazine = fireArmMagazine;
+
+                        ammoBoxByAmmoID.Add(defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["cartridge"].ToString(), i);
+                    }
+                    else // Generic ammo box, does not have specific round type (yet, should be given one when spawned) and reload trigger
+                    {
+                        FVRFireArmMagazine fireArmMagazine = (FVRFireArmMagazine)itemPhysicalObject;
+                        fireArmMagazine.MagazineType = FireArmMagazineType.mNone;
+                        fireArmMagazine.RoundEjectionPos = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
+                        fireArmMagazine.RoundType = FireArmRoundType.a106_25mmR; // Just a default one
+                        fireArmMagazine.m_capacity = (int)defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["maxStack"];
+                        fireArmMagazine.m_numRounds = 0;
+                    }
                 }
 
                 // Money
@@ -1042,6 +1074,12 @@ namespace EFM
             {
                 locationsDB[i] = JObject.Parse(File.ReadAllText(locationFiles[i]));
             }
+            lootContainerDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/LootContainer.json"));
+            lootContainersByName = new Dictionary<string, JObject>();
+            foreach(JToken container in lootContainerDB)
+            {
+                lootContainersByName.Add(container["_name"].ToString(), (JObject)container);
+            }
         }
 
         private void SetVanillaItems()
@@ -1064,6 +1102,15 @@ namespace EFM
                 descriptor.parent = vanillaItemRaw["parent"].ToString();
                 descriptor.lootExperience = (int)vanillaItemRaw["LootExperience"];
                 descriptor.itemName = itemPrefab.name;
+
+                if (itemsByParents.ContainsKey(descriptor.parent))
+                {
+                    itemsByParents[descriptor.parent].Add(H3ID);
+                }
+                else
+                {
+                    itemsByParents.Add(descriptor.parent, new List<string>() { H3ID });
+                }
 
                 FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
                 if(physObj is FVRFireArm)
@@ -1098,11 +1145,12 @@ namespace EFM
                     descriptor.compatibilityValue = 1;
                     descriptor.roundType = (physObj as Speedloader).Chambers[0].Type;
                 }
-                // TODO: Figure out how to get a round's compatible mags efficiently
-                //else if(physObj is FVRFireArmRound)
-                //{
-                //    descriptor.magType = (physObj as FVRFireArmRound).magType;
-                //}
+                else if (physObj is FVRFireArmRound)
+                {
+                    usedRoundIDs.Add(H3ID);
+
+                    // TODO: Figure out how to get a round's compatible mags efficiently so we can list them in the round's description
+                }
 
                 vanillaItems.Add(descriptor.H3ID, descriptor);
             }
@@ -1551,6 +1599,9 @@ namespace EFM
             clipsByType = new Dictionary<FireArmClipType, Dictionary<string, int>>();
             roundsByType = new Dictionary<FireArmRoundType, Dictionary<string, int>>();
             activeDescriptions = new List<EFM_DescriptionManager>();
+            usedRoundIDs = new List<string>();
+            ammoBoxByAmmoID = new Dictionary<string, int>();
+            itemsByParents = new Dictionary<string, List<string>>();
 
             // Subscribe to events
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -4715,7 +4766,31 @@ namespace EFM
         {
             int postNumRounds = ___m_numRounds;
 
-            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+            EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+            if (VID != null)
+            {
+                VID.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+            }
+            else
+            {
+                if (postNumRounds == 0)
+                {
+                    if (CIW.ID.Equals("715") || CIW.ID.Equals("716"))
+                    {
+                        __instance.EndInteraction(__instance.m_hand);
+                        GameObject.Destroy(CIW.gameObject);
+                    }
+                    else
+                    {
+                        CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                    }
+                }
+                else
+                {
+                    CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                }
+            }
         }
     }
 

@@ -1270,62 +1270,10 @@ namespace EFM
             foreach(JToken forced in locationDB["forced"])
             {
                 JArray items = forced["Items"].Value<JArray>();
-                Dictionary<string, EFM_CustomItemWrapper> spawnedItems = new Dictionary<string, EFM_CustomItemWrapper>();
-                for (int i=0; i < items.Count; ++i)
-                {
-                    // Get item from item map
-                    string originalID = items[i]["_tpl"].ToString();
-                    string itemID = null;
-                    if (Mod.itemMap.ContainsKey(originalID))
-                    {
-                        itemID = Mod.itemMap[originalID];
-                    }
-                    else
-                    {
-                        missingForced.Add(originalID);
-                        continue;
-                    }
+                Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
+                Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
+                List<string> unspawnedParents = new List<string>();
 
-                    // Get item prefab
-                    GameObject itemPrefab = null;
-                    if (int.TryParse(itemID, out int index))
-                    {
-                        itemPrefab = Mod.itemPrefabs[index];
-                    }
-                    else
-                    {
-                        itemPrefab = IM.OD[itemID].GetGameObject();
-                    }
-                    EFM_CustomItemWrapper itemWrapper = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
-
-                    // Check for stack
-                    int amountToSpawn = items[i]["upd"] == null ? 1 : items[i]["upd"]["StackObjectCount"] == null ? 1 : (int)items[i]["upd"]["StackObjectCount"];
-                    bool stackable = itemWrapper != null && itemWrapper.maxStack > 1;
-
-                    // Spawn item(s)
-                    if (!stackable)
-                    {
-                        // If not stackable, spawn individual instances of this item and place them under the same parent
-                        for (int j = 0; j < amountToSpawn; ++j)
-                        {
-                            SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItems, forced, originalID);
-                        }
-                    }
-                    else // Unstackable
-                    {
-                        GameObject itemObject = SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItems, forced, originalID);
-
-                        // TODO: Set the item's stack
-                        // TODO: itemObject.GetComponent<EFM_CustomItemWrapper>().stack = amountToSpawn;
-                    }
-                }
-            }
-            // TODO: Figure out how to spawn static loot
-            // Dynamic, has chance of spawning based on rarity TODO: Which should be written to default item data
-            foreach (JToken dynamic in locationDB["dynamic"])
-            {
-                JArray items = dynamic["Items"].Value<JArray>();
-                Dictionary<string, EFM_CustomItemWrapper> spawnedItems = new Dictionary<string, EFM_CustomItemWrapper>();
                 for (int i = 0; i < items.Count; ++i)
                 {
                     // Get item from item map
@@ -1337,8 +1285,10 @@ namespace EFM
                     }
                     else
                     {
-                        missingDynamic.Add(originalID);
-                        continue;
+                        missingForced.Add(originalID);
+
+                        // Spawn random round instead
+                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
                     }
 
                     // Get item prefab
@@ -1351,33 +1301,123 @@ namespace EFM
                     {
                         itemPrefab = IM.OD[itemID].GetGameObject();
                     }
-                    EFM_CustomItemWrapper itemWrapper = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
 
-                    // Check for stack
-                    int amountToSpawn = items[i]["upd"] == null ? 1 : items[i]["upd"]["StackObjectCount"] == null ? 1 : (int)items[i]["upd"]["StackObjectCount"];
-                    bool stackable = itemWrapper != null && itemWrapper.maxStack > 1;
-
-                    // Spawn item(s)
-                    if (!stackable)
-                    {
-                        // If not stackable, spawn individual instances of this item and place them under the same parent
-                        for (int j = 0; j < amountToSpawn; ++j)
-                        {
-                            SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItems, dynamic, originalID);
-                        }
-                    }
-                    else // Unstackable
-                    {
-                        GameObject itemObject = SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItems, dynamic, originalID);
-
-                        // TODO: Set the item's stack
-                        // TODO: itemObject.GetComponent<EFM_CustomItemWrapper>().stack = amountToSpawn;
-                    }
+                    // Spawn item
+                    SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItemCIWs, spawnedItemVIDs, unspawnedParents, forced, originalID, false);
                 }
             }
 
-            // Spawn container loot
-            // TODO: When we get containers implemented 
+            // Dynamic, has chance of spawning
+            foreach (JToken dynamicSpawn in locationDB["dynamic"])
+            {
+                JArray items = dynamicSpawn["Items"].Value<JArray>();
+                Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
+                Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
+                List<string> unspawnedParents = new List<string>();
+
+                for (int i = 0; i < items.Count; ++i)
+                {
+                    // Get item from item map
+                    string originalID = items[i]["_tpl"].ToString();
+                    string itemID = null;
+                    if (Mod.itemMap.ContainsKey(originalID))
+                    {
+                        itemID = Mod.itemMap[originalID];
+                    }
+                    else
+                    {
+                        missingForced.Add(originalID);
+
+                        // Spawn random round instead
+                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
+                    }
+
+                    // Get item prefab
+                    GameObject itemPrefab = null;
+                    if (int.TryParse(itemID, out int index))
+                    {
+                        itemPrefab = Mod.itemPrefabs[index];
+                    }
+                    else
+                    {
+                        itemPrefab = IM.OD[itemID].GetGameObject();
+                    }
+
+                    // Spawn item
+                    SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItemCIWs, spawnedItemVIDs, unspawnedParents, dynamicSpawn, originalID, true);
+                }
+            }
+
+            // Init containers
+            Transform containersRoot = transform.GetChild(1).GetChild(1).GetChild(1);
+            JArray mapContainerData = (JArray)Mod.mapData["maps"][Mod.chosenMapIndex]["containers"];
+            for(int i=0; i< containersRoot.childCount;++i)
+            {
+                Transform container = containersRoot.GetChild(i);
+
+                // Setup the container
+                JObject containerData = Mod.lootContainersByName[container.name];
+                Transform mainContainer = container.GetChild(container.childCount - 1);
+                switch (container.name)
+                {
+                    case "Jacket":
+                    case "scavDead":
+                    case "MedBag":
+                    case "SportBag":
+                        // Static containers that can be toggled open closed by hovering hand overthem and pressing interact button
+                        EFM_CustomItemWrapper containerCIW = container.gameObject.AddComponent<EFM_CustomItemWrapper>();
+                        containerCIW.itemType = Mod.ItemType.LootContainer;
+                        containerCIW.canInsertItems = false;
+                        containerCIW.mainContainer = mainContainer.gameObject;
+                        containerCIW.itemObjectsRoot = mainContainer;
+                        mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
+                        break;
+                    case "Safe":
+                    case "meds&other":
+                    case "tools&other":
+                    case "GrenadeBox":
+                    case "terraWBoxLongBig":
+                    case "terraWBoxLong":
+                    case "WeaponCrate":
+                    case "ToolBox":
+                        // Containers that must be physically opened (Door, Cover, Cap, Lid...)
+                        EFM_LootContainerCover cover = container.GetChild(0).gameObject.AddComponent<EFM_LootContainerCover>();
+                        cover.keyID = mapContainerData[i]["keyID"].ToString();
+                        cover.hasKey = !cover.keyID.Equals("");
+                        cover.Root = cover.transform;
+                        cover.MinRot = -90;
+                        cover.MaxRot = 0;
+
+                        EFM_LootContainer containerScript = container.gameObject.AddComponent<EFM_LootContainer>();
+                        containerScript.interactable = cover;
+                        containerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
+                        JToken gridProps = containerData["_props"]["Grids"]["_props"];
+                        containerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)gridProps["cellsH"] * (int)gridProps["cellsV"]);
+                        break;
+                    case "Drawer":
+                        // Containers that must be slid open
+                        for (int drawerIndex = 0; drawerIndex < 4; ++drawerIndex)
+                        {
+                            Transform drawerTransform = container.GetChild(drawerIndex);
+                            EFM_LootContainerSlider slider = drawerTransform.gameObject.AddComponent<EFM_LootContainerSlider>();
+                            slider.keyID = mapContainerData[i]["keyID"].ToString();
+                            slider.hasKey = !slider.keyID.Equals("");
+                            slider.Root = slider.transform;
+                            slider.MinY = -0.3f;
+                            slider.MaxY = 0.2f;
+                            slider.posZ = container.GetChild(drawerIndex).localPosition.z;
+
+                            EFM_LootContainer drawerScript = drawerTransform.gameObject.AddComponent<EFM_LootContainer>();
+                            drawerScript.interactable = slider;
+                            drawerScript.mainContainerCollider = drawerTransform.GetChild(drawerTransform.childCount - 1).GetComponent<Collider>();
+                            JToken drawerGridProps = containerData["_props"]["Grids"]["_props"];
+                            drawerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)drawerGridProps["cellsH"] * (int)drawerGridProps["cellsV"]);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             // Output missing items
             if (Mod.instance.debug)
@@ -1392,7 +1432,7 @@ namespace EFM
                 {
                     text += id + "\n";
                 }
-                File.AppendAllText("BepinEx/Plugins/EscapeFromMeatov/ErrorLog.txt", text);
+                File.WriteAllText("BepinEx/Plugins/EscapeFromMeatov/ErrorLog.txt", text);
             }
 
             // Init time
@@ -1463,47 +1503,192 @@ namespace EFM
             time %= 86400;
         }
 
-        private GameObject SpawnLootItem(GameObject itemPrefab, Transform itemsRoot, string itemID, JToken itemData, Dictionary<string, EFM_CustomItemWrapper> spawnedItems, JToken spawnData, string originalID)
+        private GameObject SpawnLootItem(GameObject itemPrefab, Transform itemsRoot, string itemID, JToken itemData,
+                                         Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs, Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs,
+                                         List<string> unspawnedParents, JToken spawnData, string originalID, bool useChance)
         {
-            GameObject itemObject = GameObject.Instantiate(itemPrefab, itemsRoot);
+            GameObject itemObject = null;
             if (itemObject == null)
             {
                 Mod.instance.LogError("Could not instantiate item prefab: " + itemID);
                 return null;
             }
 
+            // Instantiate in a random slot that fits the item if there is one
+            EFM_CustomItemWrapper prefabCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
+            EFM_VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<EFM_VanillaItemDescriptor>();
+
+            FVRPhysicalObject itemPhysObj = null;
+            EFM_CustomItemWrapper itemCIW = null;
+            EFM_VanillaItemDescriptor itemVID = null;
+            if (prefabCIW != null)
+            {
+                if(useChance && UnityEngine.Random.value > prefabCIW.spawnChance / 100)
+                {
+                    unspawnedParents.Add(itemData["_id"].ToString());
+                    return null;
+                }
+
+                itemObject = GameObject.Instantiate(itemPrefab);
+                itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                itemPhysObj = itemCIW.physObj;
+
+                // Could be money so set stack
+                int amount = itemData["upd"]["StackObjectsCount"] != null ? (int)itemData["upd"]["StackObjectsCount"] : 1;
+                if (amount > 1)
+                {
+                    itemCIW.stack = amount;
+                }
+            }
+            else
+            {
+                if (useChance && UnityEngine.Random.value > prefabVID.spawnChance / 100)
+                {
+                    unspawnedParents.Add(itemData["_id"].ToString());
+                    return null;
+                }
+
+                if (Mod.usedRoundIDs.Contains(prefabVID.H3ID))
+                {
+                    // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of rounds
+                    int amount = itemData["upd"]["StackObjectsCount"] != null ? (int)itemData["upd"]["StackObjectsCount"] : 1;
+                    if (amount > 1)
+                    {
+                        if (Mod.ammoBoxByAmmoID.ContainsKey(prefabVID.H3ID))
+                        {
+                            itemObject = GameObject.Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[prefabVID.H3ID]]);
+                            itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                            itemPhysObj = itemCIW.physObj;
+                            itemCIW.amount = amount;
+                        }
+                        else // Spawn in generic box
+                        {
+                            if(amount > 30)
+                            {
+                                itemObject = GameObject.Instantiate(Mod.itemPrefabs[716]);
+                            }
+                            else
+                            {
+                                itemObject = GameObject.Instantiate(Mod.itemPrefabs[715]);
+                            }
+
+                            itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                            itemPhysObj = itemCIW.physObj;
+                            itemCIW.amount = amount;
+                        }
+                    }
+                    else // Single round, spawn as normal
+                    {
+                        itemObject = GameObject.Instantiate(itemPrefab);
+                        itemVID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+                        itemPhysObj = itemVID.physObj;
+                    }
+                }
+                else // Not a round, spawn as normal
+                {
+                    itemObject = GameObject.Instantiate(itemPrefab);
+                    itemVID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    itemPhysObj = itemVID.physObj;
+                }
+            }
+
             // Position and rotate item
             if (itemData["parentId"] != null)
             {
+                if (unspawnedParents.Contains(itemData["parentID"].ToString()))
+                {
+                    Destroy(itemObject);
+                    unspawnedParents.Add(itemData["_id"].ToString());
+                    return null;
+                }
+
                 // Item has a parent which should be a previously spawned item
                 // This parent should be a container of some sort so we need to add this item to the container
-                if (spawnedItems.ContainsKey(itemData["parentId"].ToString()))
+                string parentID = itemData["parentId"].ToString();
+                if (spawnedItemCIWs.ContainsKey(parentID))
                 {
-                    EFM_CustomItemWrapper parent = spawnedItems[itemData["parentId"].ToString()];
-                    bool boxMainContainer = parent.mainContainer.GetComponent<BoxCollider>() != null;
-                    parent.AddItemToContainer(itemObject.GetComponent<EFM_CustomItemWrapper>().physObj);
-                    if (boxMainContainer)
+                    EFM_CustomItemWrapper parent = spawnedItemCIWs[parentID];
+
+                    // Check which type of item the parent is, because how we instantiate it depends on that
+                    if(parent.itemType == Mod.ItemType.Rig || parent.itemType == Mod.ItemType.ArmoredRig)
                     {
-                        BoxCollider boxCollider = parent.mainContainer.GetComponent<BoxCollider>();
-                        itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-boxCollider.size.x / 2, boxCollider.size.x / 2),
-                                                                         UnityEngine.Random.Range(-boxCollider.size.y / 2, boxCollider.size.y / 2),
-                                                                         UnityEngine.Random.Range(-boxCollider.size.z / 2, boxCollider.size.z / 2));
+                        // Set item in a random slot that fits it if there is one
+
+                        List<int> fittingSlotIndices = new List<int>();
+                        for (int i = 0; i < parent.rigSlots.Count; ++i)
+                        {
+                            if ((int)parent.rigSlots[i].SizeLimit >= (int)itemPhysObj.Size)
+                            {
+                                fittingSlotIndices.Add(i);
+                            }
+                        }
+
+                        if(fittingSlotIndices.Count > 0)
+                        {
+                            itemObject.transform.parent = parent.itemObjectsRoot;
+
+                            int randomIndex = fittingSlotIndices[UnityEngine.Random.Range(0, fittingSlotIndices.Count - 1)];
+
+                            parent.itemsInSlots[randomIndex] = itemObject;
+                        }
+                        else // No fitting slots, just spawn next to parent
+                        {
+                            itemObject.transform.position = parent.transform.position + Vector3.up; // 1m above parent
+                        }
                     }
-                    else
+                    else if(parent.itemType == Mod.ItemType.Backpack || parent.itemType == Mod.ItemType.Container || parent.itemType == Mod.ItemType.Pouch)
                     {
-                        CapsuleCollider capsuleCollider = parent.mainContainer.GetComponent<CapsuleCollider>();
-                        if (capsuleCollider != null)
+                        // Set item in the container, at random pos and rot, if volume fits
+                        bool boxMainContainer = parent.mainContainer.GetComponent<BoxCollider>() != null;
+                        if (parent.AddItemToContainer(itemObject.GetComponent<EFM_CustomItemWrapper>().physObj))
                         {
-                            itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-capsuleCollider.radius / 2, capsuleCollider.radius / 2),
-                                                                             UnityEngine.Random.Range(-(capsuleCollider.height / 2 - capsuleCollider.radius), capsuleCollider.height / 2 - capsuleCollider.radius),
-                                                                             0);
+                            itemObject.transform.parent = parent.itemObjectsRoot;
+
+                            if (boxMainContainer)
+                            {
+                                BoxCollider boxCollider = parent.mainContainer.GetComponent<BoxCollider>();
+                                itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-boxCollider.size.x / 2, boxCollider.size.x / 2),
+                                                                                 UnityEngine.Random.Range(-boxCollider.size.y / 2, boxCollider.size.y / 2),
+                                                                                 UnityEngine.Random.Range(-boxCollider.size.z / 2, boxCollider.size.z / 2));
+                            }
+                            else
+                            {
+                                CapsuleCollider capsuleCollider = parent.mainContainer.GetComponent<CapsuleCollider>();
+                                if (capsuleCollider != null)
+                                {
+                                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-capsuleCollider.radius / 2, capsuleCollider.radius / 2),
+                                                                                     UnityEngine.Random.Range(-(capsuleCollider.height / 2 - capsuleCollider.radius), capsuleCollider.height / 2 - capsuleCollider.radius),
+                                                                                     0);
+                                }
+                                else
+                                {
+                                    itemObject.transform.localPosition = Vector3.zero;
+                                }
+                            }
+                            itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
                         }
-                        else
+                        else // Could not add item to container, set it next to parent
                         {
-                            itemObject.transform.localPosition = Vector3.zero;
+                            itemObject.transform.position = parent.transform.position + Vector3.up; // 1m above parent
                         }
                     }
-                    itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
+                    else if(parent.itemType == Mod.ItemType.AmmoBox)
+                    {
+                        // Destroy itemObject, Set the ammo box's magazine script's ammo to the one specified and of specified count
+                        FireArmRoundClass roundClass = (itemVID.physObj as FVRFireArmRound).RoundClass;
+                        Destroy(itemObject);
+                        itemCIW = null;
+                        itemVID = null;
+                        itemObject = null;
+
+                        FVRFireArmMagazine parentAsMagazine = parent.physObj as FVRFireArmMagazine;
+
+                        int stack = (itemData["upd"]["StackObjectsCount"] != null ? (int)itemData["upd"]["StackObjectsCount"] : 1);
+                        for (int i = 0; i < stack; ++i)
+                        {
+                            parentAsMagazine.AddRound(roundClass, false, false);
+                        }
+                    }
                 }
                 else
                 {
@@ -1524,10 +1709,14 @@ namespace EFM
                 }
             }
 
-            // Add custom item wrapper to spawned items dict with _id as key
-            if (spawnedItems.ContainsKey(itemData["_id"].ToString()))
+            // Add item wrapper or descriptor to spawned items dict with _id as key
+            if (itemCIW != null)
             {
-                spawnedItems.Add(itemData["_id"].ToString(), itemObject.GetComponent<EFM_CustomItemWrapper>());
+                spawnedItemCIWs.Add(itemData["_id"].ToString(), itemCIW);
+            }
+            else // itemVID should not be null
+            {
+                spawnedItemVIDs.Add(itemData["_id"].ToString(), itemVID);
             }
 
             return itemObject;

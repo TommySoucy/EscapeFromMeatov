@@ -16,6 +16,8 @@ namespace EFM
 		public string ID;
 		public bool looted;
 		public int lootExperience;
+		public float spawnChance;
+		public Mod.ItemRarity rarity;
 		public string itemName;
 		public string description;
 		private DescriptionPack descriptionPack;
@@ -99,6 +101,7 @@ namespace EFM
 		// Backpacks, Containers, Pouches
 		public GameObject mainContainer;
 		public Renderer[] mainContainerRenderers;
+		public bool canInsertItems = true;
 		public Text volumeIndicator;
 		public float maxVolume;
 		private float _containingVolume;
@@ -1041,7 +1044,7 @@ namespace EFM
 					SetMode(0);
 					SetContainerOpen(true, isRightHand);
 				}
-				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
+				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch || itemType == Mod.ItemType.LootContainer)
 				{
 					SetContainerOpen(true, isRightHand);
 				}

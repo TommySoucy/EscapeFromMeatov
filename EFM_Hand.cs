@@ -20,6 +20,61 @@ namespace EFM
             colliders = new List<Collider>();
         }
 
+        private void Update()
+        {
+            if (fvrHand.CurrentInteractable == null && collidingContainerWrapper != null)
+            {
+                if (fvrHand.IsInStreamlinedMode)
+                {
+                    if (fvrHand.Input.AXButtonPressed)
+                    {
+                        switch (collidingContainerWrapper.itemType)
+                        {
+                            case Mod.ItemType.ArmoredRig:
+                            case Mod.ItemType.Rig:
+                            case Mod.ItemType.Backpack:
+                            case Mod.ItemType.BodyArmor:
+                            case Mod.ItemType.Container:
+                            case Mod.ItemType.Pouch:
+                                collidingContainerWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    Vector2 touchpadAxes = fvrHand.Input.TouchpadAxes;
+
+                    // If touchpad has started being pressed this frame
+                    if (fvrHand.Input.TouchpadDown)
+                    {
+                        Vector2 TouchpadClickInitiation = touchpadAxes;
+                        if (touchpadAxes.magnitude > 0.2f)
+                        {
+                            if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
+                            {
+                                switch (collidingContainerWrapper.itemType)
+                                {
+                                    case Mod.ItemType.ArmoredRig:
+                                    case Mod.ItemType.Rig:
+                                    case Mod.ItemType.Backpack:
+                                    case Mod.ItemType.BodyArmor:
+                                    case Mod.ItemType.Container:
+                                    case Mod.ItemType.Pouch:
+                                        collidingContainerWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         private void OnTriggerEnter(Collider collider)
         {
             Mod.instance.LogInfo("Entered trigger: " + collider.name);
@@ -32,6 +87,38 @@ namespace EFM
             else if (collider.transform.parent.name.Equals("MainContainer"))
             {
                 mainContainerTransform = collider.transform.parent;
+            }
+            else if (collider.gameObject.name.Equals("Interactive"))
+            {
+                EFM_CustomItemWrapper lootContainerCIW = collider.transform.parent.GetComponent<EFM_CustomItemWrapper>();
+                if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
+                {
+                    collidingContainerWrapper = lootContainerCIW;
+                    colliders.Add(collider);
+                }
+            }
+            else if (collider.transform.parent.name.Equals("Interactives"))
+            {
+                EFM_CustomItemWrapper lootContainerCIW = collider.transform.parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
+                {
+                    collidingContainerWrapper = lootContainerCIW;
+                    colliders.Add(collider);
+                }
+            }
+            else if (collider.transform.parent.parent.name.Equals("Interactives"))
+            {
+                EFM_CustomItemWrapper itemCIW = collider.transform.parent.parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                if (itemCIW != null && 
+                    (itemCIW.itemType == Mod.ItemType.Container ||
+                     itemCIW.itemType == Mod.ItemType.Backpack || 
+                     itemCIW.itemType == Mod.ItemType.Pouch || 
+                     itemCIW.itemType == Mod.ItemType.Rig ||
+                     itemCIW.itemType == Mod.ItemType.ArmoredRig))
+                {
+                    collidingContainerWrapper = itemCIW;
+                    colliders.Add(collider);
+                }
             }
 
             if (mainContainerTransform != null)
@@ -48,7 +135,7 @@ namespace EFM
             }
 
             // Set container hovered is necessary
-            if (collidingContainerWrapper != null)
+            if (collidingContainerWrapper != null && collidingContainerWrapper.canInsertItems)
             {
                 // Verify container mode
                 if (collidingContainerWrapper.mainContainer.activeSelf)

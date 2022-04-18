@@ -74,6 +74,9 @@
     <Compile Include="EFM_EquipmentSlot.cs" />
     <Compile Include="EFM_Hand.cs" />
     <Compile Include="EFM_HoverScroll.cs" />
+    <Compile Include="EFM_LootContainer.cs" />
+    <Compile Include="EFM_LootContainerCover.cs" />
+    <Compile Include="EFM_LootContainerSlider.cs" />
     <Compile Include="EFM_Manager.cs" />
     <Compile Include="EFM_Menu_Manager.cs" />
     <Compile Include="EFM_OtherInteractable.cs" />
