@@ -1105,6 +1105,7 @@ namespace EFM
             }
             // Count each type of item we have
             UpdateBaseInventory();
+            Mod.UpdatePlayerInventory();
 
             // Instantiate areas
             baseAreaManagers = new List<EFM_BaseAreaManager>();
@@ -1184,6 +1185,7 @@ namespace EFM
         private void AddToBaseInventory(Transform item)
         {
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
+            EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
             string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
             if (Mod.baseInventory.ContainsKey(itemID))
             {
@@ -1194,6 +1196,117 @@ namespace EFM
             {
                 Mod.baseInventory.Add(itemID, customItemWrapper != null ? customItemWrapper.stack : 1);
                 baseInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
+            }
+
+            if(customItemWrapper != null)
+            {
+                if(customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                {
+                    FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
+                    foreach(FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
+                    {
+                        string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
+
+                        if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
+                        {
+                            if (Mod.roundsByType[boxMagazine.RoundType] == null)
+                            {
+                                Mod.roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
+                                Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                            }
+                            else
+                            {
+                                if (Mod.roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
+                                {
+                                    Mod.roundsByType[boxMagazine.RoundType][roundName] += 1;
+                                }
+                                else
+                                {
+                                    Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Mod.roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
+                            Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                        }
+                    }
+                }
+            }
+
+            if(vanillaItemDescriptor != null)
+            {
+                if(vanillaItemDescriptor.physObj is FVRFireArmMagazine)
+                {
+                    FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
+                    if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
+                    {
+                        if(Mod.magazinesByType[asMagazine.MagazineType] == null)
+                        {
+                            Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                    }
+                    else
+                    {
+                        Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
+                        Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                    }
+                }
+                else if(vanillaItemDescriptor.physObj is FVRFireArmClip)
+                {
+                    FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
+                    if (Mod.clipsByType.ContainsKey(asClip.ClipType))
+                    {
+                        if (Mod.clipsByType[asClip.ClipType] == null)
+                        {
+                            Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
+                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                    }
+                    else
+                    {
+                        Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                        Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                    }
+                }
+                else if(vanillaItemDescriptor.physObj is FVRFireArmRound)
+                {
+                    FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                    if (Mod.roundsByType.ContainsKey(asRound.RoundType))
+                    {
+                        if (Mod.roundsByType[asRound.RoundType] == null)
+                        {
+                            Mod.roundsByType[asRound.RoundType] = new Dictionary<string, int>();
+                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                            {
+                                Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                        Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                    }
+                }
             }
 
             // Check for more items that may be contained inside this one

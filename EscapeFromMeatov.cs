@@ -1240,7 +1240,7 @@ namespace EFM
             return root.gameObject;
         }
 
-        public void UpdatePlayerInventory()
+        public static void UpdatePlayerInventory()
         {
             if (playerInventory == null)
             {
@@ -1281,9 +1281,10 @@ namespace EFM
             }
         }
 
-        public void AddToPlayerInventory(Transform item)
+        public static void AddToPlayerInventory(Transform item)
         {
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
+            EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
             string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
             if (playerInventory.ContainsKey(itemID))
             {
@@ -1294,6 +1295,117 @@ namespace EFM
             {
                 playerInventory.Add(itemID, customItemWrapper != null ? customItemWrapper.stack : 1);
                 playerInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
+            }
+
+            if (customItemWrapper != null)
+            {
+                if (customItemWrapper.itemType == ItemType.AmmoBox)
+                {
+                    FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
+                    foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
+                    {
+                        string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
+
+                        if (roundsByType.ContainsKey(boxMagazine.RoundType))
+                        {
+                            if (roundsByType[boxMagazine.RoundType] == null)
+                            {
+                                roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
+                                roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                            }
+                            else
+                            {
+                                if (roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
+                                {
+                                    roundsByType[boxMagazine.RoundType][roundName] += 1;
+                                }
+                                else
+                                {
+                                    roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
+                            roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                        }
+                    }
+                }
+            }
+
+            if (vanillaItemDescriptor != null)
+            {
+                if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
+                {
+                    FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
+                    if (magazinesByType.ContainsKey(asMagazine.MagazineType))
+                    {
+                        if (magazinesByType[asMagazine.MagazineType] == null)
+                        {
+                            magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                    }
+                    else
+                    {
+                        magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
+                        magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                    }
+                }
+                else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
+                {
+                    FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
+                    if (clipsByType.ContainsKey(asClip.ClipType))
+                    {
+                        if (clipsByType[asClip.ClipType] == null)
+                        {
+                            clipsByType[asClip.ClipType] = new Dictionary<string, int>();
+                            clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                    }
+                    else
+                    {
+                        clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                        clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                    }
+                }
+                else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
+                {
+                    FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                    if (roundsByType.ContainsKey(asRound.RoundType))
+                    {
+                        if (roundsByType[asRound.RoundType] == null)
+                        {
+                            roundsByType[asRound.RoundType] = new Dictionary<string, int>();
+                            roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                            {
+                                roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                        roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                    }
+                }
             }
 
             // Check for more items that may be contained inside this one
