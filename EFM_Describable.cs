@@ -16,6 +16,7 @@ namespace EFM
         public bool isCustom;
         public EFM_CustomItemWrapper customItem;
         public EFM_VanillaItemDescriptor vanillaItem;
+        public Dictionary<string, int> containedAmmoClasses;
         public string name;
         public string description;
         public Sprite icon;

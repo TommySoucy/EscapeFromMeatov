@@ -1232,6 +1232,21 @@ namespace EFM
 				FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
 				descriptionPack.stack = asMagazine.m_numRounds;
 				descriptionPack.maxStack = asMagazine.m_capacity;
+				descriptionPack.containedAmmoClasses = new Dictionary<string, int>();
+				foreach(FVRLoadedRound loadedRound in asMagazine.LoadedRounds)
+                {
+					if(loadedRound != null)
+                    {
+                        if (descriptionPack.containedAmmoClasses.ContainsKey(loadedRound.LR_Class.ToString()))
+                        {
+							descriptionPack.containedAmmoClasses[loadedRound.LR_Class.ToString()] += 1;
+						}
+                        else
+						{
+							descriptionPack.containedAmmoClasses.Add(loadedRound.LR_Class.ToString(), 1);
+						}
+                    }
+                }
 			}
 			descriptionPack.weight = currentWeight;
 			descriptionPack.volume = volumes[mode];

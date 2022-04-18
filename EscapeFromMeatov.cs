@@ -163,6 +163,7 @@ namespace EFM
         public static GameObject consumeUIPrefab;
         public static GameObject itemDescriptionUIPrefab;
         public static GameObject neededForPrefab;
+        public static GameObject ammoContainsPrefab;
         public static GameObject staminaBarPrefab;
 
         // DB
@@ -492,6 +493,7 @@ namespace EFM
             extractionCardPrefab = assetsBundle.LoadAsset<GameObject>("ExtractionCard");
             itemDescriptionUIPrefab = assetsBundle.LoadAsset<GameObject>("ItemDescriptionUI");
             neededForPrefab = assetsBundle.LoadAsset<GameObject>("NeededForText");
+            ammoContainsPrefab = assetsBundle.LoadAsset<GameObject>("ContainsText");
             staminaBarPrefab = assetsBundle.LoadAsset<GameObject>("StaminaBar");
 
             LogInfo("Loading item prefabs...");

@@ -208,6 +208,43 @@ namespace EFM
             descriptionPack.weight = physObj.RootRigidbody.mass;
             descriptionPack.volume = Mod.sizeVolumes[(int)physObj.Size];
             descriptionPack.amountRequiredQuest = Mod.requiredForQuest[H3ID];
+            FVRFireArmMagazine asMagazine = gameObject.GetComponent<FVRFireArmMagazine>();
+            FVRFireArmClip asClip = gameObject.GetComponent<FVRFireArmClip>();
+            descriptionPack.containedAmmoClasses = new Dictionary<string, int>();
+            if (asMagazine != null)
+            {
+                foreach (FVRLoadedRound loadedRound in asMagazine.LoadedRounds)
+                {
+                    if (loadedRound != null)
+                    {
+                        if (descriptionPack.containedAmmoClasses.ContainsKey(loadedRound.LR_Class.ToString()))
+                        {
+                            descriptionPack.containedAmmoClasses[loadedRound.LR_Class.ToString()] += 1;
+                        }
+                        else
+                        {
+                            descriptionPack.containedAmmoClasses.Add(loadedRound.LR_Class.ToString(), 1);
+                        }
+                    }
+                }
+            }
+            else if(asClip != null)
+            {
+                foreach (FVRFireArmClip.FVRLoadedRound loadedRound in asClip.LoadedRounds)
+                {
+                    if (loadedRound != null)
+                    {
+                        if (descriptionPack.containedAmmoClasses.ContainsKey(loadedRound.LR_Class.ToString()))
+                        {
+                            descriptionPack.containedAmmoClasses[loadedRound.LR_Class.ToString()] += 1;
+                        }
+                        else
+                        {
+                            descriptionPack.containedAmmoClasses.Add(loadedRound.LR_Class.ToString(), 1);
+                        }
+                    }
+                }
+            }
 
             return descriptionPack;
         }

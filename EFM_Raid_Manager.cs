@@ -1754,10 +1754,10 @@ namespace EFM
                     time.end = (int)timeData["end"];
                     extraction.times.Add(time);
                 }
-                extraction.itemRequirements = new List<string>();
+                extraction.itemRequirements = new Dictionary<string, int>();
                 foreach (JToken itemRequirement in extractionData["itemRequirements"])
                 {
-                    extraction.itemRequirements.Add(itemRequirement.ToString());
+                    extraction.itemRequirements.Add(itemRequirement["ID"].ToString(), (int)itemRequirement["amount"]);
                 }
                 extraction.equipmentRequirements = new List<string>();
                 foreach (JToken equipmentRequirement in extractionData["equipmentRequirements"])
@@ -1878,7 +1878,7 @@ namespace EFM
 
         public List<TimeInterval> raidTimes;
         public List<TimeInterval> times;
-        public List<string> itemRequirements;
+        public Dictionary<string, int> itemRequirements;
         public List<string> equipmentRequirements;
         public List<string> itemBlacklist;
         public List<string> equipmentBlacklist;
@@ -1897,17 +1897,32 @@ namespace EFM
             }
 
             // Item requirements
-            foreach(string id in itemRequirements)
+            foreach(KeyValuePair<string, int> entry in itemRequirements)
             {
-                if (!Mod.playerInventory.ContainsKey(id))
+                string id = entry.Key;
+                if (!Mod.playerInventory.ContainsKey(id) || Mod.playerInventory[id] < entry.Value)
                 {
                     if(int.TryParse(id, out int result))
                     {
-                        return "Need " + Mod.itemPrefabs[result].name;
+                        if (entry.Value > 1)
+                        {
+                            return "Need " + entry.Value + Mod.itemPrefabs[result].name;
+                        }
+                        else
+                        {
+                            return "Need " + Mod.itemPrefabs[result].name;
+                        }
                     }
                     else
                     {
-                        return "Need " + IM.OD[id].name;
+                        if (entry.Value > 1)
+                        {
+                            return "Need " + entry.Value + IM.OD[id].name;
+                        }
+                        else
+                        {
+                            return "Need " + IM.OD[id].name;
+                        }
                     }
                 }
             }

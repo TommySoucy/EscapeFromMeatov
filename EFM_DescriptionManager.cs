@@ -43,9 +43,11 @@ namespace EFM
         public Text propertiesText;
         public EFM_HoverScroll upHoverScroll;
         public EFM_HoverScroll downHoverScroll;
+        public GameObject ammoContainsTitle;
 
         private AudioSource buttonClickAudio;
         private List<GameObject> areaNeededForTexts;
+        private List<GameObject> ammoContainsTexts;
 
         public void Init()
         {
@@ -68,24 +70,25 @@ namespace EFM
             fullIcon = fullContent.GetChild(1).GetComponent<Image>();
             fullAmountStackText = fullContent.GetChild(1).GetChild(0).GetComponent<Text>();
             fullNameText = fullContent.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
-            fullNeededForNone = fullContent.GetChild(3).gameObject;
-            fullWishlist = fullContent.GetChild(4).gameObject;
-            fullNeededForTotal = fullContent.GetChild(5).gameObject;
-            fullNeededForTotalText = fullContent.GetChild(5).GetChild(0).GetComponent<Text>();
+            fullNeededForNone = fullContent.GetChild(5).gameObject;
+            fullWishlist = fullContent.GetChild(6).gameObject;
+            fullNeededForTotal = fullContent.GetChild(7).gameObject;
+            fullNeededForTotalText = fullContent.GetChild(7).GetChild(0).GetComponent<Text>();
             fullInsuredIcon = fullContent.GetChild(1).GetChild(1).gameObject;
             fullInsuredBorder = fullContent.GetChild(1).GetChild(2).gameObject;
             summaryNeededIcons[0] = fullContent.GetChild(1).GetChild(3).GetChild(0).gameObject;
             summaryNeededIcons[1] = fullContent.GetChild(1).GetChild(3).GetChild(1).gameObject;
             summaryNeededIcons[2] = fullContent.GetChild(1).GetChild(3).GetChild(2).gameObject;
             summaryNeededIcons[3] = fullContent.GetChild(1).GetChild(3).GetChild(3).gameObject;
-            fullDescriptionText = fullContent.GetChild(7).GetChild(0).GetComponent<Text>();
-            compatibleMagsTitle = fullContent.GetChild(8).gameObject;
-            compatibleMags = fullContent.GetChild(9).gameObject;
-            compatibleMagsText = fullContent.GetChild(9).GetChild(0).GetComponent<Text>();
-            compatibleAmmoTitle = fullContent.GetChild(10).gameObject;
-            compatibleAmmo = fullContent.GetChild(11).gameObject;
-            compatibleAmmoText = fullContent.GetChild(11).GetChild(0).GetComponent<Text>();
+            fullDescriptionText = fullContent.GetChild(9).GetChild(0).GetComponent<Text>();
+            compatibleMagsTitle = fullContent.GetChild(10).gameObject;
+            compatibleMags = fullContent.GetChild(11).gameObject;
+            compatibleMagsText = fullContent.GetChild(11).GetChild(0).GetComponent<Text>();
+            compatibleAmmoTitle = fullContent.GetChild(12).gameObject;
+            compatibleAmmo = fullContent.GetChild(13).gameObject;
+            compatibleAmmoText = fullContent.GetChild(13).GetChild(0).GetComponent<Text>();
             propertiesText = fullContent.GetChild(2).GetChild(0).GetComponent<Text>();
+            ammoContainsTitle = fullContent.GetChild(3).gameObject;
 
             // Set exit button
             EFM_PointableButton exitButton = transform.GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_PointableButton>();
@@ -300,7 +303,7 @@ namespace EFM
                     // For each area that requires this item we want to add a NeededForText instance and set its text and color correctly
                     // Also keep a reference to these texts so we can remove them easily when updating the UI
                     GameObject neededForInstance = Instantiate(Mod.neededForPrefab, transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0));
-                    neededForInstance.transform.SetSiblingIndex(6);
+                    neededForInstance.transform.SetSiblingIndex(7);
                     Text neededForInstanceText = neededForInstance.transform.GetChild(0).GetComponent<Text>();
                     neededForInstanceText.text = "- " + Mod.localDB["interface"]["hideout_area_" + i + "_name"].ToString() + "("+ descriptionPack.amount+ "/"+ descriptionPack.amountRequiredPerArea[i] + ")";
                     if (descriptionPack.amount >= descriptionPack.amountRequiredPerArea[i])
@@ -379,8 +382,41 @@ namespace EFM
             }
             propertiesText.text = "Weight: " + descriptionPack.weight + "kg, Volume: " + descriptionPack.volume;
 
+            if (descriptionPack.containedAmmoClasses != null)
+            {
+                if (ammoContainsTexts == null)
+                {
+                    ammoContainsTexts = new List<GameObject>();
+                }
+                else
+                {
+                    for (int i = ammoContainsTexts.Count - 1; i >= 0; --i)
+                    {
+                        Destroy(ammoContainsTexts[i]);
+                    }
+                    ammoContainsTexts.Clear();
+                }
+                if (descriptionPack.containedAmmoClasses.Count > 0)
+                {
+                    ammoContainsTitle.SetActive(true);
+                    foreach (KeyValuePair<string, int> entry in descriptionPack.containedAmmoClasses)
+                    {
+                        GameObject containsInstance = Instantiate(Mod.ammoContainsPrefab, transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0));
+                        containsInstance.transform.SetSiblingIndex(4);
+                        Text neededForInstanceText = containsInstance.transform.GetChild(0).GetComponent<Text>();
+                        neededForInstanceText.text = entry.Key + "("+entry.Value+")";
+                        ammoContainsTexts.Add(containsInstance);
+                        descriptionHeight += 47;
+                    }
+                }
+                else
+                {
+                    ammoContainsTitle.SetActive(false);
+                }
+            }
+
             // Set hoverscrolls depending on description height
-            if(descriptionHeight > 1000)
+            if (descriptionHeight > 1000)
             {
                 downHoverScroll.gameObject.SetActive(true); // Only down should be activated at first
 
