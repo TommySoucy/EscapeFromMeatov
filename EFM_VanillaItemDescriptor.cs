@@ -60,6 +60,9 @@ namespace EFM
 
         public void Start()
         {
+            // Set the reference to the physical object
+            physObj = gameObject.GetComponent<FVRPhysicalObject>();
+
             if (takeCurrentLocation)
             {
                 locationIndex = Mod.currentLocationIndex;
@@ -70,10 +73,7 @@ namespace EFM
             descriptionPack.vanillaItem = this;
             descriptionPack.name = itemName;
             descriptionPack.description = description;
-            descriptionPack.icon = Mod.itemIcons[H3ID];
-
-            // Set the reference to the physical object
-            physObj = gameObject.GetComponent<FVRPhysicalObject>();
+            descriptionPack.icon = IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
 
             // Set init weight
             SetCurrentWeight(this);
@@ -93,7 +93,7 @@ namespace EFM
                 FVRFireArm asFireArm = (FVRFireArm)item.physObj;
 
                 // Considering 0.015g per round
-                item.currentWeight += 0.015f * asFireArm.GetChamberRoundList().Count;
+                item.currentWeight += 0.015f * (asFireArm.GetChamberRoundList() == null ? 0 : asFireArm.GetChamberRoundList().Count);
 
                 // Ammo container
                 if (asFireArm.UsesMagazines && asFireArm.Magazine != null)

@@ -37,7 +37,7 @@ namespace EFM
             for (int i = 0; i < 7; ++i)
             {
                 partHealthTexts[i] = partHealthParent.GetChild(i).GetChild(1).GetComponent<Text>();
-                partHealthImages[i] = partHealthParent.GetChild(i).GetComponent<Image>();
+                partHealthImages[i] = partImageParent.GetChild(i).GetComponent<Image>();
             }
             // Set main stats texts
             healthText = transform.GetChild(0).GetChild(3).GetChild(1).GetComponent<Text>();
@@ -140,7 +140,7 @@ namespace EFM
             }
             if (Mod.leftHand.fvrHand.Input.BYButtonPressed && displayed)
             {
-                transform.position = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * -0.3f;
+                transform.position = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
             }
 
             // Right menu button
@@ -159,7 +159,7 @@ namespace EFM
             }
             if (Mod.rightHand.fvrHand.Input.BYButtonPressed && displayed)
             {
-                transform.position = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * -0.3f;
+                transform.position = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.6f + Mod.rightHand.transform.right * -0.3f;
             }
 
             UpdateStamina();
@@ -167,8 +167,9 @@ namespace EFM
 
         private void UpdateStamina()
         {
-            Vector3 movementVector = (Vector3)typeof(FVRMovementManager).GetField("m_twoAxisVelocity").GetValue(GM.CurrentMovementManager);
-            bool sprintEngaged = (bool)typeof(FVRMovementManager).GetField("m_sprintingEngaged").GetValue(GM.CurrentMovementManager);
+            Vector3 movementVector = (Vector3)typeof(FVRMovementManager).GetField("m_twoAxisVelocity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(GM.CurrentMovementManager);
+            bool sprintEngaged = (bool)typeof(FVRMovementManager).GetField("m_sprintingEngaged", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(GM.CurrentMovementManager);
+
             if (sprintEngaged)
             {
                 // Reset stamina timer

@@ -51,11 +51,16 @@ namespace EFM
 
         public void Init()
         {
+            // Transform the description properly
+            transform.localScale = Vector3.one * 0.0003f;
+            transform.localPosition = Vector3.up * 0.1f;
+            transform.localRotation = Quaternion.Euler(25, 0, 0);
+
             Transform summaryElements = transform.GetChild(0).GetChild(0).GetChild(0);
             summaryIcon = summaryElements.GetChild(0).GetComponent<Image>();
             summaryAmountStackText = summaryElements.GetChild(0).GetChild(0).GetComponent<Text>();
             summaryNameText = summaryElements.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
-            summaryNeededForTotalText = summaryElements.GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>();
+            summaryNeededForTotalText = summaryElements.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>();
             summaryWishlist = summaryElements.GetChild(1).GetChild(2).gameObject;
             summaryInsuredIcon = summaryElements.GetChild(0).GetChild(1).gameObject;
             summaryInsuredBorder = summaryElements.GetChild(0).GetChild(2).gameObject;

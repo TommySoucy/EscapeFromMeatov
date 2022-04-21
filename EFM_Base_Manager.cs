@@ -735,7 +735,7 @@ namespace EFM
                     healthDelta += currentHealthDelta;
                     health += Mod.health[i];
                 }
-                Mod.playerStatusManager.partHealthTexts[i].text = Mod.health[i].ToString() + "/" + maxHealth[i];
+                Mod.playerStatusManager.partHealthTexts[i].text = String.Format("{0:0.#}", Mod.health[i]) + "/" + String.Format("{0:0.#}", maxHealth[i]);
                 Mod.playerStatusManager.partHealthImages[i].color = Color.Lerp(Color.red, Color.white, Mod.health[i] / maxHealth[i]);
             }
             if (healthDelta != 0)
@@ -897,7 +897,7 @@ namespace EFM
             Mod.consumeUIText = Mod.consumeUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
             // Extraction UI
             Mod.extractionUI = Instantiate(Mod.extractionUIPrefab, GM.CurrentPlayerRoot);
-            Mod.extractionUIText = Mod.consumeUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
+            Mod.extractionUIText = Mod.extractionUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
             Mod.extractionUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
             // ItemDescription UIs
             Mod.leftDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
@@ -908,19 +908,77 @@ namespace EFM
             Mod.rightDescriptionManager.Init();
             // Stamina bar
             Mod.staminaBarUI = Instantiate(Mod.staminaBarPrefab, GM.CurrentPlayerBody.Head);
-            Mod.extractionUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
-            Mod.extractionUI.transform.localPosition = new Vector3(0, -0.4f, 0.6f);
-            Mod.extractionUI.transform.localScale = Vector3.one * 0.01f;
+            Mod.staminaBarUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+            Mod.staminaBarUI.transform.localPosition = new Vector3(0, -0.4f, 0.6f);
+            Mod.staminaBarUI.transform.localScale = Vector3.one * 0.0015f;
 
             // Add our own hand component to each hand
             Mod.rightHand = GM.CurrentPlayerBody.RightHand.gameObject.AddComponent<EFM_Hand>();
             Mod.leftHand = GM.CurrentPlayerBody.LeftHand.gameObject.AddComponent<EFM_Hand>();
             Mod.rightHand.otherHand = Mod.leftHand;
             Mod.leftHand.otherHand = Mod.rightHand;
+
+            // Shoulder storage
+            GameObject rightVolume = new GameObject();
+            rightVolume.AddComponent<BoxCollider>();
+            rightVolume.SetActive(false);
+            rightVolume.transform.parent = GM.CurrentPlayerBody.Head;
+            rightVolume.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            rightVolume.transform.localPosition = new Vector3(0.15f, 0, -0.05f);
+            rightVolume.GetComponent<Collider>().isTrigger = true;
+            rightVolume.layer = LayerMask.NameToLayer("Interactable");
+
+            EFM_ShoulderStorage rightSlotComponent = rightVolume.AddComponent<EFM_ShoulderStorage>();
+            rightSlotComponent.right = true;
+            Mod.rightShoulderSlot = rightSlotComponent;
+            rightSlotComponent.QuickbeltRoot = rightVolume.transform;
+            rightSlotComponent.HoverGeo = new GameObject();
+            rightSlotComponent.HoverGeo.AddComponent<MeshRenderer>();
+            rightSlotComponent.HoverGeo.transform.parent = rightVolume.transform;
+            rightSlotComponent.HoverGeo.SetActive(false);
+            rightSlotComponent.PoseOverride = rightVolume.transform;
+            rightSlotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear;
+            rightSlotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
+            rightSlotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
+
+            GameObject leftVolume = new GameObject();
+            leftVolume.AddComponent<BoxCollider>();
+            leftVolume.SetActive(false);
+            leftVolume.transform.parent = GM.CurrentPlayerBody.Head;
+            leftVolume.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            leftVolume.transform.localPosition = new Vector3(-0.15f, 0, -0.05f);
+            leftVolume.GetComponent<Collider>().isTrigger = true;
+            leftVolume.layer = LayerMask.NameToLayer("Interactable");
+
+            EFM_ShoulderStorage leftSlotComponent = leftVolume.AddComponent<EFM_ShoulderStorage>();
+            leftSlotComponent.right = false;
+            Mod.leftShoulderSlot = leftSlotComponent;
+            leftSlotComponent.QuickbeltRoot = leftVolume.transform;
+            leftSlotComponent.HoverGeo = new GameObject();
+            leftSlotComponent.HoverGeo.AddComponent<MeshRenderer>();
+            leftSlotComponent.HoverGeo.transform.parent = leftVolume.transform;
+            leftSlotComponent.HoverGeo.SetActive(false);
+            leftSlotComponent.PoseOverride = leftVolume.transform;
+            leftSlotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear;
+            leftSlotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
+            leftSlotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
+
+            rightVolume.SetActive(true);
+            leftVolume.SetActive(true);
+
+            // Set movement control
+            GM.CurrentMovementManager.Mode = FVRMovementManager.MovementMode.TwinStick;
+            GM.Options.MovementOptions.Touchpad_Confirm = FVRMovementManager.TwoAxisMovementConfirm.OnTouch;
+
+            // Disable wrist menus
+            Mod.rightHand.fvrHand.DisableWristMenu();
+            Mod.leftHand.fvrHand.DisableWristMenu();
         }
 
         public void ProcessData()
         {
+            // Set pockets
+
             // Check if we have loaded data
             if (data == null)
             {
@@ -928,9 +986,20 @@ namespace EFM
                 data = new JObject();
                 Mod.level = 1;
                 Mod.skills = new EFM_Skill[64];
+                for (int i = 0; i < 64; ++i)
+                {
+                    Mod.skills[i] = new EFM_Skill();
+                }
                 Mod.health = new float[7];
+                for (int i = 0; i < 7; ++i)
+                {
+                    Mod.health[i] = maxHealth[i];
+                }
                 Mod.hydration = 100;
                 Mod.energy = 100;
+
+                // Set pockets configuration as default
+                GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
 
                 // Spawn standard edition starting items
                 Transform itemRoot = transform.GetChild(transform.childCount - 2);
@@ -938,22 +1007,118 @@ namespace EFM
                 GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(16.685f, 0.405f, -2.755f), Quaternion.Euler(328.4395f, 270.6471f, 2.003955E-06f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(8.198049f, 0.4181025f, -6.029191f), Quaternion.Euler(346.8106f, 0f, 0f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(-4.905951f, 0.4161026f, 23.27681f), Quaternion.Euler(348.9087f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.007049f, 0.5902026f, 3.70981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.007049f, 0.5902026f, 3.64581f), Quaternion.Euler(0f, 5.83668f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(0.9946489f, 0.5902026f, 3.578609f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.004449f, 0.5902026f, 3.49771f), Quaternion.Euler(0f, 323.5824f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.084949f, 0.5902026f, 3.58231f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.145749f, 0.6102026f, 3.68561f), Quaternion.Euler(0f, 0f, 86.27259f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.117249f, 0.5902026f, 3.39831f), Quaternion.Euler(0f, 350.4561f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.117249f, 1.496603f, 3.39831f), Quaternion.Euler(0f, 350.4561f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.049649f, 1.496603f, 3.63981f), Quaternion.Euler(0f, 221.015f, 180f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(0.9520493f, 0.2060025f, 4.07481f), Quaternion.Euler(0f, 54.43977f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-4.89295f, 0.02490258f, -7.48019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-4.825951f, 0.02490258f, -7.42929f), Quaternion.Euler(0f, 56.71285f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(16.25405f, 0.02390254f, -1.25619f), Quaternion.Euler(0f, 51.82084f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.582951f, 0.07820261f, 1.22981f), Quaternion.Euler(0f, 51.82084f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.651051f, 0.07820261f, 1.23771f), Quaternion.Euler(0f, 117.0799f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.61725f, 0.1157026f, 1.23901f), Quaternion.Euler(0f, 106.7499f, 0f), itemRoot);
+                GameObject ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.007049f, 0.5902026f, 3.70981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                EFM_CustomItemWrapper customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                FVRFireArmMagazine asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.007049f, 0.5902026f, 3.64581f), Quaternion.Euler(0f, 5.83668f, 0f), itemRoot); customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(0.9946489f, 0.5902026f, 3.578609f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.004449f, 0.5902026f, 3.49771f), Quaternion.Euler(0f, 323.5824f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.084949f, 0.5902026f, 3.58231f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.145749f, 0.6102026f, 3.68561f), Quaternion.Euler(0f, 0f, 86.27259f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.117249f, 0.5902026f, 3.39831f), Quaternion.Euler(0f, 350.4561f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.117249f, 1.496603f, 3.39831f), Quaternion.Euler(0f, 350.4561f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.049649f, 1.496603f, 3.63981f), Quaternion.Euler(0f, 221.015f, 180f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(0.9520493f, 0.2060025f, 4.07481f), Quaternion.Euler(0f, 54.43977f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-4.89295f, 0.02490258f, -7.48019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-4.825951f, 0.02490258f, -7.42929f), Quaternion.Euler(0f, 56.71285f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(16.25405f, 0.02390254f, -1.25619f), Quaternion.Euler(0f, 51.82084f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.582951f, 0.07820261f, 1.22981f), Quaternion.Euler(0f, 51.82084f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.651051f, 0.07820261f, 1.23771f), Quaternion.Euler(0f, 117.0799f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.61725f, 0.1157026f, 1.23901f), Quaternion.Euler(0f, 106.7499f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
                 GameObject.Instantiate(IM.OD["PinnedGrenadeXM84"].GetGameObject(), new Vector3(-0.04095078f, 0.4530027f, 4.52161f), Quaternion.Euler(0f, 0f, 271.3958f), itemRoot);
                 GameObject.Instantiate(IM.OD["PinnedGrenadeXM84"].GetGameObject(), new Vector3(-0.2619514f, 0.4481025f, 4.35781f), Quaternion.Euler(359.111f, 39.55607f, 271.0761f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[608], new Vector3(-3.854952f, 0.1344025f, 0.6271096f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
@@ -1032,11 +1197,41 @@ namespace EFM
                 GameObject.Instantiate(IM.OD["MagazineAK74N"].GetGameObject(), new Vector3(7.210049f, 0.4011025f, -4.81319f), Quaternion.Euler(359.8211f, 300.7395f, 90.13593f), itemRoot);
                 GameObject.Instantiate(IM.OD["PinnedGrenadeM67"].GetGameObject(), new Vector3(-0.3319511f, 0.4461026f, 4.372809f), Quaternion.Euler(359.4122f, 24.90105f, 271.266f), itemRoot);
                 GameObject.Instantiate(IM.OD["PinnedGrenadeF1Russia"].GetGameObject(), new Vector3(-0.3249512f, 0.4461026f, 4.47281f), Quaternion.Euler(359.9848f, 0.6241663f, 271.3957f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[711], new Vector3(-3.788952f, 0.03410256f, 1.97721f), Quaternion.Euler(0f, 348.3584f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[706], new Vector3(10.97705f, 0.04020262f, -1.23219f), Quaternion.Euler(0f, 97.96564f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(7.163049f, 0.03710258f, -4.63719f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(4.257049f, 0.3941026f, -5.22419f), Quaternion.Euler(0f, 70.93663f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(4.222049f, 0.3941026f, -5.41819f), Quaternion.Euler(90f, 102f, 0f), itemRoot);
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[711], new Vector3(-3.788952f, 0.03410256f, 1.97721f), Quaternion.Euler(0f, 348.3584f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[706], new Vector3(10.97705f, 0.04020262f, -1.23219f), Quaternion.Euler(0f, 97.96564f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(7.163049f, 0.03710258f, -4.63719f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(4.257049f, 0.3941026f, -5.22419f), Quaternion.Euler(0f, 70.93663f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
+                ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(4.222049f, 0.3941026f, -5.41819f), Quaternion.Euler(90f, 102f, 0f), itemRoot);
+                customItemWrapper = ammoBoxObject.GetComponent<EFM_CustomItemWrapper>();
+                asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
+                for (int i = 0; i < customItemWrapper.maxAmount; ++i)
+                {
+                    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
+                }
                 GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.5500488f, 0.03410256f, 33.48181f), Quaternion.Euler(0f, 343.748f, 0f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.8410492f, 0.1321025f, 33.00081f), Quaternion.Euler(0f, 93.00641f, 0f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[633], new Vector3(-0.3458996f, 0.09630001f, 32.2702f), Quaternion.Euler(332.3804f, 73.96642f, 1.927157E-06f), itemRoot);
@@ -1059,15 +1254,22 @@ namespace EFM
                 }
 
                 // Instantiate other
-                Mod.baseInventory = new Dictionary<string, int>();
-                baseInventoryObjects = new Dictionary<string, List<GameObject>>();
                 traderStatuses = new EFM_TraderStatus[8];
                 for (int i = 0; i < 8; i++)
                 {
                     traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true);
                 }
 
+                // Init lists
                 UpdateBaseInventory();
+                if (Mod.playerInventory == null)
+                {
+                    Mod.playerInventory = new Dictionary<string, int>();
+                    Mod.playerInventoryObjects = new Dictionary<string, List<GameObject>>();
+                }
+
+                Mod.playerInventory.Clear();
+                Mod.playerInventoryObjects.Clear();
 
                 return;
             }
@@ -1084,9 +1286,13 @@ namespace EFM
             Mod.skills = new EFM_Skill[64];
             for(int i=0; i<64; ++i)
             {
+                Mod.skills[i] = new EFM_Skill();
                 Mod.skills[i].progress = (float)data["skills"][i]["progress"];
                 Mod.skills[i].currentProgress = (float)data["skills"][i]["currentProgress"];
             }
+
+            // Set pockets configuration as default
+            GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
 
             // Instantiate items
             Transform itemsRoot = transform.GetChild(2);
@@ -1176,7 +1382,7 @@ namespace EFM
 
             Transform itemsRoot = transform.GetChild(2);
 
-            foreach(Transform item in itemsRoot)
+            foreach (Transform item in itemsRoot)
             {
                 AddToBaseInventory(item);
             }
@@ -1184,6 +1390,7 @@ namespace EFM
 
         private void AddToBaseInventory(Transform item)
         {
+            Mod.instance.LogInfo("add to base inventory called");
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
             string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
@@ -1203,9 +1410,13 @@ namespace EFM
                 if(customItemWrapper.itemType == Mod.ItemType.AmmoBox)
                 {
                     FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
-                    foreach(FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
+                    foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                     {
-                        string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
+                        if(loadedRound == null)
+                        {
+                            continue;
+                        }
+                        string roundName = AM.GetFullRoundName(boxMagazine.RoundType, loadedRound.LR_Class);
 
                         if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
                         {
@@ -1751,9 +1962,15 @@ namespace EFM
                 {
                     customItemWrapper.takeCurrentLocation = false;
 
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[(int)item["PhysicalObject"]["equipSlot"]];
+                    int equipSlotIndex = (int)item["PhysicalObject"]["equipSlot"];
+                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[equipSlotIndex];
                     itemPhysicalObject.SetQuickBeltSlot(equipSlot);
                     itemPhysicalObject.SetParentage(equipSlot.QuickbeltRoot);
+
+                    if(equipSlotIndex == 0)
+                    {
+                        Mod.leftShoulderObject = itemPhysicalObject.gameObject;
+                    }
 
                     for(int i=0; i < customItemWrapper.itemsInSlots.Length; ++i)
                     {
@@ -1763,12 +1980,20 @@ namespace EFM
                             if (currentItemPhysObj != null)
                             {
                                 // Attach item to quick slot
-                                FVRQuickBeltSlot quickBeltSlot = GM.CurrentPlayerBody.QuickbeltSlots[i];
+                                FVRQuickBeltSlot quickBeltSlot = GM.CurrentPlayerBody.QuickbeltSlots[i + 4];
                                 currentItemPhysObj.SetQuickBeltSlot(quickBeltSlot);
                                 currentItemPhysObj.SetParentage(quickBeltSlot.QuickbeltRoot);
                             }
                         }
                     }
+                }
+                else if(item["pocketSlotIndex"] != null)
+                {
+                    customItemWrapper.takeCurrentLocation = false;
+
+                    FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
+                    itemPhysicalObject.SetQuickBeltSlot(pocketSlot);
+                    itemPhysicalObject.SetParentage(pocketSlot.QuickbeltRoot);
                 }
             }
 
@@ -2489,6 +2714,23 @@ namespace EFM
                 }
             }
 
+            // Save pockets
+            Mod.instance.LogInfo("Saving pockets");
+            foreach (FVRQuickBeltSlot pocketSlot in Mod.pocketSlots)
+            {
+                if (pocketSlot.CurObject != null)
+                {
+                    SaveItem(saveItems, pocketSlot.CurObject.transform);
+                }
+            }
+
+            // Save right shoulder
+            Mod.instance.LogInfo("Saving right shoulder");
+            if (Mod.rightShoulderObject != null)
+            {
+                SaveItem(saveItems, Mod.rightShoulderObject.transform);
+            }
+
             // Replace data
             data = saveObject;
 
@@ -2569,6 +2811,16 @@ namespace EFM
 
             // Fill ObjectWrapper
             savedItem["PhysicalObject"]["ObjectWrapper"]["ItemID"] = itemObjectWrapper.ItemID;
+
+            // Check if in pocket
+            for(int i=0; i< 4; ++i)
+            {
+                if (Mod.itemsInPocketSlots[i].Equals(item.gameObject))
+                {
+                    savedItem["pocketSlotIndex"] = i;
+                    break;
+                }
+            }
 
             // Firearm
             if (itemPhysicalObject is FVRFireArm)

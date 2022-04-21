@@ -8,7 +8,7 @@ namespace EFM
 {
     public class EFM_Effect
     {
-        public static List<EFM_Effect> effects; // Active effects
+        public static List<EFM_Effect> effects = new List<EFM_Effect>(); // Active effects
 
         public enum EffectType
         {

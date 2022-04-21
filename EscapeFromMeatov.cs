@@ -14,6 +14,7 @@ using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
 using System.Reflection.Emit;
+using System.Collections;
 
 namespace EFM
 {
@@ -55,6 +56,13 @@ namespace EFM
         public static bool grillHouseSecure;
         public static bool isGrillhouse;
         public static bool inMeatovScene;
+        public static int pocketsConfigIndex;
+        public static GameObject[] itemsInPocketSlots;
+        public static FVRQuickBeltSlot[] pocketSlots;
+        public static EFM_ShoulderStorage leftShoulderSlot;
+        public static EFM_ShoulderStorage rightShoulderSlot;
+        public static GameObject leftShoulderObject;
+        public static GameObject rightShoulderObject;
         public static Dictionary<string, int> baseInventory;
         public static EFM_Base_Manager currentBaseManager;
         public static Dictionary<string, int>[] requiredPerArea;
@@ -496,16 +504,72 @@ namespace EFM
             ammoContainsPrefab = assetsBundle.LoadAsset<GameObject>("ContainsText");
             staminaBarPrefab = assetsBundle.LoadAsset<GameObject>("StaminaBar");
 
+            // Load pockets configuration
+            quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
+            quickSlotConstantMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Renderer>().material;
+            List<GameObject> rigConfigurations = new List<GameObject>();
+            pocketSlots = new FVRQuickBeltSlot[4];
+            int rigIndex = 0;
+            GameObject pocketsConfiguration = assetsBundle.LoadAsset<GameObject>("PocketsConfiguration");
+            rigConfigurations.Add(pocketsConfiguration);
+            for (int j = 0; j < pocketsConfiguration.transform.childCount; ++j)
+            {
+                GameObject slotObject = pocketsConfiguration.transform.GetChild(j).gameObject;
+                slotObject.tag = "QuickbeltSlot";
+                slotObject.SetActive(false); // Just so Awake() isn't called until we've set slot components fields
+
+                string[] splitSlotName = slotObject.name.Split('_');
+                FVRQuickBeltSlot.QuickbeltSlotShape slotShape = splitSlotName[1].Contains("Rect") ? FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear : FVRQuickBeltSlot.QuickbeltSlotShape.Sphere;
+
+                FVRQuickBeltSlot slotComponent = slotObject.AddComponent<FVRQuickBeltSlot>();
+                pocketSlots[j] = slotComponent;
+                slotComponent.QuickbeltRoot = slotObject.transform;
+                slotComponent.HoverGeo = slotObject.transform.GetChild(0).GetChild(0).gameObject;
+                slotComponent.HoverGeo.SetActive(false);
+                slotComponent.PoseOverride = slotObject.transform.GetChild(0).GetChild(2);
+                slotComponent.Shape = slotShape;
+
+                switch (splitSlotName[0])
+                {
+                    case "Small":
+                        slotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.Small;
+                        break;
+                    case "Medium":
+                        slotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.Medium;
+                        break;
+                    case "Large":
+                        slotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.Large;
+                        break;
+                    case "Massive":
+                        slotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.Massive;
+                        break;
+                    case "CantCarryBig":
+                        slotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
+                        break;
+                    default:
+                        break;
+                }
+                slotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
+
+                // Set slot glow materials
+                slotObject.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().material = quickSlotHoverMaterial;
+                slotObject.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().material = quickSlotConstantMaterial;
+
+                slotObject.SetActive(true);
+            }
+
+            pocketsConfigIndex = ManagerSingleton<GM>.Instance.QuickbeltConfigurations.Length + rigIndex++;
+            itemsInPocketSlots = new GameObject[4];
+
             LogInfo("Loading item prefabs...");
             // Load custom item prefabs
             otherActiveSlots = new List<List<FVRQuickBeltSlot>>();
             itemPrefabs = new List<GameObject>();
             itemIcons = new Dictionary<string, Sprite>();
             defaultItemsData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DefaultItemData.txt"));
-            List<GameObject> rigConfigurations = new List<GameObject>();
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
             quickSlotConstantMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Renderer>().material;
-            for (int i = 0, rigIndex = 0; i < ((JArray)defaultItemsData["ItemDefaults"]).Count; ++i)
+            for (int i = 0; i < ((JArray)defaultItemsData["ItemDefaults"]).Count; ++i)
             {
                 LogInfo("\tLoading Item"+i);
                 GameObject itemPrefab = assetsBundle.LoadAsset<GameObject>("Item"+i);
@@ -575,45 +639,6 @@ namespace EFM
                 itemObjectWrapper.TagFirearmAction = (FVRObject.OTagFirearmAction)(int)defaultObjectWrapper["TagFirearmAction"];
                 itemObjectWrapper.TagFirearmRoundPower = (FVRObject.OTagFirearmRoundPower)(int)defaultObjectWrapper["TagFirearmRoundPower"];
                 itemObjectWrapper.TagFirearmCountryOfOrigin = (FVRObject.OTagFirearmCountryOfOrigin)(int)defaultObjectWrapper["TagFirearmCountryOfOrigin"];
-                if (defaultObjectWrapper["TagFirearmFiringModes"] != null && ((JArray)defaultObjectWrapper["TagFirearmFiringModes"]).Count > 0)
-                {
-                    List<FVRObject.OTagFirearmFiringMode> newTagFirearmFiringModes = new List<FVRObject.OTagFirearmFiringMode>();
-                    foreach (int e in defaultObjectWrapper["TagFirearmFiringModes"])
-                    {
-                        newTagFirearmFiringModes.Add((FVRObject.OTagFirearmFiringMode)e);
-                    }
-                    itemObjectWrapper.TagFirearmFiringModes = newTagFirearmFiringModes;
-                }
-                else
-                {
-                    itemObjectWrapper.TagFirearmFiringModes = null;
-                }
-                if (defaultObjectWrapper["TagFirearmFeedOption"] != null && ((JArray)defaultObjectWrapper["TagFirearmFeedOption"]).Count > 0)
-                {
-                    List<FVRObject.OTagFirearmFeedOption> newTagFirearmFeedOption = new List<FVRObject.OTagFirearmFeedOption>();
-                    foreach (int e in defaultObjectWrapper["TagFirearmFeedOption"])
-                    {
-                        newTagFirearmFeedOption.Add((FVRObject.OTagFirearmFeedOption)e);
-                    }
-                    itemObjectWrapper.TagFirearmFeedOption = newTagFirearmFeedOption;
-                }
-                else
-                {
-                    itemObjectWrapper.TagFirearmFeedOption = null;
-                }
-                if (defaultObjectWrapper["TagFirearmMounts"] != null && ((JArray)defaultObjectWrapper["TagFirearmMounts"]).Count > 0)
-                {
-                    List<FVRObject.OTagFirearmMount> newTagFirearmMounts = new List<FVRObject.OTagFirearmMount>();
-                    foreach (int e in defaultObjectWrapper["TagFirearmMounts"])
-                    {
-                        newTagFirearmMounts.Add((FVRObject.OTagFirearmMount)e);
-                    }
-                    itemObjectWrapper.TagFirearmMounts = newTagFirearmMounts;
-                }
-                else
-                {
-                    itemObjectWrapper.TagFirearmMounts = null;
-                }
                 itemObjectWrapper.TagAttachmentMount = (FVRObject.OTagFirearmMount)((int)defaultObjectWrapper["TagAttachmentMount"]);
                 itemObjectWrapper.TagAttachmentFeature = (FVRObject.OTagAttachmentFeature)((int)defaultObjectWrapper["TagAttachmentFeature"]);
                 itemObjectWrapper.TagMeleeStyle = (FVRObject.OTagMeleeStyle)((int)defaultObjectWrapper["TagMeleeStyle"]);
@@ -629,9 +654,9 @@ namespace EFM
                 customItemWrapper.ID = i.ToString();
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 customItemWrapper.volumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
-                customItemWrapper.parent = defaultItemsData["ItemDefaults"][i]["parent"].ToString();
+                customItemWrapper.parent = defaultItemsData["ItemDefaults"][i]["parent"] != null ? defaultItemsData["ItemDefaults"][i]["parent"].ToString() : "";
                 customItemWrapper.itemName = itemObjectWrapper.DisplayName;
-                customItemWrapper.description = defaultItemsData["ItemDefaults"][i]["description"].ToString();
+                customItemWrapper.description = defaultItemsData["ItemDefaults"][i]["description"] != null ? defaultItemsData["ItemDefaults"][i]["description"].ToString() : "";
                 customItemWrapper.lootExperience = (int)defaultItemsData["ItemDefaults"][i]["lootExperience"];
                 customItemWrapper.spawnChance = (float)defaultItemsData["ItemDefaults"][i]["spawnChance"];
                 customItemWrapper.rarity = ItemRarityStringToEnum(defaultItemsData["ItemDefaults"][i]["rarity"].ToString());
@@ -692,14 +717,12 @@ namespace EFM
                 // Rig
                 if (itemType == 2 || itemType == 3)
                 {
-                    LogInfo("\t\tIs rig");
                     // Setup the slots for the player rig config and the rig config
                     int slotCount = 0;
                     GameObject quickBeltConfiguration = assetsBundle.LoadAsset<GameObject>("Item"+i+"Configuration");
                     customItemWrapper.rigSlots = new List<FVRQuickBeltSlot>();
                     for (int j = 0; j < quickBeltConfiguration.transform.childCount; ++j)
                     {
-                        LogInfo("\t\tLoading rig slot "+j);
                         GameObject slotObject = quickBeltConfiguration.transform.GetChild(j).gameObject;
                         slotObject.tag = "QuickbeltSlot";
                         slotObject.SetActive(false); // Just so Awake() isn't called until we've set slot components fields
@@ -855,6 +878,8 @@ namespace EFM
                 {
                     if (!defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundType"].ToString().Equals("none"))
                     {
+                        customItemWrapper.roundClass = (FireArmRoundClass)Enum.Parse(typeof(FireArmRoundClass), defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundClass"].ToString());
+
                         FVRFireArmMagazine fireArmMagazine = (FVRFireArmMagazine)itemPhysicalObject;
                         fireArmMagazine.MagazineType = FireArmMagazineType.mNone;
                         fireArmMagazine.RoundEjectionPos = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
@@ -865,7 +890,10 @@ namespace EFM
                         FVRFireArmMagazineReloadTrigger reloadTrigger = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1).gameObject.AddComponent<FVRFireArmMagazineReloadTrigger>();
                         reloadTrigger.Magazine = fireArmMagazine;
 
-                        ammoBoxByAmmoID.Add(defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["cartridge"].ToString(), i);
+                        if (!ammoBoxByAmmoID.ContainsKey(defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["cartridge"].ToString()))
+                        {
+                            ammoBoxByAmmoID.Add(defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["cartridge"].ToString(), i);
+                        }
                     }
                     else // Generic ammo box, does not have specific round type (yet, should be given one when spawned) and reload trigger
                     {
@@ -902,10 +930,10 @@ namespace EFM
                 if (itemType == 10)
                 {
                     // Set use time
-                    customItemWrapper.useTime = (float)defaultItemsData["ItemDefaults"][i]["useTime"];
+                    customItemWrapper.useTime = (float)defaultItemsData["ItemDefaults"][i]["consumableUseTime"];
 
                     // Set amount rate
-                    if(defaultItemsData["ItemDefaults"][i]["hpResourceRate"] != null)
+                    if (defaultItemsData["ItemDefaults"][i]["hpResourceRate"] != null)
                     {
                         customItemWrapper.amountRate = (float)defaultItemsData["ItemDefaults"][i]["hpResourceRate"];
                     }
@@ -986,7 +1014,7 @@ namespace EFM
 
                     // Set buffs
                     customItemWrapper.effects = new List<EFM_Effect_Buff>();
-                    if (defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"] != null) 
+                    if (defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"] != null)
                     {
                         JArray buffs = (JArray)globalDB["config"]["Health"]["Stimulator"]["Buffs"][defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"].ToString()];
                         foreach(JToken buff in buffs)
@@ -997,7 +1025,7 @@ namespace EFM
                             currentBuff.delay = (float)buff["Delay"];
                             currentBuff.duration = (float)buff["Duration"];
                             currentBuff.value = (float)buff["Value"];
-                            currentBuff.absolute = (bool)buff["Absolute"];
+                            currentBuff.absolute = (bool)buff["AbsoluteValue"];
                             if (currentBuff.effectType == EFM_Effect.EffectType.SkillRate)
                             {
                                 currentBuff.skillIndex = Mod.SkillNameToIndex(buff["SkillName"].ToString());
@@ -1032,26 +1060,32 @@ namespace EFM
         {
             customItemWrapper.whiteList = new List<string>();
             customItemWrapper.blackList = new List<string>();
-            foreach (JToken whiteListElement in defaultItemsData["ItemDefaults"][index]["ContainerProperties"]["WhiteList"])
+            if (defaultItemsData["ItemDefaults"][index]["ContainerProperties"]["WhiteList"] != null)
             {
-                if (itemMap.ContainsKey(whiteListElement.ToString()))
+                foreach (JToken whiteListElement in defaultItemsData["ItemDefaults"][index]["ContainerProperties"]["WhiteList"])
                 {
-                    customItemWrapper.whiteList.Add(itemMap[whiteListElement.ToString()]);
-                }
-                else
-                {
-                    customItemWrapper.whiteList.Add(whiteListElement.ToString());
+                    if (itemMap.ContainsKey(whiteListElement.ToString()))
+                    {
+                        customItemWrapper.whiteList.Add(itemMap[whiteListElement.ToString()]);
+                    }
+                    else
+                    {
+                        customItemWrapper.whiteList.Add(whiteListElement.ToString());
+                    }
                 }
             }
-            foreach (JToken blackListElement in defaultItemsData["ItemDefaults"][index]["ContainerProperties"]["BlackList"])
+            if (defaultItemsData["ItemDefaults"][index]["ContainerProperties"]["BlackList"] != null)
             {
-                if (itemMap.ContainsKey(blackListElement.ToString()))
+                foreach (JToken blackListElement in defaultItemsData["ItemDefaults"][index]["ContainerProperties"]["BlackList"])
                 {
-                    customItemWrapper.blackList.Add(itemMap[blackListElement.ToString()]);
-                }
-                else
-                {
-                    customItemWrapper.blackList.Add(blackListElement.ToString());
+                    if (itemMap.ContainsKey(blackListElement.ToString()))
+                    {
+                        customItemWrapper.blackList.Add(itemMap[blackListElement.ToString()]);
+                    }
+                    else
+                    {
+                        customItemWrapper.blackList.Add(blackListElement.ToString());
+                    }
                 }
             }
         }
@@ -1158,17 +1192,19 @@ namespace EFM
             }
 
             // Get all item spawner object defs
-            UnityEngine.Object[] array = Resources.LoadAll("ItemSpawnerDefinitions", typeof(ItemSpawnerObjectDefinition));
-            foreach(ItemSpawnerObjectDefinition def in array)
-            {
-                // Check if our vanilla items contain the ItemID of this object
-                FVRPhysicalObject physObj = def.Prefab.GetComponentInChildren<FVRPhysicalObject>();
-                if (physObj != null && vanillaItems.ContainsKey(physObj.ObjectWrapper.ItemID) && !itemIcons.ContainsKey(physObj.ObjectWrapper.ItemID))
-                {
-                    // Add the sprite
-                    itemIcons.Add(physObj.ObjectWrapper.ItemID, def.Sprite);
-                }
-            }
+            //UnityEngine.Object[] array = Resources.LoadAll("ItemSpawnerDefinitions", typeof(ItemSpawnerObjectDefinition));
+            //LogInfo("VANILLA SPRITES COUNT=" + array.Length);
+            //foreach (ItemSpawnerObjectDefinition def in array)
+            //{
+            //    // Check if our vanilla items contain the ItemID of this object
+            //    FVRPhysicalObject physObj = def.Prefab.GetComponentInChildren<FVRPhysicalObject>();
+            //    if (physObj != null && vanillaItems.ContainsKey(physObj.ObjectWrapper.ItemID) && !itemIcons.ContainsKey(physObj.ObjectWrapper.ItemID))
+            //    {
+            //        // Add the sprite
+            //        itemIcons.Add(physObj.ObjectWrapper.ItemID, def.Sprite);
+            //        LogInfo("Added sprite for vanilla ID: " + physObj.ObjectWrapper.ItemID);
+            //    }
+            //}
         }
 
         private static ItemRarity ItemRarityStringToEnum(string name)
@@ -1540,7 +1576,7 @@ namespace EFM
             harmony.Patch(magazineUpdateInteractionPatchOriginal, null, new HarmonyMethod(magazineUpdateInteractionPatchPostfix), new HarmonyMethod(magazineUpdateInteractionPatchTranspiler));
 
             // ClipUpdateInteractionPatch
-            MethodInfo clipUpdateInteractionPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("UpdateInteraction", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo clipUpdateInteractionPatchOriginal = typeof(FVRFireArmClip).GetMethod("UpdateInteraction", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo clipUpdateInteractionPatchPostfix = typeof(ClipUpdateInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo clipUpdateInteractionPatchTranspiler = typeof(ClipUpdateInteractionPatch).GetMethod("Transpiler", BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -1554,9 +1590,9 @@ namespace EFM
 
             // MovementManagerTwinstickPatch
             MethodInfo movementManagerTwinstickPatchOriginal = typeof(FVRMovementManager).GetMethod("HandUpdateTwinstick", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo movementManagerTwinstickPatchTranspiler = typeof(MovementManagerUpdatePatch).GetMethod("Transpiler", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo movementManagerTwinstickPatchPrefix = typeof(MovementManagerUpdatePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(movementManagerTwinstickPatchOriginal, null, null, new HarmonyMethod(movementManagerTwinstickPatchTranspiler));
+            harmony.Patch(movementManagerTwinstickPatchOriginal, new HarmonyMethod(movementManagerTwinstickPatchPrefix));
 
             // ChamberSetRoundPatch
             MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance);
@@ -1565,7 +1601,7 @@ namespace EFM
             harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
 
             // MagRemoveRoundPatch
-            MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] {}, null);
             MethodInfo magRemoveRoundPatchPrefix = typeof(MagRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo magRemoveRoundPatchPostfix = typeof(MagRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -1586,7 +1622,7 @@ namespace EFM
             harmony.Patch(magRemoveRoundIntPatchOriginal, new HarmonyMethod(magRemoveRoundIntPatchPrefix), new HarmonyMethod(magRemoveRoundIntPatchPostfix));
 
             // ClipRemoveRoundPatch
-            MethodInfo clipRemoveRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo clipRemoveRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
             MethodInfo clipRemoveRoundPatchPrefix = typeof(ClipRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo clipRemoveRoundPatchPostfix = typeof(ClipRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -1782,6 +1818,9 @@ namespace EFM
 
                 Transform spawnPoint = baseRoot.transform.GetChild(baseRoot.transform.childCount - 1).GetChild(0);
                 GM.CurrentMovementManager.TeleportToPoint(spawnPoint.position, true, spawnPoint.rotation.eulerAngles);
+
+                // Also set respawn to spawn point
+                GM.CurrentSceneSettings.DeathResetPoint = spawnPoint;
             }
             else if (loadedScene.name.Equals("MeatovFactoryScene") /*|| other raid scenes*/)
             {
@@ -1831,6 +1870,9 @@ namespace EFM
             // TP Player
             Transform spawnPoint = menuRoot.transform.GetChild(menuRoot.transform.childCount - 1).GetChild(0);
             GM.CurrentMovementManager.TeleportToPoint(spawnPoint.position, true, spawnPoint.rotation.eulerAngles);
+
+            // Also set respawn to spawn point
+            GM.CurrentSceneSettings.DeathResetPoint = spawnPoint;
 
             // Init menu
             EFM_Menu_Manager menuManager = menuRoot.AddComponent<EFM_Menu_Manager>();
@@ -2145,6 +2187,11 @@ namespace EFM
     {
         static void Postfix(FVRViveHand hand, ref FVRInteractiveObject __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             Mod.instance.LogInfo("0");
             hand.GetComponent<EFM_Hand>().currentHeldItem = null;
 
@@ -2773,16 +2820,22 @@ namespace EFM
     }
 
     // Patches FVRPlayerBody.ConfigureQuickbelt so we can call it with index -1 to clear the quickbelt, or to save which is the latest quick belt index we configured
+    // This completely replaces the original
     class ConfigureQuickbeltPatch
     {
         static bool Prefix(int index, ref FVRPlayerBody __instance)
         {
-            if(index < 0)
+            if (!Mod.inMeatovScene)
             {
-                // Clear the belt
-                if (__instance.QuickbeltSlots.Count > 0)
+                return true;
+            }
+
+            if (index < 0)
+            {
+                // Clear the belt above the pockets
+                if (__instance.QuickbeltSlots.Count > 4)
                 {
-                    for (int i = __instance.QuickbeltSlots.Count - 1; i >= 0; i--)
+                    for (int i = __instance.QuickbeltSlots.Count - 1; i >= 4; --i)
                     {
                         if (__instance.QuickbeltSlots[i] == null)
                         {
@@ -2790,8 +2843,8 @@ namespace EFM
                         }
                         else if (__instance.QuickbeltSlots[i].IsPlayer)
                         {
-                            // Index -2 will destroy objects associated to the slots
-                            if (index == -2 && __instance.QuickbeltSlots[i].CurObject != null)
+                            // Index -2 or -3 will destroy objects associated to the slots
+                            if ((index == -2 || index == -3) && __instance.QuickbeltSlots[i].CurObject != null)
                             {
                                 GameObject.Destroy(__instance.QuickbeltSlots[i].CurObject.gameObject);
                                 __instance.QuickbeltSlots[i].CurObject.ClearQuickbeltState();
@@ -2802,22 +2855,116 @@ namespace EFM
                     }
                 }
 
-                Mod.currentQuickBeltConfiguration = -1;
+                // If -3 also destroy objects in pockets, but dont get rid of the slots themselves
+                if(index == -3)
+                {
+                    for (int i = 3; i >= 0; --i)
+                    {
+                        if (__instance.QuickbeltSlots[i].IsPlayer && __instance.QuickbeltSlots[i].CurObject != null)
+                        {
+                            GameObject.Destroy(__instance.QuickbeltSlots[i].CurObject.gameObject);
+                            __instance.QuickbeltSlots[i].CurObject.ClearQuickbeltState();
+                        }
+                    }
+                }
 
-                return false;
+                Mod.currentQuickBeltConfiguration = Mod.pocketsConfigIndex;
+            }
+            else if(index >= Mod.pocketsConfigIndex) // If index is higher than the pockets configuration index, we must keep the pocket slots intact
+            {
+                // Only check for slots other than pockets
+                if (__instance.QuickbeltSlots.Count > /* 0 */ 4)
+                {
+                    for (int i = __instance.QuickbeltSlots.Count - 1; i >= /* 0 */ 4; i--)
+                    {
+                        if (__instance.QuickbeltSlots[i] == null)
+                        {
+                            __instance.QuickbeltSlots.RemoveAt(i);
+                        }
+                        else if (__instance.QuickbeltSlots[i].IsPlayer)
+                        {
+                            if (__instance.QuickbeltSlots[i].CurObject != null)
+                            {
+                                __instance.QuickbeltSlots[i].CurObject.ClearQuickbeltState();
+                            }
+                            UnityEngine.Object.Destroy(__instance.QuickbeltSlots[i].gameObject);
+                            __instance.QuickbeltSlots.RemoveAt(i);
+                        }
+                    }
+                }
+                int num = Mathf.Clamp(index, 0, ManagerSingleton<GM>.Instance.QuickbeltConfigurations.Length - 1);
+                GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(ManagerSingleton<GM>.Instance.QuickbeltConfigurations[num], __instance.Torso.position, __instance.Torso.rotation);
+                gameObject.transform.SetParent(__instance.Torso.transform);
+                gameObject.transform.localPosition = Vector3.zero;
+                IEnumerator enumerator = gameObject.transform.GetEnumerator();
+                try
+                {
+                    while (enumerator.MoveNext())
+                    {
+                        object obj = enumerator.Current;
+                        Transform transform = (Transform)obj;
+                        if (transform.gameObject.tag == "QuickbeltSlot")
+                        {
+                            FVRQuickBeltSlot component = transform.GetComponent<FVRQuickBeltSlot>();
+                            if (GM.Options.QuickbeltOptions.QuickbeltHandedness > 0)
+                            {
+                                Vector3 vector = component.PoseOverride.forward;
+                                Vector3 vector2 = component.PoseOverride.up;
+                                vector = Vector3.Reflect(vector, component.transform.right);
+                                vector2 = Vector3.Reflect(vector2, component.transform.right);
+                                component.PoseOverride.rotation = Quaternion.LookRotation(vector, vector2);
+                            }
+                            __instance.QuickbeltSlots.Add(component);
+                        }
+                    }
+                }
+                finally
+                {
+                    IDisposable disposable;
+                    if ((disposable = (enumerator as IDisposable)) != null)
+                    {
+                        disposable.Dispose();
+                    }
+                }
+                for (int j = 0; j < __instance.QuickbeltSlots.Count; j++)
+                {
+                    if (__instance.QuickbeltSlots[j].IsPlayer)
+                    {
+                        __instance.QuickbeltSlots[j].transform.SetParent(__instance.Torso);
+                        __instance.QuickbeltSlots[j].QuickbeltRoot = null;
+                        if (GM.Options.QuickbeltOptions.QuickbeltHandedness > 0)
+                        {
+                            __instance.QuickbeltSlots[j].transform.localPosition = new Vector3(-__instance.QuickbeltSlots[j].transform.localPosition.x, __instance.QuickbeltSlots[j].transform.localPosition.y, __instance.QuickbeltSlots[j].transform.localPosition.z);
+                        }
+                    }
+                }
+                PlayerBackPack[] array = UnityEngine.Object.FindObjectsOfType<PlayerBackPack>();
+                for (int k = 0; k < array.Length; k++)
+                {
+                    array[k].RegisterQuickbeltSlots();
+                }
+                UnityEngine.Object.Destroy(gameObject);
+
+                // Set custom quick belt config index
+                Mod.currentQuickBeltConfiguration = index;
             }
 
-            Mod.currentQuickBeltConfiguration = index;
-
-            return true;
+            return false;
         }
     }
 
     // Patches FVRViveHand.TestQuickBeltDistances so we also check custom slots and check for equipment incompatibility
+    // This completely replaces the original
     class TestQuickbeltPatch
     {
         static bool Prefix(ref FVRViveHand __instance, ref FVRViveHand.HandState ___m_state, ref FVRInteractiveObject ___m_currentInteractable)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+
             if (__instance.CurrentHoveredQuickbeltSlot != null && !__instance.CurrentHoveredQuickbeltSlot.IsSelectable)
             {
                 __instance.CurrentHoveredQuickbeltSlot = null;
@@ -2854,7 +3001,7 @@ namespace EFM
 
             // Check equip slots
             int equipmentSlotIndex = -1;
-            if(fvrquickBeltSlot == null && Mod.equipmentSlots != null)
+            if (fvrquickBeltSlot == null && Mod.equipmentSlots != null)
             {
                 for (int i = 0; i < Mod.equipmentSlots.Count; ++i) 
                 {
@@ -2883,6 +3030,22 @@ namespace EFM
                 }
             }
 
+            // Check shoulder slots
+            int shoulderIndex = -1;
+            if(fvrquickBeltSlot == null)
+            {
+                if (Mod.leftShoulderSlot != null && Mod.leftShoulderSlot.IsPointInsideMe(position))
+                {
+                    fvrquickBeltSlot = Mod.leftShoulderSlot;
+                    shoulderIndex = 0;
+                }
+                else if (Mod.leftShoulderSlot != null && Mod.rightShoulderSlot.IsPointInsideMe(position))
+                {
+                    fvrquickBeltSlot = Mod.rightShoulderSlot;
+                    shoulderIndex = 1;
+                }
+            }
+
             if (fvrquickBeltSlot == null)
             {
                 if (__instance.CurrentHoveredQuickbeltSlot != null)
@@ -2900,6 +3063,12 @@ namespace EFM
                     {
                         __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                     }
+                    else if (fvrquickBeltSlot is EFM_ShoulderStorage && !(fvrquickBeltSlot as EFM_ShoulderStorage).right &&
+                            Mod.equipmentSlots[0].CurObject != null && !Mod.equipmentSlots[0].CurObject.IsHeld && Mod.equipmentSlots[0].CurObject.IsInteractable())
+                    {
+                        // Set hovered QB slot to backpack equip slot if it is left shoulder and backpack slot is not empty
+                        __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
+                    }
                 }
                 else if (___m_state == FVRViveHand.HandState.GripInteracting && ___m_currentInteractable != null && ___m_currentInteractable is FVRPhysicalObject)
                 {
@@ -2913,7 +3082,7 @@ namespace EFM
                             if(customItemWrapper != null)
                             {
                                 bool typeCompatible = Mod.equipmentSlots[equipmentSlotIndex].equipmentType == customItemWrapper.itemType;
-                                bool otherCompatible = false;
+                                bool otherCompatible = true;
                                 switch (customItemWrapper.itemType)
                                 {
                                     case Mod.ItemType.ArmoredRig:
@@ -2961,6 +3130,19 @@ namespace EFM
                                 }
                             }
                         }
+                        else if(shoulderIndex > -1)
+                        {
+                            // If left shoulder, make sure item is backpack, and player not already wearing a backpack
+                            // If right shoulder, make sure item is a firearm
+                            if (shoulderIndex == 0 && customItemWrapper != null && customItemWrapper.itemType == Mod.ItemType.Backpack && EFM_EquipmentSlot.currentBackpack == null)
+                            {
+                                __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
+                            }
+                            else if(shoulderIndex == 1 && fvrphysicalObject is FVRFireArm)
+                            {
+                                __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
+                            }
+                        }
                         else
                         {
                             __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
@@ -2976,9 +3158,14 @@ namespace EFM
     // Patches FVRPhysicalObject.SetQuickBeltSlot so we can keep track of what goes in and out of rigs
     class SetQuickBeltSlotPatch
     {
-        static void Prefix(FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
+        static void Prefix(ref FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
         {
-            if(slot == null)
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (slot == null)
             {
                 // Set the size of the object to normal because it may have been scaled to fit the slot
                 __instance.transform.localScale = Vector3.one;
@@ -2992,30 +3179,56 @@ namespace EFM
                     {
                         EFM_EquipmentSlot.TakeOffEquipment(customItemWrapper);
                     }
+
+                    // Also set left shoulder object to null if this is backpack slot
+                    if (__instance.QuickbeltSlot.Equals(Mod.equipmentSlots[0]))
+                    {
+                        Mod.leftShoulderObject = null;
+                    }
+                }
+                else if(__instance.QuickbeltSlot is EFM_ShoulderStorage)
+                {
+                    EFM_ShoulderStorage asShoulderSlot = __instance.QuickbeltSlot as EFM_ShoulderStorage;
+                    if (asShoulderSlot.right)
+                    {
+                        Mod.rightShoulderObject = null;
+                        __instance.gameObject.SetActive(true);
+                    }
+                    //else
+                    //{
+                    //    Mod.leftShoulderObject = null;
+                    //    EFM_EquipmentSlot.TakeOffEquipment(customItemWrapper);
+                    //}
                 }
                 else 
                 {
-                    // Check if slot in a loose rig
-                    if (__instance.QuickbeltSlot)
+                    // Check if in pockets
+                    for (int i = 0; i < 4; ++i)
                     {
-                        Transform slotRootParent = __instance.QuickbeltSlot.transform.parent.parent;
-                        if (slotRootParent != null)
+                        if (Mod.itemsInPocketSlots[i].Equals(__instance.gameObject))
                         {
-                            Transform rootOwner = slotRootParent.parent;
-                            if (rootOwner != null)
+                            Mod.itemsInPocketSlots[i] = null;
+                            return;
+                        }
+                    }
+
+                    // Check if slot in a loose rig
+                    Transform slotRootParent = __instance.QuickbeltSlot.transform.parent.parent;
+                    if (slotRootParent != null)
+                    {
+                        Transform rootOwner = slotRootParent.parent;
+                        if (rootOwner != null)
+                        {
+                            EFM_CustomItemWrapper rigItemWrapper = rootOwner.GetComponent<EFM_CustomItemWrapper>();
+                            if (rigItemWrapper != null && (rigItemWrapper.itemType == Mod.ItemType.Rig || rigItemWrapper.itemType == Mod.ItemType.ArmoredRig))
                             {
-                                EFM_CustomItemWrapper rigItemWrapper = rootOwner.GetComponent<EFM_CustomItemWrapper>();
-                                if (rigItemWrapper != null && (rigItemWrapper.itemType == Mod.ItemType.Rig || rigItemWrapper.itemType == Mod.ItemType.ArmoredRig))
+                                // This slot is owned by a rig, need to update that rig's content
+                                for (int slotIndex = 0; slotIndex < rigItemWrapper.rigSlots.Count; ++slotIndex)
                                 {
-                                    // This slot is owned by a rig, need to update that rig's content
-                                    // Upadte rig content
-                                    for (int slotIndex = 0; slotIndex < rigItemWrapper.rigSlots.Count; ++slotIndex)
+                                    if (rigItemWrapper.rigSlots[slotIndex].Equals(__instance.QuickbeltSlot))
                                     {
-                                        if (rigItemWrapper.rigSlots[slotIndex].Equals(__instance.QuickbeltSlot))
-                                        {
-                                            rigItemWrapper.itemsInSlots[slotIndex] = null;
-                                            return;
-                                        }
+                                        rigItemWrapper.itemsInSlots[slotIndex] = null;
+                                        return;
                                     }
                                 }
                             }
@@ -3041,12 +3254,56 @@ namespace EFM
                     }
                 }
             }
+            else
+            {
+                // Need to make sure that a backpack being put into left shoulder slot gets put into backpack equipment slot instead
+                if(slot is EFM_ShoulderStorage)
+                {
+                    if(!(slot as EFM_ShoulderStorage).right)
+                    {
+                        slot = Mod.equipmentSlots[0]; // Set the slot as the backpack equip slot
+                    }
+                }
+            }
         }
 
         static void Postfix(FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             if (slot == null)
             {
+                return;
+            }
+
+            // Check if pocket slot
+            for(int i=0; i < 4; ++i)
+            {
+                if (Mod.pocketSlots[i].Equals(slot))
+                {
+                    Mod.itemsInPocketSlots[i] = __instance.gameObject;
+                    return;
+                }
+            }
+
+            // Check if shoulder slot
+            if(slot is EFM_ShoulderStorage)
+            {
+                EFM_ShoulderStorage asShoulderSlot = slot as EFM_ShoulderStorage;
+                if (asShoulderSlot.right)
+                {
+                    Mod.rightShoulderObject = __instance.gameObject;
+                    __instance.gameObject.SetActive(false);
+                }
+                //else
+                //{
+                //    Mod.leftShoulderObject = __instance.gameObject;
+                //    EFM_EquipmentSlot.WearEquipment(__instance.GetComponent<EFM_CustomItemWrapper>());
+                //}
+
                 return;
             }
 
@@ -3059,13 +3316,19 @@ namespace EFM
                     Mod.instance.LogInfo("Object was put into equipment slot and scale set to: "+ __instance.transform.localScale.x);
                 }
 
+                // If this is backpack slot, also set left shoulder to the object
+                if (slot.Equals(Mod.equipmentSlots[0]))
+                {
+                    Mod.leftShoulderObject = __instance.gameObject;
+                }
+
                 EFM_EquipmentSlot.WearEquipment(__instance.GetComponent<EFM_CustomItemWrapper>());
             }
             else if (EFM_EquipmentSlot.wearingArmoredRig || EFM_EquipmentSlot.wearingRig) // We are wearing custom quick belt, check if slot is in there, update if it is
             {
                 // Find slot index in config
                 bool foundSlot = false;
-                for (int slotIndex=0; slotIndex < GM.CurrentPlayerBody.QuickbeltSlots.Count; ++slotIndex)
+                for (int slotIndex=4; slotIndex < GM.CurrentPlayerBody.QuickbeltSlots.Count; ++slotIndex)
                 {
                     if (GM.CurrentPlayerBody.QuickbeltSlots[slotIndex].Equals(slot))
                     {
@@ -3128,6 +3391,11 @@ namespace EFM
     {
         static void Prefix(FVRViveHand hand, ref FVRPhysicalObject __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             hand.GetComponent<EFM_Hand>().currentHeldItem = __instance.gameObject;
 
             EFM_VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
@@ -3484,6 +3752,11 @@ namespace EFM
 
         static void Postfix()
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             if (Mod.beginInteractingEquipRig)
             {
                 Mod.beginInteractingEquipRig = false;
@@ -3496,6 +3769,11 @@ namespace EFM
     {
         static bool Prefix(Damage d, ref FVRPlayerHitbox __instance, ref AudioSource ___m_aud)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             if (!GM.CurrentSceneSettings.DoesDamageGetRegistered)
             {
                 return false;
@@ -3581,6 +3859,11 @@ namespace EFM
     {
         static bool Prefix(Collider collider, bool isEnter, bool isPalm, ref FVRViveHand.HandState ___m_state, ref bool ___m_isClosestInteractableInPalm, ref FVRViveHand __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             FVRInteractiveObject interactiveObject = collider.gameObject.GetComponent<FVRInteractiveObject>();
             EFM_OtherInteractable otherInteractable = collider.gameObject.GetComponent<EFM_OtherInteractable>();
 
@@ -3652,6 +3935,11 @@ namespace EFM
     {
         static bool Prefix(Collider collider, ref FVRViveHand __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             FVRInteractiveObject interactiveObject = collider.gameObject.GetComponent<FVRInteractiveObject>();
             EFM_OtherInteractable otherInteractable = collider.gameObject.GetComponent<EFM_OtherInteractable>();
             FVRInteractiveObject interactiveObjectToUse = otherInteractable != null ? otherInteractable.interactiveObject : interactiveObject;
@@ -3678,6 +3966,11 @@ namespace EFM
     {
         static bool Prefix(float ___distBetween, ref float ___m_keyLerp, ref SideHingedDestructibleDoorDeadBoltKey __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
 
             Vector3 pos = __instance.m_hand.Input.Pos;
@@ -3740,6 +4033,11 @@ namespace EFM
     {
         static bool Prefix(ref SideHingedDestructibleDoorDeadBoltKey __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
 
             GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(int.TryParse(__instance.KeyFO, out int result) ? Mod.itemPrefabs[result] : IM.OD[__instance.KeyFO].GetGameObject(), __instance.transform.position, __instance.transform.rotation);
@@ -3756,6 +4054,11 @@ namespace EFM
     {
         static bool Prefix(ref SideHingedDestructibleDoor __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             if (!Mod.initDoors)
             {
                 return false;
@@ -3771,6 +4074,11 @@ namespace EFM
     {
         static bool Prefix(Vector3 upVec, ref Vector3 ___lastHandForward, ref float ___m_curRot, ref SideHingedDestructibleDoorDeadBolt __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             // First check if lock is flipped
             Vector3 dirVecToUse = __instance.Mount.forward;
             EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
@@ -3796,6 +4104,11 @@ namespace EFM
     {
         static bool Prefix(Vector3 upVec, ref Vector3 ___lastHandForward, ref SideHingedDestructibleDoorDeadBolt __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             // First check if lock is flipped
             Vector3 dirVecToUse = __instance.Mount.forward;
             EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
@@ -3815,6 +4128,11 @@ namespace EFM
     {
         static void Postfix(ref float ___m_vizRot, ref SideHingedDestructibleDoorDeadBolt __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             // First check if lock is flipped
             float yAngleToUse = 0;
             EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
@@ -3833,6 +4151,11 @@ namespace EFM
     {
         static void Postfix(ref float ___m_vizRot, ref SideHingedDestructibleDoorDeadBolt __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             // First check if lock is flipped
             float yAngleToUse = 0;
             EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
@@ -3852,6 +4175,11 @@ namespace EFM
     {
         static bool Prefix(bool triggersToo, string layerName, ref Collider[] ___m_colliders, ref FVRInteractiveObject __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             if (triggersToo)
             {
                 foreach (Collider collider in ___m_colliders)
@@ -3880,6 +4208,7 @@ namespace EFM
     }
 
     // Patches FVRViveHand.Update to change the grab laser input
+    // This completely replaces the original
     class HandUpdatePatch
     {
         static bool touchWithinDescRange;
@@ -3893,6 +4222,11 @@ namespace EFM
                            ref FVRPhysicalObject ___m_grabityHoveredObject, ref float ___m_timeSinceLastGripButtonDown, ref float ___m_timeGripButtonHasBeenHeld,
                            ref bool ___m_canMadeGrabReleaseSoundThisFrame, ref FVRViveHand __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             if (___m_initState == FVRViveHand.HandInitializationState.Uninitialized)
             {
                 return false;
@@ -3941,6 +4275,7 @@ namespace EFM
                     }
                 }
             }
+            Mod.instance.LogInfo("0");
 
             typeof(FVRViveHand).GetMethod("HapticBuzzUpdate", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
             typeof(FVRViveHand).GetMethod("TestQuickBeltDistances", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
@@ -4021,10 +4356,10 @@ namespace EFM
             }
             else // Started touching within desc range, want to stop movement, sprinting, and smooth turning
             {
-                typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningClockwise").SetValue(GM.CurrentMovementManager, false);
-                typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningCounterClockwise").SetValue(GM.CurrentMovementManager, false);
-                typeof(FVRMovementManager).GetField("m_sprintingEngaged").SetValue(GM.CurrentMovementManager, false);
-                typeof(FVRMovementManager).GetField("m_twoAxisVelocity").SetValue(GM.CurrentMovementManager, Vector2.zero);
+                typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
+                typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningCounterClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
+                typeof(FVRMovementManager).GetField("m_sprintingEngaged", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
+                typeof(FVRMovementManager).GetField("m_twoAxisVelocity", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, Vector2.zero);
             }
 
             if (__instance.MovementManager.ShouldFlushTouchpad(__instance))
@@ -4053,8 +4388,9 @@ namespace EFM
             {
                 if(___m_state == FVRViveHand.HandState.GripInteracting)
                 {
-                    // Only display description if started touching at magnitude < 0.2
-                    if (touchWithinDescRange)
+                    // Only display description if started touching at magnitude < 0.2, and also check if descriptions have been init yet
+                    // Because this will also be checked in meatov menu but they havent been init yet at that point
+                    if (touchWithinDescRange && Mod.rightDescriptionManager != null)
                     {
                         EFM_Describable describable = __instance.CurrentInteractable.GetComponent<EFM_Describable>();
                         if (describable != null)
@@ -4106,24 +4442,27 @@ namespace EFM
                 // Even if we started touching within magnitude, if we touched out of it at any time, set it to false
                 touchWithinDescRange = false;
 
-                // Get the description currently on this hand
-                EFM_DescriptionManager manager = null;
-                if (__instance.IsThisTheRightHand)
+                if (Mod.rightDescriptionManager != null)
                 {
-                    manager = Mod.rightDescriptionManager;
-                }
-                else
-                {
-                    manager = Mod.leftDescriptionManager;
-                }
+                    // Get the description currently on this hand
+                    EFM_DescriptionManager manager = null;
+                    if (__instance.IsThisTheRightHand)
+                    {
+                        manager = Mod.rightDescriptionManager;
+                    }
+                    else
+                    {
+                        manager = Mod.leftDescriptionManager;
+                    }
 
-                // Make sure it is not displayed
-                if (manager.gameObject.activeSelf)
-                {
-                    manager.gameObject.SetActive(false);
+                    // Make sure it is not displayed
+                    if (manager.gameObject.activeSelf)
+                    {
+                        manager.gameObject.SetActive(false);
+                    }
                 }
             }
-            if (pressedCenter)
+            if (pressedCenter && Mod.rightDescriptionManager != null)
             {
                 // Get the description currently on this hand
                 EFM_DescriptionManager manager = null;
@@ -4188,7 +4527,7 @@ namespace EFM
                     {
                         // Display summary description of object if describable and if not already displayed
                         EFM_Describable describable = fvrphysicalObject.GetComponent<EFM_Describable>();
-                        if(describable != null)
+                        if(describable != null && Mod.rightDescriptionManager != null)
                         {
                             // Get the description currently on this hand
                             EFM_DescriptionManager manager = null;
@@ -4249,19 +4588,22 @@ namespace EFM
                     }
                     else
                     {
-                        // Hide summary description of object
-                        EFM_DescriptionManager manager = null;
-                        if (__instance.IsThisTheRightHand)
+                        if (Mod.rightDescriptionManager != null)
                         {
-                            manager = Mod.rightDescriptionManager;
-                        }
-                        else
-                        {
-                            manager = Mod.leftDescriptionManager;
-                        }
-                        if (manager.gameObject.activeSelf)
-                        {
-                            manager.gameObject.SetActive(false);
+                            // Hide summary description of object
+                            EFM_DescriptionManager manager = null;
+                            if (__instance.IsThisTheRightHand)
+                            {
+                                manager = Mod.rightDescriptionManager;
+                            }
+                            else
+                            {
+                                manager = Mod.leftDescriptionManager;
+                            }
+                            if (manager.gameObject.activeSelf)
+                            {
+                                manager.gameObject.SetActive(false);
+                            }
                         }
 
                         if (__instance.BlueLaser.activeSelf)
@@ -4317,6 +4659,19 @@ namespace EFM
                             ___m_state = FVRViveHand.HandState.GripInteracting;
                             __instance.CurrentInteractable.BeginInteraction(__instance);
                             __instance.Buzz(__instance.Buzzer.Buzz_BeginInteraction);
+                            flag4 = true;
+                        }
+                        else if (__instance.CurrentHoveredQuickbeltSlot != null && 
+                                 __instance.CurrentHoveredQuickbeltSlot is EFM_ShoulderStorage &&
+                                 !(__instance.CurrentHoveredQuickbeltSlot as EFM_ShoulderStorage).right &&
+                                 Mod.equipmentSlots[0].CurObject != null)
+                        {
+                            // If we are hovering over left shoulder slot and backpack slot is not empty we want to grab backpack
+                            __instance.CurrentInteractable = Mod.equipmentSlots[0].CurObject;
+                            ___m_state = FVRViveHand.HandState.GripInteracting;
+                            __instance.CurrentInteractable.BeginInteraction(__instance);
+                            __instance.Buzz(__instance.Buzzer.Buzz_BeginInteraction);
+                            Mod.leftShoulderObject = null;
                             flag4 = true;
                         }
                         else if (__instance.ClosestPossibleInteractable != null && !__instance.ClosestPossibleInteractable.IsSimpleInteract)
@@ -4527,10 +4882,12 @@ namespace EFM
     class MagazineUpdateInteractionPatch
     {
         static GameObject latestEjectedRound;
-        static int latestEjectedRoundLocation; // IGNORE WARNING, Will be written by transpiler
+        static int latestEjectedRoundLocation;
+        static int callcount = 0;
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
+            Mod.instance.LogInfo("transpiler call count: "+ (callcount++));
             List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
             List<CodeInstruction> toInsert = new List<CodeInstruction>();
             toInsert.Add(new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
@@ -4539,32 +4896,32 @@ namespace EFM
             for (int i = 0; i < instructionList.Count; ++i)
             {
                 CodeInstruction instruction = instructionList[i];
-                if (instruction.opcode == OpCodes.Call && instruction.operand.ToString().Equals("instance class [UnityEngine]UnityEngine.GameObject FistVR.FVRFireArmMagazine::RemoveRound(bool)") &&
+                if (instruction.opcode == OpCodes.Call && instruction.operand.ToString().Equals("UnityEngine.GameObject RemoveRound(Boolean)") &&
                     instructionList[i+1].opcode == OpCodes.Stloc_S)
                 {
-                    if (instructionList[i + 1].operand.ToString().Equals("V_13"))
+                    if (instructionList[i + 1].operand.ToString().Equals("UnityEngine.GameObject (13)"))
                     {
                         instructionList.InsertRange(i + 1, toInsert);
 
                         // Now in hand
                         instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldc_I4_0));
-                        instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
+                        instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
                     }
-                    else if(instructionList[i + 1].operand.ToString().Equals("V_18"))
+                    else if(instructionList[i + 1].operand.ToString().Equals("UnityEngine.GameObject (18)"))
                     {
                         instructionList.InsertRange(i + 1, toInsert);
 
                         // Now in slot, could be in raid or base so can just take the one in mod
                         instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldc_I4_1));
-                        instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
+                        instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
                     }
-                    else if(instructionList[i + 1].operand.ToString().Equals("V_23"))
+                    else if(instructionList[i + 1].operand.ToString().Equals("UnityEngine.GameObject (23)"))
                     {
                         instructionList.InsertRange(i + 1, toInsert);
 
                         // Now in slot, could be in raid or base so can just take the one in mod
                         instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldc_I4_1));
-                        instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
+                        instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
                     }
                 }
             }
@@ -4573,7 +4930,12 @@ namespace EFM
 
         static void Postfix()
         {
-            if(latestEjectedRound != null)
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (latestEjectedRound != null)
             {
                 EFM_VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<EFM_VanillaItemDescriptor>();
                 if (latestEjectedRoundLocation == 0) 
@@ -4648,7 +5010,7 @@ namespace EFM
             for (int i = 0; i < instructionList.Count; ++i)
             {
                 CodeInstruction instruction = instructionList[i];
-                if (instruction.opcode == OpCodes.Call && instruction.operand.ToString().Equals("instance class [UnityEngine]UnityEngine.GameObject FistVR.FVRFireArmMagazine::RemoveRound(bool)"))
+                if (instruction.opcode == OpCodes.Call && instruction.operand.ToString().Equals("UnityEngine.GameObject RemoveRound(Boolean)"))
                 {
                     if(instructionList[i + 1].opcode == OpCodes.Stloc_1)
                     {
@@ -4656,25 +5018,25 @@ namespace EFM
 
                         // Now in hand
                         instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldc_I4_0));
-                        instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
+                        instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
                     }
                     else if (instructionList[i + 1].opcode == OpCodes.Stloc_S)
                     {
-                        if (instructionList[i + 1].operand.ToString().Equals("V_6"))
+                        if (instructionList[i + 1].operand.ToString().Equals("UnityEngine.GameObject (6)"))
                         {
                             instructionList.InsertRange(i + 1, toInsert);
 
                             // Now in slot, could be in raid or base so can just take the one in mod
                             instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldc_I4_1));
-                            instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
+                            instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
                         }
-                        else if (instructionList[i + 1].operand.ToString().Equals("V_11"))
+                        else if (instructionList[i + 1].operand.ToString().Equals("UnityEngine.GameObject (11)"))
                         {
                             instructionList.InsertRange(i + 1, toInsert);
 
                             // Now in slot, could be in raid or base so can just take the one in mod
                             instructionList.Insert(i + 5, new CodeInstruction(OpCodes.Ldc_I4_1));
-                            instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stloc_S, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
+                            instructionList.Insert(i + 6, new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRoundLocation")));
                         }
                     }
                 }
@@ -4684,7 +5046,12 @@ namespace EFM
 
         static void Postfix()
         {
-            if(latestEjectedRound != null)
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (latestEjectedRound != null)
             {
                 EFM_VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<EFM_VanillaItemDescriptor>();
                 if (latestEjectedRoundLocation == 0) 
@@ -4750,8 +5117,13 @@ namespace EFM
         static bool Prefix(ref bool ___m_armSwingerGrounded, ref bool ___m_twoAxisGrounded, ref Vector3 ___m_armSwingerVelocity,
                            ref Vector3 ___m_twoAxisVelocity, ref FVRMovementManager __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             // Return if not enough stamina
-            if(Mod.stamina < Mod.jumpStaminaDrain)
+            if (Mod.stamina < Mod.jumpStaminaDrain)
             {
                 return false;
             }
@@ -4808,35 +5180,381 @@ namespace EFM
     // Patches FVRMovementManager.HandUpdateTwinstick to prevent sprinting in case of lack of stamina
     class MovementManagerUpdatePatch
     {
-        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        static bool Prefix(FVRViveHand hand, ref bool ___m_isRightHandActive, ref bool ___m_isLeftHandActive, ref GameObject ___m_twinStickArrowsRight,
+                           ref bool ___m_isTwinStickSmoothTurningCounterClockwise, ref bool ___m_isTwinStickSmoothTurningClockwise, ref GameObject ___m_twinStickArrowsLeft,
+                           ref float ___m_timeSinceSprintDownClick, ref float ___m_timeSinceSnapTurn, ref bool ___m_sprintingEngaged, ref bool ___m_twoAxisGrounded,
+                           ref Vector3 ___m_twoAxisVelocity, ref FVRMovementManager __instance)
         {
-            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
-            int v6Count = 0;
-            for (int i = 0; i < instructionList.Count; ++i)
+            if (!Mod.inMeatovScene)
             {
-                CodeInstruction instruction = instructionList[i];
-                if (instruction.operand.ToString().Equals("V_6"))
+                return true;
+            }
+
+            bool flag = hand.IsThisTheRightHand;
+            if (GM.Options.MovementOptions.TwinStickLeftRightState == MovementOptions.TwinStickLeftRightSetup.RightStickMove)
+            {
+                flag = !flag;
+            }
+            if (!hand.IsInStreamlinedMode && (hand.CMode == ControlMode.Vive || hand.CMode == ControlMode.Oculus))
+            {
+                if (hand.Input.BYButtonDown)
                 {
-                    ++v6Count;
-                }
-                if(v6Count == 4)
-                {
-                    if(instruction.opcode == OpCodes.Ldc_I4_1 && 
-                       instructionList[i + 1].opcode == OpCodes.Stfld && instructionList[i + 1].operand.ToString().Equals("bool FistVR.FVRMovementManager::m_sprintingEngaged"))
+                    if (flag)
                     {
-                        // Loads stamina on stack
-                        instructionList[i - 1].opcode = OpCodes.Ldsfld;
-                        instructionList[i - 1].operand = AccessTools.Field(typeof(Mod), "stamina");
-
-                        // Loads 0 on stack
-                        instruction.opcode = OpCodes.Ldc_I4_0;
-
-                        // Puts 1 on stack if stamina > 0
-                        instructionList.Insert(i + 1, new CodeInstruction(OpCodes.Cgt));
+                        ___m_isRightHandActive = !___m_isRightHandActive;
+                    }
+                    if (!flag)
+                    {
+                        ___m_isLeftHandActive = !___m_isLeftHandActive;
                     }
                 }
             }
-            return instructionList;
+            else
+            {
+                ___m_isLeftHandActive = true;
+                ___m_isRightHandActive = true;
+            }
+            if (flag && !___m_isRightHandActive)
+            {
+                if (___m_twinStickArrowsRight.activeSelf)
+                {
+                    ___m_twinStickArrowsRight.SetActive(false);
+                }
+                ___m_isTwinStickSmoothTurningCounterClockwise = false;
+                ___m_isTwinStickSmoothTurningClockwise = false;
+                return false;
+            }
+            if (!flag && !___m_isLeftHandActive)
+            {
+                if (___m_twinStickArrowsLeft.activeSelf)
+                {
+                    ___m_twinStickArrowsLeft.SetActive(false);
+                }
+                return false;
+            }
+            if (!hand.IsInStreamlinedMode && (hand.CMode == ControlMode.Vive || hand.CMode == ControlMode.Oculus))
+            {
+                if (flag)
+                {
+                    if (!___m_twinStickArrowsRight.activeSelf)
+                    {
+                        ___m_twinStickArrowsRight.SetActive(true);
+                    }
+                    if (___m_twinStickArrowsRight.transform.parent != hand.TouchpadArrowTarget)
+                    {
+                        ___m_twinStickArrowsRight.transform.SetParent(hand.TouchpadArrowTarget);
+                        ___m_twinStickArrowsRight.transform.localPosition = Vector3.zero;
+                        ___m_twinStickArrowsRight.transform.localRotation = Quaternion.identity;
+                    }
+                }
+                else
+                {
+                    if (!___m_twinStickArrowsLeft.activeSelf)
+                    {
+                        ___m_twinStickArrowsLeft.SetActive(true);
+                    }
+                    if (___m_twinStickArrowsLeft.transform.parent != hand.TouchpadArrowTarget)
+                    {
+                        ___m_twinStickArrowsLeft.transform.SetParent(hand.TouchpadArrowTarget);
+                        ___m_twinStickArrowsLeft.transform.localPosition = Vector3.zero;
+                        ___m_twinStickArrowsLeft.transform.localRotation = Quaternion.identity;
+                    }
+                }
+            }
+            if (___m_timeSinceSprintDownClick < 2f)
+            {
+                ___m_timeSinceSprintDownClick += Time.deltaTime;
+            }
+            if (___m_timeSinceSnapTurn < 2f)
+            {
+                ___m_timeSinceSnapTurn += Time.deltaTime;
+            }
+            bool flag3;
+            bool flag4;
+            Vector2 vector;
+            bool flag5;
+            bool flag6;
+            if (hand.CMode == ControlMode.Vive || hand.CMode == ControlMode.Oculus)
+            {
+                bool flag2 = hand.Input.TouchpadUp;
+                flag3 = hand.Input.TouchpadDown;
+                flag4 = hand.Input.TouchpadPressed;
+                vector = hand.Input.TouchpadAxes;
+                flag5 = hand.Input.TouchpadNorthDown;
+                flag6 = hand.Input.TouchpadNorthPressed;
+            }
+            else
+            {
+                bool flag2 = hand.Input.Secondary2AxisInputUp;
+                flag3 = hand.Input.Secondary2AxisInputDown;
+                flag4 = hand.Input.Secondary2AxisInputPressed;
+                vector = hand.Input.Secondary2AxisInputAxes;
+                flag5 = hand.Input.Secondary2AxisNorthDown;
+                flag6 = hand.Input.Secondary2AxisNorthPressed;
+            }
+            if (flag)
+            {
+                ___m_isTwinStickSmoothTurningCounterClockwise = false;
+                ___m_isTwinStickSmoothTurningClockwise = false;
+                if (GM.Options.MovementOptions.TwinStickSnapturnState == MovementOptions.TwinStickSnapturnMode.Enabled)
+                {
+                    if (hand.CMode == ControlMode.Oculus)
+                    {
+                        if (hand.Input.TouchpadWestDown)
+                        {
+                            __instance.TurnCounterClockWise();
+                        }
+                        else if (hand.Input.TouchpadEastDown)
+                        {
+                            __instance.TurnClockWise();
+                        }
+                    }
+                    else if (hand.CMode == ControlMode.Vive)
+                    {
+                        if (GM.Options.MovementOptions.Touchpad_Confirm == FVRMovementManager.TwoAxisMovementConfirm.OnClick)
+                        {
+                            if (hand.Input.TouchpadDown)
+                            {
+                                if (hand.Input.TouchpadWestPressed)
+                                {
+                                    __instance.TurnCounterClockWise();
+                                }
+                                else if (hand.Input.TouchpadEastPressed)
+                                {
+                                    __instance.TurnClockWise();
+                                }
+                            }
+                        }
+                        else if (hand.Input.TouchpadWestDown)
+                        {
+                            __instance.TurnCounterClockWise();
+                        }
+                        else if (hand.Input.TouchpadEastDown)
+                        {
+                            __instance.TurnClockWise();
+                        }
+                    }
+                    else if (hand.Input.Secondary2AxisWestDown)
+                    {
+                        __instance.TurnCounterClockWise();
+                    }
+                    else if (hand.Input.Secondary2AxisEastDown)
+                    {
+                        __instance.TurnClockWise();
+                    }
+                }
+                else if (GM.Options.MovementOptions.TwinStickSnapturnState == MovementOptions.TwinStickSnapturnMode.Smooth)
+                {
+                    if (hand.CMode == ControlMode.Oculus)
+                    {
+                        if (hand.Input.TouchpadWestPressed)
+                        {
+                            ___m_isTwinStickSmoothTurningCounterClockwise = true;
+                        }
+                        else if (hand.Input.TouchpadEastPressed)
+                        {
+                            ___m_isTwinStickSmoothTurningClockwise = true;
+                        }
+                    }
+                    else if (hand.CMode == ControlMode.Vive)
+                    {
+                        if (GM.Options.MovementOptions.Touchpad_Confirm == FVRMovementManager.TwoAxisMovementConfirm.OnClick)
+                        {
+                            if (hand.Input.TouchpadPressed)
+                            {
+                                if (hand.Input.TouchpadWestPressed)
+                                {
+                                    ___m_isTwinStickSmoothTurningCounterClockwise = true;
+                                }
+                                else if (hand.Input.TouchpadEastPressed)
+                                {
+                                    ___m_isTwinStickSmoothTurningClockwise = true;
+                                }
+                            }
+                        }
+                        else if (hand.Input.TouchpadWestPressed)
+                        {
+                            ___m_isTwinStickSmoothTurningCounterClockwise = true;
+                        }
+                        else if (hand.Input.TouchpadEastPressed)
+                        {
+                            ___m_isTwinStickSmoothTurningClockwise = true;
+                        }
+                    }
+                    else if (hand.Input.Secondary2AxisWestPressed)
+                    {
+                        ___m_isTwinStickSmoothTurningCounterClockwise = true;
+                    }
+                    else if (hand.Input.Secondary2AxisEastPressed)
+                    {
+                        ___m_isTwinStickSmoothTurningClockwise = true;
+                    }
+                }
+                MethodInfo jumpMethod = typeof(FVRMovementManager).GetMethod("Jump", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (GM.Options.MovementOptions.TwinStickJumpState == MovementOptions.TwinStickJumpMode.Enabled)
+                {
+                    if (hand.CMode == ControlMode.Oculus)
+                    {
+                        if (hand.Input.TouchpadSouthDown)
+                        {
+                            jumpMethod.Invoke(__instance, null);
+                        }
+                    }
+                    else if (hand.CMode == ControlMode.Vive)
+                    {
+                        if (GM.Options.MovementOptions.Touchpad_Confirm == FVRMovementManager.TwoAxisMovementConfirm.OnClick)
+                        {
+                            if (hand.Input.TouchpadDown && hand.Input.TouchpadSouthPressed)
+                            {
+                                jumpMethod.Invoke(__instance, null);
+                            }
+                        }
+                        else if (hand.Input.TouchpadSouthDown)
+                        {
+                            jumpMethod.Invoke(__instance, null);
+                        }
+                    }
+                    else if (hand.Input.Secondary2AxisSouthDown)
+                    {
+                        jumpMethod.Invoke(__instance, null);
+                    }
+                }
+                if (GM.Options.MovementOptions.TwinStickSprintState == MovementOptions.TwinStickSprintMode.RightStickForward)
+                {
+                    if (GM.Options.MovementOptions.TwinStickSprintToggleState == MovementOptions.TwinStickSprintToggleMode.Disabled)
+                    {
+                        // Also check stamina for sprinting
+                        if (flag6 && Mod.stamina > 0)
+                        {
+                            ___m_sprintingEngaged = true;
+                        }
+                        else
+                        {
+                            ___m_sprintingEngaged = false;
+                        }
+                    }
+                    else if (flag5)
+                    {
+                        ___m_sprintingEngaged = !___m_sprintingEngaged;
+                    }
+                }
+            }
+            else
+            {
+                if (GM.Options.MovementOptions.TwinStickSprintState == MovementOptions.TwinStickSprintMode.LeftStickClick)
+                {
+                    if (GM.Options.MovementOptions.TwinStickSprintToggleState == MovementOptions.TwinStickSprintToggleMode.Disabled)
+                    {
+                        if (flag4)
+                        {
+                            ___m_sprintingEngaged = true;
+                        }
+                        else
+                        {
+                            ___m_sprintingEngaged = false;
+                        }
+                    }
+                    else if (flag3)
+                    {
+                        ___m_sprintingEngaged = !___m_sprintingEngaged;
+                    }
+                }
+                Vector3 a = Vector3.zero;
+                float y = vector.y;
+                float x = vector.x;
+                switch (GM.Options.MovementOptions.Touchpad_MovementMode)
+                {
+                    case FVRMovementManager.TwoAxisMovementMode.Standard:
+                        a = y * hand.PointingTransform.forward + x * hand.PointingTransform.right * 0.75f;
+                        a.y = 0f;
+                        break;
+                    case FVRMovementManager.TwoAxisMovementMode.Onward:
+                        a = y * hand.Input.Forward + x * hand.Input.Right * 0.75f;
+                        break;
+                    case FVRMovementManager.TwoAxisMovementMode.LeveledHand:
+                        {
+                            Vector3 forward = hand.Input.Forward;
+                            forward.y = 0f;
+                            forward.Normalize();
+                            Vector3 right = hand.Input.Right;
+                            right.y = 0f;
+                            right.Normalize();
+                            a = y * forward + x * right * 0.75f;
+                            break;
+                        }
+                    case FVRMovementManager.TwoAxisMovementMode.LeveledHead:
+                        {
+                            Vector3 forward2 = GM.CurrentPlayerBody.Head.forward;
+                            forward2.y = 0f;
+                            forward2.Normalize();
+                            Vector3 right2 = GM.CurrentPlayerBody.Head.right;
+                            right2.y = 0f;
+                            right2.Normalize();
+                            a = y * forward2 + x * right2 * 0.75f;
+                            break;
+                        }
+                }
+                Vector3 normalized = a.normalized;
+                a *= GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex];
+                if (hand.CMode == ControlMode.Vive && GM.Options.MovementOptions.Touchpad_Confirm == FVRMovementManager.TwoAxisMovementConfirm.OnClick)
+                {
+                    if (!flag4)
+                    {
+                        a = Vector3.zero;
+                    }
+                    else if (___m_sprintingEngaged && GM.Options.MovementOptions.TPLocoSpeedIndex < 5)
+                    {
+                        a += normalized * 2f;
+                    }
+                }
+                else if (___m_sprintingEngaged && GM.Options.MovementOptions.TPLocoSpeedIndex < 5)
+                {
+                    a += normalized * 2f;
+                }
+                if (___m_twoAxisGrounded)
+                {
+                    ___m_twoAxisVelocity.x = a.x;
+                    ___m_twoAxisVelocity.z = a.z;
+                    if (GM.CurrentSceneSettings.UsesMaxSpeedClamp)
+                    {
+                        Vector2 vector2 = new Vector2(___m_twoAxisVelocity.x, ___m_twoAxisVelocity.z);
+                        if (vector2.magnitude > GM.CurrentSceneSettings.MaxSpeedClamp)
+                        {
+                            vector2 = vector2.normalized * GM.CurrentSceneSettings.MaxSpeedClamp;
+                            ___m_twoAxisVelocity.x = vector2.x;
+                            ___m_twoAxisVelocity.z = vector2.y;
+                        }
+                    }
+                }
+                else if (GM.CurrentSceneSettings.DoesAllowAirControl)
+                {
+                    Vector3 vector3 = new Vector3(___m_twoAxisVelocity.x, 0f, ___m_twoAxisVelocity.z);
+                    ___m_twoAxisVelocity.x = ___m_twoAxisVelocity.x + a.x * Time.deltaTime;
+                    ___m_twoAxisVelocity.z = ___m_twoAxisVelocity.z + a.z * Time.deltaTime;
+                    Vector3 vector4 = new Vector3(___m_twoAxisVelocity.x, 0f, ___m_twoAxisVelocity.z);
+                    float maxLength = Mathf.Max(1f, vector3.magnitude);
+                    vector4 = Vector3.ClampMagnitude(vector4, maxLength);
+                    ___m_twoAxisVelocity.x = vector4.x;
+                    ___m_twoAxisVelocity.z = vector4.z;
+                }
+                else
+                {
+                    Vector3 vector5 = new Vector3(___m_twoAxisVelocity.x, 0f, ___m_twoAxisVelocity.z);
+                    ___m_twoAxisVelocity.x = ___m_twoAxisVelocity.x + a.x * Time.deltaTime * 0.3f;
+                    ___m_twoAxisVelocity.z = ___m_twoAxisVelocity.z + a.z * Time.deltaTime * 0.3f;
+                    Vector3 vector6 = new Vector3(___m_twoAxisVelocity.x, 0f, ___m_twoAxisVelocity.z);
+                    float maxLength2 = Mathf.Max(1f, vector5.magnitude);
+                    vector6 = Vector3.ClampMagnitude(vector6, maxLength2);
+                    ___m_twoAxisVelocity.x = vector6.x;
+                    ___m_twoAxisVelocity.z = vector6.z;
+                }
+                if (flag3)
+                {
+                    ___m_timeSinceSprintDownClick = 0f;
+                }
+            }
+
+            return false;
         }
     }
 
@@ -4845,6 +5563,11 @@ namespace EFM
     {
         static void Prefix(ref FVRFireArmRound round, ref FVRFireArmChamber __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             if (__instance.IsFull && round == null)
             {
                 EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
@@ -4873,11 +5596,21 @@ namespace EFM
 
         static void Prefix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             preNumRounds = ___m_numRounds;
         }
 
         static void Postfix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             int postNumRounds = ___m_numRounds;
 
             EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
@@ -4898,11 +5631,13 @@ namespace EFM
                     else
                     {
                         CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                        CIW.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
                     CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                    CIW.amount -= (preNumRounds - postNumRounds);
                 }
             }
         }
@@ -4916,14 +5651,50 @@ namespace EFM
 
         static void Prefix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             preNumRounds = ___m_numRounds;
         }
 
         static void Postfix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             int postNumRounds = ___m_numRounds;
 
-            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+            EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+            if (VID != null)
+            {
+                VID.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+            }
+            else
+            {
+                if (postNumRounds == 0)
+                {
+                    if (CIW.ID.Equals("715") || CIW.ID.Equals("716"))
+                    {
+                        __instance.EndInteraction(__instance.m_hand);
+                        GameObject.Destroy(CIW.gameObject);
+                    }
+                    else
+                    {
+                        CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                        CIW.amount -= (preNumRounds - postNumRounds);
+                    }
+                }
+                else
+                {
+                    CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                    CIW.amount -= (preNumRounds - postNumRounds);
+                }
+            }
         }
     }
 
@@ -4934,14 +5705,50 @@ namespace EFM
 
         static void Prefix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             preNumRounds = ___m_numRounds;
         }
 
         static void Postfix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             int postNumRounds = ___m_numRounds;
 
-            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+            EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+            if (VID != null)
+            {
+                VID.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+            }
+            else
+            {
+                if (postNumRounds == 0)
+                {
+                    if (CIW.ID.Equals("715") || CIW.ID.Equals("716"))
+                    {
+                        __instance.EndInteraction(__instance.m_hand);
+                        GameObject.Destroy(CIW.gameObject);
+                    }
+                    else
+                    {
+                        CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                        CIW.amount -= (preNumRounds - postNumRounds);
+                    }
+                }
+                else
+                {
+                    CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                    CIW.amount -= (preNumRounds - postNumRounds);
+                }
+            }
         }
     }
 
@@ -4952,11 +5759,21 @@ namespace EFM
 
         static void Prefix(int ___m_numRounds, ref FVRFireArmClip __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             preNumRounds = ___m_numRounds;
         }
 
         static void Postfix(int ___m_numRounds, ref FVRFireArmClip __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             int postNumRounds = ___m_numRounds;
 
             __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
@@ -4971,11 +5788,21 @@ namespace EFM
 
         static void Prefix(int ___m_numRounds, ref FVRFireArmClip __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             preNumRounds = ___m_numRounds;
         }
 
         static void Postfix(int ___m_numRounds, ref FVRFireArmClip __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             int postNumRounds = ___m_numRounds;
 
             __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
@@ -4989,11 +5816,21 @@ namespace EFM
 
         static void Prefix(int ___m_numRounds, ref FVRFireArmClip __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             preNumRounds = ___m_numRounds;
         }
 
         static void Postfix(int ___m_numRounds, ref FVRFireArmClip __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             int postNumRounds = ___m_numRounds;
 
             __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
@@ -5005,7 +5842,12 @@ namespace EFM
     {
         static void Prefix(FVRFireArmMagazine mag, ref FVRFireArm __instance)
         {
-            if(__instance.Magazine == null && mag != null)
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (__instance.Magazine == null && mag != null)
             {
                 EFM_VanillaItemDescriptor magVID = mag.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
@@ -5040,7 +5882,12 @@ namespace EFM
     {
         static void Prefix(ref FVRFireArm __instance)
         {
-            if(__instance.Magazine != null)
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (__instance.Magazine != null)
             {
                 EFM_VanillaItemDescriptor magVID = __instance.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
@@ -5075,7 +5922,12 @@ namespace EFM
     {
         static void Prefix(FVRFireArmClip clip, ref FVRFireArm __instance)
         {
-            if(__instance.Clip == null && clip != null)
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (__instance.Clip == null && clip != null)
             {
                 EFM_VanillaItemDescriptor clipVID = clip.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
@@ -5110,7 +5962,12 @@ namespace EFM
     {
         static void Prefix(ref FVRFireArm __instance)
         {
-            if(__instance.Clip != null)
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (__instance.Clip != null)
             {
                 EFM_VanillaItemDescriptor clipVID = __instance.Clip.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
@@ -5145,9 +6002,25 @@ namespace EFM
     {
         static void Prefix(ref FVRFireArmMagazine __instance)
         {
-            if(__instance.m_numRounds < __instance.m_capacity)
+            if (!Mod.inMeatovScene)
             {
-                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
+                return;
+            }
+
+            if (__instance.m_numRounds < __instance.m_capacity)
+            {
+                EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+
+                if (VID != null)
+                {
+                    VID.currentWeight += 0.015f;
+                }
+                else if(CIW != null)
+                {
+                    CIW.currentWeight += 0.015f;
+                    CIW.amount += 1;
+                }
             }
         }
     }
@@ -5157,9 +6030,25 @@ namespace EFM
     {
         static void Prefix(ref FVRFireArmMagazine __instance)
         {
-            if(__instance.m_numRounds < __instance.m_capacity)
+            if (!Mod.inMeatovScene)
             {
-                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
+                return;
+            }
+
+            if (__instance.m_numRounds < __instance.m_capacity)
+            {
+                EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+
+                if (VID != null)
+                {
+                    VID.currentWeight += 0.015f;
+                }
+                else if (CIW != null)
+                {
+                    CIW.currentWeight += 0.015f;
+                    CIW.amount += 1;
+                }
             }
         }
     }
@@ -5169,7 +6058,12 @@ namespace EFM
     {
         static void Prefix(ref FVRFireArmClip __instance)
         {
-            if(__instance.m_numRounds < __instance.m_capacity)
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (__instance.m_numRounds < __instance.m_capacity)
             {
                 __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
             }
@@ -5181,7 +6075,12 @@ namespace EFM
     {
         static void Prefix(ref FVRFireArmClip __instance)
         {
-            if(__instance.m_numRounds < __instance.m_capacity)
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (__instance.m_numRounds < __instance.m_capacity)
             {
                 __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
             }
@@ -5194,6 +6093,11 @@ namespace EFM
     {
         static bool Prefix(FVRFireArmAttachment attachment, ref HashSet<FVRFireArmAttachment> ___AttachmentsHash, ref FVRFireArmAttachmentMount __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             if (___AttachmentsHash.Add(attachment))
             {
                 __instance.AttachmentsList.Add(attachment);
@@ -5220,6 +6124,11 @@ namespace EFM
     {
         static bool Prefix(FVRFireArmAttachment attachment, ref HashSet<FVRFireArmAttachment> ___AttachmentsHash, ref FVRFireArmAttachmentMount __instance)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
             if (___AttachmentsHash.Remove(attachment))
             {
                 __instance.AttachmentsList.Remove(attachment);
@@ -5252,10 +6161,7 @@ namespace EFM
 
         static bool Prefix(AudioEvent clipSet, Vector3 pos, Vector2 pitch, Vector2 volume, AudioMixerGroup mixerOverride, ref AudioSourcePool __instance, ref FVRPooledAudioSource __result)
         {
-            Mod.instance.LogInfo("Dequeue and play debug prefix called on AudioSourcePool with type: " + __instance.Type + " with SourceQueue_Disabled count: " + __instance.SourceQueue_Disabled.Count);
             FVRPooledAudioSource fvrpooledAudioSource = __instance.SourceQueue_Disabled.Dequeue();
-            Mod.instance.LogInfo("After dequeue count: "+ __instance.SourceQueue_Disabled.Count + ", Dequeued is null?: "+ (fvrpooledAudioSource == null));
-            Mod.instance.LogInfo("Dequeued gameobject is null?: "+ (fvrpooledAudioSource.gameObject == null));
             fvrpooledAudioSource.gameObject.SetActive(true);
             fvrpooledAudioSource.Play(clipSet, pos, pitch, volume, mixerOverride);
             __instance.ActiveSources.Add(fvrpooledAudioSource);
@@ -5353,7 +6259,6 @@ namespace EFM
             {
                 gameObject.SetActive(false);
             }
-            Mod.instance.LogInfo("Instnatite and enqueue prefix called, component null?: "+(component == null));
             __instance.SourceQueue_Disabled.Enqueue(component);
             FieldInfo curSizeField = typeof(AudioSourcePool).GetField("m_curSize", BindingFlags.NonPublic | BindingFlags.Instance);
             int curSizeVal = (int)curSizeField.GetValue(__instance);

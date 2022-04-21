@@ -128,6 +128,7 @@ namespace EFM
 
 		// AmmoBox
 		public string cartridge;
+		public FireArmRoundClass roundClass;
 
 		// Stack
 		private int _stack;
@@ -413,8 +414,9 @@ namespace EFM
 
 										float use = consumableTimer / useTime;
 										Mod.consumeUIText.text = ((int)(use * amountRate)).ToString() + "/" + amountRate;
-										Mod.consumeUI.transform.position = hand.transform.position;
-										Mod.consumeUI.transform.rotation = hand.transform.rotation;
+										Mod.consumeUI.transform.parent = hand.transform;
+										Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+										Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
 										Mod.consumeUI.SetActive(true);
 										validConsumePress = true;
 									}

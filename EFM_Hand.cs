@@ -187,12 +187,14 @@ namespace EFM
                                 {
                                     hoverValid = true;
                                     collidingContainerWrapper.SetContainerHovered(true);
+                                    fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
                                 }
                             }
                             else
                             {
                                 hoverValid = true;
                                 collidingContainerWrapper.SetContainerHovered(true);
+                                fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
                             }
                         }
                         else if (!otherHand.hoverValid)

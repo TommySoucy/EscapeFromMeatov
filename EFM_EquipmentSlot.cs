@@ -203,8 +203,8 @@ namespace EFM
                 {
                     Mod.instance.LogInfo("Item in slot "+i+" not null: " + customItemWrapper.itemName);
                     FVRPhysicalObject physicalObject = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
-                    physicalObject.SetQuickBeltSlot(GM.CurrentPlayerBody.QuickbeltSlots[i]);
-                    physicalObject.SetParentage(GM.CurrentPlayerBody.QuickbeltSlots[i].gameObject.transform);
+                    physicalObject.SetQuickBeltSlot(GM.CurrentPlayerBody.QuickbeltSlots[i + 4]);
+                    physicalObject.SetParentage(GM.CurrentPlayerBody.QuickbeltSlots[i + 4].gameObject.transform);
                     physicalObject.transform.localScale = Vector3.one;
                     customItemWrapper.itemsInSlots[i].transform.localPosition = Vector3.zero;
                     customItemWrapper.itemsInSlots[i].transform.localRotation = Quaternion.identity;
