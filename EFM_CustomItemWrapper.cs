@@ -171,6 +171,11 @@ namespace EFM
 		private bool validConsumePress;
         public int targettedPart = -1;
 
+		private void Awake()
+		{
+			physObj = gameObject.GetComponent<FVRPhysicalObject>();
+		}
+
 		private void Start()
 		{
 			if (takeCurrentLocation)
@@ -184,8 +189,7 @@ namespace EFM
 			descriptionPack.name = itemName;
 			descriptionPack.description = description;
 			descriptionPack.icon = Mod.itemIcons[ID];
-
-			physObj = gameObject.GetComponent<FVRPhysicalObject>();
+			descriptionPack.amountRequiredPerArea = new int[22];
 
 			SetCurrentWeight(this);
 		}
@@ -413,7 +417,7 @@ namespace EFM
 										consumableTimer += Time.deltaTime;
 
 										float use = consumableTimer / useTime;
-										Mod.consumeUIText.text = ((int)(use * amountRate)).ToString() + "/" + amountRate;
+										Mod.consumeUIText.text = string.Format("{0:0.#}/{0:0.#}", (use * amountRate), amountRate);
 										Mod.consumeUI.transform.parent = hand.transform;
 										Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
 										Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
@@ -1199,10 +1203,10 @@ namespace EFM
 	
 		public DescriptionPack GetDescriptionPack()
         {
-			descriptionPack.amount = Mod.baseInventory[ID] + Mod.playerInventory[ID];
-			for(int i=0; i < 22; ++i)
+			descriptionPack.amount = (Mod.baseInventory.ContainsKey(ID) ? Mod.baseInventory[ID] : 0) + (Mod.playerInventory.ContainsKey(ID) ? Mod.playerInventory[ID] : 0);
+			for (int i=0; i < 22; ++i)
 			{
-				if (Mod.requiredPerArea[i] != null && Mod.requiredPerArea[i].ContainsKey(ID)) 
+				if (Mod.requiredPerArea[i] != null && Mod.requiredPerArea[i].ContainsKey(ID))
 				{
 					descriptionPack.amountRequired += Mod.requiredPerArea[i][ID];
 					descriptionPack.amountRequiredPerArea[i] = Mod.requiredPerArea[i][ID];
@@ -1215,7 +1219,7 @@ namespace EFM
 			}
 			descriptionPack.onWishlist = Mod.wishList.Contains(ID);
 			descriptionPack.insured = insured;
-			if(itemType == Mod.ItemType.Money)
+			if (itemType == Mod.ItemType.Money)
 			{
 				descriptionPack.stack = stack;
 			}
@@ -1252,7 +1256,7 @@ namespace EFM
 			}
 			descriptionPack.weight = currentWeight;
 			descriptionPack.volume = volumes[mode];
-			descriptionPack.amountRequiredQuest = Mod.requiredForQuest[ID];
+			descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(ID) ? Mod.requiredForQuest[ID] : 0;
 
 			return descriptionPack;
         }

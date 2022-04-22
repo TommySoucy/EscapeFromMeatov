@@ -725,8 +725,10 @@ namespace EFM
             // Apply health, energy, and hydration rates
             float healthDelta = 0;
             float health = 0;
+            float maxHealthTotal = 0;
             for (int i = 0; i < 7; ++i)
             {
+                maxHealthTotal += maxHealth[i];
                 if (heal[i] && currentHealthRates[i] > 0)
                 {
                     float currentHealthDelta = currentHealthRates[i];
@@ -744,13 +746,13 @@ namespace EFM
                 {
                     Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.healthDeltaText.text = (healthDelta >= 0 ? "+ " : "- ") + healthDelta + "/min";
+                Mod.playerStatusManager.healthDeltaText.text = (healthDelta >= 0 ? "+ " : "- ") + String.Format("{0:0.#}/min", healthDelta);
             }
             else if(Mod.playerStatusManager.healthDeltaText.gameObject.activeSelf)
             {
                 Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(false);
             }
-            Mod.playerStatusManager.healthText.text = health.ToString() + "/440";
+            Mod.playerStatusManager.healthText.text = String.Format("{0:0.#}/{0}", health, maxHealthTotal);
 
             if (currentHydrationRate > 0)
             {
@@ -760,13 +762,13 @@ namespace EFM
                 {
                     Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.hydrationDeltaText.text = (currentHydrationRate >= 0 ? "+ " : "- ") + currentHydrationRate + "/min";
+                Mod.playerStatusManager.hydrationDeltaText.text = (currentHydrationRate >= 0 ? "+ " : "- ") + String.Format("{0:0.#}/min", currentHydrationRate);
             }
             else if (Mod.playerStatusManager.hydrationDeltaText.gameObject.activeSelf)
             {
                 Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(false);
             }
-            Mod.playerStatusManager.hydrationText.text = Mod.hydration.ToString() + "/" + Mod.maxHydration;
+            Mod.playerStatusManager.hydrationText.text = String.Format("{0:0.#}/{0}", Mod.hydration, Mod.maxHydration);
             if(Mod.hydration > 20)
             {
                 // Remove any dehydration effect
@@ -798,13 +800,13 @@ namespace EFM
                 {
                     Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.energyDeltaText.text = (currentEnergyRate >= 0 ? "+ " : "- ") + currentEnergyRate + "/min";
+                Mod.playerStatusManager.energyDeltaText.text = (currentEnergyRate >= 0 ? "+ " : "- ") + String.Format("{0:0.#}/min", currentEnergyRate);
             }
             else if (Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
             {
                 Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(false);
             }
-            Mod.playerStatusManager.energyText.text = Mod.energy.ToString() + "/" + Mod.maxEnergy;
+            Mod.playerStatusManager.energyText.text = String.Format("{0:0.#}/{0}", Mod.energy, Mod.maxEnergy);
             if(Mod.energy > 20)
             {
                 // Remove any fatigue effect
@@ -887,7 +889,6 @@ namespace EFM
         {
             Mod.instance.LogInfo("Setup player rig called");
 
-            // TODO: Setup player UI, attaching all to camrig so it gets secured with the other stuff while switching scenes
             // Player status
             Mod.playerStatusUI = Instantiate(Mod.playerStatusUIPrefab, GM.CurrentPlayerRoot);
             Mod.playerStatusManager = Mod.playerStatusUI.AddComponent<EFM_PlayerStatusManager>();
@@ -895,15 +896,17 @@ namespace EFM
             // Consumable indicator
             Mod.consumeUI = Instantiate(Mod.consumeUIPrefab, GM.CurrentPlayerRoot);
             Mod.consumeUIText = Mod.consumeUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
+            Mod.consumeUI.SetActive(false);
             // Extraction UI
             Mod.extractionUI = Instantiate(Mod.extractionUIPrefab, GM.CurrentPlayerRoot);
             Mod.extractionUIText = Mod.extractionUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
             Mod.extractionUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+            Mod.extractionUI.SetActive(false);
             // ItemDescription UIs
             Mod.leftDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
             Mod.leftDescriptionManager = Mod.leftDescriptionUI.AddComponent<EFM_DescriptionManager>();
             Mod.leftDescriptionManager.Init();
-            Mod.rightDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
+            Mod.rightDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.RightHand);
             Mod.rightDescriptionManager = Mod.rightDescriptionUI.AddComponent<EFM_DescriptionManager>();
             Mod.rightDescriptionManager.Init();
             // Stamina bar
@@ -978,6 +981,7 @@ namespace EFM
         public void ProcessData()
         {
             // Set pockets
+            GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
 
             // Check if we have loaded data
             if (data == null)

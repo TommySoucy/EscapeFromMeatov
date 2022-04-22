@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FistVR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -74,17 +75,17 @@ namespace EFM
             Transform fullContent = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             fullIcon = fullContent.GetChild(1).GetComponent<Image>();
             fullAmountStackText = fullContent.GetChild(1).GetChild(0).GetComponent<Text>();
-            fullNameText = fullContent.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
+            fullNameText = fullContent.GetChild(0).GetChild(0).GetComponent<Text>();
             fullNeededForNone = fullContent.GetChild(5).gameObject;
             fullWishlist = fullContent.GetChild(6).gameObject;
             fullNeededForTotal = fullContent.GetChild(7).gameObject;
             fullNeededForTotalText = fullContent.GetChild(7).GetChild(0).GetComponent<Text>();
             fullInsuredIcon = fullContent.GetChild(1).GetChild(1).gameObject;
             fullInsuredBorder = fullContent.GetChild(1).GetChild(2).gameObject;
-            summaryNeededIcons[0] = fullContent.GetChild(1).GetChild(3).GetChild(0).gameObject;
-            summaryNeededIcons[1] = fullContent.GetChild(1).GetChild(3).GetChild(1).gameObject;
-            summaryNeededIcons[2] = fullContent.GetChild(1).GetChild(3).GetChild(2).gameObject;
-            summaryNeededIcons[3] = fullContent.GetChild(1).GetChild(3).GetChild(3).gameObject;
+            fullNeededIcons[0] = fullContent.GetChild(1).GetChild(3).GetChild(0).gameObject;
+            fullNeededIcons[1] = fullContent.GetChild(1).GetChild(3).GetChild(1).gameObject;
+            fullNeededIcons[2] = fullContent.GetChild(1).GetChild(3).GetChild(2).gameObject;
+            fullNeededIcons[3] = fullContent.GetChild(1).GetChild(3).GetChild(3).gameObject;
             fullDescriptionText = fullContent.GetChild(9).GetChild(0).GetComponent<Text>();
             compatibleMagsTitle = fullContent.GetChild(10).gameObject;
             compatibleMags = fullContent.GetChild(11).gameObject;
@@ -102,6 +103,10 @@ namespace EFM
             exitButton.hoverSound = transform.GetChild(0).GetChild(1).GetChild(3).GetComponent<AudioSource>();
             buttonClickAudio = transform.GetChild(0).GetChild(1).GetChild(4).GetComponent<AudioSource>();
             exitButton.Button.onClick.AddListener(() => { OnExitClick(); });
+
+            // Set background pointable
+            FVRPointable backgroundPointable = transform.GetChild(0).GetChild(1).GetChild(0).gameObject.AddComponent<FVRPointable>();
+            backgroundPointable.MaxPointingRange = 30;
 
             // Set hover scrolls
             upHoverScroll = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_HoverScroll>();
@@ -205,7 +210,7 @@ namespace EFM
                 summaryAmountStackText.gameObject.SetActive(false);
             }
             summaryNameText.text = descriptionPack.name;
-            if(descriptionPack.amountRequired > 0)
+            if (descriptionPack.amountRequired > 0)
             {
                 summaryNeededForTotalText.gameObject.SetActive(true);
                 summaryNeededForTotalText.text = "Total: (" + descriptionPack.amount + "/" + descriptionPack.amountRequired + ")";
@@ -235,8 +240,8 @@ namespace EFM
                 summaryNeededIcons[2].SetActive(false);
             }
             summaryNeededIcons[3].SetActive(descriptionPack.onWishlist);
-            summaryWeightText.text = descriptionPack.weight.ToString();
-            summaryVolumeText.text = descriptionPack.volume.ToString();
+            summaryWeightText.text = descriptionPack.weight.ToString()+"kg";
+            summaryVolumeText.text = descriptionPack.volume.ToString()+"L";
 
             // Full
             float descriptionHeight = 615; // Top and bottom padding (25+25) + Icon (300) + Icon spacing (20) + Needed for title (55) + Spacing (20) + Desc. title (55) + Spacing (20) + Name spacing (20) + Properties (55) + Spacing (20)
@@ -252,7 +257,7 @@ namespace EFM
             }
             fullNameText.text = descriptionPack.name;
             descriptionHeight += fullNameText.rectTransform.sizeDelta.y;
-            if(descriptionPack.amountRequired == 0)
+            if (descriptionPack.amountRequired == 0)
             {
                 descriptionHeight += 47;
                 fullNeededForNone.SetActive(true);
@@ -261,7 +266,7 @@ namespace EFM
             {
                 fullNeededForNone.SetActive(false);
             }
-            if(descriptionPack.onWishlist)
+            if (descriptionPack.onWishlist)
             {
                 descriptionHeight += 47;
                 fullWishlist.SetActive(true);
@@ -276,7 +281,7 @@ namespace EFM
                 fullNeededForTotal.SetActive(true);
 
                 fullNeededForTotalText.text = "Total: (" + descriptionPack.amount + "/" + descriptionPack.amountRequired + ")";
-                if(descriptionPack.amount >= descriptionPack.amountRequired)
+                if (descriptionPack.amount >= descriptionPack.amountRequired)
                 {
                     fullNeededForTotalText.color = Color.green;
                 }
@@ -295,7 +300,7 @@ namespace EFM
             }
             else
             {
-                for(int i= areaNeededForTexts.Count-1; i>=0; --i)
+                for (int i= areaNeededForTexts.Count-1; i>=0; --i)
                 {
                     Destroy(areaNeededForTexts[i]);
                 }
@@ -303,7 +308,7 @@ namespace EFM
             }
             for (int i = 0; i < 22; ++i)
             {
-                if(descriptionPack.amountRequiredPerArea[i] > 0)
+                if (descriptionPack.amountRequiredPerArea[i] > 0)
                 {
                     // For each area that requires this item we want to add a NeededForText instance and set its text and color correctly
                     // Also keep a reference to these texts so we can remove them easily when updating the UI

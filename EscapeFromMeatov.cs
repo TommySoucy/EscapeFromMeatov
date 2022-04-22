@@ -879,8 +879,13 @@ namespace EFM
                     if (!defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundType"].ToString().Equals("none"))
                     {
                         customItemWrapper.roundClass = (FireArmRoundClass)Enum.Parse(typeof(FireArmRoundClass), defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundClass"].ToString());
+                        customItemWrapper.maxAmount = (int)defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["maxStack"];
 
                         FVRFireArmMagazine fireArmMagazine = (FVRFireArmMagazine)itemPhysicalObject;
+                        fireArmMagazine.Profile = ScriptableObject.CreateInstance<FVRFirearmAudioSet>();
+                        fireArmMagazine.Viz = itemPrefab.transform;
+                        fireArmMagazine.DisplayBullets = new GameObject[0];
+                        fireArmMagazine.PoseOverride_Touch = fireArmMagazine.PoseOverride;
                         fireArmMagazine.MagazineType = FireArmMagazineType.mNone;
                         fireArmMagazine.RoundEjectionPos = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
                         fireArmMagazine.RoundType = (FireArmRoundType)Enum.Parse(typeof(FireArmRoundType), defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundType"].ToString());
@@ -898,6 +903,10 @@ namespace EFM
                     else // Generic ammo box, does not have specific round type (yet, should be given one when spawned) and reload trigger
                     {
                         FVRFireArmMagazine fireArmMagazine = (FVRFireArmMagazine)itemPhysicalObject;
+                        fireArmMagazine.Profile = ScriptableObject.CreateInstance<FVRFirearmAudioSet>();
+                        fireArmMagazine.Viz = itemPrefab.transform;
+                        fireArmMagazine.DisplayBullets = new GameObject[0];
+                        fireArmMagazine.PoseOverride_Touch = fireArmMagazine.PoseOverride;
                         fireArmMagazine.MagazineType = FireArmMagazineType.mNone;
                         fireArmMagazine.RoundEjectionPos = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
                         fireArmMagazine.RoundType = FireArmRoundType.a106_25mmR; // Just a default one
@@ -1752,6 +1761,8 @@ namespace EFM
             usedRoundIDs = new List<string>();
             ammoBoxByAmmoID = new Dictionary<string, int>();
             itemsByParents = new Dictionary<string, List<string>>();
+            requiredForQuest = new Dictionary<string, int>();
+            wishList = new List<string>();
 
             // Subscribe to events
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -2192,7 +2203,6 @@ namespace EFM
                 return;
             }
 
-            Mod.instance.LogInfo("0");
             hand.GetComponent<EFM_Hand>().currentHeldItem = null;
 
             // Stop here if dropping in a quick belt slot or if this is a door
@@ -2870,7 +2880,7 @@ namespace EFM
 
                 Mod.currentQuickBeltConfiguration = Mod.pocketsConfigIndex;
             }
-            else if(index >= Mod.pocketsConfigIndex) // If index is higher than the pockets configuration index, we must keep the pocket slots intact
+            else if(index > Mod.pocketsConfigIndex) // If index is higher than the pockets configuration index, we must keep the pocket slots intact
             {
                 // Only check for slots other than pockets
                 if (__instance.QuickbeltSlots.Count > /* 0 */ 4)
@@ -3167,6 +3177,11 @@ namespace EFM
 
             if (slot == null)
             {
+                if(__instance.QuickbeltSlot == null)
+                {
+                    return;
+                }
+
                 // Set the size of the object to normal because it may have been scaled to fit the slot
                 __instance.transform.localScale = Vector3.one;
 
@@ -4211,7 +4226,8 @@ namespace EFM
     // This completely replaces the original
     class HandUpdatePatch
     {
-        static bool touchWithinDescRange;
+        static bool leftTouchWithinDescRange;
+        static bool rightTouchWithinDescRange;
 
         //flag2 = __instance.Input.TouchpadTouched && __instance.Input.TouchpadAxes.magnitude < 0.2f;
         static bool Prefix(ref FVRViveHand.HandInitializationState ___m_initState, ref FVRPhysicalObject ___m_selectedObj,
@@ -4236,12 +4252,36 @@ namespace EFM
             if (__instance.Input.TouchpadTouchDown)
             {
                 // Store whether we are in range for description so that we can only activate description if we STARTED touching within the range
-                touchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.2f;
+                if (__instance.IsThisTheRightHand)
+                {
+                    rightTouchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.3f;
+                    Mod.instance.LogInfo("\tstarted touching right this frame, in range?: " + rightTouchWithinDescRange +", with magnitude: "+ __instance.Input.TouchpadAxes.magnitude);
+                }
+                else
+                {
+                    leftTouchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.3f;
+                    Mod.instance.LogInfo("\tstarted touching left this frame, in range?: " + leftTouchWithinDescRange + ", with magnitude: " + __instance.Input.TouchpadAxes.magnitude);
+                }
             }
-            else if (!__instance.Input.TouchpadTouched)
+            if(__instance.Input.TouchpadTouchUp || __instance.Input.TouchpadAxes.magnitude >= 0.3f)
             {
-                touchWithinDescRange = false;
+                if (__instance.IsThisTheRightHand)
+                {
+                    rightTouchWithinDescRange = false;
+                }
+                else
+                {
+                    leftTouchWithinDescRange = false;
+                }
             }
+            //else if (!__instance.Input.TouchpadTouched)
+            //{
+            //    touchWithinDescRange = false;
+            //}
+            //else
+            //{
+            //    Mod.instance.LogInfo("\ttouching this frame, in range?: " + touchWithinDescRange);
+            //}
 
             if (___m_selectedObj != null && ___m_selectedObj.IsHeld)
             {
@@ -4275,7 +4315,6 @@ namespace EFM
                     }
                 }
             }
-            Mod.instance.LogInfo("0");
 
             typeof(FVRViveHand).GetMethod("HapticBuzzUpdate", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
             typeof(FVRViveHand).GetMethod("TestQuickBeltDistances", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
@@ -4350,7 +4389,7 @@ namespace EFM
                 __instance.CurrentPointable = null;
             }
 
-            if (!touchWithinDescRange)
+            if (!(__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange))
             {
                 __instance.MovementManager.UpdateMovementWithHand(__instance);
             }
@@ -4359,8 +4398,13 @@ namespace EFM
                 typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
                 typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningCounterClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
                 typeof(FVRMovementManager).GetField("m_sprintingEngaged", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
-                typeof(FVRMovementManager).GetField("m_twoAxisVelocity", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, Vector2.zero);
+                typeof(FVRMovementManager).GetField("m_twoAxisVelocity", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, Vector3.zero);
             }
+
+            // Keep a reference to touchpad touch inputs so we can still use descriptions after touchpad input has been flushed
+            bool touchpadTouched = __instance.Input.TouchpadTouched;
+            float touchpadAxisMagnitude = __instance.Input.TouchpadAxes.magnitude;
+            bool touchpadDown = __instance.Input.TouchpadDown;
 
             if (__instance.MovementManager.ShouldFlushTouchpad(__instance))
             {
@@ -4379,18 +4423,21 @@ namespace EFM
                 flag = __instance.Input.TouchpadDown;
 
                 // Here check if only touched and within center of touchpad for grab laser input
-                flag2 = __instance.Input.TouchpadTouched && __instance.Input.TouchpadAxes.magnitude < 0.2f;
+                flag2 = touchpadTouched && touchpadAxisMagnitude < 0.3f;
+                //Mod.instance.LogInfo("Flag2: " + flag2 + " from touched: " + __instance.Input.TouchpadTouched + " and magnitude: " + __instance.Input.TouchpadAxes.magnitude);
 
                 // Check if we started pressing the center of touchpad this frame
-                pressedCenter = __instance.Input.TouchpadDown && __instance.Input.TouchpadAxes.magnitude < 0.2f;
+                pressedCenter = touchpadDown && touchpadAxisMagnitude < 0.3f;
             }
             if (flag2)
             {
-                if(___m_state == FVRViveHand.HandState.GripInteracting)
+                Mod.instance.LogInfo("Touch being touched in range");
+                if (___m_state == FVRViveHand.HandState.GripInteracting)
                 {
+                    Mod.instance.LogInfo("griping something");
                     // Only display description if started touching at magnitude < 0.2, and also check if descriptions have been init yet
                     // Because this will also be checked in meatov menu but they havent been init yet at that point
-                    if (touchWithinDescRange && Mod.rightDescriptionManager != null)
+                    if ((__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange) && Mod.rightDescriptionManager != null)
                     {
                         EFM_Describable describable = __instance.CurrentInteractable.GetComponent<EFM_Describable>();
                         if (describable != null)
@@ -4439,9 +4486,6 @@ namespace EFM
             }
             else
             {
-                // Even if we started touching within magnitude, if we touched out of it at any time, set it to false
-                touchWithinDescRange = false;
-
                 if (Mod.rightDescriptionManager != null)
                 {
                     // Get the description currently on this hand
@@ -4497,8 +4541,9 @@ namespace EFM
             if (___m_state == FVRViveHand.HandState.Empty && __instance.CurrentHoveredQuickbeltSlot == null)
             {
                 // Dont have the grab laser if we didnt start touching the touchpad within magnitude 0.2
-                if (flag2 && touchWithinDescRange)
+                if (flag2 && (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange))
                 {
+                    Mod.instance.LogInfo("Hand empty, not hovering slot, touching within 0.2f and started touching in range");
                     if (!__instance.GrabLaser.gameObject.activeSelf)
                     {
                         __instance.GrabLaser.gameObject.SetActive(true);

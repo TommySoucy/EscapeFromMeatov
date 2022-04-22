@@ -74,6 +74,7 @@ namespace EFM
             descriptionPack.name = itemName;
             descriptionPack.description = description;
             descriptionPack.icon = IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+            descriptionPack.amountRequiredPerArea = new int[22];
 
             // Set init weight
             SetCurrentWeight(this);
@@ -149,7 +150,7 @@ namespace EFM
 
         public DescriptionPack GetDescriptionPack()
         {
-            descriptionPack.amount = Mod.baseInventory[H3ID] + Mod.playerInventory[H3ID];
+            descriptionPack.amount = (Mod.baseInventory.ContainsKey(H3ID) ? Mod.baseInventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
             for (int i = 0; i < 22; ++i)
             {
                 if (Mod.requiredPerArea[i] != null && Mod.requiredPerArea[i].ContainsKey(H3ID))
@@ -207,7 +208,7 @@ namespace EFM
             }
             descriptionPack.weight = physObj.RootRigidbody.mass;
             descriptionPack.volume = Mod.sizeVolumes[(int)physObj.Size];
-            descriptionPack.amountRequiredQuest = Mod.requiredForQuest[H3ID];
+            descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(H3ID) ? Mod.requiredForQuest[H3ID] : 0;
             FVRFireArmMagazine asMagazine = gameObject.GetComponent<FVRFireArmMagazine>();
             FVRFireArmClip asClip = gameObject.GetComponent<FVRFireArmClip>();
             descriptionPack.containedAmmoClasses = new Dictionary<string, int>();

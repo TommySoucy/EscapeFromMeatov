@@ -122,12 +122,14 @@ namespace EFM
                 return;
             }
 
-            // Left menu button
+            // Left (TODO: Non main hand) menu button
             if (Mod.leftHand.fvrHand.Input.BYButtonDown)
             {
                 if (displayed)
                 {
                     displayed = false;
+                    transform.GetChild(0).gameObject.SetActive(false);
+                    transform.GetChild(1).gameObject.SetActive(false);
                 }
                 else
                 {
@@ -141,25 +143,7 @@ namespace EFM
             if (Mod.leftHand.fvrHand.Input.BYButtonPressed && displayed)
             {
                 transform.position = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
-            }
-
-            // Right menu button
-            if (Mod.rightHand.fvrHand.Input.BYButtonDown)
-            {
-                if (displayed)
-                {
-                    displayed = false;
-                }
-                else
-                {
-                    // TODO: Play inventory opening sound
-                    transform.GetChild(0).gameObject.SetActive(true);
-                    transform.GetChild(1).gameObject.SetActive(true);
-                }
-            }
-            if (Mod.rightHand.fvrHand.Input.BYButtonPressed && displayed)
-            {
-                transform.position = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.6f + Mod.rightHand.transform.right * -0.3f;
+                transform.rotation = Quaternion.Euler(0, Mod.leftHand.transform.rotation.eulerAngles.y, 0);
             }
 
             UpdateStamina();
