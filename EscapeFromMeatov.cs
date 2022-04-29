@@ -2655,7 +2655,7 @@ namespace EFM
             }
         }
 
-        public static void DropItemInWorld(FVRPhysicalObject primary, EFM_CustomItemWrapper heldCustomItemWrapper, EFM_VanillaItemDescriptor heldVanillaItemDescriptor)
+        private static void DropItemInWorld(FVRPhysicalObject primary, EFM_CustomItemWrapper heldCustomItemWrapper, EFM_VanillaItemDescriptor heldVanillaItemDescriptor)
         {
             // Drop item in world
             GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
@@ -5025,8 +5025,9 @@ namespace EFM
                 else // Could be in raid or base
                 {
                     BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor);
-                
-                    if(Mod.currentLocationIndex == 1)
+
+                    GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
+                    if (Mod.currentLocationIndex == 1)
                     {
                         // Now in hideout
                         if (Mod.baseInventory.ContainsKey(vanillaItemDescriptor.H3ID))
@@ -5046,10 +5047,13 @@ namespace EFM
                             Mod.currentBaseManager.baseInventoryObjects.Add(vanillaItemDescriptor.H3ID, new List<GameObject>());
                             Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
                         }
-                    }
-                    // else if 2, we dont need to do anything
 
-                    EndInteractionPatch.DropItemInWorld(vanillaItemDescriptor.physObj, null, vanillaItemDescriptor);
+                        vanillaItemDescriptor.physObj.SetParentage(sceneRoot.transform.GetChild(2));
+                    }
+                    else if (Mod.currentLocationIndex == 2)
+                    {
+                        vanillaItemDescriptor.physObj.SetParentage(sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2));
+                    }
                 }
 
                 latestEjectedRound = null;
@@ -5143,8 +5147,9 @@ namespace EFM
                 else // Could be in raid or base
                 {
                     BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor);
-                
-                    if(Mod.currentLocationIndex == 1)
+
+                    GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
+                    if (Mod.currentLocationIndex == 1)
                     {
                         // Now in hideout
                         if (Mod.baseInventory.ContainsKey(vanillaItemDescriptor.H3ID))
@@ -5164,8 +5169,13 @@ namespace EFM
                             Mod.currentBaseManager.baseInventoryObjects.Add(vanillaItemDescriptor.H3ID, new List<GameObject>());
                             Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
                         }
+
+                        vanillaItemDescriptor.physObj.SetParentage(sceneRoot.transform.GetChild(2));
                     }
-                    // else if 2, we dont need to do anything
+                    else if (Mod.currentLocationIndex == 2)
+                    {
+                        vanillaItemDescriptor.physObj.SetParentage(sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2));
+                    }
                 }
 
                 latestEjectedRound = null;
