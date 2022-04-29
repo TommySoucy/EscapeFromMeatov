@@ -166,9 +166,7 @@ namespace EFM
 
         public DescriptionPack GetDescriptionPack()
         {
-            Mod.instance.LogInfo("Vanilla getdesc pack called on "+gameObject.name);
             descriptionPack.amount = (Mod.baseInventory.ContainsKey(H3ID) ? Mod.baseInventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
-            Mod.instance.LogInfo("0");
             for (int i = 0; i < 22; ++i)
             {
                 if (Mod.requiredPerArea[i] != null && Mod.requiredPerArea[i].ContainsKey(H3ID))
@@ -182,77 +180,58 @@ namespace EFM
                     descriptionPack.amountRequiredPerArea[i] = 0;
                 }
             }
-            Mod.instance.LogInfo("0");
             descriptionPack.onWishlist = Mod.wishList.Contains(H3ID);
-            Mod.instance.LogInfo("0");
             descriptionPack.insured = insured;
-            Mod.instance.LogInfo("0");
 
             if (compatibilityValue == 3 || compatibilityValue == 1)
             {
-                Mod.instance.LogInfo("\t0");
                 if (usesAmmoContainers)
                 {
-                    Mod.instance.LogInfo("\t\t0");
                     if (usesMags)
                     {
-                        Mod.instance.LogInfo("\t\t\t0");
                         if (Mod.magazinesByType.ContainsKey(magType))
                         {
-                            Mod.instance.LogInfo("\t\t\t\t0");
                             descriptionPack.compatibleAmmoContainers = Mod.magazinesByType[magType];
                         }
                         else
                         {
-                            Mod.instance.LogInfo("\t\t\t\t0");
                             descriptionPack.compatibleAmmoContainers = new Dictionary<string, int>();
                         }
                     }
                     else
                     {
-                        Mod.instance.LogInfo("\t\t\t0");
                         if (Mod.clipsByType.ContainsKey(clipType))
                         {
-                            Mod.instance.LogInfo("\t\t\t\t0");
                             descriptionPack.compatibleAmmoContainers = Mod.clipsByType[clipType];
                         }
                         else
                         {
-                            Mod.instance.LogInfo("\t\t\t\t0");
                             descriptionPack.compatibleAmmoContainers = new Dictionary<string, int>();
                         }
                     }
                 }
             }
-            Mod.instance.LogInfo("0");
             if (compatibilityValue == 3 || compatibilityValue == 2)
             {
-                Mod.instance.LogInfo("\t0");
                 if (Mod.roundsByType.ContainsKey(roundType))
                 {
-                    Mod.instance.LogInfo("\t\t0");
                     descriptionPack.compatibleAmmo = Mod.roundsByType[roundType];
                 }
                 else
                 {
-                    Mod.instance.LogInfo("\t\t0");
                     descriptionPack.compatibleAmmo = new Dictionary<string, int>();
                 }
             }
-            Mod.instance.LogInfo("0");
             descriptionPack.weight = weight;
-            Mod.instance.LogInfo("0");
             descriptionPack.volume = Mod.sizeVolumes[(int)physObj.Size];
-            Mod.instance.LogInfo("0");
             descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(H3ID) ? Mod.requiredForQuest[H3ID] : 0;
-            Mod.instance.LogInfo("0");
             FVRFireArmMagazine asMagazine = gameObject.GetComponent<FVRFireArmMagazine>();
-            Mod.instance.LogInfo("0");
             FVRFireArmClip asClip = gameObject.GetComponent<FVRFireArmClip>();
-            Mod.instance.LogInfo("0");
             descriptionPack.containedAmmoClasses = new Dictionary<string, int>();
             if (asMagazine != null)
             {
+                descriptionPack.stack = asMagazine.m_numRounds;
+                descriptionPack.maxStack = asMagazine.m_capacity;
                 foreach (FVRLoadedRound loadedRound in asMagazine.LoadedRounds)
                 {
                     if (loadedRound != null)
@@ -270,6 +249,8 @@ namespace EFM
             }
             else if(asClip != null)
             {
+                descriptionPack.stack = asClip.m_numRounds;
+                descriptionPack.maxStack = asClip.m_capacity;
                 foreach (FVRFireArmClip.FVRLoadedRound loadedRound in asClip.LoadedRounds)
                 {
                     if (loadedRound != null)
@@ -286,7 +267,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("returning desc");
             return descriptionPack;
         }
     }

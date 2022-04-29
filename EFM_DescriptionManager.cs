@@ -222,6 +222,11 @@ namespace EFM
                     summaryAmountStackText.gameObject.SetActive(false);
                 }
             }
+            else if(this.descriptionPack.maxStack > 0) // Mags and clips
+            {
+                summaryAmountStackText.gameObject.SetActive(true);
+                summaryAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
+            }
             else
             {
                 summaryAmountStackText.gameObject.SetActive(false);
