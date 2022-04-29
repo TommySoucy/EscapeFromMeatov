@@ -12,6 +12,7 @@ namespace EFM
     public class EFM_PlayerStatusManager : MonoBehaviour
     {
         private bool init;
+        private Vector3 setPosition;
 
         public Text[] partHealthTexts;
         public Image[] partHealthImages;
@@ -108,6 +109,10 @@ namespace EFM
             buttonClickAudio = transform.GetChild(4).GetComponent<AudioSource>();
             exitButton.Button.onClick.AddListener(() => { OnExitClick(); });
 
+            // Set background pointable
+            FVRPointable backgroundPointable = transform.GetChild(0).gameObject.AddComponent<FVRPointable>();
+            backgroundPointable.MaxPointingRange = 30;
+
             // Set as not active by default
             transform.GetChild(0).gameObject.SetActive(false);
             transform.GetChild(1).gameObject.SetActive(false);
@@ -120,6 +125,13 @@ namespace EFM
             if (!init)
             {
                 return;
+            }
+
+            if (displayed && Vector3.Distance(setPosition, GM.CurrentPlayerRoot.position) > 10)
+            {
+                transform.GetChild(0).gameObject.SetActive(false);
+                transform.GetChild(1).gameObject.SetActive(false);
+                displayed = false;
             }
 
             // Left (TODO: Non main hand) menu button
@@ -142,8 +154,12 @@ namespace EFM
             }
             if (Mod.leftHand.fvrHand.Input.BYButtonPressed && displayed)
             {
-                transform.position = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
+                setPosition = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
                 transform.rotation = Quaternion.Euler(0, Mod.leftHand.transform.rotation.eulerAngles.y, 0);
+            }
+            if (displayed)
+            {
+                transform.position = setPosition;
             }
 
             UpdateStamina();

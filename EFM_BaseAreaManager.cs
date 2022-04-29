@@ -108,24 +108,32 @@ namespace EFM
                     constructionTimer = 0;
                     constructTime = 0;
                     ++level;
-                    UpdateAreaState();
+
+                    // Update all area managers // TODO: Maybe it would be better to just update the requirements directly, take the part that does that for an area, put it in a method we can use here
+                    foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
+                    {
+                        baseAreaManager.UpdateAreaState();
+                    }
                 }
             }
         }
-
-        // TODO: This should only be called on an area if the area it self changes. 
-        // Obviously though UI should change when, for example, changes in amount of items in inventory required by an area has changed, this will be done else where
-        // so as to not have to refresh the entire state UI every time player drops an item in the hideout and so on
+        
         public void UpdateAreaState()
         {
             // Check for preexisting areaCanvas
             if(areaCanvas != null)
             {
+                areaCanvas.transform.parent = null;
                 Destroy(areaCanvas);
+                areaCanvas = null;
             }
 
             // Attach an area canvas to the area
             areaCanvas = Instantiate(EFM_Base_Manager.areaCanvasPrefab, transform.GetChild(transform.childCount - 2));
+
+            // Set full background pointable
+            FVRPointable backgroundPointable = transform.GetChild(transform.childCount - 2).GetChild(0).GetChild(1).gameObject.AddComponent<FVRPointable>();
+            backgroundPointable.MaxPointingRange = 30;
 
             // Set button click sound
             buttonClickSound = areaCanvas.transform.GetChild(3).GetComponent<AudioSource>();
@@ -163,22 +171,15 @@ namespace EFM
             if(areaRequirementMiddleParents == null)
             {
                 areaRequirementMiddleParents = new List<List<GameObject>>();
-                for(int i=0; i < 4; ++i)
-                {
-                    areaRequirementMiddleParents.Add(new List<GameObject>());
-                    areaRequirementMiddleParents[i].Add(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(i + 2).gameObject);
-                }
             }
-            foreach(List<GameObject> list in areaRequirementMiddleParents)
+            else
             {
-                if(list.Count > 1)
-                {
-                    for(int i=list.Count - 1; i >= 1; --i)
-                    {
-                        Destroy(list[i]);
-                        list.RemoveAt(i);
-                    }
-                }
+                areaRequirementMiddleParents.Clear();
+            }
+            for (int i = 0; i < 4; ++i)
+            {
+                areaRequirementMiddleParents.Add(new List<GameObject>());
+                areaRequirementMiddleParents[i].Add(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(i + 2).gameObject);
             }
 
             // Do same for middle 2
@@ -191,16 +192,14 @@ namespace EFM
                     areaRequirementMiddle2Parents[i].Add(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(i + 2).gameObject);
                 }
             }
-            foreach(List<GameObject> list in areaRequirementMiddle2Parents)
+            else
             {
-                if(list.Count > 1)
-                {
-                    for(int i=list.Count - 1; i >= 1; --i)
-                    {
-                        Destroy(list[i]);
-                        list.RemoveAt(i);
-                    }
-                }
+                areaRequirementMiddle2Parents.Clear();
+            }
+            for (int i = 0; i < 4; ++i)
+            {
+                areaRequirementMiddle2Parents.Add(new List<GameObject>());
+                areaRequirementMiddle2Parents[i].Add(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(i + 2).gameObject);
             }
 
             if (constructing)
@@ -584,6 +583,7 @@ namespace EFM
                             if (listToUse[0][listToUse[0].Count - 1].transform.childCount == 2)
                             {
                                 areaRequirementParentToUse = Instantiate(EFM_Base_Manager.areaRequirementsPrefab, parentRequirementsPanel).transform;
+                                areaRequirementParentToUse.SetSiblingIndex(3);
                                 listToUse[0].Add(areaRequirementParentToUse.gameObject); // Add the new parent to the corresponding list
                                 if (middle)
                                 {
@@ -645,6 +645,7 @@ namespace EFM
                             if (listToUse[1][listToUse[1].Count - 1].transform.childCount == 5)
                             {
                                 itemRequirementParentToUse = Instantiate(EFM_Base_Manager.itemRequirementsPrefab, parentRequirementsPanel).transform;
+                                itemRequirementParentToUse.SetSiblingIndex(4);
                                 listToUse[1].Add(itemRequirementParentToUse.gameObject);
                                 if (middle)
                                 {
@@ -753,6 +754,7 @@ namespace EFM
                             if (listToUse[2][listToUse[2].Count - 1].transform.childCount == 2)
                             {
                                 traderRequirementParentToUse = Instantiate(EFM_Base_Manager.traderRequirementsPrefab, parentRequirementsPanel).transform;
+                                traderRequirementParentToUse.SetSiblingIndex(5);
                                 listToUse[2].Add(traderRequirementParentToUse.gameObject);
                                 if (middle)
                                 {
@@ -822,6 +824,7 @@ namespace EFM
                             if (listToUse[3][listToUse[3].Count - 1].transform.childCount == 4)
                             {
                                 skillRequirementParentToUse = Instantiate(EFM_Base_Manager.skillRequirementsPrefab, parentRequirementsPanel).transform;
+                                skillRequirementParentToUse.SetAsLastSibling();
                                 listToUse[3].Add(skillRequirementParentToUse.gameObject);
                                 if (middle)
                                 {
@@ -1001,7 +1004,101 @@ namespace EFM
                         }
 
                         int itemAmountNeeded = (int)requirement["count"];
-                        int itemAmountInInventory = (Mod.baseInventory.ContainsKey(itemID) ? Mod.baseInventory[itemID] : 0) + (Mod.playerInventory.ContainsKey(itemID) ? Mod.playerInventory[itemID] : 0);
+
+                        // Have to check each item object because if it has CIW, if it is container or rig, can only count if it has no contents
+                        int itemAmountInInventory = 0;
+                        if (Mod.baseInventory.ContainsKey(itemID) && Mod.baseInventory[itemID] > 0)
+                        {
+                            foreach(GameObject obj in baseManager.baseInventoryObjects[itemID])
+                            {
+                                EFM_CustomItemWrapper CIW = obj.GetComponent<EFM_CustomItemWrapper>();
+                                if(CIW != null)
+                                {
+                                    if(CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                                    {
+                                        bool containsItem = false;
+                                        foreach(GameObject itemInSlot in CIW.itemsInSlots)
+                                        {
+                                            if(itemInSlot != null)
+                                            {
+                                                containsItem = true;
+                                                break;
+                                            }
+                                        }
+
+                                        if (!containsItem)
+                                        {
+                                            ++itemAmountInInventory;
+                                        }
+                                    }
+                                    else if(CIW.itemType == Mod.ItemType.Backpack ||CIW.itemType == Mod.ItemType.Container ||CIW.itemType == Mod.ItemType.Pouch)
+                                    {
+                                        if (CIW.itemObjectsRoot.childCount == 0)
+                                        {
+                                            ++itemAmountInInventory;
+                                        }
+                                    }
+                                    else if(CIW.stack > 0)
+                                    {
+                                        itemAmountInInventory += CIW.stack;
+                                    }
+                                    else
+                                    {
+                                        ++itemAmountInInventory;
+                                    }
+                                }
+                                else
+                                {
+                                    ++itemAmountInInventory;
+                                }
+                            }
+                        }
+                        if (Mod.playerInventory.ContainsKey(itemID) && Mod.playerInventory[itemID] > 0)
+                        {
+                            foreach (GameObject obj in Mod.playerInventoryObjects[itemID])
+                            {
+                                EFM_CustomItemWrapper CIW = obj.GetComponent<EFM_CustomItemWrapper>();
+                                if (CIW != null)
+                                {
+                                    if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                                    {
+                                        bool containsItem = false;
+                                        foreach (GameObject itemInSlot in CIW.itemsInSlots)
+                                        {
+                                            if (itemInSlot != null)
+                                            {
+                                                containsItem = true;
+                                                break;
+                                            }
+                                        }
+
+                                        if (!containsItem)
+                                        {
+                                            ++itemAmountInInventory;
+                                        }
+                                    }
+                                    else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                                    {
+                                        if (CIW.itemObjectsRoot.childCount == 0)
+                                        {
+                                            ++itemAmountInInventory;
+                                        }
+                                    }
+                                    else if (CIW.stack > 0)
+                                    {
+                                        itemAmountInInventory += CIW.stack;
+                                    }
+                                    else
+                                    {
+                                        ++itemAmountInInventory;
+                                    }
+                                }
+                                else
+                                {
+                                    ++itemAmountInInventory;
+                                }
+                            }
+                        }
 
                         return itemAmountInInventory >= itemAmountNeeded;
                     }
@@ -1140,7 +1237,6 @@ namespace EFM
             buttonClickSound.Play();
 
             // Remove items from inventory
-            //TODO: Check for stackable items before removing, maybe we only want to remove part of the stack
             foreach (JToken requirement in Mod.areasDB["areaDefaults"][areaIndex]["stages"][level+1]["requirements"])
             {
                 if (requirement["type"].ToString().Equals("Item"))
@@ -1169,11 +1265,66 @@ namespace EFM
                     {
                         Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - amountToRemoveFromBase;
                         List<GameObject> objectList = baseManager.baseInventoryObjects[actualID];
-                        for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i, --j)
+                        for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i)
                         {
-                            GameObject toDestroy = objectList[objectList.Count - 1];
-                            objectList.RemoveAt(objectList.Count - 1);
-                            Destroy(toDestroy);
+                            GameObject toCheck = objectList[objectList.Count - 1];
+                            EFM_CustomItemWrapper CIW = toCheck.GetComponent<EFM_CustomItemWrapper>();
+                            if (CIW != null)
+                            {
+                                if(CIW.stack > 0)
+                                {
+                                    if(CIW.stack > amountToRemoveFromBase)
+                                    {
+                                        CIW.stack = CIW.stack - amountToRemoveFromBase;
+                                    }
+                                    else // CIW.stack <= amountToRemoveFromBase
+                                    {
+                                        j -= CIW.stack;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        Destroy(toCheck);
+                                    }
+                                }
+                                else if(CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                                {
+                                    bool containsItem = false;
+                                    foreach (GameObject itemInSlot in CIW.itemsInSlots)
+                                    {
+                                        if (itemInSlot != null)
+                                        {
+                                            containsItem = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!containsItem)
+                                    {
+                                        --j;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        Destroy(toCheck);
+                                    }
+                                }
+                                else if(CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                                {
+                                    if (CIW.itemObjectsRoot.childCount == 0)
+                                    {
+                                        --j;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        Destroy(toCheck);
+                                    }
+                                }
+                                else
+                                {
+                                    --j;
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    Destroy(toCheck);
+                                }
+                            }
+                            else
+                            {
+                                --j;
+                                objectList.RemoveAt(objectList.Count - 1);
+                                Destroy(toCheck);
+                            }
                         }
                     }
                     if (amountToRemoveFromPlayer > 0)
@@ -1181,11 +1332,76 @@ namespace EFM
                         // TODO: Check if destroying the objects is enough or if we need to do things like set the QB slot current object to null or something
                         Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - amountToRemoveFromPlayer;
                         List<GameObject> objectList = Mod.playerInventoryObjects[actualID];
-                        for (int i = objectList.Count - 1, j = amountToRemoveFromPlayer; i >= 0 && j > 0; --i, --j)
+                        for (int i = objectList.Count - 1, j = amountToRemoveFromPlayer; i >= 0 && j > 0; --i)
                         {
-                            GameObject toDestroy = objectList[objectList.Count - 1];
-                            objectList.RemoveAt(objectList.Count - 1);
-                            Destroy(toDestroy);
+                            GameObject toCheck = objectList[objectList.Count - 1];
+                            EFM_CustomItemWrapper CIW = toCheck.GetComponent<EFM_CustomItemWrapper>();
+                            EFM_VanillaItemDescriptor VID = toCheck.GetComponent<EFM_VanillaItemDescriptor>();
+                            if (CIW != null)
+                            {
+                                if (CIW.stack > 0)
+                                {
+                                    if (CIW.stack > amountToRemoveFromPlayer)
+                                    {
+                                        CIW.stack = CIW.stack - amountToRemoveFromPlayer;
+                                    }
+                                    else // CIW.stack <= amountToRemoveFromBase
+                                    {
+                                        j -= CIW.stack;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        Destroy(toCheck);
+                                        Mod.weight -= CIW.currentWeight;
+                                    }
+                                }
+                                else if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                                {
+                                    bool containsItem = false;
+                                    foreach (GameObject itemInSlot in CIW.itemsInSlots)
+                                    {
+                                        if (itemInSlot != null)
+                                        {
+                                            containsItem = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!containsItem)
+                                    {
+                                        --j;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        Destroy(toCheck);
+                                    }
+                                }
+                                else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                                {
+                                    if (CIW.itemObjectsRoot.childCount == 0)
+                                    {
+                                        --j;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        Destroy(toCheck);
+                                    }
+                                }
+                                else
+                                {
+                                    --j;
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    Destroy(toCheck);
+                                    Mod.weight -= CIW.currentWeight;
+                                }
+                            }
+                            else // VID != null
+                            {
+                                --j;
+                                objectList.RemoveAt(objectList.Count - 1);
+                                Destroy(toCheck);
+                                Mod.weight -= VID.currentWeight;
+                            }
+                            //else // should never happen, every item is supposed to have a CIW or VID
+                            //{
+                            //    --j;
+                            //    objectList.RemoveAt(objectList.Count - 1);
+                            //    Destroy(toCheck);
+                            //}
                         }
                     }
                 }
@@ -1196,13 +1412,18 @@ namespace EFM
             if ((int)Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["constructionTime"] == 0)
             {
                 ++level;
-                UpdateAreaState();
             }
             else
             {
                 constructing = true;
                 constructTime = baseManager.GetTimeSeconds();
                 constructionTimer = (int)Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["constructionTime"];
+            }
+
+            // Update all area managers // TODO: Maybe it would be better to just update the requirements directly, take the part that does that for an area, put it in a method we can use here
+            foreach(EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
+            {
+                baseAreaManager.UpdateAreaState();
             }
         }
     }

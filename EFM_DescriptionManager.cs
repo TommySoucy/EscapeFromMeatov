@@ -12,6 +12,7 @@ namespace EFM
     {
         public DescriptionPack descriptionPack;
         public bool isFull;
+        private bool destroying;
 
         public Image summaryIcon;
         public Text summaryAmountStackText;
@@ -42,8 +43,8 @@ namespace EFM
         public GameObject compatibleAmmo;
         public Text compatibleAmmoText;
         public Text propertiesText;
-        public EFM_HoverScroll upHoverScroll;
         public EFM_HoverScroll downHoverScroll;
+        public EFM_HoverScroll upHoverScroll;
         public GameObject ammoContainsTitle;
 
         private AudioSource buttonClickAudio;
@@ -109,20 +110,20 @@ namespace EFM
             backgroundPointable.MaxPointingRange = 30;
 
             // Set hover scrolls
-            upHoverScroll = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_HoverScroll>();
-            downHoverScroll = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_HoverScroll>();
-            upHoverScroll.MaxPointingRange = 30;
-            upHoverScroll.hoverSound = exitButton.hoverSound;
-            upHoverScroll.scrollbar = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
-            upHoverScroll.other = downHoverScroll;
-            upHoverScroll.up = true;
-            upHoverScroll.rate = 0.5f;
+            downHoverScroll = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(1).gameObject.AddComponent<EFM_HoverScroll>();
+            upHoverScroll = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
             downHoverScroll.MaxPointingRange = 30;
             downHoverScroll.hoverSound = exitButton.hoverSound;
             downHoverScroll.scrollbar = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
             downHoverScroll.other = upHoverScroll;
-            downHoverScroll.up = false;
+            downHoverScroll.up = true;
             downHoverScroll.rate = 0.5f;
+            upHoverScroll.MaxPointingRange = 30;
+            upHoverScroll.hoverSound = exitButton.hoverSound;
+            upHoverScroll.scrollbar = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
+            upHoverScroll.other = downHoverScroll;
+            upHoverScroll.up = false;
+            upHoverScroll.rate = 0.5f;
 
             // Inactive by default
             gameObject.SetActive(false);
@@ -131,11 +132,20 @@ namespace EFM
             Mod.activeDescriptions.Add(this);
         }
 
+        private void Update()
+        {
+            if(!destroying && Vector3.Distance(transform.position, GM.CurrentPlayerRoot.position) > 10)
+            {
+                Destroy(gameObject);
+                destroying = true;
+            }
+        }
+
         public void SetDescriptionPack(DescriptionPack descriptionPack = null)
         {
             if(descriptionPack == null)
             {
-                if(this.descriptionPack == null)
+                if (this.descriptionPack == null)
                 {
                     return;
                 }
@@ -177,28 +187,35 @@ namespace EFM
             }
 
             // Summary
-            summaryIcon.sprite = descriptionPack.icon;
-            if (descriptionPack.isCustom)
+            summaryIcon.sprite = this.descriptionPack.icon;
+            if (this.descriptionPack.isCustom)
             {
-                if (descriptionPack.customItem.itemType == Mod.ItemType.Money)
+                if (this.descriptionPack.customItem.itemType == Mod.ItemType.Money)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
-                    summaryAmountStackText.text = descriptionPack.stack.ToString();
+                    summaryAmountStackText.text = this.descriptionPack.stack.ToString();
                 }
-                else if (descriptionPack.customItem.itemType == Mod.ItemType.Consumable)
+                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.Consumable)
                 {
-                    summaryAmountStackText.gameObject.SetActive(true);
-                    summaryAmountStackText.text = descriptionPack.stack.ToString() + "/" + descriptionPack.maxStack;
+                    if (this.descriptionPack.maxStack > 0)
+                    {
+                        summaryAmountStackText.gameObject.SetActive(true);
+                        summaryAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
+                    }
+                    else
+                    {
+                        summaryAmountStackText.gameObject.SetActive(false);
+                    }
                 }
-                else if (descriptionPack.customItem.itemType == Mod.ItemType.Backpack || descriptionPack.customItem.itemType == Mod.ItemType.Container || descriptionPack.customItem.itemType == Mod.ItemType.Pouch)
+                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.Backpack || this.descriptionPack.customItem.itemType == Mod.ItemType.Container || this.descriptionPack.customItem.itemType == Mod.ItemType.Pouch)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
-                    summaryAmountStackText.text = descriptionPack.containingVolume.ToString() + "/" + descriptionPack.maxVolume;
+                    summaryAmountStackText.text = this.descriptionPack.containingVolume.ToString() + "/" + this.descriptionPack.maxVolume;
                 }
-                else if (descriptionPack.customItem.itemType == Mod.ItemType.AmmoBox)
+                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.AmmoBox)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
-                    summaryAmountStackText.text = descriptionPack.stack.ToString() + "/" + descriptionPack.maxStack;
+                    summaryAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
                 }
                 else
                 {
@@ -209,23 +226,24 @@ namespace EFM
             {
                 summaryAmountStackText.gameObject.SetActive(false);
             }
-            summaryNameText.text = descriptionPack.name;
-            if (descriptionPack.amountRequired > 0)
+            summaryNameText.text = this.descriptionPack.name;
+            if (this.descriptionPack.amountRequired > 0)
             {
                 summaryNeededForTotalText.gameObject.SetActive(true);
-                summaryNeededForTotalText.text = "Total: (" + descriptionPack.amount + "/" + descriptionPack.amountRequired + ")";
+                summaryNeededForTotalText.text = "Total: (" + this.descriptionPack.amount + "/" + this.descriptionPack.amountRequired + ")";
+                Mod.instance.LogInfo("Setting description of item " + this.descriptionPack.name+", amount = "+ this.descriptionPack.amount);
             }
             else
             {
                 summaryNeededForTotalText.gameObject.SetActive(false);
             }
-            summaryWishlist.SetActive(descriptionPack.onWishlist);
-            summaryInsuredIcon.SetActive(descriptionPack.insured);
-            summaryInsuredBorder.SetActive(descriptionPack.insured);
-            summaryNeededIcons[0].SetActive(descriptionPack.amountRequiredQuest > 0);
-            if (descriptionPack.amountRequired > 0)
+            summaryWishlist.SetActive(this.descriptionPack.onWishlist);
+            summaryInsuredIcon.SetActive(this.descriptionPack.insured);
+            summaryInsuredBorder.SetActive(this.descriptionPack.insured);
+            summaryNeededIcons[0].SetActive(this.descriptionPack.amountRequiredQuest > 0);
+            if (this.descriptionPack.amountRequired > 0)
             {
-                if (descriptionPack.amount >= descriptionPack.amountRequired)
+                if (this.descriptionPack.amount >= this.descriptionPack.amountRequired)
                 {
                     summaryNeededIcons[1].SetActive(true);
                 }
@@ -239,25 +257,54 @@ namespace EFM
                 summaryNeededIcons[1].SetActive(false);
                 summaryNeededIcons[2].SetActive(false);
             }
-            summaryNeededIcons[3].SetActive(descriptionPack.onWishlist);
-            summaryWeightText.text = descriptionPack.weight.ToString()+"kg";
-            summaryVolumeText.text = descriptionPack.volume.ToString()+"L";
+            summaryNeededIcons[3].SetActive(this.descriptionPack.onWishlist);
+            summaryWeightText.text = this.descriptionPack.weight.ToString()+"kg";
+            summaryVolumeText.text = this.descriptionPack.volume.ToString()+"L";
 
             // Full
-            float descriptionHeight = 615; // Top and bottom padding (25+25) + Icon (300) + Icon spacing (20) + Needed for title (55) + Spacing (20) + Desc. title (55) + Spacing (20) + Name spacing (20) + Properties (55) + Spacing (20)
-            fullIcon.sprite = descriptionPack.icon;
-            if (descriptionPack.maxStack != -1)
+            float descriptionHeight = 640; // Top and bottom padding (25+25) + Icon (300) + Icon spacing (20) + Needed for title (55) + Spacing (20) + Desc. title (55) + Spacing (20) + Name spacing (20) + Properties (55) + Spacing (20)
+            fullIcon.sprite = this.descriptionPack.icon;
+            if (this.descriptionPack.isCustom)
             {
-                fullAmountStackText.gameObject.SetActive(true);
-                fullAmountStackText.text = descriptionPack.stack.ToString() + "/" + descriptionPack.maxStack;
+                if (this.descriptionPack.customItem.itemType == Mod.ItemType.Money)
+                {
+                    fullAmountStackText.gameObject.SetActive(true);
+                    fullAmountStackText.text = this.descriptionPack.stack.ToString();
+                }
+                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.Consumable)
+                {
+                    if (this.descriptionPack.maxStack > 0)
+                    {
+                        fullAmountStackText.gameObject.SetActive(true);
+                        fullAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
+                    }
+                    else
+                    {
+                        fullAmountStackText.gameObject.SetActive(false);
+                    }
+                }
+                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.Backpack || this.descriptionPack.customItem.itemType == Mod.ItemType.Container || this.descriptionPack.customItem.itemType == Mod.ItemType.Pouch)
+                {
+                    fullAmountStackText.gameObject.SetActive(true);
+                    fullAmountStackText.text = this.descriptionPack.containingVolume.ToString() + "/" + this.descriptionPack.maxVolume;
+                }
+                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.AmmoBox)
+                {
+                    fullAmountStackText.gameObject.SetActive(true);
+                    fullAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
+                }
+                else
+                {
+                    fullAmountStackText.gameObject.SetActive(false);
+                }
             }
             else
             {
                 fullAmountStackText.gameObject.SetActive(false);
             }
-            fullNameText.text = descriptionPack.name;
-            descriptionHeight += fullNameText.rectTransform.sizeDelta.y;
-            if (descriptionPack.amountRequired == 0)
+            fullNameText.text = this.descriptionPack.name;
+            descriptionHeight += fullNameText.preferredHeight;
+            if (this.descriptionPack.amountRequired == 0)
             {
                 descriptionHeight += 47;
                 fullNeededForNone.SetActive(true);
@@ -266,7 +313,7 @@ namespace EFM
             {
                 fullNeededForNone.SetActive(false);
             }
-            if (descriptionPack.onWishlist)
+            if (this.descriptionPack.onWishlist)
             {
                 descriptionHeight += 47;
                 fullWishlist.SetActive(true);
@@ -275,13 +322,13 @@ namespace EFM
             {
                 fullWishlist.SetActive(false);
             }
-            if (descriptionPack.amountRequired > 0)
+            if (this.descriptionPack.amountRequired > 0)
             {
                 descriptionHeight += 47;
                 fullNeededForTotal.SetActive(true);
 
-                fullNeededForTotalText.text = "Total: (" + descriptionPack.amount + "/" + descriptionPack.amountRequired + ")";
-                if (descriptionPack.amount >= descriptionPack.amountRequired)
+                fullNeededForTotalText.text = "Total: (" + this.descriptionPack.amount + "/" + this.descriptionPack.amountRequired + ")";
+                if (this.descriptionPack.amount >= this.descriptionPack.amountRequired)
                 {
                     fullNeededForTotalText.color = Color.green;
                 }
@@ -308,15 +355,15 @@ namespace EFM
             }
             for (int i = 0; i < 22; ++i)
             {
-                if (descriptionPack.amountRequiredPerArea[i] > 0)
+                if (this.descriptionPack.amountRequiredPerArea[i] > 0)
                 {
                     // For each area that requires this item we want to add a NeededForText instance and set its text and color correctly
                     // Also keep a reference to these texts so we can remove them easily when updating the UI
                     GameObject neededForInstance = Instantiate(Mod.neededForPrefab, transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0));
                     neededForInstance.transform.SetSiblingIndex(7);
                     Text neededForInstanceText = neededForInstance.transform.GetChild(0).GetComponent<Text>();
-                    neededForInstanceText.text = "- " + Mod.localDB["interface"]["hideout_area_" + i + "_name"].ToString() + "("+ descriptionPack.amount+ "/"+ descriptionPack.amountRequiredPerArea[i] + ")";
-                    if (descriptionPack.amount >= descriptionPack.amountRequiredPerArea[i])
+                    neededForInstanceText.text = "- " + Mod.localDB["interface"]["hideout_area_" + i + "_name"].ToString() + "("+ this.descriptionPack.amount+ "/"+ this.descriptionPack.amountRequiredPerArea[i] + ")";
+                    if (this.descriptionPack.amount >= this.descriptionPack.amountRequiredPerArea[i])
                     {
                         neededForInstanceText.color = Color.green;
                     }
@@ -328,12 +375,12 @@ namespace EFM
                     descriptionHeight += 47;
                 }
             }
-            fullInsuredIcon.SetActive(descriptionPack.insured);
-            fullInsuredBorder.SetActive(descriptionPack.insured);
-            fullNeededIcons[0].SetActive(descriptionPack.amountRequiredQuest > 0);
-            if (descriptionPack.amountRequired > 0)
+            fullInsuredIcon.SetActive(this.descriptionPack.insured);
+            fullInsuredBorder.SetActive(this.descriptionPack.insured);
+            fullNeededIcons[0].SetActive(this.descriptionPack.amountRequiredQuest > 0);
+            if (this.descriptionPack.amountRequired > 0)
             {
-                if (descriptionPack.amount >= descriptionPack.amountRequired)
+                if (this.descriptionPack.amount >= this.descriptionPack.amountRequired)
                 {
                     fullNeededIcons[1].SetActive(true);
                 }
@@ -347,10 +394,10 @@ namespace EFM
                 fullNeededIcons[1].SetActive(false);
                 fullNeededIcons[2].SetActive(false);
             }
-            fullNeededIcons[3].SetActive(descriptionPack.onWishlist);
-            fullDescriptionText.text = descriptionPack.description;
-            descriptionHeight += fullDescriptionText.rectTransform.sizeDelta.y;
-            bool addCompatibleMags = descriptionPack.compatibleAmmoContainers != null && descriptionPack.compatibleAmmoContainers.Count > 0;
+            fullNeededIcons[3].SetActive(this.descriptionPack.onWishlist);
+            fullDescriptionText.text = this.descriptionPack.description;
+            descriptionHeight += fullDescriptionText.preferredHeight;
+            bool addCompatibleMags = this.descriptionPack.compatibleAmmoContainers != null && this.descriptionPack.compatibleAmmoContainers.Count > 0;
             if (addCompatibleMags)
             {
                 compatibleMagsTitle.SetActive(true);
@@ -358,19 +405,19 @@ namespace EFM
                 compatibleMags.SetActive(true);
 
                 string compatibleAmmoContainersString = "";
-                foreach (KeyValuePair<string, int> ammoContainer in descriptionPack.compatibleAmmoContainers)
+                foreach (KeyValuePair<string, int> ammoContainer in this.descriptionPack.compatibleAmmoContainers)
                 {
                     compatibleAmmoContainersString += "- "+ammoContainer.Key +" ("+ammoContainer.Value+")\n";
                 }
                 compatibleMagsText.text = compatibleAmmoContainersString;
-                descriptionHeight += compatibleMagsText.rectTransform.sizeDelta.y;
+                descriptionHeight += compatibleMagsText.preferredHeight;
             }
             else
             {
                 compatibleMagsTitle.SetActive(false);
                 compatibleMags.SetActive(false);
             }
-            bool addCompatibleAmmo = descriptionPack.compatibleAmmo != null && descriptionPack.compatibleAmmo.Count > 0;
+            bool addCompatibleAmmo = this.descriptionPack.compatibleAmmo != null && this.descriptionPack.compatibleAmmo.Count > 0;
             if (addCompatibleAmmo)
             {
                 compatibleAmmoTitle.SetActive(true);
@@ -378,21 +425,21 @@ namespace EFM
                 compatibleAmmo.SetActive(true);
 
                 string compatibleAmmoString = "";
-                foreach (KeyValuePair<string, int> ammo in descriptionPack.compatibleAmmo)
+                foreach (KeyValuePair<string, int> ammo in this.descriptionPack.compatibleAmmo)
                 {
                     compatibleAmmoString += "- "+ammo.Key +" ("+ammo.Value+")\n";
                 }
                 compatibleAmmoText.text = compatibleAmmoString;
-                descriptionHeight += compatibleAmmoText.rectTransform.sizeDelta.y;
+                descriptionHeight += compatibleAmmoText.preferredHeight;
             }
             else
             {
                 compatibleAmmoTitle.SetActive(false);
                 compatibleAmmo.SetActive(false);
             }
-            propertiesText.text = "Weight: " + descriptionPack.weight + "kg, Volume: " + descriptionPack.volume;
+            propertiesText.text = "Weight: " + this.descriptionPack.weight + "kg, Volume: " + this.descriptionPack.volume;
 
-            if (descriptionPack.containedAmmoClasses != null)
+            if (this.descriptionPack.containedAmmoClasses != null)
             {
                 if (ammoContainsTexts == null)
                 {
@@ -406,10 +453,11 @@ namespace EFM
                     }
                     ammoContainsTexts.Clear();
                 }
-                if (descriptionPack.containedAmmoClasses.Count > 0)
+                if (this.descriptionPack.containedAmmoClasses.Count > 0)
                 {
                     ammoContainsTitle.SetActive(true);
-                    foreach (KeyValuePair<string, int> entry in descriptionPack.containedAmmoClasses)
+                    descriptionHeight += 55;
+                    foreach (KeyValuePair<string, int> entry in this.descriptionPack.containedAmmoClasses)
                     {
                         GameObject containsInstance = Instantiate(Mod.ammoContainsPrefab, transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0));
                         containsInstance.transform.SetSiblingIndex(4);
@@ -428,12 +476,12 @@ namespace EFM
             // Set hoverscrolls depending on description height
             if (descriptionHeight > 1000)
             {
-                downHoverScroll.gameObject.SetActive(true); // Only down should be activated at first
+                upHoverScroll.gameObject.SetActive(true); // Only down should be activated at first
 
                 // We want to move set amount every second, we know the height = 1 so if want to move half of height per second,
                 // we want to move at rate of amount we want/height, this will give us a fraction of scroll bar to move per second
-                downHoverScroll.rate = 500 / descriptionHeight;
-                upHoverScroll.rate = 500 / descriptionHeight;
+                upHoverScroll.rate = 1000 / (descriptionHeight - 1000);
+                downHoverScroll.rate = 1000 / (descriptionHeight - 1000);
             }
         }
 

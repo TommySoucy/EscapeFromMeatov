@@ -853,11 +853,15 @@ namespace EFM
         public override void Init()
         {
             Mod.currentBaseManager = this;
+            GM.CurrentSceneSettings.MaxPointingDistance = 30;
 
             // Don't want to setup player rig if just got out of raid
             if (!Mod.justFinishedRaid)
             {
                 SetupPlayerRig();
+
+                // Set pockets configuration as default
+                GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
             }
 
             ProcessData();
@@ -980,9 +984,6 @@ namespace EFM
 
         public void ProcessData()
         {
-            // Set pockets
-            GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
-
             // Check if we have loaded data
             if (data == null)
             {
@@ -1001,9 +1002,7 @@ namespace EFM
                 }
                 Mod.hydration = 100;
                 Mod.energy = 100;
-
-                // Set pockets configuration as default
-                GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
+                Mod.weight = 0;
 
                 // Spawn standard edition starting items
                 Transform itemRoot = transform.GetChild(transform.childCount - 2);
@@ -1125,40 +1124,102 @@ namespace EFM
                 }
                 GameObject.Instantiate(IM.OD["PinnedGrenadeXM84"].GetGameObject(), new Vector3(-0.04095078f, 0.4530027f, 4.52161f), Quaternion.Euler(0f, 0f, 271.3958f), itemRoot);
                 GameObject.Instantiate(IM.OD["PinnedGrenadeXM84"].GetGameObject(), new Vector3(-0.2619514f, 0.4481025f, 4.35781f), Quaternion.Euler(359.111f, 39.55607f, 271.0761f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[608], new Vector3(-3.854952f, 0.1344025f, 0.6271096f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[608], new Vector3(13.58705f, 0.08240259f, -2.68019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(13.41505f, 0.1511025f, -0.4421903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(13.46805f, 0.1511025f, -0.2891903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(16.04205f, 0.05110264f, -1.50819f), Quaternion.Euler(45f, 27.66409f, 270.0001f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(-3.742851f, 0.1030025f, 0.8398097f), Quaternion.Euler(45f, 27.66409f, 270.0001f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(11.52605f, 0.1997025f, -2.04419f), Quaternion.Euler(0f, 10.17791f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(8.865049f, 0.5168025f, -4.50319f), Quaternion.Euler(0f, 10.17791f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(8.865049f, 0.5331025f, -4.43109f), Quaternion.Euler(14.04671f, 10.49514f, 2.574447f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(11.78305f, 0.1993027f, -2.02819f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(-4.93795f, 0.07120264f, 1.75981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(-4.906952f, 0.07120264f, 1.86681f), Quaternion.Euler(0f, 21.25007f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(11.44805f, 0.1927025f, -1.02219f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(11.40375f, 0.1927025f, -1.12049f), Quaternion.Euler(0f, 7.272392f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(12.21005f, 0.1927025f, -1.70619f), Quaternion.Euler(0f, 29.66055f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(16.37205f, 0.04950261f, -1.18019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(11.35405f, 0.04950261f, -2.26519f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(-4.762951f, 0.1073025f, 1.95981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(-4.830952f, 0.1073025f, 2.08881f), Quaternion.Euler(0f, 0f, 270.0742f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[628], new Vector3(-4.569649f, 0.0717026f, 1.841403f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[628], new Vector3(-4.73295f, 0.8293025f, 10.27161f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(0.3083f, 0.1314001f, 32.8823f), Quaternion.Euler(0f, 333.2294f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(-4.58f, 0.1506f, 1.13f), Quaternion.Euler(0f, 7.700641f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(11.6359f, 0.2268f, -1.4793f), Quaternion.Euler(0f, 7.700641f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[656], new Vector3(-0.6802502f, 0.3907025f, 3.97801f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[63], new Vector3(2.551049f, 0.2303026f, -5.279191f), Quaternion.Euler(0f, 302.7106f, 0f), itemRoot);
+                GameObject consumableObject = GameObject.Instantiate(Mod.itemPrefabs[608], new Vector3(-3.854952f, 0.1344025f, 0.6271096f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                EFM_CustomItemWrapper consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[608], new Vector3(13.58705f, 0.08240259f, -2.68019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(13.41505f, 0.1511025f, -0.4421903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(13.46805f, 0.1511025f, -0.2891903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(16.04205f, 0.05110264f, -1.50819f), Quaternion.Euler(45f, 27.66409f, 270.0001f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(-3.742851f, 0.1030025f, 0.8398097f), Quaternion.Euler(45f, 27.66409f, 270.0001f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(11.52605f, 0.1997025f, -2.04419f), Quaternion.Euler(0f, 10.17791f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(8.865049f, 0.5168025f, -4.50319f), Quaternion.Euler(0f, 10.17791f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(8.865049f, 0.5331025f, -4.43109f), Quaternion.Euler(14.04671f, 10.49514f, 2.574447f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(11.78305f, 0.1993027f, -2.02819f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(-4.93795f, 0.07120264f, 1.75981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(-4.906952f, 0.07120264f, 1.86681f), Quaternion.Euler(0f, 21.25007f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(11.44805f, 0.1927025f, -1.02219f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(11.40375f, 0.1927025f, -1.12049f), Quaternion.Euler(0f, 7.272392f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(12.21005f, 0.1927025f, -1.70619f), Quaternion.Euler(0f, 29.66055f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(16.37205f, 0.04950261f, -1.18019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(11.35405f, 0.04950261f, -2.26519f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(-4.762951f, 0.1073025f, 1.95981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(-4.830952f, 0.1073025f, 2.08881f), Quaternion.Euler(0f, 0f, 270.0742f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[628], new Vector3(-4.569649f, 0.0717026f, 1.841403f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[628], new Vector3(-4.73295f, 0.8293025f, 10.27161f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(0.3083f, 0.1314001f, 32.8823f), Quaternion.Euler(0f, 333.2294f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(-4.58f, 0.1506f, 1.13f), Quaternion.Euler(0f, 7.700641f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(11.6359f, 0.2268f, -1.4793f), Quaternion.Euler(0f, 7.700641f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[656], new Vector3(-0.6802502f, 0.3907025f, 3.97801f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[63], new Vector3(2.551049f, 0.2303026f, -5.279191f), Quaternion.Euler(0f, 302.7106f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
                 GameObject.Instantiate(Mod.itemPrefabs[513], new Vector3(14.11435f, 0.3618026f, -0.3831904f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[594], new Vector3(13.90705f, 0.01460254f, -1.54019f), Quaternion.Euler(0f, 324.3596f, 0f), itemRoot);
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[594], new Vector3(13.90705f, 0.01460254f, -1.54019f), Quaternion.Euler(0f, 324.3596f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
                 GameObject.Instantiate(Mod.itemPrefabs[93], new Vector3(0.9440489f, 0.00280261f, 15.13881f), Quaternion.Euler(0f, 327.9549f, 0f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[92], new Vector3(0.9536486f, 0.03980255f, 15.15481f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(-4.80595f, 0.01010263f, -7.312191f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(-0.6729507f, 0.3903027f, 4.17981f), Quaternion.Euler(0f, 314.1891f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(11.68705f, 0.1943026f, -1.87019f), Quaternion.Euler(0f, 68.00121f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(11.74695f, 0.1985025f, -1.77169f), Quaternion.Euler(0f, 30.20087f, 0f), itemRoot);
+                GameObject moneyObject = GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(-4.80595f, 0.01010263f, -7.312191f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                customItemWrapper = moneyObject.GetComponent<EFM_CustomItemWrapper>();
+                customItemWrapper.stack = 80000;
+                moneyObject = GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(-0.6729507f, 0.3903027f, 4.17981f), Quaternion.Euler(0f, 314.1891f, 0f), itemRoot);
+                customItemWrapper = moneyObject.GetComponent<EFM_CustomItemWrapper>();
+                customItemWrapper.stack = 175000;
+                moneyObject = GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(11.68705f, 0.1943026f, -1.87019f), Quaternion.Euler(0f, 68.00121f, 0f), itemRoot);
+                customItemWrapper = moneyObject.GetComponent<EFM_CustomItemWrapper>();
+                customItemWrapper.stack = 200000;
+                moneyObject = GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(11.74695f, 0.1985025f, -1.77169f), Quaternion.Euler(0f, 30.20087f, 0f), itemRoot);
+                customItemWrapper = moneyObject.GetComponent<EFM_CustomItemWrapper>();
+                customItemWrapper.stack = 45000;
                 GameObject.Instantiate(IM.OD["CombatKnife"].GetGameObject(), new Vector3(-3.296951f, 0.03210258f, 0.4808097f), Quaternion.Euler(358.7422f, 318.3018f, 270.2902f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[568], new Vector3(16.10405f, 0.08310258f, -2.71819f), Quaternion.Euler(0f, 0f, 291.3354f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[567], new Vector3(0.6410007f, 0.03299999f, 15.506f), Quaternion.Euler(0f, 0f, 90f), itemRoot);
@@ -1236,12 +1297,24 @@ namespace EFM
                 {
                     asMagazine.AddRound(customItemWrapper.roundClass, false, false);
                 }
-                GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.5500488f, 0.03410256f, 33.48181f), Quaternion.Euler(0f, 343.748f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.8410492f, 0.1321025f, 33.00081f), Quaternion.Euler(0f, 93.00641f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[633], new Vector3(-0.3458996f, 0.09630001f, 32.2702f), Quaternion.Euler(332.3804f, 73.96642f, 1.927157E-06f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[633], new Vector3(-0.2215977f, 0.03030002f, 32.30628f), Quaternion.Euler(0f, 345.1047f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[182], new Vector3(14.78605f, 0.002902627f, -0.4561903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                GameObject.Instantiate(Mod.itemPrefabs[180], new Vector3(-8.410952f, 0.01550257f, -7.51019f), Quaternion.Euler(0f, 56.62873f, 0f), itemRoot);
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.5500488f, 0.03410256f, 33.48181f), Quaternion.Euler(0f, 343.748f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.8410492f, 0.1321025f, 33.00081f), Quaternion.Euler(0f, 93.00641f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[633], new Vector3(-0.3458996f, 0.09630001f, 32.2702f), Quaternion.Euler(332.3804f, 73.96642f, 1.927157E-06f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[633], new Vector3(-0.2215977f, 0.03030002f, 32.30628f), Quaternion.Euler(0f, 345.1047f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[182], new Vector3(14.78605f, 0.002902627f, -0.4561903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
+                consumableObject = GameObject.Instantiate(Mod.itemPrefabs[180], new Vector3(-8.410952f, 0.01550257f, -7.51019f), Quaternion.Euler(0f, 56.62873f, 0f), itemRoot);
+                consumableCIW = consumableObject.GetComponent<EFM_CustomItemWrapper>();
+                consumableCIW.amount = consumableCIW.maxAmount;
 
                 // Instantiate areas
                 baseAreaManagers = new List<EFM_BaseAreaManager>();
@@ -1287,6 +1360,7 @@ namespace EFM
             Mod.maxEnergy = (float)data["maxEnergy"];
             Mod.stamina = (float)data["stamina"];
             Mod.maxStamina = (float)data["maxStamina"];
+            Mod.weight = (float)data["weight"];
             Mod.skills = new EFM_Skill[64];
             for(int i=0; i<64; ++i)
             {
@@ -1294,9 +1368,6 @@ namespace EFM
                 Mod.skills[i].progress = (float)data["skills"][i]["progress"];
                 Mod.skills[i].currentProgress = (float)data["skills"][i]["currentProgress"];
             }
-
-            // Set pockets configuration as default
-            GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
 
             // Instantiate items
             Transform itemsRoot = transform.GetChild(2);
@@ -1378,6 +1449,9 @@ namespace EFM
             if(Mod.baseInventory == null)
             {
                 Mod.baseInventory = new Dictionary<string, int>();
+            }
+            if(baseInventoryObjects == null)
+            {
                 baseInventoryObjects = new Dictionary<string, List<GameObject>>();
             }
 
@@ -1388,24 +1462,24 @@ namespace EFM
 
             foreach (Transform item in itemsRoot)
             {
+                Mod.instance.LogInfo("Adding "+item.name+" to base inventory");
                 AddToBaseInventory(item);
             }
         }
 
         private void AddToBaseInventory(Transform item)
         {
-            Mod.instance.LogInfo("add to base inventory called");
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
             string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
             if (Mod.baseInventory.ContainsKey(itemID))
             {
-                Mod.baseInventory[itemID] += customItemWrapper != null ? customItemWrapper.stack : 1;
+                Mod.baseInventory[itemID] += customItemWrapper != null ? (customItemWrapper.stack > 0 ? customItemWrapper.stack : 1) : 1;
                 baseInventoryObjects[itemID].Add(item.gameObject);
             }
             else
             {
-                Mod.baseInventory.Add(itemID, customItemWrapper != null ? customItemWrapper.stack : 1);
+                Mod.baseInventory.Add(itemID, customItemWrapper != null ? (customItemWrapper.stack > 0 ? customItemWrapper.stack : 1) : 1);
                 baseInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
             }
 
@@ -1799,7 +1873,6 @@ namespace EFM
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
                 {
                     Mod.instance.LogInfo("is rig");
-
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
                         customItemWrapper.takeCurrentLocation = false;
@@ -1811,7 +1884,7 @@ namespace EFM
                         JArray loadedQBContents = (JArray)item["PhysicalObject"]["quickBeltSlotContents"];
                         for (int j = 0; j < loadedQBContents.Count; ++j)
                         {
-                            if (loadedQBContents[j] == null)
+                            if (loadedQBContents[j] == null || loadedQBContents[j].Type == JTokenType.Null)
                             {
                                 customItemWrapper.itemsInSlots[j] = null;
                             }
@@ -1991,8 +2064,11 @@ namespace EFM
                         }
                     }
                 }
-                else if(item["pocketSlotIndex"] != null)
+
+                // Put item in pocket if it has pocket index
+                if (item["pocketSlotIndex"] != null)
                 {
+                    Mod.instance.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
                     customItemWrapper.takeCurrentLocation = false;
 
                     FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
@@ -2011,6 +2087,17 @@ namespace EFM
                 }
                 vanillaItemDescriptor.looted = (bool)item["looted"];
                 vanillaItemDescriptor.insured = (bool)item["insured"];
+
+                // Put item in pocket if it has pocket index
+                if (item["pocketSlotIndex"] != null)
+                {
+                    Mod.instance.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
+                    vanillaItemDescriptor.takeCurrentLocation = false;
+
+                    FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
+                    itemPhysicalObject.SetQuickBeltSlot(pocketSlot);
+                    itemPhysicalObject.SetParentage(pocketSlot.QuickbeltRoot);
+                }
             }
 
             // GameObject
@@ -2629,6 +2716,7 @@ namespace EFM
             saveObject["stamina"] = Mod.stamina;
             saveObject["maxStamina"] = Mod.maxStamina;
             saveObject["level"] = Mod.level;
+            saveObject["weight"] = Mod.weight;
 
             // Write skills
             saveObject["skills"] = new JArray();
@@ -2724,6 +2812,7 @@ namespace EFM
             {
                 if (pocketSlot.CurObject != null)
                 {
+                    Mod.instance.LogInfo("\tPocker curObject != null");
                     SaveItem(saveItems, pocketSlot.CurObject.transform);
                 }
             }
@@ -2797,7 +2886,6 @@ namespace EFM
                 itemPhysicalObject = item.GetComponentInChildren<FVRPhysicalObject>();
                 savedItem["PhysicalObject"]["heldMode"] = 0;
             }
-            FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
 
             // Fill PhysicalObject
             savedItem["PhysicalObject"]["positionX"] = item.localPosition.x;
@@ -2814,12 +2902,13 @@ namespace EFM
             savedItem["PhysicalObject"]["m_quickBeltSlot"] = quickBeltSlotIndex;
 
             // Fill ObjectWrapper
+            FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
             savedItem["PhysicalObject"]["ObjectWrapper"]["ItemID"] = itemObjectWrapper.ItemID;
 
             // Check if in pocket
-            for(int i=0; i< 4; ++i)
+            for (int i=0; i< 4; ++i)
             {
-                if (Mod.itemsInPocketSlots[i].Equals(item.gameObject))
+                if (Mod.itemsInPocketSlots[i] != null && Mod.itemsInPocketSlots[i].Equals(item.gameObject))
                 {
                     savedItem["pocketSlotIndex"] = i;
                     break;

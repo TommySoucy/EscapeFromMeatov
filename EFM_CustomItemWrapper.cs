@@ -12,6 +12,7 @@ namespace EFM
 
 		public Mod.ItemType itemType;
 		public Collider[] colliders;
+		public EFM_CustomItemWrapper prefabCIW;
 		public string parent;
 		public string ID;
 		public bool looted;
@@ -152,10 +153,11 @@ namespace EFM
 		public int amount 
 		{ 
 			get { return _amount; } 
-			set {
+			set
+			{
 				_amount = value;
-				if(descriptionManager != null)
-                {
+				if (descriptionManager != null)
+				{
 					descriptionManager.SetDescriptionPack();
                 }
 			} 
@@ -182,6 +184,8 @@ namespace EFM
 			{
 				locationIndex = Mod.currentLocationIndex;
 			}
+
+			prefabCIW = Mod.itemPrefabs[int.Parse(ID)].GetComponent<EFM_CustomItemWrapper>();
 
 			descriptionPack = new DescriptionPack();
 			descriptionPack.isCustom = true;
@@ -397,7 +401,7 @@ namespace EFM
 				// If the touchpadd is being pressed
 				if (hand.Input.TouchpadPressed)
 				{
-					if (touchpadAxes.magnitude > 0.2f)
+					if (touchpadAxes.magnitude > 0.3f)
 					{
 						if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
 						{
@@ -416,8 +420,24 @@ namespace EFM
 										// Increment timer
 										consumableTimer += Time.deltaTime;
 
-										float use = consumableTimer / useTime;
-										Mod.consumeUIText.text = string.Format("{0:0.#}/{0:0.#}", (use * amountRate), amountRate);
+										float use = Mathf.Clamp01(consumableTimer / useTime);
+										Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate < 0 ? (use * amount) : (use * amountRate), amountRate < 0 ? amount :  amountRate);
+										if (amountRate == 0)
+										{
+											// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
+											if (consumableTimer >= useTime)
+											{
+												Mod.consumeUIText.color = Color.green;
+                                            }
+                                            else
+											{
+												Mod.consumeUIText.color = Color.red;
+											}
+                                        }
+                                        else
+										{
+											Mod.consumeUIText.color = Color.white;
+										}
 										Mod.consumeUI.transform.parent = hand.transform;
 										Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
 										Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
@@ -454,9 +474,11 @@ namespace EFM
                         {
 							if(maxAmount > 0)
 							{
+								Mod.instance.LogInfo("Consuming, amountRate == -1, maxAmount > 0, consumableTimer: "+consumableTimer+ ", useTime: "+useTime);
 								// Consume for the fraction timer/useTime of remaining amount. If timer >= useTime, we consume the whole thing
-								int amountToConsume = consumableTimer >= useTime ? maxAmount : (int)(amount * (consumableTimer / useTime));
-								if(amount - amountToConsume == 0)
+								int amountToConsume = consumableTimer >= useTime ? amount : (int)(amount * (consumableTimer / useTime));
+								Mod.instance.LogInfo("Amount to consume: " + amountToConsume);
+								if (amount - amountToConsume <= 0)
                                 {
 									// Attempt to apply effects at full effectiveness
 									// Consume if succesful
@@ -475,24 +497,24 @@ namespace EFM
 									}
 								}
 							}
-							else
-                            {
-								// Consume the whole thing if timer >= useTime because this is a single unit consumable
-								if(consumableTimer >= useTime)
-                                {
-									// Attempt to apply effects at full effectiveness
-									// Consume if succesful
-									if (ApplyEffects(1, 0))
-									{
-										amount = 0;
-										Destroy(gameObject);
-									}
-								}
-                            }
+							//else // This should never happen anymore because single unit consumable have amountRate = 0 and maxAmount = 1
+							//{
+							//	// Consume the whole thing if timer >= useTime because this is a single unit consumable
+							//	if(consumableTimer >= useTime)
+							//  {
+							//		// Attempt to apply effects at full effectiveness
+							//		// Consume if succesful
+							//		if (ApplyEffects(1, 0))
+							//		{
+							//			amount = 0;
+							//			Destroy(gameObject);
+							//		}
+							//	}
+							//}
                         }
 						else if(amountRate == 0)
                         {
-							// This consumable is multiple units but can only use one at a time, so consume one unit of it if timer >= useTime
+							// This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
 							if (consumableTimer >= useTime)
 							{
 								if (ApplyEffects(1, 1))
@@ -524,6 +546,8 @@ namespace EFM
 							}
 						}
 
+						consumableTimer = 0;
+
 						if (amount == 0)
 						{
 							Destroy(gameObject);
@@ -535,6 +559,12 @@ namespace EFM
 
 		private bool ApplyEffects(float effectiveness, int amountToConsume)
         {
+			if(consumeEffects == null)
+            {
+				consumeEffects = prefabCIW.consumeEffects;
+				effects = prefabCIW.effects;
+            }
+
 			// TODO: Set targetted part if hovering over a part
 
 
@@ -543,8 +573,8 @@ namespace EFM
 
 			// Apply consume effects
 			foreach (EFM_Effect_Consumable consumeEffect in consumeEffects)
-            {
-                switch (consumeEffect.effectType)
+			{
+				switch (consumeEffect.effectType)
                 {
 					// Health
 					case EFM_Effect_Consumable.EffectConsumable.Hydration:
@@ -991,8 +1021,8 @@ namespace EFM
             }
 
 			// Apply buffs
-			foreach(EFM_Effect_Buff buff in effects)
-            {
+			foreach (EFM_Effect_Buff buff in effects)
+			{
 				if (buff.chance != 1 && Random.value > buff.chance)
 				{
 					continue;
@@ -1186,7 +1216,7 @@ namespace EFM
 
 		public void UpdateStackModel()
         {
-			float stackFraction = maxStack / (float)_stack;
+			float stackFraction = (float)_stack / maxStack;
 			if(stackFraction <= 0.33f)
             {
 				SetMode(0);
@@ -1204,13 +1234,14 @@ namespace EFM
 		public DescriptionPack GetDescriptionPack()
         {
 			descriptionPack.amount = (Mod.baseInventory.ContainsKey(ID) ? Mod.baseInventory[ID] : 0) + (Mod.playerInventory.ContainsKey(ID) ? Mod.playerInventory[ID] : 0);
+			Mod.instance.LogInfo("Item " + ID + " description amount = " + descriptionPack.amount);
+			descriptionPack.amountRequired = 0;
 			for (int i=0; i < 22; ++i)
 			{
 				if (Mod.requiredPerArea[i] != null && Mod.requiredPerArea[i].ContainsKey(ID))
 				{
 					descriptionPack.amountRequired += Mod.requiredPerArea[i][ID];
 					descriptionPack.amountRequiredPerArea[i] = Mod.requiredPerArea[i][ID];
-
                 }
                 else
 				{
@@ -1225,8 +1256,11 @@ namespace EFM
 			}
 			else if(itemType == Mod.ItemType.Consumable)
 			{
-				descriptionPack.stack = amount;
-				descriptionPack.maxStack = maxAmount;
+				if (maxAmount > 0)
+				{
+					descriptionPack.stack = amount;
+					descriptionPack.maxStack = maxAmount;
+                }
 			}
 			else if(itemType == Mod.ItemType.Backpack || itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
 			{
@@ -1253,7 +1287,7 @@ namespace EFM
 						}
                     }
                 }
-			}
+            }
 			descriptionPack.weight = currentWeight;
 			descriptionPack.volume = volumes[mode];
 			descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(ID) ? Mod.requiredForQuest[ID] : 0;

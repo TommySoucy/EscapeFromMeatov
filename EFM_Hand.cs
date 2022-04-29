@@ -77,47 +77,49 @@ namespace EFM
 
         private void OnTriggerEnter(Collider collider)
         {
-            Mod.instance.LogInfo("Entered trigger: " + collider.name);
-
             Transform mainContainerTransform = null;
             if (collider.gameObject.name.Equals("MainContainer"))
             {
                 mainContainerTransform = collider.transform;
             }
-            else if (collider.transform.parent.name.Equals("MainContainer"))
+            else if (collider.transform.parent != null)
             {
-                mainContainerTransform = collider.transform.parent;
-            }
-            else if (collider.gameObject.name.Equals("Interactive"))
-            {
-                EFM_CustomItemWrapper lootContainerCIW = collider.transform.parent.GetComponent<EFM_CustomItemWrapper>();
-                if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
+                if (collider.transform.parent.name.Equals("MainContainer"))
                 {
-                    collidingContainerWrapper = lootContainerCIW;
-                    colliders.Add(collider);
+                    mainContainerTransform = collider.transform.parent;
                 }
-            }
-            else if (collider.transform.parent.name.Equals("Interactives"))
-            {
-                EFM_CustomItemWrapper lootContainerCIW = collider.transform.parent.parent.GetComponent<EFM_CustomItemWrapper>();
-                if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
+                else if (collider.gameObject.name.Equals("Interactive"))
                 {
-                    collidingContainerWrapper = lootContainerCIW;
-                    colliders.Add(collider);
+                    EFM_CustomItemWrapper lootContainerCIW = collider.transform.parent.GetComponent<EFM_CustomItemWrapper>();
+                    if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
+                    {
+                        collidingContainerWrapper = lootContainerCIW;
+                        colliders.Add(collider);
+                    }
                 }
-            }
-            else if (collider.transform.parent.parent.name.Equals("Interactives"))
-            {
-                EFM_CustomItemWrapper itemCIW = collider.transform.parent.parent.parent.GetComponent<EFM_CustomItemWrapper>();
-                if (itemCIW != null && 
-                    (itemCIW.itemType == Mod.ItemType.Container ||
-                     itemCIW.itemType == Mod.ItemType.Backpack || 
-                     itemCIW.itemType == Mod.ItemType.Pouch || 
-                     itemCIW.itemType == Mod.ItemType.Rig ||
-                     itemCIW.itemType == Mod.ItemType.ArmoredRig))
+                else if (collider.transform.parent.name.Equals("Interactives") && collider.transform.parent.parent != null)
                 {
-                    collidingContainerWrapper = itemCIW;
-                    colliders.Add(collider);
+                    EFM_CustomItemWrapper lootContainerCIW = collider.transform.parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                    if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
+                    {
+                        collidingContainerWrapper = lootContainerCIW;
+                        colliders.Add(collider);
+                    }
+                }
+                else if(collider.transform.parent.parent != null)
+                {
+                    if (collider.transform.parent.parent.name.Equals("Interactives") && collider.transform.parent.parent.parent != null)
+                    {
+                        EFM_CustomItemWrapper itemCIW = collider.transform.parent.parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                        if (itemCIW != null &&
+                            (itemCIW.itemType == Mod.ItemType.Container ||
+                             itemCIW.itemType == Mod.ItemType.Backpack ||
+                             itemCIW.itemType == Mod.ItemType.Pouch))
+                        {
+                            collidingContainerWrapper = itemCIW;
+                            colliders.Add(collider);
+                        }
+                    }
                 }
             }
 

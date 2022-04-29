@@ -65,6 +65,7 @@ namespace EFM
         public bool nonLethal = false;
     }
 
+    [System.Serializable]
     public class EFM_Effect_Buff
     {
         public EFM_Effect.EffectType effectType;
@@ -76,6 +77,7 @@ namespace EFM
         public int skillIndex = -1;
     }
 
+    [System.Serializable]
     public class EFM_Effect_Consumable
     {
         public enum EffectConsumable

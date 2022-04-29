@@ -31,6 +31,7 @@ namespace EFM
         public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
         public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid. This is to keep track of where an item is in general
         public EFM_DescriptionManager descriptionManager; // The current description manager displaying this item's description
+        public float weight; // The original weight of the item. We need to keep it ourselves because we would usually use the RB mass but the RB gets destroyed when a mag gets put in a firearm
         private bool _insured;
         public bool insured
         {
@@ -62,6 +63,21 @@ namespace EFM
         {
             // Set the reference to the physical object
             physObj = gameObject.GetComponent<FVRPhysicalObject>();
+            weight = physObj.RootRigidbody.mass;
+
+            if(physObj is FVRFireArm)
+            {
+                FVRFireArm asFireArm = physObj as FVRFireArm;
+
+                // Set chamber firearm vars
+                if (asFireArm.GetChambers() != null && asFireArm.GetChambers().Count > 0)
+                {
+                    foreach (FVRFireArmChamber chamber in asFireArm.GetChambers())
+                    {
+                        chamber.Firearm = asFireArm;
+                    }
+                }
+            }
 
             if (takeCurrentLocation)
             {
@@ -73,7 +89,7 @@ namespace EFM
             descriptionPack.vanillaItem = this;
             descriptionPack.name = itemName;
             descriptionPack.description = description;
-            descriptionPack.icon = IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+            descriptionPack.icon = physObj is FVRFireArmRound ? null /*TODO have a default icon for all rounds?*/ : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
             descriptionPack.amountRequiredPerArea = new int[22];
 
             // Set init weight
@@ -87,7 +103,7 @@ namespace EFM
                 return 0;
             }
 
-            item.currentWeight = item.physObj.RootRigidbody.mass;
+            item.currentWeight = item.weight;
 
             if (item.physObj is FVRFireArm)
             {
@@ -150,7 +166,9 @@ namespace EFM
 
         public DescriptionPack GetDescriptionPack()
         {
+            Mod.instance.LogInfo("Vanilla getdesc pack called on "+gameObject.name);
             descriptionPack.amount = (Mod.baseInventory.ContainsKey(H3ID) ? Mod.baseInventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
+            Mod.instance.LogInfo("0");
             for (int i = 0; i < 22; ++i)
             {
                 if (Mod.requiredPerArea[i] != null && Mod.requiredPerArea[i].ContainsKey(H3ID))
@@ -164,53 +182,74 @@ namespace EFM
                     descriptionPack.amountRequiredPerArea[i] = 0;
                 }
             }
+            Mod.instance.LogInfo("0");
             descriptionPack.onWishlist = Mod.wishList.Contains(H3ID);
+            Mod.instance.LogInfo("0");
             descriptionPack.insured = insured;
+            Mod.instance.LogInfo("0");
 
-            if (compatibilityValue == 3 || compatibilityValue == 1) 
+            if (compatibilityValue == 3 || compatibilityValue == 1)
             {
+                Mod.instance.LogInfo("\t0");
                 if (usesAmmoContainers)
                 {
+                    Mod.instance.LogInfo("\t\t0");
                     if (usesMags)
                     {
+                        Mod.instance.LogInfo("\t\t\t0");
                         if (Mod.magazinesByType.ContainsKey(magType))
                         {
+                            Mod.instance.LogInfo("\t\t\t\t0");
                             descriptionPack.compatibleAmmoContainers = Mod.magazinesByType[magType];
                         }
                         else
                         {
+                            Mod.instance.LogInfo("\t\t\t\t0");
                             descriptionPack.compatibleAmmoContainers = new Dictionary<string, int>();
                         }
                     }
                     else
                     {
+                        Mod.instance.LogInfo("\t\t\t0");
                         if (Mod.clipsByType.ContainsKey(clipType))
                         {
+                            Mod.instance.LogInfo("\t\t\t\t0");
                             descriptionPack.compatibleAmmoContainers = Mod.clipsByType[clipType];
                         }
                         else
                         {
+                            Mod.instance.LogInfo("\t\t\t\t0");
                             descriptionPack.compatibleAmmoContainers = new Dictionary<string, int>();
                         }
                     }
                 }
             }
-            if(compatibilityValue == 3 || compatibilityValue == 2)
+            Mod.instance.LogInfo("0");
+            if (compatibilityValue == 3 || compatibilityValue == 2)
             {
+                Mod.instance.LogInfo("\t0");
                 if (Mod.roundsByType.ContainsKey(roundType))
                 {
+                    Mod.instance.LogInfo("\t\t0");
                     descriptionPack.compatibleAmmo = Mod.roundsByType[roundType];
                 }
                 else
                 {
+                    Mod.instance.LogInfo("\t\t0");
                     descriptionPack.compatibleAmmo = new Dictionary<string, int>();
                 }
             }
-            descriptionPack.weight = physObj.RootRigidbody.mass;
+            Mod.instance.LogInfo("0");
+            descriptionPack.weight = weight;
+            Mod.instance.LogInfo("0");
             descriptionPack.volume = Mod.sizeVolumes[(int)physObj.Size];
+            Mod.instance.LogInfo("0");
             descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(H3ID) ? Mod.requiredForQuest[H3ID] : 0;
+            Mod.instance.LogInfo("0");
             FVRFireArmMagazine asMagazine = gameObject.GetComponent<FVRFireArmMagazine>();
+            Mod.instance.LogInfo("0");
             FVRFireArmClip asClip = gameObject.GetComponent<FVRFireArmClip>();
+            Mod.instance.LogInfo("0");
             descriptionPack.containedAmmoClasses = new Dictionary<string, int>();
             if (asMagazine != null)
             {
@@ -247,6 +286,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("returning desc");
             return descriptionPack;
         }
     }
