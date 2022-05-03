@@ -925,53 +925,73 @@ namespace EFM
             Mod.rightHand.otherHand = Mod.leftHand;
             Mod.leftHand.otherHand = Mod.rightHand;
 
-            // Shoulder storage
-            GameObject rightVolume = new GameObject();
-            rightVolume.AddComponent<BoxCollider>();
-            rightVolume.SetActive(false);
-            rightVolume.transform.parent = GM.CurrentPlayerBody.Head;
-            rightVolume.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            rightVolume.transform.localPosition = new Vector3(0.15f, 0, -0.05f);
-            rightVolume.GetComponent<Collider>().isTrigger = true;
-            rightVolume.layer = LayerMask.NameToLayer("Interactable");
+            /*
+             * GameObject slotObject = equipSlotParent.GetChild(i).GetChild(0).gameObject;
+                slotObject.tag = "QuickbeltSlot";
+                slotObject.SetActive(false); // Just so Awake() isn't called until we've set slot components fields
 
-            EFM_ShoulderStorage rightSlotComponent = rightVolume.AddComponent<EFM_ShoulderStorage>();
+                EFM_EquipmentSlot slotComponent = slotObject.AddComponent<EFM_EquipmentSlot>();
+                Mod.equipmentSlots.Add(slotComponent);
+                slotComponent.QuickbeltRoot = slotObject.transform;
+                slotComponent.HoverGeo = slotObject.transform.GetChild(0).GetChild(0).gameObject;
+                slotComponent.HoverGeo.SetActive(false);
+                slotComponent.PoseOverride = slotObject.transform.GetChild(0).GetChild(2);
+                slotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Sphere;
+                slotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
+                slotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
+
+                // Set slot sphere materials
+                slotObject.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().material = Mod.quickSlotHoverMaterial;
+                slotObject.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().material = Mod.quickSlotConstantMaterial;
+             * */
+
+            // Shoulder storage
+            GameObject rightShoulderSlot = GameObject.Instantiate(Mod.rectQuickBeltSlotPrefab, GM.CurrentPlayerBody.Head);
+            rightShoulderSlot.name = "RightShoulderSlot";
+            rightShoulderSlot.tag = "QuickbeltSlot";
+            rightShoulderSlot.SetActive(false);
+            rightShoulderSlot.transform.GetChild(0).localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            rightShoulderSlot.transform.GetChild(0).localPosition = new Vector3(0.15f, 0, -0.05f);
+
+            EFM_ShoulderStorage rightSlotComponent = rightShoulderSlot.AddComponent<EFM_ShoulderStorage>();
             rightSlotComponent.right = true;
             Mod.rightShoulderSlot = rightSlotComponent;
-            rightSlotComponent.QuickbeltRoot = rightVolume.transform;
-            rightSlotComponent.HoverGeo = new GameObject();
-            rightSlotComponent.HoverGeo.AddComponent<MeshRenderer>();
-            rightSlotComponent.HoverGeo.transform.parent = rightVolume.transform;
+            rightSlotComponent.QuickbeltRoot = rightShoulderSlot.transform;
+            rightSlotComponent.HoverGeo = rightShoulderSlot.transform.GetChild(0).GetChild(0).gameObject;
             rightSlotComponent.HoverGeo.SetActive(false);
-            rightSlotComponent.PoseOverride = rightVolume.transform;
+            rightSlotComponent.PoseOverride = rightShoulderSlot.transform.GetChild(0).GetChild(2);
             rightSlotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear;
             rightSlotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
             rightSlotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
+            rightSlotComponent.RectBounds = rightShoulderSlot.transform.GetChild(0);
 
-            GameObject leftVolume = new GameObject();
-            leftVolume.AddComponent<BoxCollider>();
-            leftVolume.SetActive(false);
-            leftVolume.transform.parent = GM.CurrentPlayerBody.Head;
-            leftVolume.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            leftVolume.transform.localPosition = new Vector3(-0.15f, 0, -0.05f);
-            leftVolume.GetComponent<Collider>().isTrigger = true;
-            leftVolume.layer = LayerMask.NameToLayer("Interactable");
+            GameObject leftShoulderSlot = GameObject.Instantiate(Mod.rectQuickBeltSlotPrefab, GM.CurrentPlayerBody.Head);
+            leftShoulderSlot.name = "LeftShoulderSlot";
+            leftShoulderSlot.tag = "QuickbeltSlot";
+            leftShoulderSlot.SetActive(false);
+            leftShoulderSlot.transform.GetChild(0).localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            leftShoulderSlot.transform.GetChild(0).localPosition = new Vector3(-0.15f, 0, -0.05f);
 
-            EFM_ShoulderStorage leftSlotComponent = leftVolume.AddComponent<EFM_ShoulderStorage>();
-            leftSlotComponent.right = false;
+            EFM_ShoulderStorage leftSlotComponent = leftShoulderSlot.AddComponent<EFM_ShoulderStorage>();
+            leftSlotComponent.right = true;
             Mod.leftShoulderSlot = leftSlotComponent;
-            leftSlotComponent.QuickbeltRoot = leftVolume.transform;
-            leftSlotComponent.HoverGeo = new GameObject();
-            leftSlotComponent.HoverGeo.AddComponent<MeshRenderer>();
-            leftSlotComponent.HoverGeo.transform.parent = leftVolume.transform;
+            leftSlotComponent.QuickbeltRoot = leftShoulderSlot.transform;
+            leftSlotComponent.HoverGeo = leftShoulderSlot.transform.GetChild(0).GetChild(0).gameObject;
             leftSlotComponent.HoverGeo.SetActive(false);
-            leftSlotComponent.PoseOverride = leftVolume.transform;
+            leftSlotComponent.PoseOverride = leftShoulderSlot.transform.GetChild(0).GetChild(2);
             leftSlotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear;
             leftSlotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
             leftSlotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
+            leftSlotComponent.RectBounds = leftShoulderSlot.transform.GetChild(0);
 
-            rightVolume.SetActive(true);
-            leftVolume.SetActive(true);
+            // Set shoulders invisible
+            rightShoulderSlot.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().enabled = false;
+            rightShoulderSlot.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().enabled = false;
+            leftShoulderSlot.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().enabled = false;
+            leftShoulderSlot.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().enabled = false;
+
+            rightShoulderSlot.SetActive(true);
+            leftShoulderSlot.SetActive(true);
 
             // Set movement control
             GM.CurrentMovementManager.Mode = FVRMovementManager.MovementMode.TwinStick;
@@ -2529,6 +2549,34 @@ namespace EFM
             for (int i = 0; i < 22; ++i)
             {
                 baseAreaManagers[i].Init();
+            }
+
+            // Add switches
+            // LightSwitch
+            EFM_Switch lightSwitch = transform.GetChild(1).GetChild(23).GetChild(0).gameObject.AddComponent<EFM_Switch>();
+            lightSwitch.gameObjects = new List<GameObject>
+            {
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(0).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(1).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(2).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(3).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(4).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(5).GetChild(1).gameObject,
+
+                transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(0).GetChild(5).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(1).GetChild(5).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(2).GetChild(5).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(3).GetChild(5).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(4).GetChild(5).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(5).GetChild(5).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(6).GetChild(5).gameObject
+            };
+            // UISwitch
+            EFM_Switch UISwitch = transform.GetChild(1).GetChild(23).GetChild(0).gameObject.AddComponent<EFM_Switch>();
+            UISwitch.gameObjects = new List<GameObject>();
+            for(int i=0; i < 22; ++i)
+            {
+                UISwitch.gameObjects.Add(transform.GetChild(1).GetChild(i).GetChild(transform.GetChild(1).GetChild(i).childCount - 2).gameObject);
             }
 
             if (Mod.justFinishedRaid)

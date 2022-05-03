@@ -13,6 +13,7 @@ namespace EFM
     {
         private bool init;
         private Vector3 setPosition;
+        private Quaternion setRotation;
 
         public Text[] partHealthTexts;
         public Image[] partHealthImages;
@@ -155,11 +156,12 @@ namespace EFM
             if (Mod.leftHand.fvrHand.Input.BYButtonPressed && displayed)
             {
                 setPosition = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
-                transform.rotation = Quaternion.Euler(0, Mod.leftHand.transform.rotation.eulerAngles.y, 0);
+                setRotation = Quaternion.Euler(0, Mod.leftHand.transform.rotation.eulerAngles.y, 0);
             }
             if (displayed)
             {
                 transform.position = setPosition;
+                transform.rotation = setRotation;
             }
 
             UpdateStamina();

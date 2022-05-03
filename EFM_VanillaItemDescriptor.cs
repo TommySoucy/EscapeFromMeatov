@@ -16,8 +16,7 @@ namespace EFM
         public Mod.ItemRarity rarity; // Rarity of item
         public float spawnChance; // Spawn chance of item
         public int creditCost; // Value of item in rubles(?)
-        public Sprite sprite; // Icon for this item, only assigned if it has no custom icon
-        public string parent; // The parent ID of this item, the category this item is really
+        public List<string> parents; // The parent IDs of this item, the categories this item is a part of
         public bool looted; // Whether this item has been looted before
         public string itemName;
         public FVRPhysicalObject physObj; // Reference to the physical object of this item
@@ -89,7 +88,7 @@ namespace EFM
             descriptionPack.vanillaItem = this;
             descriptionPack.name = itemName;
             descriptionPack.description = description;
-            descriptionPack.icon = physObj is FVRFireArmRound ? null /*TODO have a default icon for all rounds?*/ : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+            descriptionPack.icon = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
             descriptionPack.amountRequiredPerArea = new int[22];
 
             // Set init weight

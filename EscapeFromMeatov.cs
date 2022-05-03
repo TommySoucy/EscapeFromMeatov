@@ -173,6 +173,7 @@ namespace EFM
         public static GameObject neededForPrefab;
         public static GameObject ammoContainsPrefab;
         public static GameObject staminaBarPrefab;
+        public static Sprite cartridgeIcon;
 
         // DB
         public static JObject areasDB;
@@ -491,6 +492,7 @@ namespace EFM
             neededForPrefab = assetsBundle.LoadAsset<GameObject>("NeededForText");
             ammoContainsPrefab = assetsBundle.LoadAsset<GameObject>("ContainsText");
             staminaBarPrefab = assetsBundle.LoadAsset<GameObject>("StaminaBar");
+            cartridgeIcon = assetsBundle.LoadAsset<Sprite>("ItemCartridge_Icon");
 
             // Load pockets configuration
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
@@ -641,7 +643,7 @@ namespace EFM
                 customItemWrapper.ID = i.ToString();
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 customItemWrapper.volumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
-                customItemWrapper.parent = defaultItemsData["ItemDefaults"][i]["parent"] != null ? defaultItemsData["ItemDefaults"][i]["parent"].ToString() : "";
+                customItemWrapper.parents = defaultItemsData["ItemDefaults"][i]["parents"] != null ? defaultItemsData["ItemDefaults"][i]["parents"].ToObject<List<String>>() : new List<string>();
                 customItemWrapper.itemName = itemObjectWrapper.DisplayName;
                 customItemWrapper.description = defaultItemsData["ItemDefaults"][i]["description"] != null ? defaultItemsData["ItemDefaults"][i]["description"].ToString() : "";
                 customItemWrapper.lootExperience = (int)defaultItemsData["ItemDefaults"][i]["lootExperience"];
@@ -659,13 +661,16 @@ namespace EFM
                     customItemWrapper.blocksHeadwear = (bool)defaultItemsData["ItemDefaults"][i]["BlocksHeadwear"];
                 }
 
-                if (itemsByParents.ContainsKey(customItemWrapper.parent))
+                foreach (string parent in customItemWrapper.parents)
                 {
-                    itemsByParents[customItemWrapper.parent].Add(customItemWrapper.ID);
-                }
-                else
-                {
-                    itemsByParents.Add(customItemWrapper.parent, new List<string>() { customItemWrapper.ID });
+                    if (itemsByParents.ContainsKey(parent))
+                    {
+                        itemsByParents[parent].Add(customItemWrapper.ID);
+                    }
+                    else
+                    {
+                        itemsByParents.Add(parent, new List<string>() { customItemWrapper.ID });
+                    }
                 }
 
                 // Fill customItemWrapper Colliders
@@ -691,6 +696,13 @@ namespace EFM
                     models.Add(model.gameObject);
                 }
                 customItemWrapper.models = models.ToArray();
+
+                // Add PMat depending on properties
+                PMat pMat = itemPrefab.AddComponent<PMat>();
+                pMat.Def = ScriptableObject.CreateInstance<PMaterialDefinition>();
+                pMat.Def.material = (PMaterial)Enum.Parse(typeof(PMaterial), defaultItemsData["ItemDefaults"][i]["MaterialProperties"]["PMaterial"].ToString());
+                pMat.Def.soundCategory = (PMatSoundCategory)Enum.Parse(typeof(PMatSoundCategory), defaultItemsData["ItemDefaults"][i]["MaterialProperties"]["PMatSoundCategory"].ToString());
+                pMat.Def.impactCategory = (PMatImpactEffectCategory)Enum.Parse(typeof(PMatImpactEffectCategory), defaultItemsData["ItemDefaults"][i]["MaterialProperties"]["PMatImpactEffectCategory"].ToString());
 
                 // Armor
                 if (itemType == 1 || itemType == 3)
@@ -735,6 +747,11 @@ namespace EFM
                         rigSlotComponent.HoverGeo.SetActive(false);
                         rigSlotComponent.PoseOverride = rigSlotObject.transform.GetChild(0).GetChild(2);
                         rigSlotComponent.Shape = slotShape;
+                        if(slotShape == FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear)
+                        {
+                            slotComponent.RectBounds = slotObject.transform.GetChild(0);
+                            rigSlotComponent.RectBounds = rigSlotObject.transform.GetChild(0);
+                        }
                         switch (splitSlotName[0])
                         {
                             case "Small":
@@ -812,7 +829,8 @@ namespace EFM
                     }
 
                     // Set backpack settings
-                    customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponent<Text>();
+                    customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
+                    customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["BackpackProperties"]["MaxVolume"];
 
@@ -832,7 +850,8 @@ namespace EFM
                     customItemWrapper.mainContainerRenderers = mainContainerRenderer;
 
                     // Set container settings
-                    customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponent<Text>();
+                    customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
+                    customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
 
@@ -852,7 +871,8 @@ namespace EFM
                     customItemWrapper.mainContainerRenderers = mainContainerRenderer;
 
                     // Set pouch settings
-                    customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponent<Text>();
+                    customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
+                    customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
 
@@ -863,6 +883,9 @@ namespace EFM
                 // Ammobox
                 if(itemType == 8)
                 {
+                    // Make sure keys use the poseoverride when grabbing, easier to add rounds to and round extract transform is positionned accordingly
+                    itemPhysicalObject.UseGrabPointChild = false;
+
                     if (!defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundType"].ToString().Equals("none"))
                     {
                         customItemWrapper.roundClass = (FireArmRoundClass)Enum.Parse(typeof(FireArmRoundClass), defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundClass"].ToString());
@@ -910,6 +933,9 @@ namespace EFM
                 // Money
                 if (itemType == 9)
                 {
+                    // Make sure money use the poseoverride when grabbing, easier to stack
+                    itemPhysicalObject.UseGrabPointChild = false;
+
                     // Add stacktriggers
                     Transform triggerRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.stackTriggers = new GameObject[3];
@@ -1137,17 +1163,20 @@ namespace EFM
                 descriptor.rarity = ItemRarityStringToEnum(vanillaItemRaw["Rarity"].ToString());
                 descriptor.spawnChance = (float)vanillaItemRaw["SpawnChance"];
                 descriptor.creditCost = (int)vanillaItemRaw["CreditCost"];
-                descriptor.parent = vanillaItemRaw["parent"].ToString();
+                descriptor.parents = vanillaItemRaw["parents"].ToObject<List<string>>();
                 descriptor.lootExperience = (int)vanillaItemRaw["LootExperience"];
                 descriptor.itemName = itemPrefab.name;
 
-                if (itemsByParents.ContainsKey(descriptor.parent))
+                foreach (string parent in descriptor.parents)
                 {
-                    itemsByParents[descriptor.parent].Add(H3ID);
-                }
-                else
-                {
-                    itemsByParents.Add(descriptor.parent, new List<string>() { H3ID });
+                    if (itemsByParents.ContainsKey(parent))
+                    {
+                        itemsByParents[parent].Add(H3ID);
+                    }
+                    else
+                    {
+                        itemsByParents.Add(parent, new List<string>() { H3ID });
+                    }
                 }
 
                 FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
@@ -2441,16 +2470,19 @@ namespace EFM
 
         private static void DropItem(FVRViveHand hand, FVRPhysicalObject primary)
         {
+            Mod.instance.LogInfo("Dropped Item " + primary.name);
             EFM_CustomItemWrapper collidingContainerWrapper = null;
             if (Mod.rightHand != null)
             {
                 if (hand.IsThisTheRightHand)
                 {
                     collidingContainerWrapper = Mod.rightHand.collidingContainerWrapper;
+                    Mod.instance.LogInfo("\tfrom right hand, container null? " + (collidingContainerWrapper == null));
                 }
                 else // Left hand
                 {
                     collidingContainerWrapper = Mod.leftHand.collidingContainerWrapper;
+                    Mod.instance.LogInfo("\tfrom left hand, container null? " + (collidingContainerWrapper == null));
                 }
             }
 
@@ -2458,18 +2490,8 @@ namespace EFM
             EFM_VanillaItemDescriptor heldVanillaItemDescriptor = primary.GetComponent<EFM_VanillaItemDescriptor>();
             if (collidingContainerWrapper != null && (heldCustomItemWrapper == null || !heldCustomItemWrapper.Equals(collidingContainerWrapper)))
             {
-                // Get item volume
-                float volumeToUse = 0;
-                if (heldCustomItemWrapper != null)
-                {
-                    volumeToUse = heldCustomItemWrapper.volumes[heldCustomItemWrapper.mode];
-                }
-                else
-                {
-                    volumeToUse = Mod.sizeVolumes[(int)primary.Size];
-                }
-
-                // Check if volume fits in container
+                Mod.instance.LogInfo("\tChecking if item fits in container");
+                // Check if item fits in container
                 if (collidingContainerWrapper.AddItemToContainer(primary))
                 {
                     if(collidingContainerWrapper.locationIndex == 1)
@@ -3074,7 +3096,7 @@ namespace EFM
                     fvrquickBeltSlot = Mod.leftShoulderSlot;
                     shoulderIndex = 0;
                 }
-                else if (Mod.leftShoulderSlot != null && Mod.rightShoulderSlot.IsPointInsideMe(position))
+                else if (Mod.rightShoulderSlot != null && Mod.rightShoulderSlot.IsPointInsideMe(position))
                 {
                     fvrquickBeltSlot = Mod.rightShoulderSlot;
                     shoulderIndex = 1;
@@ -3094,15 +3116,15 @@ namespace EFM
                 __instance.CurrentHoveredQuickbeltSlotDirty = fvrquickBeltSlot;
                 if (___m_state == FVRViveHand.HandState.Empty)
                 {
+                    if (shoulderIndex == 0) Mod.instance.LogInfo("Empty hand hovering over left shoulder");
                     if (fvrquickBeltSlot.CurObject != null && !fvrquickBeltSlot.CurObject.IsHeld && fvrquickBeltSlot.CurObject.IsInteractable())
                     {
                         __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                     }
-                    else if (fvrquickBeltSlot is EFM_ShoulderStorage && !(fvrquickBeltSlot as EFM_ShoulderStorage).right &&
-                            Mod.equipmentSlots[0].CurObject != null && !Mod.equipmentSlots[0].CurObject.IsHeld && Mod.equipmentSlots[0].CurObject.IsInteractable())
+                    else if (shoulderIndex == 0 && Mod.equipmentSlots[0].CurObject != null && !Mod.equipmentSlots[0].CurObject.IsHeld && Mod.equipmentSlots[0].CurObject.IsInteractable())
                     {
                         // Set hovered QB slot to backpack equip slot if it is left shoulder and backpack slot is not empty
-                        __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
+                        __instance.CurrentHoveredQuickbeltSlot = Mod.equipmentSlots[0];
                     }
                 }
                 else if (___m_state == FVRViveHand.HandState.GripInteracting && ___m_currentInteractable != null && ___m_currentInteractable is FVRPhysicalObject)
@@ -3171,7 +3193,7 @@ namespace EFM
                             // If right shoulder, make sure item is a firearm
                             if (shoulderIndex == 0 && customItemWrapper != null && customItemWrapper.itemType == Mod.ItemType.Backpack && EFM_EquipmentSlot.currentBackpack == null)
                             {
-                                __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
+                                __instance.CurrentHoveredQuickbeltSlot = Mod.equipmentSlots[0];
                             }
                             else if(shoulderIndex == 1 && fvrphysicalObject is FVRFireArm)
                             {
@@ -3349,11 +3371,14 @@ namespace EFM
 
             if (slot is EFM_EquipmentSlot)
             {
-                // Make equipment the size of its QBPoseOverride because by default the game only sets position? and rotation
+                // Make equipment the size of its QBPoseOverride because by default the game only sets rotation
                 if (__instance.QBPoseOverride != null)
                 {
-                    __instance.transform.localPosition = __instance.QBPoseOverride.localPosition;
                     __instance.transform.localScale = __instance.QBPoseOverride.localScale;
+
+                    // Also set the slot's poseoverride to the QBPoseOverride of the item so it get positionned properly
+                    // Multiply poseoverride position by 10 because our pose override is set in cm not relativ to scale of QBTransform but H3 sets position relative to it
+                    slot.PoseOverride.localPosition = __instance.QBPoseOverride.localPosition * 10;
                 }
 
                 // If this is backpack slot, also set left shoulder to the object
@@ -3454,6 +3479,12 @@ namespace EFM
                 {
                     // Check which PoseOverride to use depending on hand side
                     __instance.PoseOverride = hand.IsThisTheRightHand ? customItemWrapper.rightHandPoseOverride : customItemWrapper.leftHandPoseOverride;
+
+                    // If taken out of shoulderStorage, align with hand
+                    if (Mod.leftShoulderObject != null && Mod.leftShoulderObject.Equals(customItemWrapper.gameObject))
+                    {
+                        FVRViveHand.AlignChild(__instance.transform, __instance.PoseOverride, hand.transform);
+                    }
                 }
 
                 if (!customItemWrapper.looted)

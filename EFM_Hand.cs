@@ -8,6 +8,7 @@ namespace EFM
     {
         public EFM_Hand otherHand;
         public EFM_CustomItemWrapper collidingContainerWrapper;
+        public EFM_Switch collidingSwitch;
         public bool hoverValid;
         private List<Collider> colliders;
         public FVRViveHand fvrHand;
@@ -26,7 +27,7 @@ namespace EFM
             {
                 if (fvrHand.IsInStreamlinedMode)
                 {
-                    if (fvrHand.Input.AXButtonPressed)
+                    if (fvrHand.Input.AXButtonDown)
                     {
                         switch (collidingContainerWrapper.itemType)
                         {
@@ -73,6 +74,34 @@ namespace EFM
                     }
                 }
             }
+            else if(fvrHand.CurrentInteractable == null && collidingSwitch != null)
+            {
+                // TODO: maybe change this to trigger instead of interaction button we use for containers and other custom functional items
+                if (fvrHand.IsInStreamlinedMode)
+                {
+                    if (fvrHand.Input.AXButtonDown)
+                    {
+                        collidingSwitch.Activate();
+                    }
+                }
+                else
+                {
+                    Vector2 touchpadAxes = fvrHand.Input.TouchpadAxes;
+
+                    // If touchpad has started being pressed this frame
+                    if (fvrHand.Input.TouchpadDown)
+                    {
+                        Vector2 TouchpadClickInitiation = touchpadAxes;
+                        if (touchpadAxes.magnitude > 0.2f)
+                        {
+                            if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
+                            {
+                                collidingSwitch.Activate();
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void OnTriggerEnter(Collider collider)
@@ -80,7 +109,13 @@ namespace EFM
             Transform mainContainerTransform = null;
             if (collider.gameObject.name.Equals("MainContainer"))
             {
+                Mod.instance.LogInfo("Hand entered collider named MainCollider");
                 mainContainerTransform = collider.transform;
+            }
+            else if (collider.gameObject.GetComponent<EFM_Switch>() != null)
+            {
+                collidingSwitch = collider.gameObject.GetComponent<EFM_Switch>();
+                colliders.Add(collider);
             }
             else if (collider.transform.parent != null)
             {
@@ -131,23 +166,27 @@ namespace EFM
                      customItemWrapper.itemType == Mod.ItemType.Container ||
                      customItemWrapper.itemType == Mod.ItemType.Pouch))
                 {
+                    Mod.instance.LogInfo("\tMainCollider is part of some kind of container");
                     collidingContainerWrapper = customItemWrapper;
                     colliders.Add(collider);
                 }
             }
 
-            // Set container hovered is necessary
+            // Set container hovered if necessary
             if (collidingContainerWrapper != null && collidingContainerWrapper.canInsertItems)
             {
+                Mod.instance.LogInfo("\tCna insert items into this container");
                 // Verify container mode
                 if (collidingContainerWrapper.mainContainer.activeSelf)
                 {
+                    Mod.instance.LogInfo("\t\tContainer is active");
                     // Set material, if this hand is also holding something that fits in the container, set the material to hovered
                     if (fvrHand.CurrentInteractable != null && fvrHand.CurrentInteractable is FVRPhysicalObject)
                     {
+                        Mod.instance.LogInfo("\t\t\tThis hand is holding an item");
                         float volumeToUse = 0;
                         string IDToUse = "";
-                        string parentToUse = "";
+                        List<string> parentsToUse = null;
                         FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;
                         EFM_CustomItemWrapper heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<EFM_CustomItemWrapper>();
                         EFM_VanillaItemDescriptor heldVanillaItemDescriptor = fvrHand.CurrentInteractable.GetComponent<EFM_VanillaItemDescriptor>();
@@ -156,7 +195,7 @@ namespace EFM
                             volumeToUse = heldCustomItemWrapper.volumes[heldCustomItemWrapper.mode];
 
                             IDToUse = heldCustomItemWrapper.ID;
-                            parentToUse = heldCustomItemWrapper.parent;
+                            parentsToUse = heldCustomItemWrapper.parents;
                         }
                         else
                         {
@@ -165,7 +204,7 @@ namespace EFM
                             if (heldVanillaItemDescriptor != null)
                             {
                                 IDToUse = heldVanillaItemDescriptor.H3ID;
-                                parentToUse = heldVanillaItemDescriptor.parent;
+                                parentsToUse = heldVanillaItemDescriptor.parents;
                             }
                             else
                             {
@@ -177,23 +216,27 @@ namespace EFM
                         // Check if volume fits in bag
                         if (collidingContainerWrapper.containingVolume + volumeToUse <= collidingContainerWrapper.maxVolume)
                         {
+                            Mod.instance.LogInfo("\t\t\t\tVolume fits");
                             // Also check if the container can contain the item through filters
                             if (collidingContainerWrapper.whiteList != null)
                             {
                                 // If whitelist includes item and blacklist doesn't
-                                if ((collidingContainerWrapper.whiteList.Contains("54009119af1c881c07000029") || // This ID indicates any item
-                                    collidingContainerWrapper.whiteList.Contains(heldCustomItemWrapper.parent) || // The ID of the item's category
-                                    collidingContainerWrapper.whiteList.Contains(heldCustomItemWrapper.ID)) && // The ID of the item
-                                    (!collidingContainerWrapper.blackList.Contains(heldCustomItemWrapper.ID) &&
-                                    !collidingContainerWrapper.blackList.Contains(heldCustomItemWrapper.parent))) 
+                                if (EFM_CustomItemWrapper.ItemFitsInContainer(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
                                 {
+                                    Mod.instance.LogInfo("\t\t\t\tpasses filter");
                                     hoverValid = true;
                                     collidingContainerWrapper.SetContainerHovered(true);
                                     fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
                                 }
+                                else
+                                {
+                                    hoverValid = false;
+                                    collidingContainerWrapper.SetContainerHovered(false);
+                                }
                             }
                             else
                             {
+                                Mod.instance.LogInfo("\t\t\t\t\tContainer does not have whitelist");
                                 hoverValid = true;
                                 collidingContainerWrapper.SetContainerHovered(true);
                                 fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
@@ -217,6 +260,10 @@ namespace EFM
                     collidingContainerWrapper.SetContainerHovered(false);
                     collidingContainerWrapper = null;
                 }
+            }
+            else if(collidingSwitch != null)
+            {
+                fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
             }
         }
 
@@ -249,6 +296,10 @@ namespace EFM
                 }
 
                 collidingContainerWrapper = null;
+            }
+            else if(collidingSwitch != null && colliders.Remove(collider))
+            {
+                collidingSwitch = null;
             }
         }
     }

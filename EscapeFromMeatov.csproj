@@ -86,6 +86,7 @@
     <Compile Include="EFM_ShoulderStorage.cs" />
     <Compile Include="EFM_Skill.cs" />
     <Compile Include="EFM_StackTrigger.cs" />
+    <Compile Include="EFM_Switch.cs" />
     <Compile Include="EFM_TraderStatus.cs" />
     <Compile Include="EFM_VanillaItemDescriptor.cs" />
     <Compile Include="EscapeFromMeatov.cs" />

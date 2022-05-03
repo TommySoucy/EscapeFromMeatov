@@ -13,7 +13,7 @@ namespace EFM
 		public Mod.ItemType itemType;
 		public Collider[] colliders;
 		public EFM_CustomItemWrapper prefabCIW;
-		public string parent;
+		public List<string> parents;
 		public string ID;
 		public bool looted;
 		public int lootExperience;
@@ -103,7 +103,8 @@ namespace EFM
 		public GameObject mainContainer;
 		public Renderer[] mainContainerRenderers;
 		public bool canInsertItems = true;
-		public Text volumeIndicator;
+		public Text volumeIndicatorText;
+		public GameObject volumeIndicator;
 		public float maxVolume;
 		private float _containingVolume;
 		public float containingVolume 
@@ -115,7 +116,7 @@ namespace EFM
 				{
 					descriptionManager.SetDescriptionPack();
 				}
-				volumeIndicator.text = _containingVolume.ToString() +"/"+maxVolume;
+				volumeIndicatorText.text = _containingVolume.ToString() +"/"+maxVolume;
 			}
 		}
 		public class ResetColPair
@@ -276,8 +277,10 @@ namespace EFM
 
 		public bool AddItemToContainer(FVRPhysicalObject item)
 		{
-			if (itemType != Mod.ItemType.Backpack ||
-			   itemType != Mod.ItemType.Container ||
+			Mod.instance.LogInfo("\tAddItemToContainer called with item "+item.name+", on container item with actual type: "+itemType);
+
+			if (itemType != Mod.ItemType.Backpack &&
+			   itemType != Mod.ItemType.Container &&
 			   itemType != Mod.ItemType.Pouch)
 			{
 				return false;
@@ -285,19 +288,28 @@ namespace EFM
 
 			// Get item volume
 			float volumeToUse = 0;
+			string IDToUse = "";
+			List<string> parentsToUse = null;
 			EFM_CustomItemWrapper wrapper = item.GetComponent<EFM_CustomItemWrapper>();
+			EFM_VanillaItemDescriptor VID = item.GetComponent<EFM_VanillaItemDescriptor>();
 			if (wrapper != null)
 			{
 				volumeToUse = wrapper.volumes[wrapper.mode];
+				IDToUse = wrapper.ID;
+				parentsToUse = wrapper.parents;
 			}
 			else
 			{
 				volumeToUse = Mod.sizeVolumes[(int)item.Size];
+				IDToUse = VID.H3ID;
+				parentsToUse = VID.parents;
 			}
+			Mod.instance.LogInfo("\tChecking if item fits, container containing vol: "+containingVolume+", volToUse: "+volumeToUse+", maxVol: "+maxVolume);
 
-			if (containingVolume + volumeToUse <= maxVolume)
+			if (containingVolume + volumeToUse <= maxVolume && ItemFitsInContainer(IDToUse, parentsToUse, whiteList, blackList))
 			{
-				// Attach item to backpack
+				Mod.instance.LogInfo("\t\tItem fits");
+				// Attach item to container
 				// Set all non trigger colliders that are on default layer to trigger so they dont collide with anything
 				Collider[] cols = item.gameObject.GetComponentsInChildren<Collider>(true);
 				if (resetColPairs == null)
@@ -325,26 +337,61 @@ namespace EFM
 				{
 					resetColPairs.Add(resetColPair);
 				}
+				Mod.instance.LogInfo("\t\tsetup reset col pairs");
 				item.SetParentage(itemObjectsRoot);
+				Mod.instance.LogInfo("\t\tset parentage");
 				item.RootRigidbody.isKinematic = true;
+				Mod.instance.LogInfo("\t\tset RB kinematic");
 
 				// Add volume to backpack
-				EFM_CustomItemWrapper primaryWrapper = item.gameObject.GetComponent<EFM_CustomItemWrapper>();
-				if (primaryWrapper != null)
-				{
-					containingVolume += primaryWrapper.volumes[primaryWrapper.mode];
-				}
-				else
-				{
-					containingVolume += Mod.sizeVolumes[(int)item.Size];
-				}
+				containingVolume += volumeToUse;
+				Mod.instance.LogInfo("\t\tadded colume to container");
 
 				return true;
 			}
 			else
 			{
+				Mod.instance.LogInfo("\t\tItem DOES NOT fits");
 				return false;
 			}
+		}
+
+		public static bool ItemFitsInContainer(string IDToUse, List<string> parentsToUse, List<string> whiteList, List<string> blackList)
+		{
+			// If an item's corresponding ID is specified in whitelist, then that is the ID we must check the blacklist against.
+			// If the blacklist contains any of the item's more specific IDs than the ID in the whitelist, then the item does not fit. Otherwise, it fits.
+
+			// Check item ID
+			if (whiteList.Contains(IDToUse))
+			{
+				// The specific item is specified as fitting or not, we dont need to check the list of ancestors
+				//return !collidingContainerWrapper.blackList.Contains(IDToUse);
+
+				// In truth, a specific ID in whitelist should mean that this item fits. The specific ID should never be specified in both white and black lists
+				return true;
+			}
+
+			// Check ancestors
+			for (int i = 0; i < parentsToUse.Count; ++i)
+			{
+				// If whitelist contains the ancestor ID
+				if (whiteList.Contains(parentsToUse[i]))
+				{
+					// Must check if any prior ancestor IDs are in the blacklist
+					// If an prior ancestor or the item's ID is found in the blacklist, return false, the item does not fit
+					for (int j = 0; j < i; ++j)
+					{
+						if (blackList.Contains(parentsToUse[j]))
+						{
+							return false;
+						}
+					}
+					return !blackList.Contains(IDToUse);
+				}
+			}
+
+			// Getting this far would mean that the item's ID nor any of its ancestors are in the whitelist, so doesn't fit
+			return false;
 		}
 
 		private void TakeInput()
@@ -1079,8 +1126,14 @@ namespace EFM
 				{
 					SetMode(0);
 					SetContainerOpen(true, isRightHand);
+					volumeIndicator.SetActive(true);
 				}
-				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch || itemType == Mod.ItemType.LootContainer)
+				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
+				{
+					SetContainerOpen(true, isRightHand);
+					volumeIndicator.SetActive(true);
+				}
+				else if(itemType == Mod.ItemType.LootContainer)
 				{
 					SetContainerOpen(true, isRightHand);
 				}
@@ -1111,6 +1164,7 @@ namespace EFM
 				{
 					SetMode(containingVolume > 0 ? 1 : 2);
 					SetContainerOpen(false, isRightHand);
+					volumeIndicator.SetActive(true);
 				}
 				else if (itemType == Mod.ItemType.BodyArmor)
 				{
@@ -1119,6 +1173,7 @@ namespace EFM
 				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
 				{
 					SetContainerOpen(false, isRightHand);
+					volumeIndicator.SetActive(true);
 				}
 			}
 		}
