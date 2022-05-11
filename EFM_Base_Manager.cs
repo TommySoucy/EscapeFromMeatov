@@ -63,7 +63,7 @@ namespace EFM
         public static Sprite[] areaIcons; // icon_vents, icon_security, icon_watercloset, icon_stash, icon_generators, icon_heating, icon_rain_collector, icon_medstation, icon_kitchen, icon_restplace, icon_workbench, icon_intelligence_center, icon_shooting_range, icon_library, icon_scav_case, icon_illumination, icon_placeoffame, icon_afu, icon_solarpower, icon_boozegen, icon_bitcionfarm, icon_christmas_illumination
         public static Dictionary<string, Sprite> bonusIcons;
         public static Sprite[] skillIcons;
-        public static Sprite emptyItemSlotIcon; // TODO: init this
+        public static Sprite emptyItemSlotIcon;
 
         public JToken data;
 
@@ -881,7 +881,6 @@ namespace EFM
             }
 
             ProcessData();
-            // TODO: In the case taht we just came back from raid, make sure that we dont load content of player inventory on load and make sure that we add everything that we actually currently have in player inventory is added to the corresponding lists
 
             if (Mod.justFinishedRaid)
             {
@@ -2391,20 +2390,8 @@ namespace EFM
                 areaStatusIconProducing = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_producing");
                 areaStatusIconOutOfFuel = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_out_of_fuel");
                 requirementFulfilled = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_requirement_fulfilled");
-                Mod.instance.LogInfo("requirementFulfilled null?: "+(requirementFulfilled == null));
                 requirementLocked = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_requirement_locked");
-                Mod.instance.LogInfo("requirementLocked null?: " + (requirementLocked == null));
-                Mod.instance.LogInfo("All asset names:");
-
-                string[] allNames = Mod.baseAssetsBundle.GetAllAssetNames();
-                foreach(string name in allNames)
-                {
-                    Mod.instance.LogInfo(name);
-                    if (name.Contains("locked"))
-                    {
-                        Mod.instance.LogInfo("\tCONTAINS LOCKED");
-                    }
-                }
+                emptyItemSlotIcon = Mod.baseAssetsBundle.LoadAsset<Sprite>("slot_empty_fill");
                 traderAvatars = new Sprite[8];
                 traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_russian_small");
                 traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_therapist_small");

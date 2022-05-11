@@ -37,6 +37,7 @@ namespace EFM
         public Dictionary<string, List<Transform>> produceViewByItemID; // Produce views dependent on item ID, the ones we need to update when count of item changes in inventory
         public Dictionary<string, List<Transform>> farmingViewByItemID; // Farming views dependent on item ID, the ones we need to update when count of item changes in inventory
         public Dictionary<string, List<Transform>> itemRequirementsByItemID; // Area item requirements dependent on item ID, the ones we need to update when count of item changes in inventory
+        public Dictionary<int, List<Transform>> areaRequirementsByAreaIndex; // Area requirements dependent on area index, the ones we need to update when level of an area changes
         public List<EFM_AreaRequirement> itemRequirements;
         public List<EFM_AreaRequirement> areaRequirements;
         public List<EFM_AreaRequirement> skillRequirements;
@@ -1463,6 +1464,19 @@ namespace EFM
                             Text areaRequirementNameText = areaRequirement.transform.GetChild(1).GetChild(0).GetComponent<Text>();
                             areaRequirementNameText.text = Mod.localDB["interface"]["hideout_area_" + requirement["areaType"] + "_name"].ToString(); // Area name
 
+                            if (areaRequirementsByAreaIndex == null)
+                            {
+                                areaRequirementsByAreaIndex = new Dictionary<int, List<Transform>>();
+                            }
+                            if (areaRequirementsByAreaIndex.ContainsKey(requiredAreaIndex))
+                            {
+                                areaRequirementsByAreaIndex[requiredAreaIndex].Add(areaRequirement.transform);
+                            }
+                            else
+                            {
+                                areaRequirementsByAreaIndex.Add(requiredAreaIndex, new List<Transform>() { areaRequirement.transform });
+                            }
+
                             Mod.instance.LogInfo("\t0");
                             // Check if requirement is met
                             if (baseManager.baseAreaManagers[(int)requirement["areaType"]].level >= requiredLevel)
@@ -2277,7 +2291,6 @@ namespace EFM
                             break;
                         default:
                             return false;
-                            break;
                     }
                 }
             }
@@ -4039,9 +4052,26 @@ namespace EFM
 
         public void UpdateBasedOnAreaLevel(int index, int newLevel)
         {
-            // TODO: Update UI of relevant area requirements
-            continue from here
-            UpdateUpgradableStatus();
+            if (areaRequirementsByAreaIndex.ContainsKey(index))
+            {
+                List<Transform> requirementTransforms = areaRequirementsByAreaIndex[index];
+                foreach (Transform currentRequirementTransform in requirementTransforms)
+                {
+                    EFM_AreaRequirement requirementScript = currentRequirementTransform.GetComponent<EFM_AreaRequirement>();
+
+                    if (newLevel >= requirementScript.level)
+                    {
+                        currentRequirementTransform.GetChild(1).GetChild(0).GetComponent<Text>().color = Color.white;
+                        currentRequirementTransform.GetChild(2).GetComponent<Image>().sprite = EFM_Base_Manager.requirementFulfilled;
+                    }
+                    else
+                    {
+                        currentRequirementTransform.GetChild(1).GetChild(0).GetComponent<Text>().color = Color.red;
+                        currentRequirementTransform.GetChild(2).GetComponent<Image>().sprite = EFM_Base_Manager.requirementLocked;
+                    }
+                }
+                UpdateUpgradableStatus();
+            }
         }
 
         public void UpdateBasedOnSlots()
