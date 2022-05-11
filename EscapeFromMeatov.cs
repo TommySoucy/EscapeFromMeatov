@@ -69,12 +69,16 @@ namespace EFM
         public static List<string> wishList;
         public static Dictionary<FireArmMagazineType, Dictionary<string, int>> magazinesByType;
         public static Dictionary<FireArmClipType, Dictionary<string, int>> clipsByType;
-        public static Dictionary<FireArmRoundType, Dictionary<string, int>> roundsByType;
+        public static Dictionary<FireArmRoundType, Dictionary<string, int>> roundsByType; // TODO: See if we tak into account ammo in boxes, we should
+        public static Dictionary<ItemRarity, List<string>> itemsByRarity;
         public static Dictionary<string, List<string>> itemsByParents;
         public static List<string> usedRoundIDs;
         public static Dictionary<string, int> ammoBoxByAmmoID;
         public static Dictionary<string, int> requiredForQuest;
         public static List<EFM_DescriptionManager> activeDescriptions;
+        public static List<EFM_AreaSlot> areaSlots;
+        public static bool areaSlotShouldUpdate = true;
+        public static List<EFM_AreaBonus> activeBonuses;
 
         // Player
         public static GameObject playerStatusUI;
@@ -649,6 +653,14 @@ namespace EFM
                 customItemWrapper.lootExperience = (int)defaultItemsData["ItemDefaults"][i]["lootExperience"];
                 customItemWrapper.spawnChance = (float)defaultItemsData["ItemDefaults"][i]["spawnChance"];
                 customItemWrapper.rarity = ItemRarityStringToEnum(defaultItemsData["ItemDefaults"][i]["rarity"].ToString());
+                if (itemsByRarity.ContainsKey(customItemWrapper.rarity))
+                {
+                    itemsByRarity[customItemWrapper.rarity].Add(customItemWrapper.ID);
+                }
+                else
+                {
+                    itemsByRarity.Add(customItemWrapper.rarity, new List<string>() { customItemWrapper.ID });
+                }
                 if (defaultItemsData["ItemDefaults"][i]["MaxAmount"] != null)
                 {
                     customItemWrapper.maxAmount = (int)defaultItemsData["ItemDefaults"][i]["MaxAmount"];
@@ -950,7 +962,6 @@ namespace EFM
 
                     // Set stack defaults
                     customItemWrapper.maxStack = (int)defaultItemsData["ItemDefaults"][i]["stackMaxSize"];
-                    customItemWrapper.stack = 1;
                 }
 
                 // Consumable
@@ -1161,6 +1172,14 @@ namespace EFM
                 descriptor.description = vanillaItemRaw["Description"].ToString();
                 descriptor.lootExperience = (int)vanillaItemRaw["LootExperience"];
                 descriptor.rarity = ItemRarityStringToEnum(vanillaItemRaw["Rarity"].ToString());
+                if (itemsByRarity.ContainsKey(descriptor.rarity))
+                {
+                    itemsByRarity[descriptor.rarity].Add(descriptor.H3ID);
+                }
+                else
+                {
+                    itemsByRarity.Add(descriptor.rarity, new List<string>() { descriptor.H3ID });
+                }
                 descriptor.spawnChance = (float)vanillaItemRaw["SpawnChance"];
                 descriptor.creditCost = (int)vanillaItemRaw["CreditCost"];
                 descriptor.parents = vanillaItemRaw["parents"].ToObject<List<string>>();
@@ -1791,6 +1810,7 @@ namespace EFM
             itemsByParents = new Dictionary<string, List<string>>();
             requiredForQuest = new Dictionary<string, int>();
             wishList = new List<string>();
+            itemsByRarity = new Dictionary<ItemRarity, List<string>>();
 
             // Subscribe to events
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -2245,6 +2265,44 @@ namespace EFM
             if ((__instance is FVRPhysicalObject && (__instance as FVRPhysicalObject).QuickbeltSlot != null))
             {
                 Mod.instance.LogInfo("Dropping item in qs");
+
+                // Check if area slot
+                if ((__instance as FVRPhysicalObject).QuickbeltSlot is EFM_AreaSlot)
+                {
+                    EFM_CustomItemWrapper heldCustomItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
+                    EFM_VanillaItemDescriptor heldVanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                    BeginInteractionPatch.SetItemLocationIndex(3, null, heldVanillaItemDescriptor);
+                    if (heldCustomItemWrapper != null)
+                    {
+                        // Was on player
+                        Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
+                        if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
+                        {
+                            Mod.playerInventory.Remove(heldCustomItemWrapper.ID);
+                        }
+                        Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Remove(heldCustomItemWrapper.gameObject);
+                        if (Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Count == 0)
+                        {
+                            Mod.playerInventoryObjects.Remove(heldCustomItemWrapper.ID);
+                        }
+                    }
+                    else if(heldVanillaItemDescriptor != null)
+                    {
+                        // Was on player
+                        Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
+                        if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
+                        {
+                            Mod.playerInventory.Remove(heldVanillaItemDescriptor.H3ID);
+                        }
+                        Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
+                        if (Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Count == 0)
+                        {
+                            Mod.playerInventoryObjects.Remove(heldVanillaItemDescriptor.H3ID);
+                        }
+                    }
+                    return;
+                }
+
                 // This is only relevant in the case where the QB slot is on a loose rig in base or raid
                 FVRPhysicalObject physObj =  __instance as FVRPhysicalObject;
                 FVRQuickBeltSlot qbs = physObj.QuickbeltSlot;
@@ -2427,10 +2485,8 @@ namespace EFM
             }
             else if(CheckIfDoorUpwards(__instance.gameObject, 3))
             {
-                Mod.instance.LogInfo("Let go of door");
                 return;
             }
-            Mod.instance.LogInfo("1");
 
             if (__instance is FVRAlternateGrip)
             {
@@ -3103,6 +3159,19 @@ namespace EFM
                 }
             }
 
+            // Check area slots
+            if(fvrquickBeltSlot == null)
+            {
+                foreach(FVRQuickBeltSlot slot in Mod.areaSlots)
+                {
+                    if(slot != null && slot.transform.parent.gameObject.activeSelf && slot.IsPointInsideMe(position))
+                    {
+                        fvrquickBeltSlot = slot;
+                        break;
+                    }
+                }
+            }
+
             if (fvrquickBeltSlot == null)
             {
                 if (__instance.CurrentHoveredQuickbeltSlot != null)
@@ -3116,7 +3185,6 @@ namespace EFM
                 __instance.CurrentHoveredQuickbeltSlotDirty = fvrquickBeltSlot;
                 if (___m_state == FVRViveHand.HandState.Empty)
                 {
-                    if (shoulderIndex == 0) Mod.instance.LogInfo("Empty hand hovering over left shoulder");
                     if (fvrquickBeltSlot.CurObject != null && !fvrquickBeltSlot.CurObject.IsHeld && fvrquickBeltSlot.CurObject.IsInteractable())
                     {
                         __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
@@ -3200,6 +3268,23 @@ namespace EFM
                                 __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                             }
                         }
+                        else if(fvrquickBeltSlot is EFM_AreaSlot)
+                        {
+                            EFM_AreaSlot asAreaSlot = fvrquickBeltSlot as EFM_AreaSlot;
+                            string IDToUse;
+                            if(customItemWrapper != null)
+                            {
+                                IDToUse = customItemWrapper.ID;
+                            }
+                            else
+                            {
+                                IDToUse = fvrphysicalObject.GetComponent<EFM_VanillaItemDescriptor>().H3ID;
+                            }
+                            if (asAreaSlot.filter.Contains(IDToUse))
+                            {
+                                __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
+                            }
+                        }
                         else
                         {
                             __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
@@ -3261,6 +3346,24 @@ namespace EFM
                     //    Mod.leftShoulderObject = null;
                     //    EFM_EquipmentSlot.TakeOffEquipment(customItemWrapper);
                     //}
+                }
+                else if(__instance.QuickbeltSlot is EFM_AreaSlot)
+                {
+                    EFM_AreaSlot asAreaSlot = __instance.QuickbeltSlot as EFM_AreaSlot;
+                    Mod.currentBaseManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = null;
+                    
+                    if (Mod.areaSlotShouldUpdate)
+                    {
+                        EFM_BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<EFM_BaseAreaManager>();
+
+                        areaManager.slotItems[asAreaSlot.slotIndex] = null;
+
+                        areaManager.UpdateBasedOnSlots();
+                    }
+                    else
+                    {
+                        Mod.areaSlotShouldUpdate = true;
+                    }
                 }
                 else 
                 {
@@ -3368,6 +3471,25 @@ namespace EFM
 
                 return;
             }
+            
+            if (slot is EFM_AreaSlot)
+            {
+                EFM_AreaSlot asAreaSlot = __instance.QuickbeltSlot as EFM_AreaSlot;
+                Mod.currentBaseManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
+
+                if (Mod.areaSlotShouldUpdate)
+                {
+                    EFM_BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<EFM_BaseAreaManager>();
+
+                    areaManager.slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
+
+                    areaManager.UpdateBasedOnSlots();
+                }
+                else
+                {
+                    Mod.areaSlotShouldUpdate = true;
+                }
+            }
 
             if (slot is EFM_EquipmentSlot)
             {
@@ -3467,6 +3589,16 @@ namespace EFM
             EFM_CustomItemWrapper customItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (customItemWrapper != null)
             {
+                if (customItemWrapper.hideoutSpawned)
+                {
+                    customItemWrapper.hideoutSpawned = false;
+                    foreach (Collider col in customItemWrapper.colliders)
+                    {
+                        col.enabled = true;
+                    }
+                    // TODO: Check if backpack or rig, we dont want to change the cols with colliding smoke layer or wtv?
+                }
+
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig) 
                 {
                     // Update whether we are picking the rig up from an equip slot
@@ -3554,9 +3686,44 @@ namespace EFM
                     // Update locationIndex
                     SetItemLocationIndex(0, customItemWrapper, null);
                 }
+                else if(customItemWrapper.locationIndex == 3)
+                {
+                    // Now on player
+                    if (Mod.playerInventory.ContainsKey(customItemWrapper.ID))
+                    {
+                        Mod.playerInventory[customItemWrapper.ID] += customItemWrapper.stack;
+                    }
+                    else
+                    {
+                        Mod.playerInventory.Add(customItemWrapper.ID, customItemWrapper.stack);
+                    }
+                    if (Mod.playerInventoryObjects.ContainsKey(customItemWrapper.ID))
+                    {
+                        Mod.playerInventoryObjects[customItemWrapper.ID].Add(customItemWrapper.gameObject);
+                    }
+                    else
+                    {
+                        Mod.playerInventoryObjects.Add(customItemWrapper.ID, new List<GameObject>());
+                        Mod.playerInventoryObjects[customItemWrapper.ID].Add(customItemWrapper.gameObject);
+                    }
+
+                    // Update locationIndex
+                    SetItemLocationIndex(0, customItemWrapper, null);
+
+                    //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentBaseManager.baseAreaManagers)
+                    //{
+                    //    baseAreaManager.UpdateBasedOnItem(customItemWrapper.ID);
+                    //}
+                }
             }
             else if (vanillaItemDescriptor != null)
             {
+                if (vanillaItemDescriptor.hideoutSpawned)
+                {
+                    vanillaItemDescriptor.hideoutSpawned = false;
+                    vanillaItemDescriptor.physObj.SetAllCollidersToLayer(false, "Default");
+                }
+
                 if (!vanillaItemDescriptor.looted)
                 {
                     vanillaItemDescriptor.looted = true;
@@ -3700,6 +3867,35 @@ namespace EFM
 
                     // Update locationIndex
                     SetItemLocationIndex(0, null, vanillaItemDescriptor);
+                }
+                else if (vanillaItemDescriptor.locationIndex == 3)
+                {
+                    // Now on player
+                    if (Mod.playerInventory.ContainsKey(vanillaItemDescriptor.H3ID))
+                    {
+                        Mod.playerInventory[vanillaItemDescriptor.H3ID] += 1;
+                    }
+                    else
+                    {
+                        Mod.playerInventory.Add(vanillaItemDescriptor.H3ID, 1);
+                    }
+                    if (Mod.playerInventoryObjects.ContainsKey(vanillaItemDescriptor.H3ID))
+                    {
+                        Mod.playerInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
+                    }
+                    else
+                    {
+                        Mod.playerInventoryObjects.Add(vanillaItemDescriptor.H3ID, new List<GameObject>());
+                        Mod.playerInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
+                    }
+
+                    // Update locationIndex
+                    SetItemLocationIndex(0, null, vanillaItemDescriptor);
+
+                    //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentBaseManager.baseAreaManagers)
+                    //{
+                    //    baseAreaManager.UpdateBasedOnItem(vanillaItemDescriptor.H3ID);
+                    //}
                 }
             }
 

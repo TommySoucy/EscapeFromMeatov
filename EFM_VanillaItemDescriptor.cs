@@ -18,6 +18,7 @@ namespace EFM
         public int creditCost; // Value of item in rubles(?)
         public List<string> parents; // The parent IDs of this item, the categories this item is a part of
         public bool looted; // Whether this item has been looted before
+        public bool hideoutSpawned;
         public string itemName;
         public FVRPhysicalObject physObj; // Reference to the physical object of this item
         public int compatibilityValue; // 0: Does not need mag or round, 1: Needs mag, 2: Needs round, 3: Needs both

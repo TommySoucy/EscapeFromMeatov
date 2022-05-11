@@ -14,6 +14,7 @@ namespace EFM
 		private bool m_hasSpawnedContents;
 		private List<string> vanillaIDs;
 		private List<int> customIDs;
+		private List<int> stackSizes;
 		private bool spawnCustomItems;
 		public FVRInteractiveObject interactable;
 		public Collider mainContainerCollider;
@@ -33,6 +34,7 @@ namespace EFM
 
 			vanillaIDs = new List<string>();
 			customIDs = new List<int>();
+			stackSizes = new List<int>();
 
 			// Set vanillaIDs and customIDs lists with ID of items to spawn when opened
 			int successfulAttempts = 0;
@@ -50,6 +52,8 @@ namespace EFM
                 }
                 else
                 {
+					// TODO: If we have no item of a particular ancestor implemented, we will come here. 
+					// Maybe in this case we want to spawn a single random round instead
 					Mod.instance.LogError("Loot container has spawn filter ID: " + randomFilterID + " not present in both itemMap and parents dict.");
 					continue;
                 }
@@ -63,17 +67,48 @@ namespace EFM
 						++successfulAttempts;
 
 						customIDs.Add(result);
+
+						if(prefabCIW.itemType == Mod.ItemType.AmmoBox)
+                        {
+							stackSizes.Add(-1); // -1 indicates maxAmount, actual ammo boxes should always spawn with max amount in them
+                        }
                     }
                 }
                 else
 				{
 					EFM_VanillaItemDescriptor prefabVID = Mod.vanillaItems[itemID];
 
-					if (UnityEngine.Random.value <= prefabVID.spawnChance / 100)
+					// If loose round stack, spawn generic ammo box instead
+					if (Mod.usedRoundIDs.Contains(itemID))
 					{
-						++successfulAttempts;
+						int stackSize = UnityEngine.Random.Range(15, 120);
+						int actualItemID;
+						if(stackSize <= 30)
+						{
+							actualItemID = 715;
+                        }
+                        else
+						{
+							actualItemID = 716;
+						}
 
-						vanillaIDs.Add(itemID);
+						if (UnityEngine.Random.value <= prefabVID.spawnChance / 100)
+						{
+							++successfulAttempts;
+
+							customIDs.Add(actualItemID);
+
+							stackSizes.Add(stackSize);
+						}
+					}
+                    else
+					{
+						if (UnityEngine.Random.value <= prefabVID.spawnChance / 100)
+						{
+							++successfulAttempts;
+
+							vanillaIDs.Add(itemID);
+						}
 					}
 				}
 
@@ -123,11 +158,29 @@ namespace EFM
 						}
 					}
 					itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
-                }
+					EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+					if (itemCIW.itemType == Mod.ItemType.Money)
+					{
+						itemCIW.stack = UnityEngine.Random.Range(120, 2500);
+					}
+					else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
+					{
+						int stackSize = stackSizes[stackSizes.Count - 1];
+						int actualStackSize = stackSize == -1 ? itemCIW.maxAmount : stackSize;
+						FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+						for (int j = 0; j < actualStackSize; ++j)
+						{
+							asMagazine.AddRound(itemCIW.roundClass, false, false);
+						}
+					}
+					else if (itemCIW.maxAmount > 0)
+					{
+						itemCIW.amount = itemCIW.maxAmount;
+					}
+				}
                 else
                 {
 					spawnCustomItems = false;
-
 				}
             }
 		}

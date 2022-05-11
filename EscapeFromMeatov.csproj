@@ -61,8 +61,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EFM_AreaBonus.cs" />
     <Compile Include="EFM_AreaProduction.cs" />
+    <Compile Include="EFM_AreaRequirement.cs" />
     <Compile Include="EFM_AreasDB.cs" />
+    <Compile Include="EFM_AreaSlot.cs" />
     <Compile Include="EFM_BaseAreaManager.cs" />
     <Compile Include="EFM_Base_Manager.cs" />
     <Compile Include="EFM_CustomItemWrapper.cs" />

@@ -106,7 +106,7 @@ namespace EFM
                 EFM_Effect effect = EFM_Effect.effects[i];
                 if (effect.active)
                 {
-                    if (effect.hasTimer)
+                    if (effect.hasTimer || effect.hideoutOnly)
                     {
                         effect.timer -= Time.deltaTime;
                         if (effect.timer <= 0)
@@ -1533,11 +1533,23 @@ namespace EFM
                 itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                 itemPhysObj = itemCIW.physObj;
 
-                // Could be money so set stack
+                // Get amount
                 int amount = itemData["upd"]["StackObjectsCount"] != null ? (int)itemData["upd"]["StackObjectsCount"] : 1;
-                if (amount > 1)
+                if (itemCIW.itemType == Mod.ItemType.Money)
                 {
                     itemCIW.stack = amount;
+                }
+                else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
+                {
+                    FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                    for (int j = 0; j < itemCIW.maxAmount; ++j)
+                    {
+                        asMagazine.AddRound(itemCIW.roundClass, false, false);
+                    }
+                }
+                else if (itemCIW.maxAmount > 0)
+                {
+                    itemCIW.amount = itemCIW.maxAmount;
                 }
             }
             else
@@ -1559,7 +1571,12 @@ namespace EFM
                             itemObject = GameObject.Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[prefabVID.H3ID]]);
                             itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                             itemPhysObj = itemCIW.physObj;
-                            itemCIW.amount = amount;
+
+                            FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                            for (int j = 0; j < amount; ++j)
+                            {
+                                asMagazine.AddRound(itemCIW.roundClass, false, false);
+                            }
                         }
                         else // Spawn in generic box
                         {
@@ -1574,7 +1591,12 @@ namespace EFM
 
                             itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                             itemPhysObj = itemCIW.physObj;
-                            itemCIW.amount = amount;
+
+                            FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                            for (int j = 0; j < amount; ++j)
+                            {
+                                asMagazine.AddRound(itemCIW.roundClass, false, false);
+                            }
                         }
                     }
                     else // Single round, spawn as normal

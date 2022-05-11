@@ -7,6 +7,17 @@ namespace EFM
 {
     public class EFM_Skill
     {
+        public enum SkillType
+        {
+            // Used in SkillGroupLevelingBoost type bonuses
+            Special,
+            Physical,
+            Practical,
+
+            NotSpecified
+        }
+        public SkillType skillType;
+
         public float progress; // Actual
         public float currentProgress; // Affected by effects, this is the one we should check while playing
     }

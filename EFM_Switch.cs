@@ -8,7 +8,7 @@ namespace EFM
 {
     public class EFM_Switch : MonoBehaviour
     {
-        public int mode; // 0: Toggle gameObjects
+        public int mode; // 0: Toggle gameObjects, 1: Power
 
         // 0
         public List<GameObject> gameObjects;
@@ -22,6 +22,9 @@ namespace EFM
                     {
                         go.SetActive(!go.activeSelf);
                     }
+                    break;
+                case 1:
+                    EFM_BaseAreaManager.ToggleGenerator();
                     break;
                 default:
                     break;

@@ -63,6 +63,7 @@ namespace EFM
         public static Sprite[] areaIcons; // icon_vents, icon_security, icon_watercloset, icon_stash, icon_generators, icon_heating, icon_rain_collector, icon_medstation, icon_kitchen, icon_restplace, icon_workbench, icon_intelligence_center, icon_shooting_range, icon_library, icon_scav_case, icon_illumination, icon_placeoffame, icon_afu, icon_solarpower, icon_boozegen, icon_bitcionfarm, icon_christmas_illumination
         public static Dictionary<string, Sprite> bonusIcons;
         public static Sprite[] skillIcons;
+        public static Sprite emptyItemSlotIcon; // TODO: init this
 
         public JToken data;
 
@@ -87,6 +88,16 @@ namespace EFM
         public float currentEnergyRate = 1;
         public float hydrationRate = 1;
         public float currentHydrationRate = 1;
+
+        // TODO make sure the following are used where they should
+        public static float currentExperienceRate = 1;
+        public static float currentQuestMoneyReward = 1;
+        public static float currentFuelConsumption = 1;
+        public static float currentDebuffEndDelay = 1;
+        public static float currentScavCooldownTimer = 1;
+        public static float currentInsuranceReturnTime = 1;
+        public static float currentRagfairCommission = 1;
+        public static Dictionary<EFM_Skill.SkillType, float> currentSkillGroupLevelingBoosts;
 
         private void Update()
         {
@@ -440,6 +451,11 @@ namespace EFM
                         effect.inactiveTimer -= Time.deltaTime;
                     }
                     else if (effect.delay <= 0)
+                    {
+                        effect.active = true;
+                        effectJustActivated = true;
+                    }
+                    if (effect.hideoutOnly)
                     {
                         effect.active = true;
                         effectJustActivated = true;
@@ -865,6 +881,7 @@ namespace EFM
             }
 
             ProcessData();
+            // TODO: In the case taht we just came back from raid, make sure that we dont load content of player inventory on load and make sure that we add everything that we actually currently have in player inventory is added to the corresponding lists
 
             if (Mod.justFinishedRaid)
             {
@@ -1014,6 +1031,21 @@ namespace EFM
                 for (int i = 0; i < 64; ++i)
                 {
                     Mod.skills[i] = new EFM_Skill();
+                    // 0-6 unless 4 physical
+                    // 28-53 unless 52 practical
+                    // 54-63 special
+                    if (i >= 0 && i <= 6 && i != 4) 
+                    {
+                        Mod.skills[i].skillType = EFM_Skill.SkillType.Physical;
+                    }
+                    else if(i >= 28 && i <= 53 && i != 52)
+                    {
+                        Mod.skills[i].skillType = EFM_Skill.SkillType.Practical;
+                    }
+                    else if (i >= 54 && i <= 63)
+                    {
+                        Mod.skills[i].skillType = EFM_Skill.SkillType.Special;
+                    }
                 }
                 Mod.health = new float[7];
                 for (int i = 0; i < 7; ++i)
@@ -1387,6 +1419,21 @@ namespace EFM
                 Mod.skills[i] = new EFM_Skill();
                 Mod.skills[i].progress = (float)data["skills"][i]["progress"];
                 Mod.skills[i].currentProgress = (float)data["skills"][i]["currentProgress"];
+                // 0-6 unless 4 physical
+                // 28-53 unless 52 practical
+                // 54-63 special
+                if (i >= 0 && i <= 6 && i != 4)
+                {
+                    Mod.skills[i].skillType = EFM_Skill.SkillType.Physical;
+                }
+                else if (i >= 28 && i <= 53 && i != 52)
+                {
+                    Mod.skills[i].skillType = EFM_Skill.SkillType.Practical;
+                }
+                else if (i >= 54 && i <= 63)
+                {
+                    Mod.skills[i].skillType = EFM_Skill.SkillType.Special;
+                }
             }
 
             // Instantiate items
@@ -1438,9 +1485,12 @@ namespace EFM
                         }
                     }
                 }
-                currentBaseAreaManager.level = 0;
-                currentBaseAreaManager.constructing = false;
-                currentBaseAreaManager.constructTime = 0;
+                else
+                {
+                    currentBaseAreaManager.level = 0;
+                    currentBaseAreaManager.constructing = false;
+                    currentBaseAreaManager.constructTime = 0;
+                }
 
                 baseAreaManagers.Add(currentBaseAreaManager);
             }
@@ -2535,6 +2585,50 @@ namespace EFM
                 bottomPointableButton.buttonText = areaCanvasBottomButtonPrefab.transform.GetChild(1).GetComponent<Text>();
                 bottomPointableButton.toggleTextColor = true;
 
+                // Production produce view
+                Transform produceView = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(0);
+                GameObject produceViewStartButtonObject = produceView.GetChild(4).GetChild(0).gameObject;
+                EFM_PointableButton produceViewStartPointableButton = produceViewStartButtonObject.AddComponent<EFM_PointableButton>();
+                produceViewStartPointableButton.SetButton();
+                produceViewStartPointableButton.MaxPointingRange = 30;
+                produceViewStartPointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+                GameObject produceViewGetItemsButtonObject = produceView.GetChild(4).GetChild(1).gameObject;
+                EFM_PointableButton produceViewGetItemsPointableButton = produceViewGetItemsButtonObject.AddComponent<EFM_PointableButton>();
+                produceViewGetItemsPointableButton.SetButton();
+                produceViewGetItemsPointableButton.MaxPointingRange = 30;
+                produceViewGetItemsPointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+
+                // Production farming view
+                Transform farmingView = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(1);
+                GameObject farmingViewSetAllButtonObject = farmingView.GetChild(1).GetChild(0).gameObject;
+                EFM_PointableButton farmingViewSetAllPointableButton = farmingViewSetAllButtonObject.AddComponent<EFM_PointableButton>();
+                farmingViewSetAllPointableButton.SetButton();
+                farmingViewSetAllPointableButton.MaxPointingRange = 30;
+                farmingViewSetAllPointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+                GameObject farmingViewSetOneButtonObject = farmingView.GetChild(1).GetChild(1).gameObject;
+                EFM_PointableButton farmingViewSetOnePointableButton = farmingViewSetOneButtonObject.AddComponent<EFM_PointableButton>();
+                farmingViewSetOnePointableButton.SetButton();
+                farmingViewSetOnePointableButton.MaxPointingRange = 30;
+                farmingViewSetOnePointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+                GameObject farmingViewRemoveOneButtonObject = farmingView.GetChild(1).GetChild(2).gameObject;
+                EFM_PointableButton farmingViewRemoveOnePointableButton = farmingViewRemoveOneButtonObject.AddComponent<EFM_PointableButton>();
+                farmingViewRemoveOnePointableButton.SetButton();
+                farmingViewRemoveOnePointableButton.MaxPointingRange = 30;
+                farmingViewRemoveOnePointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+                GameObject farmingViewGetItemsButtonObject = farmingView.GetChild(5).GetChild(0).gameObject;
+                EFM_PointableButton farmingViewGetItemsPointableButton = farmingViewGetItemsButtonObject.AddComponent<EFM_PointableButton>();
+                farmingViewGetItemsPointableButton.SetButton();
+                farmingViewGetItemsPointableButton.MaxPointingRange = 30;
+                farmingViewGetItemsPointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+
+                // Production scav case view
+                Transform scavCaseView = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(2);
+                GameObject scavCaseViewGetItemsButtonObject = scavCaseView.GetChild(4).GetChild(0).gameObject;
+                EFM_PointableButton scavCaseViewGetItemsPointableButton = scavCaseViewGetItemsButtonObject.AddComponent<EFM_PointableButton>();
+                scavCaseViewGetItemsPointableButton.SetButton();
+                scavCaseViewGetItemsPointableButton.MaxPointingRange = 30;
+                scavCaseViewGetItemsPointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+
                 Mod.instance.LogInfo("Area UI prepped");
             }
 
@@ -2799,6 +2893,51 @@ namespace EFM
                         {
                             SaveItem(slots, slotItem.transform);
                         }
+                    }
+                }
+                if(baseAreaManagers[i].activeProductions != null)
+                {
+                    currentSavedArea["productions"] = new JObject();
+
+                    foreach(KeyValuePair<string, EFM_AreaProduction> production in baseAreaManagers[i].activeProductions)
+                    {
+                        JObject currentProduction = new JObject();
+                        currentProduction["timeLeft"] = production.Value.timeLeft;
+                        currentProduction["productionCount"] = production.Value.productionCount;
+                        currentProduction["count"] = production.Value.count;
+
+                        currentSavedArea["productions"][production.Value.ID] = currentProduction;
+                    }
+                }
+                else if(baseAreaManagers[i].activeScavCaseProductions != null)
+                {
+                    currentSavedArea["productions"] = new JArray();
+
+                    foreach(EFM_ScavCaseProduction production in baseAreaManagers[i].activeScavCaseProductions)
+                    {
+                        JObject currentProduction = new JObject();
+                        currentProduction["timeLeft"] = production.timeLeft;
+                        currentProduction["products"] = new JObject();
+                        if (production.products.ContainsKey(Mod.ItemRarity.Common))
+                        {
+                            currentProduction["products"]["common"] = new JObject();
+                            currentProduction["products"]["common"]["min"] = production.products[Mod.ItemRarity.Common].x;
+                            currentProduction["products"]["common"]["max"] = production.products[Mod.ItemRarity.Common].y;
+                        }
+                        if (production.products.ContainsKey(Mod.ItemRarity.Rare))
+                        {
+                            currentProduction["products"]["rare"] = new JObject();
+                            currentProduction["products"]["rare"]["min"] = production.products[Mod.ItemRarity.Rare].x;
+                            currentProduction["products"]["rare"]["max"] = production.products[Mod.ItemRarity.Rare].y;
+                        }
+                        if (production.products.ContainsKey(Mod.ItemRarity.Superrare))
+                        {
+                            currentProduction["products"]["superrare"] = new JObject();
+                            currentProduction["products"]["superrare"]["min"] = production.products[Mod.ItemRarity.Superrare].x;
+                            currentProduction["products"]["superrare"]["max"] = production.products[Mod.ItemRarity.Superrare].y;
+                        }
+
+                        (currentSavedArea["productions"] as JArray).Add(currentProduction);
                     }
                 }
                 savedAreas.Add(currentSavedArea);

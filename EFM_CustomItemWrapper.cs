@@ -16,6 +16,7 @@ namespace EFM
 		public List<string> parents;
 		public string ID;
 		public bool looted;
+		public bool hideoutSpawned;
 		public int lootExperience;
 		public float spawnChance;
 		public Mod.ItemRarity rarity;
@@ -23,7 +24,7 @@ namespace EFM
 		public string description;
 		private DescriptionPack descriptionPack;
 		public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
-		public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid. This is to keep track of where an item is in general
+		public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid, 3: Area slot. This is to keep track of where an item is in general
 		public EFM_DescriptionManager descriptionManager; // The current description manager displaying this item's description
 		private bool _insured;
 		public bool insured 
@@ -133,7 +134,7 @@ namespace EFM
 		public FireArmRoundClass roundClass;
 
 		// Stack
-		private int _stack;
+		private int _stack = 1;
 		public int stack
 		{
 			get { return _stack; }
@@ -532,7 +533,20 @@ namespace EFM
 									if (ApplyEffects(1, amountToConsume))
                                     {
 										amount = 0;
+										// Update player inventory and weight
+										Mod.playerInventory[ID] -= 1;
+										if(Mod.playerInventory[ID] == 0)
+                                        {
+											Mod.playerInventory.Remove(ID);
+											Mod.playerInventoryObjects.Remove(ID);
+										}
+										Mod.weight -= currentWeight;
 										Destroy(gameObject);
+
+										foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+										{
+											areaManager.UpdateBasedOnItem(ID);
+										}
 									}
                                 }
                                 else
@@ -597,7 +611,20 @@ namespace EFM
 
 						if (amount == 0)
 						{
+							// Update player inventory and weight
+							Mod.playerInventory[ID] -= 1;
+							if (Mod.playerInventory[ID] == 0)
+							{
+								Mod.playerInventory.Remove(ID);
+								Mod.playerInventoryObjects.Remove(ID);
+							}
+							Mod.weight -= currentWeight;
 							Destroy(gameObject);
+
+							foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+							{
+								areaManager.UpdateBasedOnItem(ID);
+							}
 						}
 					}
 				}

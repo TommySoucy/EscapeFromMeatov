@@ -63,6 +63,7 @@ namespace EFM
         public float value;
         public List<EFM_Effect> caused = new List<EFM_Effect>();
         public bool nonLethal = false;
+        public bool hideoutOnly = false;
     }
 
     [System.Serializable]
