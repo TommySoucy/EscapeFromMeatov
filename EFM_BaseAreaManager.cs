@@ -2454,6 +2454,7 @@ namespace EFM
                                         j -= CIW.stack;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
+                                        CIW.destroyed = true;
                                         Destroy(toCheck);
                                     }
                                 }
@@ -2474,6 +2475,7 @@ namespace EFM
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
+                                        CIW.destroyed = true;
                                         Destroy(toCheck);
                                     }
                                 }
@@ -2484,6 +2486,7 @@ namespace EFM
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
+                                        CIW.destroyed = true;
                                         Destroy(toCheck);
                                     }
                                 }
@@ -2492,6 +2495,7 @@ namespace EFM
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
+                                    CIW.destroyed = true;
                                     Destroy(toCheck);
                                 }
                             }
@@ -2500,6 +2504,7 @@ namespace EFM
                                 --j;
                                 objectList.RemoveAt(objectList.Count - 1);
                                 CIW.physObj.SetQuickBeltSlot(null);
+                                CIW.destroyed = true;
                                 Destroy(toCheck);
                             }
                         }
@@ -2526,6 +2531,7 @@ namespace EFM
                                         j -= CIW.stack;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
+                                        CIW.destroyed = true;
                                         Destroy(toCheck);
                                         Mod.weight -= CIW.currentWeight;
                                     }
@@ -2547,6 +2553,7 @@ namespace EFM
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
+                                        CIW.destroyed = true;
                                         Destroy(toCheck);
                                         Mod.weight -= CIW.currentWeight;
                                     }
@@ -2558,6 +2565,7 @@ namespace EFM
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
+                                        CIW.destroyed = true;
                                         Destroy(toCheck);
                                         Mod.weight -= CIW.currentWeight;
                                     }
@@ -2567,6 +2575,7 @@ namespace EFM
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
+                                    CIW.destroyed = true;
                                     Destroy(toCheck);
                                     Mod.weight -= CIW.currentWeight;
                                 }
@@ -2575,7 +2584,8 @@ namespace EFM
                             {
                                 --j;
                                 objectList.RemoveAt(objectList.Count - 1);
-                                CIW.physObj.SetQuickBeltSlot(null);
+                                VID.physObj.SetQuickBeltSlot(null);
+                                VID.destroyed = true;
                                 Destroy(toCheck);
                                 Mod.weight -= VID.currentWeight;
                             }

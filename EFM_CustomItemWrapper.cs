@@ -9,6 +9,7 @@ namespace EFM
 	public class EFM_CustomItemWrapper : MonoBehaviour, EFM_Describable
 	{
 		public FVRPhysicalObject physObj;
+		public bool destroyed;
 
 		public Mod.ItemType itemType;
 		public Collider[] colliders;
@@ -469,7 +470,7 @@ namespace EFM
 										consumableTimer += Time.deltaTime;
 
 										float use = Mathf.Clamp01(consumableTimer / useTime);
-										Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate < 0 ? (use * amount) : (use * amountRate), amountRate < 0 ? amount :  amountRate);
+										Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount :  amountRate);
 										if (amountRate == 0)
 										{
 											// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
@@ -533,20 +534,6 @@ namespace EFM
 									if (ApplyEffects(1, amountToConsume))
                                     {
 										amount = 0;
-										// Update player inventory and weight
-										Mod.playerInventory[ID] -= 1;
-										if(Mod.playerInventory[ID] == 0)
-                                        {
-											Mod.playerInventory.Remove(ID);
-											Mod.playerInventoryObjects.Remove(ID);
-										}
-										Mod.weight -= currentWeight;
-										Destroy(gameObject);
-
-										foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
-										{
-											areaManager.UpdateBasedOnItem(ID);
-										}
 									}
                                 }
                                 else
@@ -619,6 +606,7 @@ namespace EFM
 								Mod.playerInventoryObjects.Remove(ID);
 							}
 							Mod.weight -= currentWeight;
+							destroyed = true;
 							Destroy(gameObject);
 
 							foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
@@ -1154,11 +1142,13 @@ namespace EFM
 					SetMode(0);
 					SetContainerOpen(true, isRightHand);
 					volumeIndicator.SetActive(true);
+					volumeIndicatorText.text = containingVolume.ToString()+"/"+maxVolume;
 				}
 				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
 				{
 					SetContainerOpen(true, isRightHand);
 					volumeIndicator.SetActive(true);
+					volumeIndicatorText.text = containingVolume.ToString() + "/" + maxVolume;
 				}
 				else if(itemType == Mod.ItemType.LootContainer)
 				{

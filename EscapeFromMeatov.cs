@@ -2259,6 +2259,24 @@ namespace EFM
                 return;
             }
 
+            // Just return if we declared the item as destroyed already, it would mean that we already managed the weight and item lists so we dont want this patch to do it
+            EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+            EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            if(CIW != null)
+            {
+                if (CIW.destroyed)
+                {
+                    return;
+                }
+            }
+            else if(VID != null)
+            {
+                if (VID.destroyed)
+                {
+                    return;
+                }
+            }
+
             hand.GetComponent<EFM_Hand>().currentHeldItem = null;
 
             // Stop here if dropping in a quick belt slot or if this is a door

@@ -9,6 +9,8 @@ namespace EFM
 {
     public class EFM_VanillaItemDescriptor : MonoBehaviour, EFM_Describable
     {
+        public bool destroyed;
+
         public string H3ID; // ID of item in H3VR
         public string tarkovID; // ID of item in Tarkov
         public string description; // Item's description
