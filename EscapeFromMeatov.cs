@@ -3160,7 +3160,7 @@ namespace EFM
             }
 
             // Check area slots
-            if(fvrquickBeltSlot == null)
+            if(fvrquickBeltSlot == null && Mod.areaSlots != null)
             {
                 foreach(FVRQuickBeltSlot slot in Mod.areaSlots)
                 {

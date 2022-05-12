@@ -606,18 +606,13 @@ namespace EFM
             for (int i = 0; i < 4; ++i)
             {
                 areaRequirementMiddleParents.Add(new List<GameObject>());
-                areaRequirementMiddleParents[i].Add(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(i + 2).gameObject);
+                areaRequirementMiddleParents[i].Add(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(i + 2).gameObject);
             }
 
             // Do same for middle 2
             if(areaRequirementMiddle2Parents == null)
             {
                 areaRequirementMiddle2Parents = new List<List<GameObject>>();
-                for(int i=0; i < 4; ++i)
-                {
-                    areaRequirementMiddle2Parents.Add(new List<GameObject>());
-                    areaRequirementMiddle2Parents[i].Add(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(i + 2).gameObject);
-                }
             }
             else
             {
@@ -664,7 +659,7 @@ namespace EFM
 
                     // Full middle
                     areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_"+areaIndex+"_stage_1_description"].ToString();
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(2), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][1]["bonuses"], "FUTURE BONUSES");
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][1]["bonuses"], "FUTURE BONUSES");
                     
                     // Full middle 2
                     // Nothing, when constructing the first level we show that description and future bonuses on middle
@@ -697,12 +692,12 @@ namespace EFM
 
                     // Full middle
                     areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_"+level+"_description"].ToString();
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(2), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level]["bonuses"], "CURRENT BONUSES");
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level]["bonuses"], "CURRENT BONUSES");
                     SetProductions();
 
                     // Full middle 2
                     areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_" + (level + 1) + "_description"].ToString();
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(2), false, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["bonuses"], "FUTURE BONUSES");
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(3), false, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["bonuses"], "FUTURE BONUSES");
 
                     // Full bottom
                     Transform bottom = areaCanvas.transform.GetChild(1).GetChild(3);
@@ -838,8 +833,9 @@ namespace EFM
                     // Full middle
                     Mod.instance.LogInfo("\t\t\t0");
                     areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_1_description"].ToString();
-                    SetRequirements(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][1]["requirements"]);
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(2), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][1]["bonuses"], "FUTURE BONUSES");
+                    SetRequirements(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(2), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][1]["requirements"]);
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][1]["bonuses"], "FUTURE BONUSES");
+                    SetProductions();
                     Mod.instance.LogWarning("MIDDLEHEIGHT = " + middleHeight);
                     if (middleHeight > 360)
                     {
@@ -926,7 +922,7 @@ namespace EFM
                     // Middle will show current level (no requirements) and middle 2 will show next level (with requirements), if there is a next level
                     //Full middle
                     areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_" + level + "_description"].ToString();
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(2), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level]["bonuses"], "CURRENT BONUSES");
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level]["bonuses"], "CURRENT BONUSES");
                     SetProductions();
 
                     // Full middle 2, and full bottom and bottom 2
@@ -974,6 +970,7 @@ namespace EFM
 
         public void SetProductions()
         {
+            Mod.instance.LogInfo("SetProductions called on "+areaIndex+" at level "+level);
             // Reset productions
             if (this.productions == null)
             {
@@ -987,6 +984,7 @@ namespace EFM
                 }
                 this.productions.Clear();
             }
+            Mod.instance.LogInfo("0");
 
             // Get all productions for this area including previous levels
             JArray productions = new JArray();
@@ -998,10 +996,14 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("0");
             // Init slots if necessary and set items in slotItems to their corresponding slots
             if (!slotsInit) 
             {
-                Mod.areaSlots = new List<EFM_AreaSlot>();
+                if (Mod.areaSlots == null)
+                {
+                    Mod.areaSlots = new List<EFM_AreaSlot>();
+                }
                 slots = new List<List<EFM_AreaSlot>>();
                 for (int slotsLevel = 0; slotsLevel < transform.GetChild(transform.childCount - 1).childCount; ++slotsLevel)
                 {
@@ -1067,15 +1069,20 @@ namespace EFM
                 }
                 slotsInit = true;
             }
-            for(int slotItemIndex = 0; slotItemIndex < slotItems.Count; ++slotItemIndex)
+            Mod.instance.LogInfo("0");
+            if (slotItems != null)
             {
-                if (slotItems[slotItemIndex] != null)
+                for (int slotItemIndex = 0; slotItemIndex < slotItems.Count; ++slotItemIndex)
                 {
-                    FVRPhysicalObject slotItemPhysObj = slotItems[slotItemIndex].GetComponentInChildren<FVRPhysicalObject>();
-                    slotItemPhysObj.SetQuickBeltSlot(slots[level][slotItemIndex]);
-                    slotItemPhysObj.SetParentage(slots[level][slotItemIndex].QuickbeltRoot);
+                    if (slotItems[slotItemIndex] != null)
+                    {
+                        FVRPhysicalObject slotItemPhysObj = slotItems[slotItemIndex].GetComponentInChildren<FVRPhysicalObject>();
+                        slotItemPhysObj.SetQuickBeltSlot(slots[level][slotItemIndex]);
+                        slotItemPhysObj.SetParentage(slots[level][slotItemIndex].QuickbeltRoot);
+                    }
                 }
             }
+            Mod.instance.LogInfo("0");
 
             // Farming view can be on bitcoin farm and water collector
             // Bitcoin doesn't use up any resources but it needs GPUs to functions, the amount of which affects the bitcoin mining rate
@@ -1083,23 +1090,45 @@ namespace EFM
             Transform productionsParent = areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(1);
             GameObject produceView = productionsParent.GetChild(0).gameObject;
             GameObject farmingView = productionsParent.GetChild(1).gameObject;
-            JToken areaData = baseManager.data["areas"][areaIndex];
-            JToken loadedProductions = areaData["productions"];
-
-            if(productions.Count > 0)
+            JToken areaData = null;
+            if (baseManager.data["areas"] != null)
             {
+                areaData = baseManager.data["areas"][areaIndex];
+            }
+            JToken loadedProductions = null;
+            if (areaData != null)
+            {
+                loadedProductions = areaData["productions"];
+            }
+            else
+            {
+                loadedProductions = new JArray();
+            }
+            Dictionary<string, JToken> productionsDict = new Dictionary<string, JToken>();
+            foreach(JToken loadedProduction in loadedProductions)
+            {
+                productionsDict.Add(loadedProduction["_id"].ToString(), loadedProduction);
+            }
+
+            Mod.instance.LogInfo("0");
+            if (productions.Count > 0)
+            {
+                Mod.instance.LogInfo("Apparetly, area index: " + areaIndex + " have " + productions.Count + " productions as level "+level);
                 productionsParent.parent.gameObject.SetActive(true);
 
                 middleHeight += 106.4f; // scroll view content spacing + production top padding + production bottom padding + header height + container spacing
             }
             bool firstProduction = true;
+            Mod.instance.LogInfo("0");
             foreach (JObject production in productions)
             {
+                Mod.instance.LogInfo("1");
                 EFM_AreaProduction productionScript = null;
                 GameObject newFarmingView = null;
                 GameObject newProduceView = null;
                 if ((bool)production["continuous"])
                 {
+                    Mod.instance.LogInfo("2");
                     newFarmingView = Instantiate(farmingView, productionsParent);
                     middleHeight += 99.8f; // farming view height
                     if (!firstProduction)
@@ -1108,6 +1137,7 @@ namespace EFM
                     }
                     productionScript = newFarmingView.AddComponent<EFM_AreaProduction>();
 
+                    Mod.instance.LogInfo("2");
                     productionScript.continuous = true;
                     productionScript.ID = production["_id"].ToString();
                     productionScript.productionTime = (float)production["productionTime"];
@@ -1115,6 +1145,7 @@ namespace EFM
                     productionScript.count = (int)production["count"];
                     productionScript.productionLimitCount = (int)production["productionLimitCount"];
 
+                    Mod.instance.LogInfo("2");
                     // Init UI
                     newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
                     newFarmingView.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewSetAllClick(productionScript.ID); });
@@ -1122,31 +1153,37 @@ namespace EFM
                     newFarmingView.transform.GetChild(1).GetChild(1).GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewRemoveOneClick(productionScript.ID); });
                     newFarmingView.transform.GetChild(1).GetChild(5).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnProductionGetItemsClick(productionScript.ID); });
 
+                    Mod.instance.LogInfo("2");
                     // Depending on save data
                     // If data about this production has been saved
-                    if (loadedProductions[productionScript.ID] != null)
+                    if (productionsDict.ContainsKey(productionScript.ID))
                     {
+                        Mod.instance.LogInfo("3");
                         activeProductions.Add(productionScript.ID, productionScript);
 
                         productionScript.active = true;
-                        productionScript.timeLeft = (float)loadedProductions[productionScript.ID]["timeLeft"];
-                        productionScript.productionCount = (int)loadedProductions[productionScript.ID]["productionCount"];
+                        productionScript.timeLeft = (float)productionsDict[productionScript.ID]["timeLeft"];
+                        productionScript.productionCount = (int)productionsDict[productionScript.ID]["productionCount"];
 
+                        Mod.instance.LogInfo("3");
                         // Set production count
                         newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionScript.productionCount.ToString() + "/" + productionScript.productionLimitCount;
 
+                        Mod.instance.LogInfo("3");
                         // Set installed item count
                         newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = slotItems.Count.ToString();
 
+                        Mod.instance.LogInfo("3");
                         // It is possible we have an unclaimed amount of item
                         if (productionScript.productionCount > 0)
                         {
                             // Activate get items button
                             newFarmingView.transform.GetChild(1).GetChild(5).GetChild(0).gameObject.SetActive(true);
                         }
-                        
+
+                        Mod.instance.LogInfo("3");
                         // If have necessary items to produce and not at production limit yet
-                        if(slotItems.Count > 0 && productionScript.productionCount < productionScript.productionLimitCount)
+                        if (slotItems.Count > 0 && productionScript.productionCount < productionScript.productionLimitCount)
                         {
                             // Activate production status
                             newFarmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
@@ -1170,6 +1207,7 @@ namespace EFM
                 }
                 else
                 {
+                    Mod.instance.LogInfo("4");
                     newProduceView = Instantiate(produceView, productionsParent);
                     middleHeight += 141.8f; // produce view height
                     if (!firstProduction)
@@ -1178,30 +1216,36 @@ namespace EFM
                     }
                     productionScript = newProduceView.AddComponent<EFM_AreaProduction>();
 
+                    Mod.instance.LogInfo("4");
                     productionScript.continuous = true;
                     productionScript.ID = production["_id"].ToString();
                     productionScript.productionTime = (float)production["productionTime"];
                     productionScript.endProduct = Mod.itemMap[production["endProduct"].ToString()];
                     productionScript.count = (int)production["count"];
 
+                    Mod.instance.LogInfo("4");
                     // Init UI
                     newProduceView.transform.GetChild(3).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
                     newProduceView.transform.GetChild(3).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionScript.count.ToString();
                     newProduceView.transform.GetChild(4).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnProduceViewStartClick(productionScript.ID); });
                     newProduceView.transform.GetChild(4).GetChild(1).GetComponent<Button>().onClick.AddListener(() => { OnProductionGetItemsClick(productionScript.ID); });
 
+                    Mod.instance.LogInfo("4");
                     // Depending on save data
                     // If data about this production has been saved
-                    if(loadedProductions[productionScript.ID] != null)
+                    if (productionsDict.ContainsKey(productionScript.ID))
                     {
+                        Mod.instance.LogInfo("5");
                         activeProductions.Add(productionScript.ID, productionScript);
 
                         productionScript.active = true;
-                        productionScript.timeLeft = (float)loadedProductions[productionScript.ID]["timeLeft"];
+                        productionScript.timeLeft = (float)productionsDict[productionScript.ID]["timeLeft"];
 
+                        Mod.instance.LogInfo("5");
                         // Deactivate start button because for sure we cant start production if already active
                         newProduceView.transform.GetChild(4).GetChild(0).gameObject.SetActive(false);
 
+                        Mod.instance.LogInfo("5");
                         // It is possible we have an unclaimed amount of items
                         if (productionScript.timeLeft <= 0)
                         {
@@ -1234,13 +1278,16 @@ namespace EFM
                         }
                     }
                 }
+                Mod.instance.LogInfo("1");
 
                 // Fill requirements
                 productionScript.requirements = new List<AreaProductionRequirement>();
                 foreach(JObject requirement in production["requirements"])
                 {
+                    Mod.instance.LogInfo("2");
                     if (requirement["type"].ToString().Equals("Resource"))
                     {
+                        Mod.instance.LogInfo("3");
                         AreaProductionRequirement currentRequirement = new AreaProductionRequirement();
                         currentRequirement.resource = true;
                         currentRequirement.ID = Mod.itemMap[requirement["templateId"].ToString()];
@@ -1248,12 +1295,15 @@ namespace EFM
                         newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.ID];
                         currentRequirement.count = (int)requirement["resource"];
 
+                        Mod.instance.LogInfo("3");
                         productionScript.requirements.Add(currentRequirement);
 
+                        Mod.instance.LogInfo("3");
                         int amountInInventory = (Mod.baseInventory.ContainsKey(currentRequirement.ID) ? Mod.baseInventory[currentRequirement.ID] : 0) +
                                                 (Mod.playerInventory.ContainsKey(currentRequirement.ID) ? Mod.playerInventory[currentRequirement.ID] : 0);
                         newFarmingView.transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = amountInInventory.ToString() + " (STASH)";
 
+                        Mod.instance.LogInfo("3");
                         if (farmingViewByItemID == null)
                         {
                             farmingViewByItemID = new Dictionary<string, List<Transform>>();
@@ -1269,15 +1319,19 @@ namespace EFM
                     }
                     else if (requirement["type"].ToString().Equals("Item"))
                     {
+                        Mod.instance.LogInfo("4");
                         AreaProductionRequirement currentRequirement = new AreaProductionRequirement();
                         currentRequirement.ID = Mod.itemMap[requirement["templateId"].ToString()];
                         currentRequirement.count = (int)requirement["count"];
                         currentRequirement.isFunctional = (bool)requirement["isFunctional"];
 
+                        Mod.instance.LogInfo("4");
                         productionScript.requirements.Add(currentRequirement);
 
+                        Mod.instance.LogInfo("4");
                         int amountInInventory = (Mod.baseInventory.ContainsKey(currentRequirement.ID) ? Mod.baseInventory[currentRequirement.ID] : 0) +
                                                 (Mod.playerInventory.ContainsKey(currentRequirement.ID) ? Mod.playerInventory[currentRequirement.ID] : 0);
+                        Mod.instance.LogInfo("4");
                         if (newFarmingView != null)
                         {
                             newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.ID];
@@ -1323,15 +1377,17 @@ namespace EFM
                         }
                     }
                 }
+                Mod.instance.LogInfo("1");
 
                 // Add the production to the list
                 this.productions.Add(productionScript.ID, productionScript);
 
                 firstProduction = false;
             }
+            Mod.instance.LogInfo("0");
 
             // Setup scav case view after because it is not specified in the area's production list
-            if(areaIndex == 14)
+            if (areaIndex == 14)
             {
                 GameObject scavCaseView = productionsParent.GetChild(2).gameObject;
                 middleHeight += 75; // scav case view height
@@ -1781,6 +1837,22 @@ namespace EFM
             else
             {
                 this.bonuses.Clear();
+            }
+
+            // Add all bonuses to this.bonuses, including ones from previous levels
+            JArray stagesData = Mod.areasDB["areaDefaults"][areaIndex]["stages"] as JArray;
+            for(int i = 0; i <= level; ++i)
+            {
+                foreach (JToken bonusData in Mod.areasDB["areaDefaults"][areaIndex]["stages"][i]["bonuses"])
+                {
+                    EFM_AreaBonus bonus = new EFM_AreaBonus();
+                    bonus.bonusType = (EFM_AreaBonus.BonusType)Enum.Parse(typeof(EFM_AreaBonus.BonusType), bonusData["type"].ToString());
+                    bonus.value = (float)bonusData["value"];
+                    if(bonus.bonusType == EFM_AreaBonus.BonusType.SkillGroupLevelingBoost)
+                    {
+                        bonus.skillType = (EFM_Skill.SkillType)Enum.Parse(typeof(EFM_Skill.SkillType), bonusData["skillType"].ToString());
+                    }
+                }
             }
 
             if (bonuses != null && ((JArray)bonuses).Count > 0)
@@ -2542,16 +2614,16 @@ namespace EFM
         {
             transform.GetChild(level).gameObject.SetActive(false);
             transform.GetChild(level + 1).gameObject.SetActive(true);
-            if(slots[level] != null && slots[level].Count > 0)
+            if(level < slots.Count && slots[level] != null && slots[level].Count > 0)
             {
                 for(int i=0; i < slots[level].Count; ++i)
                 {
                     Mod.areaSlotShouldUpdate = false;
                     slots[level][i].CurObject.SetQuickBeltSlot(slots[level + 1][i]);
                 }
+                transform.GetChild(transform.childCount - 1).GetChild(level).gameObject.SetActive(false);
+                transform.GetChild(transform.childCount - 1).GetChild(level + 1).gameObject.SetActive(true);
             }
-            transform.GetChild(transform.childCount - 1).GetChild(level).gameObject.SetActive(false);
-            transform.GetChild(transform.childCount - 1).GetChild(level + 1).gameObject.SetActive(true);
             SetEffectsActive(false);
 
             ++level;
@@ -2587,6 +2659,10 @@ namespace EFM
                                 ++amountInBaseInventory;
                             }
                         }
+                        else if (itemCIW.maxStack > 0)
+                        {
+                            amountInBaseInventory += itemCIW.stack;
+                        }
                         else
                         {
                             ++amountInBaseInventory;
@@ -2612,6 +2688,10 @@ namespace EFM
                             {
                                 ++amountInPlayerInventory;
                             }
+                        }
+                        else if (itemCIW.maxStack > 0)
+                        {
+                            amountInPlayerInventory += itemCIW.stack;
                         }
                         else
                         {
@@ -2878,6 +2958,10 @@ namespace EFM
                                 ++amountInBaseInventory;
                             }
                         }
+                        else if (itemCIW.maxStack > 0)
+                        {
+                            amountInBaseInventory += itemCIW.stack;
+                        }
                         else
                         {
                             ++amountInBaseInventory;
@@ -2903,6 +2987,10 @@ namespace EFM
                             {
                                 ++amountInPlayerInventory;
                             }
+                        }
+                        else if (itemCIW.maxStack > 0)
+                        {
+                            amountInPlayerInventory += itemCIW.stack;
                         }
                         else
                         {
@@ -3316,6 +3404,10 @@ namespace EFM
                                         ++amountInBaseInventory;
                                     }
                                 }
+                                else if (itemCIW.maxStack > 0)
+                                {
+                                    amountInBaseInventory += itemCIW.stack;
+                                }
                                 else
                                 {
                                     ++amountInBaseInventory;
@@ -3340,6 +3432,10 @@ namespace EFM
                                     {
                                         ++amountInPlayerInventory;
                                     }
+                                }
+                                else if (itemCIW.maxStack > 0)
+                                {
+                                    amountInPlayerInventory += itemCIW.stack;
                                 }
                                 else
                                 {
@@ -3839,6 +3935,10 @@ namespace EFM
                                         ++amountInBaseInventory;
                                     }
                                 }
+                                else if (itemCIW.maxStack > 0)
+                                {
+                                    amountInBaseInventory += itemCIW.stack;
+                                }
                                 else
                                 {
                                     ++amountInBaseInventory;
@@ -3863,6 +3963,10 @@ namespace EFM
                                     {
                                         ++amountInPlayerInventory;
                                     }
+                                }
+                                else if (itemCIW.maxStack > 0)
+                                {
+                                    amountInPlayerInventory += itemCIW.stack;
                                 }
                                 else
                                 {
@@ -3915,6 +4019,7 @@ namespace EFM
 
         public void UpdateBasedOnItem(string itemID, bool amountSpecified = false, int amount = 0)
         {
+            Mod.instance.LogInfo("UpdateBaedOnItem " + itemID + " called on " + areaIndex);
             // Amount of usable instances of this item left
             int totalAmount = amount;
             if (!amountSpecified)
@@ -3935,6 +4040,10 @@ namespace EFM
                                 {
                                     ++amountInBaseInventory;
                                 }
+                            }
+                            else if(itemCIW.maxStack > 0)
+                            {
+                                amountInBaseInventory += itemCIW.stack;
                             }
                             else
                             {
@@ -3961,6 +4070,10 @@ namespace EFM
                                     ++amountInPlayerInventory;
                                 }
                             }
+                            else if (itemCIW.maxStack > 0)
+                            {
+                                amountInPlayerInventory += itemCIW.stack;
+                            }
                             else
                             {
                                 ++amountInPlayerInventory;
@@ -3975,84 +4088,97 @@ namespace EFM
                 totalAmount = amountInBaseInventory + amountInPlayerInventory;
             }
 
+            Mod.instance.LogInfo("0");
             // Update UI corresponding to this item
-            List<Transform> farmingViews = farmingViewByItemID[itemID];
-            foreach (Transform currentFarmingView in farmingViews)
+            if (farmingViewByItemID != null && farmingViewByItemID.ContainsKey(itemID))
             {
-                currentFarmingView.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = totalAmount.ToString() + "(STASH)";
+                List<Transform> farmingViews = farmingViewByItemID[itemID];
+                foreach (Transform currentFarmingView in farmingViews)
+                {
+                    currentFarmingView.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = totalAmount.ToString() + "(STASH)";
+                }
             }
-            List<Transform> produceViews = produceViewByItemID[itemID];
-            foreach (Transform currentProduceView in produceViews)
+            Mod.instance.LogInfo("0");
+            if (produceViewByItemID != null && produceViewByItemID.ContainsKey(itemID))
             {
-                // Find index of requirement in production that is the item
-                // While we're at it also check if requirements are now fulfilled
-                EFM_AreaProduction production = currentProduceView.GetComponent<EFM_AreaProduction>();
-                AreaProductionRequirement requirement = null;
-                int requirementIndex = -1;
-                bool requirementsFulfilled = true;
-                for(int i=0; i < production.requirements.Count; ++i)
+                List<Transform> produceViews = produceViewByItemID[itemID];
+                foreach (Transform currentProduceView in produceViews)
                 {
-                    if(production.requirements[i].ID == itemID)
+                    // Find index of requirement in production that is the item
+                    // While we're at it also check if requirements are now fulfilled
+                    EFM_AreaProduction production = currentProduceView.GetComponent<EFM_AreaProduction>();
+                    AreaProductionRequirement requirement = null;
+                    int requirementIndex = -1;
+                    bool requirementsFulfilled = true;
+                    for (int i = 0; i < production.requirements.Count; ++i)
                     {
-                        requirement = production.requirements[i];
-                        requirementIndex = i;
+                        if (production.requirements[i].ID == itemID)
+                        {
+                            requirement = production.requirements[i];
+                            requirementIndex = i;
+                        }
+
+                        if (requirementsFulfilled && production.requirements[i].count > totalAmount)
+                        {
+                            requirementsFulfilled = false;
+                        }
                     }
 
-                    if(requirementsFulfilled && production.requirements[i].count > totalAmount)
+                    // Update UI accordingly
+                    currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = Mathf.Min(requirement.count, totalAmount).ToString() + "/" + requirement.count;
+                    if (totalAmount >= requirement.count)
                     {
-                        requirementsFulfilled = false;
+                        currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(1).GetChild(0).gameObject.SetActive(false);
+                        currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(1).GetChild(1).gameObject.SetActive(true);
+                    }
+                    else // totalAmount < requirement.count
+                    {
+                        currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(1).GetChild(0).gameObject.SetActive(true);
+                        currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(1).GetChild(1).gameObject.SetActive(false);
+                    }
+
+                    // Update state of production, maybe it can now be started
+                    if (!production.active)
+                    {
+                        if (requirementsFulfilled)
+                        {
+                            currentProduceView.GetChild(4).GetChild(0).GetComponent<Collider>().enabled = true;
+                            currentProduceView.GetChild(4).GetChild(0).GetChild(0).GetComponent<Text>().color = Color.white;
+                        }
+                        else
+                        {
+                            currentProduceView.GetChild(4).GetChild(0).GetComponent<Collider>().enabled = false;
+                            currentProduceView.GetChild(4).GetChild(0).GetChild(0).GetComponent<Text>().color = Color.gray;
+                        }
                     }
                 }
+            }
+            Mod.instance.LogInfo("0");
+            if (itemRequirementsByItemID != null && itemRequirementsByItemID.ContainsKey(itemID))
+            {
+                List<Transform> itemRequirements = itemRequirementsByItemID[itemID];
+                foreach (Transform currentItemRequirement in itemRequirements)
+                {
+                    EFM_AreaRequirement requirementScript = currentItemRequirement.GetComponent<EFM_AreaRequirement>();
+                    currentItemRequirement.GetChild(1).GetChild(0).GetComponent<Text>().text = Mathf.Min(totalAmount, requirementScript.count).ToString() + "/" + requirementScript.count;
 
-                // Update UI accordingly
-                currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = Mathf.Min(requirement.count, totalAmount).ToString() + "/" + requirement.count;
-                if (totalAmount >= requirement.count) 
-                {
-                    currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(1).GetChild(0).gameObject.SetActive(false);
-                    currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(1).GetChild(1).gameObject.SetActive(true);
-                }
-                else // totalAmount < requirement.count
-                {
-                    currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(1).GetChild(0).gameObject.SetActive(true);
-                    currentProduceView.GetChild(1).GetChild(requirementIndex + 1).GetChild(1).GetChild(1).GetChild(1).gameObject.SetActive(false);
-                }
-
-                // Update state of production, maybe it can now be started
-                if (!production.active)
-                {
-                    if (requirementsFulfilled)
+                    if (totalAmount > requirementScript.count)
                     {
-                        currentProduceView.GetChild(4).GetChild(0).GetComponent<Collider>().enabled = true;
-                        currentProduceView.GetChild(4).GetChild(0).GetChild(0).GetComponent<Text>().color = Color.white;
+                        currentItemRequirement.GetChild(1).GetChild(1).GetComponent<Image>().sprite = EFM_Base_Manager.requirementFulfilled;
                     }
                     else
                     {
-                        currentProduceView.GetChild(4).GetChild(0).GetComponent<Collider>().enabled = false;
-                        currentProduceView.GetChild(4).GetChild(0).GetChild(0).GetComponent<Text>().color = Color.gray;
+                        currentItemRequirement.GetChild(1).GetChild(1).GetComponent<Image>().sprite = EFM_Base_Manager.requirementLocked;
                     }
                 }
             }
-            List<Transform> itemRequirements = itemRequirementsByItemID[itemID];
-            foreach (Transform currentItemRequirement in itemRequirements)
-            {
-                EFM_AreaRequirement requirementScript = currentItemRequirement.GetComponent<EFM_AreaRequirement>();
-                currentItemRequirement.GetChild(1).GetChild(0).GetComponent<Text>().text = Mathf.Min(totalAmount, requirementScript.count).ToString() + "/" + requirementScript.count;
-
-                if(totalAmount > requirementScript.count)
-                {
-                    currentItemRequirement.GetChild(1).GetChild(1).GetComponent<Image>().sprite = EFM_Base_Manager.requirementFulfilled;
-                }
-                else
-                {
-                    currentItemRequirement.GetChild(1).GetChild(1).GetComponent<Image>().sprite = EFM_Base_Manager.requirementLocked;
-                }
-            }
+            Mod.instance.LogInfo("0");
             UpdateUpgradableStatus();
         }
 
         public void UpdateBasedOnAreaLevel(int index, int newLevel)
         {
-            if (areaRequirementsByAreaIndex.ContainsKey(index))
+            if (areaRequirementsByAreaIndex != null && areaRequirementsByAreaIndex.ContainsKey(index))
             {
                 List<Transform> requirementTransforms = areaRequirementsByAreaIndex[index];
                 foreach (Transform currentRequirementTransform in requirementTransforms)
@@ -4368,8 +4494,8 @@ namespace EFM
                     }
 
                     // Disable Upgrade button, should be second one on bottom 2
-                    areaCanvas.transform.GetChild(1).GetChild(3).GetChild(0).GetComponent<Collider>().enabled = false;
-                    areaCanvas.transform.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
+                    areaCanvas.transform.GetChild(1).GetChild(4).GetChild(1).GetComponent<Collider>().enabled = false;
+                    areaCanvas.transform.GetChild(1).GetChild(4).GetChild(1).GetChild(1).GetComponent<Text>().color = Color.gray;
                 }
             }
         }

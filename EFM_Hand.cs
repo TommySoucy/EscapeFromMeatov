@@ -79,24 +79,35 @@ namespace EFM
                 // TODO: maybe change this to trigger instead of interaction button we use for containers and other custom functional items
                 if (fvrHand.IsInStreamlinedMode)
                 {
-                    if (fvrHand.Input.AXButtonDown)
+                    if(fvrHand.Input.TriggerDown || fvrHand.Input.IsGrabDown)
+                    {
+                        collidingSwitch.Activate();
+                    }
+                    else if (fvrHand.Input.AXButtonDown)
                     {
                         collidingSwitch.Activate();
                     }
                 }
                 else
                 {
-                    Vector2 touchpadAxes = fvrHand.Input.TouchpadAxes;
-
-                    // If touchpad has started being pressed this frame
-                    if (fvrHand.Input.TouchpadDown)
+                    if (fvrHand.Input.TriggerDown || fvrHand.Input.IsGrabDown)
                     {
-                        Vector2 TouchpadClickInitiation = touchpadAxes;
-                        if (touchpadAxes.magnitude > 0.2f)
+                        collidingSwitch.Activate();
+                    }
+                    else
+                    {
+                        Vector2 touchpadAxes = fvrHand.Input.TouchpadAxes;
+
+                        // If touchpad has started being pressed this frame
+                        if (fvrHand.Input.TouchpadDown)
                         {
-                            if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
+                            Vector2 TouchpadClickInitiation = touchpadAxes;
+                            if (touchpadAxes.magnitude > 0.2f)
                             {
-                                collidingSwitch.Activate();
+                                if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
+                                {
+                                    collidingSwitch.Activate();
+                                }
                             }
                         }
                     }

@@ -2587,22 +2587,22 @@ namespace EFM
 
                 // Production farming view
                 Transform farmingView = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(1);
-                GameObject farmingViewSetAllButtonObject = farmingView.GetChild(1).GetChild(0).gameObject;
+                GameObject farmingViewSetAllButtonObject = farmingView.GetChild(1).GetChild(1).GetChild(0).gameObject;
                 EFM_PointableButton farmingViewSetAllPointableButton = farmingViewSetAllButtonObject.AddComponent<EFM_PointableButton>();
                 farmingViewSetAllPointableButton.SetButton();
                 farmingViewSetAllPointableButton.MaxPointingRange = 30;
                 farmingViewSetAllPointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
-                GameObject farmingViewSetOneButtonObject = farmingView.GetChild(1).GetChild(1).gameObject;
+                GameObject farmingViewSetOneButtonObject = farmingView.GetChild(1).GetChild(1).GetChild(1).gameObject;
                 EFM_PointableButton farmingViewSetOnePointableButton = farmingViewSetOneButtonObject.AddComponent<EFM_PointableButton>();
                 farmingViewSetOnePointableButton.SetButton();
                 farmingViewSetOnePointableButton.MaxPointingRange = 30;
                 farmingViewSetOnePointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
-                GameObject farmingViewRemoveOneButtonObject = farmingView.GetChild(1).GetChild(2).gameObject;
+                GameObject farmingViewRemoveOneButtonObject = farmingView.GetChild(1).GetChild(1).GetChild(2).gameObject;
                 EFM_PointableButton farmingViewRemoveOnePointableButton = farmingViewRemoveOneButtonObject.AddComponent<EFM_PointableButton>();
                 farmingViewRemoveOnePointableButton.SetButton();
                 farmingViewRemoveOnePointableButton.MaxPointingRange = 30;
                 farmingViewRemoveOnePointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
-                GameObject farmingViewGetItemsButtonObject = farmingView.GetChild(5).GetChild(0).gameObject;
+                GameObject farmingViewGetItemsButtonObject = farmingView.GetChild(1).GetChild(5).GetChild(0).gameObject;
                 EFM_PointableButton farmingViewGetItemsPointableButton = farmingViewGetItemsButtonObject.AddComponent<EFM_PointableButton>();
                 farmingViewGetItemsPointableButton.SetButton();
                 farmingViewGetItemsPointableButton.MaxPointingRange = 30;
@@ -2610,11 +2610,11 @@ namespace EFM
 
                 // Production scav case view
                 Transform scavCaseView = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(2);
-                GameObject scavCaseViewGetItemsButtonObject = scavCaseView.GetChild(4).GetChild(0).gameObject;
-                EFM_PointableButton scavCaseViewGetItemsPointableButton = scavCaseViewGetItemsButtonObject.AddComponent<EFM_PointableButton>();
-                scavCaseViewGetItemsPointableButton.SetButton();
-                scavCaseViewGetItemsPointableButton.MaxPointingRange = 30;
-                scavCaseViewGetItemsPointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
+                GameObject scavCaseViewStartButtonObject = scavCaseView.GetChild(4).GetChild(0).gameObject;
+                EFM_PointableButton scavCaseViewStartPointableButton = scavCaseViewStartButtonObject.AddComponent<EFM_PointableButton>();
+                scavCaseViewStartPointableButton.SetButton();
+                scavCaseViewStartPointableButton.MaxPointingRange = 30;
+                scavCaseViewStartPointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
 
                 Mod.instance.LogInfo("Area UI prepped");
             }
@@ -2653,7 +2653,7 @@ namespace EFM
                 transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(6).GetChild(5).gameObject
             };
             // UISwitch
-            EFM_Switch UISwitch = transform.GetChild(1).GetChild(23).GetChild(0).gameObject.AddComponent<EFM_Switch>();
+            EFM_Switch UISwitch = transform.GetChild(1).GetChild(23).GetChild(1).gameObject.AddComponent<EFM_Switch>();
             UISwitch.gameObjects = new List<GameObject>();
             for(int i=0; i < 22; ++i)
             {
