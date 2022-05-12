@@ -3388,7 +3388,7 @@ namespace EFM
                     // Check if in pockets
                     for (int i = 0; i < 4; ++i)
                     {
-                        if (Mod.itemsInPocketSlots[i].Equals(__instance.gameObject))
+                        if (Mod.itemsInPocketSlots[i] != null && Mod.itemsInPocketSlots[i].Equals(__instance.gameObject))
                         {
                             Mod.itemsInPocketSlots[i] = null;
                             return;
@@ -5293,11 +5293,11 @@ namespace EFM
                             Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
                         }
 
-                        vanillaItemDescriptor.physObj.SetParentage(sceneRoot.transform.GetChild(2));
+                        latestEjectedRound.GetComponent<FVRPhysicalObject>().SetParentage(sceneRoot.transform.GetChild(2));
                     }
                     else if (Mod.currentLocationIndex == 2)
                     {
-                        vanillaItemDescriptor.physObj.SetParentage(sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2));
+                        latestEjectedRound.GetComponent<FVRPhysicalObject>().SetParentage(sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2));
                     }
                 }
 
@@ -5415,11 +5415,11 @@ namespace EFM
                             Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
                         }
 
-                        vanillaItemDescriptor.physObj.SetParentage(sceneRoot.transform.GetChild(2));
+                        latestEjectedRound.GetComponent<FVRPhysicalObject>().SetParentage(sceneRoot.transform.GetChild(2));
                     }
                     else if (Mod.currentLocationIndex == 2)
                     {
-                        vanillaItemDescriptor.physObj.SetParentage(sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2));
+                        latestEjectedRound.GetComponent<FVRPhysicalObject>().SetParentage(sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2));
                     }
                 }
 

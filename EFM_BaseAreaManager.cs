@@ -4029,7 +4029,6 @@ namespace EFM
 
         public void UpdateBasedOnItem(string itemID, bool amountSpecified = false, int amount = 0)
         {
-            Mod.instance.LogInfo("UpdateBaedOnItem " + itemID + " called on " + areaIndex);
             // Amount of usable instances of this item left
             int totalAmount = amount;
             if (!amountSpecified)
@@ -4098,7 +4097,6 @@ namespace EFM
                 totalAmount = amountInBaseInventory + amountInPlayerInventory;
             }
 
-            Mod.instance.LogInfo("0");
             // Update UI corresponding to this item
             if (farmingViewByItemID != null && farmingViewByItemID.ContainsKey(itemID))
             {
@@ -4108,7 +4106,6 @@ namespace EFM
                     currentFarmingView.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = totalAmount.ToString() + "(STASH)";
                 }
             }
-            Mod.instance.LogInfo("0");
             if (produceViewByItemID != null && produceViewByItemID.ContainsKey(itemID))
             {
                 List<Transform> produceViews = produceViewByItemID[itemID];
@@ -4163,7 +4160,6 @@ namespace EFM
                     }
                 }
             }
-            Mod.instance.LogInfo("0");
             if (itemRequirementsByItemID != null && itemRequirementsByItemID.ContainsKey(itemID))
             {
                 List<Transform> itemRequirements = itemRequirementsByItemID[itemID];
@@ -4182,7 +4178,6 @@ namespace EFM
                     }
                 }
             }
-            Mod.instance.LogInfo("0");
             UpdateUpgradableStatus();
         }
 
