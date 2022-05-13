@@ -150,6 +150,10 @@ namespace EFM
 		}
 		public int maxStack;
 		public GameObject[] stackTriggers;
+		private bool splittingStack;
+		private int splitAmount;
+		private Vector3 stackSplitStartPosition;
+		private Vector3 stackSplitRightVector;
 
 		// Amount
 		private int _amount;
@@ -265,6 +269,26 @@ namespace EFM
 			if (physObj.m_hand != null)
 			{
 				TakeInput();
+			}
+
+			// Update splitting stack flag
+			if(physObj.m_hand == null && splittingStack)
+            {
+				Mod.stackSplitUI.SetActive(false);
+				splittingStack = false;
+            }
+
+			// Update based on splitting stack
+            if (splittingStack)
+            {
+				Vector3 handVector = physObj.m_hand.transform.position - stackSplitStartPosition;
+				float angle = Vector3.Angle(stackSplitRightVector, handVector);
+				float distanceFromCenter = Mathf.Clamp(handVector.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad), -0.19f, 0.19f);
+
+				// Scale is from -0.19 (0) to 0.19 (stack)
+				splitAmount = distanceFromCenter == 0.19f ? stack : (int)((distanceFromCenter + 0.19f) * stack);
+				Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
+				Mod.stackSplitUIText.text = splitAmount.ToString()+"/"+stack;
 			}
 		}
 
@@ -426,7 +450,7 @@ namespace EFM
 				if (hand.Input.TouchpadDown)
 				{
 					Vector2 TouchpadClickInitiation = touchpadAxes;
-					if (touchpadAxes.magnitude > 0.2f)
+					if (touchpadAxes.magnitude > 0.3f)
 					{
 						if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
 						{
@@ -439,6 +463,46 @@ namespace EFM
 								case Mod.ItemType.Container:
 								case Mod.ItemType.Pouch:
 									ToggleMode(true, hand.IsThisTheRightHand);
+									break;
+								case Mod.ItemType.Money:
+                                    if (splittingStack)
+                                    {
+										// End splitting
+										if (splitAmount != stack || splitAmount == 0)
+										{
+											stack -= splitAmount;
+
+											GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
+											if (Mod.currentLocationIndex == 1) // In hideout
+                                            {
+												itemObject.transform.parent = Mod.currentBaseManager.transform.GetChild(Mod.currentBaseManager.transform.childCount - 2);
+												EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+												CIW.stack = splitAmount;
+												Mod.currentBaseManager.baseInventoryObjects[ID].Add(itemObject);
+											}
+                                            else // In raid
+											{
+												itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
+												EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+												CIW.stack = splitAmount;
+											}
+										}
+										// else the chosen amount is 0 or max, meaning cancel the split
+										Mod.stackSplitUI.SetActive(false);
+										splittingStack = false;
+                                    }
+                                    else
+                                    {
+										// Start splitting
+										Mod.stackSplitUI.SetActive(true);
+										Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
+										Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
+										stackSplitStartPosition = hand.transform.position;
+										stackSplitRightVector = hand.transform.right;
+										stackSplitRightVector.y = 0;
+
+										splittingStack = true;
+                                    }
 									break;
 								default:
 									break;

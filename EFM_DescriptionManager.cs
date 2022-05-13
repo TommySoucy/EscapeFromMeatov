@@ -116,13 +116,13 @@ namespace EFM
             downHoverScroll.hoverSound = exitButton.hoverSound;
             downHoverScroll.scrollbar = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
             downHoverScroll.other = upHoverScroll;
-            downHoverScroll.up = true;
+            downHoverScroll.up = false;
             downHoverScroll.rate = 0.5f;
             upHoverScroll.MaxPointingRange = 30;
             upHoverScroll.hoverSound = exitButton.hoverSound;
             upHoverScroll.scrollbar = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
             upHoverScroll.other = downHoverScroll;
-            upHoverScroll.up = false;
+            upHoverScroll.up = true;
             upHoverScroll.rate = 0.5f;
 
             // Inactive by default
@@ -236,7 +236,6 @@ namespace EFM
             {
                 summaryNeededForTotalText.gameObject.SetActive(true);
                 summaryNeededForTotalText.text = "Total: (" + this.descriptionPack.amount + "/" + this.descriptionPack.amountRequired + ")";
-                Mod.instance.LogInfo("Setting description of item " + this.descriptionPack.name+", amount = "+ this.descriptionPack.amount);
             }
             else
             {
@@ -476,6 +475,15 @@ namespace EFM
                 {
                     ammoContainsTitle.SetActive(false);
                 }
+            }
+            else if(ammoContainsTitle.activeSelf)
+            {
+                for (int i = ammoContainsTexts.Count - 1; i >= 0; --i)
+                {
+                    Destroy(ammoContainsTexts[i]);
+                }
+                ammoContainsTexts.Clear();
+                ammoContainsTitle.SetActive(false);
             }
 
             // Set hoverscrolls depending on description height

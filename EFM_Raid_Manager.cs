@@ -9,7 +9,7 @@ using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
-    class EFM_Raid_Manager : EFM_Manager
+    public class EFM_Raid_Manager : EFM_Manager
     {
         public static readonly float extractionTime = 10; 
 
@@ -993,6 +993,8 @@ namespace EFM
 
         public override void Init()
         {
+            Mod.currentRaidManager = this;
+
             // Init player state
             currentHealthRates = new float[7];
             currentNonLethalHealthRates = new float[7];
@@ -1822,7 +1824,7 @@ namespace EFM
         }
     }
 
-    class ExtractionManager : MonoBehaviour
+    public class ExtractionManager : MonoBehaviour
     {
         public EFM_Raid_Manager raidManager;
 

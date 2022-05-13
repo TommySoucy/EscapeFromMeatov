@@ -65,6 +65,7 @@ namespace EFM
         public static GameObject rightShoulderObject;
         public static Dictionary<string, int> baseInventory;
         public static EFM_Base_Manager currentBaseManager;
+        public static EFM_Raid_Manager currentRaidManager;
         public static Dictionary<string, int>[] requiredPerArea;
         public static List<string> wishList;
         public static Dictionary<FireArmMagazineType, Dictionary<string, int>> magazinesByType;
@@ -120,6 +121,9 @@ namespace EFM
         public static EFM_Effect overweightFatigueEffect;
         public static GameObject consumeUI;
         public static Text consumeUIText;
+        public static GameObject stackSplitUI;
+        public static Text stackSplitUIText;
+        public static Transform stackSplitUICursor;
         public static GameObject extractionUI;
         public static Text extractionUIText;
         public static GameObject leftDescriptionUI;
@@ -173,6 +177,7 @@ namespace EFM
         public static GameObject extractionUIPrefab;
         public static GameObject extractionCardPrefab;
         public static GameObject consumeUIPrefab;
+        public static GameObject stackSplitUIPrefab;
         public static GameObject itemDescriptionUIPrefab;
         public static GameObject neededForPrefab;
         public static GameObject ammoContainsPrefab;
@@ -490,6 +495,7 @@ namespace EFM
             rectQuickBeltSlotPrefab = assetsBundle.LoadAsset<GameObject>("RectQuickBeltSlot");
             playerStatusUIPrefab = assetsBundle.LoadAsset<GameObject>("StatusUI");
             consumeUIPrefab = assetsBundle.LoadAsset<GameObject>("ConsumeUI");
+            stackSplitUIPrefab = assetsBundle.LoadAsset<GameObject>("StackSplitUI");
             extractionUIPrefab = assetsBundle.LoadAsset<GameObject>("ExtractionUI");
             extractionCardPrefab = assetsBundle.LoadAsset<GameObject>("ExtractionCard");
             itemDescriptionUIPrefab = assetsBundle.LoadAsset<GameObject>("ItemDescriptionUI");
@@ -5188,7 +5194,7 @@ namespace EFM
     class MagazineUpdateInteractionPatch
     {
         static GameObject latestEjectedRound;
-        static int latestEjectedRoundLocation;
+        static int latestEjectedRoundLocation; // IGNORE WARNING, Will be written by transpiler
         static int callcount = 0;
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
