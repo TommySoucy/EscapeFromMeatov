@@ -183,12 +183,14 @@ namespace EFM
         public static GameObject ammoContainsPrefab;
         public static GameObject staminaBarPrefab;
         public static Sprite cartridgeIcon;
+        public static Sprite[] playerLevelIcons;
 
         // DB
         public static JObject areasDB;
         public static JObject localDB;
         public static Dictionary<string, string> itemMap;
         public static JObject[] traderBaseDB;
+        public static JObject[] traderAssortDB;
         public static JObject globalDB;
         public static JArray XPPerLevel;
         public static JObject mapData;
@@ -503,6 +505,11 @@ namespace EFM
             ammoContainsPrefab = assetsBundle.LoadAsset<GameObject>("ContainsText");
             staminaBarPrefab = assetsBundle.LoadAsset<GameObject>("StaminaBar");
             cartridgeIcon = assetsBundle.LoadAsset<Sprite>("ItemCartridge_Icon");
+            playerLevelIcons = new Sprite[16];
+            for(int i=1; i <= 16; ++i)
+            {
+                playerLevelIcons[i - 1] = assetsBundle.LoadAsset<Sprite>("rank"+(i*5));
+            }
 
             // Load pockets configuration
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
@@ -1141,10 +1148,12 @@ namespace EFM
             localDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/local.json"));
             ParseItemMap();
             traderBaseDB = new JObject[8];
+            traderAssortDB = new JObject[8];
             for(int i=0; i < 8; ++i)
             {
                 string traderID = EFM_TraderStatus.IndexToID(i);
                 traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/base.json"));
+                traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/assort.json"));
             }
             globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/globals.json"));
             XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
@@ -1520,6 +1529,13 @@ namespace EFM
                 ++level;
                 experience -= XPForNextLevel; 
                 XPForNextLevel = (int)XPPerLevel[level]["exp"];
+            }
+
+            // Update UI
+            playerStatusManager.UpdatePlayerLevel();
+            if (currentLocationIndex == 1) // In hideout
+            {
+                currentBaseManager.UpdateBasedOnPlayerLevel();
             }
         }
 
@@ -2552,16 +2568,19 @@ namespace EFM
         {
             Mod.instance.LogInfo("Dropped Item " + primary.name);
             EFM_CustomItemWrapper collidingContainerWrapper = null;
+            EFM_TradeVolume collidingTradeVolume = null;
             if (Mod.rightHand != null)
             {
                 if (hand.IsThisTheRightHand)
                 {
                     collidingContainerWrapper = Mod.rightHand.collidingContainerWrapper;
+                    collidingTradeVolume = Mod.rightHand.collidingTradeVolume;
                     Mod.instance.LogInfo("\tfrom right hand, container null? " + (collidingContainerWrapper == null));
                 }
                 else // Left hand
                 {
                     collidingContainerWrapper = Mod.leftHand.collidingContainerWrapper;
+                    collidingTradeVolume = Mod.leftHand.collidingTradeVolume;
                     Mod.instance.LogInfo("\tfrom left hand, container null? " + (collidingContainerWrapper == null));
                 }
             }
@@ -2749,6 +2768,81 @@ namespace EFM
                 else
                 {
                     DropItemInWorld(primary, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                }
+            }
+            else if (collidingTradeVolume != null)
+            {
+                collidingTradeVolume.AddItem(primary);
+
+                collidingTradeVolume.market.UpdateBasedOnItem(false, heldCustomItemWrapper, heldVanillaItemDescriptor);
+
+                BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor);
+
+                if (heldCustomItemWrapper != null)
+                {
+                    // Was on player
+                    Mod.playerInventory[heldCustomItemWrapper.ID] -= heldCustomItemWrapper.stack;
+                    if (Mod.playerInventory[heldCustomItemWrapper.ID] == 0)
+                    {
+                        Mod.playerInventory.Remove(heldCustomItemWrapper.ID);
+                    }
+                    Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Remove(heldCustomItemWrapper.gameObject);
+                    if (Mod.playerInventoryObjects[heldCustomItemWrapper.ID].Count == 0)
+                    {
+                        Mod.playerInventoryObjects.Remove(heldCustomItemWrapper.ID);
+                    }
+
+                    // Now in hideout
+                    if (Mod.baseInventory.ContainsKey(heldCustomItemWrapper.ID))
+                    {
+                        Mod.baseInventory[heldCustomItemWrapper.ID] += heldCustomItemWrapper.stack;
+                    }
+                    else
+                    {
+                        Mod.baseInventory.Add(heldCustomItemWrapper.ID, heldCustomItemWrapper.stack);
+                    }
+                    if (Mod.currentBaseManager.baseInventoryObjects.ContainsKey(heldCustomItemWrapper.ID))
+                    {
+                        Mod.currentBaseManager.baseInventoryObjects[heldCustomItemWrapper.ID].Add(heldCustomItemWrapper.gameObject);
+                    }
+                    else
+                    {
+                        Mod.currentBaseManager.baseInventoryObjects.Add(heldCustomItemWrapper.ID, new List<GameObject>());
+                        Mod.currentBaseManager.baseInventoryObjects[heldCustomItemWrapper.ID].Add(heldCustomItemWrapper.gameObject);
+                    }
+                }
+                else
+                {
+                    // Was on player
+                    Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
+                    if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
+                    {
+                        Mod.playerInventory.Remove(heldVanillaItemDescriptor.H3ID);
+                    }
+                    Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
+                    if (Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Count == 0)
+                    {
+                        Mod.playerInventoryObjects.Remove(heldVanillaItemDescriptor.H3ID);
+                    }
+
+                    // Now in hideout
+                    if (Mod.baseInventory.ContainsKey(heldVanillaItemDescriptor.H3ID))
+                    {
+                        Mod.baseInventory[heldVanillaItemDescriptor.H3ID] += 1;
+                    }
+                    else
+                    {
+                        Mod.baseInventory.Add(heldVanillaItemDescriptor.H3ID, 1);
+                    }
+                    if (Mod.currentBaseManager.baseInventoryObjects.ContainsKey(heldVanillaItemDescriptor.H3ID))
+                    {
+                        Mod.currentBaseManager.baseInventoryObjects[heldVanillaItemDescriptor.H3ID].Add(heldVanillaItemDescriptor.gameObject);
+                    }
+                    else
+                    {
+                        Mod.currentBaseManager.baseInventoryObjects.Add(heldVanillaItemDescriptor.H3ID, new List<GameObject>());
+                        Mod.currentBaseManager.baseInventoryObjects[heldVanillaItemDescriptor.H3ID].Add(heldVanillaItemDescriptor.gameObject);
+                    }
                 }
             }
             else
@@ -3923,8 +4017,27 @@ namespace EFM
                 }
             }
 
-            // Check if in container
-            if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
+            // Check if in trade volume or container
+            EFM_TradeVolume tradeVolume = __instance.transform.parent.GetComponent<EFM_TradeVolume>();
+            if (tradeVolume != null)
+            {
+                // Reset cols of item so that they are non trigger again and can collide with the world
+                for (int i = tradeVolume.resetColPairs.Count - 1; i >= 0; --i)
+                {
+                    if (tradeVolume.resetColPairs[i].physObj.Equals(__instance))
+                    {
+                        foreach (Collider col in tradeVolume.resetColPairs[i].colliders)
+                        {
+                            col.isTrigger = false;
+                        }
+                        tradeVolume.resetColPairs.RemoveAt(i);
+                        break;
+                    }
+                }
+
+                tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<EFM_CustomItemWrapper>(), __instance.GetComponent<EFM_VanillaItemDescriptor>());
+            }
+            else if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
             {
                 EFM_CustomItemWrapper containerItemWrapper = __instance.transform.parent.parent.GetComponent<EFM_CustomItemWrapper>();
                 if(containerItemWrapper != null && (containerItemWrapper.itemType == Mod.ItemType.Backpack || 

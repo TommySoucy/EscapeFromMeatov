@@ -64,6 +64,10 @@ namespace EFM
         public static Dictionary<string, Sprite> bonusIcons;
         public static Sprite[] skillIcons;
         public static Sprite emptyItemSlotIcon;
+        public static Sprite dollarCurrencySprite;
+        public static Sprite euroCurrencySprite;
+        public static Sprite roubleCurrencySprite;
+        public static Sprite barterSprite;
 
         public JToken data;
 
@@ -88,6 +92,8 @@ namespace EFM
         public float currentEnergyRate = 1;
         public float hydrationRate = 1;
         public float currentHydrationRate = 1;
+        public EFM_MarketManager marketManager;
+        public static bool marketUI; // whether we are currently in market mode or in area UI mode
 
         // TODO make sure the following are used where they should
         public static float currentExperienceRate = 1;
@@ -1390,7 +1396,7 @@ namespace EFM
                 traderStatuses = new EFM_TraderStatus[8];
                 for (int i = 0; i < 8; i++)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true);
+                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true, Mod.traderAssortDB[i]);
                 }
 
                 // Init lists
@@ -1409,6 +1415,7 @@ namespace EFM
 
             // Load player status
             Mod.level = (int)data["level"];
+            Mod.experience = (int)data["experience"];
             Mod.health = data["health"].ToObject<float[]>();
             Mod.hydration = (float)data["hydration"];
             Mod.maxHydration = (float)data["maxHydration"];
@@ -1505,7 +1512,7 @@ namespace EFM
             {
                 for(int i=0; i < 8; i++)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true);
+                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true, Mod.traderAssortDB[i]);
                 }
             }
             else
@@ -1513,7 +1520,7 @@ namespace EFM
                 JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
                 for (int i = 0; i < 8; i++)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, (float)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"]);
+                    traderStatuses[i] = new EFM_TraderStatus(this, i, (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderAssortDB[i]);
                 }
             }
         }
@@ -1536,7 +1543,12 @@ namespace EFM
 
             foreach (Transform item in itemsRoot)
             {
-                Mod.instance.LogInfo("Adding "+item.name+" to base inventory");
+                AddToBaseInventory(item);
+            }
+
+            // Also add items in trade volume
+            foreach(Transform item in transform.GetChild(1).GetChild(25).GetChild(1))
+            {
                 AddToBaseInventory(item);
             }
         }
@@ -2174,6 +2186,12 @@ namespace EFM
                 }
             }
 
+            // Place in tradeVolume
+            if(item["inTradeVolume"] != null)
+            {
+                itemObject.transform.parent = transform.GetChild(1).GetChild(25).GetChild(1);
+            }
+
             // GameObject
             itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
             itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
@@ -2397,6 +2415,10 @@ namespace EFM
                 requirementFulfilled = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_requirement_fulfilled");
                 requirementLocked = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_requirement_locked");
                 emptyItemSlotIcon = Mod.baseAssetsBundle.LoadAsset<Sprite>("slot_empty_fill");
+                dollarCurrencySprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money_dollars");
+                euroCurrencySprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money_euros");
+                roubleCurrencySprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money_roubles");
+                barterSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_currency_barter");
                 traderAvatars = new Sprite[8];
                 traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_russian_small");
                 traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_therapist_small");
@@ -2637,6 +2659,10 @@ namespace EFM
                 baseAreaManagers[i].Init();
             }
 
+            // Init Market
+            marketManager = transform.GetChild(1).GetChild(25).gameObject.AddComponent<EFM_MarketManager>();
+            marketManager.Init();
+
             // Add switches
             // LightSwitch
             EFM_Switch lightSwitch = transform.GetChild(1).GetChild(23).GetChild(0).gameObject.AddComponent<EFM_Switch>();
@@ -2659,11 +2685,24 @@ namespace EFM
             };
             // UISwitch
             EFM_Switch UISwitch = transform.GetChild(1).GetChild(23).GetChild(1).gameObject.AddComponent<EFM_Switch>();
+            UISwitch.mode = 2;
             UISwitch.gameObjects = new List<GameObject>();
             for(int i=0; i < 22; ++i)
             {
+                // Each area canvas
                 UISwitch.gameObjects.Add(transform.GetChild(1).GetChild(i).GetChild(transform.GetChild(1).GetChild(i).childCount - 2).gameObject);
             }
+            UISwitch.gameObjects.Add(transform.GetChild(1).GetChild(25).gameObject); // Market
+            // MarketSwitch
+            EFM_Switch MarketSwitch = transform.GetChild(1).GetChild(23).GetChild(2).gameObject.AddComponent<EFM_Switch>();
+            MarketSwitch.mode = 3;
+            MarketSwitch.gameObjects = new List<GameObject>();
+            for(int i=0; i < 22; ++i)
+            {
+                // Each area canvas
+                MarketSwitch.gameObjects.Add(transform.GetChild(1).GetChild(i).GetChild(transform.GetChild(1).GetChild(i).childCount - 2).gameObject);
+            }
+            MarketSwitch.gameObjects.Add(transform.GetChild(1).GetChild(25).gameObject); // Market
 
             if (Mod.justFinishedRaid)
             {
@@ -2850,6 +2889,7 @@ namespace EFM
             saveObject["stamina"] = Mod.stamina;
             saveObject["maxStamina"] = Mod.maxStamina;
             saveObject["level"] = Mod.level;
+            saveObject["experience"] = Mod.experience;
             saveObject["weight"] = Mod.weight;
 
             // Write skills
@@ -2955,12 +2995,15 @@ namespace EFM
 
             // Save loose items
             Transform itemsRoot = transform.GetChild(2);
-
-            // Create a SavedItem for each item and fill it with minimum data needed to spawn it on load
-            Mod.instance.LogInfo("Saving items on items root");
             for (int i = 0; i < itemsRoot.childCount; ++i)
             {
                 SaveItem(saveItems, itemsRoot.GetChild(i));
+            }
+
+            // Save trade volume items
+            for (int i = 0; i < marketManager.tradeVolume.transform.childCount; ++i)
+            {
+                SaveItem(saveItems, marketManager.tradeVolume.transform.GetChild(i));
             }
 
             // Save items in hands
@@ -2976,7 +3019,6 @@ namespace EFM
             }
 
             // Save equipment
-            Mod.instance.LogInfo("Saving equipment");
             foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
             {
                 if (equipSlot.CurObject != null)
@@ -3092,6 +3134,12 @@ namespace EFM
                     savedItem["pocketSlotIndex"] = i;
                     break;
                 }
+            }
+
+            // Check if in tradeVolume
+            if (item.parent != null && item.parent.GetComponent<EFM_TradeVolume>() != null)
+            {
+                savedItem["inTradeVolume"] = true;
             }
 
             // Firearm
@@ -3542,9 +3590,9 @@ namespace EFM
             File.WriteAllText("BepInEx/Plugins/EscapeFromMeatov/" + (Mod.saveSlotIndex == 5 ? "AutoSave" : "Slot" + Mod.saveSlotIndex) + ".sav", data.ToString());
         }
 
-        private void SetupPlayerStatus()
+        public void UpdateBasedOnPlayerLevel()
         {
-
+            marketManager.UpdateBasedOnPlayerLevel();
         }
     }
 }

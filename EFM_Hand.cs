@@ -8,6 +8,7 @@ namespace EFM
     {
         public EFM_Hand otherHand;
         public EFM_CustomItemWrapper collidingContainerWrapper;
+        public EFM_TradeVolume collidingTradeVolume;
         public EFM_Switch collidingSwitch;
         public bool hoverValid;
         private List<Collider> colliders;
@@ -120,12 +121,17 @@ namespace EFM
             Transform mainContainerTransform = null;
             if (collider.gameObject.name.Equals("MainContainer"))
             {
-                Mod.instance.LogInfo("Hand entered collider named MainCollider");
+                Mod.instance.LogInfo("Hand entered collider named MainContainer");
                 mainContainerTransform = collider.transform;
             }
             else if (collider.gameObject.GetComponent<EFM_Switch>() != null)
             {
                 collidingSwitch = collider.gameObject.GetComponent<EFM_Switch>();
+                colliders.Add(collider);
+            }
+            else if (collider.gameObject.GetComponent<EFM_TradeVolume>() != null)
+            {
+                collidingTradeVolume = collider.gameObject.GetComponent<EFM_TradeVolume>();
                 colliders.Add(collider);
             }
             else if (collider.transform.parent != null)
@@ -272,9 +278,14 @@ namespace EFM
                     collidingContainerWrapper = null;
                 }
             }
-            else if(collidingSwitch != null)
+            else if(collidingSwitch != null || collidingTradeVolume != null)
             {
                 fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
+            }
+            else if(collidingTradeVolume != null)
+            {
+                fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
+                collidingTradeVolume.SetContainerHovered(true);
             }
         }
 
@@ -311,6 +322,11 @@ namespace EFM
             else if(collidingSwitch != null && colliders.Remove(collider))
             {
                 collidingSwitch = null;
+            }
+            else if(collidingTradeVolume != null && colliders.Remove(collider))
+            {
+                collidingTradeVolume.SetContainerHovered(false);
+                collidingTradeVolume = null;
             }
         }
     }

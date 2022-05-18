@@ -303,5 +303,11 @@ namespace EFM
                 transform.GetChild(0).GetChild(2).GetChild(7).gameObject.SetActive(false);
             }
         }
+
+        public void UpdatePlayerLevel()
+        {
+            transform.GetChild(0).GetChild(10).GetChild(0).GetComponent<Image>().sprite = Mod.playerLevelIcons[Mod.level / 5];
+            transform.GetChild(0).GetChild(10).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
+        }
     }
 }

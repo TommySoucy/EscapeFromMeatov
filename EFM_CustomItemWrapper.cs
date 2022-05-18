@@ -342,7 +342,7 @@ namespace EFM
 				{
 					resetColPairs = new List<EFM_CustomItemWrapper.ResetColPair>();
 				}
-				EFM_CustomItemWrapper.ResetColPair resetColPair = null;
+				ResetColPair resetColPair = null;
 				foreach (Collider col in cols)
 				{
 					if (col.gameObject.layer == 0 || col.gameObject.layer == 14)
@@ -352,7 +352,7 @@ namespace EFM
 						// Create new resetColPair for each collider so we can reset those specific ones to non-triggers when taken out of the backpack
 						if (resetColPair == null)
 						{
-							resetColPair = new EFM_CustomItemWrapper.ResetColPair();
+							resetColPair = new ResetColPair();
 							resetColPair.physObj = item;
 							resetColPair.colliders = new List<Collider>();
 						}

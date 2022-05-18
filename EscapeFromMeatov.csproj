@@ -81,6 +81,7 @@
     <Compile Include="EFM_LootContainerCover.cs" />
     <Compile Include="EFM_LootContainerSlider.cs" />
     <Compile Include="EFM_Manager.cs" />
+    <Compile Include="EFM_MarketManager.cs" />
     <Compile Include="EFM_Menu_Manager.cs" />
     <Compile Include="EFM_OtherInteractable.cs" />
     <Compile Include="EFM_PlayerStatusManager.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="EFM_StackTrigger.cs" />
     <Compile Include="EFM_Switch.cs" />
     <Compile Include="EFM_TraderStatus.cs" />
+    <Compile Include="EFM_TradeVolume.cs" />
     <Compile Include="EFM_VanillaItemDescriptor.cs" />
     <Compile Include="EscapeFromMeatov.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

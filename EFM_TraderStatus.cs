@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
@@ -12,11 +13,25 @@ namespace EFM
 
         public string id;
         public int index;
-        public float salesSum;
+        public int salesSum;
         public float standing;
         public bool unlocked;
 
-        public EFM_TraderStatus(EFM_Base_Manager baseManager, int index, float salesSum, float standing, bool unlocked)
+        public Dictionary<int, TraderAssortment> assortmentByLevel;
+
+        public struct TraderLoyaltyDetails
+        {
+            public int currentLevel;
+            public int nextLevel;
+            public int currentMinLevel;
+            public int nextMinLevel;
+            public int currentMinSalesSum;
+            public int nextMinSalesSum;
+            public float currentMinStanding;
+            public float nextMinStanding;
+        }
+
+        public EFM_TraderStatus(EFM_Base_Manager baseManager, int index, int salesSum, float standing, bool unlocked, JObject assortData)
         {
             this.baseManager = baseManager;
             this.id = IndexToID(index);
@@ -24,32 +39,62 @@ namespace EFM
             this.salesSum = salesSum;
             this.standing = standing;
             this.unlocked = unlocked;
+
+            BuildAssortments(assortData);
         }
 
         public int GetLoyaltyLevel()
         {
-            Mod.instance.LogInfo("traderbaseDB length: " + (Mod.traderBaseDB.Length));
             JObject traderBase = Mod.traderBaseDB[index];
-            Mod.instance.LogInfo("0");
-            for (int i=0; i < traderBase["loyaltyLevels"].Count(); ++i)
+            for (int i=1; i < traderBase["loyaltyLevels"].Count(); ++i)
             {
-                Mod.instance.LogInfo(""+i);
-                Mod.instance.LogInfo("loyaltylevels null?: "+(traderBase["loyaltyLevels"] == null));
-                Mod.instance.LogInfo("loyaltylevels[i] null?: "+(traderBase["loyaltyLevels"][i] == null));
-                Mod.instance.LogInfo("minlevel null?: "+(traderBase["loyaltyLevels"][i]["minLevel"] == null));
-                Mod.instance.LogInfo("minSalesSum null?: " + (traderBase["loyaltyLevels"][i]["minSalesSum"] == null));
-                Mod.instance.LogInfo("minStanding null?: " + (traderBase["loyaltyLevels"][i]["minStanding"] == null));
                 int minLevel = ((int)traderBase["loyaltyLevels"][i]["minLevel"]);
                 float minSalesSum = ((int)traderBase["loyaltyLevels"][i]["minSalesSum"]);
                 float minStanding = ((int)traderBase["loyaltyLevels"][i]["minStanding"]);
 
                 if(Mod.level < minLevel || salesSum < minSalesSum || standing < minStanding)
                 {
-                    return i + 1;
+                    return i;
                 }
             }
 
             return -1;
+        }
+
+        public TraderLoyaltyDetails GetLoyaltyDetails()
+        {
+            JObject traderBase = Mod.traderBaseDB[index];
+            for (int i = 1; i < traderBase["loyaltyLevels"].Count(); ++i)
+            {
+                int minLevel = ((int)traderBase["loyaltyLevels"][i]["minLevel"]);
+                int minSalesSum = ((int)traderBase["loyaltyLevels"][i]["minSalesSum"]);
+                float minStanding = ((float)traderBase["loyaltyLevels"][i]["minStanding"]);
+
+                if (Mod.level < minLevel || salesSum < minSalesSum || standing < minStanding)
+                {
+                    TraderLoyaltyDetails lowerTLD = new TraderLoyaltyDetails();
+                    // Current level will be i, but i is the index, not the level, and it is 1 smaller than the level we are currently checking
+                    // So the first one where level<minLevel etc will be the next level, i is then current level, and i + 1 is next level
+                    // and if we never hit that, it means that the current level is the last one
+                    lowerTLD.currentLevel = i;
+                    lowerTLD.nextLevel = i + 1;
+                    lowerTLD.currentMinLevel = ((int)traderBase["loyaltyLevels"][i - 1]["minLevel"]);
+                    lowerTLD.nextMinLevel = minLevel;
+                    lowerTLD.currentMinStanding = ((int)traderBase["loyaltyLevels"][i - 1]["minStanding"]);
+                    lowerTLD.nextMinStanding = minStanding;
+                    lowerTLD.currentMinSalesSum = ((int)traderBase["loyaltyLevels"][i - 1]["minSalesSum"]);
+                    lowerTLD.nextMinSalesSum = minSalesSum;
+
+                    return lowerTLD;
+                }
+            }
+
+            // All stats are greater than all loyalty levels requirements, meaning we are at max level
+            // Set tld's current and next level equal to mean that we reach maximum
+            TraderLoyaltyDetails tld = new TraderLoyaltyDetails();
+            tld.currentLevel = traderBase["loyaltyLevels"].Count();
+            tld.nextLevel = tld.currentLevel;
+            return tld;
         }
 
         public static int IDToIndex(string ID)
@@ -117,5 +162,110 @@ namespace EFM
                     return "";
             }
         }
+
+        public static string GetMoneyString(long money)
+        {
+            if (money < 1000L)
+            {
+                return money.ToString();
+            }
+            if (money < 1000000L)
+            {
+                long num = money / 1000L;
+                long num2 = money / 100L % 10L;
+                return num + ((num2 != 0L) ? ("." + num2) : "") + "k";
+            }
+            long num3 = money / 1000000L;
+            long num4 = money / 100000L % 10L;
+            return num3 + ((num4 != 0L) ? ("." + num4) : "") + "M";
+        }
+
+        public void BuildAssortments(JObject assortData)
+        {
+            Dictionary<string, JObject> data = assortData.ToObject<Dictionary<string, JObject>>();
+            assortmentByLevel = new Dictionary<int, TraderAssortment>();
+            foreach (KeyValuePair<string, JObject> entry in data)
+            {
+                if((entry.Value["items"] as JArray).Count > 0)
+                {
+                    // Only add item if we have an ID for it
+                    JObject parentItem = entry.Value["items"][0] as JObject;
+                    string parentItemID = parentItem["_tpl"].ToString();
+                    string actualParentItemID = "";
+                    if (Mod.itemMap.ContainsKey(parentItemID))
+                    {
+                        actualParentItemID = Mod.itemMap[parentItemID];
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    // Add new assort for this level or get the one already there
+                    int loyaltyLevel = (int)entry.Value["loyalty"];
+                    TraderAssortment currentAssort = null;
+                    if (!assortmentByLevel.ContainsKey(loyaltyLevel))
+                    {
+                        currentAssort = new TraderAssortment();
+                        currentAssort.level = loyaltyLevel;
+                        currentAssort.itemsByID = new Dictionary<string, AssortmentItem>();
+                        assortmentByLevel.Add(loyaltyLevel, currentAssort);
+                    }
+                    else
+                    {
+                        currentAssort = assortmentByLevel[loyaltyLevel];
+                    }
+
+                    // Add all the items in the assort
+                    if (currentAssort.itemsByID.ContainsKey(actualParentItemID))
+                    {
+                        currentAssort.itemsByID[actualParentItemID].stack += (int)parentItem["upd"]["StackObjectsCount"];
+
+                        Dictionary<string, int> currentPrices = new Dictionary<string, int>();
+                        currentAssort.itemsByID[actualParentItemID].prices.Add(currentPrices);
+                        foreach (JObject price in entry.Value["barter_scheme"])
+                        {
+                            currentPrices.Add(price["_tpl"].ToString(), (int)price["count"]);
+                        }
+                    }
+                    else
+                    {
+                        AssortmentItem item = new AssortmentItem();
+                        item.ID = actualParentItemID;
+                        item.prices = new List<Dictionary<string, int>>();
+                        Dictionary<string, int> currentPrices = new Dictionary<string, int>();
+                        item.prices.Add(currentPrices);
+                        foreach(JObject price in entry.Value["barter_scheme"])
+                        {
+                            currentPrices.Add(price["_tpl"].ToString(), (int)price["count"]);
+                        }
+                        currentAssort.itemsByID[actualParentItemID].stack = (int)parentItem["upd"]["StackObjectsCount"];
+                        if(parentItem["upd"]["BuyRestrictionMax"] != null)
+                        {
+                            currentAssort.itemsByID[actualParentItemID].buyRestrictionMax = (int)parentItem["upd"]["BuyRestrictionMax"];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public class TraderAssortment
+    {
+        public int level;
+        public Dictionary<string, AssortmentItem> itemsByID;
+    }
+
+    public class AssortmentItem
+    {
+        public List<GameObject> currentShowcaseElements;
+
+        public string ID;
+
+        public List<Dictionary<string, int>> prices;
+
+        public int stack = 1;
+        public int buyRestrictionMax = -1;
+        public int buyRestrictionCurrent;
     }
 }
