@@ -81,6 +81,7 @@
     <Compile Include="EFM_LootContainerCover.cs" />
     <Compile Include="EFM_LootContainerSlider.cs" />
     <Compile Include="EFM_Manager.cs" />
+    <Compile Include="EFM_MarketItemView.cs" />
     <Compile Include="EFM_MarketManager.cs" />
     <Compile Include="EFM_Menu_Manager.cs" />
     <Compile Include="EFM_OtherInteractable.cs" />

@@ -27,6 +27,7 @@ namespace EFM
 		public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
 		public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid, 3: Area slot. This is to keep track of where an item is in general
 		public EFM_DescriptionManager descriptionManager; // The current description manager displaying this item's description
+		public List<EFM_MarketItemView> marketItemViews;
 		private bool _insured;
 		public bool insured 
 		{
@@ -1429,6 +1430,11 @@ namespace EFM
 			descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(ID) ? Mod.requiredForQuest[ID] : 0;
 
 			return descriptionPack;
+        }
+
+		public int GetValue()
+        {
+			TODO: Return value of this item + all sub items atatchd to it
         }
 	}
 }

@@ -191,7 +191,10 @@ namespace EFM
         public static Dictionary<string, string> itemMap;
         public static JObject[] traderBaseDB;
         public static JObject[] traderAssortDB;
+        public static JObject[] traderTasksDB;
+        public static JArray[] traderCategoriesDB;
         public static JObject globalDB;
+        public static JArray questDB;
         public static JArray XPPerLevel;
         public static JObject mapData;
         public static JObject[] locationsDB;
@@ -652,7 +655,7 @@ namespace EFM
                 itemObjectWrapper.TagPowerupType = (FVRObject.OTagPowerupType)((int)defaultObjectWrapper["TagPowerupType"]);
                 itemObjectWrapper.TagThrownType = (FVRObject.OTagThrownType)((int)defaultObjectWrapper["TagThrownType"]);
                 itemObjectWrapper.MagazineType = (FireArmMagazineType)((int)defaultObjectWrapper["MagazineType"]);
-                itemObjectWrapper.CreditCost = (int)defaultObjectWrapper["CreditCost"];
+                itemObjectWrapper.CreditCost = (int)defaultObjectWrapper["CreditCost"]; 
                 itemObjectWrapper.OSple = (bool)defaultObjectWrapper["OSple"];
 
                 // Add custom item wrapper
@@ -1149,13 +1152,18 @@ namespace EFM
             ParseItemMap();
             traderBaseDB = new JObject[8];
             traderAssortDB = new JObject[8];
-            for(int i=0; i < 8; ++i)
+            traderTasksDB = new JObject[8];
+            traderCategoriesDB = new JArray[8];
+            for (int i=0; i < 8; ++i)
             {
                 string traderID = EFM_TraderStatus.IndexToID(i);
                 traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/base.json"));
                 traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/assort.json"));
+                traderTasksDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/questassort.json"));
+                traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/categories.json"));
             }
             globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/globals.json"));
+            questDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/quests.json"));
             XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
             mapData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/EscapeFromMeatovMapData.txt"));
             locationsDB = new JObject[9];

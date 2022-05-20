@@ -9,15 +9,16 @@ namespace EFM
 {
     public class EFM_TraderStatus
     {
-        public EFM_Base_Manager baseManager;
-
         public string id;
         public int index;
         public int salesSum;
         public float standing;
         public bool unlocked;
+        public int currency; // 0: RUB, 1: USD
 
         public Dictionary<int, TraderAssortment> assortmentByLevel;
+        public List<string> categories;
+        public List<TraderTask> tasks;
 
         public struct TraderLoyaltyDetails
         {
@@ -31,16 +32,23 @@ namespace EFM
             public float nextMinStanding;
         }
 
-        public EFM_TraderStatus(EFM_Base_Manager baseManager, int index, int salesSum, float standing, bool unlocked, JObject assortData)
+        public EFM_TraderStatus(int index, int salesSum, float standing, bool unlocked, string currency, JObject assortData, JArray categoriesData, JObject questAssortData)
         {
-            this.baseManager = baseManager;
             this.id = IndexToID(index);
             this.index = index;
             this.salesSum = salesSum;
             this.standing = standing;
             this.unlocked = unlocked;
+            if (currency.Equals("USD"))
+            {
+                this.currency = 1;
+            }
 
             BuildAssortments(assortData);
+
+            categories = categoriesData.ToObject<List<string>>();
+
+            BuildTasks(questAssortData);
         }
 
         public int GetLoyaltyLevel()
@@ -180,7 +188,7 @@ namespace EFM
             return num3 + ((num4 != 0L) ? ("." + num4) : "") + "M";
         }
 
-        public void BuildAssortments(JObject assortData)
+        private void BuildAssortments(JObject assortData)
         {
             Dictionary<string, JObject> data = assortData.ToObject<Dictionary<string, JObject>>();
             assortmentByLevel = new Dictionary<int, TraderAssortment>();
@@ -248,6 +256,179 @@ namespace EFM
                 }
             }
         }
+
+        public bool ItemSellable(string itemID, List<string> ancestors)
+        {
+            if (categories.Contains(itemID))
+            {
+                return true;
+            }
+
+            foreach(string ancestor in ancestors)
+            {
+                if (categories.Contains(ancestor))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void BuildTasks(JObject tasksData)
+        {
+            tasks = new List<TraderTask>();
+            Dictionary<string, string> rawTasks = tasksData["success"].ToObject<Dictionary<string, string>>();
+            Dictionary<string, TraderTask> foundTasks = new Dictionary<string, TraderTask>();
+            Dictionary<string, JObject> questLocales = Mod.localDB["quest"].ToObject<Dictionary<string, JObject>>();
+            Dictionary<string, List<TraderTaskCondition>> waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
+
+            foreach (KeyValuePair<string, string> rawTask in rawTasks)
+            {
+                TODO check if the task has some save data because some conditions may already be completed, will need to initialize with taht data instead of default one
+
+                if (foundTasks.ContainsKey(rawTask.Value))
+                {
+                    continue;
+                }
+
+                // Find quest in questDB
+                JObject questData = null;
+                foreach(JObject quest in Mod.questDB)
+                {
+                    if (quest["_id"].ToString().Equals(rawTask))
+                    {
+                        questData = quest;
+                        break;
+                    }
+                }
+                if(questData == null)
+                {
+                    Mod.instance.LogError("Could not find quest with ID: "+rawTask.Value+" in questDB");
+                    continue;
+                }
+
+                // Find quest locale
+                JObject questLocale = null;
+                foreach (KeyValuePair<string, JObject> quest in questLocales)
+                {
+                    if (quest.Key.Equals(rawTask))
+                    {
+                        questLocale = quest.Value;
+                        break;
+                    }
+                }
+                if(questData == null)
+                {
+                    Mod.instance.LogError("Could not find quest with ID: "+rawTask.Value+" in locale");
+                    continue;
+                }
+
+                TraderTask newTask = new TraderTask();
+                tasks.Add(newTask);
+
+                newTask.ID = rawTask.Value;
+                newTask.name = questLocale["name"].ToString();
+                newTask.description = Mod.localDB["mail"][questLocale["description"].ToString()].ToString();
+                newTask.failMessage = Mod.localDB["mail"][questLocale["failMessageText"].ToString()].ToString();
+                newTask.successMessage = Mod.localDB["mail"][questLocale["successMessageText"].ToString()].ToString();
+
+                // Fill start conditions
+                newTask.startConditions = new Dictionary<string, TraderTaskCondition>();
+                foreach(JObject startConditionData in questData["conditions"]["AvailableForStart"])
+                {
+                    TraderTaskCondition newCondition = new TraderTaskCondition();
+
+                    if(!SetCondition(newCondition, startConditionData, foundTasks, waitingQuestConditions))
+                    {
+                        Mod.instance.LogError("Quest " + newTask.name + " with ID " + newTask.ID + " has unexpected type: " + startConditionData["_parent"].ToString());
+                        continue;
+                    }
+                    else
+                    {
+                        newTask.startConditions.Add(newCondition.ID, newCondition);
+                    }
+                }
+
+                // Fill completion conditions
+                newTask.completionConditions = new Dictionary<string, TraderTaskCondition>();
+                foreach(JObject completionConditionData in questData["conditions"]["AvailableForFinish"])
+                {
+                    TraderTaskCondition newCondition = new TraderTaskCondition();
+
+                    if(!SetCondition(newCondition, completionConditionData, foundTasks, waitingQuestConditions))
+                    {
+                        Mod.instance.LogError("Quest " + newTask.name + " with ID " + newTask.ID + " has unexpected type: " + completionConditionData["_parent"].ToString());
+                        continue;
+                    }
+                    else
+                    {
+                        newTask.completionConditions.Add(newCondition.ID, newCondition);
+                    }
+                }
+
+                Fill visibility conditions on all start and completion conditions
+
+                // Add task to found tasks and update condition waiting for it if any
+                foundTasks.Add(rawTask.Value, newTask);
+                if (waitingQuestConditions.ContainsKey(rawTask.Value))
+                {
+                    foreach(TraderTaskCondition condition in waitingQuestConditions[rawTask.Value])
+                    {
+                        condition.target = newTask;
+                    }
+                    waitingQuestConditions.Remove(rawTask.Value);
+                }
+            }
+        }
+
+        private bool SetCondition(TraderTaskCondition condition, JObject conditionData, Dictionary<string, TraderTask> foundTasks, Dictionary<string, List<TraderTaskCondition>> waitingQuestConditions)
+        {
+            condition.ID = conditionData["_props"]["id"].ToString();
+
+            switch (conditionData["_parent"].ToString())
+            {
+                case "CounterCreator":
+                    contineufro mehrer
+                case "Level":
+                    condition.conditionType = TraderTaskCondition.ConditionType.Level;
+                    condition.value = (int)conditionData["_props"]["value"];
+                    if (conditionData["_props"]["compareMethod"].ToString().Equals("<="))
+                    {
+                        condition.mode = 1;
+                    }
+                    break;
+                case "Quest":
+                    condition.conditionType = TraderTaskCondition.ConditionType.Quest;
+                    condition.value = (int)conditionData["_props"]["status"][0];
+                    string targetTaskID = conditionData["_props"]["target"].ToString();
+                    if (foundTasks.ContainsKey(targetTaskID))
+                    {
+                        condition.target = foundTasks[targetTaskID];
+                    }
+                    else
+                    {
+                        if (waitingQuestConditions.ContainsKey(targetTaskID))
+                        {
+                            waitingQuestConditions[targetTaskID].Add(condition);
+                        }
+                        else
+                        {
+                            waitingQuestConditions.Add(targetTaskID, new List<TraderTaskCondition> { condition });
+                        }
+                    }
+                    break;
+                case "TraderLoyalty":
+                    condition.conditionType = TraderTaskCondition.ConditionType.TraderLoyalty;
+                    condition.value = (int)conditionData["_props"]["value"];
+                    condition.targetTraderIndex = IDToIndex(conditionData["_props"]["target"].ToString());
+                    break;
+                default:
+                    return false;
+            }
+
+            return true;
+        }
     }
 
     public class TraderAssortment
@@ -267,5 +448,78 @@ namespace EFM
         public int stack = 1;
         public int buyRestrictionMax = -1;
         public int buyRestrictionCurrent;
+    }
+
+    public class TraderTask
+    {
+        public string ID;
+        public string name;
+        public string description;
+        public string failMessage;
+        public string successMessage;
+
+        public Dictionary<string, TraderTaskCondition> startConditions;
+        public Dictionary<string, TraderTaskCondition> completionConditions;
+        public List<TraderTaskReward> rewards;
+    }
+
+    public class TraderTaskCondition
+    {
+        public enum ConditionType
+        {
+            CounterCreator,
+            HandoverItem,
+            Level,
+            FindItem,
+            Quest,
+            LeaveItemAtLocation,
+            TraderLoyalty
+        }
+        public ConditionType conditionType;
+        public string ID;
+
+        // Level: The level to compare with
+        // Quest: The status the quest should be at, 2: started, 4: completed
+        // TraderLoyalty: The loyalty level of that trader
+        public int value;
+
+        // Level, TraderLoyalty
+        public int mode; // 0: >= (Min), 1: <= (Max) 
+
+        // Quest
+        public TraderTask target;
+
+        // TraderLoyalty
+        public int targetTraderIndex;
+    }
+
+    public class TraderStaskVisibilitycondition
+    {
+        // CompleteCondition
+        TraderTaskCondition conditionToComplete;
+    }
+
+    public class TraderStaskCountercondition
+    {
+        public enum CounterConditionType
+        {
+            Kills,
+            ExitStatus,
+            VisitPlace,
+            Location
+        }
+        public CounterConditionType counterConditionType;
+    }
+
+    public class TraderTaskReward
+    {
+        public enum TaskRewardType
+        {
+            Experience,
+            TraderStanding,
+            Item,
+            TraderUnlock
+        }
+        public TaskRewardType taskRewardType;
     }
 }

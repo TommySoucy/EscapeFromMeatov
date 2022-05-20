@@ -84,7 +84,7 @@ namespace EFM
         AssetBundleCreateRequest currentRaidBundleRequest;
         public List<EFM_BaseAreaManager> baseAreaManagers;
         public Dictionary<string, List<GameObject>> baseInventoryObjects;
-        public EFM_TraderStatus[] traderStatuses;
+        public EFM_TraderStatus[] traderStatuses; // TODO: Store these in Mod, because we want them to also exist in raid
         public float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
         public static float[] healthRates = { 0.6125f, 1.4f, 1.225f, 1.05f, 1.05f, 1.1375f, 1.1375f };
         public static float[] currentHealthRates = { 0.6125f, 1.4f, 1.225f, 1.05f, 1.05f, 1.1375f, 1.1375f };
@@ -1396,7 +1396,7 @@ namespace EFM
                 traderStatuses = new EFM_TraderStatus[8];
                 for (int i = 0; i < 8; i++)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true, Mod.traderAssortDB[i]);
+                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
                 }
 
                 // Init lists
@@ -1512,7 +1512,7 @@ namespace EFM
             {
                 for(int i=0; i < 8; i++)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true, Mod.traderAssortDB[i]);
+                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
                 }
             }
             else
@@ -1520,7 +1520,7 @@ namespace EFM
                 JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
                 for (int i = 0; i < 8; i++)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderAssortDB[i]);
+                    traderStatuses[i] = new EFM_TraderStatus(this, i, (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
                 }
             }
         }

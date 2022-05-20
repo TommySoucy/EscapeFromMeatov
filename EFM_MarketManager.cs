@@ -52,11 +52,10 @@ namespace EFM
 
         public void SetTrader(int index)
         {
-            // TODO
             EFM_TraderStatus trader = baseManager.traderStatuses[index];
             Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
-
             EFM_TraderStatus.TraderLoyaltyDetails loyaltyDetails = trader.GetLoyaltyDetails();
+            Transform tradeVolume = transform.GetChild(1);
 
             // Top
             traderDisplay.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[index];
@@ -147,23 +146,24 @@ namespace EFM
 
             // Main
             // Buy
+            // TODO: Set correct prices depending on rebate depending on loyalty level
             bool setDefaultBuy = false;
-            List<Transform> currentHorizontals = new List<Transform>();
-            Transform horizontalsParent = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-            GameObject horizontalCopy = horizontalsParent.GetChild(0).gameObject;
+            List<Transform> currentBuyHorizontals = new List<Transform>();
+            Transform buyHorizontalsParent = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject buyHorizontalCopy = buyHorizontalsParent.GetChild(0).gameObject;
             // Clear previous horizontals
-            while (horizontalsParent.childCount > 1)
+            while (buyHorizontalsParent.childCount > 1)
             {
-               Destroy(horizontalsParent.GetChild(1));
+                Destroy(buyHorizontalsParent.GetChild(1));
             }
             // Add all assort items to showcase
-            for(int i = 1; i <= loyaltyDetails.currentLevel; ++i)
+            for (int i = 1; i <= loyaltyDetails.currentLevel; ++i)
             {
                 TraderAssortment assort = trader.assortmentByLevel[i];
 
-                foreach(KeyValuePair<string, AssortmentItem> item in assort.itemsByID)
+                foreach (KeyValuePair<string, AssortmentItem> item in assort.itemsByID)
                 {
-                    if(item.Value.currentShowcaseElements == null)
+                    if (item.Value.currentShowcaseElements == null)
                     {
                         item.Value.currentShowcaseElements = new List<GameObject>();
                     }
@@ -174,10 +174,10 @@ namespace EFM
                     // Add a new item entry, in a new horizontal if necessary
                     foreach (Dictionary<string, int> priceList in item.Value.prices)
                     {
-                        Transform currentHorizontal = currentHorizontals[currentHorizontals.Count - 1];
-                        if (currentHorizontals[currentHorizontals.Count - 1].childCount == 7)
+                        Transform currentHorizontal = currentBuyHorizontals[currentBuyHorizontals.Count - 1];
+                        if (currentBuyHorizontals[currentBuyHorizontals.Count - 1].childCount == 7)
                         {
-                            currentHorizontal = GameObject.Instantiate(horizontalCopy, horizontalsParent).transform;
+                            currentHorizontal = GameObject.Instantiate(buyHorizontalCopy, buyHorizontalsParent).transform;
                         }
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
@@ -195,12 +195,12 @@ namespace EFM
                         int totalPriceCount = 0;
                         Sprite currencySprite = null;
                         bool barterSprite = false;
-                        foreach(KeyValuePair<string, int> currentPrice in priceList)
+                        foreach (KeyValuePair<string, int> currentPrice in priceList)
                         {
                             totalPriceCount += currentPrice.Value;
                             if (!barterSprite)
                             {
-                                if(currentPrice.Key.Equals("201"))
+                                if (currentPrice.Key.Equals("201"))
                                 {
                                     currencySprite = EFM_Base_Manager.dollarCurrencySprite;
                                 }
@@ -220,7 +220,7 @@ namespace EFM
                             }
                         }
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
-                        currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = "totalPriceCount";
+                        currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = totalPriceCount.ToString();
 
                         // Setup button
                         EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
@@ -253,7 +253,115 @@ namespace EFM
             pointableBuyAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
             // Sell
-            // TODO
+            List<Transform> currentSellHorizontals = new List<Transform>();
+            Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject sellHorizontalCopy = sellHorizontalsParent.GetChild(0).gameObject;
+            // Clear previous horizontals
+            while (sellHorizontalsParent.childCount > 1)
+            {
+                Destroy(sellHorizontalsParent.GetChild(1));
+            }
+            // Add all items in trade volume that are sellable at this trader to showcase
+            foreach (Transform itemTransform in tradeVolume)
+            {
+                EFM_CustomItemWrapper CIW = itemTransform.GetComponent<EFM_CustomItemWrapper>();
+                EFM_VanillaItemDescriptor VID = itemTransform.GetComponent<EFM_VanillaItemDescriptor>();
+                List<EFM_MarketItemView> itemViewListToUse = null;
+                string itemID;
+                int itemValue;
+                bool custom = false;
+                if(CIW != null)
+                {
+                    if(CIW.marketItemViews == null)
+                    {
+                        CIW.marketItemViews = new List<EFM_MarketItemView>();
+                    }
+                    CIW.marketItemViews.Clear();
+                    itemViewListToUse = CIW.marketItemViews;
+
+                    itemID = CIW.ID;
+                    custom = true;
+
+                    itemValue = CIW.GetValue();
+
+                    if (!trader.ItemSellable(itemID, CIW.parents))
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    if (VID.marketItemViews == null)
+                    {
+                        VID.marketItemViews = new List<EFM_MarketItemView>();
+                    }
+                    VID.marketItemViews.Clear();
+                    itemViewListToUse = VID.marketItemViews;
+
+                    itemID = VID.H3ID;
+
+                    itemValue = VID.GetValue();
+
+                    if (!trader.ItemSellable(itemID, VID.parents))
+                    {
+                        continue;
+                    }
+                }
+
+                Transform currentHorizontal = currentSellHorizontals[currentSellHorizontals.Count - 1];
+                if (currentSellHorizontals[currentSellHorizontals.Count - 1].childCount == 7)
+                {
+                    currentHorizontal = GameObject.Instantiate(sellHorizontalCopy, sellHorizontalsParent).transform;
+                }
+
+                Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
+                currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                EFM_MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<EFM_MarketItemView>();
+                marketItemView.custom = custom;
+                marketItemView.CIW = CIW;
+                marketItemView.VID = VID;
+
+                // Write price to item icon and set correct currency icon
+                Sprite currencySprite = null;
+                string currencyItemID = "";
+                if (trader.currency == 0)
+                {
+                    currencySprite = EFM_Base_Manager.roubleCurrencySprite;
+                    currencyItemID = "203";
+                }
+                else if (trader.currency == 1)
+                {
+                    currencySprite = EFM_Base_Manager.dollarCurrencySprite;
+                    itemValue = (int)Mathf.Max(itemValue * 0.008f, 1); // Adjust item value
+                    currencyItemID = "201";
+                }
+                currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
+                currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemValue.ToString();
+
+                // Setup button
+                EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
+                pointableButton.SetButton();
+                pointableButton.Button.onClick.AddListener(() => { OnSellItemClick(currentItemIcon, itemValue, currencyItemID); });
+                pointableButton.MaxPointingRange = 20;
+                pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+
+                // Add the icon object to the list for that item
+                if(CIW != null)
+                {
+                    CIW.marketItemViews.Add(marketItemView);
+                }
+                else
+                {
+                    VID.marketItemViews.Add(marketItemView);
+                }
+            }
+            // Setup button
+            EFM_PointableButton pointableSellDealButton = traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            pointableSellDealButton.SetButton();
+            pointableSellDealButton.Button.onClick.AddListener(() => { OnSellDealClick(); });
+            pointableSellDealButton.MaxPointingRange = 20;
+            pointableSellDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+
             // Tasks
             // TODO
             // Insure
@@ -267,7 +375,7 @@ namespace EFM
         {
             if (added)
             {
-                // TODO: IN BUY, check if item corresponds to price, update fulfilled icon and activate deal! button if necessary
+                // TODO: IN BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
                 // TODO: IN SELL, check if item is already in showcase, if it is, increment count, if not, add a new entry, update price under FOR, make sure deal! button is activated if item is a sellable item
                 // TODO: IN TASKS, for each item requirement of each task, activate TURN IN buttons accordingly
                 // TODO: IN INSURE, check if item already in showcase, if it is, increment count, if not, add a new entry, update price, make sure deal! button is activated
@@ -292,6 +400,7 @@ namespace EFM
         public void OnBuyItemClick(AssortmentItem item, Dictionary<string, int> priceList)
         {
             // TODO: Set item in cart and store item in a var taht can be accessed when we click Deal! button
+            // Set prices in cart and count items in tradevolume to check which prices are fulfilled, change fulfilled icons accordngingly
         }
 
         public void OnBuyDealClick()
@@ -310,6 +419,20 @@ namespace EFM
             // display stack split UI to choose buy amount
             // MAYBE DO ALL THIS IN EFM_Hand SO THAT WE CAN COORDINATE IT WITH STACK SPLITTING PROPERLY
             // Set amount when we confirm amount in cart amount text and logically keep track of count so we buy the right amount
+        }
+
+        public void OnSellItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
+        {
+            // TODO: Set cart UI to this item
+            // de/activate deal! button depending on whether trader has enough money
+        }
+
+        public void OnSellDealClick()
+        {
+            // TODO: Remove all sellable items from trade volume
+            // Add FOR to trade volume
+            // Clear Sell showcase completely
+            // Deactivate deal button
         }
     }
 }
