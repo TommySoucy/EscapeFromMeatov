@@ -80,6 +80,7 @@ namespace EFM
         public static List<EFM_AreaSlot> areaSlots;
         public static bool areaSlotShouldUpdate = true;
         public static List<EFM_AreaBonus> activeBonuses;
+        public static EFM_TraderStatus[] traderStatuses;
 
         // Player
         public static GameObject playerStatusUI;

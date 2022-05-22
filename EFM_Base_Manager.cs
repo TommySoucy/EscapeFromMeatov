@@ -84,7 +84,6 @@ namespace EFM
         AssetBundleCreateRequest currentRaidBundleRequest;
         public List<EFM_BaseAreaManager> baseAreaManagers;
         public Dictionary<string, List<GameObject>> baseInventoryObjects;
-        public EFM_TraderStatus[] traderStatuses; // TODO: Store these in Mod, because we want them to also exist in raid
         public float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
         public static float[] healthRates = { 0.6125f, 1.4f, 1.225f, 1.05f, 1.05f, 1.1375f, 1.1375f };
         public static float[] currentHealthRates = { 0.6125f, 1.4f, 1.225f, 1.05f, 1.05f, 1.1375f, 1.1375f };
@@ -224,7 +223,7 @@ namespace EFM
                                 case EFM_Effect.EffectType.StaminaRate:
                                     Mod.currentStaminaEffect -= effect.value;
                                     break;
-                                case EFM_Effect.EffectType.HandsTremor:
+                                case EFM_Effect.EffectType.Tremor:
                                     // TODO: Stop tremors if there are not other tremor effects
                                     if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                     {
@@ -291,7 +290,7 @@ namespace EFM
                                     bool hasPainTremors = false;
                                     foreach(EFM_Effect effectCheck in EFM_Effect.effects)
                                     {
-                                        if(effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
+                                        if(effectCheck.effectType == EFM_Effect.EffectType.Tremor && effectCheck.active)
                                         {
                                             hasPainTremors = true;
                                             break;
@@ -339,7 +338,7 @@ namespace EFM
                                     bool hasToxinTremors = false;
                                     foreach (EFM_Effect effectCheck in EFM_Effect.effects)
                                     {
-                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.Tremor && effectCheck.active)
                                         {
                                             hasToxinTremors = true;
                                             break;
@@ -405,7 +404,7 @@ namespace EFM
                                     bool hasFractureTremors = false;
                                     foreach (EFM_Effect effectCheck in EFM_Effect.effects)
                                     {
-                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.Tremor && effectCheck.active)
                                         {
                                             hasFractureTremors = true;
                                             break;
@@ -487,7 +486,7 @@ namespace EFM
                             case EFM_Effect.EffectType.StaminaRate:
                                 Mod.currentStaminaEffect += effect.value;
                                 break;
-                            case EFM_Effect.EffectType.HandsTremor:
+                            case EFM_Effect.EffectType.Tremor:
                                 // TODO: Begin tremors if there isnt already another active one
                                 if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                 {
@@ -543,7 +542,7 @@ namespace EFM
                             case EFM_Effect.EffectType.Pain:
                                 // Add a tremor effect
                                 EFM_Effect newTremor = new EFM_Effect();
-                                newTremor.effectType = EFM_Effect.EffectType.HandsTremor;
+                                newTremor.effectType = EFM_Effect.EffectType.Tremor;
                                 newTremor.delay = 5;
                                 newTremor.hasTimer = effect.hasTimer;
                                 newTremor.timer = effect.timer;
@@ -1393,10 +1392,14 @@ namespace EFM
                 }
 
                 // Instantiate other
-                traderStatuses = new EFM_TraderStatus[8];
+                Mod.traderStatuses = new EFM_TraderStatus[8];
                 for (int i = 0; i < 8; i++)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                    Mod.traderStatuses[i] = new EFM_TraderStatus(i, 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                }
+                for (int i = 0; i < 8; i++)
+                {
+                    Mod.traderStatuses[i].Init();
                 }
 
                 // Init lists
@@ -1507,20 +1510,29 @@ namespace EFM
             }
 
             // Load trader statuses
-            traderStatuses = new EFM_TraderStatus[8];
-            if(data["traderStatuses"] == null)
+            if (Mod.traderStatuses == null)
             {
-                for(int i=0; i < 8; i++)
+                Mod.traderStatuses = new EFM_TraderStatus[8];
+                if (data["traderStatuses"] == null)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                    for (int i = 0; i < 8; i++)
+                    {
+                        Mod.traderStatuses[i] = new EFM_TraderStatus(i, 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                    }
                 }
-            }
-            else
-            {
-                JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
+                else
+                {
+                    JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
+                    for (int i = 0; i < 8; i++)
+                    {
+                        Mod.traderStatuses[i] = new EFM_TraderStatus(i, (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                    }
+                }
+
+                // Init all traderstatuses (load save data)
                 for (int i = 0; i < 8; i++)
                 {
-                    traderStatuses[i] = new EFM_TraderStatus(this, i, (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                    Mod.traderStatuses[i].Init();
                 }
             }
         }
@@ -2981,10 +2993,10 @@ namespace EFM
             for(int i=0; i<8; ++i)
             {
                 JToken currentSavedTraderStatus = new JObject();
-                currentSavedTraderStatus["id"] = traderStatuses[i].id;
-                currentSavedTraderStatus["salesSum"] = traderStatuses[i].salesSum;
-                currentSavedTraderStatus["standing"] = traderStatuses[i].standing;
-                currentSavedTraderStatus["unlocked"] = traderStatuses[i].unlocked;
+                currentSavedTraderStatus["id"] = Mod.traderStatuses[i].id;
+                currentSavedTraderStatus["salesSum"] = Mod.traderStatuses[i].salesSum;
+                currentSavedTraderStatus["standing"] = Mod.traderStatuses[i].standing;
+                currentSavedTraderStatus["unlocked"] = Mod.traderStatuses[i].unlocked;
 
                 savedTraderStatuses.Add(currentSavedTraderStatus);
             }

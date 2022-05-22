@@ -131,7 +131,7 @@ namespace EFM
                                 case EFM_Effect.EffectType.StaminaRate:
                                     Mod.currentStaminaEffect -= effect.value;
                                     break;
-                                case EFM_Effect.EffectType.HandsTremor:
+                                case EFM_Effect.EffectType.Tremor:
                                     // TODO: Stop tremors if there are no other tremor effects
                                     if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                     {
@@ -199,7 +199,7 @@ namespace EFM
                                     bool hasPainTremors = false;
                                     foreach (EFM_Effect effectCheck in EFM_Effect.effects)
                                     {
-                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.Tremor && effectCheck.active)
                                         {
                                             hasPainTremors = true;
                                             break;
@@ -247,7 +247,7 @@ namespace EFM
                                     bool hasToxinTremors = false;
                                     foreach (EFM_Effect effectCheck in EFM_Effect.effects)
                                     {
-                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.Tremor && effectCheck.active)
                                         {
                                             hasToxinTremors = true;
                                             break;
@@ -313,7 +313,7 @@ namespace EFM
                                     bool hasFractureTremors = false;
                                     foreach (EFM_Effect effectCheck in EFM_Effect.effects)
                                     {
-                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.Tremor && effectCheck.active)
                                         {
                                             hasFractureTremors = true;
                                             break;
@@ -383,7 +383,7 @@ namespace EFM
                             case EFM_Effect.EffectType.StaminaRate:
                                 Mod.currentStaminaEffect += effect.value;
                                 break;
-                            case EFM_Effect.EffectType.HandsTremor:
+                            case EFM_Effect.EffectType.Tremor:
                                 // TODO: Begin tremors if there isnt already another active one
                                 if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                 {
@@ -456,7 +456,7 @@ namespace EFM
                             case EFM_Effect.EffectType.Pain:
                                 // Add a tremor effect
                                 EFM_Effect newTremor = new EFM_Effect();
-                                newTremor.effectType = EFM_Effect.EffectType.HandsTremor;
+                                newTremor.effectType = EFM_Effect.EffectType.Tremor;
                                 newTremor.delay = 5;
                                 newTremor.hasTimer = effect.hasTimer;
                                 newTremor.timer = effect.timer;
