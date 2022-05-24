@@ -18,6 +18,9 @@ namespace EFM
 
         public List<TraderTask> referencedTasks;
         public List<TraderTaskCondition> referencedTaskConditions;
+        public EFM_TraderTab[] traderTabs;
+
+        private bool initButtonsSet;
 
         public void Init(EFM_Base_Manager baseManager)
         {
@@ -51,6 +54,32 @@ namespace EFM
 
             // Set default trader
             SetTrader(0);
+
+            // Setup trader tabs
+            Transform tabsParent = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(2);
+            for (int i = 0; i < 4;++i)
+            {
+                Transform tab = tabsParent.GetChild(i);
+                if (traderTabs == null)
+                {
+                    traderTabs = new EFM_TraderTab[4];
+                }
+
+                EFM_TraderTab tabScript = tab.gameObject.AddComponent<EFM_TraderTab>();
+                traderTabs[i] = tabScript;
+                tabScript.SetButton();
+                tabScript.MaxPointingRange = 20;
+                tabScript.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                tabScript.hoverSound = clickAudio;
+                tabScript.Button.onClick.AddListener(() => { tabScript.OnClick(i); });
+                tabScript.page = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(i).gameObject;
+
+                tabScript.tabs = traderTabs;
+            }
+
+            // TODO: Setup rag fair
+
+            // TODO: Setup rag fair tabs
         }
 
         public void SetTrader(int index)
@@ -153,6 +182,7 @@ namespace EFM
             List<Transform> currentBuyHorizontals = new List<Transform>();
             Transform buyHorizontalsParent = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject buyHorizontalCopy = buyHorizontalsParent.GetChild(0).gameObject;
+            float buyShowCaseHeight = 27; // Top padding + horizontal
             // Clear previous horizontals
             while (buyHorizontalsParent.childCount > 1)
             {
@@ -188,6 +218,7 @@ namespace EFM
                             if (currentBuyHorizontals[currentBuyHorizontals.Count - 1].childCount == 7)
                             {
                                 currentHorizontal = GameObject.Instantiate(buyHorizontalCopy, buyHorizontalsParent).transform;
+                                buyShowCaseHeight += 24; // horizontal
                             }
 
                             Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
@@ -246,27 +277,60 @@ namespace EFM
                             if (!setDefaultBuy)
                             {
                                 OnBuyItemClick(item.Value, priceList);
+                                setDefaultBuy = true;
                             }
                         }
                     }
                 }
                 // Setup buttons
-                EFM_PointableButton pointableBuyDealButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
-                pointableBuyDealButton.SetButton();
-                pointableBuyDealButton.Button.onClick.AddListener(() => { OnBuyDealClick(); });
-                pointableBuyDealButton.MaxPointingRange = 20;
-                pointableBuyDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                EFM_PointableButton pointableBuyAmountButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
-                pointableBuyAmountButton.SetButton();
-                pointableBuyAmountButton.Button.onClick.AddListener(() => { OnBuyAmountClick(); });
-                pointableBuyAmountButton.MaxPointingRange = 20;
-                pointableBuyAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                if (!initButtonsSet)
+                {
+                    EFM_PointableButton pointableBuyDealButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+                    pointableBuyDealButton.SetButton();
+                    pointableBuyDealButton.Button.onClick.AddListener(() => { OnBuyDealClick(); });
+                    pointableBuyDealButton.MaxPointingRange = 20;
+                    pointableBuyDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    EFM_PointableButton pointableBuyAmountButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+                    pointableBuyAmountButton.SetButton();
+                    pointableBuyAmountButton.Button.onClick.AddListener(() => { OnBuyAmountClick(); });
+                    pointableBuyAmountButton.MaxPointingRange = 20;
+                    pointableBuyAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+
+                    // Set hover scrolls
+                    EFM_HoverScroll newDownHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+                    EFM_HoverScroll newUpHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+                    newDownHoverScroll.MaxPointingRange = 30;
+                    newDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    newDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+                    newDownHoverScroll.other = newUpHoverScroll;
+                    newDownHoverScroll.up = false;
+                    newUpHoverScroll.MaxPointingRange = 30;
+                    newUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    newUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+                    newUpHoverScroll.other = newDownHoverScroll;
+                    newUpHoverScroll.up = true;
+                }
+                EFM_HoverScroll downHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+                EFM_HoverScroll upHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
+                if (buyShowCaseHeight > 150)
+                {
+                    downHoverScroll.rate = 150 / (buyShowCaseHeight - 150);
+                    upHoverScroll.rate = 150 / (buyShowCaseHeight - 150);
+                    downHoverScroll.gameObject.SetActive(true);
+                    upHoverScroll.gameObject.SetActive(false);
+                }
+                else
+                {
+                    downHoverScroll.gameObject.SetActive(false);
+                    upHoverScroll.gameObject.SetActive(false);
+                }
             }
 
             // Sell
             List<Transform> currentSellHorizontals = new List<Transform>();
             Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject sellHorizontalCopy = sellHorizontalsParent.GetChild(0).gameObject;
+            float sellShowCaseHeight = 27; // Top padding + horizontal
             // Clear previous horizontals
             while (sellHorizontalsParent.childCount > 1)
             {
@@ -323,6 +387,7 @@ namespace EFM
                 if (currentSellHorizontals[currentSellHorizontals.Count - 1].childCount == 7)
                 {
                     currentHorizontal = GameObject.Instantiate(sellHorizontalCopy, sellHorizontalsParent).transform;
+                    buyShowCaseHeight += 24; // horizontal
                 }
 
                 Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
@@ -367,15 +432,47 @@ namespace EFM
                 }
             }
             // Setup button
-            EFM_PointableButton pointableSellDealButton = traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
-            pointableSellDealButton.SetButton();
-            pointableSellDealButton.Button.onClick.AddListener(() => { OnSellDealClick(); });
-            pointableSellDealButton.MaxPointingRange = 20;
-            pointableSellDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            if (!initButtonsSet)
+            {
+                EFM_PointableButton pointableSellDealButton = traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+                pointableSellDealButton.SetButton();
+                pointableSellDealButton.Button.onClick.AddListener(() => { OnSellDealClick(); });
+                pointableSellDealButton.MaxPointingRange = 20;
+                pointableSellDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+
+                // Set hover scrolls
+                EFM_HoverScroll newSellDownHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+                EFM_HoverScroll newSellUpHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+                newSellDownHoverScroll.MaxPointingRange = 30;
+                newSellDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                newSellDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+                newSellDownHoverScroll.other = newSellUpHoverScroll;
+                newSellDownHoverScroll.up = false;
+                newSellUpHoverScroll.MaxPointingRange = 30;
+                newSellUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                newSellUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+                newSellUpHoverScroll.other = newSellDownHoverScroll;
+                newSellUpHoverScroll.up = true;
+            }
+            EFM_HoverScroll downSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll upSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+            if (sellShowCaseHeight > 150)
+            {
+                downSellHoverScroll.rate = 150 / (sellShowCaseHeight - 150);
+                upSellHoverScroll.rate = 150 / (sellShowCaseHeight - 150);
+                downSellHoverScroll.gameObject.SetActive(true);
+                upSellHoverScroll.gameObject.SetActive(false);
+            }
+            else
+            {
+                downSellHoverScroll.gameObject.SetActive(false);
+                upSellHoverScroll.gameObject.SetActive(false);
+            }
 
             // Tasks
             Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject taskTemplate = tasksParent.GetChild(0).gameObject;
+            float taskListHeight = 3; // Top padding
             // Clear previous tasks
             while (tasksParent.childCount > 1)
             {
@@ -404,6 +501,7 @@ namespace EFM
                 {
                     GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
                     task.marketListElement = currentTaskElement;
+                    taskListHeight += 29; // Task + Spacing
 
                     // Short info
                     Transform shortInfo = currentTaskElement.transform.GetChild(0);
@@ -603,6 +701,7 @@ namespace EFM
                 {
                     GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
                     task.marketListElement = currentTaskElement;
+                    taskListHeight += 29; // Task + Spacing
 
                     // Short info
                     Transform shortInfo = currentTaskElement.transform.GetChild(0);
@@ -820,6 +919,7 @@ namespace EFM
                 {
                     GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
                     task.marketListElement = currentTaskElement;
+                    taskListHeight += 29; // Task + Spacing
 
                     // Short info
                     Transform shortInfo = currentTaskElement.transform.GetChild(0);
@@ -1009,12 +1109,184 @@ namespace EFM
                     pointableTaskFinishButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
                 }
             }
+            // Setup hoverscrolls
+            if (!initButtonsSet)
+            {
+                EFM_HoverScroll newTaskDownHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+                EFM_HoverScroll newTaskUpHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+                newTaskDownHoverScroll.MaxPointingRange = 30;
+                newTaskDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                newTaskDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+                newTaskDownHoverScroll.other = newTaskUpHoverScroll;
+                newTaskDownHoverScroll.up = false;
+                newTaskUpHoverScroll.MaxPointingRange = 30;
+                newTaskUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                newTaskUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+                newTaskUpHoverScroll.other = newTaskDownHoverScroll;
+                newTaskUpHoverScroll.up = true;
+            }
+            EFM_HoverScroll downTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll upTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+            if (taskListHeight > 145)
+            {
+                downTaskHoverScroll.rate = 145 / (taskListHeight - 145);
+                upTaskHoverScroll.rate = 145 / (taskListHeight - 145);
+                downTaskHoverScroll.gameObject.SetActive(true);
+                upTaskHoverScroll.gameObject.SetActive(false);
+            }
+            else
+            {
+                downTaskHoverScroll.gameObject.SetActive(false);
+                upTaskHoverScroll.gameObject.SetActive(false);
+            }
 
             // Insure
-            // TODO
+            List<Transform> currentInsureHorizontals = new List<Transform>();
+            Transform insureHorizontalsParent = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject insureHorizontalCopy = insureHorizontalsParent.GetChild(0).gameObject;
+            float insureShowCaseHeight = 27; // Top padding + horizontal
+            // Clear previous horizontals
+            while (insureHorizontalsParent.childCount > 1)
+            {
+                Destroy(insureHorizontalsParent.GetChild(1));
+            }
+            if ((bool)Mod.traderBaseDB[trader.index]["insurance"]["availability"])
+            {
+                // Add all items in trade volume that are insureable at this trader to showcase
+                foreach (Transform itemTransform in tradeVolume)
+                {
+                    EFM_CustomItemWrapper CIW = itemTransform.GetComponent<EFM_CustomItemWrapper>();
+                    EFM_VanillaItemDescriptor VID = itemTransform.GetComponent<EFM_VanillaItemDescriptor>();
+                    List<EFM_MarketItemView> itemViewListToUse = null;
+                    string itemID;
+                    int itemValue;
+                    bool custom = false;
+                    if (CIW != null)
+                    {
+                        if (CIW.marketItemViews == null)
+                        {
+                            CIW.marketItemViews = new List<EFM_MarketItemView>();
+                        }
+                        CIW.marketItemViews.Clear();
+                        itemViewListToUse = CIW.marketItemViews;
 
-            // TODO: Add all necessary hover scrolls
-            // TODO: Setup tabs with functionality to make sure the corerct one overlaps 
+                        itemID = CIW.ID;
+                        custom = true;
+
+                        itemValue = CIW.GetValue();
+
+                        if (!trader.ItemInsureable(itemID, CIW.parents))
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if (VID.marketItemViews == null)
+                        {
+                            VID.marketItemViews = new List<EFM_MarketItemView>();
+                        }
+                        VID.marketItemViews.Clear();
+                        itemViewListToUse = VID.marketItemViews;
+
+                        itemID = VID.H3ID;
+
+                        itemValue = VID.GetValue();
+
+                        if (!trader.ItemInsureable(itemID, VID.parents))
+                        {
+                            continue;
+                        }
+                    }
+
+                    Transform currentHorizontal = currentInsureHorizontals[currentInsureHorizontals.Count - 1];
+                    if (currentInsureHorizontals[currentInsureHorizontals.Count - 1].childCount == 7)
+                    {
+                        currentHorizontal = GameObject.Instantiate(insureHorizontalCopy, insureHorizontalsParent).transform;
+                        insureShowCaseHeight += 24; // horizontal
+                    }
+
+                    Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
+                    currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                    EFM_MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<EFM_MarketItemView>();
+                    marketItemView.custom = custom;
+                    marketItemView.CIW = CIW;
+                    marketItemView.VID = VID;
+
+                    // Write price to item icon and set correct currency icon
+                    Sprite currencySprite = null;
+                    string currencyItemID = "";
+                    if (trader.currency == 0)
+                    {
+                        currencySprite = EFM_Base_Manager.roubleCurrencySprite;
+                        currencyItemID = "203";
+                    }
+                    else if (trader.currency == 1)
+                    {
+                        currencySprite = EFM_Base_Manager.dollarCurrencySprite;
+                        itemValue = (int)Mathf.Max(itemValue * 0.008f, 1); // Adjust item value
+                        currencyItemID = "201";
+                    }
+                    currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
+                    currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemValue.ToString();
+
+                    // Setup button
+                    EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
+                    pointableButton.SetButton();
+                    pointableButton.Button.onClick.AddListener(() => { OnInsureItemClick(currentItemIcon, itemValue, currencyItemID); });
+                    pointableButton.MaxPointingRange = 20;
+                    pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+
+                    // Add the icon object to the list for that item
+                    if (CIW != null)
+                    {
+                        CIW.marketItemViews.Add(marketItemView);
+                    }
+                    else
+                    {
+                        VID.marketItemViews.Add(marketItemView);
+                    }
+                }
+                // Setup button
+                if (!initButtonsSet)
+                {
+                    EFM_PointableButton pointableInsureDealButton = traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+                    pointableInsureDealButton.SetButton();
+                    pointableInsureDealButton.Button.onClick.AddListener(() => { OnInsureDealClick(); });
+                    pointableInsureDealButton.MaxPointingRange = 20;
+                    pointableInsureDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+
+                    // Setup hoverscrolls
+                    EFM_HoverScroll newInsureDownHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+                    EFM_HoverScroll newInsureUpHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+                    newInsureDownHoverScroll.MaxPointingRange = 30;
+                    newInsureDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    newInsureDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+                    newInsureDownHoverScroll.other = newInsureUpHoverScroll;
+                    newInsureDownHoverScroll.up = false;
+                    newInsureUpHoverScroll.MaxPointingRange = 30;
+                    newInsureUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    newInsureUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+                    newInsureUpHoverScroll.other = newInsureDownHoverScroll;
+                    newInsureUpHoverScroll.up = true;
+                }
+                EFM_HoverScroll downInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
+                EFM_HoverScroll upInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+                if (insureShowCaseHeight > 150)
+                {
+                    downInsureHoverScroll.rate = 150 / (insureShowCaseHeight - 150);
+                    upInsureHoverScroll.rate = 150 / (insureShowCaseHeight - 150);
+                    downInsureHoverScroll.gameObject.SetActive(true);
+                    upInsureHoverScroll.gameObject.SetActive(false);
+                }
+                else
+                {
+                    downInsureHoverScroll.gameObject.SetActive(false);
+                    upInsureHoverScroll.gameObject.SetActive(false);
+                }
+            }
+
+            initButtonsSet = true;
         }
 
         public void UpdateBasedOnItem(bool added, EFM_CustomItemWrapper CIW, EFM_VanillaItemDescriptor VID)
@@ -1047,6 +1319,7 @@ namespace EFM
         {
             // TODO: Set item in cart and store item in a var taht can be accessed when we click Deal! button
             // Set prices in cart and count items in tradevolume to check which prices are fulfilled, change fulfilled icons accordngingly
+            // Set price hover scrolls
         }
 
         public void OnBuyDealClick()
@@ -1078,6 +1351,20 @@ namespace EFM
             // TODO: Remove all sellable items from trade volume
             // Add FOR to trade volume
             // Clear Sell showcase completely
+            // Deactivate deal button
+        }
+
+        public void OnInsureItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
+        {
+            // TODO: Set cart UI to this item
+            // de/activate deal! button depending on whether trade volume has enough money
+        }
+
+        public void OnInsureDealClick()
+        {
+            // TODO: Set all insureable items in trade volume as insured
+            // Remove FOR from trade volume
+            // Clear insure showcase completely, considering all those items are now insured
             // Deactivate deal button
         }
 

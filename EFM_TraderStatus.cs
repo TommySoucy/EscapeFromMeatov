@@ -320,6 +320,43 @@ namespace EFM
             return false;
         }
 
+        public bool ItemInsureable(string itemID, List<string> ancestors)
+        {
+            // 5448bf274bdc2dfc2f8b456a secure container
+            // 5f4f9eb969cdc30ff33f09db compass
+            // 5447e1d04bdc2dff2f8b4567 knife (all melee really, it also includes axes)
+            // 543be6674bdc2df1348b4569 food and drink
+            // 543be5dd4bdc2deb348b4569 money
+            // 543be5664bdc2dd4348b4569 meds
+            // 543be5cb4bdc2deb348b4568 ammo container (doesnt include mags/clips, so just ammo boxes)
+            // 5485a8684bdc2da71d8b4567 ammo
+
+            // Check if compass, this is the only specific ID
+            if (itemID.Equals("5f4f9eb969cdc30ff33f09db"))
+            {
+                return false;
+            }
+
+            foreach(string ancestor in ancestors)
+            {
+                switch (itemID)
+                {
+                    case "5448bf274bdc2dfc2f8b456a": // secure container
+                    case "5447e1d04bdc2dff2f8b4567": // melee
+                    case "543be6674bdc2df1348b4569": // food/drink
+                    case "543be5dd4bdc2deb348b4569": // money
+                    case "543be5664bdc2dd4348b4569": // meds
+                    case "543be5cb4bdc2deb348b4568": // ammoboxes
+                    case "5485a8684bdc2da71d8b4567": // ammo
+                        return false;
+                    default:
+                        break;
+                }
+            }
+
+            return true;
+        }
+
         private void BuildTasks(JObject tasksData)
         {
             tasks = new List<TraderTask>();
