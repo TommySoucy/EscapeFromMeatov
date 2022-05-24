@@ -16,6 +16,9 @@ namespace EFM
         public EFM_TradeVolume tradeVolume;
         public AudioSource clickAudio;
 
+        public List<TraderTask> referencedTasks;
+        public List<TraderTaskCondition> referencedTaskConditions;
+
         public void Init(EFM_Base_Manager baseManager)
         {
             this.baseManager = baseManager;
@@ -52,7 +55,7 @@ namespace EFM
 
         public void SetTrader(int index)
         {
-            EFM_TraderStatus trader = baseManager.traderStatuses[index];
+            EFM_TraderStatus trader = Mod.traderStatuses[index];
             Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
             EFM_TraderStatus.TraderLoyaltyDetails loyaltyDetails = trader.GetLoyaltyDetails();
             Transform tradeVolume = transform.GetChild(1);
@@ -146,7 +149,6 @@ namespace EFM
 
             // Main
             // Buy
-            // TODO: Set correct prices depending on rebate depending on loyalty level
             bool setDefaultBuy = false;
             List<Transform> currentBuyHorizontals = new List<Transform>();
             Transform buyHorizontalsParent = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
@@ -156,101 +158,110 @@ namespace EFM
             {
                 Destroy(buyHorizontalsParent.GetChild(1));
             }
-            // Add all assort items to showcase
-            for (int i = 1; i <= loyaltyDetails.currentLevel; ++i)
+            if (trader.standing >= 0)
             {
-                TraderAssortment assort = trader.assortmentByLevel[i];
-
-                foreach (KeyValuePair<string, AssortmentItem> item in assort.itemsByID)
+                // Add all assort items to showcase
+                for (int i = 1; i <= loyaltyDetails.currentLevel; ++i)
                 {
-                    if (item.Value.currentShowcaseElements == null)
+                    TraderAssortment assort = trader.assortmentByLevel[i];
+
+                    foreach (KeyValuePair<string, AssortmentItem> item in assort.itemsByID)
                     {
-                        item.Value.currentShowcaseElements = new List<GameObject>();
-                    }
-                    else
-                    {
-                        item.Value.currentShowcaseElements.Clear();
-                    }
-                    // Add a new item entry, in a new horizontal if necessary
-                    foreach (Dictionary<string, int> priceList in item.Value.prices)
-                    {
-                        Transform currentHorizontal = currentBuyHorizontals[currentBuyHorizontals.Count - 1];
-                        if (currentBuyHorizontals[currentBuyHorizontals.Count - 1].childCount == 7)
+                        // Skip if this item must be unlocked
+                        if (trader.itemsToWaitForUnlock.Contains(item.Key))
                         {
-                            currentHorizontal = GameObject.Instantiate(buyHorizontalCopy, buyHorizontalsParent).transform;
+                            continue;
                         }
 
-                        Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
-                        currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[item.Key];
-                        if (item.Value.stack >= 50000)
+                        if (item.Value.currentShowcaseElements == null)
                         {
-                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "A LOT";
+                            item.Value.currentShowcaseElements = new List<GameObject>();
                         }
                         else
                         {
-                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = item.Value.stack.ToString();
+                            item.Value.currentShowcaseElements.Clear();
                         }
-
-                        // Write price to item icon and set correct currency icon
-                        int totalPriceCount = 0;
-                        Sprite currencySprite = null;
-                        bool barterSprite = false;
-                        foreach (KeyValuePair<string, int> currentPrice in priceList)
+                        // Add a new item entry, in a new horizontal if necessary
+                        foreach (Dictionary<string, int> priceList in item.Value.prices)
                         {
-                            totalPriceCount += currentPrice.Value;
-                            if (!barterSprite)
+                            Transform currentHorizontal = currentBuyHorizontals[currentBuyHorizontals.Count - 1];
+                            if (currentBuyHorizontals[currentBuyHorizontals.Count - 1].childCount == 7)
                             {
-                                if (currentPrice.Key.Equals("201"))
+                                currentHorizontal = GameObject.Instantiate(buyHorizontalCopy, buyHorizontalsParent).transform;
+                            }
+
+                            Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
+                            currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[item.Key];
+                            if (item.Value.stack >= 50000)
+                            {
+                                currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "A LOT";
+                            }
+                            else
+                            {
+                                currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = item.Value.stack.ToString();
+                            }
+
+                            // Write price to item icon and set correct currency icon
+                            int totalPriceCount = 0;
+                            Sprite currencySprite = null;
+                            bool barterSprite = false;
+                            foreach (KeyValuePair<string, int> currentPrice in priceList)
+                            {
+                                totalPriceCount += currentPrice.Value;
+                                if (!barterSprite)
                                 {
-                                    currencySprite = EFM_Base_Manager.dollarCurrencySprite;
-                                }
-                                else if (currentPrice.Key.Equals("202"))
-                                {
-                                    currencySprite = EFM_Base_Manager.euroCurrencySprite;
-                                }
-                                else if (currentPrice.Key.Equals("203"))
-                                {
-                                    currencySprite = EFM_Base_Manager.roubleCurrencySprite;
-                                }
-                                else
-                                {
-                                    currencySprite = EFM_Base_Manager.barterSprite;
-                                    barterSprite = true;
+                                    if (currentPrice.Key.Equals("201"))
+                                    {
+                                        currencySprite = EFM_Base_Manager.dollarCurrencySprite;
+                                    }
+                                    else if (currentPrice.Key.Equals("202"))
+                                    {
+                                        currencySprite = EFM_Base_Manager.euroCurrencySprite;
+                                    }
+                                    else if (currentPrice.Key.Equals("203"))
+                                    {
+                                        currencySprite = EFM_Base_Manager.roubleCurrencySprite;
+                                    }
+                                    else
+                                    {
+                                        currencySprite = EFM_Base_Manager.barterSprite;
+                                        barterSprite = true;
+                                    }
                                 }
                             }
-                        }
-                        currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
-                        currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = totalPriceCount.ToString();
+                            currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
+                            currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = totalPriceCount.ToString();
 
-                        // Setup button
-                        EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
+                            // Setup button
+                            EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
 
-                        pointableButton.SetButton();
-                        pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(item.Value, priceList); });
-                        pointableButton.MaxPointingRange = 20;
-                        pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                            pointableButton.SetButton();
+                            pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(item.Value, priceList); });
+                            pointableButton.MaxPointingRange = 20;
+                            pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
-                        // Add the icon object to the list for that item
-                        item.Value.currentShowcaseElements.Add(currentItemIcon.gameObject);
+                            // Add the icon object to the list for that item
+                            item.Value.currentShowcaseElements.Add(currentItemIcon.gameObject);
 
-                        if (!setDefaultBuy)
-                        {
-                            OnBuyItemClick(item.Value, priceList);
+                            if (!setDefaultBuy)
+                            {
+                                OnBuyItemClick(item.Value, priceList);
+                            }
                         }
                     }
                 }
+                // Setup buttons
+                EFM_PointableButton pointableBuyDealButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+                pointableBuyDealButton.SetButton();
+                pointableBuyDealButton.Button.onClick.AddListener(() => { OnBuyDealClick(); });
+                pointableBuyDealButton.MaxPointingRange = 20;
+                pointableBuyDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                EFM_PointableButton pointableBuyAmountButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+                pointableBuyAmountButton.SetButton();
+                pointableBuyAmountButton.Button.onClick.AddListener(() => { OnBuyAmountClick(); });
+                pointableBuyAmountButton.MaxPointingRange = 20;
+                pointableBuyAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
             }
-            // Setup buttons
-            EFM_PointableButton pointableBuyDealButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
-            pointableBuyDealButton.SetButton();
-            pointableBuyDealButton.Button.onClick.AddListener(() => { OnBuyDealClick(); });
-            pointableBuyDealButton.MaxPointingRange = 20;
-            pointableBuyDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-            EFM_PointableButton pointableBuyAmountButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
-            pointableBuyAmountButton.SetButton();
-            pointableBuyAmountButton.Button.onClick.AddListener(() => { OnBuyAmountClick(); });
-            pointableBuyAmountButton.MaxPointingRange = 20;
-            pointableBuyAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
             // Sell
             List<Transform> currentSellHorizontals = new List<Transform>();
@@ -363,7 +374,642 @@ namespace EFM
             pointableSellDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
             // Tasks
-            // TODO
+            Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject taskTemplate = tasksParent.GetChild(0).gameObject;
+            // Clear previous tasks
+            while (tasksParent.childCount > 1)
+            {
+                Destroy(tasksParent.GetChild(1));
+            }
+            if (referencedTasks != null)
+            {
+                foreach (TraderTask referencedTask in referencedTasks)
+                {
+                    referencedTask.marketListElement = null;
+                }
+                foreach (TraderTaskCondition referencedTaskCondition in referencedTaskConditions)
+                {
+                    referencedTaskCondition.marketListElement = null;
+                }
+            }
+            else
+            {
+                referencedTasks = new List<TraderTask>();
+                referencedTaskConditions = new List<TraderTaskCondition>();
+            }
+            // Add all of that trader's available and active tasks to the list
+            foreach (TraderTask task in trader.tasks)
+            {
+                if(task.taskState == TraderTask.TaskState.Available)
+                {
+                    GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
+                    task.marketListElement = currentTaskElement;
+
+                    // Short info
+                    Transform shortInfo = currentTaskElement.transform.GetChild(0);
+                    shortInfo.GetChild(0).GetChild(0).GetComponent<Text>().text = task.name;
+                    shortInfo.GetChild(1).GetChild(0).GetComponent<Text>().text = task.location;
+
+                    // Description
+                    Transform description = currentTaskElement.transform.GetChild(1);
+                    description.GetChild(0).GetComponent<Text>().text = task.description;
+                    // Objectives (conditions)
+                    Transform objectivesParent = description.GetChild(1).GetChild(1);
+                    GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
+                    foreach(KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+                    {
+                        TraderTaskCondition currentCondition = condition.Value;
+                        GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
+                        currentCondition.marketListElement = currentObjectiveElement;
+
+                        Transform objectiveInfo = currentObjectiveElement.transform.GetChild(0).GetChild(0);
+                        objectiveInfo.GetChild(1).GetComponent<Text>().text = currentCondition.text;
+                        // Progress counter, only necessary if value > 1 and for specific condition types
+                        if (currentCondition.value > 1)
+                        {
+                            switch (currentCondition.conditionType)
+                            {
+                                case TraderTaskCondition.ConditionType.CounterCreator:
+                                    foreach(TraderTaskCounterCondition counter in currentCondition.counters)
+                                    {
+                                        if(counter.counterConditionType == TraderTaskCounterCondition.CounterConditionType.Kills)
+                                        {
+                                            objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
+                                            objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
+                                            objectiveInfo.GetChild(3).GetComponent<Text>().text = "0/"+currentCondition.value; // Activate progress counter
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                case TraderTaskCondition.ConditionType.HandoverItem:
+                                case TraderTaskCondition.ConditionType.FindItem:
+                                case TraderTaskCondition.ConditionType.LeaveItemAtLocation:
+                                    objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
+                                    objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
+                                    objectiveInfo.GetChild(3).GetComponent<Text>().text = "0/" + currentCondition.value; // Activate progress counter
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        // Disable condition gameObject if visibility conditions not met
+                        if(currentCondition.visibilityConditions != null && currentCondition.visibilityConditions.Count > 0)
+                        {
+                            foreach(TraderTaskCondition visibilityCondition in currentCondition.visibilityConditions)
+                            {
+                                if(!visibilityCondition.fulfilled)
+                                {
+                                    currentObjectiveElement.SetActive(false);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    // Initial equipment
+                    if (task.startingEquipment != null && task.startingEquipment.Count > 0)
+                    {
+                        Transform initEquipParent = description.GetChild(2);
+                        initEquipParent.gameObject.SetActive(true);
+                        GameObject currentInitEquipHorizontalTemplate = initEquipParent.GetChild(1).gameObject;
+                        Transform currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
+                        foreach (TraderTaskReward reward in task.startingEquipment)
+                        {
+                            // Add new horizontal if necessary
+                            if (currentInitEquipHorizontal.childCount == 6)
+                            {
+                                currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
+                            }
+                            switch (reward.taskRewardType)
+                            {
+                                case TraderTaskReward.TaskRewardType.Item:
+                                    GameObject currentInitEquipItemElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    if (reward.amount > 1)
+                                    {
+                                        currentInitEquipItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
+                                    }
+                                    else
+                                    {
+                                        currentInitEquipItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                    }
+                                    currentInitEquipItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                    break;
+                                case TraderTaskReward.TaskRewardType.TraderUnlock:
+                                    GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[reward.traderIndex];
+                                    currentInitEquipTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
+                                    break;
+                                case TraderTaskReward.TaskRewardType.TraderStanding:
+                                    GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.standingSprite;
+                                    currentInitEquipStandingElement.transform.GetChild(1).gameObject.SetActive(true);
+                                    currentInitEquipStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
+                                    currentInitEquipStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
+                                    break;
+                                case TraderTaskReward.TaskRewardType.Experience:
+                                    GameObject currentInitEquipExperienceElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
+                                    currentInitEquipExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                                    break;
+                                case TraderTaskReward.TaskRewardType.AssortmentUnlock:
+                                    GameObject currentInitEquipAssortElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                    currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    // Rewards
+                    Transform rewardParent = description.GetChild(2);
+                    rewardParent.gameObject.SetActive(true);
+                    GameObject currentRewardHorizontalTemplate = rewardParent.GetChild(1).gameObject;
+                    Transform currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+                    foreach (TraderTaskReward reward in task.successRewards)
+                    {
+                        // Add new horizontal if necessary
+                        if (currentRewardHorizontal.childCount == 6)
+                        {
+                            currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+                        }
+                        switch (reward.taskRewardType)
+                        {
+                            case TraderTaskReward.TaskRewardType.Item:
+                                GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                                currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                if (reward.amount > 1)
+                                {
+                                    currentRewardItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
+                                }
+                                else
+                                {
+                                    currentRewardItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                }
+                                currentRewardItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                break;
+                            case TraderTaskReward.TaskRewardType.TraderUnlock:
+                                GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
+                                currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[reward.traderIndex];
+                                currentRewardTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
+                                break;
+                            case TraderTaskReward.TaskRewardType.TraderStanding:
+                                GameObject currentRewardStandingElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                                currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.standingSprite;
+                                currentRewardStandingElement.transform.GetChild(1).gameObject.SetActive(true);
+                                currentRewardStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
+                                currentRewardStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
+                                break;
+                            case TraderTaskReward.TaskRewardType.Experience:
+                                GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                                currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
+                                currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                                break;
+                            case TraderTaskReward.TaskRewardType.AssortmentUnlock:
+                                GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                                currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    // TODO: Maybe have fail conditions and fail rewards sections
+
+                    // Setup buttons
+                    // ShortInfo
+                    EFM_PointableButton pointableTaskShortInfoButton = shortInfo.gameObject.AddComponent<EFM_PointableButton>();
+                    pointableTaskShortInfoButton.SetButton();
+                    pointableTaskShortInfoButton.Button.onClick.AddListener(() => { OnTaskShortInfoClick(description.gameObject); });
+                    pointableTaskShortInfoButton.MaxPointingRange = 20;
+                    pointableTaskShortInfoButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    // Start
+                    EFM_PointableButton pointableTaskStartButton = shortInfo.GetChild(6).gameObject.AddComponent<EFM_PointableButton>();
+                    pointableTaskStartButton.SetButton();
+                    pointableTaskStartButton.Button.onClick.AddListener(() => { OnTaskStartClick(task); });
+                    pointableTaskStartButton.MaxPointingRange = 20;
+                    pointableTaskStartButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    // Finish
+                    EFM_PointableButton pointableTaskFinishButton = shortInfo.GetChild(7).gameObject.AddComponent<EFM_PointableButton>();
+                    pointableTaskFinishButton.SetButton();
+                    pointableTaskFinishButton.Button.onClick.AddListener(() => { OnTaskFinishClick(task); });
+                    pointableTaskFinishButton.MaxPointingRange = 20;
+                    pointableTaskFinishButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                }
+                else if(task.taskState == TraderTask.TaskState.Active)
+                {
+                    GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
+                    task.marketListElement = currentTaskElement;
+
+                    // Short info
+                    Transform shortInfo = currentTaskElement.transform.GetChild(0);
+                    shortInfo.GetChild(0).GetChild(0).GetComponent<Text>().text = task.name;
+                    shortInfo.GetChild(1).GetChild(0).GetComponent<Text>().text = task.location;
+                    shortInfo.GetChild(2).gameObject.SetActive(true);
+                    shortInfo.GetChild(3).gameObject.SetActive(false);
+                    shortInfo.GetChild(5).gameObject.SetActive(true);
+                    shortInfo.GetChild(6).gameObject.SetActive(false);
+
+                    // Description
+                    Transform description = currentTaskElement.transform.GetChild(1);
+                    description.GetChild(0).GetComponent<Text>().text = task.description;
+                    // Objectives (conditions)
+                    Transform objectivesParent = description.GetChild(1).GetChild(1);
+                    GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
+                    int completedCount = 0;
+                    int totalCount = 0;
+                    foreach (KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+                    {
+                        TraderTaskCondition currentCondition = condition.Value;
+                        if (currentCondition.fulfilled)
+                        {
+                            ++completedCount;
+                        }
+                        ++totalCount;
+                        GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
+                        currentCondition.marketListElement = currentObjectiveElement;
+
+                        Transform objectiveInfo = currentObjectiveElement.transform.GetChild(0).GetChild(0);
+                        objectiveInfo.GetChild(1).GetComponent<Text>().text = currentCondition.text;
+                        // Progress counter, only necessary if value > 1 and for specific condition types
+                        if (currentCondition.value > 1)
+                        {
+                            switch (currentCondition.conditionType)
+                            {
+                                case TraderTaskCondition.ConditionType.CounterCreator:
+                                    foreach (TraderTaskCounterCondition counter in currentCondition.counters)
+                                    {
+                                        if (counter.counterConditionType == TraderTaskCounterCondition.CounterConditionType.Kills)
+                                        {
+                                            objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
+                                            objectiveInfo.GetChild(2).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(((float)counter.killCount) / currentCondition.value * 60, 6);
+                                            objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
+                                            objectiveInfo.GetChild(3).GetComponent<Text>().text = counter.killCount.ToString() + "/" + currentCondition.value;
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                case TraderTaskCondition.ConditionType.HandoverItem:
+                                case TraderTaskCondition.ConditionType.FindItem:
+                                case TraderTaskCondition.ConditionType.LeaveItemAtLocation:
+                                    objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
+                                    objectiveInfo.GetChild(2).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(((float)currentCondition.itemCount) / currentCondition.value * 60, 6);
+                                    objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
+                                    objectiveInfo.GetChild(3).GetComponent<Text>().text = currentCondition.itemCount.ToString() + "/" + currentCondition.value;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        // Disable condition gameObject if visibility conditions not met
+                        if (currentCondition.visibilityConditions != null && currentCondition.visibilityConditions.Count > 0)
+                        {
+                            foreach (TraderTaskCondition visibilityCondition in currentCondition.visibilityConditions)
+                            {
+                                if (!visibilityCondition.fulfilled)
+                                {
+                                    currentObjectiveElement.SetActive(false);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    // Initial equipment
+                    if (task.startingEquipment != null && task.startingEquipment.Count > 0)
+                    {
+                        Transform initEquipParent = description.GetChild(2);
+                        initEquipParent.gameObject.SetActive(true);
+                        GameObject currentInitEquipHorizontalTemplate = initEquipParent.GetChild(1).gameObject;
+                        Transform currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
+                        foreach (TraderTaskReward reward in task.startingEquipment)
+                        {
+                            // Add new horizontal if necessary
+                            if (currentInitEquipHorizontal.childCount == 6)
+                            {
+                                currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
+                            }
+                            switch (reward.taskRewardType)
+                            {
+                                case TraderTaskReward.TaskRewardType.Item:
+                                    GameObject currentInitEquipItemElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    if (reward.amount > 1)
+                                    {
+                                        currentInitEquipItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
+                                    }
+                                    else
+                                    {
+                                        currentInitEquipItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                    }
+                                    currentInitEquipItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                    break;
+                                case TraderTaskReward.TaskRewardType.TraderUnlock:
+                                    GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[reward.traderIndex];
+                                    currentInitEquipTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
+                                    break;
+                                case TraderTaskReward.TaskRewardType.TraderStanding:
+                                    GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.standingSprite;
+                                    currentInitEquipStandingElement.transform.GetChild(1).gameObject.SetActive(true);
+                                    currentInitEquipStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
+                                    currentInitEquipStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
+                                    break;
+                                case TraderTaskReward.TaskRewardType.Experience:
+                                    GameObject currentInitEquipExperienceElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
+                                    currentInitEquipExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                                    break;
+                                case TraderTaskReward.TaskRewardType.AssortmentUnlock:
+                                    GameObject currentInitEquipAssortElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                    currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    // Rewards
+                    Transform rewardParent = description.GetChild(2);
+                    rewardParent.gameObject.SetActive(true);
+                    GameObject currentRewardHorizontalTemplate = rewardParent.GetChild(1).gameObject;
+                    Transform currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+                    foreach (TraderTaskReward reward in task.successRewards)
+                    {
+                        // Add new horizontal if necessary
+                        if (currentRewardHorizontal.childCount == 6)
+                        {
+                            currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+                        }
+                        switch (reward.taskRewardType)
+                        {
+                            case TraderTaskReward.TaskRewardType.Item:
+                                GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                                currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                if (reward.amount > 1)
+                                {
+                                    currentRewardItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
+                                }
+                                else
+                                {
+                                    currentRewardItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                }
+                                currentRewardItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                break;
+                            case TraderTaskReward.TaskRewardType.TraderUnlock:
+                                GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
+                                currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[reward.traderIndex];
+                                currentRewardTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
+                                break;
+                            case TraderTaskReward.TaskRewardType.TraderStanding:
+                                GameObject currentRewardStandingElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                                currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.standingSprite;
+                                currentRewardStandingElement.transform.GetChild(1).gameObject.SetActive(true);
+                                currentRewardStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
+                                currentRewardStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
+                                break;
+                            case TraderTaskReward.TaskRewardType.Experience:
+                                GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                                currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
+                                currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                                break;
+                            case TraderTaskReward.TaskRewardType.AssortmentUnlock:
+                                GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                                currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    // TODO: Maybe have fail conditions and fail rewards sections
+
+                    // Set total progress depending on conditions
+                    float fractionCompletion = ((float)completedCount) / totalCount;
+                    shortInfo.GetChild(5).GetChild(0).GetComponent<Text>().text = String.Format("{0:0}%", fractionCompletion * 100);
+                    shortInfo.GetChild(5).GetChild(1).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(fractionCompletion * 60, 6);
+
+                    // Setup buttons
+                    // ShortInfo
+                    EFM_PointableButton pointableTaskShortInfoButton = shortInfo.gameObject.AddComponent<EFM_PointableButton>();
+                    pointableTaskShortInfoButton.SetButton();
+                    pointableTaskShortInfoButton.Button.onClick.AddListener(() => { OnTaskShortInfoClick(description.gameObject); });
+                    pointableTaskShortInfoButton.MaxPointingRange = 20;
+                    pointableTaskShortInfoButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    // Start
+                    EFM_PointableButton pointableTaskStartButton = shortInfo.GetChild(6).gameObject.AddComponent<EFM_PointableButton>();
+                    pointableTaskStartButton.SetButton();
+                    pointableTaskStartButton.Button.onClick.AddListener(() => { OnTaskStartClick(task); });
+                    pointableTaskStartButton.MaxPointingRange = 20;
+                    pointableTaskStartButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    // Finish
+                    EFM_PointableButton pointableTaskFinishButton = shortInfo.GetChild(7).gameObject.AddComponent<EFM_PointableButton>();
+                    pointableTaskFinishButton.SetButton();
+                    pointableTaskFinishButton.Button.onClick.AddListener(() => { OnTaskFinishClick(task); });
+                    pointableTaskFinishButton.MaxPointingRange = 20;
+                    pointableTaskFinishButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                }
+                else if(task.taskState == TraderTask.TaskState.Complete)
+                {
+                    GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
+                    task.marketListElement = currentTaskElement;
+
+                    // Short info
+                    Transform shortInfo = currentTaskElement.transform.GetChild(0);
+                    shortInfo.GetChild(0).GetChild(0).GetComponent<Text>().text = task.name;
+                    shortInfo.GetChild(1).GetChild(0).GetComponent<Text>().text = task.location;
+                    shortInfo.GetChild(3).gameObject.SetActive(false);
+                    shortInfo.GetChild(4).gameObject.SetActive(true);
+                    shortInfo.GetChild(6).gameObject.SetActive(false);
+                    shortInfo.GetChild(7).gameObject.SetActive(true);
+
+                    // Description
+                    Transform description = currentTaskElement.transform.GetChild(1);
+                    description.GetChild(0).GetComponent<Text>().text = task.description;
+                    // Objectives (conditions)
+                    Transform objectivesParent = description.GetChild(1).GetChild(1);
+                    GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
+                    foreach (KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+                    {
+                        TraderTaskCondition currentCondition = condition.Value;
+                        GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
+                        currentCondition.marketListElement = currentObjectiveElement;
+
+                        Transform objectiveInfo = currentObjectiveElement.transform.GetChild(0).GetChild(0);
+                        objectiveInfo.GetChild(1).GetComponent<Text>().text = currentCondition.text;
+                        // Progress counter, only necessary if value > 1 and for specific condition types
+                        if (currentCondition.value > 1)
+                        {
+                            switch (currentCondition.conditionType)
+                            {
+                                case TraderTaskCondition.ConditionType.CounterCreator:
+                                    foreach (TraderTaskCounterCondition counter in currentCondition.counters)
+                                    {
+                                        if (counter.counterConditionType == TraderTaskCounterCondition.CounterConditionType.Kills)
+                                        {
+                                            objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
+                                            objectiveInfo.GetChild(2).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(60, 6);
+                                            objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
+                                            objectiveInfo.GetChild(3).GetComponent<Text>().text = currentCondition.value.ToString() + "/" + currentCondition.value;
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                case TraderTaskCondition.ConditionType.HandoverItem:
+                                case TraderTaskCondition.ConditionType.FindItem:
+                                case TraderTaskCondition.ConditionType.LeaveItemAtLocation:
+                                    objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
+                                    objectiveInfo.GetChild(2).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(60, 6);
+                                    objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
+                                    objectiveInfo.GetChild(3).GetComponent<Text>().text = currentCondition.value.ToString() + "/" + currentCondition.value;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    // Initial equipment
+                    if (task.startingEquipment != null && task.startingEquipment.Count > 0)
+                    {
+                        Transform initEquipParent = description.GetChild(2);
+                        initEquipParent.gameObject.SetActive(true);
+                        GameObject currentInitEquipHorizontalTemplate = initEquipParent.GetChild(1).gameObject;
+                        Transform currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
+                        foreach (TraderTaskReward reward in task.startingEquipment)
+                        {
+                            // Add new horizontal if necessary
+                            if (currentInitEquipHorizontal.childCount == 6)
+                            {
+                                currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
+                            }
+                            switch (reward.taskRewardType)
+                            {
+                                case TraderTaskReward.TaskRewardType.Item:
+                                    GameObject currentInitEquipItemElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    if (reward.amount > 1)
+                                    {
+                                        currentInitEquipItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
+                                    }
+                                    else
+                                    {
+                                        currentInitEquipItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                    }
+                                    currentInitEquipItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                    break;
+                                case TraderTaskReward.TaskRewardType.TraderUnlock:
+                                    GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[reward.traderIndex];
+                                    currentInitEquipTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
+                                    break;
+                                case TraderTaskReward.TaskRewardType.TraderStanding:
+                                    GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.standingSprite;
+                                    currentInitEquipStandingElement.transform.GetChild(1).gameObject.SetActive(true);
+                                    currentInitEquipStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
+                                    currentInitEquipStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
+                                    break;
+                                case TraderTaskReward.TaskRewardType.Experience:
+                                    GameObject currentInitEquipExperienceElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
+                                    currentInitEquipExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                                    break;
+                                case TraderTaskReward.TaskRewardType.AssortmentUnlock:
+                                    GameObject currentInitEquipAssortElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
+                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                    currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    // Rewards
+                    Transform rewardParent = description.GetChild(2);
+                    rewardParent.gameObject.SetActive(true);
+                    GameObject currentRewardHorizontalTemplate = rewardParent.GetChild(1).gameObject;
+                    Transform currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+                    foreach (TraderTaskReward reward in task.successRewards)
+                    {
+                        // Add new horizontal if necessary
+                        if (currentRewardHorizontal.childCount == 6)
+                        {
+                            currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+                        }
+                        switch (reward.taskRewardType)
+                        {
+                            case TraderTaskReward.TaskRewardType.Item:
+                                GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                                currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                if (reward.amount > 1)
+                                {
+                                    currentRewardItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
+                                }
+                                else
+                                {
+                                    currentRewardItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                }
+                                currentRewardItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                break;
+                            case TraderTaskReward.TaskRewardType.TraderUnlock:
+                                GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
+                                currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[reward.traderIndex];
+                                currentRewardTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
+                                break;
+                            case TraderTaskReward.TaskRewardType.TraderStanding:
+                                GameObject currentRewardStandingElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                                currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.standingSprite;
+                                currentRewardStandingElement.transform.GetChild(1).gameObject.SetActive(true);
+                                currentRewardStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
+                                currentRewardStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
+                                break;
+                            case TraderTaskReward.TaskRewardType.Experience:
+                                GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                                currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
+                                currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                                break;
+                            case TraderTaskReward.TaskRewardType.AssortmentUnlock:
+                                GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                                currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    // TODO: Maybe have fail conditions and fail rewards sections
+
+                    // Setup buttons
+                    // ShortInfo
+                    EFM_PointableButton pointableTaskShortInfoButton = shortInfo.gameObject.AddComponent<EFM_PointableButton>();
+                    pointableTaskShortInfoButton.SetButton();
+                    pointableTaskShortInfoButton.Button.onClick.AddListener(() => { OnTaskShortInfoClick(description.gameObject); });
+                    pointableTaskShortInfoButton.MaxPointingRange = 20;
+                    pointableTaskShortInfoButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    // Start
+                    EFM_PointableButton pointableTaskStartButton = shortInfo.GetChild(6).gameObject.AddComponent<EFM_PointableButton>();
+                    pointableTaskStartButton.SetButton();
+                    pointableTaskStartButton.Button.onClick.AddListener(() => { OnTaskStartClick(task); });
+                    pointableTaskStartButton.MaxPointingRange = 20;
+                    pointableTaskStartButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    // Finish
+                    EFM_PointableButton pointableTaskFinishButton = shortInfo.GetChild(7).gameObject.AddComponent<EFM_PointableButton>();
+                    pointableTaskFinishButton.SetButton();
+                    pointableTaskFinishButton.Button.onClick.AddListener(() => { OnTaskFinishClick(task); });
+                    pointableTaskFinishButton.MaxPointingRange = 20;
+                    pointableTaskFinishButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                }
+            }
+
             // Insure
             // TODO
 
@@ -433,6 +1079,30 @@ namespace EFM
             // Add FOR to trade volume
             // Clear Sell showcase completely
             // Deactivate deal button
+        }
+
+        public void OnTaskShortInfoClick(GameObject description)
+        {
+            // Toggle task description
+            description.SetActive(!description.activeSelf);
+            clickAudio.Play();
+        }
+
+        public void OnTaskStartClick(TraderTask task)
+        {
+            // TODO: Set state of task to active
+            // TODO: Add task to active task list of player status
+            // TODO: Update market task list by making the shortinfo of the referenced task UI element in TraderTask to show that it is active
+            // TODO: Update visibility conditions that are dependent on this task being started, then update everything depending on those visibility conditions
+        }
+
+        public void OnTaskFinishClick(TraderTask task)
+        {
+            // TODO: Set state of task to Success
+            // TODO: Remove task from active task list of player status
+            // TODO: Update market task list by removing the referenced task UI element in TraderTask from the market task list
+            // TODO: Update visibility conditions that are dependent on this task being started, then update everything depending on those visibility conditions
+            // TODO: Update all quest conditions dependent on success of this quest, then update everything depending on those conditions
         }
     }
 }

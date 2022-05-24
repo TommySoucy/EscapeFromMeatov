@@ -169,6 +169,7 @@ namespace EFM
         public static Material quickSlotHoverMaterial;
         public static Material quickSlotConstantMaterial;
         public static List<GameObject> itemPrefabs;
+        public static Dictionary<string, string> itemNames;
         public static GameObject doorLeftPrefab;
         public static GameObject doorRightPrefab;
         public static GameObject doorDoublePrefab;
@@ -575,6 +576,7 @@ namespace EFM
             // Load custom item prefabs
             otherActiveSlots = new List<List<FVRQuickBeltSlot>>();
             itemPrefabs = new List<GameObject>();
+            itemNames = new Dictionary<string, string>();
             itemIcons = new Dictionary<string, Sprite>();
             defaultItemsData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DefaultItemData.txt"));
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
@@ -586,6 +588,7 @@ namespace EFM
                 itemPrefab.name = defaultItemsData["ItemDefaults"][i]["DefaultPhysicalObject"]["DefaultObjectWrapper"]["DisplayName"].ToString();
 
                 itemPrefabs.Add(itemPrefab);
+                itemNames.Add(i.ToString(), itemPrefab.name);
 
                 Sprite itemIcon = assetsBundle.LoadAsset<Sprite>("Item"+i+"_Icon");
                 itemIcons.Add(i.ToString(), itemIcon);
@@ -1208,7 +1211,6 @@ namespace EFM
                 descriptor.creditCost = (int)vanillaItemRaw["CreditCost"];
                 descriptor.parents = vanillaItemRaw["parents"].ToObject<List<string>>();
                 descriptor.lootExperience = (int)vanillaItemRaw["LootExperience"];
-                descriptor.itemName = itemPrefab.name;
 
                 foreach (string parent in descriptor.parents)
                 {
@@ -1223,6 +1225,8 @@ namespace EFM
                 }
 
                 FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
+                descriptor.itemName = physObj.ObjectWrapper.DisplayName;
+                itemNames.Add(H3ID, descriptor.itemName);
                 if (physObj is FVRFireArm)
                 {
                     FVRFireArm asFireArm = physObj as FVRFireArm;

@@ -68,6 +68,8 @@ namespace EFM
         public static Sprite euroCurrencySprite;
         public static Sprite roubleCurrencySprite;
         public static Sprite barterSprite;
+        public static Sprite experienceSprite;
+        public static Sprite standingSprite;
 
         public JToken data;
 
@@ -1395,7 +1397,7 @@ namespace EFM
                 Mod.traderStatuses = new EFM_TraderStatus[8];
                 for (int i = 0; i < 8; i++)
                 {
-                    Mod.traderStatuses[i] = new EFM_TraderStatus(i, 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                    Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
                 }
                 for (int i = 0; i < 8; i++)
                 {
@@ -1517,7 +1519,7 @@ namespace EFM
                 {
                     for (int i = 0; i < 8; i++)
                     {
-                        Mod.traderStatuses[i] = new EFM_TraderStatus(i, 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                        Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
                     }
                 }
                 else
@@ -1525,11 +1527,9 @@ namespace EFM
                     JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
                     for (int i = 0; i < 8; i++)
                     {
-                        Mod.traderStatuses[i] = new EFM_TraderStatus(i, (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                        Mod.traderStatuses[i] = new EFM_TraderStatus(data["traderStatuses"][i], i, Mod.traderBaseDB[i]["nickname"].ToString(), (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
                     }
                 }
-
-                // Init all traderstatuses (load save data)
                 for (int i = 0; i < 8; i++)
                 {
                     Mod.traderStatuses[i].Init();
@@ -2431,6 +2431,8 @@ namespace EFM
                 euroCurrencySprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money_euros");
                 roubleCurrencySprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money_roubles");
                 barterSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_currency_barter");
+                experienceSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_experience_big");
+                standingSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("standing_icon");
                 traderAvatars = new Sprite[8];
                 traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_russian_small");
                 traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_therapist_small");
@@ -2997,6 +2999,34 @@ namespace EFM
                 currentSavedTraderStatus["salesSum"] = Mod.traderStatuses[i].salesSum;
                 currentSavedTraderStatus["standing"] = Mod.traderStatuses[i].standing;
                 currentSavedTraderStatus["unlocked"] = Mod.traderStatuses[i].unlocked;
+
+                // Save tasks
+                // TODO: This saves literally all saveable data for tasks their conditions, and the conditions counters
+                // We could ommit tasks that dont have any data to save, like the ones that are still locked
+                // This makes trader init slower but would save on space. Check if necessary
+                currentSavedTraderStatus["tasks"] = new JObject();
+                foreach(TraderTask traderTask in Mod.traderStatuses[i].tasks)
+                {
+                    JObject taskSaveData = new JObject();
+                    currentSavedTraderStatus["tasks"][traderTask.ID] = taskSaveData;
+                    taskSaveData["state"] = traderTask.taskState.ToString();
+                    taskSaveData["conditions"] = new JObject();
+                    foreach (KeyValuePair<string, TraderTaskCondition> traderTaskConditionEntry in traderTask.completionConditions)
+                    {
+                        JObject conditionSaveData = new JObject();
+                        taskSaveData["conditions"][traderTaskConditionEntry.Key] = conditionSaveData;
+                        conditionSaveData["fulfilled"] = traderTaskConditionEntry.Value.fulfilled;
+                        conditionSaveData["itemCount"] = traderTaskConditionEntry.Value.itemCount;
+                        conditionSaveData["counters"] = new JObject();
+                        foreach (TraderTaskCounterCondition traderTaskCounterCondition in traderTaskConditionEntry.Value.counters)
+                        {
+                            JObject counterConditionSaveData = new JObject();
+                            conditionSaveData["counters"][traderTaskCounterCondition.ID] = counterConditionSaveData;
+                            counterConditionSaveData["killCount"] = traderTaskCounterCondition.killCount;
+                            counterConditionSaveData["completed"] = traderTaskCounterCondition.completed;
+                        }
+                    }
+                }
 
                 savedTraderStatuses.Add(currentSavedTraderStatus);
             }

@@ -11,6 +11,7 @@ namespace EFM
     {
         public string id;
         public int index;
+        public string name;
         public int salesSum;
         public float standing;
         public bool unlocked;
@@ -18,7 +19,18 @@ namespace EFM
 
         public Dictionary<int, TraderAssortment> assortmentByLevel;
         public List<string> categories;
-        public List<TraderTask> tasks;
+        public List<TraderTask> tasks; // TODO: Implement save
+        public List<string> itemsToWaitForUnlock;
+
+        public JToken traderData;
+
+        public static Dictionary<string, List<TraderTaskCondition>> waitingQuestConditions;
+        public static Dictionary<string, List<TraderTaskCondition>> waitingVisibilityConditions;
+        public static Dictionary<string, TraderTask> foundTasks;
+        public static Dictionary<string, TraderTaskCondition> foundTaskConditions;
+
+        public List<TraderTask> tasksToInit;
+        public List<TraderTaskCondition> conditionsToInit;
 
         public struct TraderLoyaltyDetails
         {
@@ -32,10 +44,20 @@ namespace EFM
             public float nextMinStanding;
         }
 
-        public EFM_TraderStatus(int index, int salesSum, float standing, bool unlocked, string currency, JObject assortData, JArray categoriesData, JObject questAssortData)
+        public EFM_TraderStatus(JToken traderData, int index, string name, int salesSum, float standing, bool unlocked, string currency, JObject assortData, JArray categoriesData, JObject questAssortData)
         {
+            if(waitingQuestConditions == null)
+            {
+                foundTasks = new Dictionary<string, TraderTask>();
+                foundTaskConditions = new Dictionary<string, TraderTaskCondition>();
+                waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
+                waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
+            }
+
+            this.traderData = traderData;
             this.id = IndexToID(index);
             this.index = index;
+            this.name = name;
             this.salesSum = salesSum;
             this.standing = standing;
             this.unlocked = unlocked;
@@ -44,16 +66,33 @@ namespace EFM
                 this.currency = 1;
             }
 
+            BuildTasks(questAssortData);
+
             BuildAssortments(assortData);
 
             categories = categoriesData.ToObject<List<string>>();
-
-            BuildTasks(questAssortData);
         }
 
-        public void Init(JObject data)
+        public void Init()
         {
-            sdgr
+            // Init conditions that we didnt have save data for because some are dependent on trader loyalty or standing which hasnt been loaded yet
+            // when we first build the tasks
+            foreach(TraderTaskCondition condition in conditionsToInit)
+            {
+                if (!condition.init)
+                {
+                    condition.Init();
+                }
+            }
+
+            // Then init tasks
+            foreach (TraderTask task in tasksToInit)
+            {
+                if (!task.init)
+                {
+                    task.Init();
+                }
+            }
         }
 
         public int GetLoyaltyLevel()
@@ -195,6 +234,7 @@ namespace EFM
 
         private void BuildAssortments(JObject assortData)
         {
+            // TODO: based on traderData["previousRestockTime"] and current time, decide whether we should load amounts of items from save (If havent restocked yet since last save) or just set default (has restocked since)
             Dictionary<string, JObject> data = assortData.ToObject<Dictionary<string, JObject>>();
             assortmentByLevel = new Dictionary<int, TraderAssortment>();
             foreach (KeyValuePair<string, JObject> entry in data)
@@ -284,17 +324,19 @@ namespace EFM
         {
             tasks = new List<TraderTask>();
             Dictionary<string, string> rawTasks = tasksData["success"].ToObject<Dictionary<string, string>>();
-            Dictionary<string, TraderTask> foundTasks = new Dictionary<string, TraderTask>();
-            Dictionary<string, TraderTaskCondition> foundTaskConditions = new Dictionary<string, TraderTaskCondition>();
             Dictionary<string, JObject> questLocales = Mod.localDB["quest"].ToObject<Dictionary<string, JObject>>();
-            Dictionary<string, List<TraderTaskCondition>> waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
-            Dictionary<string, List<TraderTaskCondition>> waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
 
             foreach (KeyValuePair<string, string> rawTask in rawTasks)
             {
                 if (foundTasks.ContainsKey(rawTask.Value))
                 {
                     continue;
+                }
+
+                JObject taskSaveData = null;
+                if(traderData != null && traderData[index] != null && traderData[index][rawTask.Value] != null)
+                {
+                    taskSaveData = (JObject)traderData[index]["tasks"][rawTask.Value];
                 }
 
                 // Find quest in questDB
@@ -337,6 +379,20 @@ namespace EFM
                 newTask.description = Mod.localDB["mail"][questLocale["description"].ToString()].ToString();
                 newTask.failMessage = Mod.localDB["mail"][questLocale["failMessageText"].ToString()].ToString();
                 newTask.successMessage = Mod.localDB["mail"][questLocale["successMessageText"].ToString()].ToString();
+                newTask.location = "Any";
+                if(taskSaveData == null)
+                {
+                    if(tasksToInit == null)
+                    {
+                        tasksToInit = new List<TraderTask>();
+                    }
+                    tasksToInit.Add(newTask);
+                }
+                else
+                {
+                    newTask.taskState = (TraderTask.TaskState)Enum.Parse(typeof(TraderTask.TaskState), taskSaveData["state"].ToString());
+                    newTask.init = true;
+                }
 
                 // Fill start conditions
                 newTask.startConditions = new Dictionary<string, TraderTaskCondition>();
@@ -344,7 +400,7 @@ namespace EFM
                 {
                     TraderTaskCondition newCondition = new TraderTaskCondition();
 
-                    if(!SetCondition(newCondition, startConditionData, foundTasks, foundTaskConditions, waitingQuestConditions, waitingVisibilityConditions))
+                    if(!SetCondition(newCondition, startConditionData, questLocale, taskSaveData, newTask))
                     {
                         Mod.instance.LogError("Quest " + newTask.name + " with ID " + newTask.ID + " has unexpected type: " + startConditionData["_parent"].ToString());
                         continue;
@@ -361,7 +417,7 @@ namespace EFM
                 {
                     TraderTaskCondition newCondition = new TraderTaskCondition();
 
-                    if(!SetCondition(newCondition, completionConditionData, foundTasks, foundTaskConditions, waitingQuestConditions, waitingVisibilityConditions))
+                    if(!SetCondition(newCondition, completionConditionData, questLocale, taskSaveData, newTask))
                     {
                         Mod.instance.LogError("Quest " + newTask.name + " with ID " + newTask.ID + " has unexpected type: " + completionConditionData["_parent"].ToString());
                         continue;
@@ -378,7 +434,7 @@ namespace EFM
                 {
                     TraderTaskCondition newCondition = new TraderTaskCondition();
 
-                    if(!SetCondition(newCondition, failConditionData, foundTasks, foundTaskConditions, waitingQuestConditions, waitingVisibilityConditions))
+                    if(!SetCondition(newCondition, failConditionData, questLocale, taskSaveData, newTask))
                     {
                         Mod.instance.LogError("Quest " + newTask.name + " with ID " + newTask.ID + " has unexpected type: " + failConditionData["_parent"].ToString());
                         continue;
@@ -438,6 +494,21 @@ namespace EFM
                         Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has item reward with missing item: " + originalItemID);
                     }
                     break;
+                case "AssortmentUnlock":
+                    string originalAssortUnlockItemID = rewardData["items"][0]["_tpl"].ToString();
+                    if (Mod.itemMap.ContainsKey(originalAssortUnlockItemID))
+                    {
+                        reward.taskRewardType = TraderTaskReward.TaskRewardType.AssortmentUnlock;
+                        reward.itemID = Mod.itemMap[originalAssortUnlockItemID];
+                        reward.amount = (int)rewardData["value"];
+                        listToFill.Add(reward);
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has ite0m unlock reward with missing item: " + originalAssortUnlockItemID);
+                    }
+                    itemsToWaitForUnlock.Add(originalAssortUnlockItemID);
+                    break;
                 case "TraderUnlock":
                     reward.taskRewardType = TraderTaskReward.TaskRewardType.TraderUnlock;
                     reward.traderIndex = IDToIndex(rewardData["target"].ToString());
@@ -448,30 +519,70 @@ namespace EFM
             }
         }
 
-        private bool SetCondition(TraderTaskCondition condition, JObject conditionData, Dictionary<string, TraderTask> foundTasks, Dictionary<string, TraderTaskCondition> foundTaskConditions, Dictionary<string, List<TraderTaskCondition>> waitingQuestConditions, Dictionary<string, List<TraderTaskCondition>> waitingVisibilityConditions)
+        private bool SetCondition(TraderTaskCondition condition, JObject conditionData, JObject taskLocale, JObject taskSaveData, TraderTask task)
         {
             condition.ID = conditionData["_props"]["id"].ToString();
+            condition.task = task;
+            condition.text = taskLocale["conditions"][condition.ID].ToString();
+
+            JObject conditionSaveData = null;
+            if (taskSaveData != null && taskSaveData["conditions"] != null && taskSaveData["conditions"][condition.ID] != null)
+            {
+                conditionSaveData = (JObject)taskSaveData["conditions"][condition.ID];
+            }
+            if (task.taskState == TraderTask.TaskState.Success || task.taskState == TraderTask.TaskState.Complete)
+            {
+                condition.fulfilled = true;
+                condition.init = true;
+            }
+            else if (task.taskState != TraderTask.TaskState.Active)
+            {
+                if (conditionSaveData != null)
+                {
+                    condition.fulfilled = (bool)conditionSaveData["fulfilled"];
+                    condition.init = true;
+                }
+                else
+                {
+                    if (conditionSaveData == null)
+                    {
+                        conditionsToInit = new List<TraderTaskCondition>();
+                    }
+                    conditionsToInit.Add(condition);
+                }
+            }
+            else
+            {
+                condition.fulfilled = false;
+                condition.init = true;
+            }
 
             switch (conditionData["_parent"].ToString())
             {
                 case "CounterCreator":
                     condition.conditionType = TraderTaskCondition.ConditionType.CounterCreator;
-                    condition.counters = new List<TraderTaskCountercondition>();
+                    condition.counters = new List<TraderTaskCounterCondition>();
                     condition.value = (int)conditionData["_props"]["value"];
                     foreach (JObject counter in conditionData["_props"]["counter"]["conditions"])
                     {
-                        TraderTaskCountercondition newCounter = new TraderTaskCountercondition();
+                        TraderTaskCounterCondition newCounter = new TraderTaskCounterCondition();
+                        newCounter.ID = counter["_props"]["id"].ToString();
+                        JObject conditionCounterSaveData = null;
+                        if (conditionSaveData != null && conditionSaveData["counters"] != null && conditionSaveData["counters"][newCounter.ID] != null)
+                        {
+                            conditionCounterSaveData = (JObject)conditionSaveData["counters"][newCounter.ID];
+                        }
                         switch (counter["_parent"].ToString())
                         {
                             case "Kills":
-                                newCounter.counterConditionType = TraderTaskCountercondition.CounterConditionType.Kills;
+                                newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.Kills;
                                 if (counter["_props"]["target"].ToString().Equals("Savage"))
                                 {
-                                    newCounter.counterConditionTargetEnemy = TraderTaskCountercondition.CounterConditionTargetEnemy.Scav;
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav;
                                 }
                                 else
                                 {
-                                    newCounter.counterConditionTargetEnemy = TraderTaskCountercondition.CounterConditionTargetEnemy.PMC;
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC;
                                 }
                                 if (counter["_props"]["weapon"] != null)
                                 {
@@ -513,29 +624,162 @@ namespace EFM
                                         newCounter.distanceCompareMode = 1;
                                     }
                                 }
+
+                                if ( condition.fulfilled)
+                                {
+                                    newCounter.killCount = condition.value; // Condition is fulfilled so just set count to max 
+                                }
+                                else // Not fulfilled, need to check for counter save data
+                                {
+                                    if(conditionCounterSaveData != null)
+                                    {
+                                        newCounter.killCount = (int)conditionCounterSaveData["killCount"];
+                                    }
+                                    // else, no data but is not dependent on any other task or condition, so counter is at 0
+                                }
                                 break;
                             case "ExitStatus":
-                                newCounter.counterConditionType = TraderTaskCountercondition.CounterConditionType.ExitStatus;
-                                newCounter.counterConditionTargetExitStatuses = new List<TraderTaskCountercondition.CounterConditionTargetExitStatus>();
+                                newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.ExitStatus;
+                                newCounter.counterConditionTargetExitStatuses = new List<TraderTaskCounterCondition.CounterConditionTargetExitStatus>();
                                 foreach(string raidState in counter["_props"]["status"])
                                 {
-                                    newCounter.counterConditionTargetExitStatuses.Add((TraderTaskCountercondition.CounterConditionTargetExitStatus)Enum.Parse(typeof(TraderTaskCountercondition.CounterConditionTargetExitStatus), raidState));
+                                    newCounter.counterConditionTargetExitStatuses.Add((TraderTaskCounterCondition.CounterConditionTargetExitStatus)Enum.Parse(typeof(TraderTaskCounterCondition.CounterConditionTargetExitStatus), raidState));
+                                }
+
+                                if (condition.fulfilled)
+                                {
+                                    newCounter.completed = true; // Condition is fulfilled so just set as completed
+                                }
+                                else // Not fulfilled, need to check for counter save data
+                                {
+                                    if (conditionCounterSaveData != null)
+                                    {
+                                        newCounter.completed = (bool)conditionCounterSaveData["completed"];
+                                    }
+                                    // else, no data but is not dependent on any other task or condition, so not completed
                                 }
                                 break;
                             case "VisitPlace":
-                                newCounter.counterConditionType = TraderTaskCountercondition.CounterConditionType.VisitPlace;
+                                newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.VisitPlace;
                                 newCounter.targetPlaceName = counter["_props"]["target"].ToString();
-                                break;
-                            case "Location":
-                                newCounter.counterConditionType = TraderTaskCountercondition.CounterConditionType.Location;
-                                newCounter.counterConditionLocations = new List<TraderTaskCountercondition.CounterConditionLocation>();
-                                foreach (string targetLocation in counter["_props"]["target"])
+
+                                if (condition.fulfilled)
                                 {
-                                    newCounter.counterConditionLocations.Add((TraderTaskCountercondition.CounterConditionLocation)Enum.Parse(typeof(TraderTaskCountercondition.CounterConditionLocation), targetLocation));
+                                    newCounter.completed = true; // Condition is fulfilled so just set as completed
+                                }
+                                else // Not fulfilled, need to check for counter save data
+                                {
+                                    if (conditionCounterSaveData != null)
+                                    {
+                                        newCounter.completed = (bool)conditionCounterSaveData["completed"];
+                                    }
+                                    // else, no data but is not dependent on any other task or condition, so not completed
                                 }
                                 break;
+                            case "Location":
+                                newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.Location;
+                                newCounter.counterConditionLocations = new List<TraderTaskCounterCondition.CounterConditionLocation>();
+                                foreach (string targetLocation in counter["_props"]["target"])
+                                {
+                                    newCounter.counterConditionLocations.Add((TraderTaskCounterCondition.CounterConditionLocation)Enum.Parse(typeof(TraderTaskCounterCondition.CounterConditionLocation), targetLocation));
+
+                                    if (task.location.Equals("Any"))
+                                    {
+                                        switch(newCounter.counterConditionLocations[newCounter.counterConditionLocations.Count - 1])
+                                        {
+                                            case TraderTaskCounterCondition.CounterConditionLocation.factory4_day:
+                                            case TraderTaskCounterCondition.CounterConditionLocation.factory4_night:
+                                                task.location = "Factory";
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.laboratory:
+                                                task.location = "Laboratory";
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.RezervBase:
+                                                task.location = "Reserve";
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.Lighthouse:
+                                                task.location = "Lighthouse";
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.Shoreline:
+                                                task.location = "Shoreline";
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.bigmap:
+                                                task.location = "Customs";
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.Interchange:
+                                                task.location = "Interchange";
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.Woods:
+                                                task.location = "Woods";
+                                                break;
+                                            default:
+                                                task.location = "Special";
+                                                break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        switch (newCounter.counterConditionLocations[newCounter.counterConditionLocations.Count - 1])
+                                        {
+                                            case TraderTaskCounterCondition.CounterConditionLocation.factory4_day:
+                                            case TraderTaskCounterCondition.CounterConditionLocation.factory4_night:
+                                                if (!task.location.Equals("Factory"))
+                                                {
+                                                    task.location = "Multiple";
+                                                }
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.laboratory:
+                                                if (!task.location.Equals("Laboratory"))
+                                                {
+                                                    task.location = "Multiple";
+                                                }
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.RezervBase:
+                                                if (!task.location.Equals("Reserve"))
+                                                {
+                                                    task.location = "Multiple";
+                                                }
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.Lighthouse:
+                                                if (!task.location.Equals("Lighthouse"))
+                                                {
+                                                    task.location = "Multiple";
+                                                }
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.Shoreline:
+                                                if (!task.location.Equals("Shoreline"))
+                                                {
+                                                    task.location = "Multiple";
+                                                }
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.bigmap:
+                                                if (!task.location.Equals("Customs"))
+                                                {
+                                                    task.location = "Multiple";
+                                                }
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.Interchange:
+                                                if (!task.location.Equals("Interchange"))
+                                                {
+                                                    task.location = "Multiple";
+                                                }
+                                                break;
+                                            case TraderTaskCounterCondition.CounterConditionLocation.Woods:
+                                                if (!task.location.Equals("Woods"))
+                                                {
+                                                    task.location = "Multiple";
+                                                }
+                                                break;
+                                            default:
+                                                task.location = "Multiple";
+                                                break;
+                                        }
+                                    }
+                                }
+                                // This is a constraint condition, it does not have live data of its own, so no loading save data
+                                break;
                             case "HealthEffect":
-                                newCounter.counterConditionType = TraderTaskCountercondition.CounterConditionType.HealthEffect;
+                                newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.HealthEffect;
                                 string effectName = counter["_props"]["bodyPartsWithEffects"][0]["effects"][0].ToString();
                                 if (effectName.Equals("Stimulator"))
                                 {
@@ -545,9 +789,23 @@ namespace EFM
                                 {
                                     newCounter.effectType = (EFM_Effect.EffectType)Enum.Parse(typeof(EFM_Effect.EffectType), effectName);
                                 }
+
+                                if (condition.fulfilled)
+                                {
+                                    newCounter.completed = true; // Condition is fulfilled so just set as completed
+                                }
+                                else // Not fulfilled, need to check for counter save data
+                                {
+                                    if (conditionCounterSaveData != null)
+                                    {
+                                        newCounter.completed = (bool)conditionCounterSaveData["completed"];
+                                    }
+                                    // else, no data but is not dependent on any other task or condition, so not completed
+                                }
+                                // No need to load timer, timer will always be at 0 since we are loading the game
                                 break;
                             case "Equipment":
-                                newCounter.counterConditionType = TraderTaskCountercondition.CounterConditionType.Equipment;
+                                newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.Equipment;
                                 if(counter["_props"]["equipmentExclusive"] != null)
                                 {
                                     newCounter.equipmentExclusive = new List<string>();
@@ -574,6 +832,7 @@ namespace EFM
                                         // else there is some equipment that isnt implemented (yet?)
                                     }
                                 }
+                                // This is a constraint condition, it does not have live data of its own, so no loading save data
                                 break;
                         }
                     }
@@ -610,6 +869,43 @@ namespace EFM
                     condition.conditionType = TraderTaskCondition.ConditionType.TraderLoyalty;
                     condition.value = (int)conditionData["_props"]["value"];
                     condition.targetTraderIndex = IDToIndex(conditionData["_props"]["target"].ToString());
+                    break;
+                case "HandoverItem":
+                case "FindItem":
+                    condition.conditionType = TraderTaskCondition.ConditionType.FindItem;
+                    condition.value = (int)conditionData["_props"]["value"];
+                    string originalItemID = conditionData["_props"]["target"][0].ToString();
+                    if (Mod.itemMap.ContainsKey(originalItemID))
+                    {
+                        condition.item = Mod.itemMap[originalItemID];
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    break;
+                case "LeaveItemAtLocation":
+                    condition.conditionType = TraderTaskCondition.ConditionType.LeaveItemAtLocation;
+                    condition.value = (int)conditionData["_props"]["value"];
+                    string originalLeaveItemID = conditionData["_props"]["target"][0].ToString();
+                    if (Mod.itemMap.ContainsKey(originalLeaveItemID))
+                    {
+                        condition.item = Mod.itemMap[originalLeaveItemID];
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    condition.locationID = conditionData["_props"]["zoneId"].ToString();
+                    string zoneLocation = condition.locationID.Split('_')[0];
+                    if (task.location.Equals("Any"))
+                    {
+                        task.location = zoneLocation;
+                    }
+                    else if(!task.location.Equals(zoneLocation))
+                    {
+                        task.location = "Multiple";
+                    }
                     break;
                 default:
                     return false;
@@ -679,16 +975,23 @@ namespace EFM
 
     public class TraderTask
     {
+        public bool init;
+
+        public GameObject marketListElement;
+        public GameObject statusListElement;
+
         public string ID;
         public string name;
         public string description;
         public string failMessage;
         public string successMessage;
+        public string location;
         public enum TaskState
         {
             Locked,
             Available,
             Active,
+            Complete,
             Success,
             Fail
         }
@@ -700,10 +1003,37 @@ namespace EFM
         public List<TraderTaskReward> successRewards;
         public List<TraderTaskReward> startingEquipment;
         public List<TraderTaskReward> failureRewards;
+
+        public void Init()
+        {
+            bool allStartFulfilled = true;
+            foreach(KeyValuePair<string, TraderTaskCondition> condition in startConditions)
+            {
+                if (!condition.Value.fulfilled)
+                {
+                    allStartFulfilled = false;
+                    break;
+                }
+            }
+            if (allStartFulfilled)
+            {
+                taskState = TaskState.Available;
+            }
+
+            init = true;
+        }
     }
 
     public class TraderTaskCondition
     {
+        public bool init;
+        public TraderTask task;
+
+        public GameObject marketListElement;
+        public GameObject statusListElement;
+
+        public string text;
+
         public enum ConditionType
         {
             CounterCreator,
@@ -723,6 +1053,7 @@ namespace EFM
         // Quest: The status the quest should be at, 2: started, 4: completed
         // TraderLoyalty: The loyalty level of that trader
         // Counter: depends on counter conditions
+        // HandOverItem, FindItem: amount to hand in/find
         public int value;
 
         // Level, TraderLoyalty
@@ -734,11 +1065,51 @@ namespace EFM
         // TraderLoyalty
         public int targetTraderIndex;
 
+        // HandOverItem, FindItem, LeaveItemAtLocation
+        public string item;
+
+        public int itemCount; // Live data
+
+        // LeaveItemAtLocation
+        public string locationID;
+
         // Counter
-        public List<TraderTaskCountercondition> counters;
+        public List<TraderTaskCounterCondition> counters;
+
+        public void Init()
+        {
+            // Only care for quest and trader loyalty because those are the ones that are dependent on the init of other traders
+            switch (conditionType)
+            {
+                case ConditionType.Quest:
+                    if(value == 2)
+                    {
+                        fulfilled = target.taskState == TraderTask.TaskState.Active;
+                    }
+                    else if(value == 4)
+                    {
+                        fulfilled = target.taskState == TraderTask.TaskState.Success;
+                    }
+                    break;
+                case ConditionType.TraderLoyalty:
+                    if(mode == 0) // >=
+                    {
+                        fulfilled = Mod.traderStatuses[targetTraderIndex].GetLoyaltyLevel() >= value;
+                    }
+                    else // <=
+                    {
+                        fulfilled = Mod.traderStatuses[targetTraderIndex].GetLoyaltyLevel() <= value;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            init = true;
+        }
     }
 
-    public class TraderTaskCountercondition
+    public class TraderTaskCounterCondition
     {
         public enum CounterConditionType
         {
@@ -750,6 +1121,7 @@ namespace EFM
             Equipment
         }
         public CounterConditionType counterConditionType;
+        public string ID;
 
         // Kills
         public enum CounterConditionTargetEnemy
@@ -765,7 +1137,7 @@ namespace EFM
         public float distance = -1;
         public int distanceCompareMode; //0: >=, 1: <=
 
-        public int killCount;
+        public int killCount; // Live data
 
         // ExitStatus
         public enum CounterConditionTargetExitStatus
@@ -780,8 +1152,6 @@ namespace EFM
 
         // VisitPlace
         public string targetPlaceName;
-
-        public bool completed;
 
         // Location
         public enum CounterConditionLocation
@@ -805,7 +1175,8 @@ namespace EFM
         public float time;
         public int timeCompareMode; //0: >=, 1: <=
 
-        public float timer;
+        public float timer; // Live data
+        public bool completed; // Live data
 
         // Equipment
         public List<string> equipmentExclusive;
@@ -819,7 +1190,8 @@ namespace EFM
             Experience,
             TraderStanding,
             Item,
-            TraderUnlock
+            TraderUnlock,
+            AssortmentUnlock
         }
         public TaskRewardType taskRewardType;
 
