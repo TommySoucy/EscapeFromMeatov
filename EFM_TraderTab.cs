@@ -41,7 +41,7 @@ namespace EFM
 				page.SetActive(true);
 
 				// Reorder the tabs and deactivate any other active ones
-				for(int i = 0; i < 4; ++i)
+				for(int i = 0; i < tabs.Length; ++i)
                 {
 					if(i != index)
                     {

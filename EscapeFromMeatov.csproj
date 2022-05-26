@@ -68,6 +68,7 @@
     <Compile Include="EFM_AreaSlot.cs" />
     <Compile Include="EFM_BaseAreaManager.cs" />
     <Compile Include="EFM_Base_Manager.cs" />
+    <Compile Include="EFM_CategoryTreeNode.cs" />
     <Compile Include="EFM_CustomItemWrapper.cs" />
     <Compile Include="EFM_Describable.cs" />
     <Compile Include="EFM_DescriptionManager.cs" />

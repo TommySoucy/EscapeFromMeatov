@@ -105,6 +105,14 @@ namespace EFM
             buttonClickAudio = transform.GetChild(0).GetChild(1).GetChild(4).GetComponent<AudioSource>();
             exitButton.Button.onClick.AddListener(() => { OnExitClick(); });
 
+            // Set Wishlist button (color when active: FFD800FF)
+            EFM_PointableButton wishlistButton = transform.GetChild(0).GetChild(1).GetChild(5).gameObject.AddComponent<EFM_PointableButton>();
+            wishlistButton.SetButton();
+            wishlistButton.MaxPointingRange = 30;
+            wishlistButton.hoverSound = transform.GetChild(0).GetChild(1).GetChild(3).GetComponent<AudioSource>();
+            buttonClickAudio = transform.GetChild(0).GetChild(1).GetChild(4).GetComponent<AudioSource>();
+            wishlistButton.Button.onClick.AddListener(() => { OnWishlistClick(); });
+
             // Set background pointable
             FVRPointable backgroundPointable = transform.GetChild(0).GetChild(1).GetChild(0).gameObject.AddComponent<FVRPointable>();
             backgroundPointable.MaxPointingRange = 30;
@@ -321,10 +329,12 @@ namespace EFM
             {
                 descriptionHeight += 47;
                 fullWishlist.SetActive(true);
+                transform.GetChild(0).GetChild(1).GetChild(5).GetComponent<Image>().color = new Color(1, 0.84706f, 0);
             }
             else
             {
                 fullWishlist.SetActive(false);
+                transform.GetChild(0).GetChild(1).GetChild(5).GetComponent<Image>().color = Color.black;
             }
             if (this.descriptionPack.amountRequired > 0)
             {
@@ -511,6 +521,53 @@ namespace EFM
             buttonClickAudio.Play();
             Mod.activeDescriptions.Remove(this);
             Destroy(gameObject);
+        }
+
+        public void OnWishlistClick()
+        {
+            string itemID;
+            if (descriptionPack.isCustom)
+            {
+                itemID = descriptionPack.customItem.ID;
+            }
+            else
+            {
+                itemID = descriptionPack.vanillaItem.H3ID;
+            }
+
+            if (descriptionPack.onWishlist)
+            {
+                Mod.wishList.Remove(itemID);
+            }
+            else
+            {
+                Mod.wishList.Add(itemID);
+            }
+
+            // If currently in hideout, otherwise we are in raid, and we dont need to modify the market because it doesnt exist
+            if(Mod.currentLocationIndex == 1)
+            {
+                if (descriptionPack.onWishlist)
+                {
+                    Destroy(Mod.currentBaseManager.marketManager.wishListItemViewsByID[itemID]);
+                    Mod.currentBaseManager.marketManager.wishListItemViewsByID.Remove(itemID);
+
+                    if (Mod.currentBaseManager.marketManager.ragFairItemBuyViewsByID.ContainsKey(itemID))
+                    {
+                        List<GameObject> itemViewsList = Mod.currentBaseManager.marketManager.ragFairItemBuyViewsByID[itemID];
+                        foreach (GameObject itemView in itemViewsList)
+                        {
+                            itemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = Color.black;
+                        }
+                    }
+                }
+                else
+                {
+                    Mod.currentBaseManager.marketManager.AddItemToWishlist(itemID);
+                }
+            }
+
+            descriptionPack.onWishlist = !descriptionPack.onWishlist;
         }
     }
 }

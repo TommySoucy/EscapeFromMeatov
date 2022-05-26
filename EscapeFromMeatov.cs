@@ -81,6 +81,7 @@ namespace EFM
         public static bool areaSlotShouldUpdate = true;
         public static List<EFM_AreaBonus> activeBonuses;
         public static EFM_TraderStatus[] traderStatuses;
+        public static EFM_CategoryTreeNode itemCategories;
 
         // Player
         public static GameObject playerStatusUI;
@@ -693,6 +694,8 @@ namespace EFM
                     customItemWrapper.blocksHeadwear = (bool)defaultItemsData["ItemDefaults"][i]["BlocksHeadwear"];
                 }
 
+                AddCategories(customItemWrapper.parents);
+
                 foreach (string parent in customItemWrapper.parents)
                 {
                     if (itemsByParents.ContainsKey(parent))
@@ -1113,6 +1116,33 @@ namespace EFM
             firstCustomConfigIndex = customQuickBeltConfigurations.Count;
             customQuickBeltConfigurations.AddRange(rigConfigurations);
             ManagerSingleton<GM>.Instance.QuickbeltConfigurations = customQuickBeltConfigurations.ToArray();
+        }
+
+        private void AddCategories(List<string> parents)
+        {
+            // If necessary, init categ tree root with item ID
+            if(itemCategories == null)
+            {
+                itemCategories = new EFM_CategoryTreeNode(null, "54009119af1c881c07000029", "Item");
+            }
+
+            EFM_CategoryTreeNode currentParent = itemCategories;
+            for(int i = parents.Count - 2; i >= 0; i--)
+            {
+                string ID = parents[i];
+                EFM_CategoryTreeNode foundChild = currentParent.FindChild(ID);
+                if (foundChild != null)
+                {
+                    currentParent = foundChild;
+                }
+                else
+                {
+                    string name = localDB["templates"]["ID"]["Name"].ToString();
+                    EFM_CategoryTreeNode newNode = new EFM_CategoryTreeNode(currentParent, ID, name);
+                    currentParent.children.Add(newNode);
+                    currentParent = newNode;
+                }
+            }
         }
 
         private void SetFilterListsFor(EFM_CustomItemWrapper customItemWrapper, int index)

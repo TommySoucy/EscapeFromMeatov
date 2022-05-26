@@ -19,6 +19,9 @@ namespace EFM
         public List<TraderTask> referencedTasks;
         public List<TraderTaskCondition> referencedTaskConditions;
         public EFM_TraderTab[] traderTabs;
+        public EFM_TraderTab[] ragFairTabs;
+        public Dictionary<string, GameObject> wishListItemViewsByID;
+        public Dictionary<string, List<GameObject>> ragFairItemBuyViewsByID;
 
         private bool initButtonsSet;
 
@@ -70,16 +73,162 @@ namespace EFM
                 tabScript.SetButton();
                 tabScript.MaxPointingRange = 20;
                 tabScript.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                tabScript.hoverSound = clickAudio;
+                tabScript.clickSound = clickAudio;
                 tabScript.Button.onClick.AddListener(() => { tabScript.OnClick(i); });
                 tabScript.page = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(i).gameObject;
 
                 tabScript.tabs = traderTabs;
             }
 
-            // TODO: Setup rag fair
+            // Setup rag fair
+            // Buy
+            Transform categoriesParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject categoryTemplate = categoriesParent.GetChild(0).gameObject;
+            EFM_PointableButton categoryTemplateMainButton = categoryTemplate.transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            categoryTemplateMainButton.SetButton();
+            categoryTemplateMainButton.MaxPointingRange = 20;
+            categoryTemplateMainButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            EFM_PointableButton categoryTemplateToggleButton = categoryTemplate.transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            categoryTemplateToggleButton.SetButton();
+            categoryTemplateToggleButton.MaxPointingRange = 20;
+            categoryTemplateToggleButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            AddRagFairCategories(Mod.itemCategories.children, categoriesParent, categoryTemplate, 1);
+            ragFairItemBuyViewsByID = new Dictionary<string, List<GameObject>>();
 
-            // TODO: Setup rag fair tabs
+            // Setup buy categories hoverscrolls
+            EFM_HoverScroll newBuyCategoriesDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+            EFM_HoverScroll newBuyCategoriesUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+            newBuyCategoriesDownHoverScroll.MaxPointingRange = 30;
+            newBuyCategoriesDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            newBuyCategoriesDownHoverScroll.scrollbar = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+            newBuyCategoriesDownHoverScroll.other = newBuyCategoriesUpHoverScroll;
+            newBuyCategoriesDownHoverScroll.up = false;
+            newBuyCategoriesUpHoverScroll.MaxPointingRange = 30;
+            newBuyCategoriesUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            newBuyCategoriesUpHoverScroll.scrollbar = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+            newBuyCategoriesUpHoverScroll.other = newBuyCategoriesDownHoverScroll;
+            newBuyCategoriesUpHoverScroll.up = true;
+            float buyCategoriesHeight = 3 + 12 * Mod.itemCategories.children.Count;
+            if (buyCategoriesHeight > 186)
+            {
+                newBuyCategoriesUpHoverScroll.rate = 186 / (buyCategoriesHeight - 186);
+                newBuyCategoriesDownHoverScroll.rate = 186 / (buyCategoriesHeight - 186);
+                newBuyCategoriesDownHoverScroll.gameObject.SetActive(true);
+            }
+
+            // Setup buy items hoverscrolls
+            EFM_HoverScroll newBuyItemsDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+            EFM_HoverScroll newBuyItemsUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+            newBuyItemsDownHoverScroll.MaxPointingRange = 30;
+            newBuyItemsDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            newBuyItemsDownHoverScroll.scrollbar = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+            newBuyItemsDownHoverScroll.other = newBuyItemsUpHoverScroll;
+            newBuyItemsDownHoverScroll.up = false;
+            newBuyItemsUpHoverScroll.MaxPointingRange = 30;
+            newBuyItemsUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            newBuyItemsUpHoverScroll.scrollbar = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+            newBuyItemsUpHoverScroll.other = newBuyItemsDownHoverScroll;
+            newBuyItemsUpHoverScroll.up = true;
+
+            // Wishlist
+            Transform wishlistParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject wishlistItemViewTemplate = wishlistParent.GetChild(0).gameObject;
+            EFM_PointableButton wishlistItemViewTemplateWishButton = wishlistItemViewTemplate.transform.GetChild(2).gameObject.AddComponent<EFM_PointableButton>();
+            categoryTemplateMainButton.SetButton();
+            categoryTemplateMainButton.MaxPointingRange = 20;
+            categoryTemplateMainButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            wishListItemViewsByID = new Dictionary<string, GameObject>();
+            foreach (string wishlistItemID in Mod.wishList)
+            {
+                GameObject wishlistItemView = Instantiate(wishlistItemViewTemplate, wishlistParent);
+                wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[wishlistItemID];
+                wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[wishlistItemID];
+
+                wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(wishlistItemID); });
+                wishListItemViewsByID.Add(wishlistItemID, wishlistItemView);
+            }
+
+            // Setup buy categories hoverscrolls
+            EFM_HoverScroll newWishlistDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+            EFM_HoverScroll newWishlistUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+            newWishlistDownHoverScroll.MaxPointingRange = 30;
+            newWishlistDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            newWishlistDownHoverScroll.scrollbar = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+            newWishlistDownHoverScroll.other = newWishlistUpHoverScroll;
+            newWishlistDownHoverScroll.up = false;
+            newWishlistUpHoverScroll.MaxPointingRange = 30;
+            newWishlistUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            newWishlistUpHoverScroll.scrollbar = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+            newWishlistUpHoverScroll.other = newWishlistDownHoverScroll;
+            newWishlistUpHoverScroll.up = true;
+            float wishlistHeight = 3 + 34 * Mod.wishList.Count;
+            if (wishlistHeight > 190)
+            {
+                newWishlistUpHoverScroll.rate = 190 / (wishlistHeight - 190);
+                newBuyCategoriesDownHoverScroll.rate = 190 / (wishlistHeight - 190);
+                newBuyCategoriesDownHoverScroll.gameObject.SetActive(true);
+            }
+
+            // Setup rag fair tabs
+            Transform ragFaireTabsParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(2);
+            for (int i = 0; i < 3; ++i)
+            {
+                Transform tab = ragFaireTabsParent.GetChild(i);
+                if (ragFairTabs == null)
+                {
+                    ragFairTabs = new EFM_TraderTab[3];
+                }
+
+                EFM_TraderTab tabScript = tab.gameObject.AddComponent<EFM_TraderTab>();
+                ragFairTabs[i] = tabScript;
+                tabScript.SetButton();
+                tabScript.MaxPointingRange = 20;
+                tabScript.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                tabScript.clickSound = clickAudio;
+                tabScript.Button.onClick.AddListener(() => { tabScript.OnClick(i); });
+                tabScript.page = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(i).gameObject;
+
+                tabScript.tabs = ragFairTabs;
+            }
+        }
+
+        private void AddRagFairCategories(List<EFM_CategoryTreeNode> children, Transform parent, GameObject template, int level)
+        {
+            foreach(EFM_CategoryTreeNode child in children)
+            {
+                GameObject category = Instantiate(template, parent);
+                category.transform.GetChild(0).GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(level * 10, 0, 0, 0);
+                category.transform.GetChild(0).GetChild(2).GetComponent<Text>().text = child.name;
+                category.transform.GetChild(0).GetChild(3).GetComponent<Text>().text = "(" + ((child.children.Count == 0 && Mod.itemsByParents.ContainsKey(child.ID)) ? Mod.itemsByParents[child.ID].Count : child.children.Count) + ")";
+
+                // Setup buttons
+                category.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnRagFairCategoryMainClick(category, child.ID); });
+                category.transform.GetChild(0).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnRagFairCategoryToggleClick(category); });
+
+                // Setup actual item entries if this is a leaf category
+                if(child.children.Count == 0)
+                {
+                    if (Mod.itemsByParents.ContainsKey(child.ID))
+                    {
+                        List<string> itemIDs = Mod.itemsByParents[child.ID];
+                        foreach (string itemID in itemIDs)
+                        {
+                            GameObject item = Instantiate(template, category.transform.GetChild(1));
+                            item.transform.GetChild(0).GetComponent<HorizontalLayoutGroup>().padding = new RectOffset((level + 1) * 10, 0, 0, 0);
+                            item.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
+
+                            item.transform.GetChild(0).GetChild(2).GetComponent<Text>().text = Mod.itemNames[itemID];
+                            item.transform.GetChild(0).GetChild(3).GetComponent<Text>().text = "(" + GetTotalItemSell(itemID) + ")";
+
+                            category.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnRagFairItemMainClick(item, itemID); });
+                        }
+                    }
+                }
+                else
+                {
+                    AddRagFairCategories(child.children, category.transform.GetChild(1), template, level + 1);
+                }
+            }
         }
 
         public void SetTrader(int index)
@@ -1320,6 +1469,7 @@ namespace EFM
             // TODO: Set item in cart and store item in a var taht can be accessed when we click Deal! button
             // Set prices in cart and count items in tradevolume to check which prices are fulfilled, change fulfilled icons accordngingly
             // Set price hover scrolls
+            // update ragFairItemBuyViewsByID
         }
 
         public void OnBuyDealClick()
@@ -1390,6 +1540,69 @@ namespace EFM
             // TODO: Update market task list by removing the referenced task UI element in TraderTask from the market task list
             // TODO: Update visibility conditions that are dependent on this task being started, then update everything depending on those visibility conditions
             // TODO: Update all quest conditions dependent on success of this quest, then update everything depending on those conditions
+        }
+
+        public void OnRagFairCategoryMainClick(GameObject category, string ID)
+        {
+            // TODO: reset item list
+            // Add all items of that category to the list
+            // Visually activate this category
+            // Visually deactivate any other previously active category
+            // TODO: Also update hoverscrolls here
+        }
+
+        public void OnRagFairItemMainClick(GameObject itemUIElement, string ID)
+        {
+            // TODO: reset item list
+            // Add all sell enrties of that item to the list
+            // Visually activate this item element
+            // Visually deactivate any other previously active element
+            // TODO: Also update hoverscrolls here
+        }
+
+        public void OnRagFairCategoryToggleClick(GameObject category)
+        {
+            Transform toggle = category.transform.GetChild(0).GetChild(0);
+            toggle.GetChild(0).gameObject.SetActive(!toggle.GetChild(0).gameObject.activeSelf);
+            toggle.GetChild(1).gameObject.SetActive(!toggle.GetChild(1).gameObject.activeSelf);
+            category.transform.GetChild(1).gameObject.SetActive(toggle.GetChild(1).gameObject.activeSelf);
+
+            // TODO: Ensure hoverscrolls are properly updated (active and rate) because the height of the lsit has changed since we toggled
+        }
+
+        public int GetTotalItemSell(string ID)
+        {
+            // TODO: Check in all trader assorts, for each taht has an entry of this item, +1
+            // TODO: Once rag fair player simulation is implemented, add up the number of player selling entries 
+            return 0;
+        }
+
+        public void OnRagFairWishlistItemWishClick(string ID)
+        {
+            // TODO: Keeps lists of all elements for this item that is relevant to wishlist (rag fair buy and wishlist item views (deactivate star on buy, destroy teh view in wishlist), all the CIWs and VIDs of this item that are in the hideout so we can set their wishlist var to false)
+            // TODO: Remove ID from Mod.wishList
+        }
+
+        public void AddItemToWishlist(string ID)
+        {
+            Transform wishlistParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject wishlistItemViewTemplate = wishlistParent.GetChild(0).gameObject;
+            GameObject wishlistItemView = Instantiate(wishlistItemViewTemplate, wishlistParent);
+            wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[ID];
+            wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[ID];
+
+            wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(ID); });
+
+            wishListItemViewsByID.Add(ID, wishlistItemView);
+
+            if (ragFairItemBuyViewsByID.ContainsKey(ID))
+            {
+                List<GameObject> itemViewsList = ragFairItemBuyViewsByID[ID];
+                foreach(GameObject itemView in itemViewsList)
+                {
+                    itemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = new Color(1, 0.84706f, 0);
+                }
+            }
         }
     }
 }
