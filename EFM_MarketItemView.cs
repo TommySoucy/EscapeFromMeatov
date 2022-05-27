@@ -9,7 +9,8 @@ namespace EFM
     public class EFM_MarketItemView : MonoBehaviour
     {
         public bool custom;
-        public EFM_CustomItemWrapper CIW;
-        public EFM_VanillaItemDescriptor VID;
+        public int value;
+        public List<EFM_CustomItemWrapper> CIW;
+        public List<EFM_VanillaItemDescriptor> VID;
     }
 }

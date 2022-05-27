@@ -82,6 +82,7 @@ namespace EFM
         public static List<EFM_AreaBonus> activeBonuses;
         public static EFM_TraderStatus[] traderStatuses;
         public static EFM_CategoryTreeNode itemCategories;
+        public static Dictionary<string, List<string>> itemAncestors;
 
         // Player
         public static GameObject playerStatusUI;
@@ -669,6 +670,11 @@ namespace EFM
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 customItemWrapper.volumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
                 customItemWrapper.parents = defaultItemsData["ItemDefaults"][i]["parents"] != null ? defaultItemsData["ItemDefaults"][i]["parents"].ToObject<List<String>>() : new List<string>();
+                if(itemAncestors == null)
+                {
+                    itemAncestors = new Dictionary<string, List<string>>();
+                }
+                itemAncestors.Add(customItemWrapper.ID, customItemWrapper.parents);
                 customItemWrapper.itemName = itemObjectWrapper.DisplayName;
                 customItemWrapper.description = defaultItemsData["ItemDefaults"][i]["description"] != null ? defaultItemsData["ItemDefaults"][i]["description"].ToString() : "";
                 customItemWrapper.lootExperience = (int)defaultItemsData["ItemDefaults"][i]["lootExperience"];
@@ -1240,6 +1246,7 @@ namespace EFM
                 descriptor.spawnChance = (float)vanillaItemRaw["SpawnChance"];
                 descriptor.creditCost = (int)vanillaItemRaw["CreditCost"];
                 descriptor.parents = vanillaItemRaw["parents"].ToObject<List<string>>();
+                itemAncestors.Add(descriptor.H3ID, descriptor.parents);
                 descriptor.lootExperience = (int)vanillaItemRaw["LootExperience"];
 
                 foreach (string parent in descriptor.parents)
