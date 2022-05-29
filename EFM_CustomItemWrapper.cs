@@ -17,6 +17,7 @@ namespace EFM
 		public List<string> parents;
 		public string ID;
 		public bool looted;
+		public bool foundInRaid; // TODO: Implement this, will be false by default, so set to true for any item spawned in raid, also implement save and load
 		public bool hideoutSpawned;
 		public int lootExperience;
 		public float spawnChance;
@@ -274,10 +275,9 @@ namespace EFM
 
 			// Update splitting stack flag
 			if(physObj.m_hand == null && splittingStack)
-            {
-				Mod.stackSplitUI.SetActive(false);
-				splittingStack = false;
-            }
+			{
+				CancelSplit();
+			}
 
 			// Update based on splitting stack
             if (splittingStack)
@@ -287,7 +287,19 @@ namespace EFM
 				float distanceFromCenter = Mathf.Clamp(handVector.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad), -0.19f, 0.19f);
 
 				// Scale is from -0.19 (0) to 0.19 (stack)
-				splitAmount = distanceFromCenter == 0.19f ? stack : (int)((distanceFromCenter + 0.19f) * stack);
+				if (distanceFromCenter == -0.19f)
+				{
+					splitAmount = 0;
+				}
+				else if (distanceFromCenter == 0.19f)
+				{
+					splitAmount = stack;
+				}
+				else
+				{
+					splitAmount = (int)((distanceFromCenter + 0.19f) * stack);
+				}
+
 				Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
 				Mod.stackSplitUIText.text = splitAmount.ToString()+"/"+stack;
 			}
@@ -489,9 +501,8 @@ namespace EFM
 											}
 										}
 										// else the chosen amount is 0 or max, meaning cancel the split
-										Mod.stackSplitUI.SetActive(false);
-										splittingStack = false;
-                                    }
+										CancelSplit();
+									}
                                     else
                                     {
 										// Start splitting
@@ -503,6 +514,8 @@ namespace EFM
 										stackSplitRightVector.y = 0;
 
 										splittingStack = true;
+										Mod.amountChoiceUIUp = true;
+										Mod.splittingItem = this;
                                     }
 									break;
 								default:
@@ -665,6 +678,7 @@ namespace EFM
 						{
 							// Update player inventory and weight
 							Mod.playerInventory[ID] -= 1;
+							Mod.playerInventoryObjects[ID].Remove(gameObject);
 							if (Mod.playerInventory[ID] == 0)
 							{
 								Mod.playerInventory.Remove(ID);
@@ -682,6 +696,14 @@ namespace EFM
 					}
 				}
 			}
+		}
+
+		public void CancelSplit()
+        {
+			Mod.stackSplitUI.SetActive(false);
+			splittingStack = false;
+			Mod.amountChoiceUIUp = false;
+			Mod.splittingItem = null;
 		}
 
 		private bool ApplyEffects(float effectiveness, int amountToConsume)
@@ -1435,6 +1457,11 @@ namespace EFM
 		public int GetValue()
         {
 			TODO: Return value of this item + all sub items atatchd to it
+        }
+
+		public int GetInsuranceValue()
+        {
+			TODO: Return value of this item + all sub items atatchd to it that are insurable
         }
 	}
 }

@@ -275,7 +275,12 @@ namespace EFM
 
         public int GetValue()
         {
-        TODO: Return value of this item + all sub items atatchd to it
+            TODO: Return value of this item + all sub items atatchd to it
+        }
+
+        public int GetInsuranceValue()
+        {
+            TODO: Return value of this item + all sub items atatchd to it that are insurable
         }
     }
 }

@@ -83,6 +83,8 @@ namespace EFM
         public static EFM_TraderStatus[] traderStatuses;
         public static EFM_CategoryTreeNode itemCategories;
         public static Dictionary<string, List<string>> itemAncestors;
+        public static bool amountChoiceUIUp;
+        public static EFM_CustomItemWrapper splittingItem;
 
         // Player
         public static GameObject playerStatusUI;
@@ -2824,7 +2826,7 @@ namespace EFM
             {
                 collidingTradeVolume.AddItem(primary);
 
-                collidingTradeVolume.market.UpdateBasedOnItem(false, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                collidingTradeVolume.market.UpdateBasedOnItem(true, heldCustomItemWrapper, heldVanillaItemDescriptor);
 
                 BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor);
 

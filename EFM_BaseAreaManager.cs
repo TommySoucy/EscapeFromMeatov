@@ -1743,7 +1743,7 @@ namespace EFM
                             Mod.instance.LogInfo("\t0");
                             // Check if requirement is met
                             Mod.instance.LogInfo("\t0");
-                            if (baseManager.traderStatuses[traderRequirementIndex].GetLoyaltyLevel() >= traderRequiredLevel)
+                            if (Mod.traderStatuses[traderRequirementIndex].GetLoyaltyLevel() >= traderRequiredLevel)
                             {
                                 Mod.instance.LogInfo("\t\t0");
                                 traderRequirement.transform.GetChild(1).GetComponent<Image>().sprite = EFM_Base_Manager.requirementFulfilled;
@@ -3777,12 +3777,12 @@ namespace EFM
                             itemObject = GameObject.Instantiate(Mod.itemPrefabs[716], outputVolume.transform);
                             if (Mod.baseInventory.ContainsKey("716"))
                             {
-                                Mod.baseInventory["716"] += amount;
+                                Mod.baseInventory["716"] += 1;
                                 baseManager.baseInventoryObjects["716"].Add(itemObject);
                             }
                             else
                             {
-                                Mod.baseInventory.Add("716", amount);
+                                Mod.baseInventory.Add("716", 1);
                                 baseManager.baseInventoryObjects.Add("716", new List<GameObject> { itemObject });
                             }
 
@@ -3805,12 +3805,12 @@ namespace EFM
 
                             if (Mod.baseInventory.ContainsKey("715"))
                             {
-                                Mod.baseInventory["715"] += amount;
+                                Mod.baseInventory["715"] += 1;
                                 baseManager.baseInventoryObjects["715"].Add(itemObject);
                             }
                             else
                             {
-                                Mod.baseInventory.Add("715", amount);
+                                Mod.baseInventory.Add("715", 1);
                                 baseManager.baseInventoryObjects.Add("715", new List<GameObject> { itemObject });
                             }
 

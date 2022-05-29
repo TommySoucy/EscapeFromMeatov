@@ -16,6 +16,8 @@ namespace EFM
         public float standing;
         public bool unlocked;
         public int currency; // 0: RUB, 1: USD
+        public bool offersInsurance;
+        public float insuranceRate;
 
         public Dictionary<int, TraderAssortment> assortmentByLevel;
         public List<string> categories;
@@ -28,6 +30,7 @@ namespace EFM
         public static Dictionary<string, List<TraderTaskCondition>> waitingVisibilityConditions;
         public static Dictionary<string, TraderTask> foundTasks;
         public static Dictionary<string, TraderTaskCondition> foundTaskConditions;
+        public static Dictionary<string, List<TraderTaskCondition>> conditionsByItem;
 
         public List<TraderTask> tasksToInit;
         public List<TraderTaskCondition> conditionsToInit;
@@ -64,6 +67,12 @@ namespace EFM
             if (currency.Equals("USD"))
             {
                 this.currency = 1;
+            }
+            offersInsurance = (bool)Mod.traderBaseDB[index]["insurance"]["availability"];
+            if (offersInsurance)
+            {
+                // TODO: Find out where this value is kept, for now prapor will use 0.25 * original value of item, while therapist and any other will be 0.35
+                insuranceRate = index == 0 ? 0.25f : 0.35f;
             }
 
             BuildTasks(questAssortData);
@@ -304,6 +313,7 @@ namespace EFM
 
         public bool ItemSellable(string itemID, List<string> ancestors)
         {
+            // TODO: Also check every sub item for validity
             if (categories.Contains(itemID))
             {
                 return true;
@@ -360,6 +370,7 @@ namespace EFM
         private void BuildTasks(JObject tasksData)
         {
             tasks = new List<TraderTask>();
+            conditionsByItem = new Dictionary<string, List<TraderTaskCondition>>();
             Dictionary<string, string> rawTasks = tasksData["success"].ToObject<Dictionary<string, string>>();
             Dictionary<string, JObject> questLocales = Mod.localDB["quest"].ToObject<Dictionary<string, JObject>>();
 
@@ -915,6 +926,14 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(originalItemID))
                     {
                         condition.item = Mod.itemMap[originalItemID];
+                        if (conditionsByItem.ContainsKey(originalItemID))
+                        {
+                            conditionsByItem[originalItemID].Add(condition);
+                        }
+                        else
+                        {
+                            conditionsByItem.Add(originalItemID, new List<TraderTaskCondition>() { condition });
+                        }
                     }
                     else
                     {
@@ -928,6 +947,14 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(originalLeaveItemID))
                     {
                         condition.item = Mod.itemMap[originalLeaveItemID];
+                        if (conditionsByItem.ContainsKey(originalLeaveItemID))
+                        {
+                            conditionsByItem[originalLeaveItemID].Add(condition);
+                        }
+                        else
+                        {
+                            conditionsByItem.Add(originalLeaveItemID, new List<TraderTaskCondition>() { condition });
+                        }
                     }
                     else
                     {

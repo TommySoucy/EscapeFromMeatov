@@ -10,6 +10,7 @@ namespace EFM
     {
         public bool custom;
         public int value;
+        public int insureValue;
         public List<EFM_CustomItemWrapper> CIW;
         public List<EFM_VanillaItemDescriptor> VID;
     }
