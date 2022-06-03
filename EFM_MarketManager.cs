@@ -32,6 +32,10 @@ namespace EFM
         public int cartItemCount;
         public Dictionary<string, int> prices;
         public Dictionary<string, GameObject> buyPriceElements;
+        public string ragfairCartItem;
+        public int ragfairCartItemCount;
+        public Dictionary<string, int> ragfairPrices;
+        public Dictionary<string, GameObject> ragfairBuyPriceElements;
         public Dictionary<string, GameObject> sellItemShowcaseElements;
         public Dictionary<string, GameObject> insureItemShowcaseElements;
         public int currentTotalSellingPrice = 0;
@@ -39,17 +43,21 @@ namespace EFM
 
         private bool initButtonsSet;
         private bool choosingBuyAmount;
+        private bool choosingRagfairBuyAmount;
         private Vector3 amountChoiceStartPosition;
         private Vector3 amountChoiceRightVector;
         private int chosenAmount;
         private int maxBuyAmount;
+
+        private GameObject currentActiveCategory;
+        private GameObject currentActiveItemSelector;
 
         private void Update()
         {
             TakeInput();
 
             // Update based on splitting stack
-            if (choosingBuyAmount)
+            if (choosingBuyAmount || choosingRagfairBuyAmount)
             {
                 Vector3 handVector = Mod.rightHand.transform.position - amountChoiceStartPosition;
                 float angle = Vector3.Angle(amountChoiceRightVector, handVector);
@@ -76,18 +84,29 @@ namespace EFM
 
         private void TakeInput()
         {
-            if (choosingBuyAmount)
+            if (choosingBuyAmount || choosingRagfairBuyAmount)
             {
                 FVRViveHand hand = Mod.rightHand.fvrHand;
+                Transform cartShowcase;
+                string countString;
                 if (hand.Input.TriggerDown)
                 {
-                    choosingBuyAmount = false;
-                    cartItemCount = chosenAmount;
+                    if (choosingBuyAmount)
+                    {
+                        cartItemCount = chosenAmount;
+                        cartShowcase = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1);
+                        countString = cartItemCount.ToString(); ;
+                    }
+                    else
+                    {
+                        ragfairCartItemCount = chosenAmount;
+                        cartShowcase = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(1);
+                        countString = ragfairCartItemCount.ToString();
+                    }
                     Mod.stackSplitUI.SetActive(false);
 
                     // Change amount and price on UI
-                    Transform cartShowcase = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1);
-                    cartShowcase.GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = cartItemCount.ToString();
+                    cartShowcase.GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = countString;
 
                     Transform pricesParent = cartShowcase.GetChild(4).GetChild(0).GetChild(0);
                     int priceElementIndex = 1;
@@ -122,8 +141,12 @@ namespace EFM
                         dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
                     }
 
-                    // Reenable buy amount button
+                    // Reenable buy amount buttons
                     transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = true;
+                    transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = true;
+
+                    choosingBuyAmount = false;
+                    choosingRagfairBuyAmount = false;
                 }
             }
         }
@@ -195,6 +218,17 @@ namespace EFM
             categoryTemplateToggleButton.SetButton();
             categoryTemplateToggleButton.MaxPointingRange = 20;
             categoryTemplateToggleButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            Transform buyItemListTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1);
+            Transform buyItemListParent = buyItemListTransform.GetChild(0).GetChild(0).GetChild(0);
+            GameObject buyItemTemplate = buyItemListParent.GetChild(0).gameObject;
+            EFM_PointableButton itemViewTemplateWishButton = buyItemTemplate.transform.GetChild(3).gameObject.AddComponent<EFM_PointableButton>();
+            itemViewTemplateWishButton.SetButton();
+            itemViewTemplateWishButton.MaxPointingRange = 20;
+            itemViewTemplateWishButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            EFM_PointableButton itemViewTemplateBuyButton = buyItemTemplate.transform.GetChild(3).gameObject.AddComponent<EFM_PointableButton>();
+            itemViewTemplateBuyButton.SetButton();
+            itemViewTemplateBuyButton.MaxPointingRange = 20;
+            itemViewTemplateBuyButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
             AddRagFairCategories(Mod.itemCategories.children, categoriesParent, categoryTemplate, 1);
             ragFairItemBuyViewsByID = new Dictionary<string, List<GameObject>>();
 
@@ -233,6 +267,23 @@ namespace EFM
             newBuyItemsUpHoverScroll.other = newBuyItemsDownHoverScroll;
             newBuyItemsUpHoverScroll.up = true;
 
+            // Cart
+            Transform ragfairCartTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2);
+            EFM_PointableButton ragfairCartAmountButton = ragfairCartTransform.transform.GetChild(1).GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
+            ragfairCartAmountButton.SetButton();
+            ragfairCartAmountButton.MaxPointingRange = 20;
+            ragfairCartAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            ragfairCartAmountButton.Button.onClick.AddListener(() => { OnRagfairBuyAmountClick(); });
+            EFM_PointableButton ragfairCartDealAmountButton = ragfairCartTransform.transform.GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            ragfairCartDealAmountButton.SetButton();
+            ragfairCartDealAmountButton.MaxPointingRange = 20;
+            ragfairCartDealAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            EFM_PointableButton ragfairCartCancelAmountButton = ragfairCartTransform.transform.GetChild(2).GetChild(0).GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
+            ragfairCartCancelAmountButton.SetButton();
+            ragfairCartCancelAmountButton.MaxPointingRange = 20;
+            ragfairCartCancelAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            ragfairCartCancelAmountButton.Button.onClick.AddListener(() => { OnRagfairBuyCancelClick(); });
+
             // Wishlist
             Transform wishlistParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject wishlistItemViewTemplate = wishlistParent.GetChild(0).gameObject;
@@ -247,11 +298,11 @@ namespace EFM
                 wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[wishlistItemID];
                 wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[wishlistItemID];
 
-                wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(wishlistItemID); });
+                wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(wishlistItemView, wishlistItemID); });
                 wishListItemViewsByID.Add(wishlistItemID, wishlistItemView);
             }
 
-            // Setup buy categories hoverscrolls
+            // Setup wishlist hoverscrolls
             EFM_HoverScroll newWishlistDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
             EFM_HoverScroll newWishlistUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
             newWishlistDownHoverScroll.MaxPointingRange = 30;
@@ -268,8 +319,8 @@ namespace EFM
             if (wishlistHeight > 190)
             {
                 newWishlistUpHoverScroll.rate = 190 / (wishlistHeight - 190);
-                newBuyCategoriesDownHoverScroll.rate = 190 / (wishlistHeight - 190);
-                newBuyCategoriesDownHoverScroll.gameObject.SetActive(true);
+                newWishlistDownHoverScroll.rate = 190 / (wishlistHeight - 190);
+                newWishlistDownHoverScroll.gameObject.SetActive(true);
             }
 
             // Setup rag fair tabs
@@ -1180,7 +1231,7 @@ namespace EFM
                         }
                     }
                     // Rewards
-                    Transform rewardParent = description.GetChild(2);
+                    Transform rewardParent = description.GetChild(3);
                     rewardParent.gameObject.SetActive(true);
                     GameObject currentRewardHorizontalTemplate = rewardParent.GetChild(1).gameObject;
                     Transform currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
@@ -1453,6 +1504,10 @@ namespace EFM
                     pointableTaskFinishButton.MaxPointingRange = 20;
                     pointableTaskFinishButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
                 }
+                else
+                {
+                    task.marketListElement = null;
+                }
             }
             // Setup hoverscrolls
             if (!initButtonsSet)
@@ -1521,7 +1576,7 @@ namespace EFM
 
                         itemInsureValue = (int)Mathf.Max(CIW.GetInsuranceValue() * trader.insuranceRate, 1);
 
-                        if (!trader.ItemInsureable(itemID, CIW.parents))
+                        if (CIW.insured || !trader.ItemInsureable(itemID, CIW.parents))
                         {
                             continue;
                         }
@@ -1539,7 +1594,7 @@ namespace EFM
 
                         itemInsureValue = (int)Mathf.Max(VID.GetInsuranceValue() * trader.insuranceRate, 1);
 
-                        if (!trader.ItemInsureable(itemID, VID.parents))
+                        if (CIW.insured || !trader.ItemInsureable(itemID, VID.parents))
                         {
                             continue;
                         }
@@ -1679,6 +1734,27 @@ namespace EFM
             initButtonsSet = true;
         }
 
+        public void UpdateTaskListHeight()
+        {
+            Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
+            EFM_HoverScroll downTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll upTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+            Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            float taskListHeight = 3 + 29 * (tasksParent.childCount - 1);
+            if (taskListHeight > 145)
+            {
+                downTaskHoverScroll.rate = 145 / (taskListHeight - 145);
+                upTaskHoverScroll.rate = 145 / (taskListHeight - 145);
+                downTaskHoverScroll.gameObject.SetActive(true);
+                upTaskHoverScroll.gameObject.SetActive(false);
+            }
+            else
+            {
+                downTaskHoverScroll.gameObject.SetActive(false);
+                upTaskHoverScroll.gameObject.SetActive(false);
+            }
+        }
+
         public void UpdateBasedOnItem(bool added, EFM_CustomItemWrapper CIW, EFM_VanillaItemDescriptor VID)
         {
             bool custom = CIW != null;
@@ -1751,6 +1827,43 @@ namespace EFM
                         }
                     }
                     Transform dealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
+                    if (canDeal)
+                    {
+                        dealButton.GetComponent<Collider>().enabled = true;
+                        dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                    }
+                    else
+                    {
+                        dealButton.GetComponent<Collider>().enabled = false;
+                        dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                    }
+                }
+
+                // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
+                if (ragfairPrices.ContainsKey(itemID))
+                {
+                    // Go through each price because need to check if all are fulfilled anyway
+                    bool canDeal = true;
+                    foreach (KeyValuePair<string, int> price in ragfairPrices)
+                    {
+                        if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= price.Value)
+                        {
+                            // If this is the item we are adding, make sure the requirement fulfilled icon is active
+                            if (price.Key.Equals(itemID))
+                            {
+                                Transform priceElement = ragfairBuyPriceElements[price.Key].transform;
+                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
+                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
+                            }
+                        }
+                        else
+                        {
+                            // If this is the item we are adding, no need to make sure the unfulfilled icon is active we cause we are adding it to the inventory
+                            // So for sure if not fulfilled now, the icon is already set to unfulfilled
+                            canDeal = false;
+                        }
+                    }
+                    Transform dealButton = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(2).GetChild(0).GetChild(0);
                     if (canDeal)
                     {
                         dealButton.GetComponent<Collider>().enabled = true;
@@ -1892,7 +2005,7 @@ namespace EFM
                 }
 
                 // IN INSURE, check if item already in showcase, if it is, increment count, if not, add a new entry, update price, make sure deal! button is activated, check if item is price, update accordingly
-                if (Mod.traderStatuses[currentTraderIndex].ItemInsureable(itemID, Mod.itemAncestors[itemID]))
+                if (!CIW.insured && Mod.traderStatuses[currentTraderIndex].ItemInsureable(itemID, Mod.itemAncestors[itemID]))
                 {
                     Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
                     if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
@@ -2082,6 +2195,39 @@ namespace EFM
                         // else no need to check this because we are removing item, price obviously cannot become fulfilled
                     }
                     Transform dealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
+                    if (canDeal)
+                    {
+                        dealButton.GetComponent<Collider>().enabled = true;
+                        dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                    }
+                    else
+                    {
+                        dealButton.GetComponent<Collider>().enabled = false;
+                        dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                    }
+                }
+
+                // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icon and deactivate deal! button if necessary
+                if (ragfairPrices.ContainsKey(itemID))
+                {
+                    // Go through each price because need to check if all are fulfilled anyway
+                    bool canDeal = true;
+                    foreach (KeyValuePair<string, int> price in ragfairPrices)
+                    {
+                        if (tradeVolumeInventory.ContainsKey(price.Key) || tradeVolumeInventory[price.Key] < price.Value)
+                        {
+                            // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
+                            if (price.Key.Equals(itemID))
+                            {
+                                Transform priceElement = ragfairBuyPriceElements[price.Key].transform;
+                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
+                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
+                            }
+                            canDeal = false;
+                        }
+                        // else no need to check this because we are removing item, price obviously cannot become fulfilled
+                    }
+                    Transform dealButton = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(2).GetChild(0).GetChild(0);
                     if (canDeal)
                     {
                         dealButton.GetComponent<Collider>().enabled = true;
@@ -2287,6 +2433,7 @@ namespace EFM
         public void UpdateBasedOnPlayerLevel()
         {
             SetTrader(currentTraderIndex);
+
             // TODO: Will also need to check if level 15 then we also want to add player items to flea market
         }
 
@@ -2333,7 +2480,7 @@ namespace EFM
                 }
             }
             EFM_HoverScroll downHoverScroll = cartShowcase.GetChild(3).GetChild(3).GetComponent<EFM_HoverScroll>();
-            EFM_HoverScroll upHoverScroll = cartShowcase.GetChild(3).GetChild(3).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll upHoverScroll = cartShowcase.GetChild(3).GetChild(2).GetComponent<EFM_HoverScroll>();
             if (priceHeight > 60)
             {
                 downHoverScroll.rate = 60 / (priceHeight - 60);
@@ -2687,13 +2834,14 @@ namespace EFM
             // TODO: Check coordination between stack split and buy amount choosing. For now buy amount will replace stack split if splitting stack, but havent checked other way around
 
             // Cancel stack splitting if in progress
-            if (Mod.amountChoiceUIUp && Mod.splittingItem != null)
+            if (Mod.amountChoiceUIUp || Mod.splittingItem != null)
             {
                 Mod.splittingItem.CancelSplit();
             }
 
-            // Disable buy amount button until done choosing amount
+            // Disable buy amount buttons until done choosing amount
             transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = false;
+            transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = false;
 
             // Start splitting
             Mod.stackSplitUI.SetActive(true);
@@ -2718,10 +2866,92 @@ namespace EFM
 
         public void OnSellDealClick()
         {
-            // TODO: Remove all sellable items from trade volume
-            // Add FOR to trade volume
-            // Clear Sell showcase completely, assuming selling will always only leave non sellable items and money in the trade volume
-            // Deactivate deal button
+            // Remove all sellable items from trade volume
+            List<string> itemsToRemove = new List<string>();
+            foreach (KeyValuePair<string, int> item in tradeVolumeInventory)
+            {
+                if(Mod.traderStatuses[currentTraderIndex].ItemSellable(item.Key, Mod.itemAncestors[item.Key]))
+                {
+                    foreach (GameObject itemObject in tradeVolumeInventoryObjects[item.Key])
+                    {
+                        // Destroy item
+                        EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                        if (CIW != null)
+                        {
+                            Mod.baseInventory[item.Key] -= CIW.stack;
+                        }
+                        else
+                        {
+                            Mod.baseInventory[item.Key] -= 1;
+                        }
+                        baseManager.baseInventoryObjects[item.Key].Remove(itemObject);
+                        if (Mod.baseInventory[item.Key] == 0)
+                        {
+                            Mod.baseInventory.Remove(item.Key);
+                            baseManager.baseInventoryObjects.Remove(item.Key);
+                        };
+                        Destroy(gameObject);
+                    }
+                    itemsToRemove.Add(item.Key);
+                }
+
+                // Update area managers based on item we just removed
+                foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+                {
+                    areaManager.UpdateBasedOnItem(item.Key);
+                }
+            }
+            foreach(string itemID in itemsToRemove)
+            {
+                tradeVolumeInventory.Remove(itemID);
+                tradeVolumeInventoryObjects.Remove(itemID);
+            }
+
+            // Add sold for item to trade volume
+            int amountToSpawn = currentTotalSellingPrice;
+            int currencyID = Mod.traderStatuses[currentTraderIndex].currency == 0 ? 203 : 201; // Roubles, else USD
+            GameObject itemPrefab = Mod.itemPrefabs[currencyID];
+            EFM_CustomItemWrapper prefabCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
+            BoxCollider tradeVolumeCollider = tradeVolume.GetComponent<BoxCollider>();
+            List<GameObject> objectsList = new List<GameObject>();
+            while (amountToSpawn > 0)
+            {
+                GameObject spawnedItem = Instantiate(itemPrefab, tradeVolume.transform);
+                objectsList.Add(spawnedItem);
+                float xSize = tradeVolumeCollider.size.x;
+                float ySize = tradeVolumeCollider.size.y;
+                float zSize = tradeVolumeCollider.size.z;
+                spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
+                                                                  UnityEngine.Random.Range(-ySize / 2, ySize / 2),
+                                                                  UnityEngine.Random.Range(-zSize / 2, zSize / 2));
+                spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
+
+                spawnedItem.GetComponent<EFM_CustomItemWrapper>().stack = prefabCIW.maxStack;
+                amountToSpawn -= prefabCIW.maxStack;
+            }
+            if (tradeVolumeInventory.ContainsKey(cartItem))
+            {
+                tradeVolumeInventory[cartItem] += cartItemCount;
+                tradeVolumeInventoryObjects[cartItem].AddRange(objectsList);
+            }
+            else
+            {
+                tradeVolumeInventory.Add(cartItem, cartItemCount);
+                tradeVolumeInventoryObjects.Add(cartItem, objectsList);
+            }
+            if (Mod.baseInventory.ContainsKey(cartItem))
+            {
+                Mod.baseInventory[cartItem] += cartItemCount;
+                baseManager.baseInventoryObjects[cartItem].AddRange(objectsList);
+            }
+            else
+            {
+                Mod.baseInventory.Add(cartItem, cartItemCount);
+                baseManager.baseInventoryObjects.Add(cartItem, objectsList);
+            }
+
+            // Update the whole thing
+            SetTrader(currentTraderIndex);
         }
 
         //public void OnInsureItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
@@ -2733,10 +2963,71 @@ namespace EFM
 
         public void OnInsureDealClick()
         {
-            // TODO: Set all insureable items in trade volume as insured
-            // Remove FOR from trade volume
             // Clear insure showcase completely, considering all those items are now insured
             // Deactivate deal button
+
+            // Set all insureable items in trade volume as insured
+            foreach (KeyValuePair<string, int> item in tradeVolumeInventory)
+            {
+                if (Mod.traderStatuses[currentTraderIndex].ItemInsureable(item.Key, Mod.itemAncestors[item.Key]))
+                { 
+                    foreach(GameObject itemObject in tradeVolumeInventoryObjects[item.Key])
+                    {
+                        EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                        EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+                        if(CIW != null && !CIW.insured)
+                        {
+                            CIW.insured = true;
+                        }
+                        else if(!VID.insured)
+                        {
+                            VID.insured = true;
+                        }
+                    }
+                }
+            }
+
+            // Remove price from trade volume
+            int amountToRemove = currentTotalInsurePrice;
+            string currencyID = Mod.traderStatuses[currentTraderIndex].currency == 0 ? "203" : "201"; // Roubles, else USD
+            tradeVolumeInventory[currencyID] -= amountToRemove;
+            List<GameObject> objectList = tradeVolumeInventoryObjects[currencyID];
+            while (amountToRemove > 0)
+            {
+                GameObject currentItemObject = objectList[objectList.Count - 1];
+                EFM_CustomItemWrapper CIW = currentItemObject.GetComponent<EFM_CustomItemWrapper>();
+                int stack = CIW.stack;
+                if (stack - amountToRemove <= 0)
+                {
+                    amountToRemove -= stack;
+
+                    // Destroy item
+                    objectList.RemoveAt(objectList.Count - 1);
+                    Mod.baseInventory[CIW.ID] -= stack;
+                    baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
+                    if (Mod.baseInventory[CIW.ID] == 0)
+                    {
+                        Mod.baseInventory.Remove(CIW.ID);
+                        baseManager.baseInventoryObjects.Remove(CIW.ID);
+                    }
+                    CIW.destroyed = true;
+                    Destroy(gameObject);
+                }
+                else // stack - amountToRemove > 0
+                {
+                    CIW.stack -= amountToRemove;
+                    amountToRemove = 0;
+                }
+            }
+
+            // Update area managers based on item we just removed
+            foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+            {
+                areaManager.UpdateBasedOnItem(currencyID);
+            }
+
+            // Update trader UI
+            SetTrader(currentTraderIndex);
         }
 
         public void OnTaskShortInfoClick(GameObject description)
@@ -2746,40 +3037,471 @@ namespace EFM
             clickAudio.Play();
         }
 
+        public void AddTask(TraderTask task)
+        {
+            Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
+            Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject taskTemplate = tasksParent.GetChild(0).gameObject;
+            GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
+            task.marketListElement = currentTaskElement;
+
+            // Short info
+            Transform shortInfo = currentTaskElement.transform.GetChild(0);
+            shortInfo.GetChild(0).GetChild(0).GetComponent<Text>().text = task.name;
+            shortInfo.GetChild(1).GetChild(0).GetComponent<Text>().text = task.location;
+
+            // Description
+            Transform description = currentTaskElement.transform.GetChild(1);
+            description.GetChild(0).GetComponent<Text>().text = task.description;
+            // Objectives (conditions)
+            Transform objectivesParent = description.GetChild(1).GetChild(1);
+            GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
+            foreach (KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+            {
+                TraderTaskCondition currentCondition = condition.Value;
+                GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
+                currentCondition.marketListElement = currentObjectiveElement;
+
+                Transform objectiveInfo = currentObjectiveElement.transform.GetChild(0).GetChild(0);
+                objectiveInfo.GetChild(1).GetComponent<Text>().text = currentCondition.text;
+                // Progress counter, only necessary if value > 1 and for specific condition types
+                if (currentCondition.value > 1)
+                {
+                    switch (currentCondition.conditionType)
+                    {
+                        case TraderTaskCondition.ConditionType.CounterCreator:
+                            foreach (TraderTaskCounterCondition counter in currentCondition.counters)
+                            {
+                                if (counter.counterConditionType == TraderTaskCounterCondition.CounterConditionType.Kills)
+                                {
+                                    objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
+                                    objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
+                                    objectiveInfo.GetChild(3).GetComponent<Text>().text = "0/" + currentCondition.value; // Activate progress counter
+                                    break;
+                                }
+                            }
+                            break;
+                        case TraderTaskCondition.ConditionType.HandoverItem:
+                        case TraderTaskCondition.ConditionType.FindItem:
+                        case TraderTaskCondition.ConditionType.LeaveItemAtLocation:
+                            objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
+                            objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
+                            objectiveInfo.GetChild(3).GetComponent<Text>().text = "0/" + currentCondition.value; // Activate progress counter
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                // Disable condition gameObject if visibility conditions not met
+                if (currentCondition.visibilityConditions != null && currentCondition.visibilityConditions.Count > 0)
+                {
+                    foreach (TraderTaskCondition visibilityCondition in currentCondition.visibilityConditions)
+                    {
+                        if (!visibilityCondition.fulfilled)
+                        {
+                            currentObjectiveElement.SetActive(false);
+                            break;
+                        }
+                    }
+                }
+            }
+            // Initial equipment
+            if (task.startingEquipment != null && task.startingEquipment.Count > 0)
+            {
+                Transform initEquipParent = description.GetChild(2);
+                initEquipParent.gameObject.SetActive(true);
+                GameObject currentInitEquipHorizontalTemplate = initEquipParent.GetChild(1).gameObject;
+                Transform currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
+                foreach (TraderTaskReward reward in task.startingEquipment)
+                {
+                    // Add new horizontal if necessary
+                    if (currentInitEquipHorizontal.childCount == 6)
+                    {
+                        currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
+                    }
+                    switch (reward.taskRewardType)
+                    {
+                        case TraderTaskReward.TaskRewardType.Item:
+                            GameObject currentInitEquipItemElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
+                            currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                            if (reward.amount > 1)
+                            {
+                                currentInitEquipItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
+                            }
+                            else
+                            {
+                                currentInitEquipItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                            }
+                            currentInitEquipItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                            break;
+                        case TraderTaskReward.TaskRewardType.TraderUnlock:
+                            GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
+                            currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[reward.traderIndex];
+                            currentInitEquipTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
+                            break;
+                        case TraderTaskReward.TaskRewardType.TraderStanding:
+                            GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
+                            currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.standingSprite;
+                            currentInitEquipStandingElement.transform.GetChild(1).gameObject.SetActive(true);
+                            currentInitEquipStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
+                            currentInitEquipStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
+                            break;
+                        case TraderTaskReward.TaskRewardType.Experience:
+                            GameObject currentInitEquipExperienceElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
+                            currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
+                            currentInitEquipExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                            break;
+                        case TraderTaskReward.TaskRewardType.AssortmentUnlock:
+                            GameObject currentInitEquipAssortElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
+                            currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                            currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                            currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            // Rewards
+            Transform rewardParent = description.GetChild(2);
+            rewardParent.gameObject.SetActive(true);
+            GameObject currentRewardHorizontalTemplate = rewardParent.GetChild(1).gameObject;
+            Transform currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+            foreach (TraderTaskReward reward in task.successRewards)
+            {
+                // Add new horizontal if necessary
+                if (currentRewardHorizontal.childCount == 6)
+                {
+                    currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+                }
+                switch (reward.taskRewardType)
+                {
+                    case TraderTaskReward.TaskRewardType.Item:
+                        GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                        currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        if (reward.amount > 1)
+                        {
+                            currentRewardItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
+                        }
+                        else
+                        {
+                            currentRewardItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                        }
+                        currentRewardItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                        break;
+                    case TraderTaskReward.TaskRewardType.TraderUnlock:
+                        GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
+                        currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[reward.traderIndex];
+                        currentRewardTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
+                        break;
+                    case TraderTaskReward.TaskRewardType.TraderStanding:
+                        GameObject currentRewardStandingElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                        currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.standingSprite;
+                        currentRewardStandingElement.transform.GetChild(1).gameObject.SetActive(true);
+                        currentRewardStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
+                        currentRewardStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
+                        break;
+                    case TraderTaskReward.TaskRewardType.Experience:
+                        GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                        currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
+                        currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                        break;
+                    case TraderTaskReward.TaskRewardType.AssortmentUnlock:
+                        GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                        currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                        currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // TODO: Maybe have fail conditions and fail rewards sections
+
+            // Setup buttons
+            // ShortInfo
+            EFM_PointableButton pointableTaskShortInfoButton = shortInfo.gameObject.AddComponent<EFM_PointableButton>();
+            pointableTaskShortInfoButton.SetButton();
+            pointableTaskShortInfoButton.Button.onClick.AddListener(() => { OnTaskShortInfoClick(description.gameObject); });
+            pointableTaskShortInfoButton.MaxPointingRange = 20;
+            pointableTaskShortInfoButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            // Start
+            EFM_PointableButton pointableTaskStartButton = shortInfo.GetChild(6).gameObject.AddComponent<EFM_PointableButton>();
+            pointableTaskStartButton.SetButton();
+            pointableTaskStartButton.Button.onClick.AddListener(() => { OnTaskStartClick(task); });
+            pointableTaskStartButton.MaxPointingRange = 20;
+            pointableTaskStartButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            // Finish
+            EFM_PointableButton pointableTaskFinishButton = shortInfo.GetChild(7).gameObject.AddComponent<EFM_PointableButton>();
+            pointableTaskFinishButton.SetButton();
+            pointableTaskFinishButton.Button.onClick.AddListener(() => { OnTaskFinishClick(task); });
+            pointableTaskFinishButton.MaxPointingRange = 20;
+            pointableTaskFinishButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+
+            UpdateTaskListHeight();
+        }
+
         public void OnTaskStartClick(TraderTask task)
         {
-            // TODO: Set state of task to active
-            // TODO: Add task to active task list of player status
-            // TODO: Update market task list by making the shortinfo of the referenced task UI element in TraderTask to show that it is active
-            // TODO: Update visibility conditions that are dependent on this task being started, then update everything depending on those visibility conditions
+            // Set state of task to active
+            task.taskState = TraderTask.TaskState.Active;
+
+            // Add task to active task list of player status
+            Mod.playerStatusManager.AddTask(task);
+
+            // Update market task list by making the shortinfo of the referenced task UI element in TraderTask to show that it is active
+            task.marketListElement.transform.GetChild(0).GetChild(2).gameObject.SetActive(true);
+            task.marketListElement.transform.GetChild(0).GetChild(3).gameObject.SetActive(false);
+            task.marketListElement.transform.GetChild(0).GetChild(5).gameObject.SetActive(true);
+            task.marketListElement.transform.GetChild(0).GetChild(6).gameObject.SetActive(false);
+
+            // Update conditions that are dependent on this task being started, then update everything depending on those conditions
+            if (EFM_TraderStatus.questConditionsByTask.ContainsKey(task.ID))
+            {
+                foreach (TraderTaskCondition taskCondition in EFM_TraderStatus.questConditionsByTask[task.ID])
+                {
+                    // If the condition requires this task to be started
+                    if(taskCondition.value == 2)
+                    {
+                        EFM_TraderStatus.FulfillCondition(taskCondition);
+                    }
+                }
+            }
         }
 
         public void OnTaskFinishClick(TraderTask task)
         {
-            // TODO: Set state of task to Success
-            // TODO: Remove task from active task list of player status
-            // TODO: Update market task list by removing the referenced task UI element in TraderTask from the market task list
-            // TODO: Update visibility conditions that are dependent on this task being started, then update everything depending on those visibility conditions
-            // TODO: Update all quest conditions dependent on success of this quest, then update everything depending on those conditions
+            // Set state of task to success
+            task.taskState = TraderTask.TaskState.Success;
+
+            // Remove task from active task list of player status
+            if(task.statusListElement != null)
+            {
+                Destroy(task.statusListElement);
+                task.statusListElement = null;
+            }
+
+            // Remove from trader task list if exists
+            if (task.marketListElement != null)
+            {
+                Destroy(task.marketListElement);
+                task.marketListElement = null;
+            }
+
+            // Update conditions that are dependent on this task being successfully completed, then update everything depending on those conditions
+            if (EFM_TraderStatus.questConditionsByTask.ContainsKey(task.ID))
+            {
+                foreach (TraderTaskCondition taskCondition in EFM_TraderStatus.questConditionsByTask[task.ID])
+                {
+                    // If the condition requires this task to be successfully completed
+                    if (taskCondition.value == 4)
+                    {
+                        EFM_TraderStatus.FulfillCondition(taskCondition);
+                    }
+                }
+            }
         }
 
         public void OnRagFairCategoryMainClick(GameObject category, string ID)
         {
-            // TODO: reset item list
+            // Visually deactivate any other previously active category and activate new one. Or just return if this is already the active category
+            if (currentActiveCategory != null)
+            {
+                if (category.Equals(currentActiveCategory))
+                {
+                    return;
+                }
+                else
+                {
+                    currentActiveCategory.transform.GetChild(0).GetComponent<Image>().color = new Color(0.28125f, 0.28125f, 0.28125f);
+                }
+            }
+            else if(currentActiveItemSelector != null)
+            {
+                currentActiveItemSelector.transform.GetChild(0).GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
+                currentActiveItemSelector = null;
+            }
+            currentActiveCategory = category;
+            currentActiveCategory.transform.GetChild(0).GetComponent<Image>().color = new Color(0.8203125f, 0.8203125f, 0.8203125f);
+
+            // Reset item list
+            ResetRagFairItemList();
+
             // Add all items of that category to the list
-            // Visually activate this category
-            // Visually deactivate any other previously active category
-            // TODO: Also update hoverscrolls here
+            Transform listTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1);
+            Transform listParent = listTransform.GetChild(0).GetChild(0).GetChild(0);
+            GameObject itemTemplate = listParent.GetChild(0).gameObject;
+            foreach (string itemID in Mod.itemsByParents[ID])
+            {
+                AssortmentItem[] assortItems = GetTraderItemSell(itemID);
+
+                for(int i=0; i < assortItems.Length; ++i)
+                {
+                    if(assortItems[i] != null)
+                    {
+                        // Make an entry for each price of this assort item
+                        foreach (Dictionary<string, int> priceList in assortItems[i].prices)
+                        {
+                            GameObject itemElement = Instantiate(itemTemplate, listParent);
+                            itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                            itemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = assortItems[i].ToString();
+                            itemElement.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[itemID];
+                            itemElement.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemBuyClick(i, assortItems[i], priceList); });
+                            itemElement.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemWishClick(itemID); });
+
+                            if (ragFairItemBuyViewsByID.ContainsKey(itemID))
+                            {
+                                ragFairItemBuyViewsByID[itemID].Add(itemElement);
+                            }
+                            else
+                            {
+                                ragFairItemBuyViewsByID.Add(itemID, new List<GameObject>() { itemElement });
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Open category (set active sub container)
+            category.transform.GetChild(1).gameObject.SetActive(true);
+
+            // Update category and item lists hoverscrolls
+            UpdateRagfairBuyCategoriesHoverscrolls();
+            UpdateRagfairBuyItemsHoverscrolls();
         }
 
-        public void OnRagFairItemMainClick(GameObject itemUIElement, string ID)
+        private void UpdateRagfairBuyCategoriesHoverscrolls()
         {
-            // TODO: reset item list
-            // Add all sell enrties of that item to the list
-            // Visually activate this item element
-            // Visually deactivate any other previously active element
-            // TODO: Also update hoverscrolls here
-            // update ragFairItemBuyViewsByID
+            Transform listParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            float categoriesHeight = 3; // Top padding
+            for (int i = 1; i < listParent.childCount - 1; ++i)
+            {
+                categoriesHeight += (3 + 12 * CountCategories(listParent.GetChild(i)));
+            }
+            EFM_HoverScroll newBuyCategoriesDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll newBuyCategoriesUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+            if (categoriesHeight > 186)
+            {
+                newBuyCategoriesUpHoverScroll.rate = 186 / (categoriesHeight - 186);
+                newBuyCategoriesDownHoverScroll.rate = 186 / (categoriesHeight - 186);
+                newBuyCategoriesDownHoverScroll.gameObject.SetActive(true);
+                newBuyCategoriesUpHoverScroll.gameObject.SetActive(false);
+            }
+            else
+            {
+                newBuyCategoriesDownHoverScroll.gameObject.SetActive(false);
+                newBuyCategoriesUpHoverScroll.gameObject.SetActive(false);
+            }
+        }
+
+        private void UpdateRagfairBuyItemsHoverscrolls()
+        {
+            Transform listParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            float itemsHeight = 3 + 34 * (listParent.childCount - 1);
+            EFM_HoverScroll buyItemsDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll buyItemsUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+            if (itemsHeight > 186)
+            {
+                buyItemsUpHoverScroll.rate = 186 / (itemsHeight - 186);
+                buyItemsDownHoverScroll.rate = 186 / (itemsHeight - 186);
+                buyItemsDownHoverScroll.gameObject.SetActive(true);
+                buyItemsUpHoverScroll.gameObject.SetActive(false);
+            }
+            else
+            {
+                buyItemsDownHoverScroll.gameObject.SetActive(false);
+                buyItemsUpHoverScroll.gameObject.SetActive(false);
+            }
+        }
+
+        private int CountCategories(Transform categoryTransform)
+        {
+            int count = 1;
+            if (categoryTransform.GetChild(1).gameObject.activeSelf)
+            {
+                foreach (Transform sub in categoryTransform.GetChild(1))
+                {
+                    count += CountCategories(sub);
+                }
+            }
+            return count;
+        }
+
+        private void ResetRagFairItemList()
+        {
+            Transform listTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1);
+            Transform listParent = listTransform.GetChild(0).GetChild(0).GetChild(0);
+
+            // Clear list
+            while(listParent.childCount > 1)
+            {
+                Destroy(listParent.GetChild(1).gameObject);
+            }
+
+            // Deactivate hover scrolls
+            listTransform.GetChild(2).gameObject.SetActive(false);
+            listTransform.GetChild(3).gameObject.SetActive(false);
+        }
+
+        public void OnRagFairItemMainClick(GameObject selector, string ID)
+        {
+            if (currentActiveItemSelector != null)
+            {
+                if (selector.Equals(currentActiveItemSelector))
+                {
+                    return;
+                }
+                else
+                {
+                    currentActiveItemSelector.transform.GetChild(0).GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
+                }
+            }
+            else if (currentActiveCategory != null)
+            {
+                currentActiveCategory.transform.GetChild(0).GetComponent<Image>().color = new Color(0.28125f, 0.28125f, 0.28125f);
+                currentActiveCategory = null;
+            }
+            currentActiveItemSelector = selector;
+            currentActiveItemSelector.transform.GetChild(0).GetComponent<Image>().color = new Color(0.8203125f, 0.8203125f, 0.8203125f);
+
+            // Reset item list
+            ResetRagFairItemList();
+
+            // Add all items of that category to the list
+            Transform listTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1);
+            Transform listParent = listTransform.GetChild(0).GetChild(0).GetChild(0);
+            GameObject itemTemplate = listParent.GetChild(0).gameObject;
+            AssortmentItem[] assortItems = GetTraderItemSell(ID);
+
+            for (int i = 0; i < assortItems.Length; ++i)
+            {
+                if (assortItems[i] != null)
+                {
+                    // Make an entry for each price of this assort item
+                    foreach (Dictionary<string, int> priceList in assortItems[i].prices)
+                    {
+                        GameObject itemElement = Instantiate(itemTemplate, listParent);
+                        itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[ID];
+                        itemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = assortItems[i].stack.ToString();
+                        itemElement.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[ID];
+                        itemElement.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemBuyClick(i, assortItems[i], priceList); });
+                        itemElement.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemWishClick(ID); });
+
+                        if (ragFairItemBuyViewsByID.ContainsKey(ID))
+                        {
+                            ragFairItemBuyViewsByID[ID].Add(itemElement);
+                        }
+                        else
+                        {
+                            ragFairItemBuyViewsByID.Add(ID, new List<GameObject>() { itemElement });
+                        }
+                    }
+                }
+            }
+
+            // Update item list hoverscrolls
+            UpdateRagfairBuyItemsHoverscrolls();
         }
 
         public void OnRagFairCategoryToggleClick(GameObject category)
@@ -2789,20 +3511,188 @@ namespace EFM
             toggle.GetChild(1).gameObject.SetActive(!toggle.GetChild(1).gameObject.activeSelf);
             category.transform.GetChild(1).gameObject.SetActive(toggle.GetChild(1).gameObject.activeSelf);
 
-            // TODO: Ensure hoverscrolls are properly updated (active and rate) because the height of the lsit has changed since we toggled
+            UpdateRagfairBuyCategoriesHoverscrolls();
         }
 
         public int GetTotalItemSell(string ID)
         {
-            // TODO: Check in all trader assorts, for each taht has an entry of this item, +1
             // TODO: Once rag fair player simulation is implemented, add up the number of player selling entries 
-            return 0;
+            int count = 0;
+
+            foreach (EFM_TraderStatus trader in Mod.traderStatuses)
+            {
+                int level = trader.GetLoyaltyLevel();
+                TraderAssortment currentAssort = trader.assortmentByLevel[level];
+                if (currentAssort.itemsByID.ContainsKey(ID))
+                {
+                    ++count;
+                }
+            }
+
+            return count;
         }
 
-        public void OnRagFairWishlistItemWishClick(string ID)
+        public AssortmentItem[] GetTraderItemSell(string ID)
         {
-            // TODO: Keeps lists of all elements for this item that is relevant to wishlist (rag fair buy and wishlist item views (deactivate star on buy, destroy teh view in wishlist), all the CIWs and VIDs of this item that are in the hideout so we can set their wishlist var to false)
-            // TODO: Remove ID from Mod.wishList
+            // TODO: Once rag fair player simulation is implemented, add up the number of player selling entries 
+            AssortmentItem[] itemAssortments = new AssortmentItem[8];
+
+            foreach(EFM_TraderStatus trader in Mod.traderStatuses)
+            {
+                int level = trader.GetLoyaltyLevel();
+                TraderAssortment currentAssort = trader.assortmentByLevel[level];
+                if (currentAssort.itemsByID.ContainsKey(ID))
+                {
+                    itemAssortments[trader.index] = currentAssort.itemsByID[ID];
+                }
+            }
+
+            return itemAssortments;
+        }
+
+        public void OnRagFairWishlistItemWishClick(GameObject UIElement, string ID)
+        {
+            // Destroy wishlist element
+            Destroy(UIElement);
+
+            // Update wishlist hover scrolls
+            UpdateRagFairWishlistHoverscrolls();
+
+            // Disable star of buy item view
+            if (ragFairItemBuyViewsByID.ContainsKey(ID))
+            {
+                foreach(GameObject buyItemView in ragFairItemBuyViewsByID[ID])
+                {
+                    buyItemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = Color.black;
+                }
+            }
+
+            // Remove from wishlist logic
+            wishListItemViewsByID.Remove(ID);
+            Mod.wishList.Remove(ID);
+        }
+
+        public void OnRagFairBuyItemBuyClick(int traderIndex, AssortmentItem item, Dictionary<string, int> priceList)
+        {
+            // Set rag fair cart item, icon, amount, name
+            ragfairCartItem = item.ID;
+            ragfairCartItemCount = 1;
+            ragfairPrices = priceList;
+            
+            Transform ragfairCartTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2);
+            ragfairCartTransform.GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames[item.ID];
+            ragfairCartTransform.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[item.ID];
+            ragfairCartTransform.GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "1";
+
+            Transform cartShowcase = ragfairCartTransform.GetChild(1);
+            Transform pricesParent = cartShowcase.GetChild(4).GetChild(0).GetChild(0);
+            GameObject priceTemplate = pricesParent.GetChild(0).gameObject;
+            float priceHeight = 0;
+            if (pricesParent.childCount > 1)
+            {
+                Destroy(pricesParent.GetChild(1).gameObject);
+            }
+            bool canDeal = true;
+            foreach (KeyValuePair<string, int> price in priceList)
+            {
+                priceHeight += 50;
+                Transform priceElement = Instantiate(priceTemplate, pricesParent).transform;
+                priceElement.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[price.Key];
+                priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.Value.ToString();
+                priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = Mod.itemNames[price.Key];
+                if (ragfairBuyPriceElements == null)
+                {
+                    ragfairBuyPriceElements = new Dictionary<string, GameObject>();
+                }
+                ragfairBuyPriceElements.Add(price.Key, priceElement.gameObject);
+
+                if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= price.Value)
+                {
+                    priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
+                    priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
+                }
+                else
+                {
+                    canDeal = false;
+                }
+            }
+            EFM_HoverScroll downHoverScroll = cartShowcase.GetChild(3).GetChild(3).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll upHoverScroll = cartShowcase.GetChild(3).GetChild(2).GetComponent<EFM_HoverScroll>();
+            if (priceHeight > 100)
+            {
+                downHoverScroll.rate = 100 / (priceHeight - 100);
+                upHoverScroll.rate = 100 / (priceHeight - 100);
+                downHoverScroll.gameObject.SetActive(true);
+                upHoverScroll.gameObject.SetActive(false);
+            }
+            else
+            {
+                downHoverScroll.gameObject.SetActive(false);
+                upHoverScroll.gameObject.SetActive(false);
+            }
+
+            Transform dealButton = cartShowcase.parent.GetChild(2).GetChild(0).GetChild(0);
+            if (canDeal)
+            {
+                dealButton.GetComponent<Collider>().enabled = true;
+                dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+            }
+            else
+            {
+                dealButton.GetComponent<Collider>().enabled = false;
+                dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+            }
+
+            // Set ragfair buy deal button 
+            EFM_PointableButton ragfairCartDealAmountButton = ragfairCartTransform.transform.GetChild(2).GetChild(0).GetChild(0).GetComponent<EFM_PointableButton>();
+            ragfairCartDealAmountButton.Button.onClick.AddListener(() => { OnRagfairBuyDealClick(traderIndex); });
+
+            // Deactivate ragfair buy categories and item list, enable cart
+            ragfairCartTransform.gameObject.SetActive(true);
+            ragfairCartTransform.parent.GetChild(0).gameObject.SetActive(false);
+            ragfairCartTransform.parent.GetChild(1).gameObject.SetActive(false);
+        }
+
+        public void OnRagFairBuyItemWishClick(string ID)
+        {
+            if (Mod.wishList.Contains(ID))
+            {
+                // Destroy wishlist element
+                Destroy(wishListItemViewsByID[ID]);
+
+                // Update wishlist hover scrolls
+                UpdateRagFairWishlistHoverscrolls();
+
+                // Disable star of buy item views
+                if (ragFairItemBuyViewsByID.ContainsKey(ID))
+                {
+                    foreach (GameObject buyItemView in ragFairItemBuyViewsByID[ID])
+                    {
+                        buyItemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = Color.black;
+                    }
+                }
+
+                // Remove from wishlist logic
+                wishListItemViewsByID.Remove(ID);
+                Mod.wishList.Remove(ID);
+            }
+            else
+            {
+                // Add wishlist UI entry, also updates hoverscrolls
+                AddItemToWishlist(ID);
+
+                // Enable star of buy item views
+                if (ragFairItemBuyViewsByID.ContainsKey(ID))
+                {
+                    foreach (GameObject buyItemView in ragFairItemBuyViewsByID[ID])
+                    {
+                        buyItemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = new Color(1, 0.84706f, 0); ;
+                    }
+                }
+
+                // Add to wishlist logic
+                Mod.wishList.Add(ID);
+            }
         }
 
         public void AddItemToWishlist(string ID)
@@ -2810,10 +3700,14 @@ namespace EFM
             Transform wishlistParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject wishlistItemViewTemplate = wishlistParent.GetChild(0).gameObject;
             GameObject wishlistItemView = Instantiate(wishlistItemViewTemplate, wishlistParent);
+
+            // Update wishlist hover scrolls
+            UpdateRagFairWishlistHoverscrolls();
+
             wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[ID];
             wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[ID];
 
-            wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(ID); });
+            wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(wishlistItemView, ID); });
 
             wishListItemViewsByID.Add(ID, wishlistItemView);
 
@@ -2825,6 +3719,206 @@ namespace EFM
                     itemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = new Color(1, 0.84706f, 0);
                 }
             }
+        }
+
+        private void UpdateRagFairWishlistHoverscrolls()
+        {
+            EFM_HoverScroll newWishlistDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll newWishlistUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+            float wishlistHeight = 3 + 34 * Mod.wishList.Count;
+            if (wishlistHeight > 190)
+            {
+                newWishlistUpHoverScroll.rate = 190 / (wishlistHeight - 190);
+                newWishlistDownHoverScroll.rate = 190 / (wishlistHeight - 190);
+                newWishlistDownHoverScroll.gameObject.SetActive(true);
+            }
+            else
+            {
+                newWishlistDownHoverScroll.gameObject.SetActive(false);
+                newWishlistUpHoverScroll.gameObject.SetActive(false);
+            }
+        }
+
+        public void OnRagfairBuyAmountClick()
+        {
+            // Cancel stack splitting if in progress
+            if (Mod.amountChoiceUIUp || Mod.splittingItem != null)
+            {
+                    Mod.splittingItem.CancelSplit();
+            }
+
+            // Disable buy amount buttons until done choosing amount
+            transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = false;
+            transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = false;
+
+            // Start splitting
+            Mod.stackSplitUI.SetActive(true);
+            Mod.stackSplitUI.transform.position = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.2f;
+            Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, Mod.rightHand.transform.eulerAngles.y, 0);
+            amountChoiceStartPosition = Mod.rightHand.transform.position;
+            amountChoiceRightVector = Mod.rightHand.transform.right;
+            amountChoiceRightVector.y = 0;
+
+            choosingRagfairBuyAmount = true;
+
+            // Set max buy amount
+            maxBuyAmount = Mod.traderStatuses[currentTraderIndex].assortmentByLevel[Mod.traderStatuses[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack;
+        }
+
+        public void OnRagfairBuyDealClick(int traderIndex)
+        {
+            // Remove price from trade volume
+            foreach (KeyValuePair<string, int> price in ragfairPrices)
+            {
+                int amountToRemove = price.Value;
+                tradeVolumeInventory[price.Key] -= amountToRemove;
+                List<GameObject> objectList = tradeVolumeInventoryObjects[price.Key];
+                while (amountToRemove > 0)
+                {
+                    GameObject currentItemObject = objectList[objectList.Count - 1];
+                    EFM_CustomItemWrapper CIW = currentItemObject.GetComponent<EFM_CustomItemWrapper>();
+                    if (CIW != null)
+                    {
+                        if (CIW.maxStack > 1)
+                        {
+                            int stack = CIW.stack;
+                            if (stack - amountToRemove <= 0)
+                            {
+                                amountToRemove -= stack;
+
+                                // Destroy item
+                                objectList.RemoveAt(objectList.Count - 1);
+                                Mod.baseInventory[CIW.ID] -= stack;
+                                baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
+                                if (Mod.baseInventory[CIW.ID] == 0)
+                                {
+                                    Mod.baseInventory.Remove(CIW.ID);
+                                    baseManager.baseInventoryObjects.Remove(CIW.ID);
+                                }
+                                CIW.destroyed = true;
+                                Destroy(gameObject);
+                            }
+                            else // stack - amountToRemove > 0
+                            {
+                                CIW.stack -= amountToRemove;
+                                amountToRemove = 0;
+                            }
+                        }
+                        else // Doesnt have stack, its a single item
+                        {
+                            --amountToRemove;
+
+                            // Destroy item
+                            objectList.RemoveAt(objectList.Count - 1);
+                            Mod.baseInventory[CIW.ID] -= 1;
+                            baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
+                            if (Mod.baseInventory[CIW.ID] == 0)
+                            {
+                                Mod.baseInventory.Remove(CIW.ID);
+                                baseManager.baseInventoryObjects.Remove(CIW.ID);
+                            }
+                            CIW.destroyed = true;
+                            Destroy(gameObject);
+                        }
+                    }
+                    else // Vanilla item cannot have stack
+                    {
+                        --amountToRemove;
+
+                        // Destroy item
+                        objectList.RemoveAt(objectList.Count - 1);
+                        Mod.baseInventory[price.Key] -= 1;
+                        baseManager.baseInventoryObjects[price.Key].Remove(currentItemObject);
+                        if (Mod.baseInventory[price.Key] == 0)
+                        {
+                            Mod.baseInventory.Remove(price.Key);
+                            baseManager.baseInventoryObjects.Remove(price.Key);
+                        }
+                        currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
+                        Destroy(gameObject);
+                    }
+                }
+
+                // Update area managers based on item we just removed
+                foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+                {
+                    areaManager.UpdateBasedOnItem(price.Key);
+                }
+            }
+
+            // Add bought amount of item to trade volume at random pos and rot within it
+            int amountToSpawn = ragfairCartItemCount;
+            if (int.TryParse(cartItem, out int parseResult))
+            {
+                GameObject itemPrefab = Mod.itemPrefabs[parseResult];
+                EFM_CustomItemWrapper prefabCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
+                BoxCollider tradeVolumeCollider = tradeVolume.GetComponent<BoxCollider>();
+                List<GameObject> objectsList = new List<GameObject>();
+                while (amountToSpawn > 0)
+                {
+                    GameObject spawnedItem = Instantiate(itemPrefab, tradeVolume.transform);
+                    objectsList.Add(spawnedItem);
+                    float xSize = tradeVolumeCollider.size.x;
+                    float ySize = tradeVolumeCollider.size.y;
+                    float zSize = tradeVolumeCollider.size.z;
+                    spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
+                                                                      UnityEngine.Random.Range(-ySize / 2, ySize / 2),
+                                                                      UnityEngine.Random.Range(-zSize / 2, zSize / 2));
+                    spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
+
+                    if (prefabCIW.maxStack > 1)
+                    {
+                        spawnedItem.GetComponent<EFM_CustomItemWrapper>().stack = prefabCIW.maxStack;
+                        amountToSpawn -= prefabCIW.maxStack;
+                    }
+                    else
+                    {
+                        --amountToSpawn;
+                    }
+                }
+                if (tradeVolumeInventory.ContainsKey(ragfairCartItem))
+                {
+                    tradeVolumeInventory[ragfairCartItem] += ragfairCartItemCount;
+                    tradeVolumeInventoryObjects[ragfairCartItem].AddRange(objectsList);
+                }
+                else
+                {
+                    tradeVolumeInventory.Add(ragfairCartItem, ragfairCartItemCount);
+                    tradeVolumeInventoryObjects.Add(cartItem, objectsList);
+                }
+                if (Mod.baseInventory.ContainsKey(ragfairCartItem))
+                {
+                    Mod.baseInventory[ragfairCartItem] += ragfairCartItemCount;
+                    baseManager.baseInventoryObjects[cartItem].AddRange(objectsList);
+                }
+                else
+                {
+                    Mod.baseInventory.Add(ragfairCartItem, ragfairCartItemCount);
+                    baseManager.baseInventoryObjects.Add(ragfairCartItem, objectsList);
+                }
+            }
+            else
+            {
+                AnvilManager.Run(SpawnVanillaItem(ragfairCartItem, amountToSpawn));
+            }
+
+            // Update amount of item in trader's assort
+            Mod.traderStatuses[traderIndex].assortmentByLevel[Mod.traderStatuses[traderIndex].GetLoyaltyLevel()].itemsByID[ragfairCartItem].stack -= amountToSpawn;
+
+            // Update the whole thing
+            if (currentTraderIndex == traderIndex)
+            {
+                SetTrader(currentTraderIndex);
+            }
+        }
+
+        public void OnRagfairBuyCancelClick()
+        {
+            // Deactivate ragfair buy categories and item list, enable cart
+            Transform ragfairCartTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2);
+            ragfairCartTransform.gameObject.SetActive(false);
+            ragfairCartTransform.parent.GetChild(0).gameObject.SetActive(true);
+            ragfairCartTransform.parent.GetChild(1).gameObject.SetActive(true);
         }
     }
 }

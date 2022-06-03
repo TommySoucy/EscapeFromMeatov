@@ -31,6 +31,8 @@ namespace EFM
         public static Dictionary<string, TraderTask> foundTasks;
         public static Dictionary<string, TraderTaskCondition> foundTaskConditions;
         public static Dictionary<string, List<TraderTaskCondition>> conditionsByItem;
+        public static Dictionary<string, List<TraderTaskCondition>> questConditionsByTask; // List of quest conditions dependent on the specific task 
+        public static Dictionary<string, List<TraderTaskCondition>> conditionsByVisCond; // List of conditions whos visibility depends on the specific condition
 
         public List<TraderTask> tasksToInit;
         public List<TraderTaskCondition> conditionsToInit;
@@ -423,6 +425,7 @@ namespace EFM
                 tasks.Add(newTask);
 
                 newTask.ID = rawTask.Value;
+                newTask.ownerTraderIndex = index;
                 newTask.name = questLocale["name"].ToString();
                 newTask.description = Mod.localDB["mail"][questLocale["description"].ToString()].ToString();
                 newTask.failMessage = Mod.localDB["mail"][questLocale["failMessageText"].ToString()].ToString();
@@ -912,6 +915,20 @@ namespace EFM
                             waitingQuestConditions.Add(targetTaskID, new List<TraderTaskCondition> { condition });
                         }
                     }
+
+                    // Add to lists
+                    if (questConditionsByTask == null)
+                    {
+                        questConditionsByTask = new Dictionary<string, List<TraderTaskCondition>>();
+                    }
+                    if (questConditionsByTask.ContainsKey(targetTaskID))
+                    {
+                        questConditionsByTask[targetTaskID].Add(condition);
+                    }
+                    else
+                    {
+                        questConditionsByTask.Add(targetTaskID, new List<TraderTaskCondition>() { condition });
+                    }
                     break;
                 case "TraderLoyalty":
                     condition.conditionType = TraderTaskCondition.ConditionType.TraderLoyalty;
@@ -998,6 +1015,20 @@ namespace EFM
                             waitingVisibilityConditions.Add(target, new List<TraderTaskCondition>() { condition });
                         }
                     }
+
+                    // Add to lists
+                    if (conditionsByVisCond == null)
+                    {
+                        conditionsByVisCond = new Dictionary<string, List<TraderTaskCondition>>();
+                    }
+                    if (conditionsByVisCond.ContainsKey(target))
+                    {
+                        conditionsByVisCond[target].Add(condition);
+                    }
+                    else
+                    {
+                        conditionsByVisCond.Add(target, new List<TraderTaskCondition>() { condition });
+                    }
                 }
             }
 
@@ -1015,6 +1046,146 @@ namespace EFM
             }
             
             return true;
+        }
+
+        public static void UpdateConditionVisibility(string conditionID)
+        {
+            if (EFM_TraderStatus.conditionsByVisCond.ContainsKey(conditionID))
+            {
+                foreach (TraderTaskCondition dependentCondition in EFM_TraderStatus.conditionsByVisCond[conditionID])
+                {
+                    bool fulfilled = true;
+                    foreach (TraderTaskCondition visibilityCondition in dependentCondition.visibilityConditions)
+                    {
+                        if (!visibilityCondition.fulfilled)
+                        {
+                            fulfilled = false;
+                            break;
+                        }
+                    }
+                    if (fulfilled)
+                    {
+                        if (dependentCondition.marketListElement != null)
+                        {
+                            dependentCondition.marketListElement.SetActive(true);
+                        }
+                        if (dependentCondition.statusListElement != null)
+                        {
+                            dependentCondition.statusListElement.SetActive(true);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void UpdateTaskCompletion(TraderTask task)
+        {
+            // Check if failed first
+            bool failed = true;
+            foreach (KeyValuePair<string, TraderTaskCondition> condition in task.failConditions)
+            {
+                if (!condition.Value.fulfilled)
+                {
+                    failed = false;
+                    break;
+                }
+            }
+
+            if (failed)
+            {
+                task.taskState = TraderTask.TaskState.Fail;
+                if (Mod.currentLocationIndex == 1) 
+                {
+                    if (task.marketListElement != null)
+                    {
+                        GameObject.Destroy(task.marketListElement);
+                        task.marketListElement = null;
+
+                        Mod.currentBaseManager.marketManager.UpdateTaskListHeight();
+                    }
+                }
+                if(task.statusListElement != null)
+                {
+                    GameObject.Destroy(task.statusListElement);
+                    task.statusListElement = null;
+
+                    Mod.playerStatusManager.UpdateTaskListHeight();
+                }
+            }
+            else
+            {
+                bool complete = true;
+                foreach (KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+                {
+                    if (!condition.Value.fulfilled)
+                    {
+                        complete = false;
+                        break;
+                    }
+                }
+
+                if (complete)
+                {
+                    task.taskState = TraderTask.TaskState.Complete;
+                    if (Mod.currentLocationIndex == 1) // If in base, we want to update market list element if it exists
+                    {
+                        if (task.marketListElement != null)
+                        {
+                            task.marketListElement.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+                            task.marketListElement.transform.GetChild(0).GetChild(4).gameObject.SetActive(true);
+                            task.marketListElement.transform.GetChild(0).GetChild(5).gameObject.SetActive(false);
+                            task.marketListElement.transform.GetChild(0).GetChild(7).gameObject.SetActive(true);
+                        }
+                    }
+                    if (task.statusListElement != null)
+                    {
+                        task.marketListElement.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+                        task.marketListElement.transform.GetChild(0).GetChild(3).gameObject.SetActive(true);
+                    }
+                }
+            }
+        }
+
+        public static void UpdateTaskAvailability(TraderTask task)
+        {
+            bool available = true;
+            foreach (KeyValuePair<string, TraderTaskCondition> condition in task.startConditions)
+            {
+                if (!condition.Value.fulfilled)
+                {
+                    available = false;
+                    break;
+                }
+            }
+
+            if (available)
+            {
+                task.taskState = TraderTask.TaskState.Available;
+
+                // Add to UI
+                if(Mod.currentLocationIndex == 1 && Mod.currentBaseManager.marketManager.currentTraderIndex == task.ownerTraderIndex)
+                {
+                    Mod.currentBaseManager.marketManager.AddTask(task);
+                }
+            }
+        }
+
+        public static void FulfillCondition(TraderTaskCondition condition)
+        {
+            condition.fulfilled = true;
+
+            // Make visible any conditions that have a UI element and that have all their visibility conditions fulfilled
+            EFM_TraderStatus.UpdateConditionVisibility(condition.ID);
+
+            // Update tasks dependent on this condition's fulfillment
+            if (condition.task.taskState == TraderTask.TaskState.Locked)
+            {
+                EFM_TraderStatus.UpdateTaskAvailability(condition.task);
+            }
+            else if (condition.task.taskState == TraderTask.TaskState.Active)
+            {
+                EFM_TraderStatus.UpdateTaskCompletion(condition.task);
+            }
         }
     }
 
@@ -1045,6 +1216,7 @@ namespace EFM
         public GameObject statusListElement;
 
         public string ID;
+        public int ownerTraderIndex;
         public string name;
         public string description;
         public string failMessage;

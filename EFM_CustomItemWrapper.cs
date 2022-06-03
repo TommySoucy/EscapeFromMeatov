@@ -1456,12 +1456,14 @@ namespace EFM
 
 		public int GetValue()
         {
-			TODO: Return value of this item + all sub items atatchd to it
+			TODO: Return value of this item WITHOUT all sub items atatchd to it
+			// TODO: Maybe add all values of sub items attached to this one too but will have to adapt  market for it, for example, when we insure, we only ensure the root item not sub items
         }
 
 		public int GetInsuranceValue()
         {
-			TODO: Return value of this item + all sub items atatchd to it that are insurable
-        }
+			TODO: Return value of this item WITHOUT all sub items atatchd to it that are insurable
+			// TODO: Maybe add all values of sub items attached to this one too but will have to adapt  market for it, for example, when we insure, we only ensure the root item not sub items
+		}
 	}
 }
