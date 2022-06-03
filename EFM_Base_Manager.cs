@@ -2675,7 +2675,7 @@ namespace EFM
 
             // Init Market
             marketManager = transform.GetChild(1).GetChild(25).gameObject.AddComponent<EFM_MarketManager>();
-            marketManager.Init();
+            marketManager.Init(this);
 
             // Add switches
             // LightSwitch

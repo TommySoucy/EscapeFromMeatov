@@ -2826,6 +2826,26 @@ namespace EFM
                     }
                 }
             }
+
+            // Update all areas based on the item
+            foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
+            {
+                if (spawnedSmallBox || spawnedBigBox)
+                {
+                    if (spawnedSmallBox)
+                    {
+                        baseAreaManager.UpdateBasedOnItem("715");
+                    }
+                    if (spawnedBigBox)
+                    {
+                        baseAreaManager.UpdateBasedOnItem("716");
+                    }
+                }
+                else
+                {
+                    baseAreaManager.UpdateBasedOnItem(ID);
+                }
+            }
             yield break;
         }
 

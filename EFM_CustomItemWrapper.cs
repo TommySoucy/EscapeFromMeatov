@@ -1456,13 +1456,17 @@ namespace EFM
 
 		public int GetValue()
         {
-			TODO: Return value of this item WITHOUT all sub items atatchd to it
+			return physObj.ObjectWrapper.CreditCost;
+
 			// TODO: Maybe add all values of sub items attached to this one too but will have to adapt  market for it, for example, when we insure, we only ensure the root item not sub items
         }
 
 		public int GetInsuranceValue()
         {
-			TODO: Return value of this item WITHOUT all sub items atatchd to it that are insurable
+			// Thsi inureability of the current item will be checked by the calling method
+			return physObj.ObjectWrapper.CreditCost;
+
+			// TODO: WE DONT CHECK FOR INSUREABILITY HERE FOR THIS OBJECT, BUT WE MUST FOR SUB OBJECTS WHEN WE IMPLEMENT THAT
 			// TODO: Maybe add all values of sub items attached to this one too but will have to adapt  market for it, for example, when we insure, we only ensure the root item not sub items
 		}
 	}

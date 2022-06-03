@@ -2079,7 +2079,7 @@ namespace EFM
                 case "TraderLoyalty":
                     Mod.instance.LogInfo("\t\t\t\tTraderLoyalty");
                     int traderIndex = EFM_TraderStatus.IDToIndex(requirement["traderId"].ToString());
-                    return baseManager.traderStatuses[traderIndex].GetLoyaltyLevel() >= (int)requirement["loyaltyLevel"];
+                    return Mod.traderStatuses[traderIndex].GetLoyaltyLevel() >= (int)requirement["loyaltyLevel"];
                 case "Skill":
                     Mod.instance.LogInfo("\t\t\t\tSkill");
                     float skillLevel = Mod.skills[(int)requirement["skillIndex"]].currentProgress / 100;
@@ -2196,7 +2196,7 @@ namespace EFM
 
                     return itemAmountInInventory >= itemAmountNeeded;
                 case EFM_AreaRequirement.RequirementType.Trader:
-                    return baseManager.traderStatuses[requirement.index].GetLoyaltyLevel() >= requirement.level;
+                    return Mod.traderStatuses[requirement.index].GetLoyaltyLevel() >= requirement.level;
                 case EFM_AreaRequirement.RequirementType.Skill:
                     float skillLevel = Mod.skills[requirement.index].currentProgress / 100;
                     return skillLevel >= requirement.level;
@@ -2272,7 +2272,7 @@ namespace EFM
                         else if (requirementTypeIndex == 2 && requirement["type"].ToString().Equals("TraderLoyalty"))
                         {
                             int traderIndex = EFM_TraderStatus.IDToIndex(requirement["traderId"].ToString());
-                            if (baseManager.traderStatuses[traderIndex].GetLoyaltyLevel() < (int)requirement["loyaltyLevel"])
+                            if (Mod.traderStatuses[traderIndex].GetLoyaltyLevel() < (int)requirement["loyaltyLevel"])
                             {
                                 return false;
                             }
