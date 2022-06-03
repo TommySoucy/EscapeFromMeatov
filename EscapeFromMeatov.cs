@@ -4672,6 +4672,7 @@ namespace EFM
     {
         static bool leftTouchWithinDescRange;
         static bool rightTouchWithinDescRange;
+        static float previousFrameTPAxisY;
 
         //flag2 = __instance.Input.TouchpadTouched && __instance.Input.TouchpadAxes.magnitude < 0.2f;
         static bool Prefix(ref FVRViveHand.HandInitializationState ___m_initState, ref FVRPhysicalObject ___m_selectedObj,
@@ -4733,16 +4734,32 @@ namespace EFM
             if (__instance.Input.TouchpadTouchDown)
             {
                 // Store whether we are in range for description so that we can only activate description if we STARTED touching within the range
-                if (__instance.IsThisTheRightHand)
+                if (__instance.CMode == ControlMode.Vive)
                 {
-                    rightTouchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.3f;
+                    if (__instance.IsThisTheRightHand)
+                    {
+                        rightTouchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.3f;
+                    }
+                    else
+                    {
+                        leftTouchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.3f;
+                    }
                 }
-                else
+                else if(__instance.CMode == ControlMode.Index)
                 {
-                    leftTouchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.3f;
+                    if (__instance.IsThisTheRightHand)
+                    {
+                        rightTouchWithinDescRange = __instance.Input.TouchpadAxes.y <= 0;
+                    }
+                    else
+                    {
+                        leftTouchWithinDescRange = __instance.Input.TouchpadAxes.y <= 0f;
+                    }
                 }
             }
-            if (__instance.Input.TouchpadTouchUp || __instance.Input.TouchpadAxes.magnitude >= 0.3f)
+            else if (__instance.Input.TouchpadTouchUp ||
+                    (__instance.CMode == ControlMode.Vive && __instance.Input.TouchpadAxes.magnitude >= 0.3f) || 
+                    (__instance.CMode == ControlMode.Index && __instance.Input.TouchpadAxes.y > 0))
             {
                 if (__instance.IsThisTheRightHand)
                 {
@@ -4824,52 +4841,69 @@ namespace EFM
                 __instance.CurrentPointable = null;
             }
 
-            if (!(__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange))
+            // Might have to cancel movement if touching TP for description
+            // Should only be applicable with Vive since movement and description share the touchpad
+            if (__instance.CMode == ControlMode.Vive)
+            {
+                if (!(__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange))
+                {
+                    __instance.MovementManager.UpdateMovementWithHand(__instance);
+                }
+                else // Started touching within desc range, want to stop movement, sprinting, and smooth turning
+                {
+                    typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
+                    typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningCounterClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
+                    typeof(FVRMovementManager).GetField("m_sprintingEngaged", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
+                    typeof(FVRMovementManager).GetField("m_twoAxisVelocity", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, Vector3.zero);
+                }
+            }
+            else // Any other controller, or any that has enough buttons to have description AND movement at the same time, we should update movement
             {
                 __instance.MovementManager.UpdateMovementWithHand(__instance);
-            }
-            else // Started touching within desc range, want to stop movement, sprinting, and smooth turning
-            {
-                typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
-                typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningCounterClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
-                typeof(FVRMovementManager).GetField("m_sprintingEngaged", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
-                typeof(FVRMovementManager).GetField("m_twoAxisVelocity", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, Vector3.zero);
             }
 
             // Keep a reference to touchpad touch inputs so we can still use descriptions after touchpad input has been flushed
             bool touchpadTouched = __instance.Input.TouchpadTouched;
             float touchpadAxisMagnitude = __instance.Input.TouchpadAxes.magnitude;
+            float touchpadAxisY = __instance.Input.TouchpadAxes.y;
             bool touchpadDown = __instance.Input.TouchpadDown;
 
             if (__instance.MovementManager.ShouldFlushTouchpad(__instance))
             {
                 typeof(FVRViveHand).GetMethod("FlushTouchpadData", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
             }
-            bool flag;
-            bool flag2;
-            bool pressedCenter = false;
-            if (__instance.IsInStreamlinedMode)
+            bool flag = false;
+            bool flag2 = false;
+            bool fullDescInput = false;
+            if (__instance.CMode == ControlMode.Index) // Usually we would check if streamlined here, but in meatov, it will always be streamlined if index
             {
                 flag = __instance.Input.BYButtonDown;
-                flag2 = __instance.Input.BYButtonPressed;
+
+                // Want grab laser if the default BYButtonPressed (vanilla) OR if the description is touched
+                flag2 = __instance.Input.BYButtonPressed || (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange);
+
+                // Check if we move touch from bottom (touch range) to top of touch pad this frame
+                fullDescInput = touchpadAxisY > 0 && previousFrameTPAxisY <= 0;
+                previousFrameTPAxisY = touchpadAxisY;
             }
-            else
+            else if(__instance.CMode == ControlMode.Vive)
             {
-                flag = __instance.Input.TouchpadDown;
+                flag = touchpadDown;
 
                 // Here check if only touched and within center of touchpad for grab laser input
                 flag2 = touchpadTouched && touchpadAxisMagnitude < 0.3f;
                 //Mod.instance.LogInfo("Flag2: " + flag2 + " from touched: " + __instance.Input.TouchpadTouched + " and magnitude: " + __instance.Input.TouchpadAxes.magnitude);
 
                 // Check if we started pressing the center of touchpad this frame
-                pressedCenter = touchpadDown && touchpadAxisMagnitude < 0.3f;
+                fullDescInput = touchpadDown && touchpadAxisMagnitude < 0.3f;
             }
+
             if (flag2)
             {
                 if (___m_state == FVRViveHand.HandState.GripInteracting)
                 {
-                    // Only display description if started touching at magnitude < 0.2, and also check if descriptions have been init yet
-                    // Because this will also be checked in meatov menu but they havent been init yet at that point
+                    // Only display description if started touching within desc range, and also check if descriptions have been init yet
+                    // Because this will also be checked in meatov menu, the patch will run, but they havent been init yet at that point
                     if ((__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange) && Mod.rightDescriptionManager != null)
                     {
                         EFM_Describable describable = __instance.CurrentInteractable.GetComponent<EFM_Describable>();
@@ -4939,7 +4973,7 @@ namespace EFM
                     }
                 }
             }
-            if (pressedCenter && Mod.rightDescriptionManager != null)
+            if (fullDescInput && Mod.rightDescriptionManager != null)
             {
                 // Get the description currently on this hand
                 EFM_DescriptionManager manager = null;
@@ -4973,8 +5007,9 @@ namespace EFM
             }
             if (___m_state == FVRViveHand.HandState.Empty && __instance.CurrentHoveredQuickbeltSlot == null)
             {
-                // Dont have the grab laser if we didnt start touching the touchpad within magnitude 0.2
-                if (flag2 && (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange))
+                // Dont have the grab laser if we didnt start touching the touchpad within desc range
+                if ((__instance.CMode == ControlMode.Index && flag2) ||
+                    (__instance.CMode == ControlMode.Vive && flag2 && (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange)))
                 {
                     if (!__instance.GrabLaser.gameObject.activeSelf)
                     {

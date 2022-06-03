@@ -436,9 +436,10 @@ namespace EFM
 		private void TakeInput()
 		{
 			FVRViveHand hand = physObj.m_hand;
-			if (hand.IsInStreamlinedMode)
+			if (hand.CMode == ControlMode.Index)
 			{
-				if (hand.Input.AXButtonPressed)
+				// If A has started being pressed this frame
+				if (hand.Input.AXButtonDown)
 				{
 					switch (itemType)
 					{
@@ -450,12 +451,210 @@ namespace EFM
 						case Mod.ItemType.Pouch:
 							ToggleMode(true, hand.IsThisTheRightHand);
 							break;
+						case Mod.ItemType.Money:
+							if (splittingStack)
+							{
+								// End splitting
+								if (splitAmount != stack || splitAmount == 0)
+								{
+									stack -= splitAmount;
+
+									GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
+									if (Mod.currentLocationIndex == 1) // In hideout
+									{
+										itemObject.transform.parent = Mod.currentBaseManager.transform.GetChild(Mod.currentBaseManager.transform.childCount - 2);
+										EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+										CIW.stack = splitAmount;
+										Mod.currentBaseManager.baseInventoryObjects[ID].Add(itemObject);
+									}
+									else // In raid
+									{
+										itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
+										EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+										CIW.stack = splitAmount;
+									}
+								}
+								// else the chosen amount is 0 or max, meaning cancel the split
+								CancelSplit();
+							}
+							else
+							{
+								// Start splitting
+								Mod.stackSplitUI.SetActive(true);
+								Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
+								Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
+								stackSplitStartPosition = hand.transform.position;
+								stackSplitRightVector = hand.transform.right;
+								stackSplitRightVector.y = 0;
+
+								splittingStack = true;
+								Mod.amountChoiceUIUp = true;
+								Mod.splittingItem = this;
+							}
+							break;
 						default:
 							break;
 					}
 				}
+
+				// If A is being pressed this frame
+				if (hand.Input.AXButtonPressed)
+				{
+					switch (itemType)
+					{
+						case Mod.ItemType.Consumable:
+							bool otherHandConsuming = false;
+							if (!validConsumePress)
+							{
+								otherHandConsuming = hand.OtherHand.GetComponent<EFM_Hand>().consuming;
+							}
+							if (!otherHandConsuming)
+							{
+								hand.GetComponent<EFM_Hand>().consuming = true;
+
+								// Increment timer
+								consumableTimer += Time.deltaTime;
+
+								float use = Mathf.Clamp01(consumableTimer / useTime);
+								Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
+								if (amountRate == 0)
+								{
+									// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
+									if (consumableTimer >= useTime)
+									{
+										Mod.consumeUIText.color = Color.green;
+									}
+									else
+									{
+										Mod.consumeUIText.color = Color.red;
+									}
+								}
+								else
+								{
+									Mod.consumeUIText.color = Color.white;
+								}
+								Mod.consumeUI.transform.parent = hand.transform;
+								Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+								Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+								Mod.consumeUI.SetActive(true);
+								validConsumePress = true;
+							}
+							break;
+						default:
+							break;
+					}
+				}
+
+				// If A has been released this frame
+				if (hand.Input.AXButtonUp)
+				{
+					// If last frame the consume button was being pressed
+					if (validConsumePress)
+					{
+						validConsumePress = false;
+						hand.GetComponent<EFM_Hand>().consuming = false;
+						Mod.consumeUI.SetActive(false);
+
+						if (amountRate == -1)
+						{
+							if (maxAmount > 0)
+							{
+								Mod.instance.LogInfo("Consuming, amountRate == -1, maxAmount > 0, consumableTimer: " + consumableTimer + ", useTime: " + useTime);
+								// Consume for the fraction timer/useTime of remaining amount. If timer >= useTime, we consume the whole thing
+								int amountToConsume = consumableTimer >= useTime ? amount : (int)(amount * (consumableTimer / useTime));
+								Mod.instance.LogInfo("Amount to consume: " + amountToConsume);
+								if (amount - amountToConsume <= 0)
+								{
+									// Attempt to apply effects at full effectiveness
+									// Consume if succesful
+									if (ApplyEffects(1, amountToConsume))
+									{
+										amount = 0;
+									}
+								}
+								else
+								{
+									// Apply effects at partial effectiveness
+									if (ApplyEffects(amountToConsume / maxAmount, amountToConsume))
+									{
+										amount -= amountToConsume;
+									}
+								}
+							}
+							//else // This should never happen anymore because single unit consumable have amountRate = 0 and maxAmount = 1
+							//{
+							//	// Consume the whole thing if timer >= useTime because this is a single unit consumable
+							//	if(consumableTimer >= useTime)
+							//  {
+							//		// Attempt to apply effects at full effectiveness
+							//		// Consume if succesful
+							//		if (ApplyEffects(1, 0))
+							//		{
+							//			amount = 0;
+							//			Destroy(gameObject);
+							//		}
+							//	}
+							//}
+						}
+						else if (amountRate == 0)
+						{
+							// This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
+							if (consumableTimer >= useTime)
+							{
+								if (ApplyEffects(1, 1))
+								{
+									amount -= 1;
+								}
+								// Apply effects at full effectiveness
+							}
+						}
+						else
+						{
+							// Consume timer/useTime of to amountRate
+							int amountToConsume = consumableTimer >= useTime ? (int)amountRate : (int)(amountRate * (consumableTimer / useTime));
+							if (consumableTimer >= useTime)
+							{
+								// Apply effects at full effectiveness
+								if (ApplyEffects(1, amountToConsume))
+								{
+									amount -= amountToConsume;
+								}
+							}
+							else
+							{
+								// Apply effects at effectiveness * amountToConsume / amountRate
+								if (ApplyEffects(amountToConsume / amountRate, amountToConsume))
+								{
+									amount -= amountToConsume;
+								}
+							}
+						}
+
+						consumableTimer = 0;
+
+						if (amount == 0)
+						{
+							// Update player inventory and weight
+							Mod.playerInventory[ID] -= 1;
+							Mod.playerInventoryObjects[ID].Remove(gameObject);
+							if (Mod.playerInventory[ID] == 0)
+							{
+								Mod.playerInventory.Remove(ID);
+								Mod.playerInventoryObjects.Remove(ID);
+							}
+							Mod.weight -= currentWeight;
+							destroyed = true;
+							Destroy(gameObject);
+
+							foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+							{
+								areaManager.UpdateBasedOnItem(ID);
+							}
+						}
+					}
+				}
 			}
-			else
+			else if(hand.CMode == ControlMode.Vive)
 			{
 				Vector2 touchpadAxes = hand.Input.TouchpadAxes;
 

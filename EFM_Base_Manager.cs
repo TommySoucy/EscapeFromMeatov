@@ -1024,6 +1024,7 @@ namespace EFM
             // Set movement control
             GM.CurrentMovementManager.Mode = FVRMovementManager.MovementMode.TwinStick;
             GM.Options.MovementOptions.Touchpad_Confirm = FVRMovementManager.TwoAxisMovementConfirm.OnTouch;
+            GM.Options.ControlOptions.CCM = ControlOptions.CoreControlMode.Streamlined;
 
             // Disable wrist menus
             Mod.rightHand.fvrHand.DisableWristMenu();
