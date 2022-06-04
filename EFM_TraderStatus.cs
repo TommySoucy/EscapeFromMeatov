@@ -287,7 +287,7 @@ namespace EFM
 
                         Dictionary<string, int> currentPrices = new Dictionary<string, int>();
                         currentAssort.itemsByID[actualParentItemID].prices.Add(currentPrices);
-                        foreach (JObject price in entry.Value["barter_scheme"])
+                        foreach (JObject price in entry.Value["barter_scheme"][0])
                         {
                             currentPrices.Add(price["_tpl"].ToString(), (int)price["count"]);
                         }
@@ -299,7 +299,7 @@ namespace EFM
                         item.prices = new List<Dictionary<string, int>>();
                         Dictionary<string, int> currentPrices = new Dictionary<string, int>();
                         item.prices.Add(currentPrices);
-                        foreach(JObject price in entry.Value["barter_scheme"])
+                        foreach (JObject price in entry.Value["barter_scheme"][0])
                         {
                             currentPrices.Add(price["_tpl"].ToString(), (int)price["count"]);
                         }
@@ -393,7 +393,7 @@ namespace EFM
                 JObject questData = null;
                 foreach(JObject quest in Mod.questDB)
                 {
-                    if (quest["_id"].ToString().Equals(rawTask))
+                    if (quest["_id"].ToString().Equals(rawTask.Value))
                     {
                         questData = quest;
                         break;

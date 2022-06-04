@@ -225,7 +225,7 @@ namespace EFM
                                 case EFM_Effect.EffectType.StaminaRate:
                                     Mod.currentStaminaEffect -= effect.value;
                                     break;
-                                case EFM_Effect.EffectType.Tremor:
+                                case EFM_Effect.EffectType.HandsTremor:
                                     // TODO: Stop tremors if there are not other tremor effects
                                     if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                     {
@@ -292,7 +292,7 @@ namespace EFM
                                     bool hasPainTremors = false;
                                     foreach(EFM_Effect effectCheck in EFM_Effect.effects)
                                     {
-                                        if(effectCheck.effectType == EFM_Effect.EffectType.Tremor && effectCheck.active)
+                                        if(effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
                                         {
                                             hasPainTremors = true;
                                             break;
@@ -340,7 +340,7 @@ namespace EFM
                                     bool hasToxinTremors = false;
                                     foreach (EFM_Effect effectCheck in EFM_Effect.effects)
                                     {
-                                        if (effectCheck.effectType == EFM_Effect.EffectType.Tremor && effectCheck.active)
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
                                         {
                                             hasToxinTremors = true;
                                             break;
@@ -406,7 +406,7 @@ namespace EFM
                                     bool hasFractureTremors = false;
                                     foreach (EFM_Effect effectCheck in EFM_Effect.effects)
                                     {
-                                        if (effectCheck.effectType == EFM_Effect.EffectType.Tremor && effectCheck.active)
+                                        if (effectCheck.effectType == EFM_Effect.EffectType.HandsTremor && effectCheck.active)
                                         {
                                             hasFractureTremors = true;
                                             break;
@@ -488,7 +488,7 @@ namespace EFM
                             case EFM_Effect.EffectType.StaminaRate:
                                 Mod.currentStaminaEffect += effect.value;
                                 break;
-                            case EFM_Effect.EffectType.Tremor:
+                            case EFM_Effect.EffectType.HandsTremor:
                                 // TODO: Begin tremors if there isnt already another active one
                                 if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                 {
@@ -544,7 +544,7 @@ namespace EFM
                             case EFM_Effect.EffectType.Pain:
                                 // Add a tremor effect
                                 EFM_Effect newTremor = new EFM_Effect();
-                                newTremor.effectType = EFM_Effect.EffectType.Tremor;
+                                newTremor.effectType = EFM_Effect.EffectType.HandsTremor;
                                 newTremor.delay = 5;
                                 newTremor.hasTimer = effect.hasTimer;
                                 newTremor.timer = effect.timer;
@@ -1405,6 +1405,19 @@ namespace EFM
                     Mod.traderStatuses[i].Init();
                 }
 
+                // Add tasks to player status
+                foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
+                {
+                    if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
+                    {
+                        Mod.playerStatusManager.AddTask(task.Value);
+                    }
+                    else
+                    {
+                        task.Value.statusListElement = null;
+                    }
+                }
+
                 // Init lists
                 UpdateBaseInventory();
                 if (Mod.playerInventory == null)
@@ -1534,6 +1547,19 @@ namespace EFM
                 for (int i = 0; i < 8; i++)
                 {
                     Mod.traderStatuses[i].Init();
+                }
+
+                // Add tasks to player status
+                foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
+                {
+                    if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
+                    {
+                        Mod.playerStatusManager.AddTask(task.Value);
+                    }
+                    else
+                    {
+                        task.Value.statusListElement = null;
+                    }
                 }
             }
         }
@@ -2156,7 +2182,7 @@ namespace EFM
                             if (currentItemPhysObj != null)
                             {
                                 // Attach item to quick slot
-                                FVRQuickBeltSlot quickBeltSlot = GM.CurrentPlayerBody.QuickbeltSlots[i + 4];
+                                FVRQuickBeltSlot quickBeltSlot = GM.CurrentPlayerBody.QBSlots_Internal[i + 4];
                                 currentItemPhysObj.SetQuickBeltSlot(quickBeltSlot);
                                 currentItemPhysObj.SetParentage(quickBeltSlot.QuickbeltRoot);
                             }

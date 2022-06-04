@@ -17,7 +17,7 @@ namespace EFM
             HydrationRate, // Adds/Subtract hydration rate
             MaxStamina, // Adds/Subtract max stamina
             StaminaRate, // Adds/Subtract stamina rates
-            Tremor, // Causes hands to shake
+            HandsTremor, // Causes hands to shake
             QuantumTunnelling, // Activates vignettes
             HealthRate, // Adds/Subtract healing rate
             RemoveAllBloodLosses, // Removes and prevents blood loss

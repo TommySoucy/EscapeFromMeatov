@@ -1133,7 +1133,6 @@ namespace EFM
             {
                 itemCategories = new EFM_CategoryTreeNode(null, "54009119af1c881c07000029", "Item");
             }
-
             EFM_CategoryTreeNode currentParent = itemCategories;
             for(int i = parents.Count - 2; i >= 0; i--)
             {
@@ -1145,7 +1144,7 @@ namespace EFM
                 }
                 else
                 {
-                    string name = localDB["templates"]["ID"]["Name"].ToString();
+                    string name = localDB["templates"][ID]["Name"].ToString();
                     EFM_CategoryTreeNode newNode = new EFM_CategoryTreeNode(currentParent, ID, name);
                     currentParent.children.Add(newNode);
                     currentParent = newNode;
@@ -1415,7 +1414,7 @@ namespace EFM
             }
 
             // Check quickbelt slots
-            foreach (FVRQuickBeltSlot beltSlot in GM.CurrentPlayerBody.QuickbeltSlots)
+            foreach (FVRQuickBeltSlot beltSlot in GM.CurrentPlayerBody.QBSlots_Internal)
             {
                 if (beltSlot.CurObject != null)
                 {
@@ -3095,24 +3094,24 @@ namespace EFM
             if (index < 0)
             {
                 // Clear the belt above the pockets
-                if (__instance.QuickbeltSlots.Count > 4)
+                if (__instance.QBSlots_Internal.Count > 4)
                 {
-                    for (int i = __instance.QuickbeltSlots.Count - 1; i >= 4; --i)
+                    for (int i = __instance.QBSlots_Internal.Count - 1; i >= 4; --i)
                     {
-                        if (__instance.QuickbeltSlots[i] == null)
+                        if (__instance.QBSlots_Internal[i] == null)
                         {
-                            __instance.QuickbeltSlots.RemoveAt(i);
+                            __instance.QBSlots_Internal.RemoveAt(i);
                         }
-                        else if (__instance.QuickbeltSlots[i].IsPlayer)
+                        else if (__instance.QBSlots_Internal[i].IsPlayer)
                         {
                             // Index -2 or -3 will destroy objects associated to the slots
-                            if ((index == -2 || index == -3) && __instance.QuickbeltSlots[i].CurObject != null)
+                            if ((index == -2 || index == -3) && __instance.QBSlots_Internal[i].CurObject != null)
                             {
-                                GameObject.Destroy(__instance.QuickbeltSlots[i].CurObject.gameObject);
-                                __instance.QuickbeltSlots[i].CurObject.ClearQuickbeltState();
+                                GameObject.Destroy(__instance.QBSlots_Internal[i].CurObject.gameObject);
+                                __instance.QBSlots_Internal[i].CurObject.ClearQuickbeltState();
                             }
-                            UnityEngine.Object.Destroy(__instance.QuickbeltSlots[i].gameObject);
-                            __instance.QuickbeltSlots.RemoveAt(i);
+                            UnityEngine.Object.Destroy(__instance.QBSlots_Internal[i].gameObject);
+                            __instance.QBSlots_Internal.RemoveAt(i);
                         }
                     }
                 }
@@ -3122,10 +3121,10 @@ namespace EFM
                 {
                     for (int i = 3; i >= 0; --i)
                     {
-                        if (__instance.QuickbeltSlots[i].IsPlayer && __instance.QuickbeltSlots[i].CurObject != null)
+                        if (__instance.QBSlots_Internal[i].IsPlayer && __instance.QBSlots_Internal[i].CurObject != null)
                         {
-                            GameObject.Destroy(__instance.QuickbeltSlots[i].CurObject.gameObject);
-                            __instance.QuickbeltSlots[i].CurObject.ClearQuickbeltState();
+                            GameObject.Destroy(__instance.QBSlots_Internal[i].CurObject.gameObject);
+                            __instance.QBSlots_Internal[i].CurObject.ClearQuickbeltState();
                         }
                     }
                 }
@@ -3135,22 +3134,22 @@ namespace EFM
             else if(index > Mod.pocketsConfigIndex) // If index is higher than the pockets configuration index, we must keep the pocket slots intact
             {
                 // Only check for slots other than pockets
-                if (__instance.QuickbeltSlots.Count > /* 0 */ 4)
+                if (__instance.QBSlots_Internal.Count > /* 0 */ 4)
                 {
-                    for (int i = __instance.QuickbeltSlots.Count - 1; i >= /* 0 */ 4; i--)
+                    for (int i = __instance.QBSlots_Internal.Count - 1; i >= /* 0 */ 4; i--)
                     {
-                        if (__instance.QuickbeltSlots[i] == null)
+                        if (__instance.QBSlots_Internal[i] == null)
                         {
-                            __instance.QuickbeltSlots.RemoveAt(i);
+                            __instance.QBSlots_Internal.RemoveAt(i);
                         }
-                        else if (__instance.QuickbeltSlots[i].IsPlayer)
+                        else if (__instance.QBSlots_Internal[i].IsPlayer)
                         {
-                            if (__instance.QuickbeltSlots[i].CurObject != null)
+                            if (__instance.QBSlots_Internal[i].CurObject != null)
                             {
-                                __instance.QuickbeltSlots[i].CurObject.ClearQuickbeltState();
+                                __instance.QBSlots_Internal[i].CurObject.ClearQuickbeltState();
                             }
-                            UnityEngine.Object.Destroy(__instance.QuickbeltSlots[i].gameObject);
-                            __instance.QuickbeltSlots.RemoveAt(i);
+                            UnityEngine.Object.Destroy(__instance.QBSlots_Internal[i].gameObject);
+                            __instance.QBSlots_Internal.RemoveAt(i);
                         }
                     }
                 }
@@ -3176,7 +3175,7 @@ namespace EFM
                                 vector2 = Vector3.Reflect(vector2, component.transform.right);
                                 component.PoseOverride.rotation = Quaternion.LookRotation(vector, vector2);
                             }
-                            __instance.QuickbeltSlots.Add(component);
+                            __instance.QBSlots_Internal.Add(component);
                         }
                     }
                 }
@@ -3188,15 +3187,15 @@ namespace EFM
                         disposable.Dispose();
                     }
                 }
-                for (int j = 0; j < __instance.QuickbeltSlots.Count; j++)
+                for (int j = 0; j < __instance.QBSlots_Internal.Count; j++)
                 {
-                    if (__instance.QuickbeltSlots[j].IsPlayer)
+                    if (__instance.QBSlots_Internal[j].IsPlayer)
                     {
-                        __instance.QuickbeltSlots[j].transform.SetParent(__instance.Torso);
-                        __instance.QuickbeltSlots[j].QuickbeltRoot = null;
+                        __instance.QBSlots_Internal[j].transform.SetParent(__instance.Torso);
+                        __instance.QBSlots_Internal[j].QuickbeltRoot = null;
                         if (GM.Options.QuickbeltOptions.QuickbeltHandedness > 0)
                         {
-                            __instance.QuickbeltSlots[j].transform.localPosition = new Vector3(-__instance.QuickbeltSlots[j].transform.localPosition.x, __instance.QuickbeltSlots[j].transform.localPosition.y, __instance.QuickbeltSlots[j].transform.localPosition.z);
+                            __instance.QBSlots_Internal[j].transform.localPosition = new Vector3(-__instance.QBSlots_Internal[j].transform.localPosition.x, __instance.QBSlots_Internal[j].transform.localPosition.y, __instance.QBSlots_Internal[j].transform.localPosition.z);
                         }
                     }
                 }
@@ -3230,7 +3229,7 @@ namespace EFM
             {
                 for(int i=0; i < 4; ++i)
                 {
-                    Mod.pocketSlots[i] = __instance.QuickbeltSlots[i];
+                    Mod.pocketSlots[i] = __instance.QBSlots_Internal[i];
                 }
             }
         }
@@ -3273,11 +3272,11 @@ namespace EFM
                     position = __instance.CurrentInteractable.transform.position;
                 }
             }
-            for (int i = 0; i < GM.CurrentPlayerBody.QuickbeltSlots.Count; i++)
+            for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; i++)
             {
-                if (GM.CurrentPlayerBody.QuickbeltSlots[i].IsPointInsideMe(position))
+                if (GM.CurrentPlayerBody.QBSlots_Internal[i].IsPointInsideMe(position))
                 {
-                    fvrquickBeltSlot = GM.CurrentPlayerBody.QuickbeltSlots[i];
+                    fvrquickBeltSlot = GM.CurrentPlayerBody.QBSlots_Internal[i];
                     break;
                 }
             }
@@ -3685,9 +3684,9 @@ namespace EFM
             {
                 // Find slot index in config
                 bool foundSlot = false;
-                for (int slotIndex=4; slotIndex < GM.CurrentPlayerBody.QuickbeltSlots.Count; ++slotIndex)
+                for (int slotIndex=4; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
                 {
-                    if (GM.CurrentPlayerBody.QuickbeltSlots[slotIndex].Equals(slot))
+                    if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex].Equals(slot))
                     {
                         EFM_CustomItemWrapper equipmentItemWrapper = EFM_EquipmentSlot.currentRig;
                         equipmentItemWrapper.itemsInSlots[slotIndex] = __instance.gameObject;

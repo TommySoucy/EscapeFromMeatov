@@ -127,17 +127,6 @@ namespace EFM
             upHoverScroll.scrollbar = transform.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
             upHoverScroll.other = downHoverScroll;
             upHoverScroll.up = true;
-            foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
-            {
-                if(task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
-                {
-                    AddTask(task.Value);
-                }
-                else
-                {
-                    task.Value.statusListElement = null;
-                }
-            }
             // Set task list toggle button
             EFM_PointableButton taskListButton = transform.GetChild(1).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
             exitButton.SetButton();
