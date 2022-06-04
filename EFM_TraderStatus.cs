@@ -371,6 +371,7 @@ namespace EFM
 
         private void BuildTasks(JObject tasksData)
         {
+            Mod.instance.LogInfo("BuildTask called on trader with index: " + index);
             tasks = new List<TraderTask>();
             conditionsByItem = new Dictionary<string, List<TraderTaskCondition>>();
             Dictionary<string, string> rawTasks = tasksData["success"].ToObject<Dictionary<string, string>>();
@@ -399,7 +400,7 @@ namespace EFM
                         break;
                     }
                 }
-                if(questData == null)
+                if (questData == null)
                 {
                     Mod.instance.LogError("Could not find quest with ID: "+rawTask.Value+" in questDB");
                     continue;
@@ -409,13 +410,13 @@ namespace EFM
                 JObject questLocale = null;
                 foreach (KeyValuePair<string, JObject> quest in questLocales)
                 {
-                    if (quest.Key.Equals(rawTask))
+                    if (quest.Key.Equals(rawTask.Value))
                     {
                         questLocale = quest.Value;
                         break;
                     }
                 }
-                if(questData == null)
+                if(questLocale == null)
                 {
                     Mod.instance.LogError("Could not find quest with ID: "+rawTask.Value+" in locale");
                     continue;
@@ -428,10 +429,16 @@ namespace EFM
                 newTask.ownerTraderIndex = index;
                 newTask.name = questLocale["name"].ToString();
                 newTask.description = Mod.localDB["mail"][questLocale["description"].ToString()].ToString();
-                newTask.failMessage = Mod.localDB["mail"][questLocale["failMessageText"].ToString()].ToString();
-                newTask.successMessage = Mod.localDB["mail"][questLocale["successMessageText"].ToString()].ToString();
+                if (questLocale["failMessageText"] != null && Mod.localDB["mail"][questLocale["failMessageText"].ToString()] != null) // Will be null if quest has no fail conditions
+                {
+                    newTask.failMessage = Mod.localDB["mail"][questLocale["failMessageText"].ToString()].ToString();
+                }
+                if (questLocale["successMessageText"] != null && Mod.localDB["mail"][questLocale["successMessageText"].ToString()] != null) // Can be null?
+                {
+                    newTask.successMessage = Mod.localDB["mail"][questLocale["successMessageText"].ToString()].ToString(); // Unused anyway
+                }
                 newTask.location = "Any";
-                if(taskSaveData == null)
+                if (taskSaveData == null)
                 {
                     if(tasksToInit == null)
                     {
@@ -447,7 +454,7 @@ namespace EFM
 
                 // Fill start conditions
                 newTask.startConditions = new Dictionary<string, TraderTaskCondition>();
-                foreach(JObject startConditionData in questData["conditions"]["AvailableForStart"])
+                foreach (JObject startConditionData in questData["conditions"]["AvailableForStart"])
                 {
                     TraderTaskCondition newCondition = new TraderTaskCondition();
 
@@ -461,10 +468,12 @@ namespace EFM
                         newTask.startConditions.Add(newCondition.ID, newCondition);
                     }
                 }
+                Mod.instance.LogInfo("1");
 
                 // Fill completion conditions
                 newTask.completionConditions = new Dictionary<string, TraderTaskCondition>();
-                foreach(JObject completionConditionData in questData["conditions"]["AvailableForFinish"])
+                Mod.instance.LogInfo("1");
+                foreach (JObject completionConditionData in questData["conditions"]["AvailableForFinish"])
                 {
                     TraderTaskCondition newCondition = new TraderTaskCondition();
 
@@ -479,9 +488,11 @@ namespace EFM
                     }
                 }
 
+                Mod.instance.LogInfo("1");
                 // Fill fail conditions
                 newTask.failConditions = new Dictionary<string, TraderTaskCondition>();
-                foreach(JObject failConditionData in questData["conditions"]["Fail"])
+                Mod.instance.LogInfo("1");
+                foreach (JObject failConditionData in questData["conditions"]["Fail"])
                 {
                     TraderTaskCondition newCondition = new TraderTaskCondition();
 
@@ -495,16 +506,36 @@ namespace EFM
                         newTask.failConditions.Add(newCondition.ID, newCondition);
                     }
                 }
+                Mod.instance.LogInfo("1");
 
                 // Fill success rewards
-                foreach(JObject rewardData in questData["rewards"]["Success"])
+                newTask.successRewards = new List<TraderTaskReward>();
+                foreach (JObject rewardData in questData["rewards"]["Success"])
                 {
                     TraderTaskReward newReward = new TraderTaskReward();
                     SetReward(newReward, rewardData, newTask, newTask.successRewards);
                 }
 
+                // Fill fail rewards
+                newTask.failureRewards = new List<TraderTaskReward>();
+                foreach (JObject rewardData in questData["rewards"]["Fail"])
+                {
+                    TraderTaskReward newReward = new TraderTaskReward();
+                    SetReward(newReward, rewardData, newTask, newTask.failureRewards);
+                }
+
+                // Fill start rewards
+                newTask.startingEquipment = new List<TraderTaskReward>();
+                foreach (JObject rewardData in questData["rewards"]["Started"])
+                {
+                    TraderTaskReward newReward = new TraderTaskReward();
+                    SetReward(newReward, rewardData, newTask, newTask.startingEquipment);
+                }
+
+                Mod.instance.LogInfo("1");
                 // Add task to found tasks and update condition waiting for it if any
                 foundTasks.Add(rawTask.Value, newTask);
+                Mod.instance.LogInfo("1");
                 if (waitingQuestConditions.ContainsKey(rawTask.Value))
                 {
                     foreach(TraderTaskCondition condition in waitingQuestConditions[rawTask.Value])
@@ -513,6 +544,7 @@ namespace EFM
                     }
                     waitingQuestConditions.Remove(rawTask.Value);
                 }
+                Mod.instance.LogInfo("1");
             }
         }
 
@@ -522,13 +554,13 @@ namespace EFM
             {
                 case "Experience":
                     reward.taskRewardType = TraderTaskReward.TaskRewardType.Experience;
-                    reward.experience = (int)rewardData["value"];
+                    reward.experience = int.Parse(rewardData["value"].ToString());
                     listToFill.Add(reward);
                     break;
                 case "TraderStanding":
                     reward.taskRewardType = TraderTaskReward.TaskRewardType.TraderStanding;
                     reward.traderIndex = IDToIndex(rewardData["target"].ToString());
-                    reward.standing = (float)rewardData["value"];
+                    reward.standing = float.Parse(rewardData["value"].ToString());
                     listToFill.Add(reward);
                     break;
                 case "Item":
@@ -537,7 +569,7 @@ namespace EFM
                     {
                         reward.taskRewardType = TraderTaskReward.TaskRewardType.Item;
                         reward.itemID = Mod.itemMap[originalItemID];
-                        reward.amount = (int)rewardData["value"];
+                        reward.amount = int.Parse(rewardData["value"].ToString());
                         listToFill.Add(reward);
                     }
                     else
@@ -551,7 +583,7 @@ namespace EFM
                     {
                         reward.taskRewardType = TraderTaskReward.TaskRewardType.AssortmentUnlock;
                         reward.itemID = Mod.itemMap[originalAssortUnlockItemID];
-                        reward.amount = (int)rewardData["value"];
+                        reward.amount = int.Parse(rewardData["value"].ToString());
                         listToFill.Add(reward);
                     }
                     else
@@ -574,7 +606,10 @@ namespace EFM
         {
             condition.ID = conditionData["_props"]["id"].ToString();
             condition.task = task;
-            condition.text = taskLocale["conditions"][condition.ID].ToString();
+            if (taskLocale["conditions"][condition.ID] != null) // This will be null for start/fail conditions
+            {
+                condition.text = taskLocale["conditions"][condition.ID].ToString();
+            }
 
             JObject conditionSaveData = null;
             if (taskSaveData != null && taskSaveData["conditions"] != null && taskSaveData["conditions"][condition.ID] != null)
@@ -640,7 +675,7 @@ namespace EFM
                                     newCounter.allowedWeaponIDs = counter["_props"]["weapon"].ToObject<List<string>>();
                                     for (int i = 0; i < newCounter.allowedWeaponIDs.Count; ++i)
                                     {
-                                        if (!Mod.itemMap.ContainsKey(newCounter.allowedWeaponIDs[i]))
+                                        if (Mod.itemMap.ContainsKey(newCounter.allowedWeaponIDs[i]))
                                         {
                                             newCounter.allowedWeaponIDs[i] = Mod.itemMap[newCounter.allowedWeaponIDs[i]];
                                         }
@@ -657,7 +692,7 @@ namespace EFM
                                     {
                                         // take the last element of the inner array because that seems to be the correct one
                                         string lastElement = weaponMod[weaponMod.Count - 1].ToString();
-                                        if (!Mod.itemMap.ContainsKey(lastElement))
+                                        if (Mod.itemMap.ContainsKey(lastElement))
                                         {
                                             newCounter.weaponModsInclusive.Add(Mod.itemMap[lastElement]);
                                         }
@@ -995,7 +1030,7 @@ namespace EFM
             foundTaskConditions.Add(condition.ID, condition);
 
             // Fill visibility conditions
-            if (((JArray)conditionData["_props"]["visibilityConditions"]).Count > 0)
+            if (conditionData["_props"]["visibilityConditions"] != null && ((JArray)conditionData["_props"]["visibilityConditions"]).Count > 0)
             {
                 condition.visibilityConditions = new List<TraderTaskCondition>();
                 foreach(string target in conditionData["_props"]["visibilityConditions"])
