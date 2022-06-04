@@ -29,7 +29,7 @@ namespace EFM
         public static Dictionary<string, List<TraderTaskCondition>> waitingQuestConditions;
         public static Dictionary<string, List<TraderTaskCondition>> waitingVisibilityConditions;
         public static Dictionary<string, TraderTask> foundTasks;
-        public static Dictionary<string, TraderTaskCondition> foundTaskConditions;
+        public static Dictionary<string, List<TraderTaskCondition>> foundTaskConditions;
         public static Dictionary<string, List<TraderTaskCondition>> conditionsByItem;
         public static Dictionary<string, List<TraderTaskCondition>> questConditionsByTask; // List of quest conditions dependent on the specific task 
         public static Dictionary<string, List<TraderTaskCondition>> conditionsByVisCond; // List of conditions whos visibility depends on the specific condition
@@ -54,7 +54,7 @@ namespace EFM
             if(waitingQuestConditions == null)
             {
                 foundTasks = new Dictionary<string, TraderTask>();
-                foundTaskConditions = new Dictionary<string, TraderTaskCondition>();
+                foundTaskConditions = new Dictionary<string, List<TraderTaskCondition>>();
                 waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
                 waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
             }
@@ -252,6 +252,8 @@ namespace EFM
             {
                 if((entry.Value["items"] as JArray).Count > 0)
                 {
+                    Mod.instance.LogInfo("Adding assort entry: " + entry.Key);
+
                     // Only add item if we have an ID for it
                     JObject parentItem = entry.Value["items"][0] as JObject;
                     string parentItemID = parentItem["_tpl"].ToString();
@@ -283,13 +285,29 @@ namespace EFM
                     // Add all the items in the assort
                     if (currentAssort.itemsByID.ContainsKey(actualParentItemID))
                     {
-                        currentAssort.itemsByID[actualParentItemID].stack += (int)parentItem["upd"]["StackObjectsCount"];
+                        if(parentItem["upd"] != null && parentItem["upd"]["StackObjectsCount"] != null)
+                        {
+                            currentAssort.itemsByID[actualParentItemID].stack += (int)parentItem["upd"]["StackObjectsCount"];
+                        }
+                        else
+                        {
+                            currentAssort.itemsByID[actualParentItemID].stack += 100; // TODO: Review trader 579dc571d53a0658a154fbec, their assort does not specify stack
+                        }
 
                         Dictionary<string, int> currentPrices = new Dictionary<string, int>();
                         currentAssort.itemsByID[actualParentItemID].prices.Add(currentPrices);
                         foreach (JObject price in entry.Value["barter_scheme"][0])
                         {
-                            currentPrices.Add(price["_tpl"].ToString(), (int)price["count"]);
+                            string priceID = price["_tpl"].ToString();
+                            if (currentPrices.ContainsKey(priceID))
+                            {
+                                Mod.instance.LogError("Assort entry: " + entry.Key+" has duplicate price ID: "+ priceID+". There must be some other data specified we ignored that should be used to differenciate the prices (ex.: dogtag levels)");
+                                currentPrices[priceID] += (int)price["count"];
+                            }
+                            else
+                            {
+                                currentPrices.Add(priceID, (int)price["count"]);
+                            }
                         }
                     }
                     else
@@ -301,13 +319,32 @@ namespace EFM
                         item.prices.Add(currentPrices);
                         foreach (JObject price in entry.Value["barter_scheme"][0])
                         {
-                            currentPrices.Add(price["_tpl"].ToString(), (int)price["count"]);
+                            string priceID = price["_tpl"].ToString();
+                            if (currentPrices.ContainsKey(priceID))
+                            {
+                                Mod.instance.LogError("Assort entry: " + entry.Key + " has duplicate price ID: " + priceID + ". There must be some other data specified we ignored that should be used to differenciate the prices (ex.: dogtag levels)");
+                                currentPrices[priceID] += (int)price["count"];
+                            }
+                            else
+                            {
+                                currentPrices.Add(priceID, (int)price["count"]);
+                            }
                         }
-                        currentAssort.itemsByID[actualParentItemID].stack = (int)parentItem["upd"]["StackObjectsCount"];
-                        if(parentItem["upd"]["BuyRestrictionMax"] != null)
+
+                        if (parentItem["upd"] != null && parentItem["upd"]["StackObjectsCount"] != null)
                         {
-                            currentAssort.itemsByID[actualParentItemID].buyRestrictionMax = (int)parentItem["upd"]["BuyRestrictionMax"];
+                            item.stack = (int)parentItem["upd"]["StackObjectsCount"];
                         }
+                        else
+                        {
+                            item.stack = 100; // TODO: Review trader 579dc571d53a0658a154fbec, their assort does not specify stack
+                        }
+
+                        if(parentItem["upd"] != null && parentItem["upd"]["BuyRestrictionMax"] != null)
+                        {
+                            item.buyRestrictionMax = (int)parentItem["upd"]["BuyRestrictionMax"];
+                        }
+                        currentAssort.itemsByID.Add(item.ID, item);
                     }
                 }
             }
@@ -383,6 +420,7 @@ namespace EFM
                 {
                     continue;
                 }
+                Mod.instance.LogInfo("Building new task " + rawTask.Value);
 
                 JObject taskSaveData = null;
                 if(traderData != null && traderData[index] != null && traderData[index][rawTask.Value] != null)
@@ -452,8 +490,9 @@ namespace EFM
                     newTask.init = true;
                 }
 
+                Mod.instance.LogInfo("1");
                 // Fill start conditions
-                newTask.startConditions = new Dictionary<string, TraderTaskCondition>();
+                newTask.startConditions = new List<TraderTaskCondition>();
                 foreach (JObject startConditionData in questData["conditions"]["AvailableForStart"])
                 {
                     TraderTaskCondition newCondition = new TraderTaskCondition();
@@ -465,13 +504,13 @@ namespace EFM
                     }
                     else
                     {
-                        newTask.startConditions.Add(newCondition.ID, newCondition);
+                        newTask.startConditions.Add(newCondition);
                     }
                 }
                 Mod.instance.LogInfo("1");
 
                 // Fill completion conditions
-                newTask.completionConditions = new Dictionary<string, TraderTaskCondition>();
+                newTask.completionConditions = new List<TraderTaskCondition>();
                 Mod.instance.LogInfo("1");
                 foreach (JObject completionConditionData in questData["conditions"]["AvailableForFinish"])
                 {
@@ -484,13 +523,13 @@ namespace EFM
                     }
                     else
                     {
-                        newTask.completionConditions.Add(newCondition.ID, newCondition);
+                        newTask.completionConditions.Add(newCondition);
                     }
                 }
 
                 Mod.instance.LogInfo("1");
                 // Fill fail conditions
-                newTask.failConditions = new Dictionary<string, TraderTaskCondition>();
+                newTask.failConditions = new List<TraderTaskCondition>();
                 Mod.instance.LogInfo("1");
                 foreach (JObject failConditionData in questData["conditions"]["Fail"])
                 {
@@ -503,13 +542,14 @@ namespace EFM
                     }
                     else
                     {
-                        newTask.failConditions.Add(newCondition.ID, newCondition);
+                        newTask.failConditions.Add(newCondition);
                     }
                 }
                 Mod.instance.LogInfo("1");
 
                 // Fill success rewards
                 newTask.successRewards = new List<TraderTaskReward>();
+                itemsToWaitForUnlock = new List<string>();
                 foreach (JObject rewardData in questData["rewards"]["Success"])
                 {
                     TraderTaskReward newReward = new TraderTaskReward();
@@ -550,20 +590,24 @@ namespace EFM
 
         private void SetReward(TraderTaskReward reward, JObject rewardData, TraderTask task, List<TraderTaskReward> listToFill)
         {
+            Mod.instance.LogInfo("SetReward called, "+(reward == null)+" "+(rewardData == null)+" "+(task == null)+" "+(listToFill == null));
             switch (rewardData["type"].ToString())
             {
                 case "Experience":
+                    Mod.instance.LogInfo("exp");
                     reward.taskRewardType = TraderTaskReward.TaskRewardType.Experience;
                     reward.experience = int.Parse(rewardData["value"].ToString());
                     listToFill.Add(reward);
                     break;
                 case "TraderStanding":
+                    Mod.instance.LogInfo("stand");
                     reward.taskRewardType = TraderTaskReward.TaskRewardType.TraderStanding;
                     reward.traderIndex = IDToIndex(rewardData["target"].ToString());
                     reward.standing = float.Parse(rewardData["value"].ToString());
                     listToFill.Add(reward);
                     break;
                 case "Item":
+                    Mod.instance.LogInfo("item");
                     string originalItemID = rewardData["items"][0]["_tpl"].ToString();
                     if (Mod.itemMap.ContainsKey(originalItemID))
                     {
@@ -578,12 +622,12 @@ namespace EFM
                     }
                     break;
                 case "AssortmentUnlock":
+                    Mod.instance.LogInfo("asort");
                     string originalAssortUnlockItemID = rewardData["items"][0]["_tpl"].ToString();
                     if (Mod.itemMap.ContainsKey(originalAssortUnlockItemID))
                     {
                         reward.taskRewardType = TraderTaskReward.TaskRewardType.AssortmentUnlock;
                         reward.itemID = Mod.itemMap[originalAssortUnlockItemID];
-                        reward.amount = int.Parse(rewardData["value"].ToString());
                         listToFill.Add(reward);
                     }
                     else
@@ -593,6 +637,7 @@ namespace EFM
                     itemsToWaitForUnlock.Add(originalAssortUnlockItemID);
                     break;
                 case "TraderUnlock":
+                    Mod.instance.LogInfo("traderunlock");
                     reward.taskRewardType = TraderTaskReward.TaskRewardType.TraderUnlock;
                     reward.traderIndex = IDToIndex(rewardData["target"].ToString());
                     listToFill.Add(reward);
@@ -605,6 +650,7 @@ namespace EFM
         private bool SetCondition(TraderTaskCondition condition, JObject conditionData, JObject taskLocale, JObject taskSaveData, TraderTask task)
         {
             condition.ID = conditionData["_props"]["id"].ToString();
+            Mod.instance.LogInfo("Setting condition: " + condition.ID);
             condition.task = task;
             if (taskLocale["conditions"][condition.ID] != null) // This will be null for start/fail conditions
             {
@@ -646,6 +692,7 @@ namespace EFM
             switch (conditionData["_parent"].ToString())
             {
                 case "CounterCreator":
+                    Mod.instance.LogInfo("counter");
                     condition.conditionType = TraderTaskCondition.ConditionType.CounterCreator;
                     condition.counters = new List<TraderTaskCounterCondition>();
                     condition.value = (int)conditionData["_props"]["value"];
@@ -924,6 +971,7 @@ namespace EFM
                     }
                     break;
                 case "Level":
+                    Mod.instance.LogInfo("level");
                     condition.conditionType = TraderTaskCondition.ConditionType.Level;
                     condition.value = (int)conditionData["_props"]["value"];
                     if (conditionData["_props"]["compareMethod"].ToString().Equals("<="))
@@ -932,6 +980,7 @@ namespace EFM
                     }
                     break;
                 case "Quest":
+                    Mod.instance.LogInfo("quest");
                     condition.conditionType = TraderTaskCondition.ConditionType.Quest;
                     condition.value = (int)conditionData["_props"]["status"][0];
                     string targetTaskID = conditionData["_props"]["target"].ToString();
@@ -966,12 +1015,14 @@ namespace EFM
                     }
                     break;
                 case "TraderLoyalty":
+                    Mod.instance.LogInfo("loyalty");
                     condition.conditionType = TraderTaskCondition.ConditionType.TraderLoyalty;
                     condition.value = (int)conditionData["_props"]["value"];
                     condition.targetTraderIndex = IDToIndex(conditionData["_props"]["target"].ToString());
                     break;
                 case "HandoverItem":
                 case "FindItem":
+                    Mod.instance.LogInfo("item");
                     condition.conditionType = TraderTaskCondition.ConditionType.FindItem;
                     condition.value = (int)conditionData["_props"]["value"];
                     string originalItemID = conditionData["_props"]["target"][0].ToString();
@@ -993,6 +1044,7 @@ namespace EFM
                     }
                     break;
                 case "LeaveItemAtLocation":
+                    Mod.instance.LogInfo("leave");
                     condition.conditionType = TraderTaskCondition.ConditionType.LeaveItemAtLocation;
                     condition.value = (int)conditionData["_props"]["value"];
                     string originalLeaveItemID = conditionData["_props"]["target"][0].ToString();
@@ -1027,17 +1079,28 @@ namespace EFM
                     return false;
             }
 
-            foundTaskConditions.Add(condition.ID, condition);
+            Mod.instance.LogInfo("pre");
+            if (foundTaskConditions.ContainsKey(condition.ID))
+            {
+                foundTaskConditions[condition.ID].Add(condition);
+            }
+            else
+            {
+                foundTaskConditions.Add(condition.ID, new List<TraderTaskCondition>() { condition });
+            }
 
+            Mod.instance.LogInfo("post");
             // Fill visibility conditions
             if (conditionData["_props"]["visibilityConditions"] != null && ((JArray)conditionData["_props"]["visibilityConditions"]).Count > 0)
             {
+                Mod.instance.LogInfo("vis");
                 condition.visibilityConditions = new List<TraderTaskCondition>();
-                foreach(string target in conditionData["_props"]["visibilityConditions"])
+                foreach(JObject visibilityConditionData in conditionData["_props"]["visibilityConditions"])
                 {
+                    string target = visibilityConditionData["_props"]["target"].ToString();
                     if (foundTasks.ContainsKey(target))
                     {
-                        condition.visibilityConditions.Add(foundTaskConditions[target]);
+                        condition.visibilityConditions.AddRange(foundTaskConditions[target]);
                     }
                     else
                     {
@@ -1069,6 +1132,7 @@ namespace EFM
 
             if (waitingVisibilityConditions.ContainsKey(condition.ID))
             {
+                Mod.instance.LogInfo("wait vis");
                 foreach (TraderTaskCondition visibilityCondition in waitingVisibilityConditions[condition.ID])
                 {
                     if(visibilityCondition.visibilityConditions == null)
@@ -1117,9 +1181,9 @@ namespace EFM
         {
             // Check if failed first
             bool failed = true;
-            foreach (KeyValuePair<string, TraderTaskCondition> condition in task.failConditions)
+            foreach (TraderTaskCondition condition in task.failConditions)
             {
-                if (!condition.Value.fulfilled)
+                if (!condition.fulfilled)
                 {
                     failed = false;
                     break;
@@ -1150,9 +1214,9 @@ namespace EFM
             else
             {
                 bool complete = true;
-                foreach (KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+                foreach (TraderTaskCondition condition in task.completionConditions)
                 {
-                    if (!condition.Value.fulfilled)
+                    if (!condition.fulfilled)
                     {
                         complete = false;
                         break;
@@ -1184,9 +1248,9 @@ namespace EFM
         public static void UpdateTaskAvailability(TraderTask task)
         {
             bool available = true;
-            foreach (KeyValuePair<string, TraderTaskCondition> condition in task.startConditions)
+            foreach (TraderTaskCondition condition in task.startConditions)
             {
-                if (!condition.Value.fulfilled)
+                if (!condition.fulfilled)
                 {
                     available = false;
                     break;
@@ -1268,9 +1332,9 @@ namespace EFM
         }
         public TaskState taskState;
 
-        public Dictionary<string, TraderTaskCondition> startConditions;
-        public Dictionary<string, TraderTaskCondition> completionConditions;
-        public Dictionary<string, TraderTaskCondition> failConditions;
+        public List<TraderTaskCondition> startConditions;
+        public List<TraderTaskCondition> completionConditions;
+        public List<TraderTaskCondition> failConditions;
         public List<TraderTaskReward> successRewards;
         public List<TraderTaskReward> startingEquipment;
         public List<TraderTaskReward> failureRewards;
@@ -1278,9 +1342,9 @@ namespace EFM
         public void Init()
         {
             bool allStartFulfilled = true;
-            foreach(KeyValuePair<string, TraderTaskCondition> condition in startConditions)
+            foreach(TraderTaskCondition condition in startConditions)
             {
-                if (!condition.Value.fulfilled)
+                if (!condition.fulfilled)
                 {
                     allStartFulfilled = false;
                     break;

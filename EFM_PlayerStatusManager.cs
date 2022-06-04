@@ -388,9 +388,8 @@ namespace EFM
             GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
             int completedCount = 0;
             int totalCount = 0;
-            foreach (KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+            foreach (TraderTaskCondition currentCondition in task.completionConditions)
             {
-                TraderTaskCondition currentCondition = condition.Value;
                 if (currentCondition.fulfilled)
                 {
                     ++completedCount;

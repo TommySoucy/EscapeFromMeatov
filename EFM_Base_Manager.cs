@@ -3038,14 +3038,14 @@ namespace EFM
                     currentSavedTraderStatus["tasks"][traderTask.ID] = taskSaveData;
                     taskSaveData["state"] = traderTask.taskState.ToString();
                     taskSaveData["conditions"] = new JObject();
-                    foreach (KeyValuePair<string, TraderTaskCondition> traderTaskConditionEntry in traderTask.completionConditions)
+                    foreach (TraderTaskCondition traderTaskCondition in traderTask.completionConditions)
                     {
                         JObject conditionSaveData = new JObject();
-                        taskSaveData["conditions"][traderTaskConditionEntry.Key] = conditionSaveData;
-                        conditionSaveData["fulfilled"] = traderTaskConditionEntry.Value.fulfilled;
-                        conditionSaveData["itemCount"] = traderTaskConditionEntry.Value.itemCount;
+                        taskSaveData["conditions"][traderTaskCondition.ID] = conditionSaveData;
+                        conditionSaveData["fulfilled"] = traderTaskCondition.fulfilled;
+                        conditionSaveData["itemCount"] = traderTaskCondition.itemCount;
                         conditionSaveData["counters"] = new JObject();
-                        foreach (TraderTaskCounterCondition traderTaskCounterCondition in traderTaskConditionEntry.Value.counters)
+                        foreach (TraderTaskCounterCondition traderTaskCounterCondition in traderTaskCondition.counters)
                         {
                             JObject counterConditionSaveData = new JObject();
                             conditionSaveData["counters"][traderTaskCounterCondition.ID] = counterConditionSaveData;

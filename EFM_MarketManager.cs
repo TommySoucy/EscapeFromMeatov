@@ -910,9 +910,8 @@ namespace EFM
                     // Objectives (conditions)
                     Transform objectivesParent = description.GetChild(1).GetChild(1);
                     GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
-                    foreach(KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+                    foreach(TraderTaskCondition currentCondition in task.completionConditions)
                     {
-                        TraderTaskCondition currentCondition = condition.Value;
                         GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
                         currentCondition.marketListElement = currentObjectiveElement;
 
@@ -1116,9 +1115,8 @@ namespace EFM
                     GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
                     int completedCount = 0;
                     int totalCount = 0;
-                    foreach (KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+                    foreach (TraderTaskCondition currentCondition in task.completionConditions)
                     {
-                        TraderTaskCondition currentCondition = condition.Value;
                         if (currentCondition.fulfilled)
                         {
                             ++completedCount;
@@ -1332,9 +1330,8 @@ namespace EFM
                     // Objectives (conditions)
                     Transform objectivesParent = description.GetChild(1).GetChild(1);
                     GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
-                    foreach (KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+                    foreach (TraderTaskCondition currentCondition in task.completionConditions)
                     {
-                        TraderTaskCondition currentCondition = condition.Value;
                         GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
                         currentCondition.marketListElement = currentObjectiveElement;
 
@@ -3076,9 +3073,8 @@ namespace EFM
             // Objectives (conditions)
             Transform objectivesParent = description.GetChild(1).GetChild(1);
             GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
-            foreach (KeyValuePair<string, TraderTaskCondition> condition in task.completionConditions)
+            foreach (TraderTaskCondition currentCondition in task.completionConditions)
             {
-                TraderTaskCondition currentCondition = condition.Value;
                 GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
                 currentCondition.marketListElement = currentObjectiveElement;
 
