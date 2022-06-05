@@ -1831,12 +1831,6 @@ namespace EFM
 
             harmony.Patch(attachmentMountDeRegisterPatchOriginal, new HarmonyMethod(attachmentMountDeRegisterPatchPrefix));
 
-            //// GCCollectPatch
-            //MethodInfo GCCollectPatchOriginal = typeof(GC).GetMethod("InternalCollect", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo GCCollectPatchPrefix = typeof(GCCollectPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-
-            //harmony.Patch(GCCollectPatchOriginal, new HarmonyMethod(GCCollectPatchPrefix));
-
             //// DeadBoltPatch
             //MethodInfo deadBoltPatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("TurnBolt", BindingFlags.Public | BindingFlags.Instance);
             //MethodInfo deadBoltPatchPrefix = typeof(DeadBoltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -1959,6 +1953,9 @@ namespace EFM
 
                 // Also set respawn to spawn point
                 GM.CurrentSceneSettings.DeathResetPoint = spawnPoint;
+
+                // Call a GC collect
+                baseManager.GCManager.gc_collect();
             }
             else if (loadedScene.name.Equals("MeatovFactoryScene") /*|| other raid scenes*/)
             {
@@ -1972,6 +1969,9 @@ namespace EFM
                 raidManager.Init();
 
                 GM.CurrentMovementManager.TeleportToPoint(raidManager.spawnPoint.position, true, raidManager.spawnPoint.rotation.eulerAngles);
+
+                // Call a GC collect
+                raidRoot.GetComponent<EFM_Raid_Manager>().GCManager.gc_collect();
             }
             else
             {
@@ -6752,30 +6752,6 @@ namespace EFM
     #endregion
 
     #region DebugPatches
-    // Patches GC.Internalcollect to prevent garbage collection during play in hideout and raid
-    class GCCollectPatch
-    {
-        public static bool collect;
-        static bool Prefix()
-        {
-            Mod.instance.LogInfo("GC.internalcollect called");
-
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            // Collect this call if overridden
-            if (collect)
-            {
-                collect = false;
-                return true;
-            }
-
-            return false;
-        }
-    }
-
     class DequeueAndPlayDebugPatch
     {
         //AudioSourcePool private instance

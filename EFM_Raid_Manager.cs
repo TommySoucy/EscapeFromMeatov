@@ -24,6 +24,7 @@ namespace EFM
         public Transform spawnPoint;
         public Light sun;
         public float time;
+        public EFM_GCManager GCManager;
 
         private float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
         private float[] currentHealthRates;
@@ -998,6 +999,9 @@ namespace EFM
             // Init player state
             currentHealthRates = new float[7];
             currentNonLethalHealthRates = new float[7];
+
+            // Manager GC ourselves
+            GCManager = gameObject.AddComponent<EFM_GCManager>();
 
             // Init effects that were already active before the raid to make sure their effects are applied
             InitEffects();

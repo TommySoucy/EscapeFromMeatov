@@ -95,6 +95,7 @@ namespace EFM
         public float currentHydrationRate = 1;
         public EFM_MarketManager marketManager;
         public static bool marketUI; // whether we are currently in market mode or in area UI mode
+        public EFM_GCManager GCManager;
 
         // TODO make sure the following are used where they should
         public static float currentExperienceRate = 1;
@@ -906,6 +907,9 @@ namespace EFM
             InitUI();
 
             InitTime();
+
+            // Manager GC ourselves
+            GCManager = gameObject.AddComponent<EFM_GCManager>();
 
             Mod.justFinishedRaid = false;
 
