@@ -467,6 +467,7 @@ namespace EFM
                 traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(false);
             }
             traderDisplay.GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = string.Format("{0:0.00}", trader.standing);
+            traderDisplay.GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetComponent<Image>().sprite = trader.currency == 0 ? EFM_Base_Manager.roubleCurrencySprite : EFM_Base_Manager.dollarCurrencySprite;
             // TODO: Set total amount of money the trader has, here we just disable the number for now because we dont use it
             traderDisplay.GetChild(0).GetChild(1).GetChild(2).GetChild(1).gameObject.SetActive(false);
 
