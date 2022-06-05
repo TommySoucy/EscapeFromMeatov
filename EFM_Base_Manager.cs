@@ -1586,7 +1586,7 @@ namespace EFM
             }
 
             // Also add items in trade volume
-            foreach(Transform item in transform.GetChild(1).GetChild(25).GetChild(1))
+            foreach(Transform item in transform.GetChild(1).GetChild(24).GetChild(1))
             {
                 AddToBaseInventory(item);
             }
@@ -1594,9 +1594,11 @@ namespace EFM
 
         private void AddToBaseInventory(Transform item)
         {
+            Mod.instance.LogInfo("Adding " + item.name + " to base inventory");
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
             string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
+            Mod.instance.LogInfo("0");
             if (Mod.baseInventory.ContainsKey(itemID))
             {
                 Mod.baseInventory[itemID] += customItemWrapper != null ? (customItemWrapper.stack > 0 ? customItemWrapper.stack : 1) : 1;
@@ -1607,11 +1609,14 @@ namespace EFM
                 Mod.baseInventory.Add(itemID, customItemWrapper != null ? (customItemWrapper.stack > 0 ? customItemWrapper.stack : 1) : 1);
                 baseInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
             }
+            Mod.instance.LogInfo("0");
 
-            if(customItemWrapper != null)
+            if (customItemWrapper != null)
             {
-                if(customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                Mod.instance.LogInfo("1");
+                if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
                 {
+                    Mod.instance.LogInfo("2");
                     FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
                     foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                     {
@@ -1648,11 +1653,14 @@ namespace EFM
                     }
                 }
             }
+            Mod.instance.LogInfo("0");
 
-            if(vanillaItemDescriptor != null)
+            if (vanillaItemDescriptor != null)
             {
-                if(vanillaItemDescriptor.physObj is FVRFireArmMagazine)
+                Mod.instance.LogInfo("1");
+                if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
                 {
+                    Mod.instance.LogInfo("2");
                     FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
                     if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
                     {
@@ -1674,6 +1682,7 @@ namespace EFM
                 }
                 else if(vanillaItemDescriptor.physObj is FVRFireArmClip)
                 {
+                    Mod.instance.LogInfo("3");
                     FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
                     if (Mod.clipsByType.ContainsKey(asClip.ClipType))
                     {
@@ -1695,6 +1704,7 @@ namespace EFM
                 }
                 else if(vanillaItemDescriptor.physObj is FVRFireArmRound)
                 {
+                    Mod.instance.LogInfo("4");
                     FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
                     if (Mod.roundsByType.ContainsKey(asRound.RoundType))
                     {
@@ -1722,9 +1732,10 @@ namespace EFM
                     }
                 }
             }
+            Mod.instance.LogInfo("0");
 
             // Check for more items that may be contained inside this one
-            if(customItemWrapper != null && customItemWrapper.itemObjectsRoot != null)
+            if (customItemWrapper != null && customItemWrapper.itemObjectsRoot != null)
             {
                 foreach (Transform innerItem in customItemWrapper.itemObjectsRoot)
                 {
@@ -2228,7 +2239,7 @@ namespace EFM
             // Place in tradeVolume
             if(item["inTradeVolume"] != null)
             {
-                itemObject.transform.parent = transform.GetChild(1).GetChild(25).GetChild(1);
+                itemObject.transform.parent = transform.GetChild(1).GetChild(24).GetChild(1);
             }
 
             // GameObject
@@ -2701,7 +2712,7 @@ namespace EFM
             }
 
             // Init Market
-            marketManager = transform.GetChild(1).GetChild(25).gameObject.AddComponent<EFM_MarketManager>();
+            marketManager = transform.GetChild(1).GetChild(24).gameObject.AddComponent<EFM_MarketManager>();
             marketManager.Init(this);
 
             // Add switches
@@ -2733,7 +2744,7 @@ namespace EFM
                 // Each area canvas
                 UISwitch.gameObjects.Add(transform.GetChild(1).GetChild(i).GetChild(transform.GetChild(1).GetChild(i).childCount - 2).gameObject);
             }
-            UISwitch.gameObjects.Add(transform.GetChild(1).GetChild(25).gameObject); // Market
+            UISwitch.gameObjects.Add(transform.GetChild(1).GetChild(24).gameObject); // Market
             // MarketSwitch
             EFM_Switch MarketSwitch = transform.GetChild(1).GetChild(23).GetChild(2).gameObject.AddComponent<EFM_Switch>();
             MarketSwitch.mode = 3;
@@ -2743,7 +2754,7 @@ namespace EFM
                 // Each area canvas
                 MarketSwitch.gameObjects.Add(transform.GetChild(1).GetChild(i).GetChild(transform.GetChild(1).GetChild(i).childCount - 2).gameObject);
             }
-            MarketSwitch.gameObjects.Add(transform.GetChild(1).GetChild(25).gameObject); // Market
+            MarketSwitch.gameObjects.Add(transform.GetChild(1).GetChild(24).gameObject); // Market
 
             if (Mod.justFinishedRaid)
             {

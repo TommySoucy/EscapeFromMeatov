@@ -1831,6 +1831,12 @@ namespace EFM
 
             harmony.Patch(attachmentMountDeRegisterPatchOriginal, new HarmonyMethod(attachmentMountDeRegisterPatchPrefix));
 
+            // GCCollectPatch
+            MethodInfo GCCollectPatchOriginal = typeof(GC).GetMethod("InternalCollect", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo GCCollectPatchPrefix = typeof(GCCollectPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(GCCollectPatchOriginal, new HarmonyMethod(GCCollectPatchPrefix));
+
             //// DeadBoltPatch
             //MethodInfo deadBoltPatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("TurnBolt", BindingFlags.Public | BindingFlags.Instance);
             //MethodInfo deadBoltPatchPrefix = typeof(DeadBoltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -6738,6 +6744,28 @@ namespace EFM
                 parentVID.currentWeight -= attachmentVID.currentWeight;
 
                 BeginInteractionPatch.SetItemLocationIndex(0, null, attachmentVID);
+            }
+
+            return false;
+        }
+    }
+
+    // Patches GC.Internalcollect to prevent garbage collection during play in hideout and raid
+    class GCCollectPatch
+    {
+        public static bool collect;
+        static bool Prefix()
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            // Collect this call if overridden
+            if (collect)
+            {
+                collect = false;
+                return true;
             }
 
             return false;

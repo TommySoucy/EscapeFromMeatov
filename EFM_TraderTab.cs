@@ -28,7 +28,7 @@ namespace EFM
 
 		public override void EndHoverDisplay()
 		{
-			base.BeginHoverDisplay();
+			base.EndHoverDisplay();
 
 			hover.SetActive(false);
 		}

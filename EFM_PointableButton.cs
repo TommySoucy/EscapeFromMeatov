@@ -36,7 +36,7 @@ namespace EFM
 		
 		public override void EndHoverDisplay()
 		{
-			base.BeginHoverDisplay();
+			base.EndHoverDisplay();
 
 			if (hoverGraphics != null)
 			{

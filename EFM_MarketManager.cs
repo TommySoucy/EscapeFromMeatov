@@ -155,11 +155,50 @@ namespace EFM
         {
             this.baseManager = baseManager;
 
+            if (tradeVolumeInventory == null)
+            {
+                tradeVolumeInventory = new Dictionary<string, int>();
+                tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
+            }
+
             // Setup the trade volume
             tradeVolume = transform.GetChild(1).gameObject.AddComponent<EFM_TradeVolume>();
             tradeVolume.mainContainerRenderer = tradeVolume.GetComponent<Renderer>();
             tradeVolume.mainContainerRenderer.material = Mod.quickSlotConstantMaterial;
             tradeVolume.market = this;
+
+            // Init trade volume inventory
+            foreach (Transform itemTransform in tradeVolume.transform)
+            {
+                EFM_CustomItemWrapper CIW = itemTransform.GetComponent<EFM_CustomItemWrapper>();
+                EFM_VanillaItemDescriptor VID = itemTransform.GetComponent<EFM_VanillaItemDescriptor>();
+                if (CIW != null)
+                {
+                    if (tradeVolumeInventory.ContainsKey(CIW.ID))
+                    {
+                        tradeVolumeInventory[CIW.ID] += CIW.maxStack > 1 ? CIW.stack : 1;
+                        tradeVolumeInventoryObjects[CIW.ID].Add(CIW.gameObject);
+                    }
+                    else
+                    {
+                        tradeVolumeInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
+                        tradeVolumeInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
+                    }
+                }
+                else
+                {
+                    if (tradeVolumeInventory.ContainsKey(VID.H3ID))
+                    {
+                        tradeVolumeInventory[VID.H3ID] += 1;
+                        tradeVolumeInventoryObjects[VID.H3ID].Add(VID.gameObject);
+                    }
+                    else
+                    {
+                        tradeVolumeInventory.Add(VID.H3ID, 1);
+                        tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
+                    }
+                }
+            }
 
             InitUI();
 
@@ -183,7 +222,7 @@ namespace EFM
 
             // Set default trader
             SetTrader(0);
-
+            Mod.instance.LogInfo("initUI post set trader");
             // Setup trader tabs
             Transform tabsParent = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(2);
             for (int i = 0; i < 4;++i)
@@ -201,11 +240,13 @@ namespace EFM
                 tabScript.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
                 tabScript.clickSound = clickAudio;
                 tabScript.Button.onClick.AddListener(() => { tabScript.OnClick(i); });
+                tabScript.hover = tab.transform.GetChild(0).GetChild(1).gameObject;
                 tabScript.page = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(i).gameObject;
 
                 tabScript.tabs = traderTabs;
             }
 
+            Mod.instance.LogInfo("0");
             // Setup rag fair
             // Buy
             Transform categoriesParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
@@ -232,6 +273,7 @@ namespace EFM
             AddRagFairCategories(Mod.itemCategories.children, categoriesParent, categoryTemplate, 1);
             ragFairItemBuyViewsByID = new Dictionary<string, List<GameObject>>();
 
+            Mod.instance.LogInfo("0");
             // Setup buy categories hoverscrolls
             EFM_HoverScroll newBuyCategoriesDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
             EFM_HoverScroll newBuyCategoriesUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
@@ -252,6 +294,7 @@ namespace EFM
                 newBuyCategoriesDownHoverScroll.rate = 186 / (buyCategoriesHeight - 186);
                 newBuyCategoriesDownHoverScroll.gameObject.SetActive(true);
             }
+            Mod.instance.LogInfo("0");
 
             // Setup buy items hoverscrolls
             EFM_HoverScroll newBuyItemsDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
@@ -267,6 +310,7 @@ namespace EFM
             newBuyItemsUpHoverScroll.other = newBuyItemsDownHoverScroll;
             newBuyItemsUpHoverScroll.up = true;
 
+            Mod.instance.LogInfo("0");
             // Cart
             Transform ragfairCartTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2);
             EFM_PointableButton ragfairCartAmountButton = ragfairCartTransform.transform.GetChild(1).GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
@@ -284,6 +328,7 @@ namespace EFM
             ragfairCartCancelAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
             ragfairCartCancelAmountButton.Button.onClick.AddListener(() => { OnRagfairBuyCancelClick(); });
 
+            Mod.instance.LogInfo("0");
             // Wishlist
             Transform wishlistParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject wishlistItemViewTemplate = wishlistParent.GetChild(0).gameObject;
@@ -302,6 +347,7 @@ namespace EFM
                 wishListItemViewsByID.Add(wishlistItemID, wishlistItemView);
             }
 
+            Mod.instance.LogInfo("0");
             // Setup wishlist hoverscrolls
             EFM_HoverScroll newWishlistDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
             EFM_HoverScroll newWishlistUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
@@ -322,6 +368,7 @@ namespace EFM
                 newWishlistDownHoverScroll.rate = 190 / (wishlistHeight - 190);
                 newWishlistDownHoverScroll.gameObject.SetActive(true);
             }
+            Mod.instance.LogInfo("0");
 
             // Setup rag fair tabs
             Transform ragFaireTabsParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(2);
@@ -340,10 +387,12 @@ namespace EFM
                 tabScript.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
                 tabScript.clickSound = clickAudio;
                 tabScript.Button.onClick.AddListener(() => { tabScript.OnClick(i); });
+                tabScript.hover = tab.transform.GetChild(0).GetChild(1).gameObject;
                 tabScript.page = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(i).gameObject;
 
                 tabScript.tabs = ragFairTabs;
             }
+            Mod.instance.LogInfo("0");
         }
 
         private void AddRagFairCategories(List<EFM_CategoryTreeNode> children, Transform parent, GameObject template, int level)
@@ -403,9 +452,9 @@ namespace EFM
                 traderDisplay.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().text = EFM_TraderStatus.LoyaltyLevelToRoman(loyaltyDetails.currentLevel);
 
                 // Current Loyalty
-                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(0).gameObject.SetActive(false);
-                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(1).gameObject.SetActive(true);
-                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_TraderStatus.LoyaltyLevelToRoman(loyaltyDetails.currentLevel);
+                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).gameObject.SetActive(false);
+                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(true);
+                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Text>().text = EFM_TraderStatus.LoyaltyLevelToRoman(loyaltyDetails.currentLevel);
             }
             else
             {
@@ -414,8 +463,8 @@ namespace EFM
                 traderDisplay.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(false);
 
                 // Current Loyalty
-                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(0).gameObject.SetActive(true);
-                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(1).gameObject.SetActive(false);
+                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).gameObject.SetActive(true);
+                traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(false);
             }
             traderDisplay.GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = string.Format("{0:0.00}", trader.standing);
             // TODO: Set total amount of money the trader has, here we just disable the number for now because we dont use it
@@ -494,6 +543,24 @@ namespace EFM
             }
             if (trader.standing >= 0)
             {
+                // init price hoverscrolls first because they are needed by default prices
+                if (!initButtonsSet)
+                {
+                    // Set price hover scrolls
+                    EFM_HoverScroll newPriceDownHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(3).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+                    EFM_HoverScroll newPriceUpHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(3).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+                    newPriceDownHoverScroll.MaxPointingRange = 30;
+                    newPriceDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    newPriceDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(3).GetChild(1).GetComponent<Scrollbar>();
+                    newPriceDownHoverScroll.other = newPriceUpHoverScroll;
+                    newPriceDownHoverScroll.up = false;
+                    newPriceUpHoverScroll.MaxPointingRange = 30;
+                    newPriceUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                    newPriceUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(3).GetChild(1).GetComponent<Scrollbar>();
+                    newPriceUpHoverScroll.other = newPriceDownHoverScroll;
+                    newPriceUpHoverScroll.up = true;
+                }
+
                 // Add all assort items to showcase
                 for (int i = 1; i <= loyaltyDetails.currentLevel; ++i)
                 {
@@ -518,15 +585,28 @@ namespace EFM
                         // Add a new item entry, in a new horizontal if necessary
                         foreach (Dictionary<string, int> priceList in item.Value.prices)
                         {
-                            Transform currentHorizontal = currentBuyHorizontals[currentBuyHorizontals.Count - 1];
-                            if (currentBuyHorizontals[currentBuyHorizontals.Count - 1].childCount == 7)
+                            Transform currentHorizontal = buyHorizontalsParent.GetChild(buyHorizontalsParent.childCount - 1);
+                            if (buyHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
+                            {
+                                currentHorizontal = GameObject.Instantiate(buyHorizontalCopy, buyHorizontalsParent).transform;
+                            }
+                            else if (currentHorizontal.childCount == 7)
                             {
                                 currentHorizontal = GameObject.Instantiate(buyHorizontalCopy, buyHorizontalsParent).transform;
                                 buyShowCaseHeight += 24; // horizontal
                             }
 
                             Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
-                            currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[item.Key];
+                            if (Mod.itemIcons.ContainsKey(item.Key))
+                            {
+                                currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[item.Key];
+                            }
+                            else
+                            {
+                                GameObject itemPrefab = IM.OD[item.Key].GetGameObject();
+                                FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
+                                currentItemIcon.GetChild(2).GetComponent<Image>().sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+                            }
                             if (item.Value.stack >= 50000)
                             {
                                 currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "A LOT";
@@ -571,7 +651,7 @@ namespace EFM
                             EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
 
                             pointableButton.SetButton();
-                            pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(item.Value, priceList); });
+                            pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(item.Value, priceList, currentItemIcon.GetChild(2).GetComponent<Image>().sprite); });
                             pointableButton.MaxPointingRange = 20;
                             pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
@@ -580,7 +660,7 @@ namespace EFM
 
                             if (!setDefaultBuy)
                             {
-                                OnBuyItemClick(item.Value, priceList);
+                                OnBuyItemClick(item.Value, priceList, currentItemIcon.GetChild(2).GetComponent<Image>().sprite);
                                 setDefaultBuy = true;
                             }
                         }
@@ -613,20 +693,6 @@ namespace EFM
                     newUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
                     newUpHoverScroll.other = newDownHoverScroll;
                     newUpHoverScroll.up = true;
-
-                    // Set price hover scrolls
-                    EFM_HoverScroll newPriceDownHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(3).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
-                    EFM_HoverScroll newPriceUpHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(3).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
-                    newPriceDownHoverScroll.MaxPointingRange = 30;
-                    newPriceDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                    newPriceDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                    newPriceDownHoverScroll.other = newPriceUpHoverScroll;
-                    newPriceDownHoverScroll.up = false;
-                    newPriceUpHoverScroll.MaxPointingRange = 30;
-                    newPriceUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                    newPriceUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                    newPriceUpHoverScroll.other = newPriceDownHoverScroll;
-                    newPriceUpHoverScroll.up = true;
                 }
                 EFM_HoverScroll downHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
                 EFM_HoverScroll upHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
@@ -1509,8 +1575,8 @@ namespace EFM
             // Setup hoverscrolls
             if (!initButtonsSet)
             {
-                EFM_HoverScroll newTaskDownHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
-                EFM_HoverScroll newTaskUpHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+                EFM_HoverScroll newTaskDownHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+                EFM_HoverScroll newTaskUpHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
                 newTaskDownHoverScroll.MaxPointingRange = 30;
                 newTaskDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
                 newTaskDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
@@ -1522,8 +1588,8 @@ namespace EFM
                 newTaskUpHoverScroll.other = newTaskDownHoverScroll;
                 newTaskUpHoverScroll.up = true;
             }
-            EFM_HoverScroll downTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
-            EFM_HoverScroll upTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll downTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll upTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(3).GetComponent<EFM_HoverScroll>();
             if (taskListHeight > 145)
             {
                 downTaskHoverScroll.rate = 145 / (taskListHeight - 145);
@@ -2434,18 +2500,19 @@ namespace EFM
             // TODO: Will also need to check if level 15 then we also want to add player items to flea market
         }
 
-        public void OnBuyItemClick(AssortmentItem item, Dictionary<string, int> priceList)
+        public void OnBuyItemClick(AssortmentItem item, Dictionary<string, int> priceList, Sprite itemIcon)
         {
             cartItem = item.ID;
             cartItemCount = 1;
             prices = priceList;
+            Mod.instance.LogInfo("on buy item click called, with ID: " + item.ID);
 
             Transform cartShowcase = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1);
             cartShowcase.GetChild(0).GetComponent<Text>().text = Mod.itemNames[item.ID];
-            cartShowcase.GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[item.ID];
+            cartShowcase.GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = itemIcon;
             cartShowcase.GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "1";
 
-            Transform pricesParent = cartShowcase.GetChild(4).GetChild(0).GetChild(0);
+            Transform pricesParent = cartShowcase.GetChild(3).GetChild(0).GetChild(0);
             GameObject priceTemplate = pricesParent.GetChild(0).gameObject;
             float priceHeight = 0;
             if(pricesParent.childCount > 1)
@@ -2457,7 +2524,7 @@ namespace EFM
             {
                 priceHeight += 50;
                 Transform priceElement = Instantiate(priceTemplate, pricesParent).transform;
-                priceElement.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[price.Key];
+                priceElement.GetChild(0).GetChild(2).GetComponent<Image>().sprite = itemIcon;
                 priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.Value.ToString();
                 priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = Mod.itemNames[price.Key];
                 if(buyPriceElements == null)
@@ -3601,7 +3668,7 @@ namespace EFM
             ragfairCartTransform.GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "1";
 
             Transform cartShowcase = ragfairCartTransform.GetChild(1);
-            Transform pricesParent = cartShowcase.GetChild(4).GetChild(0).GetChild(0);
+            Transform pricesParent = cartShowcase.GetChild(3).GetChild(0).GetChild(0);
             GameObject priceTemplate = pricesParent.GetChild(0).gameObject;
             float priceHeight = 0;
             if (pricesParent.childCount > 1)

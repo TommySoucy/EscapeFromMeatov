@@ -62,7 +62,7 @@ namespace EFM
 
 		public override void EndHoverDisplay()
 		{
-			base.BeginHoverDisplay();
+			base.EndHoverDisplay();
 
             scrolling = false;
 		}
