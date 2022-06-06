@@ -1573,6 +1573,7 @@ namespace EFM
 
         public static void AddExperience(int xp)
         {
+            int preLevel = level;
             experience += xp;
             int XPForNextLevel = (int)XPPerLevel[level]["exp"]; // XP for current level would be at level - 1
             while (experience >= XPForNextLevel)
@@ -1582,11 +1583,14 @@ namespace EFM
                 XPForNextLevel = (int)XPPerLevel[level]["exp"];
             }
 
-            // Update UI
-            playerStatusManager.UpdatePlayerLevel();
-            if (currentLocationIndex == 1) // In hideout
+            // Update UI if necessary
+            if (preLevel != level)
             {
-                currentBaseManager.UpdateBasedOnPlayerLevel();
+                playerStatusManager.UpdatePlayerLevel();
+                if (currentLocationIndex == 1) // In hideout
+                {
+                    currentBaseManager.UpdateBasedOnPlayerLevel();
+                }
             }
         }
 
@@ -4677,7 +4681,8 @@ namespace EFM
     {
         static bool leftTouchWithinDescRange;
         static bool rightTouchWithinDescRange;
-        static float previousFrameTPAxisY;
+        static float rightPreviousFrameTPAxisY;
+        static float leftPreviousFrameTPAxisY;
 
         //flag2 = __instance.Input.TouchpadTouched && __instance.Input.TouchpadAxes.magnitude < 0.2f;
         static bool Prefix(ref FVRViveHand.HandInitializationState ___m_initState, ref FVRPhysicalObject ___m_selectedObj,
@@ -4888,8 +4893,19 @@ namespace EFM
                 flag2 = __instance.Input.BYButtonPressed || (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange);
 
                 // Check if we move touch from bottom (touch range) to top of touch pad this frame
-                fullDescInput = touchpadAxisY > 0 && previousFrameTPAxisY <= 0;
-                previousFrameTPAxisY = touchpadAxisY;
+                fullDescInput = touchpadTouched && touchpadAxisY > 0 && (__instance.IsThisTheRightHand ? rightPreviousFrameTPAxisY <= 0 : leftPreviousFrameTPAxisY <= 0);
+                if (__instance.IsThisTheRightHand)
+                {
+                    rightPreviousFrameTPAxisY = touchpadAxisY;
+                }
+                else
+                {
+                    leftPreviousFrameTPAxisY = touchpadAxisY;
+                }
+                if (fullDescInput)
+                {
+                    Mod.instance.LogInfo("fulldescinput is true");
+                }
             }
             else if(__instance.CMode == ControlMode.Vive)
             {
@@ -4956,7 +4972,7 @@ namespace EFM
                     }
                 }
             }
-            else
+            else if(!(__instance.CMode == ControlMode.Index && fullDescInput)) // Dont want to disable if we arent in desc range but we have full desc input
             {
                 if (Mod.rightDescriptionManager != null)
                 {

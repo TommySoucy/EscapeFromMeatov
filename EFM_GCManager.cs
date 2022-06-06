@@ -211,12 +211,15 @@ namespace EFM
             if (manual_gc_profile)
             {
                 float end_time = Time.realtimeSinceStartup;
+                float finalAlloc = ((float)manual_gc_most_recent_in_use_bytes) / 1024 / 1024;
                 Debug.Log(
                     "Ran GC iteration.\n" +
                     "Time: " + (end_time - start_time) * 1000 + " ms\n" +
                     "Initial alloc: " + bytes_allocated_initially / 1024 / 1024 + " MB\n" +
-                    "Final alloc: " + ((float)manual_gc_most_recent_in_use_bytes) / 1024 / 1024 + " MB\n" +
-                    "Util: " + (manual_gc_most_recent_in_use_bytes / bytes_allocated_initially * 100) + " %\n"
+                    "Final alloc: " + finalAlloc + " MB\n" +
+                    "Util: " + (manual_gc_most_recent_in_use_bytes / bytes_allocated_initially * 100) + " %\n" +
+                    "Avg. alloc. rate: " + average_allocation_rate_mbps + " MB/s\n" +
+                    "Expected time until next GC: " + (manual_gc_bytes_threshold_mb - finalAlloc) / average_allocation_rate_mbps + " s\n"
                 );
             }
 

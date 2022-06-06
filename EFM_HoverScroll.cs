@@ -28,22 +28,22 @@ namespace EFM
 
                 if (up)
                 {
-                    scrollbar.value -= rate * Time.deltaTime * 1.5f;
+                    scrollbar.value += rate * Time.deltaTime * 1.5f;
 
-                    if (scrollbar.value <= 0)
+                    if (scrollbar.value >= 1)
                     {
-                        scrollbar.value = 0;
+                        scrollbar.value = 1;
                         scrolling = false;
                         gameObject.SetActive(false);
                     }
                 }
                 else
                 {
-                    scrollbar.value += rate * Time.deltaTime * 1.5f;
+                    scrollbar.value -= rate * Time.deltaTime * 1.5f;
 
-                    if (scrollbar.value >= 1)
+                    if (scrollbar.value <= 0)
                     {
-                        scrollbar.value = 1;
+                        scrollbar.value = 0;
                         scrolling = false;
                         gameObject.SetActive(false);
                     }

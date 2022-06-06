@@ -129,11 +129,10 @@ namespace EFM
             upHoverScroll.up = true;
             // Set task list toggle button
             EFM_PointableButton taskListButton = transform.GetChild(1).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
-            exitButton.SetButton();
-            exitButton.MaxPointingRange = 30;
-            exitButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
-            buttonClickAudio = transform.GetChild(5).GetComponent<AudioSource>();
-            exitButton.Button.onClick.AddListener(() => { OnToggleTaskListClick(); });
+            taskListButton.SetButton();
+            taskListButton.MaxPointingRange = 30;
+            taskListButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
+            taskListButton.Button.onClick.AddListener(() => { OnToggleTaskListClick(); });
 
             // Set background pointable
             FVRPointable backgroundPointable = transform.GetChild(0).gameObject.AddComponent<FVRPointable>();
@@ -308,6 +307,7 @@ namespace EFM
         private void OnToggleTaskListClick()
         {
             bool listNowActive = !transform.GetChild(2).gameObject.activeSelf;
+            transform.GetChild(2).gameObject.SetActive(listNowActive);
             transform.GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(listNowActive);
             transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(!listNowActive);
             transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.SetActive(listNowActive);
@@ -344,8 +344,8 @@ namespace EFM
 
         public void UpdatePlayerLevel()
         {
-            transform.GetChild(0).GetChild(10).GetChild(0).GetComponent<Image>().sprite = Mod.playerLevelIcons[Mod.level / 5];
-            transform.GetChild(0).GetChild(10).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
+            transform.GetChild(0).GetChild(11).GetChild(0).GetComponent<Image>().sprite = Mod.playerLevelIcons[Mod.level / 5];
+            transform.GetChild(0).GetChild(11).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
         }
 
         public void AddTask(TraderTask task)
@@ -368,6 +368,7 @@ namespace EFM
             float taskListHeight = 29 * (tasksParent.childCount - 1) + 29;
 
             GameObject taskUI = Instantiate(taskTemplate, tasksParent);
+            taskUI.SetActive(true);
             task.statusListElement = taskUI;
 
             // Short info
@@ -396,6 +397,7 @@ namespace EFM
                 }
                 ++totalCount;
                 GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
+                currentObjectiveElement.SetActive(true);
                 currentCondition.marketListElement = currentObjectiveElement;
 
                 Transform objectiveInfo = currentObjectiveElement.transform.GetChild(0).GetChild(0);
@@ -449,17 +451,20 @@ namespace EFM
             rewardParent.gameObject.SetActive(true);
             GameObject currentRewardHorizontalTemplate = rewardParent.GetChild(1).gameObject;
             Transform currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+            currentRewardHorizontal.gameObject.SetActive(true);
             foreach (TraderTaskReward reward in task.successRewards)
             {
                 // Add new horizontal if necessary
                 if (currentRewardHorizontal.childCount == 6)
                 {
                     currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
+                    currentRewardHorizontal.gameObject.SetActive(true);
                 }
                 switch (reward.taskRewardType)
                 {
                     case TraderTaskReward.TaskRewardType.Item:
                         GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                        currentRewardItemElement.SetActive(true);
                         currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
                         if (reward.amount > 1)
                         {
@@ -473,11 +478,13 @@ namespace EFM
                         break;
                     case TraderTaskReward.TaskRewardType.TraderUnlock:
                         GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
+                        currentRewardTraderUnlockElement.SetActive(true);
                         currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[reward.traderIndex];
                         currentRewardTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
                         break;
                     case TraderTaskReward.TaskRewardType.TraderStanding:
                         GameObject currentRewardStandingElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                        currentRewardStandingElement.SetActive(true);
                         currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.standingSprite;
                         currentRewardStandingElement.transform.GetChild(1).gameObject.SetActive(true);
                         currentRewardStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
@@ -485,11 +492,13 @@ namespace EFM
                         break;
                     case TraderTaskReward.TaskRewardType.Experience:
                         GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
+                        currentRewardExperienceElement.SetActive(true);
                         currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
                         currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
                         break;
                     case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                         GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                        currentRewardAssortElement.SetActive(true);
                         currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
                         currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                         currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];

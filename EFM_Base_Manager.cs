@@ -2477,13 +2477,13 @@ namespace EFM
                 standingSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("standing_icon");
                 traderAvatars = new Sprite[8];
                 traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_russian_small");
-                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_therapist_small");
-                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_fence_small");
-                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_ah_small");
-                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_peacekeeper_small");
-                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_tech_small");
-                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_ragman_small");
-                traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_jaeger_small");
+                traderAvatars[1] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_therapist_small");
+                traderAvatars[2] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_fence_small");
+                traderAvatars[3] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_ah_small");
+                traderAvatars[4] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_peacekeeper_small");
+                traderAvatars[5] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_tech_small");
+                traderAvatars[6] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_ragman_small");
+                traderAvatars[7] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_jaeger_small");
                 areaIcons = new Sprite[22];
                 areaIcons[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_vents");
                 areaIcons[1] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_security");
@@ -2616,8 +2616,8 @@ namespace EFM
                 fullClosePointableButton.MaxPointingRange = 30;
                 fullClosePointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
 
-                GameObject middleHoverScrollUpObject = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(2).gameObject;
-                GameObject middleHoverScrollDownObject = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(3).gameObject;
+                GameObject middleHoverScrollUpObject = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(3).gameObject;
+                GameObject middleHoverScrollDownObject = areaCanvasPrefab.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(2).gameObject;
                 EFM_HoverScroll middleHoverScrollUp = middleHoverScrollUpObject.AddComponent<EFM_HoverScroll>();
                 EFM_HoverScroll middleHoverScrollDown = middleHoverScrollDownObject.AddComponent<EFM_HoverScroll>();
                 middleHoverScrollUp.MaxPointingRange = 30;
@@ -2632,8 +2632,8 @@ namespace EFM
                 middleHoverScrollDown.other = middleHoverScrollUp;
                 middleHoverScrollDown.rate = 0.5f;
 
-                GameObject middle2HoverScrollUpObject = areaCanvasPrefab.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject;
-                GameObject middle2HoverScrollDownObject = areaCanvasPrefab.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(3).gameObject;
+                GameObject middle2HoverScrollUpObject = areaCanvasPrefab.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(3).gameObject;
+                GameObject middle2HoverScrollDownObject = areaCanvasPrefab.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject;
                 EFM_HoverScroll middle2HoverScrollUp = middle2HoverScrollUpObject.AddComponent<EFM_HoverScroll>();
                 EFM_HoverScroll middle2HoverScrollDown = middle2HoverScrollDownObject.AddComponent<EFM_HoverScroll>();
                 middle2HoverScrollUp.MaxPointingRange = 30;
