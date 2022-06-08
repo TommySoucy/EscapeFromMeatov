@@ -358,9 +358,9 @@ namespace EFM
             Transform wishlistParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject wishlistItemViewTemplate = wishlistParent.GetChild(0).gameObject;
             EFM_PointableButton wishlistItemViewTemplateWishButton = wishlistItemViewTemplate.transform.GetChild(2).gameObject.AddComponent<EFM_PointableButton>();
-            categoryTemplateMainButton.SetButton();
-            categoryTemplateMainButton.MaxPointingRange = 20;
-            categoryTemplateMainButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            wishlistItemViewTemplateWishButton.SetButton();
+            wishlistItemViewTemplateWishButton.MaxPointingRange = 20;
+            wishlistItemViewTemplateWishButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
             wishListItemViewsByID = new Dictionary<string, GameObject>();
             foreach (string wishlistItemID in Mod.wishList)
             {
@@ -2831,6 +2831,14 @@ namespace EFM
                     }
                 }
 
+                // Remove this item from lists if dont have anymore in inventory
+                if (tradeVolumeInventory[price.Key] == 0)
+                {
+                    tradeVolumeInventory.Remove(price.Key);
+                    tradeVolumeInventoryObjects.Remove(price.Key);
+                    // TODO: In this case, we could just destroy all objects in tradeVolumeInventoryObjects[price.Key] right away without having to check stacks like in the while loop above
+                }
+
                 // Update area managers based on item we just removed
                 foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
                 {
@@ -3329,6 +3337,14 @@ namespace EFM
                 }
             }
 
+            // Remove this item from lists if dont have anymore in inventory
+            if (tradeVolumeInventory[currencyID] == 0)
+            {
+                tradeVolumeInventory.Remove(currencyID);
+                tradeVolumeInventoryObjects.Remove(currencyID);
+                // TODO: In this case, we could just destroy all objects in tradeVolumeInventoryObjects[price.Key] right away without having to check stacks like in the while loop above
+            }
+
             // Update area managers based on item we just removed
             foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
             {
@@ -3641,7 +3657,7 @@ namespace EFM
                     currentActiveCategory.transform.GetChild(0).GetComponent<Image>().color = new Color(0.28125f, 0.28125f, 0.28125f);
                 }
             }
-            else if(currentActiveItemSelector != null)
+            if(currentActiveItemSelector != null)
             {
                 currentActiveItemSelector.transform.GetChild(0).GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
                 currentActiveItemSelector = null;
@@ -3708,11 +3724,10 @@ namespace EFM
             // Open category (set active sub container)
             category.transform.GetChild(1).gameObject.SetActive(true);
 
-            // Also toggle the toggle button
+            // Set toggle button icon to open
             Transform toggle = category.transform.GetChild(0).GetChild(0);
-            toggle.GetChild(0).gameObject.SetActive(!toggle.GetChild(0).gameObject.activeSelf);
-            toggle.GetChild(1).gameObject.SetActive(!toggle.GetChild(1).gameObject.activeSelf);
-            category.transform.GetChild(1).gameObject.SetActive(toggle.GetChild(1).gameObject.activeSelf);
+            toggle.GetChild(0).gameObject.SetActive(false);
+            toggle.GetChild(1).gameObject.SetActive(true);
 
             // Update category and item lists hoverscrolls
             UpdateRagfairBuyCategoriesHoverscrolls();
@@ -3796,8 +3811,6 @@ namespace EFM
 
         public void OnRagFairItemMainClick(GameObject selector, string ID)
         {
-            Mod.instance.LogInfo("OnRagFairItemMainClick on: " + selector.transform.GetChild(0).GetChild(2).GetComponent<Text>().text + " with ID: " + ID);
-            Mod.instance.LogInfo("OnRagFairItemMainClick callstack: \n"+Environment.StackTrace);
             if (currentActiveItemSelector != null)
             {
                 if (selector.Equals(currentActiveItemSelector))
@@ -3809,7 +3822,7 @@ namespace EFM
                     currentActiveItemSelector.transform.GetChild(0).GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
                 }
             }
-            else if (currentActiveCategory != null)
+            if (currentActiveCategory != null)
             {
                 currentActiveCategory.transform.GetChild(0).GetComponent<Image>().color = new Color(0.28125f, 0.28125f, 0.28125f);
                 currentActiveCategory = null;

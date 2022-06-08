@@ -9566,6 +9566,11 @@
       "Name": "Weapon",
       "ShortName": "Item"
     },
+    "590c745b86f7743cc433c5f2": {
+      "Description": "Item",
+      "Name": "Other",
+      "ShortName": "Item"
+    },
     "543be5664bdc2dd4348b4569": {
       "Description": "Item",
       "Name": "Meds",
@@ -9599,6 +9604,21 @@
     "543be6674bdc2df1348b4569": {
       "Description": "Item",
       "Name": "Food and drink",
+      "ShortName": "Item"
+    },
+    "5c99f98d86f7745c314214b3": {
+      "Description": "Item",
+      "Name": "Mechanical key",
+      "ShortName": "Item"
+    },
+    "5c164d2286f774194c5e69fa": {
+      "Description": "Item",
+      "Name": "Keycard",
+      "ShortName": "Item"
+    },
+    "5a341c4686f77469e155819e": {
+      "Description": "Item",
+      "Name": "Facecover",
       "ShortName": "Item"
     },
     "5447a9cd4bdc2dbd208b4567": {
@@ -11705,6 +11725,11 @@
       "Name": "Lubricant",
       "ShortName": "Item"
     },
+    "5d650c3e815116009f6201d2": {
+      "Description": "Item",
+      "Name": "Fuel",
+      "ShortName": "Item"
+    },
     "57864ee62459775490116fc1": {
       "Description": "Item",
       "Name": "Battery",
@@ -11820,6 +11845,11 @@
     "57bef4c42459772e8d35a53b": {
       "Description": "Item",
       "Name": "Armored equipment",
+      "ShortName": "Item"
+    },
+    "5a341c4086f77401f2541505": {
+      "Description": "Item",
+      "Name": "Headwear",
       "ShortName": "Item"
     },
     "57c44b372459772d2b39b8ce": {

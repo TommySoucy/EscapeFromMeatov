@@ -1538,10 +1538,13 @@
           }
         },
         "Contusion": {
-          "Dummy": 0
+          "preventHapticFeedback": true,
+		  "audioVolumeMultiplier": 0.3
         },
         "Disorientation": {
-          "Dummy": 0
+          "preventHapticFeedback": true,
+		  "audioVolumeMultiplier": 0,
+          "drunkness": 0.5
         },
         "Exhaustion": {
           "DefaultDelay": 30,
@@ -1557,9 +1560,6 @@
         "RadExposure": {
           "Damage": 1,
           "DamageLoopTime": 2
-        },
-        "Stun": {
-          "Dummy": 0
         },
         "Intoxication": {
           "DefaultDelay": 10,
@@ -1633,35 +1633,91 @@
           "ThresholdMin": 25,
           "ThresholdMax": 60
         },
-        "Berserk": {
-          "DefaultDelay": 5,
-          "WorkingTime": 10,
-          "DefaultResidueTime": 3
-        },
-        "Flash": {
-          "Dummy": 0
-        },
-        "MedEffect": {
-          "LoopTime": 0.4,
-          "StartDelay": 0,
-          "DrinkStartDelay": 2,
-          "FoodStartDelay": 1,
-          "DrugsStartDelay": 0,
-          "MedKitStartDelay": 2,
-          "MedicalStartDelay": 0,
-          "StimulatorStartDelay": 0
-        },
         "Pain": {
+		  "causeTremor": true,
           "TremorDelay": 30,
           "HealExperience": 20
         },
-        "PainKiller": {
-          "Dummy": 0
+        "Tremor": {
+		  "tremors": true,
+          "DefaultDelay": 15,
+          "DefaultResidueTime": 0.2
         },
-        "SandingScreen": {
-          "Dummy": 0
+        "ChronicStaminaFatigue": {
+          "energyDamage": 1,
+          "energyLoopTime": 10
         },
-        "Stimulator": {
+        "Fracture": {
+		  "causePain": true,
+		  "painDelay": 3,
+          "DefaultDelay": 5,
+          "DefaultResidueTime": 5,
+          "HealExperience": 30,
+          "OfflineDurationMin": -1,
+          "OfflineDurationMax": -1,
+          "RemovePrice": 1000,
+          "RemovedAfterDeath": false,
+          "BulletHitProbability": {
+            "FunctionType": "SquareRoot",
+            "K": 0.3,
+            "B": 0.05,
+            "Threshold": 0.3
+          },
+          "FallingProbability": {
+            "FunctionType": "Linear",
+            "K": 1,
+            "B": 0.38,
+            "Threshold": 0.2
+          }
+        },
+        "HeavyBleeding": {
+          "DefaultDelay": 0.4,
+          "DefaultResidueTime": 0.4,
+          "DamageEnergy": 0.5,
+          "DamageHealth": 0.9,
+          "EnergyLoopTime": 5,
+          "HealthLoopTime": 4,
+          "DamageHealthDehydrated": 0.4,
+          "HealthLoopTimeDehydrated": 6,
+          "LifeTimeDehydrated": 0,
+          "EliteVitalityDuration": 33,
+          "HealExperience": 40,
+          "OfflineDurationMin": 900,
+          "OfflineDurationMax": 900,
+          "RemovePrice": 1200,
+          "RemovedAfterDeath": false,
+          "Probability": {
+            "FunctionType": "Linear",
+            "K": 0.45,
+            "B": -0.17,
+            "Threshold": 0.5
+          }
+        },
+        "LightBleeding": {
+          "DefaultDelay": 0.4,
+          "DefaultResidueTime": 0.4,
+          "DamageEnergy": 0.5,
+          "DamageHealth": 0.8,
+          "EnergyLoopTime": 6,
+          "HealthLoopTime": 6,
+          "DamageHealthDehydrated": 0.4,
+          "HealthLoopTimeDehydrated": 6,
+          "LifeTimeDehydrated": 30,
+          "EliteVitalityDuration": 22,
+          "HealExperience": 25,
+          "OfflineDurationMin": 600,
+          "OfflineDurationMax": 600,
+          "RemovePrice": 400,
+          "RemovedAfterDeath": false,
+          "Probability": {
+            "FunctionType": "Linear",
+            "K": 0.5,
+            "B": -0.125,
+            "Threshold": 0.35
+          }
+        }
+      },
+	  "Stimulator": {
           "BuffLoopTime": 0.2,
           "Buffs": {
             "BuffsSJ1TGLabs": [
@@ -3251,90 +3307,7 @@
             ]
           }
         },
-        "Tremor": {
-          "DefaultDelay": 15,
-          "DefaultResidueTime": 0.2
-        },
-        "ChronicStaminaFatigue": {
-          "EnergyRate": 0.0001,
-          "WorkingTime": 180,
-          "TicksEvery": 10,
-          "EnergyRatePerStack": 0.0063
-        },
-        "Fracture": {
-          "DefaultDelay": 5,
-          "DefaultResidueTime": 5,
-          "HealExperience": 30,
-          "OfflineDurationMin": -1,
-          "OfflineDurationMax": -1,
-          "RemovePrice": 1000,
-          "RemovedAfterDeath": false,
-          "BulletHitProbability": {
-            "FunctionType": "SquareRoot",
-            "K": 0.3,
-            "B": 0.05,
-            "Threshold": 0.3
-          },
-          "FallingProbability": {
-            "FunctionType": "Linear",
-            "K": 1,
-            "B": 0.38,
-            "Threshold": 0.2
-          }
-        },
-        "HeavyBleeding": {
-          "DefaultDelay": 0.4,
-          "DefaultResidueTime": 0.4,
-          "DamageEnergy": 0.5,
-          "DamageHealth": 0.9,
-          "EnergyLoopTime": 5,
-          "HealthLoopTime": 4,
-          "DamageHealthDehydrated": 0.4,
-          "HealthLoopTimeDehydrated": 6,
-          "LifeTimeDehydrated": 0,
-          "EliteVitalityDuration": 33,
-          "HealExperience": 40,
-          "OfflineDurationMin": 900,
-          "OfflineDurationMax": 900,
-          "RemovePrice": 1200,
-          "RemovedAfterDeath": false,
-          "Probability": {
-            "FunctionType": "Linear",
-            "K": 0.45,
-            "B": -0.17,
-            "Threshold": 0.5
-          }
-        },
-        "LightBleeding": {
-          "DefaultDelay": 0.4,
-          "DefaultResidueTime": 0.4,
-          "DamageEnergy": 0.5,
-          "DamageHealth": 0.8,
-          "EnergyLoopTime": 6,
-          "HealthLoopTime": 6,
-          "DamageHealthDehydrated": 0.4,
-          "HealthLoopTimeDehydrated": 6,
-          "LifeTimeDehydrated": 30,
-          "EliteVitalityDuration": 22,
-          "HealExperience": 25,
-          "OfflineDurationMin": 600,
-          "OfflineDurationMax": 600,
-          "RemovePrice": 400,
-          "RemovedAfterDeath": false,
-          "Probability": {
-            "FunctionType": "Linear",
-            "K": 0.5,
-            "B": -0.125,
-            "Threshold": 0.35
-          }
-        },
-        "BodyTemperature": {
-          "DefaultBuildUpTime": 15,
-          "DefaultResidueTime": 15,
-          "LoopTime": 1
-        }
-      },
-      "HealPrice": {
+	  "HealPrice": {
         "HealthPointPrice": 30,
         "HydrationPointPrice": 0,
         "EnergyPointPrice": 0,
