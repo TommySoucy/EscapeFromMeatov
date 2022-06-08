@@ -1590,7 +1590,7 @@ namespace EFM
             }
 
             // Also add items in trade volume
-            foreach(Transform item in transform.GetChild(1).GetChild(24).GetChild(1))
+            foreach(Transform item in transform.GetChild(1).GetChild(24).GetChild(1).GetChild(1))
             {
                 AddToBaseInventory(item);
             }
@@ -3085,9 +3085,9 @@ namespace EFM
             }
 
             // Save trade volume items
-            for (int i = 0; i < marketManager.tradeVolume.transform.childCount; ++i)
+            for (int i = 0; i < marketManager.tradeVolume.itemsRoot.childCount; ++i)
             {
-                SaveItem(saveItems, marketManager.tradeVolume.transform.GetChild(i));
+                SaveItem(saveItems, marketManager.tradeVolume.itemsRoot.GetChild(i));
             }
 
             // Save items in hands
@@ -3221,7 +3221,7 @@ namespace EFM
             }
 
             // Check if in tradeVolume
-            if (item.parent != null && item.parent.GetComponent<EFM_TradeVolume>() != null)
+            if (item.parent != null && item.parent.parent != null && item.parent.parent.GetComponent<EFM_TradeVolume>() != null)
             {
                 savedItem["inTradeVolume"] = true;
             }

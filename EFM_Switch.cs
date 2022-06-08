@@ -30,7 +30,8 @@ namespace EFM
                     EFM_BaseAreaManager.ToggleGenerator();
                     break;
                 case 2:
-                    for(int i=0; i < gameObjects.Count; ++i)
+                    active = !active;
+                    for (int i=0; i < gameObjects.Count; ++i)
                     {
                         if(i < gameObjects.Count - 1)
                         {
@@ -41,7 +42,6 @@ namespace EFM
                             gameObjects[i].SetActive(active && EFM_Base_Manager.marketUI);
                         }
                     }
-                    active = !active;
                     break;
                 case 3:
                     bool currentlyActive = gameObjects[0].activeSelf || gameObjects[gameObjects.Count - 1].activeSelf;

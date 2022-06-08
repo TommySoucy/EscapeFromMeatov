@@ -129,9 +129,9 @@ namespace EFM
                 collidingSwitch = collider.gameObject.GetComponent<EFM_Switch>();
                 colliders.Add(collider);
             }
-            else if (collider.gameObject.GetComponent<EFM_TradeVolume>() != null)
+            else if (collider.transform.parent != null && collider.transform.parent.GetComponent<EFM_TradeVolume>() != null)
             {
-                collidingTradeVolume = collider.gameObject.GetComponent<EFM_TradeVolume>();
+                collidingTradeVolume = collider.transform.parent.GetComponent<EFM_TradeVolume>();
                 colliders.Add(collider);
             }
             else if (collider.transform.parent != null)

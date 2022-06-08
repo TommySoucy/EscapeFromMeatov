@@ -10,6 +10,7 @@ namespace EFM
     public class EFM_TradeVolume : MonoBehaviour
     {
 		public Renderer mainContainerRenderer;
+		public Transform itemsRoot;
 		public List<EFM_CustomItemWrapper.ResetColPair> resetColPairs;
 		public EFM_MarketManager market;
 
@@ -47,7 +48,7 @@ namespace EFM
 			{
 				resetColPairs.Add(resetColPair);
 			}
-			item.SetParentage(transform);
+			item.SetParentage(itemsRoot);
 			item.RootRigidbody.isKinematic = true;
 		}
 	}

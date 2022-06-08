@@ -407,7 +407,7 @@ namespace EFM
 
             foreach(string ancestor in ancestors)
             {
-                switch (itemID)
+                switch (ancestor)
                 {
                     case "5448bf274bdc2dfc2f8b456a": // secure container
                     case "5447e1d04bdc2dff2f8b4567": // melee

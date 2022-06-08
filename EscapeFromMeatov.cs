@@ -4079,7 +4079,11 @@ namespace EFM
             }
 
             // Check if in trade volume or container
-            EFM_TradeVolume tradeVolume = __instance.transform.parent.GetComponent<EFM_TradeVolume>();
+            EFM_TradeVolume tradeVolume = null;
+            if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
+            {
+                tradeVolume = __instance.transform.parent.parent.GetComponent<EFM_TradeVolume>();
+            }
             if (tradeVolume != null)
             {
                 // Reset cols of item so that they are non trigger again and can collide with the world
@@ -4126,19 +4130,22 @@ namespace EFM
             }
         }
 
-        public static void SetItemLocationIndex(int locationIndex, EFM_CustomItemWrapper customItemWrapper, EFM_VanillaItemDescriptor vanillaItemDescriptor)
+        public static void SetItemLocationIndex(int locationIndex, EFM_CustomItemWrapper customItemWrapper, EFM_VanillaItemDescriptor vanillaItemDescriptor, bool updateWeight = true)
         {
             if(customItemWrapper != null)
             {
-                if(customItemWrapper.locationIndex == 0 && locationIndex != 0)
+                if (updateWeight)
                 {
-                    // Taken out of player inventory
-                    Mod.weight -= customItemWrapper.currentWeight;
-                }
-                else if(customItemWrapper.locationIndex != 0 && locationIndex == 0)
-                {
-                    // Added to player inventory
-                    Mod.weight += customItemWrapper.currentWeight;
+                    if (customItemWrapper.locationIndex == 0 && locationIndex != 0)
+                    {
+                        // Taken out of player inventory
+                        Mod.weight -= customItemWrapper.currentWeight;
+                    }
+                    else if (customItemWrapper.locationIndex != 0 && locationIndex == 0)
+                    {
+                        // Added to player inventory
+                        Mod.weight += customItemWrapper.currentWeight;
+                    }
                 }
 
                 customItemWrapper.locationIndex = locationIndex;
@@ -4149,7 +4156,7 @@ namespace EFM
                     {
                         if (innerItem != null)
                         {
-                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>());
+                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
                         }
                     }
                 }
@@ -4157,21 +4164,24 @@ namespace EFM
                 {
                     foreach (Transform innerItem in customItemWrapper.itemObjectsRoot)
                     {
-                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>());
+                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
                     }
                 }
             }
             else
             {
-                if (vanillaItemDescriptor.locationIndex == 0 && locationIndex != 0)
+                if (updateWeight)
                 {
-                    // Taken out of player inventory
-                    Mod.weight -= vanillaItemDescriptor.currentWeight;
-                }
-                else if (vanillaItemDescriptor.locationIndex != 0 && locationIndex == 0)
-                {
-                    // Added to player inventory
-                    Mod.weight += vanillaItemDescriptor.currentWeight;
+                    if (vanillaItemDescriptor.locationIndex == 0 && locationIndex != 0)
+                    {
+                        // Taken out of player inventory
+                        Mod.weight -= vanillaItemDescriptor.currentWeight;
+                    }
+                    else if (vanillaItemDescriptor.locationIndex != 0 && locationIndex == 0)
+                    {
+                        // Added to player inventory
+                        Mod.weight += vanillaItemDescriptor.currentWeight;
+                    }
                 }
 
                 vanillaItemDescriptor.locationIndex = locationIndex;
@@ -4198,7 +4208,7 @@ namespace EFM
                         {
                             foreach(FVRFireArmAttachment attachment in asFireArm.Attachments)
                             {
-                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>());
+                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
                             }
                         }
                     }
@@ -4210,7 +4220,7 @@ namespace EFM
                         {
                             foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
                             {
-                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>());
+                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
                             }
                         }
                     }
