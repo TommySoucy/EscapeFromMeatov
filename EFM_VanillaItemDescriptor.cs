@@ -62,10 +62,14 @@ namespace EFM
             }
         }
 
-        public void Start()
+        public void Awake()
         {
             // Set the reference to the physical object
             physObj = gameObject.GetComponent<FVRPhysicalObject>();
+        }
+
+        public void Start()
+        {
             weight = physObj.RootRigidbody.mass;
 
             if(physObj is FVRFireArm)

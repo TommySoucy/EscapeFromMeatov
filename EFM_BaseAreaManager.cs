@@ -1147,7 +1147,14 @@ namespace EFM
 
                     Mod.instance.LogInfo("2");
                     // Init UI
-                    newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
+                    if (Mod.itemIcons.ContainsKey(productionScript.endProduct))
+                    {
+                        newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
+                    }
+                    else
+                    {
+                        AnvilManager.Run(Mod.SetVanillaIcon(productionScript.endProduct, newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).GetComponent<Image>()));
+                    }
                     newFarmingView.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewSetAllClick(productionScript.ID); });
                     newFarmingView.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewSetOneClick(productionScript.ID); });
                     newFarmingView.transform.GetChild(1).GetChild(1).GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewRemoveOneClick(productionScript.ID); });
@@ -1225,7 +1232,14 @@ namespace EFM
 
                     Mod.instance.LogInfo("4");
                     // Init UI
-                    newProduceView.transform.GetChild(3).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
+                    if (Mod.itemIcons.ContainsKey(productionScript.endProduct))
+                    {
+                        newProduceView.transform.GetChild(3).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
+                    }
+                    else
+                    {
+                        AnvilManager.Run(Mod.SetVanillaIcon(productionScript.endProduct, newProduceView.transform.GetChild(3).GetChild(0).GetChild(2).GetComponent<Image>()));
+                    }
                     newProduceView.transform.GetChild(3).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionScript.count.ToString();
                     newProduceView.transform.GetChild(4).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnProduceViewStartClick(productionScript.ID); });
                     newProduceView.transform.GetChild(4).GetChild(1).GetComponent<Button>().onClick.AddListener(() => { OnProductionGetItemsClick(productionScript.ID); });
@@ -1291,8 +1305,17 @@ namespace EFM
                         AreaProductionRequirement currentRequirement = new AreaProductionRequirement();
                         currentRequirement.resource = true;
                         currentRequirement.ID = Mod.itemMap[requirement["templateId"].ToString()];
-                        newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.ID];
-                        newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.ID];
+                        if (Mod.itemIcons.ContainsKey(currentRequirement.ID))
+                        {
+                            Sprite icon = Mod.itemIcons[currentRequirement.ID];
+                            newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
+                            newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>()));
+                            AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+                        }
                         currentRequirement.count = (int)requirement["resource"];
 
                         Mod.instance.LogInfo("3");
@@ -1334,9 +1357,19 @@ namespace EFM
                         Mod.instance.LogInfo("4");
                         if (newFarmingView != null)
                         {
-                            newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.ID];
                             newFarmingView.transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = amountInInventory.ToString() + " (STASH)";
-                            newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.ID];
+
+                            if (Mod.itemIcons.ContainsKey(currentRequirement.ID))
+                            {
+                                Sprite icon = Mod.itemIcons[currentRequirement.ID];
+                                newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
+                                newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
+                            }
+                            else
+                            {
+                                AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>()));
+                                AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+                            }
 
                             if (farmingViewByItemID == null)
                             {
@@ -1354,7 +1387,14 @@ namespace EFM
                         else
                         {
                             GameObject newRequirement = Instantiate(newProduceView.transform.GetChild(1).GetChild(0).gameObject, newProduceView.transform.GetChild(1));
-                            newRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.ID];
+                            if (Mod.itemIcons.ContainsKey(currentRequirement.ID))
+                            {
+                                newRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.ID];
+                            }
+                            else
+                            {
+                                AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>()));
+                            }
                             newRequirement.transform.GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = Mathf.Min(amountInInventory, currentRequirement.count).ToString() + "/" + currentRequirement.count;
                             if(amountInInventory > currentRequirement.count)
                             {
@@ -1600,26 +1640,20 @@ namespace EFM
                             if (Mod.itemMap.ContainsKey(itemTemplateID))
                             {
                                 Mod.instance.LogInfo("\t\t0");
-                                if (Mod.itemIcons.ContainsKey(Mod.itemMap[itemTemplateID]))
+                                string actualID = Mod.itemMap[itemTemplateID];
+                                if (Mod.itemIcons.ContainsKey(actualID))
                                 {
-                                    itemRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[Mod.itemMap[itemTemplateID]];
+                                    itemRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[actualID];
                                 }
                                 else
                                 {
-                                    Mod.instance.LogError("Area " + areaIndex + " requires item with mapped ID: " + Mod.itemMap[itemTemplateID] + " but this item does not have an icon!");
-                                    // Output missing item icon
-                                    if (Mod.instance.debug)
-                                    {
-                                        string text = "Area with index = " + areaIndex + " requirement missing icon for item with mapped ID: "+ Mod.itemMap[itemTemplateID] + "\n";
-                                        File.AppendAllText("BepinEx/Plugins/EscapeFromMeatov/ErrorLog.txt", text);
-                                    }
+                                    AnvilManager.Run(Mod.SetVanillaIcon(actualID, itemRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>()));
                                 }
                                 Mod.instance.LogInfo("\t\t0");
 
                                 int itemAmountInInventory = 0;
                                 Mod.instance.LogInfo("\t\t base manager null?: "+(baseManager == null));
                                 Mod.instance.LogInfo("\t\t base inventory null?: "+(Mod.baseInventory == null));
-                                string actualID = Mod.itemMap[itemTemplateID];
                                 if (Mod.baseInventory.ContainsKey(actualID))
                                 {
                                     Mod.instance.LogInfo("\t\t\t0");
@@ -2906,7 +2940,14 @@ namespace EFM
             farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productions[productionID].installedCount.ToString();
             if(productions[productionID].installedCount > 0)
             {
-                farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[requiredItemID];
+                if (Mod.itemIcons.ContainsKey(requiredItemID))
+                {
+                    farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[requiredItemID];
+                }
+                else
+                {
+                    AnvilManager.Run(Mod.SetVanillaIcon(requiredItemID, farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+                }
                 if (!productions[productionID].active)
                 {
                     productions[productionID].active = true;
@@ -3196,7 +3237,14 @@ namespace EFM
             productions[productionID].installedCount += 1;
 
             farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productions[productionID].installedCount.ToString();
-            farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[requiredItemID];
+            if (Mod.itemIcons.ContainsKey(requiredItemID))
+            {
+                farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[requiredItemID];
+            }
+            else
+            {
+                AnvilManager.Run(Mod.SetVanillaIcon(requiredItemID, farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+            }
             if (!productions[productionID].active)
             {
                 productions[productionID].active = true;
@@ -3822,6 +3870,9 @@ namespace EFM
 
                         EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                         FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                        FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
+                        asMagazine.RoundType = round.RoundType;
+                        itemCIW.roundClass = round.RoundClass;
                         for (int j = 0; j < amount; ++j)
                         {
                             asMagazine.AddRound(itemCIW.roundClass, false, false);
@@ -4280,7 +4331,14 @@ namespace EFM
                     farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = production.Value.installedCount.ToString();
                     if (filledSlotCount > 0)
                     {
-                        farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[production.Value.requirements[0].ID];
+                        if (Mod.itemIcons.ContainsKey(production.Value.requirements[0].ID))
+                        {
+                            farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[production.Value.requirements[0].ID];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(production.Value.requirements[0].ID, farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+                        }
                         if (!production.Value.active)
                         {
                             production.Value.active = true;

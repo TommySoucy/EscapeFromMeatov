@@ -1152,6 +1152,16 @@ namespace EFM
             }
         }
 
+        public static IEnumerator SetVanillaIcon(string ID, Image image)
+        {
+            // TODO: Maybe set a loading icon sprite by default to indicate to player 
+            image.sprite = null;
+            yield return IM.OD[ID].GetGameObjectAsync();
+            GameObject itemPrefab = IM.OD[ID].GetGameObject();
+            FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
+            image.sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+        }
+
         private void SetFilterListsFor(EFM_CustomItemWrapper customItemWrapper, int index)
         {
             customItemWrapper.whiteList = new List<string>();

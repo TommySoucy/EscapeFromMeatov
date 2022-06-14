@@ -287,17 +287,17 @@ namespace EFM
 				float distanceFromCenter = Mathf.Clamp(handVector.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad), -0.19f, 0.19f);
 
 				// Scale is from -0.19 (0) to 0.19 (stack)
-				if (distanceFromCenter == -0.19f)
+				if (distanceFromCenter <= -0.19f)
 				{
 					splitAmount = 0;
 				}
-				else if (distanceFromCenter == 0.19f)
+				else if (distanceFromCenter >= 0.19f)
 				{
 					splitAmount = stack;
 				}
 				else
 				{
-					splitAmount = (int)((distanceFromCenter + 0.19f) * stack);
+					splitAmount = Mathf.Max(1, (int)(Mathf.InverseLerp(-0.19f, 0.19f, distanceFromCenter) * stack));
 				}
 
 				Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);

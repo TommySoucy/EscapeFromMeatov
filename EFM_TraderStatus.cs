@@ -20,7 +20,7 @@ namespace EFM
         public float insuranceRate;
 
         public Dictionary<int, TraderAssortment> assortmentByLevel;
-        public List<string> categories;
+        public List<string> categories; // Categories defined in DB correspond only to a locale string and have no relation to actual items or their ancestors, so this list will be filled based on what categories this trader sells instead of the categoriesData
         public List<TraderTask> tasks; // TODO: Implement save
         public List<string> itemsToWaitForUnlock;
 
@@ -79,9 +79,10 @@ namespace EFM
 
             BuildTasks(questAssortData);
 
-            BuildAssortments(assortData);
+            //categories = categoriesData.ToObject<List<string>>();
+            categories = new List<string>();
 
-            categories = categoriesData.ToObject<List<string>>();
+            BuildAssortments(assortData);
         }
 
         public void Init()
@@ -364,6 +365,20 @@ namespace EFM
                             item.buyRestrictionMax = (int)parentItem["upd"]["BuyRestrictionMax"];
                         }
                         currentAssort.itemsByID.Add(item.ID, item);
+
+                        // Add the first of this item's ancestor to the list of sell categories if not already in there
+                        if (Mod.itemAncestors.ContainsKey(item.ID))
+                        {
+                            string firstAncestor = Mod.itemAncestors[item.ID][0];
+                            if (!categories.Contains(firstAncestor))
+                            {
+                                categories.Add(firstAncestor);
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Item ancestors does not contain a list for item: " + item.ID);
+                        }
                     }
                 }
             }
@@ -428,7 +443,10 @@ namespace EFM
         private void BuildTasks(JObject tasksData)
         {
             tasks = new List<TraderTask>();
-            conditionsByItem = new Dictionary<string, List<TraderTaskCondition>>();
+            if (conditionsByItem == null)
+            {
+                conditionsByItem = new Dictionary<string, List<TraderTaskCondition>>();
+            }
             Dictionary<string, string> rawTasks = tasksData["success"].ToObject<Dictionary<string, string>>();
             Dictionary<string, JObject> questLocales = Mod.localDB["quest"].ToObject<Dictionary<string, JObject>>();
 

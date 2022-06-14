@@ -465,7 +465,14 @@ namespace EFM
                     case TraderTaskReward.TaskRewardType.Item:
                         GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                         currentRewardItemElement.SetActive(true);
-                        currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        if (Mod.itemIcons.ContainsKey(reward.itemID))
+                        {
+                            currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                        }
                         if (reward.amount > 1)
                         {
                             currentRewardItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
@@ -499,7 +506,14 @@ namespace EFM
                     case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                         GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                         currentRewardAssortElement.SetActive(true);
-                        currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        if (Mod.itemIcons.ContainsKey(reward.itemID))
+                        {
+                            currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                        }
                         currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                         currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
                         break;

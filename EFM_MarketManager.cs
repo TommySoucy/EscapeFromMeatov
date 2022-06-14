@@ -60,7 +60,7 @@ namespace EFM
             // Update based on splitting stack
             if (choosingBuyAmount || choosingRagfairBuyAmount)
             {
-                Vector3 handVector = Mod.rightHand.transform.position - amountChoiceStartPosition;
+                Vector3 handVector = Mod.rightHand.transform.localPosition - amountChoiceStartPosition;
                 float angle = Vector3.Angle(amountChoiceRightVector, handVector);
                 float distanceFromCenter = Mathf.Clamp(handVector.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad), -0.19f, 0.19f);
 
@@ -75,7 +75,7 @@ namespace EFM
                 }
                 else
                 {
-                    chosenAmount = Mathf.Max(1, (int)((distanceFromCenter + 0.19f) * maxBuyAmount));
+                    chosenAmount = Mathf.Max(1, (int)(Mathf.InverseLerp(-0.19f, 0.19f, distanceFromCenter) * maxBuyAmount));
                 }
                 
                 Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
@@ -366,7 +366,14 @@ namespace EFM
             {
                 GameObject wishlistItemView = Instantiate(wishlistItemViewTemplate, wishlistParent);
                 wishlistItemView.SetActive(true);
-                wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[wishlistItemID];
+                if (Mod.itemIcons.ContainsKey(wishlistItemID))
+                {
+                    wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[wishlistItemID];
+                }
+                else
+                {
+                    AnvilManager.Run(Mod.SetVanillaIcon(wishlistItemID, wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                }
                 wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[wishlistItemID];
 
                 wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(wishlistItemView, wishlistItemID); });
@@ -478,6 +485,7 @@ namespace EFM
             EFM_TraderStatus.TraderLoyaltyDetails loyaltyDetails = trader.GetLoyaltyDetails();
             Transform tradeVolume = transform.GetChild(1);
 
+            Mod.instance.LogInfo("0");
             // Top
             traderDisplay.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.traderAvatars[index];
             if(loyaltyDetails.currentLevel < 4)
@@ -507,16 +515,19 @@ namespace EFM
             // TODO: Set total amount of money the trader has, here we just disable the number for now because we dont use it
             traderDisplay.GetChild(0).GetChild(1).GetChild(2).GetChild(1).gameObject.SetActive(false);
 
+            Mod.instance.LogInfo("0");
             // Player level
             traderDisplay.GetChild(0).GetChild(2).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.playerLevelIcons[Mod.level / 5];
             traderDisplay.GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
 
+            Mod.instance.LogInfo("0");
             // Other loyalty details
             // Current loyalty
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(2).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetComponent<Text>().text = trader.standing.ToString();
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(4).GetChild(1).GetComponent<Text>().text = EFM_TraderStatus.GetMoneyString(trader.salesSum);
 
+            Mod.instance.LogInfo("0");
             // Next loyalty
             if (loyaltyDetails.currentLevel == loyaltyDetails.nextLevel)
             {
@@ -566,11 +577,13 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("0");
             // Player money
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("203") ? Mod.baseInventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("202") ? Mod.baseInventory["202"] : 0) + (Mod.playerInventory.ContainsKey("202") ? Mod.playerInventory["202"] : 0));
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(2).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("201") ? Mod.baseInventory["201"] : 0) + (Mod.playerInventory.ContainsKey("201") ? Mod.playerInventory["201"] : 0));
 
+            Mod.instance.LogInfo("0");
             // Main
             // Buy
             bool setDefaultBuy = false;
@@ -579,6 +592,7 @@ namespace EFM
             GameObject buyHorizontalCopy = buyHorizontalsParent.GetChild(0).gameObject;
             float buyShowCaseHeight = 27; // Top padding + horizontal
             // Clear previous horizontals
+            Mod.instance.LogInfo("0");
             while (buyHorizontalsParent.childCount > 1)
             {
                 // Unparent so it is not a child anymore so the while loop isnt infinite because this will only actually be destroyed next frame
@@ -586,6 +600,7 @@ namespace EFM
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
+            Mod.instance.LogInfo("0");
             if (trader.standing >= 0)
             {
                 // init price hoverscrolls first because they are needed by default prices
@@ -654,9 +669,7 @@ namespace EFM
                             }
                             else
                             {
-                                GameObject itemPrefab = IM.OD[item.Key].GetGameObject();
-                                FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
-                                currentItemIcon.GetChild(2).GetComponent<Image>().sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+                                AnvilManager.Run(Mod.SetVanillaIcon(item.Key, currentItemIcon.GetChild(2).GetComponent<Image>()));
                             }
                             if (item.Value.stack >= 50000)
                             {
@@ -775,18 +788,21 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("0");
             // Sell
             List<Transform> currentSellHorizontals = new List<Transform>();
             Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject sellHorizontalCopy = sellHorizontalsParent.GetChild(0).gameObject;
             float sellShowCaseHeight = 3; // Top padding
             // Clear previous horizontals
+            Mod.instance.LogInfo("0");
             while (sellHorizontalsParent.childCount > 1)
             {
                 Transform currentFirstChild = sellHorizontalsParent.GetChild(1);
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
+            Mod.instance.LogInfo("0");
             // Add all items in trade volume that are sellable at this trader to showcase
             int totalSellingPrice = 0;
             foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
@@ -799,21 +815,6 @@ namespace EFM
                 bool custom = false;
                 if(CIW != null)
                 {
-                    if(tradeVolumeInventory == null)
-                    {
-                        tradeVolumeInventory = new Dictionary<string, int>();
-                        tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
-                    }
-                    if (tradeVolumeInventory.ContainsKey(CIW.ID))
-                    {
-                        tradeVolumeInventory[CIW.ID] += CIW.maxStack > 1 ? CIW.stack : 1;
-                        tradeVolumeInventoryObjects[CIW.ID].Add(CIW.gameObject);
-                    }
-                    else
-                    {
-                        tradeVolumeInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
-                        tradeVolumeInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
-                    }
                     if(CIW.marketItemViews == null)
                     {
                         CIW.marketItemViews = new List<EFM_MarketItemView>();
@@ -833,21 +834,6 @@ namespace EFM
                 }
                 else
                 {
-                    if (tradeVolumeInventory == null)
-                    {
-                        tradeVolumeInventory = new Dictionary<string, int>();
-                        tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
-                    }
-                    if (tradeVolumeInventory.ContainsKey(VID.H3ID))
-                    {
-                        tradeVolumeInventory[VID.H3ID] += 1;
-                        tradeVolumeInventoryObjects[VID.H3ID].Add(VID.gameObject);
-                    }
-                    else
-                    {
-                        tradeVolumeInventory.Add(VID.H3ID, 1);
-                        tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
-                    }
                     if (VID.marketItemViews == null)
                     {
                         VID.marketItemViews = new List<EFM_MarketItemView>();
@@ -907,7 +893,14 @@ namespace EFM
                         sellItemShowcaseElements = new Dictionary<string, GameObject>();
                     }
                     sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
-                    currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                    if (Mod.itemIcons.ContainsKey(itemID))
+                    {
+                        currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                    }
+                    else
+                    {
+                        AnvilManager.Run(Mod.SetVanillaIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>()));
+                    }
                     EFM_MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<EFM_MarketItemView>();
                     marketItemView.custom = custom;
                     marketItemView.CIW = new List<EFM_CustomItemWrapper>() { CIW };
@@ -950,6 +943,7 @@ namespace EFM
                     }
                 }
             }
+            Mod.instance.LogInfo("0");
             // Setup selling price display
             if (trader.currency == 0)
             {
@@ -961,8 +955,10 @@ namespace EFM
                 traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames["201"];
                 traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons["201"];
             }
+            Mod.instance.LogInfo("0");
             traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = totalSellingPrice.ToString();
             currentTotalSellingPrice = totalSellingPrice;
+            Mod.instance.LogInfo("0");
             // Setup button
             if (!initButtonsSet)
             {
@@ -1000,18 +996,22 @@ namespace EFM
                 downSellHoverScroll.gameObject.SetActive(false);
                 upSellHoverScroll.gameObject.SetActive(false);
             }
+            Mod.instance.LogInfo("0");
 
+            Mod.instance.LogInfo("0");
             // Tasks
             Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject taskTemplate = tasksParent.GetChild(0).gameObject;
             float taskListHeight = 3; // Top padding
             // Clear previous tasks
+            Mod.instance.LogInfo("0");
             while (tasksParent.childCount > 1)
             {
                 Transform currentFirstChild = tasksParent.GetChild(1);
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
+            Mod.instance.LogInfo("0");
             if (referencedTasks != null)
             {
                 foreach (TraderTask referencedTask in referencedTasks)
@@ -1028,6 +1028,7 @@ namespace EFM
                 referencedTasks = new List<TraderTask>();
                 referencedTaskConditions = new List<TraderTaskCondition>();
             }
+            Mod.instance.LogInfo("0");
             // Add all of that trader's available and active tasks to the list
             foreach (TraderTask task in trader.tasks)
             {
@@ -1117,7 +1118,14 @@ namespace EFM
                             {
                                 case TraderTaskReward.TaskRewardType.Item:
                                     GameObject currentInitEquipItemElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
-                                    currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                    {
+                                        currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    }
+                                    else
+                                    {
+                                        AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                    }
                                     if (reward.amount > 1)
                                     {
                                         currentInitEquipItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
@@ -1147,7 +1155,14 @@ namespace EFM
                                     break;
                                 case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                                     GameObject currentInitEquipAssortElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
-                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                    {
+                                        currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    }
+                                    else
+                                    {
+                                        AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                    }
                                     currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                     currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
                                     break;
@@ -1175,7 +1190,14 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.Item:
                                 GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                                 currentRewardItemElement.SetActive(true);
-                                currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                {
+                                    currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                }
+                                else
+                                {
+                                    AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                }
                                 if (reward.amount > 1)
                                 {
                                     currentRewardItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
@@ -1209,7 +1231,14 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                                 GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                                 currentRewardAssortElement.SetActive(true);
-                                currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                {
+                                    currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                }
+                                else
+                                {
+                                    AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                }
                                 currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                 currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
                                 break;
@@ -1341,7 +1370,14 @@ namespace EFM
                                 case TraderTaskReward.TaskRewardType.Item:
                                     GameObject currentInitEquipItemElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipItemElement.SetActive(true);
-                                    currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                    {
+                                        currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    }
+                                    else
+                                    {
+                                        AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                    }
                                     if (reward.amount > 1)
                                     {
                                         currentInitEquipItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
@@ -1375,7 +1411,14 @@ namespace EFM
                                 case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                                     GameObject currentInitEquipAssortElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipAssortElement.SetActive(true);
-                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                    {
+                                        currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    }
+                                    else
+                                    {
+                                        AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                    }
                                     currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                     currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
                                     break;
@@ -1403,7 +1446,14 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.Item:
                                 GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                                 currentRewardItemElement.SetActive(true);
-                                currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                {
+                                    currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                }
+                                else
+                                {
+                                    AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                }
                                 if (reward.amount > 1)
                                 {
                                     currentRewardItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
@@ -1437,7 +1487,14 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                                 GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                                 currentRewardAssortElement.SetActive(true);
-                                currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                {
+                                    currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                }
+                                else
+                                {
+                                    AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                }
                                 currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                 currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
                                 break;
@@ -1554,7 +1611,14 @@ namespace EFM
                                 case TraderTaskReward.TaskRewardType.Item:
                                     GameObject currentInitEquipItemElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipItemElement.SetActive(true);
-                                    currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                    {
+                                        currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    }
+                                    else
+                                    {
+                                        AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                    }
                                     if (reward.amount > 1)
                                     {
                                         currentInitEquipItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
@@ -1588,7 +1652,14 @@ namespace EFM
                                 case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                                     GameObject currentInitEquipAssortElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipAssortElement.SetActive(true);
-                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                    {
+                                        currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                    }
+                                    else
+                                    {
+                                        AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                    }
                                     currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                     currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
                                     break;
@@ -1616,7 +1687,14 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.Item:
                                 GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                                 currentRewardItemElement.SetActive(true);
-                                currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                {
+                                    currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                }
+                                else
+                                {
+                                    AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                }
                                 if (reward.amount > 1)
                                 {
                                     currentRewardItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
@@ -1650,7 +1728,14 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                                 GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                                 currentRewardAssortElement.SetActive(true);
-                                currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                if (Mod.itemIcons.ContainsKey(reward.itemID))
+                                {
+                                    currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                                }
+                                else
+                                {
+                                    AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                }
                                 currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                 currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
                                 break;
@@ -1685,6 +1770,7 @@ namespace EFM
                     task.marketListElement = null;
                 }
             }
+            Mod.instance.LogInfo("0");
             // Setup hoverscrolls
             if (!initButtonsSet)
             {
@@ -1715,12 +1801,14 @@ namespace EFM
                 downTaskHoverScroll.gameObject.SetActive(false);
                 upTaskHoverScroll.gameObject.SetActive(false);
             }
+            Mod.instance.LogInfo("0");
 
             // Insure
             List<Transform> currentInsureHorizontals = new List<Transform>();
             Transform insureHorizontalsParent = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject insureHorizontalCopy = insureHorizontalsParent.GetChild(0).gameObject;
             float insureShowCaseHeight = 3; // Top padding
+            Mod.instance.LogInfo("0");
             // Clear previous horizontals
             while (insureHorizontalsParent.childCount > 1)
             {
@@ -1728,12 +1816,15 @@ namespace EFM
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
+            Mod.instance.LogInfo("0");
             if ((bool)Mod.traderBaseDB[trader.index]["insurance"]["availability"])
             {
+                Mod.instance.LogInfo("insurance available");
                 // Add all items in trade volume that are insureable at this trader to showcase
                 int totalInsurePrice = 0;
                 foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
                 {
+                    Mod.instance.LogInfo("processing item "+itemTransform.name);
                     EFM_CustomItemWrapper CIW = itemTransform.GetComponent<EFM_CustomItemWrapper>();
                     EFM_VanillaItemDescriptor VID = itemTransform.GetComponent<EFM_VanillaItemDescriptor>();
                     List<EFM_MarketItemView> itemViewListToUse = null;
@@ -1772,35 +1863,51 @@ namespace EFM
 
                         itemInsureValue = (int)Mathf.Max(VID.GetInsuranceValue() * trader.insuranceRate, 1);
 
-                        if (CIW.insured || !trader.ItemInsureable(itemID, VID.parents))
+                        if (VID.insured || !trader.ItemInsureable(itemID, VID.parents))
                         {
                             continue;
                         }
                     }
 
 
+                    Mod.instance.LogInfo("1");
                     if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
                     {
+                        Mod.instance.LogInfo("2");
                         Transform currentItemIcon = insureItemShowcaseElements[itemID].transform;
+                        Mod.instance.LogInfo("2");
                         EFM_MarketItemView marketItemView = currentItemIcon.GetComponent<EFM_MarketItemView>();
+                        Mod.instance.LogInfo("2");
                         int actualInsureValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemInsureValue : (int)Mathf.Max(itemInsureValue * 0.008f, 1);
+                        Mod.instance.LogInfo("2");
                         marketItemView.insureValue = marketItemView.insureValue + actualInsureValue;
+                        Mod.instance.LogInfo("2");
                         if (marketItemView.custom)
                         {
+                            Mod.instance.LogInfo("3");
                             marketItemView.CIW.Add(CIW);
+                            Mod.instance.LogInfo("3");
                             currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
+                            Mod.instance.LogInfo("3");
                         }
                         else
                         {
+                            Mod.instance.LogInfo("4");
                             marketItemView.VID.Add(VID);
+                            Mod.instance.LogInfo("4");
                             currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
+                            Mod.instance.LogInfo("4");
                         }
+                        Mod.instance.LogInfo("2");
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
+                        Mod.instance.LogInfo("2");
                         currentTotalInsurePrice += actualInsureValue;
                     }
                     else
                     {
+                        Mod.instance.LogInfo("5");
                         Transform currentHorizontal = insureHorizontalsParent.GetChild(insureHorizontalsParent.childCount - 1);
+                        Mod.instance.LogInfo("5");
                         if (insureHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
                         {
                             currentHorizontal = GameObject.Instantiate(insureHorizontalCopy, insureHorizontalsParent).transform;
@@ -1812,6 +1919,7 @@ namespace EFM
                             currentHorizontal.gameObject.SetActive(true);
                             insureShowCaseHeight += 24; // horizontal
                         }
+                        Mod.instance.LogInfo("5");
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
                         currentItemIcon.gameObject.SetActive(true);
@@ -1819,13 +1927,22 @@ namespace EFM
                         {
                             insureItemShowcaseElements = new Dictionary<string, GameObject>();
                         }
+                        Mod.instance.LogInfo("5");
                         insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
-                        currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                        if (Mod.itemIcons.ContainsKey(itemID))
+                        {
+                            currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>()));
+                        }
                         EFM_MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<EFM_MarketItemView>();
                         marketItemView.custom = custom;
                         marketItemView.CIW = new List<EFM_CustomItemWrapper>() { CIW };
                         marketItemView.VID = new List<EFM_VanillaItemDescriptor>() { VID };
 
+                        Mod.instance.LogInfo("5");
                         // Write price to item icon and set correct currency icon
                         Sprite currencySprite = null;
                         if (trader.currency == 0)
@@ -1837,11 +1954,13 @@ namespace EFM
                             currencySprite = EFM_Base_Manager.dollarCurrencySprite;
                             itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
                         }
+                        Mod.instance.LogInfo("5");
                         marketItemView.insureValue = itemInsureValue;
                         totalInsurePrice += itemInsureValue;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemInsureValue.ToString();
 
+                        Mod.instance.LogInfo("5");
                         //// Setup button
                         //EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
                         //pointableButton.SetButton();
@@ -1858,9 +1977,11 @@ namespace EFM
                         {
                             VID.marketItemViews.Add(marketItemView);
                         }
+                        Mod.instance.LogInfo("5");
                     }
                 }
                 // Setup insure price display
+                Mod.instance.LogInfo("1");
                 if (trader.currency == 0)
                 {
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames["203"];
@@ -1871,8 +1992,10 @@ namespace EFM
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames["201"];
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons["201"];
                 }
+                Mod.instance.LogInfo("1");
                 traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = totalInsurePrice.ToString();
                 currentTotalInsurePrice = totalInsurePrice;
+                Mod.instance.LogInfo("1");
                 // Setup button
                 if (!initButtonsSet)
                 {
@@ -1896,6 +2019,7 @@ namespace EFM
                     newInsureUpHoverScroll.other = newInsureDownHoverScroll;
                     newInsureUpHoverScroll.up = true;
                 }
+                Mod.instance.LogInfo("1");
                 EFM_HoverScroll downInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
                 EFM_HoverScroll upInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
                 if (insureShowCaseHeight > 150)
@@ -1910,8 +2034,10 @@ namespace EFM
                     downInsureHoverScroll.gameObject.SetActive(false);
                     upInsureHoverScroll.gameObject.SetActive(false);
                 }
+                Mod.instance.LogInfo("1");
             }
 
+            Mod.instance.LogInfo("0");
             initButtonsSet = true;
         }
 
@@ -1956,11 +2082,14 @@ namespace EFM
             int itemValue = custom ? CIW.GetValue() : VID.GetValue();
             int itemInsureValue = custom ? CIW.GetInsuranceValue() : VID.GetInsuranceValue();
 
+            Mod.instance.LogInfo("UpdateBasedOnItem called");
             if (added)
             {
+                Mod.instance.LogInfo("Added");
                 // Add to trade volume inventory
                 if (custom)
                 {
+                    Mod.instance.LogInfo("custom");
                     if (tradeVolumeInventory == null)
                     {
                         tradeVolumeInventory = new Dictionary<string, int>();
@@ -1979,6 +2108,7 @@ namespace EFM
                 }
                 else
                 {
+                    Mod.instance.LogInfo("vanilla");
                     if (tradeVolumeInventory == null)
                     {
                         tradeVolumeInventory = new Dictionary<string, int>();
@@ -1997,13 +2127,15 @@ namespace EFM
                 }
 
                 // IN BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
+                Mod.instance.LogInfo("trader buy");
                 if (prices != null && prices.ContainsKey(itemID))
                 {
+                    Mod.instance.LogInfo("Updating prices");
                     // Go through each price because need to check if all are fulfilled anyway
                     bool canDeal = true;
                     foreach (KeyValuePair<string, int> price in prices)
                     {
-                        if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= price.Value)
+                        if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= (price.Value * cartItemCount))
                         {
                             // If this is the item we are adding, make sure the requirement fulfilled icon is active
                             if (price.Key.Equals(itemID))
@@ -2033,14 +2165,16 @@ namespace EFM
                     }
                 }
 
+                Mod.instance.LogInfo("rag buy");
                 // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
                 if (ragfairPrices != null && ragfairPrices.ContainsKey(itemID))
                 {
+                    Mod.instance.LogInfo("updating rag buy prices");
                     // Go through each price because need to check if all are fulfilled anyway
                     bool canDeal = true;
                     foreach (KeyValuePair<string, int> price in ragfairPrices)
                     {
-                        if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= price.Value)
+                        if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= (price.Value * ragfairCartItemCount))
                         {
                             // If this is the item we are adding, make sure the requirement fulfilled icon is active
                             if (price.Key.Equals(itemID))
@@ -2070,9 +2204,11 @@ namespace EFM
                     }
                 }
 
+                Mod.instance.LogInfo("trader sell");
                 // IN SELL, check if item is already in showcase, if it is, increment count, if not, add a new entry, update price under FOR, make sure deal! button is activated if item is a sellable item
                 if (Mod.traderStatuses[currentTraderIndex].ItemSellable(itemID, Mod.itemAncestors[itemID]))
                 {
+                    Mod.instance.LogInfo("updating sell showcase");
                     Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
                     if (sellItemShowcaseElements != null && sellItemShowcaseElements.ContainsKey(itemID))
                     {
@@ -2095,10 +2231,12 @@ namespace EFM
                     }
                     else
                     {
+                        Mod.instance.LogInfo("adding new sell entry");
                         // Add a new sell item entry
                         Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
                         GameObject sellHorizontalCopy = sellHorizontalsParent.GetChild(0).gameObject;
 
+                        Mod.instance.LogInfo("0");
                         float sellShowCaseHeight = 3 + 24 * sellHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
                         Transform currentHorizontal = sellHorizontalsParent.GetChild(sellHorizontalsParent.childCount - 1);
                         if (sellHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
@@ -2112,6 +2250,7 @@ namespace EFM
                             currentHorizontal.gameObject.SetActive(true);
                             sellShowCaseHeight += 24; // horizontal
                         }
+                        Mod.instance.LogInfo("0");
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
                         currentItemIcon.gameObject.SetActive(true);
@@ -2119,13 +2258,23 @@ namespace EFM
                         {
                             sellItemShowcaseElements = new Dictionary<string, GameObject>();
                         }
+                        Mod.instance.LogInfo("0");
                         sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
-                        currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                        if (Mod.itemIcons.ContainsKey(itemID))
+                        {
+                            currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>()));
+                        }
+                        Mod.instance.LogInfo("0");
                         EFM_MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<EFM_MarketItemView>();
                         marketItemView.custom = custom;
                         marketItemView.CIW = new List<EFM_CustomItemWrapper>() { CIW };
                         marketItemView.VID = new List<EFM_VanillaItemDescriptor>() { VID };
 
+                        Mod.instance.LogInfo("0");
                         // Write price to item icon and set correct currency icon
                         Sprite currencySprite = null;
                         string currencyItemID = "";
@@ -2140,11 +2289,13 @@ namespace EFM
                             itemValue = (int)Mathf.Max(itemValue * 0.008f, 1); // Adjust item value
                             currencyItemID = "201";
                         }
+                        Mod.instance.LogInfo("0");
                         marketItemView.value = itemValue;
                         currentTotalSellingPrice += itemValue;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemValue.ToString();
 
+                        Mod.instance.LogInfo("0");
                         // Set count text
                         currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "1";
 
@@ -2155,6 +2306,7 @@ namespace EFM
                         //pointableButton.MaxPointingRange = 20;
                         //pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
+                        Mod.instance.LogInfo("0");
                         // Add the icon object to the list for that item
                         if (CIW != null)
                         {
@@ -2165,6 +2317,7 @@ namespace EFM
                             VID.marketItemViews.Add(marketItemView);
                         }
 
+                        Mod.instance.LogInfo("0");
                         // Update total selling price
                         traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames[currencyItemID];
                         traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currencyItemID];
@@ -2173,6 +2326,7 @@ namespace EFM
                         traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
                         traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
 
+                        Mod.instance.LogInfo("0");
                         // Update hoverscrolls
                         EFM_HoverScroll downSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
                         EFM_HoverScroll upSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
@@ -2188,13 +2342,16 @@ namespace EFM
                             downSellHoverScroll.gameObject.SetActive(false);
                             upSellHoverScroll.gameObject.SetActive(false);
                         }
+                        Mod.instance.LogInfo("0");
                     }
                     traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalSellingPrice.ToString();
                 }
 
+                Mod.instance.LogInfo("trader tasks");
                 // IN TASKS, for each item requirement of each task, activate TURN IN buttons accordingly
                 if (EFM_TraderStatus.conditionsByItem.ContainsKey(itemID))
                 {
+                    Mod.instance.LogInfo("updating task conditions with this item");
                     foreach (TraderTaskCondition condition in EFM_TraderStatus.conditionsByItem[itemID])
                     {
                         if (condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem && !condition.fulfilled && condition.marketListElement != null)
@@ -2204,11 +2361,13 @@ namespace EFM
                     }
                 }
 
+                Mod.instance.LogInfo("trader insure");
                 // IN INSURE, check if item already in showcase, if it is, increment count, if not, add a new entry, update price, make sure deal! button is activated, check if item is price, update accordingly
                 bool itemInsureable = Mod.traderStatuses[currentTraderIndex].ItemInsureable(itemID, Mod.itemAncestors[itemID]);
 
                 if (((custom && !CIW.insured) || (!custom && !VID.insured)) && itemInsureable)
                 {
+                    Mod.instance.LogInfo("update insure showcase");
                     Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
                     if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
                     {
@@ -2231,10 +2390,12 @@ namespace EFM
                     }
                     else
                     {
+                        Mod.instance.LogInfo("adding new insure entry");
                         // Add a new insure item entry
                         Transform insureHorizontalsParent = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
                         GameObject insureHorizontalCopy = insureHorizontalsParent.GetChild(0).gameObject;
 
+                        Mod.instance.LogInfo("0");
                         float insureShowCaseHeight = 3 + 24 * insureHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
                         Transform currentHorizontal = insureHorizontalsParent.GetChild(insureHorizontalsParent.childCount - 1);
                         if (insureHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
@@ -2248,6 +2409,7 @@ namespace EFM
                             currentHorizontal.gameObject.SetActive(true);
                             insureShowCaseHeight += 24; // horizontal
                         }
+                        Mod.instance.LogInfo("0");
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
                         currentItemIcon.gameObject.SetActive(true);
@@ -2255,13 +2417,23 @@ namespace EFM
                         {
                             insureItemShowcaseElements = new Dictionary<string, GameObject>();
                         }
+                        Mod.instance.LogInfo("0");
                         insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
-                        currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                        if (Mod.itemIcons.ContainsKey(itemID))
+                        {
+                            currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>()));
+                        }
+                        Mod.instance.LogInfo("0");
                         EFM_MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<EFM_MarketItemView>();
                         marketItemView.custom = custom;
                         marketItemView.CIW = new List<EFM_CustomItemWrapper>() { CIW };
                         marketItemView.VID = new List<EFM_VanillaItemDescriptor>() { VID };
 
+                        Mod.instance.LogInfo("0");
                         // Write price to item icon and set correct currency icon
                         Sprite currencySprite = null;
                         string currencyItemID = "";
@@ -2276,6 +2448,7 @@ namespace EFM
                             itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
                             currencyItemID = "201";
                         }
+                        Mod.instance.LogInfo("0");
                         marketItemView.insureValue = itemInsureValue;
                         currentTotalInsurePrice += itemInsureValue;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
@@ -2284,6 +2457,7 @@ namespace EFM
                         // Set count text
                         currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "1";
 
+                        Mod.instance.LogInfo("0");
                         //// Setup button
                         //EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
                         //pointableButton.SetButton();
@@ -2300,6 +2474,7 @@ namespace EFM
                         {
                             VID.marketItemViews.Add(marketItemView);
                         }
+                        Mod.instance.LogInfo("0");
 
                         // Update total insure price
                         traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames[currencyItemID];
@@ -2309,6 +2484,7 @@ namespace EFM
                         traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
                         traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
 
+                        Mod.instance.LogInfo("0");
                         // Update hoverscrolls
                         EFM_HoverScroll downInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
                         EFM_HoverScroll upInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
@@ -2324,6 +2500,7 @@ namespace EFM
                             downInsureHoverScroll.gameObject.SetActive(false);
                             upInsureHoverScroll.gameObject.SetActive(false);
                         }
+                        Mod.instance.LogInfo("0");
                     }
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalInsurePrice.ToString();
                 }
@@ -2361,11 +2538,14 @@ namespace EFM
             }
             else
             {
+                Mod.instance.LogInfo("removed");
                 // Remove from trade volume inventory
                 if (custom)
                 {
+                    Mod.instance.LogInfo("custom, pre amount: "+ tradeVolumeInventory[CIW.ID]);
                     tradeVolumeInventory[CIW.ID] -= (CIW.maxStack > 1 ? CIW.stack : 1);
                     tradeVolumeInventoryObjects[CIW.ID].Remove(CIW.gameObject);
+                    Mod.instance.LogInfo("post amount: " + tradeVolumeInventory[CIW.ID]);
                     if (tradeVolumeInventory[CIW.ID] == 0)
                     {
                         tradeVolumeInventory.Remove(CIW.ID);
@@ -2374,8 +2554,9 @@ namespace EFM
                 }
                 else
                 {
+                    Mod.instance.LogInfo("vanilla");
                     tradeVolumeInventory[VID.H3ID] -= 1;
-                    tradeVolumeInventoryObjects[VID.H3ID].Remove(CIW.gameObject);
+                    tradeVolumeInventoryObjects[VID.H3ID].Remove(VID.gameObject);
                     if (tradeVolumeInventory[VID.H3ID] == 0)
                     {
                         tradeVolumeInventory.Remove(VID.H3ID);
@@ -2383,15 +2564,19 @@ namespace EFM
                     }
                 }
 
+                Mod.instance.LogInfo("updating trader buy");
                 // IN BUY, check if item corresponds to price, update fulfilled icon and deactivate deal! button if necessary
                 if (prices != null && prices.ContainsKey(itemID))
                 {
+                    Mod.instance.LogInfo("have prices and removed item is a price");
                     // Go through each price because need to check if all are fulfilled anyway
                     bool canDeal = true;
                     foreach (KeyValuePair<string, int> price in prices)
                     {
+                        Mod.instance.LogInfo("Updating price: "+price.Key+":"+price.Value);
                         if (!tradeVolumeInventory.ContainsKey(price.Key) || tradeVolumeInventory[price.Key] < price.Value)
                         {
+                            Mod.instance.LogInfo("Either trade volume does not contain price or "+ tradeVolumeInventory[price.Key] +" < "+ price.Value);
                             // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
                             if (price.Key.Equals(itemID))
                             {
@@ -2416,6 +2601,7 @@ namespace EFM
                     }
                 }
 
+                Mod.instance.LogInfo("0");
                 // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icon and deactivate deal! button if necessary
                 if (ragfairPrices != null && ragfairPrices.ContainsKey(itemID))
                 {
@@ -2449,6 +2635,7 @@ namespace EFM
                     }
                 }
 
+                Mod.instance.LogInfo("0");
                 // IN SELL, find item in showcase, if there are more its stack, decrement count, if not, remove entry, update price under FOR, make sure deal! button is deactivated if no sellable item in volume (only need to check this if this item was sellable)
                 Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
                 if (sellItemShowcaseElements != null && sellItemShowcaseElements.ContainsKey(itemID))
@@ -2480,8 +2667,9 @@ namespace EFM
                     {
                         currentItemIcon.SetParent(null);
                         Destroy(currentItemIcon.gameObject);
+                        sellItemShowcaseElements.Remove(itemID);
 
-                        for(int i=1; i<sellHorizontalsParent.childCount - 1; ++i)
+                        for (int i=1; i<sellHorizontalsParent.childCount - 1; ++i)
                         {
                             Transform currentHorizontal = sellHorizontalsParent.GetChild(i);
                             // If item icon missing from this horizontal but not thi is not the last horizontal
@@ -2527,6 +2715,7 @@ namespace EFM
                 // else, if we are removing an item and it is not a sellable item (not in sellItemShowcaseElements) we dont need to do anything
                 traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalSellingPrice.ToString();
 
+                Mod.instance.LogInfo("0");
                 // IN TASKS, for each item requirement of each task, deactivate TURN IN buttons accordingly
                 if (EFM_TraderStatus.conditionsByItem.ContainsKey(itemID))
                 {
@@ -2542,6 +2731,7 @@ namespace EFM
                     }
                 }
 
+                Mod.instance.LogInfo("0");
                 // IN INSURE, find item in showcase, if there are more its stack, decrement count, if not, remove entry, update price under FOR, make sure deal! button is deactivated if no insureable item in volume (only need to check this if this item was insureable)
                 bool insureable = false;
                 if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
@@ -2574,6 +2764,7 @@ namespace EFM
                     {
                         currentItemIcon.SetParent(null);
                         Destroy(currentItemIcon.gameObject);
+                        insureItemShowcaseElements.Remove(itemID);
 
                         for (int i = 1; i < insureHorizontalsParent.childCount - 1; ++i)
                         {
@@ -2622,6 +2813,7 @@ namespace EFM
                 traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalInsurePrice.ToString();
                 Transform insurePriceFulfilledIcons = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(2);
 
+                Mod.instance.LogInfo("0");
                 if (insureable || itemID.Equals("201") || itemID.Equals("203"))
                 {
                     if (Mod.traderStatuses[currentTraderIndex].currency == 0)
@@ -2703,7 +2895,7 @@ namespace EFM
                 }
                 else
                 {
-                    AnvilManager.Run(SetVanillaIcon(price.Key, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
+                    AnvilManager.Run(Mod.SetVanillaIcon(price.Key, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
                 }
                 priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.Value.ToString();
                 priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = Mod.itemNames[price.Key];
@@ -2747,23 +2939,13 @@ namespace EFM
             }
         }
 
-        private IEnumerator SetVanillaIcon(string ID, Image image)
-        {
-            // TODO: Maybe set a loading icon sprite by default to indicate to player 
-            image.sprite = null;
-            yield return IM.OD[ID].GetGameObjectAsync();
-            GameObject itemPrefab = IM.OD[ID].GetGameObject();
-            FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
-            image.sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
-        }
-
         public void OnBuyDealClick()
         {
             // Remove price from trade volume
             foreach(KeyValuePair<string, int> price in prices)
             {
                 int amountToRemove = price.Value;
-                tradeVolumeInventory[price.Key] -= amountToRemove;
+                tradeVolumeInventory[price.Key] -= (price.Value * cartItemCount);
                 List<GameObject> objectList = tradeVolumeInventoryObjects[price.Key];
                 while (amountToRemove > 0)
                 {
@@ -2920,7 +3102,7 @@ namespace EFM
                 }
 
                 // Set trader immediately because we spawned a custom item
-                SetTrader(currentTraderIndex);
+                SetTrader(currentTraderIndex, cartItem);
             }
             else
             {
@@ -2935,19 +3117,24 @@ namespace EFM
         private IEnumerator SpawnVanillaItem(string ID, int count)
         {
             yield return IM.OD[ID].GetGameObjectAsync();
+            Mod.instance.LogInfo("spawn vanilla got GO");
             GameObject itemPrefab = IM.OD[ID].GetGameObject();
+            Mod.instance.LogInfo("-1");
             EFM_VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<EFM_VanillaItemDescriptor>();
+            Mod.instance.LogInfo("-1");
             BoxCollider tradeVolumeCollider = tradeVolume.GetComponentInChildren<BoxCollider>();
+            Mod.instance.LogInfo("-1");
             GameObject itemObject = null;
             bool spawnedSmallBox = false;
             bool spawnedBigBox = false;
+            Mod.instance.LogInfo("-1");
             if (Mod.usedRoundIDs.Contains(prefabVID.H3ID))
             {
                 // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of round
                 if (count > 1)
                 {
                     int countLeft = count;
-                    float boxCountLeft = count / 120;
+                    float boxCountLeft = count / 120.0f;
                     while (boxCountLeft > 0)
                     {
                         int amount = 0;
@@ -3021,6 +3208,9 @@ namespace EFM
 
                         EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                         FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                        FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
+                        asMagazine.RoundType = round.RoundType;
+                        itemCIW.roundClass = round.RoundClass;
                         for (int j = 0; j < amount; ++j)
                         {
                             asMagazine.AddRound(itemCIW.roundClass, false, false);
@@ -3036,42 +3226,61 @@ namespace EFM
 
                         BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
 
-                        boxCountLeft = countLeft / 120;
+                        boxCountLeft = countLeft / 120.0f;
                     }
                 }
                 else // Single round, spawn as normal
                 {
+                    Mod.instance.LogInfo("Single round");
                     itemObject = GameObject.Instantiate(itemPrefab, tradeVolume.itemsRoot);
 
+                    Mod.instance.LogInfo("0");
                     EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
-                    VID.physObj.RootRigidbody.isKinematic = true;
+
+                    Mod.instance.LogInfo("0");
+                    // Add item to tradevolume so it can set its reset cols and kinematic to true
+                    tradeVolume.AddItem(VID.physObj);
+
+                    Mod.instance.LogInfo("0");
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID, false);
 
+                    Mod.instance.LogInfo("0");
                     itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeCollider.size.x / 2, tradeVolumeCollider.size.x / 2),
                                                                      UnityEngine.Random.Range(-tradeVolumeCollider.size.y / 2, tradeVolumeCollider.size.y / 2),
                                                                      UnityEngine.Random.Range(-tradeVolumeCollider.size.z / 2, tradeVolumeCollider.size.z / 2));
+                    Mod.instance.LogInfo("0");
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
+                    Mod.instance.LogInfo("0");
                     if (tradeVolumeInventory.ContainsKey(VID.H3ID))
                     {
+                        Mod.instance.LogInfo("1");
                         tradeVolumeInventory[VID.H3ID] += 1;
                         tradeVolumeInventoryObjects[VID.H3ID].Add(itemObject);
+                        Mod.instance.LogInfo("1");
                     }
                     else
                     {
+                        Mod.instance.LogInfo("2");
                         tradeVolumeInventory.Add(VID.H3ID, 1);
                         tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { itemObject });
+                        Mod.instance.LogInfo("2");
                     }
                     if (Mod.baseInventory.ContainsKey(VID.H3ID))
                     {
+                        Mod.instance.LogInfo("3");
                         Mod.baseInventory[VID.H3ID] += 1;
                         baseManager.baseInventoryObjects[VID.H3ID].Add(itemObject);
+                        Mod.instance.LogInfo("3");
                     }
                     else
                     {
+                        Mod.instance.LogInfo("4");
                         Mod.baseInventory.Add(VID.H3ID, 1);
                         baseManager.baseInventoryObjects.Add(VID.H3ID, new List<GameObject> { itemObject });
+                        Mod.instance.LogInfo("4");
                     }
+                    Mod.instance.LogInfo("0");
                 }
             }
             else // Not a round, spawn as normal
@@ -3081,7 +3290,10 @@ namespace EFM
                     itemObject = GameObject.Instantiate(itemPrefab, tradeVolume.itemsRoot);
 
                     EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
-                    VID.physObj.RootRigidbody.isKinematic = true;
+
+                    // Add item to tradevolume so it can set its reset cols and kinematic to true
+                    tradeVolume.AddItem(VID.physObj);
+                    
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID, false);
 
                     itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeCollider.size.x / 2, tradeVolumeCollider.size.x / 2),
@@ -3113,6 +3325,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("updating all area managers");
             // Update all areas based on the item
             foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
             {
@@ -3132,9 +3345,10 @@ namespace EFM
                     baseAreaManager.UpdateBasedOnItem(ID);
                 }
             }
+            Mod.instance.LogInfo("callingsettrader");
 
             // Refresh trader when done spawning items
-            SetTrader(currentTraderIndex);
+            SetTrader(currentTraderIndex, ID);
 
             yield break;
         }
@@ -3155,17 +3369,17 @@ namespace EFM
 
             // Start splitting
             Mod.stackSplitUI.SetActive(true);
-            Mod.stackSplitUI.transform.position = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.2f;
-            Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, Mod.rightHand.transform.eulerAngles.y, 0);
-            amountChoiceStartPosition = Mod.rightHand.transform.position;
+            Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
+            Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
+            amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
             amountChoiceRightVector = Mod.rightHand.transform.right;
             amountChoiceRightVector.y = 0;
 
             choosingBuyAmount = true;
             startedChoosingThisFrame = true;
 
-            // Set max buy amount
-            maxBuyAmount = Mod.traderStatuses[currentTraderIndex].assortmentByLevel[Mod.traderStatuses[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack;
+            // Set max buy amount, limit it to 360 otherwise scale is not large enough and its hard to specify an exact value
+            maxBuyAmount = Mathf.Min(360, Mod.traderStatuses[currentTraderIndex].assortmentByLevel[Mod.traderStatuses[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack);
         }
 
         //public void OnSellItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
@@ -3453,7 +3667,14 @@ namespace EFM
                         case TraderTaskReward.TaskRewardType.Item:
                             GameObject currentInitEquipItemElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
                             currentInitEquipItemElement.SetActive(true);
-                            currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                            if (Mod.itemIcons.ContainsKey(reward.itemID))
+                            {
+                                currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                            }
+                            else
+                            {
+                                AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                            }
                             if (reward.amount > 1)
                             {
                                 currentInitEquipItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
@@ -3487,7 +3708,14 @@ namespace EFM
                         case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                             GameObject currentInitEquipAssortElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
                             currentInitEquipAssortElement.SetActive(true);
-                            currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                            if (Mod.itemIcons.ContainsKey(reward.itemID))
+                            {
+                                currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                            }
+                            else
+                            {
+                                AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                            }
                             currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                             currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
                             break;
@@ -3515,7 +3743,14 @@ namespace EFM
                     case TraderTaskReward.TaskRewardType.Item:
                         GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                         currentRewardItemElement.SetActive(true);
-                        currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        if (Mod.itemIcons.ContainsKey(reward.itemID))
+                        {
+                            currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                        }
                         if (reward.amount > 1)
                         {
                             currentRewardItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
@@ -3549,7 +3784,14 @@ namespace EFM
                     case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                         GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                         currentRewardAssortElement.SetActive(true);
-                        currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        if (Mod.itemIcons.ContainsKey(reward.itemID))
+                        {
+                            currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                        }
                         currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                         currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
                         break;
@@ -3696,7 +3938,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    AnvilManager.Run(SetVanillaIcon(itemID, itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                    AnvilManager.Run(Mod.SetVanillaIcon(itemID, itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
                                 }
                                 itemElement.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemBuyClick(traderIndex, assortItems[traderIndex], priceList, itemIcon); });
                                 itemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = assortItems[traderIndex].stack.ToString();
@@ -3857,7 +4099,7 @@ namespace EFM
                         }
                         else
                         {
-                            AnvilManager.Run(SetVanillaIcon(ID, itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                            AnvilManager.Run(Mod.SetVanillaIcon(ID, itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
                         }
                         itemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = assortItems[i].stack.ToString();
                         itemElement.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[ID];
@@ -3963,7 +4205,7 @@ namespace EFM
             Mod.instance.LogInfo("0");
             if (itemIcon == null)
             {
-                AnvilManager.Run(SetVanillaIcon(item.ID, ragfairCartTransform.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>()));
+                AnvilManager.Run(Mod.SetVanillaIcon(item.ID, ragfairCartTransform.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>()));
             }
             else
             {
@@ -4000,7 +4242,7 @@ namespace EFM
                 }
                 else
                 {
-                    AnvilManager.Run(SetVanillaIcon(price.Key, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
+                    AnvilManager.Run(Mod.SetVanillaIcon(price.Key, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
                 }
                 Mod.instance.LogInfo("\t0");
                 priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.Value.ToString();
@@ -4118,7 +4360,14 @@ namespace EFM
             // Update wishlist hover scrolls
             UpdateRagFairWishlistHoverscrolls();
 
-            wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[ID];
+            if (Mod.itemIcons.ContainsKey(ID))
+            {
+                wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[ID];
+            }
+            else
+            {
+                AnvilManager.Run(Mod.SetVanillaIcon(ID, wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+            }
             wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[ID];
 
             wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(wishlistItemView, ID); });
@@ -4167,17 +4416,17 @@ namespace EFM
 
             // Start splitting
             Mod.stackSplitUI.SetActive(true);
-            Mod.stackSplitUI.transform.position = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.2f;
-            Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, Mod.rightHand.transform.eulerAngles.y, 0);
-            amountChoiceStartPosition = Mod.rightHand.transform.position;
+            Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
+            Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
+            amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
             amountChoiceRightVector = Mod.rightHand.transform.right;
             amountChoiceRightVector.y = 0;
 
             choosingRagfairBuyAmount = true;
             startedChoosingThisFrame = true;
 
-            // Set max buy amount
-            maxBuyAmount = Mod.traderStatuses[currentTraderIndex].assortmentByLevel[Mod.traderStatuses[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack;
+            // Set max buy amount, limit it to 360 otherwise scale is too small and it is hard to specify a exact value
+            maxBuyAmount = Mathf.Min(360, Mod.traderStatuses[currentTraderIndex].assortmentByLevel[Mod.traderStatuses[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack);
         }
 
         public void OnRagfairBuyDealClick(int traderIndex)
@@ -4186,7 +4435,7 @@ namespace EFM
             foreach (KeyValuePair<string, int> price in ragfairPrices)
             {
                 int amountToRemove = price.Value;
-                tradeVolumeInventory[price.Key] -= amountToRemove;
+                tradeVolumeInventory[price.Key] -= (price.Value * cartItemCount);
                 List<GameObject> objectList = tradeVolumeInventoryObjects[price.Key];
                 while (amountToRemove > 0)
                 {

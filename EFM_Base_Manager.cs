@@ -1675,7 +1675,14 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            }
                         }
                     }
                     else
@@ -1697,7 +1704,14 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            }
                         }
                     }
                     else
