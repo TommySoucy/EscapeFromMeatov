@@ -289,7 +289,7 @@ namespace EFM
                     // Add all the items in the assort
                     if (currentAssort.itemsByID.ContainsKey(actualParentItemID))
                     {
-                        if(parentItem["upd"] != null && parentItem["upd"]["StackObjectsCount"] != null)
+                        if (parentItem["upd"] != null && parentItem["upd"]["StackObjectsCount"] != null)
                         {
                             currentAssort.itemsByID[actualParentItemID].stack += (int)parentItem["upd"]["StackObjectsCount"];
                         }
@@ -298,8 +298,8 @@ namespace EFM
                             currentAssort.itemsByID[actualParentItemID].stack += 100; // TODO: Review trader 579dc571d53a0658a154fbec, their assort does not specify stack
                         }
 
+                        // Build entry's pricelist
                         Dictionary<string, int> currentPrices = new Dictionary<string, int>();
-                        currentAssort.itemsByID[actualParentItemID].prices.Add(currentPrices);
                         foreach (JObject price in entry.Value["barter_scheme"][0])
                         {
                             string priceID = price["_tpl"].ToString();
@@ -320,6 +320,30 @@ namespace EFM
                             {
                                 Mod.instance.LogError("Assort entry: " + entry.Key + " has price ID: " + priceID + " missing from itemMap.");
                             }
+                        }
+
+                        // Ensure that this exact pricelist doesn't already exist, only add the pricelist if it isnt there yet
+                        bool priceListFound = false;
+                        foreach (Dictionary<string, int> existingPriceList in currentAssort.itemsByID[actualParentItemID].prices)
+                        {
+                            bool allFound = true;
+                            foreach (KeyValuePair<string, int> price in currentPrices)
+                            {
+                                if (!existingPriceList.ContainsKey(price.Key))
+                                {
+                                    allFound = false;
+                                    break;
+                                }
+                            }
+                            if (allFound)
+                            {
+                                priceListFound = true;
+                                break;
+                            }
+                        }
+                        if (!priceListFound)
+                        {
+                            currentAssort.itemsByID[actualParentItemID].prices.Add(currentPrices);
                         }
                     }
                     else
@@ -527,18 +551,26 @@ namespace EFM
 
                 // Fill start conditions
                 newTask.startConditions = new List<TraderTaskCondition>();
-                foreach (JObject startConditionData in questData["conditions"]["AvailableForStart"])
+                JArray startConditionsData = questData["conditions"]["AvailableForStart"] as JArray;
+                if (startConditionsData != null && startConditionsData.Count > 0)
                 {
-                    TraderTaskCondition newCondition = new TraderTaskCondition();
+                    foreach (JObject startConditionData in questData["conditions"]["AvailableForStart"])
+                    {
+                        TraderTaskCondition newCondition = new TraderTaskCondition();
 
-                    if(!SetCondition(newCondition, startConditionData, questLocale, taskSaveData, newTask))
-                    {
-                        continue;
+                        if (!SetCondition(newCondition, startConditionData, questLocale, taskSaveData, newTask))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            newTask.startConditions.Add(newCondition);
+                        }
                     }
-                    else
-                    {
-                        newTask.startConditions.Add(newCondition);
-                    }
+                }
+                else if(newTask.taskState == TraderTask.TaskState.Locked) // Some starting tasks may have no starting conditions so set to available if currently locked
+                {
+                    newTask.taskState = TraderTask.TaskState.Available;
                 }
 
                 // Fill completion conditions
@@ -715,6 +747,7 @@ namespace EFM
                     {
                         TraderTaskCounterCondition newCounter = new TraderTaskCounterCondition();
                         newCounter.ID = counter["_props"]["id"].ToString();
+                        newCounter.parentCondition = condition;
                         JObject conditionCounterSaveData = null;
                         if (conditionSaveData != null && conditionSaveData["counters"] != null && conditionSaveData["counters"][newCounter.ID] != null)
                         {
@@ -1040,13 +1073,13 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(originalItemID))
                     {
                         condition.item = Mod.itemMap[originalItemID];
-                        if (conditionsByItem.ContainsKey(originalItemID))
+                        if (conditionsByItem.ContainsKey(condition.item))
                         {
-                            conditionsByItem[originalItemID].Add(condition);
+                            conditionsByItem[condition.item].Add(condition);
                         }
                         else
                         {
-                            conditionsByItem.Add(originalItemID, new List<TraderTaskCondition>() { condition });
+                            conditionsByItem.Add(condition.item, new List<TraderTaskCondition>() { condition });
                         }
                     }
                     else
@@ -1062,13 +1095,13 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(originalLeaveItemID))
                     {
                         condition.item = Mod.itemMap[originalLeaveItemID];
-                        if (conditionsByItem.ContainsKey(originalLeaveItemID))
+                        if (conditionsByItem.ContainsKey(condition.item))
                         {
-                            conditionsByItem[originalLeaveItemID].Add(condition);
+                            conditionsByItem[condition.item].Add(condition);
                         }
                         else
                         {
-                            conditionsByItem.Add(originalLeaveItemID, new List<TraderTaskCondition>() { condition });
+                            conditionsByItem.Add(condition.item, new List<TraderTaskCondition>() { condition });
                         }
                     }
                     else
@@ -1300,6 +1333,121 @@ namespace EFM
                 EFM_TraderStatus.UpdateTaskCompletion(condition.task);
             }
         }
+
+        public static void UpdateCounterConditionFulfillment(TraderTaskCounterCondition counterCondition)
+        {
+            // Some counter conditinos are not dependent on some other variable than being complete or not
+            // So this may be called right after counterCondition.completed was set to true
+            // So for some types we need to check that and can't assume we dont have to do anything if already true
+            switch (counterCondition.counterConditionType)
+            {
+                case TraderTaskCounterCondition.CounterConditionType.Kills:
+                    if (counterCondition.completed)
+                    {
+                        return;
+                    }
+                    if (counterCondition.killCount >= counterCondition.parentCondition.value)
+                    {
+                        counterCondition.completed = true;
+                        UpdateConditionFulfillment(counterCondition.parentCondition);
+                    }
+                    break;
+                case TraderTaskCounterCondition.CounterConditionType.ExitStatus:
+                    // See first comment of method
+                    if (counterCondition.completed)
+                    {
+                        UpdateConditionFulfillment(counterCondition.parentCondition);
+                    }
+                    break;
+                case TraderTaskCounterCondition.CounterConditionType.VisitPlace:
+                    // See first comment of method
+                    if (counterCondition.completed)
+                    {
+                        UpdateConditionFulfillment(counterCondition.parentCondition);
+                    }
+                    break;
+                case TraderTaskCounterCondition.CounterConditionType.HealthEffect:
+                    // TODO: Will need to check how compare mode is used in this case
+                    if(counterCondition.timer >= counterCondition.time)
+                    {
+                        counterCondition.completed = true;
+                        UpdateConditionFulfillment(counterCondition.parentCondition);
+                    }
+                    break;
+                case TraderTaskCounterCondition.CounterConditionType.Location:
+                case TraderTaskCounterCondition.CounterConditionType.Equipment:
+                    // This is a constraint condition, it does not have live data of its own, so no updating it
+                    break;
+            }
+        }
+
+        public static void UpdateConditionFulfillment(TraderTaskCondition condition)
+        {
+            // Return right away if condition is already fulfilled TODO: This assumes conditions cannot be unfulfilled, ensure that we will never need to unfulfill conditions
+            if (condition.fulfilled)
+            {
+                return;
+            }
+
+            switch (condition.conditionType)
+            {
+                case TraderTaskCondition.ConditionType.CounterCreator:
+                    bool fulfilled = true;
+                    foreach (TraderTaskCounterCondition counterCondition in condition.counters)
+                    {
+                        if (!counterCondition.completed)
+                        {
+                            fulfilled = false;
+                            break;
+                        }
+                    }
+                    if (fulfilled)
+                    {
+                        FulfillCondition(condition);
+                    }
+                    break;
+                case TraderTaskCondition.ConditionType.Level:
+                    if(condition.mode == 0 && Mod.level >= condition.value) // >=
+                    {
+                        FulfillCondition(condition);
+                    }
+                    else if (condition.mode == 1 && Mod.level <= condition.value) // <=
+                    {
+                        FulfillCondition(condition);
+                    }
+                    break;
+                case TraderTaskCondition.ConditionType.Quest:
+                    if(condition.target.taskState == TraderTask.TaskState.Success)
+                    {
+                        FulfillCondition(condition);
+                    }
+                    break;
+                case TraderTaskCondition.ConditionType.TraderLoyalty:
+                    if (condition.mode == 0 && Mod.traderStatuses[condition.targetTraderIndex].GetLoyaltyLevel() >= condition.value) // >=
+                    {
+                        FulfillCondition(condition);
+                    }
+                    else if (condition.mode == 1 && Mod.traderStatuses[condition.targetTraderIndex].GetLoyaltyLevel() <= condition.value) // <=
+                    {
+                        FulfillCondition(condition);
+                    }
+                    break;
+                case TraderTaskCondition.ConditionType.HandoverItem:
+                case TraderTaskCondition.ConditionType.FindItem:
+                case TraderTaskCondition.ConditionType.LeaveItemAtLocation:
+                    if (condition.itemCount == condition.value)
+                    {
+                        FulfillCondition(condition);
+                    }
+                    break;
+                case TraderTaskCondition.ConditionType.Skill:
+                    if(condition.value >= Mod.skills[condition.skillIndex].progress / 100)
+                    {
+                        FulfillCondition(condition);
+                    }
+                    break;
+            }
+        }
     }
 
     public class TraderAssortment
@@ -1404,7 +1552,7 @@ namespace EFM
         // Quest: The status the quest should be at, 2: started, 4: completed
         // TraderLoyalty: The loyalty level of that trader
         // Counter: depends on counter conditions
-        // HandOverItem, FindItem: amount to hand in/find
+        // HandOverItem, FindItem, LeaveItemAtLocation: amount to hand in/find/leave at location
         public int value;
 
         // Level, TraderLoyalty, Skill
@@ -1419,10 +1567,10 @@ namespace EFM
         // HandOverItem, FindItem, LeaveItemAtLocation
         public string item;
 
-        public int itemCount; // Live data
-
         // LeaveItemAtLocation
         public string locationID;
+
+        public int itemCount; // Live data, count of items handed in/found/left at location
 
         // Counter
         public List<TraderTaskCounterCondition> counters;
@@ -1476,6 +1624,7 @@ namespace EFM
         }
         public CounterConditionType counterConditionType;
         public string ID;
+        public TraderTaskCondition parentCondition;
 
         // Kills
         public enum CounterConditionTargetEnemy

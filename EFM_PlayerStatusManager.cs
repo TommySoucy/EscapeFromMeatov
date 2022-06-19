@@ -32,6 +32,7 @@ namespace EFM
         private Dictionary<string, GameObject> taskUIByID;
 
         private bool displayed;
+        private int mustUpdateTaskListHeight;
 
         public void Init()
         {
@@ -193,6 +194,16 @@ namespace EFM
             }
 
             UpdateStamina();
+
+            if (mustUpdateTaskListHeight == 0)
+            {
+                UpdateTaskListHeight();
+                --mustUpdateTaskListHeight;
+            }
+            else if (mustUpdateTaskListHeight > 0)
+            {
+                --mustUpdateTaskListHeight;
+            }
         }
 
         private void UpdateStamina()
@@ -306,8 +317,7 @@ namespace EFM
 
         private void OnToggleTaskListClick()
         {
-            bool listNowActive = !transform.GetChild(2).gameObject.activeSelf;
-            transform.GetChild(2).gameObject.SetActive(listNowActive);
+            bool listNowActive = !transform.GetChild(1).GetChild(0).GetChild(1).gameObject.activeSelf;
             transform.GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(listNowActive);
             transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(!listNowActive);
             transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.SetActive(listNowActive);
@@ -501,7 +511,7 @@ namespace EFM
                         GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                         currentRewardExperienceElement.SetActive(true);
                         currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
-                        currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                        currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.experience > 0 ? "+" : "-") + reward.experience;
                         break;
                     case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                         GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
@@ -570,6 +580,8 @@ namespace EFM
             // Toggle task description
             description.SetActive(!description.activeSelf);
             buttonClickAudio.Play();
+
+            mustUpdateTaskListHeight = 1;
         }
 
         public void UpdateTaskListHeight()

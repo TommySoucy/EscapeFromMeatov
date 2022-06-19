@@ -52,6 +52,7 @@ namespace EFM
 
         private GameObject currentActiveCategory;
         private GameObject currentActiveItemSelector;
+        private int mustUpdateTaskListHeight;
 
         private void Update()
         {
@@ -80,6 +81,16 @@ namespace EFM
                 
                 Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
                 Mod.stackSplitUIText.text = chosenAmount.ToString() + "/" + maxBuyAmount;
+            }
+
+            if (mustUpdateTaskListHeight == 0)
+            {
+                UpdateTaskListHeight();
+                --mustUpdateTaskListHeight;
+            }
+            else if(mustUpdateTaskListHeight > 0)
+            {
+                --mustUpdateTaskListHeight;
             }
         }
 
@@ -465,6 +476,8 @@ namespace EFM
                             item.transform.GetChild(0).GetChild(2).GetComponent<Text>().text = Mod.itemNames[itemID];
                             item.transform.GetChild(0).GetChild(3).GetComponent<Text>().text = "(" + GetTotalItemSell(itemID) + ")";
 
+                            item.transform.GetChild(0).GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
+
                             item.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnRagFairItemMainClick(item, itemID); });
                         }
                     }
@@ -587,7 +600,6 @@ namespace EFM
             // Main
             // Buy
             bool setDefaultBuy = false;
-            List<Transform> currentBuyHorizontals = new List<Transform>();
             Transform buyHorizontalsParent = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject buyHorizontalCopy = buyHorizontalsParent.GetChild(0).gameObject;
             float buyShowCaseHeight = 27; // Top padding + horizontal
@@ -632,7 +644,7 @@ namespace EFM
                     foreach (KeyValuePair<string, AssortmentItem> item in assort.itemsByID)
                     {
                         // Skip if this item must be unlocked
-                        if (trader.itemsToWaitForUnlock.Contains(item.Key))
+                        if (trader.itemsToWaitForUnlock != null && trader.itemsToWaitForUnlock.Contains(item.Key))
                         {
                             continue;
                         }
@@ -790,7 +802,6 @@ namespace EFM
 
             Mod.instance.LogInfo("0");
             // Sell
-            List<Transform> currentSellHorizontals = new List<Transform>();
             Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject sellHorizontalCopy = sellHorizontalsParent.GetChild(0).gameObject;
             float sellShowCaseHeight = 3; // Top padding
@@ -802,11 +813,20 @@ namespace EFM
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
-            Mod.instance.LogInfo("0");
+            Mod.instance.LogInfo("Adding all item involume to sell showcase");
             // Add all items in trade volume that are sellable at this trader to showcase
             int totalSellingPrice = 0;
+            if (sellItemShowcaseElements == null)
+            {
+                sellItemShowcaseElements = new Dictionary<string, GameObject>();
+            }
+            else
+            {
+                sellItemShowcaseElements.Clear();
+            }
             foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
             {
+                Mod.instance.LogInfo("\tAdding item from volume: "+itemTransform.name);
                 EFM_CustomItemWrapper CIW = itemTransform.GetComponent<EFM_CustomItemWrapper>();
                 EFM_VanillaItemDescriptor VID = itemTransform.GetComponent<EFM_VanillaItemDescriptor>();
                 List<EFM_MarketItemView> itemViewListToUse = null;
@@ -879,7 +899,7 @@ namespace EFM
                         currentHorizontal = GameObject.Instantiate(sellHorizontalCopy, sellHorizontalsParent).transform;
                         currentHorizontal.gameObject.SetActive(true);
                     }
-                    else if (currentSellHorizontals[currentSellHorizontals.Count - 1].childCount == 7)
+                    else if (currentHorizontal.childCount == 7)
                     {
                         currentHorizontal = GameObject.Instantiate(sellHorizontalCopy, sellHorizontalsParent).transform;
                         currentHorizontal.gameObject.SetActive(true);
@@ -888,10 +908,6 @@ namespace EFM
 
                     Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
                     currentItemIcon.gameObject.SetActive(true);
-                    if (sellItemShowcaseElements == null)
-                    {
-                        sellItemShowcaseElements = new Dictionary<string, GameObject>();
-                    }
                     sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
                     if (Mod.itemIcons.ContainsKey(itemID))
                     {
@@ -924,6 +940,8 @@ namespace EFM
                     totalSellingPrice += itemValue;
                     currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
                     currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemValue.ToString();
+
+                    currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "1";
 
                     //// Setup button
                     //EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
@@ -1032,6 +1050,7 @@ namespace EFM
             // Add all of that trader's available and active tasks to the list
             foreach (TraderTask task in trader.tasks)
             {
+                Mod.instance.LogInfo("Check if can add task "+task.name+" to task list, its state is: "+task.taskState);
                 if(task.taskState == TraderTask.TaskState.Available)
                 {
                     GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
@@ -1172,7 +1191,7 @@ namespace EFM
                         }
                     }
                     // Rewards
-                    Transform rewardParent = description.GetChild(2);
+                    Transform rewardParent = description.GetChild(3);
                     rewardParent.gameObject.SetActive(true);
                     GameObject currentRewardHorizontalTemplate = rewardParent.GetChild(1).gameObject;
                     Transform currentRewardHorizontal = Instantiate(currentRewardHorizontalTemplate, rewardParent).transform;
@@ -1226,7 +1245,7 @@ namespace EFM
                                 GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                                 currentRewardExperienceElement.SetActive(true);
                                 currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.experienceSprite;
-                                currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                                currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.experience > 0 ? "+" : "-") + reward.experience;
                                 break;
                             case TraderTaskReward.TaskRewardType.AssortmentUnlock:
                                 GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
@@ -1822,6 +1841,14 @@ namespace EFM
                 Mod.instance.LogInfo("insurance available");
                 // Add all items in trade volume that are insureable at this trader to showcase
                 int totalInsurePrice = 0;
+                if(insureItemShowcaseElements == null)
+                {
+                    insureItemShowcaseElements = new Dictionary<string, GameObject>();
+                }
+                else
+                {
+                    insureItemShowcaseElements.Clear();
+                }
                 foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
                 {
                     Mod.instance.LogInfo("processing item "+itemTransform.name);
@@ -1833,11 +1860,6 @@ namespace EFM
                     bool custom = false;
                     if (CIW != null)
                     {
-                        if (CIW.marketItemViews == null)
-                        {
-                            CIW.marketItemViews = new List<EFM_MarketItemView>();
-                        }
-                        CIW.marketItemViews.Clear();
                         itemViewListToUse = CIW.marketItemViews;
 
                         itemID = CIW.ID;
@@ -1852,11 +1874,6 @@ namespace EFM
                     }
                     else
                     {
-                        if (VID.marketItemViews == null)
-                        {
-                            VID.marketItemViews = new List<EFM_MarketItemView>();
-                        }
-                        VID.marketItemViews.Clear();
                         itemViewListToUse = VID.marketItemViews;
 
                         itemID = VID.H3ID;
@@ -1923,10 +1940,6 @@ namespace EFM
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
                         currentItemIcon.gameObject.SetActive(true);
-                        if (insureItemShowcaseElements == null)
-                        {
-                            insureItemShowcaseElements = new Dictionary<string, GameObject>();
-                        }
                         Mod.instance.LogInfo("5");
                         insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
                         if (Mod.itemIcons.ContainsKey(itemID))
@@ -2056,11 +2069,29 @@ namespace EFM
 
         public void UpdateTaskListHeight()
         {
+            Mod.instance.LogInfo("UpdateTaskListHeight called");
             Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
-            EFM_HoverScroll downTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetComponent<EFM_HoverScroll>();
-            EFM_HoverScroll upTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
+            Mod.instance.LogInfo("got trader display");
+            EFM_HoverScroll downTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<EFM_HoverScroll>();
+            EFM_HoverScroll upTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(3).GetComponent<EFM_HoverScroll>();
+            Mod.instance.LogInfo("got hoverscrolls");
             Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            Mod.instance.LogInfo("got task parents");
             float taskListHeight = 3 + 29 * (tasksParent.childCount - 1);
+
+            // Also need to add height of open descriptions
+            for(int i = 1; i<tasksParent.childCount; ++i)
+            {
+                Mod.instance.LogInfo("\tGetting task " + i);
+                GameObject description = tasksParent.GetChild(i).GetChild(1).gameObject;
+                Mod.instance.LogInfo("\tgot description");
+                if (description.activeSelf) 
+                {
+                    taskListHeight += description.GetComponent<RectTransform>().sizeDelta.y;
+                }
+            }
+            Mod.instance.LogInfo("done adding desc heights, total: "+ taskListHeight);
+
             if (taskListHeight > 145)
             {
                 downTaskHoverScroll.rate = 145 / (taskListHeight - 145);
@@ -2254,10 +2285,6 @@ namespace EFM
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
                         currentItemIcon.gameObject.SetActive(true);
-                        if (sellItemShowcaseElements == null)
-                        {
-                            sellItemShowcaseElements = new Dictionary<string, GameObject>();
-                        }
                         Mod.instance.LogInfo("0");
                         sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
                         if (Mod.itemIcons.ContainsKey(itemID))
@@ -2413,10 +2440,6 @@ namespace EFM
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
                         currentItemIcon.gameObject.SetActive(true);
-                        if (insureItemShowcaseElements == null)
-                        {
-                            insureItemShowcaseElements = new Dictionary<string, GameObject>();
-                        }
                         Mod.instance.LogInfo("0");
                         insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
                         if (Mod.itemIcons.ContainsKey(itemID))
@@ -2576,7 +2599,6 @@ namespace EFM
                         Mod.instance.LogInfo("Updating price: "+price.Key+":"+price.Value);
                         if (!tradeVolumeInventory.ContainsKey(price.Key) || tradeVolumeInventory[price.Key] < price.Value)
                         {
-                            Mod.instance.LogInfo("Either trade volume does not contain price or "+ tradeVolumeInventory[price.Key] +" < "+ price.Value);
                             // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
                             if (price.Key.Equals(itemID))
                             {
@@ -2970,7 +2992,8 @@ namespace EFM
                                     baseManager.baseInventoryObjects.Remove(CIW.ID);
                                 }
                                 CIW.destroyed = true;
-                                Destroy(gameObject);
+                                currentItemObject.transform.parent = null;
+                                Destroy(currentItemObject);
                             }
                             else // stack - amountToRemove > 0
                             {
@@ -2992,7 +3015,8 @@ namespace EFM
                                 baseManager.baseInventoryObjects.Remove(CIW.ID);
                             }
                             CIW.destroyed = true;
-                            Destroy(gameObject);
+                            currentItemObject.transform.parent = null;
+                            Destroy(currentItemObject);
                         }
                     }
                     else // Vanilla item cannot have stack
@@ -3009,7 +3033,8 @@ namespace EFM
                             baseManager.baseInventoryObjects.Remove(price.Key);
                         }
                         currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
-                        Destroy(gameObject);
+                        currentItemObject.transform.parent = null;
+                        Destroy(currentItemObject);
                     }
                 }
 
@@ -3415,7 +3440,9 @@ namespace EFM
                             Mod.baseInventory.Remove(item.Key);
                             baseManager.baseInventoryObjects.Remove(item.Key);
                         };
-                        Destroy(gameObject);
+                        // Unparent object before destroying so it doesnt get processed by settrader
+                        itemObject.transform.parent = null;
+                        Destroy(itemObject);
                     }
                     itemsToRemove.Add(item.Key);
                 }
@@ -3542,7 +3569,8 @@ namespace EFM
                         baseManager.baseInventoryObjects.Remove(CIW.ID);
                     }
                     CIW.destroyed = true;
-                    Destroy(gameObject);
+                    currentItemObject.transform.parent = null;
+                    Destroy(currentItemObject);
                 }
                 else // stack - amountToRemove > 0
                 {
@@ -3574,6 +3602,17 @@ namespace EFM
             // Toggle task description
             description.SetActive(!description.activeSelf);
             clickAudio.Play();
+
+            if (description.activeSelf)
+            {
+                // Set to call UpdateTaskListHeight on next frame because we will need description height but that will only be accessible next frame
+                mustUpdateTaskListHeight = 1;
+            }
+            else
+            {
+                // If deactivated we can update height right away
+                UpdateTaskListHeight();
+            }
         }
 
         public void AddTask(TraderTask task)
@@ -3944,6 +3983,58 @@ namespace EFM
                                 itemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = assortItems[traderIndex].stack.ToString();
                                 itemElement.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[itemID];
                                 itemElement.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemWishClick(itemID); });
+
+                                // Set price icon and label
+                                int currencyIndex = -1; // Rouble, Dollar, Euro, Barter
+                                Sprite priceLabelSprite = EFM_Base_Manager.roubleCurrencySprite;
+                                int totalPriceCount = 0;
+                                foreach(KeyValuePair<string, int> price in priceList)
+                                {
+                                    totalPriceCount += price.Value;
+                                    switch (price.Key)
+                                    {
+                                        case "201":
+                                            if (currencyIndex != 1)
+                                            {
+                                                currencyIndex = 3;
+                                                priceLabelSprite = EFM_Base_Manager.barterSprite;
+                                            }
+                                            else if(currencyIndex == -1)
+                                            {
+                                                currencyIndex = 1;
+                                                priceLabelSprite = EFM_Base_Manager.dollarCurrencySprite;
+                                            }
+                                            break;
+                                        case "202":
+                                            if (currencyIndex != 2)
+                                            {
+                                                currencyIndex = 3;
+                                                priceLabelSprite = EFM_Base_Manager.barterSprite;
+                                            }
+                                            else if (currencyIndex == -1)
+                                            {
+                                                currencyIndex = 2;
+                                                priceLabelSprite = EFM_Base_Manager.euroCurrencySprite;
+                                            }
+                                            break;
+                                        case "203":
+                                            if(currencyIndex != 0)
+                                            {
+                                                currencyIndex = 3;
+                                                priceLabelSprite = EFM_Base_Manager.barterSprite;
+                                            }
+                                            else if (currencyIndex == -1)
+                                            {
+                                                currencyIndex = 0;
+                                                priceLabelSprite = EFM_Base_Manager.roubleCurrencySprite;
+                                            }
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                                itemElement.transform.GetChild(0).GetChild(2).GetChild(0).GetComponent<Image>().sprite = priceLabelSprite;
+                                itemElement.transform.GetChild(0).GetChild(2).GetChild(1).GetComponent<Text>().text = totalPriceCount.ToString();
 
                                 if (ragFairItemBuyViewsByID.ContainsKey(itemID))
                                 {
@@ -4460,7 +4551,8 @@ namespace EFM
                                     baseManager.baseInventoryObjects.Remove(CIW.ID);
                                 }
                                 CIW.destroyed = true;
-                                Destroy(gameObject);
+                                currentItemObject.transform.parent = null;
+                                Destroy(currentItemObject);
                             }
                             else // stack - amountToRemove > 0
                             {
@@ -4482,7 +4574,8 @@ namespace EFM
                                 baseManager.baseInventoryObjects.Remove(CIW.ID);
                             }
                             CIW.destroyed = true;
-                            Destroy(gameObject);
+                            currentItemObject.transform.parent = null;
+                            Destroy(currentItemObject);
                         }
                     }
                     else // Vanilla item cannot have stack
@@ -4499,7 +4592,8 @@ namespace EFM
                             baseManager.baseInventoryObjects.Remove(price.Key);
                         }
                         currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
-                        Destroy(gameObject);
+                        currentItemObject.transform.parent = null;
+                        Destroy(currentItemObject);
                     }
                 }
 

@@ -640,6 +640,11 @@ namespace EFM
                 {
                     itemPhysicalObject.PoseOverride = null;
                 }
+                itemPhysicalObject.PoseOverride_Touch = itemPrefab.transform.GetChild(4);
+                if (!itemPhysicalObject.PoseOverride_Touch.gameObject.activeSelf)
+                {
+                    itemPhysicalObject.PoseOverride_Touch = null;
+                }
                 itemPhysicalObject.QBPoseOverride = itemPrefab.transform.GetChild(2);
                 itemPhysicalObject.UseGrabPointChild = true; // Makes sure the item will be held where the player grabs it instead of at pose override
 
@@ -940,7 +945,6 @@ namespace EFM
                         fireArmMagazine.Profile.MagazineEjectRound = new AudioEvent();
                         fireArmMagazine.Viz = itemPrefab.transform;
                         fireArmMagazine.DisplayBullets = new GameObject[0];
-                        fireArmMagazine.PoseOverride_Touch = fireArmMagazine.PoseOverride;
                         fireArmMagazine.MagazineType = FireArmMagazineType.mNone;
                         fireArmMagazine.RoundEjectionPos = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
                         fireArmMagazine.RoundType = (FireArmRoundType)Enum.Parse(typeof(FireArmRoundType), defaultItemsData["ItemDefaults"][i]["AmmoBoxProperties"]["roundType"].ToString());
@@ -964,7 +968,6 @@ namespace EFM
                         fireArmMagazine.Profile.MagazineEjectRound = new AudioEvent();
                         fireArmMagazine.Viz = itemPrefab.transform;
                         fireArmMagazine.DisplayBullets = new GameObject[0];
-                        fireArmMagazine.PoseOverride_Touch = fireArmMagazine.PoseOverride;
                         fireArmMagazine.MagazineType = FireArmMagazineType.mNone;
                         fireArmMagazine.RoundEjectionPos = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
                         fireArmMagazine.RoundType = FireArmRoundType.a106_25mmR; // Just a default one
@@ -2843,6 +2846,7 @@ namespace EFM
             }
             else if (collidingTradeVolume != null)
             {
+                Mod.instance.LogInfo("\tcolliding trade volume not null, adding to trade volume");
                 collidingTradeVolume.AddItem(primary);
 
                 collidingTradeVolume.market.UpdateBasedOnItem(true, heldCustomItemWrapper, heldVanillaItemDescriptor);
@@ -3805,6 +3809,42 @@ namespace EFM
                     if (Mod.leftShoulderObject != null && Mod.leftShoulderObject.Equals(customItemWrapper.gameObject))
                     {
                         FVRViveHand.AlignChild(__instance.transform, __instance.PoseOverride, hand.transform);
+                    }
+                }
+
+                // Check if this item is a container, if so need to check if we were colliding with its container volume and make sure we are not
+                if (customItemWrapper.itemType == Mod.ItemType.Pouch ||
+                    customItemWrapper.itemType == Mod.ItemType.Backpack ||
+                    customItemWrapper.itemType == Mod.ItemType.Container)
+                {
+                    if (hand.IsThisTheRightHand && Mod.rightHand.collidingContainerWrapper != null && Mod.rightHand.collidingContainerWrapper.Equals(customItemWrapper))
+                    {
+                        Mod.rightHand.hoverValid = false;
+                        Mod.rightHand.collidingContainerWrapper.SetContainerHovered(false);
+                        Mod.rightHand.collidingContainerWrapper = null;
+                    }
+                    else if(!hand.IsThisTheRightHand && Mod.leftHand.collidingContainerWrapper != null && Mod.leftHand.collidingContainerWrapper.Equals(customItemWrapper))
+                    {
+                        Mod.leftHand.hoverValid = false;
+                        Mod.leftHand.collidingContainerWrapper.SetContainerHovered(false);
+                        Mod.leftHand.collidingContainerWrapper = null;
+                    }
+                }
+
+                // Check if this item is a togglable, if so need to check if we were colliding with it and make sure we are not
+                if (customItemWrapper.itemType == Mod.ItemType.Pouch ||
+                    customItemWrapper.itemType == Mod.ItemType.Backpack ||
+                    customItemWrapper.itemType == Mod.ItemType.Container ||
+                    customItemWrapper.itemType == Mod.ItemType.ArmoredRig ||
+                    customItemWrapper.itemType == Mod.ItemType.Rig)
+                {
+                    if (hand.IsThisTheRightHand && Mod.rightHand.collidingTogglableWrapper != null && Mod.rightHand.collidingTogglableWrapper.Equals(customItemWrapper))
+                    {
+                        Mod.rightHand.collidingTogglableWrapper = null;
+                    }
+                    else if(!hand.IsThisTheRightHand && Mod.leftHand.collidingTogglableWrapper != null && Mod.leftHand.collidingTogglableWrapper.Equals(customItemWrapper))
+                    {
+                        Mod.leftHand.collidingTogglableWrapper = null;
                     }
                 }
 
@@ -5540,11 +5580,11 @@ namespace EFM
                             Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
                         }
 
-                        latestEjectedRound.GetComponent<FVRPhysicalObject>().SetParentage(sceneRoot.transform.GetChild(2));
+                        latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(2);
                     }
                     else if (Mod.currentLocationIndex == 2)
                     {
-                        latestEjectedRound.GetComponent<FVRPhysicalObject>().SetParentage(sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2));
+                        latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2);
                     }
                 }
 
@@ -5662,11 +5702,11 @@ namespace EFM
                             Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
                         }
 
-                        latestEjectedRound.GetComponent<FVRPhysicalObject>().SetParentage(sceneRoot.transform.GetChild(2));
+                        latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(2);
                     }
                     else if (Mod.currentLocationIndex == 2)
                     {
-                        latestEjectedRound.GetComponent<FVRPhysicalObject>().SetParentage(sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2));
+                        latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2);
                     }
                 }
 
@@ -6197,7 +6237,7 @@ namespace EFM
                 {
                     if (CIW.ID.Equals("715") || CIW.ID.Equals("716"))
                     {
-                        __instance.EndInteraction(__instance.m_hand);
+                        __instance.ForceBreakInteraction();
                         GameObject.Destroy(CIW.gameObject);
                     }
                     else
@@ -6253,7 +6293,7 @@ namespace EFM
                 {
                     if (CIW.ID.Equals("715") || CIW.ID.Equals("716"))
                     {
-                        __instance.EndInteraction(__instance.m_hand);
+                        __instance.ForceBreakInteraction();
                         GameObject.Destroy(CIW.gameObject);
                     }
                     else
@@ -6308,7 +6348,7 @@ namespace EFM
                 {
                     if (CIW.ID.Equals("715") || CIW.ID.Equals("716"))
                     {
-                        __instance.EndInteraction(__instance.m_hand);
+                        __instance.ForceBreakInteraction();
                         GameObject.Destroy(CIW.gameObject);
                     }
                     else

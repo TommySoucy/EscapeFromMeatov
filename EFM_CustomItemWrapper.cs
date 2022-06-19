@@ -644,6 +644,7 @@ namespace EFM
 							}
 							Mod.weight -= currentWeight;
 							destroyed = true;
+							physObj.ForceBreakInteraction();
 							Destroy(gameObject);
 
 							foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
