@@ -4215,14 +4215,15 @@ namespace EFM
                                 itemElement.SetActive(true);
                                 Sprite itemIcon = null;
                                 string itemName = Mod.itemNames[itemID];
+                                Image imageElement = itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>();
                                 if (Mod.itemIcons.ContainsKey(itemID))
                                 {
                                     itemIcon = Mod.itemIcons[itemID];
-                                    itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = itemIcon;
+                                    imageElement.sprite = itemIcon;
                                 }
                                 else
                                 {
-                                    AnvilManager.Run(Mod.SetVanillaIcon(itemID, itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                    AnvilManager.Run(Mod.SetVanillaIcon(itemID, imageElement));
                                 }
                                 itemElement.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemBuyClick(traderIndex, assortItems[traderIndex], priceList, itemIcon); });
                                 itemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = assortItems[traderIndex].stack.ToString();
@@ -4556,7 +4557,8 @@ namespace EFM
 
             Mod.instance.LogInfo("0");
             Transform ragfairCartTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2);
-            ragfairCartTransform.GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames[item.ID];
+            string itemName = Mod.itemNames[item.ID];
+            ragfairCartTransform.GetChild(1).GetChild(0).GetComponent<Text>().text = itemName;
             Mod.instance.LogInfo("0");
             if (itemIcon == null)
             {
@@ -4568,6 +4570,18 @@ namespace EFM
             }
             Mod.instance.LogInfo("0");
             ragfairCartTransform.GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "1";
+
+            // Setup selected item ItemIcon
+            EFM_ItemIcon ragfairCartItemIconScript = ragfairCartTransform.GetChild(1).GetChild(1).GetComponent<EFM_ItemIcon>();
+            if(ragfairCartItemIconScript == null)
+            { 
+                ragfairCartItemIconScript = ragfairCartTransform.GetChild(1).GetChild(1).gameObject.AddComponent<EFM_ItemIcon>();
+            }
+            ragfairCartItemIconScript.itemID = item.ID;
+            ragfairCartItemIconScript.itemName = itemName;
+            ragfairCartItemIconScript.description = Mod.itemDescriptions[item.ID];
+            ragfairCartItemIconScript.weight = Mod.itemWeights[item.ID];
+            ragfairCartItemIconScript.volume = Mod.itemVolumes[item.ID];
 
             Mod.instance.LogInfo("0");
             Transform cartShowcase = ragfairCartTransform.GetChild(1);
@@ -4601,7 +4615,8 @@ namespace EFM
                 }
                 Mod.instance.LogInfo("\t0");
                 priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.Value.ToString();
-                priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = Mod.itemNames[price.Key];
+                string priceItemName = Mod.itemNames[price.Key];
+                priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = priceItemName;
                 Mod.instance.LogInfo("\t0");
                 if (ragfairBuyPriceElements == null)
                 {
@@ -4619,6 +4634,14 @@ namespace EFM
                 {
                     canDeal = false;
                 }
+
+                // Setup price ItemIcon
+                EFM_ItemIcon ragfairCartPriceItemIconScript = priceElement.GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                ragfairCartPriceItemIconScript.itemID = price.Key;
+                ragfairCartPriceItemIconScript.itemName = priceItemName;
+                ragfairCartPriceItemIconScript.description = Mod.itemDescriptions[price.Key];
+                ragfairCartPriceItemIconScript.weight = Mod.itemWeights[price.Key];
+                ragfairCartPriceItemIconScript.volume = Mod.itemVolumes[price.Key];
             }
             Mod.instance.LogInfo("0");
             EFM_HoverScroll downHoverScroll = cartShowcase.GetChild(3).GetChild(3).GetComponent<EFM_HoverScroll>();

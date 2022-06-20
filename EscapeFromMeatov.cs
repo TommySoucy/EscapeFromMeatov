@@ -585,6 +585,9 @@ namespace EFM
             otherActiveSlots = new List<List<FVRQuickBeltSlot>>();
             itemPrefabs = new List<GameObject>();
             itemNames = new Dictionary<string, string>();
+            itemDescriptions = new Dictionary<string, string>();
+            itemWeights = new Dictionary<string, float>();
+            itemVolumes = new Dictionary<string, float>();
             itemIcons = new Dictionary<string, Sprite>();
             defaultItemsData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DefaultItemData.txt"));
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
@@ -5114,7 +5117,9 @@ namespace EFM
                         __instance.GrabLaser.gameObject.SetActive(true);
                     }
                     bool flag3 = false;
+                    bool pointNonGrabbableDescribable = false;
                     FVRPhysicalObject fvrphysicalObject = null;
+                    EFM_Describable nonGrabbableDescribable = null;
                     if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out ___m_grabHit, 3f, __instance.GrabLaserMask, QueryTriggerInteraction.Collide))
                     {
                         if (___m_grabHit.collider.attachedRigidbody != null && ___m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<FVRPhysicalObject>())
@@ -5124,6 +5129,11 @@ namespace EFM
                             {
                                 flag3 = true;
                             }
+                        }
+                        else if (___m_grabHit.collider.GetComponent<EFM_Describable>() != null)
+                        {
+                            nonGrabbableDescribable = ___m_grabHit.collider.GetComponent<EFM_Describable>();
+                            pointNonGrabbableDescribable = true;
                         }
                         __instance.GrabLaser.localScale = new Vector3(0.004f, 0.004f, ___m_grabHit.distance) * d;
                     }
@@ -5201,6 +5211,67 @@ namespace EFM
                             {
                                 __instance.GrabLaser.gameObject.SetActive(false);
                             }
+                        }
+                    }
+                    else if (pointNonGrabbableDescribable)
+                    {
+                        // Display summary description of object if describable and if not already displayed
+                        if (nonGrabbableDescribable != null && Mod.rightDescriptionManager != null)
+                        {
+                            // Get the description currently on this hand
+                            EFM_DescriptionManager manager = null;
+                            if (__instance.IsThisTheRightHand)
+                            {
+                                manager = Mod.rightDescriptionManager;
+                            }
+                            else
+                            {
+                                manager = Mod.leftDescriptionManager;
+                            }
+
+                            // Get item and check if the one we are pointing at is already being described
+                            EFM_Describable describableToUse = null;
+                            if (manager.descriptionPack != null)
+                            {
+                                if (manager.descriptionPack.isPhysical)
+                                {
+                                    if (manager.descriptionPack.isCustom)
+                                    {
+                                        describableToUse = manager.descriptionPack.customItem;
+                                    }
+                                    else
+                                    {
+                                        describableToUse = manager.descriptionPack.vanillaItem;
+                                    }
+                                }
+                                else
+                                {
+                                    describableToUse = manager.descriptionPack.nonPhysDescribable;
+                                }
+
+                                // If not already displayed
+                                if (!nonGrabbableDescribable.Equals(describableToUse))
+                                {
+                                    // Update the display to the description of the new item we are pointing at
+                                    manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
+                                }
+                            }
+                            else
+                            {
+                                // Set description pack
+                                manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
+                            }
+
+                            manager.gameObject.SetActive(true);
+                        }
+
+                        if (!__instance.BlueLaser.activeSelf)
+                        {
+                            __instance.BlueLaser.SetActive(true);
+                        }
+                        if (__instance.RedLaser.activeSelf)
+                        {
+                            __instance.RedLaser.SetActive(false);
                         }
                     }
                     else
