@@ -198,6 +198,7 @@ namespace EFM
 
 			descriptionPack = new DescriptionPack();
 			descriptionPack.isCustom = true;
+			descriptionPack.isPhysical = true;
 			descriptionPack.customItem = this;
 			descriptionPack.name = itemName;
 			descriptionPack.description = description;
@@ -1669,5 +1670,10 @@ namespace EFM
 			// TODO: WE DONT CHECK FOR INSUREABILITY HERE FOR THIS OBJECT, BUT WE MUST FOR SUB OBJECTS WHEN WE IMPLEMENT THAT
 			// TODO: Maybe add all values of sub items attached to this one too but will have to adapt  market for it, for example, when we insure, we only ensure the root item not sub items
 		}
-	}
+
+        public void SetDescriptionManager(EFM_DescriptionManager descriptionManager)
+        {
+			this.descriptionManager = descriptionManager;
+        }
+    }
 }

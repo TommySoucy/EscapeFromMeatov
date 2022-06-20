@@ -158,44 +158,87 @@ namespace EFM
                 }
                 else
                 {
-                    if (this.descriptionPack.isCustom)
+                    if (this.descriptionPack.isPhysical)
                     {
-                        if (this.descriptionPack.customItem != null)
+                        if (this.descriptionPack.isCustom)
                         {
-                            this.descriptionPack = this.descriptionPack.customItem.GetDescriptionPack();
+                            if (this.descriptionPack.customItem != null)
+                            {
+                                this.descriptionPack = this.descriptionPack.customItem.GetDescriptionPack();
+                            }
+                        }
+                        else
+                        {
+                            if (this.descriptionPack.vanillaItem != null)
+                            {
+                                this.descriptionPack = this.descriptionPack.vanillaItem.GetDescriptionPack();
+                            }
                         }
                     }
                     else
                     {
-                        if (this.descriptionPack.vanillaItem != null)
-                        {
-                            this.descriptionPack = this.descriptionPack.vanillaItem.GetDescriptionPack();
-                        }
+                        this.descriptionPack = this.descriptionPack.nonPhysDescribable.GetDescriptionPack();
                     }
                 }
             }
             else
             {
                 this.descriptionPack = descriptionPack;
-                if (this.descriptionPack.isCustom)
+                if (this.descriptionPack.isPhysical)
                 {
-                    if (this.descriptionPack.customItem != null)
+                    if (this.descriptionPack.isCustom)
                     {
-                        this.descriptionPack.customItem.descriptionManager = this;
+                        if (this.descriptionPack.customItem != null)
+                        {
+                            this.descriptionPack.customItem.descriptionManager = this;
+                        }
+                    }
+                    else
+                    {
+                        if (this.descriptionPack.vanillaItem != null)
+                        {
+                            this.descriptionPack.vanillaItem.descriptionManager = this;
+                        }
                     }
                 }
                 else
                 {
-                    if (this.descriptionPack.vanillaItem != null)
-                    {
-                        this.descriptionPack.vanillaItem.descriptionManager = this;
-                    }
+                    this.descriptionPack.nonPhysDescribable.SetDescriptionManager(this);
+                }
+            }
+
+            // Set icons
+            if (this.descriptionPack.isPhysical)
+            {
+                summaryIcon.sprite = this.descriptionPack.icon; 
+                fullIcon.sprite = this.descriptionPack.icon;
+            }
+            else
+            {
+                if (Mod.itemIcons.ContainsKey(this.descriptionPack.ID))
+                {
+                    Sprite currentSprite = Mod.itemIcons[this.descriptionPack.ID];
+                    summaryIcon.sprite = currentSprite;
+                    fullIcon.sprite = currentSprite;
+                }
+                else
+                {
+                    AnvilManager.Run(Mod.SetVanillaIcon(this.descriptionPack.ID, summaryIcon));
+                    AnvilManager.Run(Mod.SetVanillaIcon(this.descriptionPack.ID, fullIcon));
                 }
             }
 
             // Summary
-            summaryIcon.sprite = this.descriptionPack.icon;
-            if (this.descriptionPack.isCustom)
+            if (!this.descriptionPack.isPhysical)
+            {
+                // TODO: Implement specific item types with specific details, like dogtags that need to have a level field
+                //if (this.descriptionPack.itemType == Mod.ItemType.DogTag)
+                //{
+                //    summaryAmountStackText.gameObject.SetActive(true);
+                //    summaryAmountStackText.text = this.descriptionPack.level.ToString();
+                //}
+            }
+            else if (this.descriptionPack.isCustom)
             {
                 if (this.descriptionPack.customItem.itemType == Mod.ItemType.Money)
                 {
@@ -274,8 +317,16 @@ namespace EFM
 
             // Full
             float descriptionHeight = 640; // Top and bottom padding (25+25) + Icon (300) + Icon spacing (20) + Needed for title (55) + Spacing (20) + Desc. title (55) + Spacing (20) + Name spacing (20) + Properties (55) + Spacing (20)
-            fullIcon.sprite = this.descriptionPack.icon;
-            if (this.descriptionPack.isCustom)
+            if (!this.descriptionPack.isPhysical)
+            {
+                // TODO: Implement specific item types with specific details, like dogtags that need to have a level field
+                //if (this.descriptionPack.itemType == Mod.ItemType.DogTag)
+                //{
+                //    summaryAmountStackText.gameObject.SetActive(true);
+                //    summaryAmountStackText.text = this.descriptionPack.level.ToString();
+                //}
+            }
+            else if (this.descriptionPack.isCustom)
             {
                 if (this.descriptionPack.customItem.itemType == Mod.ItemType.Money)
                 {
@@ -525,13 +576,20 @@ namespace EFM
         public void OnWishlistClick()
         {
             string itemID;
-            if (descriptionPack.isCustom)
+            if (descriptionPack.isPhysical)
             {
-                itemID = descriptionPack.customItem.ID;
+                if (descriptionPack.isCustom)
+                {
+                    itemID = descriptionPack.customItem.ID;
+                }
+                else
+                {
+                    itemID = descriptionPack.vanillaItem.H3ID;
+                }
             }
             else
             {
-                itemID = descriptionPack.vanillaItem.H3ID;
+                itemID = descriptionPack.ID;
             }
 
             if (descriptionPack.onWishlist)

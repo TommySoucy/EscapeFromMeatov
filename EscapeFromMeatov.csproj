@@ -81,6 +81,7 @@
     <Compile Include="EFM_GCManager.cs" />
     <Compile Include="EFM_Hand.cs" />
     <Compile Include="EFM_HoverScroll.cs" />
+    <Compile Include="EFM_ItemIcon.cs" />
     <Compile Include="EFM_LootContainer.cs" />
     <Compile Include="EFM_LootContainerCover.cs" />
     <Compile Include="EFM_LootContainerSlider.cs" />

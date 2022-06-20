@@ -675,6 +675,15 @@ namespace EFM
 
                             Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
                             currentItemIcon.gameObject.SetActive(true);
+
+                            // Setup ItemIcon
+                            EFM_ItemIcon itemIconScript = currentItemIcon.gameObject.AddComponent<EFM_ItemIcon>();
+                            itemIconScript.itemID = item.Key;
+                            itemIconScript.itemName = Mod.itemNames[item.Key];
+                            itemIconScript.description = Mod.itemDescriptions[item.Key];
+                            itemIconScript.weight = Mod.itemWeights[item.Key];
+                            itemIconScript.volume = Mod.itemVolumes[item.Key];
+
                             if (Mod.itemIcons.ContainsKey(item.Key))
                             {
                                 currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[item.Key];
@@ -2245,7 +2254,17 @@ namespace EFM
                     {
                         Transform currentItemIcon = sellItemShowcaseElements[itemID].transform;
                         EFM_MarketItemView marketItemView = currentItemIcon.GetComponent<EFM_MarketItemView>();
-                        int actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemValue : (int)Mathf.Max(itemValue * 0.008f, 1);
+                        int actualValue;
+                        if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
+                        {
+                            actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
+                        }
+                        else
+                        {
+                            // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
+                            actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
+                        }
+                        actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? actualValue : (int)Mathf.Max(actualValue * 0.008f, 1);
                         marketItemView.value = marketItemView.value + actualValue;
                         if (marketItemView.custom)
                         {
@@ -2305,6 +2324,17 @@ namespace EFM
                         // Write price to item icon and set correct currency icon
                         Sprite currencySprite = null;
                         string currencyItemID = "";
+                        int actualValue;
+                        if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
+                        {
+                            actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
+                        }
+                        else
+                        {
+                            // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
+                            actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
+                        }
+
                         if (Mod.traderStatuses[currentTraderIndex].currency == 0)
                         {
                             currencySprite = EFM_Base_Manager.roubleCurrencySprite;
@@ -2313,14 +2343,14 @@ namespace EFM
                         else if (Mod.traderStatuses[currentTraderIndex].currency == 1)
                         {
                             currencySprite = EFM_Base_Manager.dollarCurrencySprite;
-                            itemValue = (int)Mathf.Max(itemValue * 0.008f, 1); // Adjust item value
+                            actualValue = (int)Mathf.Max(actualValue * 0.008f, 1); // Adjust item value
                             currencyItemID = "201";
                         }
                         Mod.instance.LogInfo("0");
-                        marketItemView.value = itemValue;
-                        currentTotalSellingPrice += itemValue;
+                        marketItemView.value = actualValue;
+                        currentTotalSellingPrice += actualValue;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
-                        currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemValue.ToString();
+                        currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = actualValue.ToString();
 
                         Mod.instance.LogInfo("0");
                         // Set count text
@@ -2881,11 +2911,20 @@ namespace EFM
             cartItemCount = 1;
             prices = priceList;
             Mod.instance.LogInfo("on buy item click called, with ID: " + item.ID);
+            string itemName = Mod.itemNames[item.ID];
 
             Transform cartShowcase = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1);
-            cartShowcase.GetChild(0).GetComponent<Text>().text = Mod.itemNames[item.ID];
+            cartShowcase.GetChild(0).GetComponent<Text>().text = itemName;
             cartShowcase.GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = itemIcon;
             cartShowcase.GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "1";
+
+            // Setup ItemIcon
+            EFM_ItemIcon itemIconScript = cartShowcase.GetChild(1).gameObject.AddComponent<EFM_ItemIcon>();
+            itemIconScript.itemID = item.ID;
+            itemIconScript.itemName = itemName;
+            itemIconScript.description = Mod.itemDescriptions[item.ID];
+            itemIconScript.weight = Mod.itemWeights[item.ID];
+            itemIconScript.volume = Mod.itemVolumes[item.ID];
 
             Transform pricesParent = cartShowcase.GetChild(3).GetChild(0).GetChild(0);
             GameObject priceTemplate = pricesParent.GetChild(0).gameObject;
@@ -2920,8 +2959,17 @@ namespace EFM
                     AnvilManager.Run(Mod.SetVanillaIcon(price.Key, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
                 }
                 priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.Value.ToString();
-                priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = Mod.itemNames[price.Key];
+                string priceName = Mod.itemNames[price.Key];
+                priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = priceName;
                 buyPriceElements.Add(price.Key, priceElement.gameObject);
+
+                // Setup ItemIcon
+                EFM_ItemIcon priceIconScript = priceElement.gameObject.AddComponent<EFM_ItemIcon>();
+                priceIconScript.itemID = price.Key;
+                priceIconScript.itemName = priceName;
+                priceIconScript.description = Mod.itemDescriptions[price.Key];
+                priceIconScript.weight = Mod.itemWeights[price.Key];
+                priceIconScript.volume = Mod.itemVolumes[price.Key];
 
                 if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= price.Value)
                 {

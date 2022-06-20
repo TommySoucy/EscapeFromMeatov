@@ -9,10 +9,19 @@ namespace EFM
     public interface EFM_Describable
     {
         DescriptionPack GetDescriptionPack();
+
+        void SetDescriptionManager(EFM_DescriptionManager descriptionManager);
     }
 
     public class DescriptionPack
     {
+        public bool isPhysical;
+        public EFM_Describable nonPhysDescribable;
+        public string ID;
+        public Mod.ItemType itemType;
+        // Dogtag
+        public int level;
+
         public bool isCustom;
         public EFM_CustomItemWrapper customItem;
         public EFM_VanillaItemDescriptor vanillaItem;

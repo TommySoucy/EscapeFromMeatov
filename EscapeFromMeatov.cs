@@ -83,6 +83,7 @@ namespace EFM
         public static EFM_TraderStatus[] traderStatuses;
         public static EFM_CategoryTreeNode itemCategories;
         public static Dictionary<string, List<string>> itemAncestors;
+        public static Dictionary<string, int> lowestBuyValueByItem;
         public static bool amountChoiceUIUp;
         public static EFM_CustomItemWrapper splittingItem;
 
@@ -174,6 +175,9 @@ namespace EFM
         public static Material quickSlotConstantMaterial;
         public static List<GameObject> itemPrefabs;
         public static Dictionary<string, string> itemNames;
+        public static Dictionary<string, string> itemDescriptions;
+        public static Dictionary<string, float> itemWeights;
+        public static Dictionary<string, float> itemVolumes;
         public static GameObject doorLeftPrefab;
         public static GameObject doorRightPrefab;
         public static GameObject doorDoublePrefab;
@@ -653,6 +657,7 @@ namespace EFM
                 itemObjectWrapper.DisplayName = defaultObjectWrapper["DisplayName"].ToString();
                 itemObjectWrapper.Category = (FVRObject.ObjectCategory)((int)defaultObjectWrapper["Category"]);
                 itemObjectWrapper.Mass = itemPrefab.GetComponent<Rigidbody>().mass;
+                itemWeights.Add(i.ToString(), itemObjectWrapper.Mass);
                 itemObjectWrapper.MagazineCapacity = (int)defaultObjectWrapper["MagazineCapacity"];
                 itemObjectWrapper.RequiresPicatinnySight = (bool)defaultObjectWrapper["RequiresPicatinnySight"];
                 itemObjectWrapper.TagEra = (FVRObject.OTagEra)(int)defaultObjectWrapper["TagEra"];
@@ -676,6 +681,7 @@ namespace EFM
                 customItemWrapper.ID = i.ToString();
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 customItemWrapper.volumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
+                itemVolumes.Add(i.ToString(), customItemWrapper.volumes[0]);
                 customItemWrapper.parents = defaultItemsData["ItemDefaults"][i]["parents"] != null ? defaultItemsData["ItemDefaults"][i]["parents"].ToObject<List<String>>() : new List<string>();
                 if(itemAncestors == null)
                 {
@@ -684,6 +690,7 @@ namespace EFM
                 itemAncestors.Add(customItemWrapper.ID, customItemWrapper.parents);
                 customItemWrapper.itemName = itemObjectWrapper.DisplayName;
                 customItemWrapper.description = defaultItemsData["ItemDefaults"][i]["description"] != null ? defaultItemsData["ItemDefaults"][i]["description"].ToString() : "";
+                itemDescriptions.Add(i.ToString(), customItemWrapper.description);
                 customItemWrapper.lootExperience = (int)defaultItemsData["ItemDefaults"][i]["lootExperience"];
                 customItemWrapper.spawnChance = (float)defaultItemsData["ItemDefaults"][i]["spawnChance"];
                 customItemWrapper.rarity = ItemRarityStringToEnum(defaultItemsData["ItemDefaults"][i]["rarity"].ToString());
@@ -1244,9 +1251,11 @@ namespace EFM
                 string H3ID = vanillaItemRaw["H3ID"].ToString();
                 GameObject itemPrefab = IM.OD[H3ID].GetGameObject();
                 EFM_VanillaItemDescriptor descriptor = itemPrefab.AddComponent<EFM_VanillaItemDescriptor>();
+                itemWeights.Add(H3ID, itemPrefab.GetComponent<Rigidbody>().mass);
                 descriptor.H3ID = vanillaItemRaw["H3ID"].ToString();
                 descriptor.tarkovID = vanillaItemRaw["TarkovID"].ToString();
                 descriptor.description = vanillaItemRaw["Description"].ToString();
+                itemDescriptions.Add(H3ID, descriptor.description);
                 descriptor.lootExperience = (int)vanillaItemRaw["LootExperience"];
                 descriptor.rarity = ItemRarityStringToEnum(vanillaItemRaw["Rarity"].ToString());
                 if (itemsByRarity.ContainsKey(descriptor.rarity))
@@ -1278,6 +1287,7 @@ namespace EFM
                 FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
                 descriptor.itemName = physObj.ObjectWrapper.DisplayName;
                 itemNames.Add(H3ID, descriptor.itemName);
+                itemVolumes.Add(H3ID, sizeVolumes[(int)physObj.Size]);
                 if (physObj is FVRFireArm)
                 {
                     FVRFireArm asFireArm = physObj as FVRFireArm;
@@ -5005,13 +5015,20 @@ namespace EFM
                             EFM_Describable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
-                                if (manager.descriptionPack.isCustom)
+                                if (manager.descriptionPack.isPhysical)
                                 {
-                                    describableToUse = manager.descriptionPack.customItem;
+                                    if (manager.descriptionPack.isCustom)
+                                    {
+                                        describableToUse = manager.descriptionPack.customItem;
+                                    }
+                                    else
+                                    {
+                                        describableToUse = manager.descriptionPack.vanillaItem;
+                                    }
                                 }
                                 else
                                 {
-                                    describableToUse = manager.descriptionPack.vanillaItem;
+                                    describableToUse = manager.descriptionPack.nonPhysDescribable;
                                 }
 
                                 // If not already displayed
@@ -5137,13 +5154,20 @@ namespace EFM
                             EFM_Describable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
-                                if (manager.descriptionPack.isCustom)
+                                if (manager.descriptionPack.isPhysical)
                                 {
-                                    describableToUse = manager.descriptionPack.customItem;
+                                    if (manager.descriptionPack.isCustom)
+                                    {
+                                        describableToUse = manager.descriptionPack.customItem;
+                                    }
+                                    else
+                                    {
+                                        describableToUse = manager.descriptionPack.vanillaItem;
+                                    }
                                 }
                                 else
                                 {
-                                    describableToUse = manager.descriptionPack.vanillaItem;
+                                    describableToUse = manager.descriptionPack.nonPhysDescribable;
                                 }
 
                                 // If not already displayed

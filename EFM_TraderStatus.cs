@@ -300,20 +300,36 @@ namespace EFM
 
                         // Build entry's pricelist
                         Dictionary<string, int> currentPrices = new Dictionary<string, int>();
+                        bool onlyCurrency = true;
+                        int totalRoubles = 0;
                         foreach (JObject price in entry.Value["barter_scheme"][0])
                         {
                             string priceID = price["_tpl"].ToString();
                             if (Mod.itemMap.ContainsKey(priceID))
                             {
                                 string actualPriceID = Mod.itemMap[priceID];
+                                int priceCount = (int)price["count"];
                                 if (currentPrices.ContainsKey(actualPriceID))
                                 {
                                     Mod.instance.LogError("Assort entry: " + entry.Key + " has duplicate price ID: " + actualPriceID + ". There must be some other data specified we ignored that should be used to differenciate the prices (ex.: dogtag levels)");
-                                    currentPrices[actualPriceID] += (int)price["count"];
+                                    currentPrices[actualPriceID] += priceCount;
                                 }
                                 else
                                 {
-                                    currentPrices.Add(actualPriceID, (int)price["count"]);
+                                    currentPrices.Add(actualPriceID, priceCount);
+                                }
+
+                                if (actualPriceID.Equals("203"))
+                                {
+                                    totalRoubles += priceCount;
+                                }
+                                else if (actualPriceID.Equals("201"))
+                                {
+                                    totalRoubles += priceCount * 125;
+                                }
+                                else
+                                {
+                                    onlyCurrency = false;
                                 }
                             }
                             else
@@ -344,6 +360,25 @@ namespace EFM
                         if (!priceListFound)
                         {
                             currentAssort.itemsByID[actualParentItemID].prices.Add(currentPrices);
+
+                            if (onlyCurrency)
+                            {
+                                if(Mod.lowestBuyValueByItem == null)
+                                {
+                                    Mod.lowestBuyValueByItem = new Dictionary<string, int>();
+                                }
+                                if (Mod.lowestBuyValueByItem.ContainsKey(actualParentItemID))
+                                {
+                                    if(Mod.lowestBuyValueByItem[actualParentItemID] > totalRoubles)
+                                    {
+                                        Mod.lowestBuyValueByItem[actualParentItemID] = totalRoubles;
+                                    }
+                                }
+                                else
+                                {
+                                    Mod.lowestBuyValueByItem.Add(actualParentItemID, totalRoubles);
+                                }
+                            }
                         }
                     }
                     else
@@ -353,25 +388,60 @@ namespace EFM
                         item.prices = new List<Dictionary<string, int>>();
                         Dictionary<string, int> currentPrices = new Dictionary<string, int>();
                         item.prices.Add(currentPrices);
+                        bool onlyCurrency = true;
+                        int totalRoubles = 0;
                         foreach (JObject price in entry.Value["barter_scheme"][0])
                         {
                             string priceID = price["_tpl"].ToString();
                             if (Mod.itemMap.ContainsKey(priceID))
                             {
                                 string actualPriceID = Mod.itemMap[priceID];
+                                int priceCount = (int)price["count"];
                                 if (currentPrices.ContainsKey(actualPriceID))
                                 {
                                     Mod.instance.LogError("Assort entry: " + entry.Key + " has duplicate price ID: " + actualPriceID + ". There must be some other data specified we ignored that should be used to differenciate the prices (ex.: dogtag levels)");
-                                    currentPrices[actualPriceID] += (int)price["count"];
+                                    currentPrices[actualPriceID] += priceCount;
                                 }
                                 else
                                 {
-                                    currentPrices.Add(actualPriceID, (int)price["count"]);
+                                    currentPrices.Add(actualPriceID, priceCount);
+                                }
+
+                                if (actualPriceID.Equals("203"))
+                                {
+                                    totalRoubles += priceCount;
+                                }
+                                else if (actualPriceID.Equals("201"))
+                                {
+                                    totalRoubles += priceCount * 125;
+                                }
+                                else
+                                {
+                                    onlyCurrency = false;
                                 }
                             }
                             else
                             {
                                 Mod.instance.LogError("Assort entry: " + entry.Key + " has price ID: " + priceID + " missing from itemMap.");
+                            }
+                        }
+
+                        if (onlyCurrency)
+                        {
+                            if (Mod.lowestBuyValueByItem == null)
+                            {
+                                Mod.lowestBuyValueByItem = new Dictionary<string, int>();
+                            }
+                            if (Mod.lowestBuyValueByItem.ContainsKey(actualParentItemID))
+                            {
+                                if (Mod.lowestBuyValueByItem[actualParentItemID] > totalRoubles)
+                                {
+                                    Mod.lowestBuyValueByItem[actualParentItemID] = totalRoubles;
+                                }
+                            }
+                            else
+                            {
+                                Mod.lowestBuyValueByItem.Add(actualParentItemID, totalRoubles);
                             }
                         }
 
