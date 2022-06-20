@@ -1160,6 +1160,14 @@ namespace EFM
                     newFarmingView.transform.GetChild(1).GetChild(1).GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewRemoveOneClick(productionScript.ID); });
                     newFarmingView.transform.GetChild(1).GetChild(5).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnProductionGetItemsClick(productionScript.ID); });
 
+                    // Setup end product itemIcon
+                    EFM_ItemIcon currentItemIconScript = newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                    currentItemIconScript.itemID = productionScript.endProduct;
+                    currentItemIconScript.itemName = Mod.itemNames[productionScript.endProduct];
+                    currentItemIconScript.description = Mod.itemDescriptions[productionScript.endProduct];
+                    currentItemIconScript.weight = Mod.itemWeights[productionScript.endProduct];
+                    currentItemIconScript.volume = Mod.itemVolumes[productionScript.endProduct];
+
                     Mod.instance.LogInfo("2");
                     // Depending on save data
                     // If data about this production has been saved
@@ -1318,6 +1326,24 @@ namespace EFM
                         }
                         currentRequirement.count = (int)requirement["resource"];
 
+                        // Setup farm cost itemIcon
+                        string itemName = Mod.itemNames[currentRequirement.ID];
+                        string itemDescription = Mod.itemDescriptions[currentRequirement.ID];
+                        float itemWeight = Mod.itemWeights[currentRequirement.ID];
+                        float itemVolume = Mod.itemVolumes[currentRequirement.ID];
+                        EFM_ItemIcon costItemIconScript = newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                        costItemIconScript.itemID = currentRequirement.ID;
+                        costItemIconScript.itemName = itemName;
+                        costItemIconScript.description = itemDescription;
+                        costItemIconScript.weight = itemWeight;
+                        costItemIconScript.volume = itemVolume;
+                        EFM_ItemIcon costInstalledItemIconScript = newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                        costInstalledItemIconScript.itemID = currentRequirement.ID;
+                        costInstalledItemIconScript.itemName = itemName;
+                        costInstalledItemIconScript.description = itemDescription;
+                        costInstalledItemIconScript.weight = itemWeight;
+                        costInstalledItemIconScript.volume = itemVolume;
+
                         Mod.instance.LogInfo("3");
                         productionScript.requirements.Add(currentRequirement);
 
@@ -1383,6 +1409,24 @@ namespace EFM
                             {
                                 farmingViewByItemID.Add(currentRequirement.ID, new List<Transform>() { newFarmingView.transform });
                             }
+
+                            // Setup farm cost itemIcon
+                            string itemName = Mod.itemNames[currentRequirement.ID];
+                            string itemDescription = Mod.itemDescriptions[currentRequirement.ID];
+                            float itemWeight = Mod.itemWeights[currentRequirement.ID];
+                            float itemVolume = Mod.itemVolumes[currentRequirement.ID];
+                            EFM_ItemIcon costItemIconScript = newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                            costItemIconScript.itemID = currentRequirement.ID;
+                            costItemIconScript.itemName = itemName;
+                            costItemIconScript.description = itemDescription;
+                            costItemIconScript.weight = itemWeight;
+                            costItemIconScript.volume = itemVolume;
+                            EFM_ItemIcon costInstalledItemIconScript = newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                            costInstalledItemIconScript.itemID = currentRequirement.ID;
+                            costInstalledItemIconScript.itemName = itemName;
+                            costInstalledItemIconScript.description = itemDescription;
+                            costInstalledItemIconScript.weight = itemWeight;
+                            costInstalledItemIconScript.volume = itemVolume;
                         }
                         else
                         {
@@ -1414,6 +1458,14 @@ namespace EFM
                             {
                                 produceViewByItemID.Add(currentRequirement.ID, new List<Transform>() { newProduceView.transform });
                             }
+
+                            // Setup production cost itemIcon
+                            EFM_ItemIcon costItemIconScript = newRequirement.transform.GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                            costItemIconScript.itemID = currentRequirement.ID;
+                            costItemIconScript.itemName = Mod.itemNames[currentRequirement.ID];
+                            costItemIconScript.description = Mod.itemDescriptions[currentRequirement.ID];
+                            costItemIconScript.weight = Mod.itemWeights[currentRequirement.ID];
+                            costItemIconScript.volume = Mod.itemVolumes[currentRequirement.ID];
                         }
                     }
                 }
@@ -1650,6 +1702,14 @@ namespace EFM
                                     AnvilManager.Run(Mod.SetVanillaIcon(actualID, itemRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>()));
                                 }
                                 Mod.instance.LogInfo("\t\t0");
+
+                                // Setup item req itemIcon
+                                EFM_ItemIcon reqItemIconScript = itemRequirement.transform.GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                                reqItemIconScript.itemID = actualID;
+                                reqItemIconScript.itemName = Mod.itemNames[actualID];
+                                reqItemIconScript.description = Mod.itemDescriptions[actualID];
+                                reqItemIconScript.weight = Mod.itemWeights[actualID];
+                                reqItemIconScript.volume = Mod.itemVolumes[actualID];
 
                                 int itemAmountInInventory = 0;
                                 Mod.instance.LogInfo("\t\t base manager null?: "+(baseManager == null));
