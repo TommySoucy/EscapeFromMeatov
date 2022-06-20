@@ -1194,6 +1194,14 @@ namespace EFM
                                         currentInitEquipItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                     }
                                     currentInitEquipItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+
+                                    // Setup ItemIcon
+                                    EFM_ItemIcon itemIconScript = currentInitEquipItemElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                                    itemIconScript.itemID = reward.itemID;
+                                    itemIconScript.itemName = Mod.itemNames[reward.itemID];
+                                    itemIconScript.description = Mod.itemDescriptions[reward.itemID];
+                                    itemIconScript.weight = Mod.itemWeights[reward.itemID];
+                                    itemIconScript.volume = Mod.itemVolumes[reward.itemID];
                                     break;
                                 case TraderTaskReward.TaskRewardType.TraderUnlock:
                                     GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
@@ -1224,6 +1232,14 @@ namespace EFM
                                     }
                                     currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                     currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+
+                                    // Setup ItemIcon
+                                    EFM_ItemIcon assortIconScript = currentInitEquipAssortElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                                    assortIconScript.itemID = reward.itemID;
+                                    assortIconScript.itemName = Mod.itemNames[reward.itemID];
+                                    assortIconScript.description = Mod.itemDescriptions[reward.itemID];
+                                    assortIconScript.weight = Mod.itemWeights[reward.itemID];
+                                    assortIconScript.volume = Mod.itemVolumes[reward.itemID];
                                     break;
                                 default:
                                     break;
@@ -1266,6 +1282,14 @@ namespace EFM
                                     currentRewardItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                 }
                                 currentRewardItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+
+                                // Setup ItemIcon
+                                EFM_ItemIcon itemIconScript = currentRewardItemElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                                itemIconScript.itemID = reward.itemID;
+                                itemIconScript.itemName = Mod.itemNames[reward.itemID];
+                                itemIconScript.description = Mod.itemDescriptions[reward.itemID];
+                                itemIconScript.weight = Mod.itemWeights[reward.itemID];
+                                itemIconScript.volume = Mod.itemVolumes[reward.itemID];
                                 break;
                             case TraderTaskReward.TaskRewardType.TraderUnlock:
                                 GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
@@ -1300,6 +1324,14 @@ namespace EFM
                                 }
                                 currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                                 currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+
+                                // Setup ItemIcon
+                                EFM_ItemIcon assortIconScript = currentRewardAssortElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                                assortIconScript.itemID = reward.itemID;
+                                assortIconScript.itemName = Mod.itemNames[reward.itemID];
+                                assortIconScript.description = Mod.itemDescriptions[reward.itemID];
+                                assortIconScript.weight = Mod.itemWeights[reward.itemID];
+                                assortIconScript.volume = Mod.itemVolumes[reward.itemID];
                                 break;
                             default:
                                 break;
@@ -3832,6 +3864,14 @@ namespace EFM
                                 currentInitEquipItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                             }
                             currentInitEquipItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+
+                            // Setup ItemIcon
+                            EFM_ItemIcon itemIconScript = currentInitEquipItemElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                            itemIconScript.itemID = reward.itemID;
+                            itemIconScript.itemName = Mod.itemNames[reward.itemID];
+                            itemIconScript.description = Mod.itemDescriptions[reward.itemID];
+                            itemIconScript.weight = Mod.itemWeights[reward.itemID];
+                            itemIconScript.volume = Mod.itemVolumes[reward.itemID];
                             break;
                         case TraderTaskReward.TaskRewardType.TraderUnlock:
                             GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
@@ -3866,6 +3906,14 @@ namespace EFM
                             }
                             currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                             currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+
+                            // Setup ItemIcon
+                            EFM_ItemIcon assortIconScript = currentInitEquipAssortElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                            assortIconScript.itemID = reward.itemID;
+                            assortIconScript.itemName = Mod.itemNames[reward.itemID];
+                            assortIconScript.description = Mod.itemDescriptions[reward.itemID];
+                            assortIconScript.weight = Mod.itemWeights[reward.itemID];
+                            assortIconScript.volume = Mod.itemVolumes[reward.itemID];
                             break;
                         default:
                             break;
@@ -3908,6 +3956,14 @@ namespace EFM
                             currentRewardItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                         }
                         currentRewardItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+
+                        // Setup ItemIcon
+                        EFM_ItemIcon itemIconScript = currentRewardItemElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                        itemIconScript.itemID = reward.itemID;
+                        itemIconScript.itemName = Mod.itemNames[reward.itemID];
+                        itemIconScript.description = Mod.itemDescriptions[reward.itemID];
+                        itemIconScript.weight = Mod.itemWeights[reward.itemID];
+                        itemIconScript.volume = Mod.itemVolumes[reward.itemID];
                         break;
                     case TraderTaskReward.TaskRewardType.TraderUnlock:
                         GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
@@ -3942,6 +3998,14 @@ namespace EFM
                         }
                         currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                         currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemID];
+
+                        // Setup ItemIcon
+                        EFM_ItemIcon assortIconScript = currentRewardAssortElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                        assortIconScript.itemID = reward.itemID;
+                        assortIconScript.itemName = Mod.itemNames[reward.itemID];
+                        assortIconScript.description = Mod.itemDescriptions[reward.itemID];
+                        assortIconScript.weight = Mod.itemWeights[reward.itemID];
+                        assortIconScript.volume = Mod.itemVolumes[reward.itemID];
                         break;
                     default:
                         break;
