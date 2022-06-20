@@ -898,6 +898,15 @@ namespace EFM
                     }
                     currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.value.ToString();
                     currentTotalSellingPrice += actualValue;
+
+                    // Setup itemIcon
+                    EFM_ItemIcon currentItemIconScript = currentItemIcon.GetComponent<EFM_ItemIcon>();
+                    currentItemIconScript.isPhysical = false;
+                    currentItemIconScript.itemID = itemID;
+                    currentItemIconScript.itemName = Mod.itemNames[itemID];
+                    currentItemIconScript.description = Mod.itemDescriptions[itemID];
+                    currentItemIconScript.weight = Mod.itemWeights[itemID];
+                    currentItemIconScript.volume = Mod.itemVolumes[itemID];
                 }
                 else
                 {
@@ -916,6 +925,14 @@ namespace EFM
                     }
 
                     Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
+
+                    // Setup itemIcon
+                    EFM_ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<EFM_ItemIcon>();
+                    currentItemIconScript.isPhysical = true;
+                    currentItemIconScript.isCustom = custom;
+                    currentItemIconScript.CIW = CIW;
+                    currentItemIconScript.VID = VID;
+
                     currentItemIcon.gameObject.SetActive(true);
                     sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
                     if (Mod.itemIcons.ContainsKey(itemID))
@@ -972,15 +989,29 @@ namespace EFM
             }
             Mod.instance.LogInfo("0");
             // Setup selling price display
+            string sellPriceItemID = "203";
+            string sellPriceItemName = "Rouble";
             if (trader.currency == 0)
             {
-                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames["203"];
+                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = sellPriceItemName;
                 traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons["203"];
             }
             else if (trader.currency == 1)
             {
-                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames["201"];
+                sellPriceItemID = "201";
+                sellPriceItemName = Mod.itemNames["201"];
+                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = sellPriceItemName;
                 traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons["201"];
+            }
+            EFM_ItemIcon traderSellPriceItemIcon = traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<EFM_ItemIcon>();
+            if (traderSellPriceItemIcon == null)
+            {
+                traderSellPriceItemIcon = traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                traderSellPriceItemIcon.itemID = sellPriceItemID;
+                traderSellPriceItemIcon.itemName = sellPriceItemName;
+                traderSellPriceItemIcon.description = Mod.itemDescriptions[sellPriceItemID];
+                traderSellPriceItemIcon.weight = Mod.itemWeights[sellPriceItemID];
+                traderSellPriceItemIcon.volume = Mod.itemVolumes[sellPriceItemID];
             }
             Mod.instance.LogInfo("0");
             traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = totalSellingPrice.ToString();
@@ -2278,6 +2309,15 @@ namespace EFM
                         }
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.value.ToString();
                         currentTotalSellingPrice += actualValue;
+
+                        // Setup itemIcon
+                        EFM_ItemIcon currentItemIconScript = currentItemIcon.GetComponent<EFM_ItemIcon>();
+                        currentItemIconScript.isPhysical = false;
+                        currentItemIconScript.itemID = itemID;
+                        currentItemIconScript.itemName = Mod.itemNames[itemID];
+                        currentItemIconScript.description = Mod.itemDescriptions[itemID];
+                        currentItemIconScript.weight = Mod.itemWeights[itemID];
+                        currentItemIconScript.volume = Mod.itemVolumes[itemID];
                     }
                     else
                     {
@@ -2303,6 +2343,14 @@ namespace EFM
                         Mod.instance.LogInfo("0");
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
+
+                        // Setup itemIcon
+                        EFM_ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<EFM_ItemIcon>();
+                        currentItemIconScript.isPhysical = true;
+                        currentItemIconScript.isCustom = custom;
+                        currentItemIconScript.CIW = CIW;
+                        currentItemIconScript.VID = VID;
+
                         currentItemIcon.gameObject.SetActive(true);
                         Mod.instance.LogInfo("0");
                         sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
@@ -2699,20 +2747,33 @@ namespace EFM
                     int actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemValue : (int)Mathf.Max(itemValue * 0.008f, 1);
                     marketItemView.value = marketItemView.value -= actualValue;
                     bool shouldRemove = false;
+                    bool lastOne = false;
                     if (marketItemView.custom)
                     {
                         marketItemView.CIW.Remove(CIW);
                         currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
                         shouldRemove = marketItemView.CIW.Count == 0;
+                        lastOne = marketItemView.CIW.Count == 1;
                     }
                     else
                     {
                         marketItemView.VID.Remove(VID);
                         currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
                         shouldRemove = marketItemView.VID.Count == 0;
+                        lastOne = marketItemView.VID.Count == 1;
                     }
                     currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.value.ToString();
                     currentTotalSellingPrice -= actualValue;
+
+                    // Setup itemIcon
+                    if (lastOne)
+                    {
+                        EFM_ItemIcon currentItemIconScript = currentItemIcon.GetComponent<EFM_ItemIcon>();
+                        currentItemIconScript.isPhysical = true;
+                        currentItemIconScript.isCustom = custom;
+                        currentItemIconScript.CIW = CIW;
+                        currentItemIconScript.VID = VID;
+                    }
 
                     // Remove item if necessary and move all other item icons that come after
                     if (shouldRemove)
