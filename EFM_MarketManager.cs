@@ -377,6 +377,7 @@ namespace EFM
             {
                 GameObject wishlistItemView = Instantiate(wishlistItemViewTemplate, wishlistParent);
                 wishlistItemView.SetActive(true);
+                string wishlistItemName = Mod.itemNames[wishlistItemID];
                 if (Mod.itemIcons.ContainsKey(wishlistItemID))
                 {
                     wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[wishlistItemID];
@@ -385,10 +386,19 @@ namespace EFM
                 {
                     AnvilManager.Run(Mod.SetVanillaIcon(wishlistItemID, wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
                 }
-                wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[wishlistItemID];
+                wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = wishlistItemName;
 
                 wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(wishlistItemView, wishlistItemID); });
                 wishListItemViewsByID.Add(wishlistItemID, wishlistItemView);
+
+                // Setup itemIcon
+                EFM_ItemIcon currentItemIconScript = wishlistItemView.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                currentItemIconScript.isPhysical = false;
+                currentItemIconScript.itemID = wishlistItemID;
+                currentItemIconScript.itemName = wishlistItemName;
+                currentItemIconScript.description = Mod.itemDescriptions[wishlistItemID];
+                currentItemIconScript.weight = Mod.itemWeights[wishlistItemID];
+                currentItemIconScript.volume = Mod.itemVolumes[wishlistItemID];
             }
 
             // Setup wishlist hoverscrolls
@@ -4204,6 +4214,7 @@ namespace EFM
                                 GameObject itemElement = Instantiate(itemTemplate, listParent);
                                 itemElement.SetActive(true);
                                 Sprite itemIcon = null;
+                                string itemName = Mod.itemNames[itemID];
                                 if (Mod.itemIcons.ContainsKey(itemID))
                                 {
                                     itemIcon = Mod.itemIcons[itemID];
@@ -4215,7 +4226,7 @@ namespace EFM
                                 }
                                 itemElement.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemBuyClick(traderIndex, assortItems[traderIndex], priceList, itemIcon); });
                                 itemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = assortItems[traderIndex].stack.ToString();
-                                itemElement.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[itemID];
+                                itemElement.transform.GetChild(1).GetComponent<Text>().text = itemName;
                                 itemElement.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemWishClick(itemID); });
 
                                 // Set price icon and label
@@ -4269,6 +4280,15 @@ namespace EFM
                                 }
                                 itemElement.transform.GetChild(0).GetChild(2).GetChild(0).GetComponent<Image>().sprite = priceLabelSprite;
                                 itemElement.transform.GetChild(0).GetChild(2).GetChild(1).GetComponent<Text>().text = totalPriceCount.ToString();
+
+                                // Setup itemIcon
+                                EFM_ItemIcon currentItemIconScript = itemElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                                currentItemIconScript.isPhysical = false;
+                                currentItemIconScript.itemID = itemID;
+                                currentItemIconScript.itemName = itemName;
+                                currentItemIconScript.description = Mod.itemDescriptions[itemID];
+                                currentItemIconScript.weight = Mod.itemWeights[itemID];
+                                currentItemIconScript.volume = Mod.itemVolumes[itemID];
 
                                 if (ragFairItemBuyViewsByID.ContainsKey(itemID))
                                 {
@@ -4417,6 +4437,7 @@ namespace EFM
                         GameObject itemElement = Instantiate(itemTemplate, listParent);
                         itemElement.SetActive(true);
                         Sprite itemIcon = null;
+                        string itemName = Mod.itemNames[ID];
                         if (Mod.itemIcons.ContainsKey(ID))
                         {
                             itemIcon = Mod.itemIcons[ID];
@@ -4427,7 +4448,7 @@ namespace EFM
                             AnvilManager.Run(Mod.SetVanillaIcon(ID, itemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
                         }
                         itemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = assortItems[i].stack.ToString();
-                        itemElement.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[ID];
+                        itemElement.transform.GetChild(1).GetComponent<Text>().text = itemName;
                         itemElement.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemBuyClick(traderIndex, assortItems[traderIndex], priceList, itemIcon); });
                         itemElement.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() => { OnRagFairBuyItemWishClick(ID); });
 
@@ -4439,6 +4460,15 @@ namespace EFM
                         {
                             ragFairItemBuyViewsByID.Add(ID, new List<GameObject>() { itemElement });
                         }
+
+                        // Setup itemIcon
+                        EFM_ItemIcon currentItemIconScript = itemElement.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                        currentItemIconScript.isPhysical = false;
+                        currentItemIconScript.itemID = ID;
+                        currentItemIconScript.itemName = itemName;
+                        currentItemIconScript.description = Mod.itemDescriptions[ID];
+                        currentItemIconScript.weight = Mod.itemWeights[ID];
+                        currentItemIconScript.volume = Mod.itemVolumes[ID];
                     }
                 }
             }
@@ -4685,6 +4715,7 @@ namespace EFM
             // Update wishlist hover scrolls
             UpdateRagFairWishlistHoverscrolls();
 
+            string itemName = Mod.itemNames[ID];
             if (Mod.itemIcons.ContainsKey(ID))
             {
                 wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[ID];
@@ -4693,9 +4724,18 @@ namespace EFM
             {
                 AnvilManager.Run(Mod.SetVanillaIcon(ID, wishlistItemView.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
             }
-            wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = Mod.itemNames[ID];
+            wishlistItemView.transform.GetChild(1).GetComponent<Text>().text = itemName;
 
             wishlistItemView.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnRagFairWishlistItemWishClick(wishlistItemView, ID); });
+
+            // Setup itemIcon
+            EFM_ItemIcon currentItemIconScript = wishlistItemView.transform.GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+            currentItemIconScript.isPhysical = false;
+            currentItemIconScript.itemID = ID;
+            currentItemIconScript.itemName = itemName;
+            currentItemIconScript.description = Mod.itemDescriptions[ID];
+            currentItemIconScript.weight = Mod.itemWeights[ID];
+            currentItemIconScript.volume = Mod.itemVolumes[ID];
 
             wishListItemViewsByID.Add(ID, wishlistItemView);
 
