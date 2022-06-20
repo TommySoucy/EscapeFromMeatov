@@ -1991,6 +1991,15 @@ namespace EFM
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
                         Mod.instance.LogInfo("2");
                         currentTotalInsurePrice += actualInsureValue;
+
+                        // Setup itemIcon
+                        EFM_ItemIcon currentItemIconScript = currentItemIcon.GetComponent<EFM_ItemIcon>();
+                        currentItemIconScript.isPhysical = false;
+                        currentItemIconScript.itemID = itemID;
+                        currentItemIconScript.itemName = Mod.itemNames[itemID];
+                        currentItemIconScript.description = Mod.itemDescriptions[itemID];
+                        currentItemIconScript.weight = Mod.itemWeights[itemID];
+                        currentItemIconScript.volume = Mod.itemVolumes[itemID];
                     }
                     else
                     {
@@ -2011,6 +2020,14 @@ namespace EFM
                         Mod.instance.LogInfo("5");
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
+
+                        // Setup itemIcon
+                        EFM_ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<EFM_ItemIcon>();
+                        currentItemIconScript.isPhysical = true;
+                        currentItemIconScript.isCustom = custom;
+                        currentItemIconScript.CIW = CIW;
+                        currentItemIconScript.VID = VID;
+
                         currentItemIcon.gameObject.SetActive(true);
                         Mod.instance.LogInfo("5");
                         insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
@@ -2067,6 +2084,8 @@ namespace EFM
                 }
                 // Setup insure price display
                 Mod.instance.LogInfo("1");
+                string insurePriceItemID = "203";
+                string insurePriceItemName = "Rouble";
                 if (trader.currency == 0)
                 {
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames["203"];
@@ -2074,8 +2093,20 @@ namespace EFM
                 }
                 else if (trader.currency == 1)
                 {
+                    insurePriceItemID = "201";
+                    insurePriceItemName = Mod.itemNames["201"];
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames["201"];
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons["201"];
+                }
+                EFM_ItemIcon traderInsurePriceItemIcon = traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<EFM_ItemIcon>();
+                if (traderInsurePriceItemIcon == null)
+                {
+                    traderInsurePriceItemIcon = traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                    traderInsurePriceItemIcon.itemID = insurePriceItemID;
+                    traderInsurePriceItemIcon.itemName = insurePriceItemName;
+                    traderInsurePriceItemIcon.description = Mod.itemDescriptions[insurePriceItemID];
+                    traderInsurePriceItemIcon.weight = Mod.itemWeights[insurePriceItemID];
+                    traderInsurePriceItemIcon.volume = Mod.itemVolumes[insurePriceItemID];
                 }
                 Mod.instance.LogInfo("1");
                 traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = totalInsurePrice.ToString();
@@ -2524,6 +2555,15 @@ namespace EFM
                         }
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
                         currentTotalInsurePrice += actualInsureValue;
+
+                        // Setup itemIcon
+                        EFM_ItemIcon currentItemIconScript = currentItemIcon.GetComponent<EFM_ItemIcon>();
+                        currentItemIconScript.isPhysical = false;
+                        currentItemIconScript.itemID = itemID;
+                        currentItemIconScript.itemName = Mod.itemNames[itemID];
+                        currentItemIconScript.description = Mod.itemDescriptions[itemID];
+                        currentItemIconScript.weight = Mod.itemWeights[itemID];
+                        currentItemIconScript.volume = Mod.itemVolumes[itemID];
                     }
                     else
                     {
@@ -2549,6 +2589,14 @@ namespace EFM
                         Mod.instance.LogInfo("0");
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
+
+                        // Setup itemIcon
+                        EFM_ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<EFM_ItemIcon>();
+                        currentItemIconScript.isPhysical = true;
+                        currentItemIconScript.isCustom = custom;
+                        currentItemIconScript.CIW = CIW;
+                        currentItemIconScript.VID = VID;
+
                         currentItemIcon.gameObject.SetActive(true);
                         Mod.instance.LogInfo("0");
                         insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
@@ -2889,20 +2937,33 @@ namespace EFM
                     int actualInsureValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemInsureValue : (int)Mathf.Max(itemInsureValue * 0.008f, 1);
                     marketItemView.insureValue = marketItemView.insureValue -= actualInsureValue;
                     bool shouldRemove = false;
+                    bool lastOne = false;
                     if (marketItemView.custom)
                     {
                         marketItemView.CIW.Remove(CIW);
                         currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
                         shouldRemove = marketItemView.CIW.Count == 0;
+                        lastOne = marketItemView.CIW.Count == 1;
                     }
                     else
                     {
                         marketItemView.VID.Remove(VID);
                         currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
                         shouldRemove = marketItemView.VID.Count == 0;
+                        lastOne = marketItemView.VID.Count == 1;
                     }
                     currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
                     currentTotalInsurePrice -= actualInsureValue;
+
+                    // Setup itemIcon
+                    if (lastOne)
+                    {
+                        EFM_ItemIcon currentItemIconScript = currentItemIcon.GetComponent<EFM_ItemIcon>();
+                        currentItemIconScript.isPhysical = true;
+                        currentItemIconScript.isCustom = custom;
+                        currentItemIconScript.CIW = CIW;
+                        currentItemIconScript.VID = VID;
+                    }
 
                     // Remove item if necessary and move all other item icons that come after
                     if (shouldRemove)
