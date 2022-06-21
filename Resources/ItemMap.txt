@@ -132,7 +132,7 @@
 59faf7ca86f7740dbe19f6c2:125
 5d235a5986f77443f6329bc6:126
 59e3647686f774176a362507:127
-5bc9c1e2d4351e00367fbcf0:128
+
 60b0f6c058e0b0481a09ad11:129
 59fafd4b86f7745ca07e1232:130
 590a3cd386f77436f20848cb:131
@@ -1043,7 +1043,6 @@
 5fc0f9cbd6fa9c00c571bb90:ForegripRKO
 
 59d790f486f77403cb06aec6:TacticalFlashlight
-57d17c5e2459775a5c57d17d:SureglowLight
 
 61605d88ffa6e502ac5e7eeb:LAMMK23
 5c5952732e2216398b5abda2:Perst3Laser
@@ -1117,7 +1116,6 @@
 57dc324a24597759501edc20:MuzzleBrakeCharon
 5943ee5a86f77413872d25ec:MuzzleBrakeOrbit
 5a7c147ce899ef00150bd8b8:MuzzleBrakeBomber
-5a9fb739a2750c003215717f:MuzzleBrakeCobra
 5998598e86f7740b3f498a86:MuzzleBrakeImpact
 5943eeeb86f77412d6384f6b:MuzzleBrakeTriad
 5888996c24597754281f9419:CompensatorCutts
@@ -1195,7 +1193,7 @@
 58aeac1b86f77457c419f475:MaximSilencerLargeA
 57838c962459774a1651ec63:MaximSilencerSmallB
 5a0d63621526d8dba31fe3bf:SuppressorG19
-5abcc328d8ce8700194394f3:SuppressorTriad
+56e05b06d2720bb2668b4586:SuppressorTriad
 564caa3d4bdc2d17108b458e:SuppressorSalvo
 57c44dd02459772d2e0ae249:MaximSilencerMediumB
 57f3c8cc2459773ec4480328:SuppressorBoxy

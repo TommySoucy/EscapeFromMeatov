@@ -59993,6 +59993,23 @@
       ]
     },
     {
+      "H3ID": "UtilityFlashlight",
+      "TarkovID": "57d17c5e2459775a5c57d17d",
+      "Description": "The Flashlight is a utility item for lighting up dark areas. The flashlight can be held by the player in their hand, or it can be used in a quickbelt slot to light the way ahead.",
+      "LootExperience": 20,
+      "Rarity": "Rare",
+      "SpawnChance": 3,
+      "CreditCost": 6049,
+      "ContainerProperties": {},
+      "parents": [
+        "55818b084bdc2d5b648b4571",
+        "550aa4154bdc2dd8348b456b",
+        "5448fe124bdc2da5018b4567",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
       "H3ID": "LAMMK23",
       "TarkovID": "61605d88ffa6e502ac5e7eeb",
       "Description": "LAM attachment that is a combination of laser & flashlight.",
@@ -60779,6 +60796,24 @@
       "Rarity": "Rare",
       "SpawnChance": 3,
       "CreditCost": 42714,
+      "ContainerProperties": {},
+      "parents": [
+        "550aa4cd4bdc2dd8348b456c",
+        "5448fe394bdc2d0d028b456c",
+        "550aa4154bdc2dd8348b456b",
+        "5448fe124bdc2da5018b4567",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "H3ID": "SuppressorOilFilter",
+      "TarkovID": "5a9fb739a2750c003215717f",
+      "Description": "Suppressors (sometimes called Silencers) reduce the sound a firearm makes.",
+      "LootExperience": 30,
+      "Rarity": "Rare",
+      "SpawnChance": 3,
+      "CreditCost": 29350,
       "ContainerProperties": {},
       "parents": [
         "550aa4cd4bdc2dd8348b456c",

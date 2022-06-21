@@ -58,21 +58,7 @@
           "dynamicLocale": false
         }
       ],
-      "AvailableForStart": [
-        {
-          "_parent": "Level",
-          "_props": {
-            "compareMethod": ">=",
-            "dynamicLocale": false,
-            "id": "5981a09b86f77455537a65ac",
-            "index": 0,
-            "parentId": "",
-            "value": 1,
-            "visibilityConditions": []
-          },
-          "dynamicLocale": false
-        }
-      ],
+      "AvailableForStart": [],
       "Fail": []
     },
     "description": "5936d90786f7742b1420ba5b description",
@@ -28405,7 +28391,7 @@
                     "value": "1",
                     "weapon": ["5aafa857e5b5b00018480968"],
                     "weaponModsInclusive": [
-                      ["59bffbb386f77435b379b9c2", "5a1eaa87fcdbcb001865f75e"]
+                      ["59bffbb386f77435b379b9c2", "5aa66be6e5b5b0214e506e97"]
                     ]
                   }
                 }
