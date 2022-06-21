@@ -2535,6 +2535,7 @@ namespace EFM
                         {
                             GameObject toCheck = objectList[objectList.Count - 1];
                             EFM_CustomItemWrapper CIW = toCheck.GetComponent<EFM_CustomItemWrapper>();
+                            EFM_VanillaItemDescriptor VID = toCheck.GetComponent<EFM_VanillaItemDescriptor>();
                             if (CIW != null)
                             {
                                 if(CIW.stack > 0)
@@ -2542,6 +2543,7 @@ namespace EFM
                                     if(CIW.stack > amountToRemoveFromBase)
                                     {
                                         CIW.stack = CIW.stack - amountToRemoveFromBase;
+                                        j = 0;
                                     }
                                     else // CIW.stack <= amountToRemoveFromBase
                                     {
@@ -2597,8 +2599,8 @@ namespace EFM
                             {
                                 --j;
                                 objectList.RemoveAt(objectList.Count - 1);
-                                CIW.physObj.SetQuickBeltSlot(null);
-                                CIW.destroyed = true;
+                                VID.physObj.SetQuickBeltSlot(null);
+                                VID.destroyed = true;
                                 Destroy(toCheck);
                             }
                         }
@@ -2619,12 +2621,14 @@ namespace EFM
                                     if (CIW.stack > amountToRemoveFromPlayer)
                                     {
                                         CIW.stack = CIW.stack - amountToRemoveFromPlayer;
+                                        j = 0;
                                     }
                                     else // CIW.stack <= amountToRemoveFromBase
                                     {
                                         j -= CIW.stack;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
+                                        CIW.physObj.ForceBreakInteraction();
                                         CIW.destroyed = true;
                                         Destroy(toCheck);
                                         Mod.weight -= CIW.currentWeight;
@@ -2647,6 +2651,7 @@ namespace EFM
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
+                                        CIW.physObj.ForceBreakInteraction();
                                         CIW.destroyed = true;
                                         Destroy(toCheck);
                                         Mod.weight -= CIW.currentWeight;
@@ -2659,6 +2664,7 @@ namespace EFM
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
+                                        CIW.physObj.ForceBreakInteraction();
                                         CIW.destroyed = true;
                                         Destroy(toCheck);
                                         Mod.weight -= CIW.currentWeight;
@@ -2669,6 +2675,7 @@ namespace EFM
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
+                                    CIW.physObj.ForceBreakInteraction();
                                     CIW.destroyed = true;
                                     Destroy(toCheck);
                                     Mod.weight -= CIW.currentWeight;
@@ -2679,6 +2686,7 @@ namespace EFM
                                 --j;
                                 objectList.RemoveAt(objectList.Count - 1);
                                 VID.physObj.SetQuickBeltSlot(null);
+                                VID.physObj.ForceBreakInteraction();
                                 VID.destroyed = true;
                                 Destroy(toCheck);
                                 Mod.weight -= VID.currentWeight;
@@ -4140,6 +4148,7 @@ namespace EFM
 
         public void UpdateBasedOnItem(string itemID, bool amountSpecified = false, int amount = 0)
         {
+            Mod.instance.LogInfo("UpdateBasedOnItem called with item: "+itemID+" amount "+amount);
             // Amount of usable instances of this item left
             int totalAmount = amount;
             if (!amountSpecified)
@@ -4208,6 +4217,7 @@ namespace EFM
                 totalAmount = amountInBaseInventory + amountInPlayerInventory;
             }
 
+            Mod.instance.LogInfo("After amount: "+totalAmount);
             // Update UI corresponding to this item
             if (farmingViewByItemID != null && farmingViewByItemID.ContainsKey(itemID))
             {
@@ -4453,8 +4463,10 @@ namespace EFM
 
         public void UpdateUpgradableStatus()
         {
-            if(GetRequirementsFullfilled(true, false))
+            Mod.instance.LogInfo("Update upgradable status called");
+            if (GetRequirementsFullfilled(true, true))
             {
+                Mod.instance.LogInfo("Update upgradable status FULFILLED");
                 // Also implies !constructing
 
                 areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.areaBackgroundAvailableSprite; // Summary Icon background color
@@ -4498,6 +4510,8 @@ namespace EFM
                     // Summary
                     areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.areaBackgroundLockedSprite; // Summary Icon background color
                     areaCanvas.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = "Locked"; // Status text
+                    areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(6).gameObject.SetActive(true); // Enable locked icon
+                    areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(7).gameObject.SetActive(false); // Disable unlocked icon
 
                     // Top
                     areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.areaBackgroundLockedSprite; // Icon background color

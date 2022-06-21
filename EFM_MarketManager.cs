@@ -687,6 +687,7 @@ namespace EFM
                             currentItemIcon.gameObject.SetActive(true);
 
                             // Setup ItemIcon
+                            Mod.instance.LogInfo("Adding item assort " + item.Key);
                             EFM_ItemIcon itemIconScript = currentItemIcon.gameObject.AddComponent<EFM_ItemIcon>();
                             itemIconScript.itemID = item.Key;
                             itemIconScript.itemName = Mod.itemNames[item.Key];
@@ -3083,7 +3084,11 @@ namespace EFM
             cartShowcase.GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "1";
 
             // Setup ItemIcon
-            EFM_ItemIcon itemIconScript = cartShowcase.GetChild(1).gameObject.AddComponent<EFM_ItemIcon>();
+            EFM_ItemIcon itemIconScript = cartShowcase.GetChild(1).gameObject.GetComponent<EFM_ItemIcon>();
+            if (itemIconScript == null)
+            {
+                itemIconScript = cartShowcase.GetChild(1).gameObject.AddComponent<EFM_ItemIcon>();
+            }
             itemIconScript.itemID = item.ID;
             itemIconScript.itemName = itemName;
             itemIconScript.description = Mod.itemDescriptions[item.ID];
@@ -3210,6 +3215,7 @@ namespace EFM
                             else // stack - amountToRemove > 0
                             {
                                 CIW.stack -= amountToRemove;
+                                Mod.baseInventory[CIW.ID] -= amountToRemove;
                                 amountToRemove = 0;
                             }
                         }
@@ -3304,8 +3310,16 @@ namespace EFM
                     // Set stack and remove amount to spawn
                     if (itemCIW.maxStack > 1)
                     {
-                        itemCIW.stack = itemCIW.maxStack;
-                        amountToSpawn -= itemCIW.maxStack;
+                        if (amountToSpawn > itemCIW.maxStack)
+                        {
+                            itemCIW.stack = itemCIW.maxStack;
+                            amountToSpawn -= itemCIW.maxStack;
+                        }
+                        else // amountToSpawn <= itemCIW.maxStack
+                        {
+                            itemCIW.stack = amountToSpawn;
+                            amountToSpawn = 0;
+                        }
                     }
                     else
                     {
@@ -3340,6 +3354,12 @@ namespace EFM
 
                 // Set trader immediately because we spawned a custom item
                 SetTrader(currentTraderIndex, cartItem);
+
+                // Update area managers based on item we just added
+                foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+                {
+                    areaManager.UpdateBasedOnItem(cartItem);
+                }
             }
             else
             {
@@ -3720,6 +3740,12 @@ namespace EFM
                 baseManager.baseInventoryObjects.Add(cartItem, objectsList);
             }
 
+            // Update area managers based on item we just added
+            foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+            {
+                areaManager.UpdateBasedOnItem(cartItem);
+            }
+
             // Update the whole thing
             SetTrader(currentTraderIndex);
         }
@@ -3787,6 +3813,7 @@ namespace EFM
                 else // stack - amountToRemove > 0
                 {
                     CIW.stack -= amountToRemove;
+                    Mod.baseInventory[CIW.ID] -= amountToRemove;
                     amountToRemove = 0;
                 }
             }
@@ -4597,6 +4624,14 @@ namespace EFM
             }
             bool canDeal = true;
             Mod.instance.LogInfo("0");
+            if (ragfairBuyPriceElements == null)
+            {
+                ragfairBuyPriceElements = new Dictionary<string, GameObject>();
+            }
+            else
+            {
+                ragfairBuyPriceElements.Clear();
+            }
             foreach (KeyValuePair<string, int> price in priceList)
             {
                 Mod.instance.LogInfo("\t0");
@@ -4618,10 +4653,6 @@ namespace EFM
                 string priceItemName = Mod.itemNames[price.Key];
                 priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = priceItemName;
                 Mod.instance.LogInfo("\t0");
-                if (ragfairBuyPriceElements == null)
-                {
-                    ragfairBuyPriceElements = new Dictionary<string, GameObject>();
-                }
                 ragfairBuyPriceElements.Add(price.Key, priceElement.gameObject);
 
                 Mod.instance.LogInfo("\t0");
@@ -4854,6 +4885,7 @@ namespace EFM
                             else // stack - amountToRemove > 0
                             {
                                 CIW.stack -= amountToRemove;
+                                Mod.baseInventory[CIW.ID] -= amountToRemove;
                                 amountToRemove = 0;
                             }
                         }
@@ -4940,8 +4972,16 @@ namespace EFM
                     // Set stack and remove amount to spawn
                     if (itemCIW.maxStack > 1)
                     {
-                        itemCIW.stack = itemCIW.maxStack;
-                        amountToSpawn -= itemCIW.maxStack;
+                        if (amountToSpawn > itemCIW.maxStack)
+                        {
+                            itemCIW.stack = itemCIW.maxStack;
+                            amountToSpawn -= itemCIW.maxStack;
+                        }
+                        else // amountToSpawn <= itemCIW.maxStack
+                        {
+                            itemCIW.stack = amountToSpawn;
+                            amountToSpawn = 0;
+                        }
                     }
                     else
                     {
@@ -4978,6 +5018,12 @@ namespace EFM
                 if (currentTraderIndex == traderIndex)
                 {
                     SetTrader(currentTraderIndex);
+                }
+
+                // Update area managers based on item we just added
+                foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+                {
+                    areaManager.UpdateBasedOnItem(ragfairCartItem);
                 }
             }
             else

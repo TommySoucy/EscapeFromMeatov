@@ -237,6 +237,10 @@ namespace EFM
                 //    summaryAmountStackText.gameObject.SetActive(true);
                 //    summaryAmountStackText.text = this.descriptionPack.level.ToString();
                 //}
+                //else
+                {
+                    summaryAmountStackText.gameObject.SetActive(false);
+                }
             }
             else if (this.descriptionPack.isCustom)
             {
