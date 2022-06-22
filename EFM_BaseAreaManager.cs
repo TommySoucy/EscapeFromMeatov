@@ -1091,29 +1091,37 @@ namespace EFM
             GameObject produceView = productionsParent.GetChild(0).gameObject;
             GameObject farmingView = productionsParent.GetChild(1).gameObject;
             JToken areaData = null;
+            Mod.instance.LogInfo("Loading production data from save");
             if (baseManager.data["areas"] != null)
             {
+                Mod.instance.LogInfo("Data has areas");
                 areaData = baseManager.data["areas"][areaIndex];
+                Mod.instance.LogInfo("Got specific area");
             }
             JToken loadedProductions = null;
-            if (areaData != null)
+            if (areaData != null && areaData["productions"] != null)
             {
+                Mod.instance.LogInfo("Area has productions");
                 loadedProductions = areaData["productions"];
             }
             else
             {
+                Mod.instance.LogInfo("Area does not have productions");
                 loadedProductions = new JArray();
             }
             Dictionary<string, JToken> productionsDict = new Dictionary<string, JToken>();
-            foreach(JToken loadedProduction in loadedProductions)
+            Mod.instance.LogInfo("Loading productions");
+            foreach (JToken loadedProduction in loadedProductions)
             {
+                Mod.instance.LogInfo("Loading production "+ loadedProduction["_id"].ToString());
                 productionsDict.Add(loadedProduction["_id"].ToString(), loadedProduction);
             }
+            Mod.instance.LogInfo("Done loading productions");
 
             Mod.instance.LogInfo("0");
             if (productions.Count > 0)
             {
-                Mod.instance.LogInfo("Apparetly, area index: " + areaIndex + " have " + productions.Count + " productions as level "+level);
+                Mod.instance.LogInfo("Apparently, area index: " + areaIndex + " have " + productions.Count + " productions as level "+level);
                 productionsParent.parent.gameObject.SetActive(true);
 
                 middleHeight += 106.4f; // scroll view content spacing + production top padding + production bottom padding + header height + container spacing

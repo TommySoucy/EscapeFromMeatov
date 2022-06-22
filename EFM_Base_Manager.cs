@@ -878,11 +878,16 @@ namespace EFM
         {
             Mod.currentBaseManager = this;
             GM.CurrentSceneSettings.MaxPointingDistance = 30;
+            GM.CurrentSceneSettings.IsSpawnLockingEnabled = false;
 
             // Don't want to setup player rig if just got out of raid
             if (!Mod.justFinishedRaid)
             {
-                SetupPlayerRig();
+                // Only setup player rig if not already setup
+                if (Mod.playerStatusUI == null)
+                {
+                    SetupPlayerRig();
+                }
 
                 // Set pockets configuration as default
                 GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
@@ -1782,7 +1787,6 @@ namespace EFM
 
             FVRPhysicalObject itemPhysicalObject = itemObject.GetComponentInChildren<FVRPhysicalObject>();
             FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
-            Mod.instance.LogInfo("physical object null?: "+(itemPhysicalObject == null)+", itemObjectWrapper null?: "+(itemObjectWrapper == null));
 
             // Fill data
 
@@ -2047,6 +2051,22 @@ namespace EFM
                                 customItemWrapper.itemsInSlots[j] = LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedQBContents[j], customItemWrapper.locationIndex);
                             }
                         }
+
+                        // Put inner items in their slots
+                        for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
+                        {
+                            if (customItemWrapper.itemsInSlots[i] != null)
+                            {
+                                FVRPhysicalObject currentItemPhysObj = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
+                                if (currentItemPhysObj != null)
+                                {
+                                    // Attach item to quick slot
+                                    FVRQuickBeltSlot quickBeltSlot = customItemWrapper.rigSlots[i];
+                                    currentItemPhysObj.SetQuickBeltSlot(quickBeltSlot);
+                                    currentItemPhysObj.SetParentage(quickBeltSlot.QuickbeltRoot);
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -2203,20 +2223,7 @@ namespace EFM
                         Mod.leftShoulderObject = itemPhysicalObject.gameObject;
                     }
 
-                    for(int i=0; i < customItemWrapper.itemsInSlots.Length; ++i)
-                    {
-                        if (customItemWrapper.itemsInSlots[i] != null)
-                        {
-                            FVRPhysicalObject currentItemPhysObj = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
-                            if (currentItemPhysObj != null)
-                            {
-                                // Attach item to quick slot
-                                FVRQuickBeltSlot quickBeltSlot = GM.CurrentPlayerBody.QBSlots_Internal[i + 4];
-                                currentItemPhysObj.SetQuickBeltSlot(quickBeltSlot);
-                                currentItemPhysObj.SetParentage(quickBeltSlot.QuickbeltRoot);
-                            }
-                        }
-                    }
+                    EFM_EquipmentSlot.WearEquipment(customItemWrapper);
                 }
 
                 // Put item in pocket if it has pocket index
@@ -2935,16 +2942,17 @@ namespace EFM
             EFM_EquipmentSlot.Clear();
             for (int i = 0; i < Mod.equipmentSlots.Count; ++i)
             {
-                if (Mod.equipmentSlots[i] != null)
+                if (Mod.equipmentSlots[i] != null && Mod.equipmentSlots[i].CurObject != null)
                 {
                     Destroy(Mod.equipmentSlots[i].CurObject.gameObject);
                 }
             }
-            GM.CurrentPlayerBody.ConfigureQuickbelt(-2); // -2 in order to detroy the objects on belt as well
+            GM.CurrentPlayerBody.ConfigureQuickbelt(-2); // -2 in order to destroy the objects on belt as well
         }
 
         private void SaveBase()
         {
+            Mod.instance.LogInfo("Saving base");
             JToken saveObject = data;
 
             // Write time
@@ -2961,6 +2969,7 @@ namespace EFM
             saveObject["level"] = Mod.level;
             saveObject["experience"] = Mod.experience;
             saveObject["weight"] = Mod.weight;
+            Mod.instance.LogInfo("\tWrote basic data");
 
             // Write skills
             saveObject["skills"] = new JArray();
@@ -2970,18 +2979,21 @@ namespace EFM
                 saveObject["skills"][i]["progress"] = Mod.skills[i].progress;
                 saveObject["skills"][i]["currentProgress"] = Mod.skills[i].currentProgress;
             }
+            Mod.instance.LogInfo("\tWrote skills");
 
             // Write areas
+            Mod.instance.LogInfo("\tWriting areas...");
             JArray savedAreas = new JArray();
             saveObject["areas"] = savedAreas;
             for (int i = 0; i < baseAreaManagers.Count; ++i)
             {
-
+                Mod.instance.LogInfo("\t\tWriting area "+i);
                 JToken currentSavedArea = new JObject();
                 currentSavedArea["level"] = baseAreaManagers[i].level;
                 currentSavedArea["constructing"] = baseAreaManagers[i].constructing;
                 currentSavedArea["constructTime"] = baseAreaManagers[i].constructTime;
-                if(baseAreaManagers[i].slotItems != null)
+                Mod.instance.LogInfo("\t\t\tWrote basic data");
+                if (baseAreaManagers[i].slotItems != null)
                 {
                     JArray slots = new JArray();
                     currentSavedArea["slots"] = slots;
@@ -2997,8 +3009,10 @@ namespace EFM
                         }
                     }
                 }
-                if(baseAreaManagers[i].activeProductions != null)
+                Mod.instance.LogInfo("\t\t\tWrote slot items");
+                if (baseAreaManagers[i].activeProductions != null)
                 {
+                    Mod.instance.LogInfo("\t\t\t\tWriting active productions");
                     currentSavedArea["productions"] = new JObject();
 
                     foreach(KeyValuePair<string, EFM_AreaProduction> production in baseAreaManagers[i].activeProductions)
@@ -3010,9 +3024,11 @@ namespace EFM
 
                         currentSavedArea["productions"][production.Value.ID] = currentProduction;
                     }
+                    Mod.instance.LogInfo("\t\t\t\tWrote active productions");
                 }
                 else if(baseAreaManagers[i].activeScavCaseProductions != null)
                 {
+                    Mod.instance.LogInfo("\t\t\t\tWriting active scav case productions");
                     currentSavedArea["productions"] = new JArray();
 
                     foreach(EFM_ScavCaseProduction production in baseAreaManagers[i].activeScavCaseProductions)
@@ -3041,21 +3057,26 @@ namespace EFM
 
                         (currentSavedArea["productions"] as JArray).Add(currentProduction);
                     }
+                    Mod.instance.LogInfo("\t\t\t\tWrote active scav case productions");
                 }
                 savedAreas.Add(currentSavedArea);
             }
+            Mod.instance.LogInfo("\tWrote areas");
 
             // Save trader statuses
             JArray savedTraderStatuses = new JArray();
             saveObject["traderStatuses"] = savedTraderStatuses;
-            for(int i=0; i<8; ++i)
+            Mod.instance.LogInfo("\tWriting trader statuses...");
+            for (int i=0; i<8; ++i)
             {
+                Mod.instance.LogInfo("\t\tWriting trader " + i);
                 JToken currentSavedTraderStatus = new JObject();
                 currentSavedTraderStatus["id"] = Mod.traderStatuses[i].id;
                 currentSavedTraderStatus["salesSum"] = Mod.traderStatuses[i].salesSum;
                 currentSavedTraderStatus["standing"] = Mod.traderStatuses[i].standing;
                 currentSavedTraderStatus["unlocked"] = Mod.traderStatuses[i].unlocked;
 
+                Mod.instance.LogInfo("\t\t\tWrote basic data");
                 // Save tasks
                 // TODO: This saves literally all saveable data for tasks their conditions, and the conditions counters
                 // We could ommit tasks that dont have any data to save, like the ones that are still locked
@@ -3073,37 +3094,46 @@ namespace EFM
                         taskSaveData["conditions"][traderTaskCondition.ID] = conditionSaveData;
                         conditionSaveData["fulfilled"] = traderTaskCondition.fulfilled;
                         conditionSaveData["itemCount"] = traderTaskCondition.itemCount;
-                        conditionSaveData["counters"] = new JObject();
-                        foreach (TraderTaskCounterCondition traderTaskCounterCondition in traderTaskCondition.counters)
+                        if (traderTaskCondition.counters != null)
                         {
-                            JObject counterConditionSaveData = new JObject();
-                            conditionSaveData["counters"][traderTaskCounterCondition.ID] = counterConditionSaveData;
-                            counterConditionSaveData["killCount"] = traderTaskCounterCondition.killCount;
-                            counterConditionSaveData["completed"] = traderTaskCounterCondition.completed;
+                            conditionSaveData["counters"] = new JObject();
+                            foreach (TraderTaskCounterCondition traderTaskCounterCondition in traderTaskCondition.counters)
+                            {
+                                JObject counterConditionSaveData = new JObject();
+                                conditionSaveData["counters"][traderTaskCounterCondition.ID] = counterConditionSaveData;
+                                counterConditionSaveData["killCount"] = traderTaskCounterCondition.killCount;
+                                counterConditionSaveData["completed"] = traderTaskCounterCondition.completed;
+                            }
                         }
                     }
                 }
+                Mod.instance.LogInfo("\t\t\tWrote tasks");
 
                 savedTraderStatuses.Add(currentSavedTraderStatus);
             }
+            Mod.instance.LogInfo("\tWrote trader statuses");
 
             // Reset save data item list
             JArray saveItems = new JArray();
             saveObject["items"] = saveItems;
 
             // Save loose items
+            Mod.instance.LogInfo("\tWriting items...");
+            Mod.instance.LogInfo("\t\tWriting loose items");
             Transform itemsRoot = transform.GetChild(2);
             for (int i = 0; i < itemsRoot.childCount; ++i)
             {
                 SaveItem(saveItems, itemsRoot.GetChild(i));
             }
 
+            Mod.instance.LogInfo("\t\tWriting trade volume items");
             // Save trade volume items
             for (int i = 0; i < marketManager.tradeVolume.itemsRoot.childCount; ++i)
             {
                 SaveItem(saveItems, marketManager.tradeVolume.itemsRoot.GetChild(i));
             }
 
+            Mod.instance.LogInfo("\t\tWriting hand items");
             // Save items in hands
             FVRViveHand rightHand = GM.CurrentPlayerBody.RightHand.GetComponentInChildren<FVRViveHand>();
             FVRViveHand leftHand = GM.CurrentPlayerBody.LeftHand.GetComponentInChildren<FVRViveHand>();
@@ -3116,6 +3146,7 @@ namespace EFM
                 SaveItem(saveItems, leftHand.CurrentInteractable.transform, leftHand);
             }
 
+            Mod.instance.LogInfo("\t\tWriting equip items");
             // Save equipment
             foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
             {
@@ -3125,6 +3156,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\t\tWriting pocket items");
             // Save pockets
             Mod.instance.LogInfo("Saving pockets");
             foreach (FVRQuickBeltSlot pocketSlot in Mod.pocketSlots)
@@ -3136,17 +3168,20 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\t\tWriting right shoulder items");
             // Save right shoulder
-            Mod.instance.LogInfo("Saving right shoulder");
             if (Mod.rightShoulderObject != null)
             {
                 SaveItem(saveItems, Mod.rightShoulderObject.transform);
             }
+            Mod.instance.LogInfo("\tWrote items");
 
             // Replace data
             data = saveObject;
 
+            Mod.instance.LogInfo("\tWriting save data to file");
             SaveDataToFile();
+            Mod.instance.LogInfo("Saved base");
         }
 
         private void SaveItem(JArray listToAddTo, Transform item, FVRViveHand hand = null, int quickBeltSlotIndex = -1)
@@ -3504,7 +3539,7 @@ namespace EFM
                 }
 
                 // Pouch
-                if (customItemWrapper.itemType == Mod.ItemType.Backpack)
+                if (customItemWrapper.itemType == Mod.ItemType.Pouch)
                 {
                     Mod.instance.LogInfo("Item is pouch");
 

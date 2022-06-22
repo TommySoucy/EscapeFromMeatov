@@ -191,8 +191,6 @@ namespace EFM
 
         private static void EquipRig(EFM_CustomItemWrapper customItemWrapper)
         {
-            Mod.instance.LogInfo("EquipRig called with item name: "+customItemWrapper.itemName);
-
             // Load the config
             GM.CurrentPlayerBody.ConfigureQuickbelt(customItemWrapper.configurationIndex);
 
@@ -201,7 +199,6 @@ namespace EFM
             {
                 if (customItemWrapper.itemsInSlots[i] != null)
                 {
-                    Mod.instance.LogInfo("Item in slot "+i+" not null: " + customItemWrapper.itemName);
                     FVRPhysicalObject physicalObject = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
                     physicalObject.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i + 4]);
                     physicalObject.SetParentage(GM.CurrentPlayerBody.QBSlots_Internal[i + 4].gameObject.transform);

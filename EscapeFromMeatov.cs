@@ -647,11 +647,11 @@ namespace EFM
                 {
                     itemPhysicalObject.PoseOverride = null;
                 }
-                itemPhysicalObject.PoseOverride_Touch = itemPrefab.transform.GetChild(4);
-                if (!itemPhysicalObject.PoseOverride_Touch.gameObject.activeSelf)
-                {
-                    itemPhysicalObject.PoseOverride_Touch = null;
-                }
+                //itemPhysicalObject.PoseOverride_Touch = itemPrefab.transform.GetChild(4);
+                //if (!itemPhysicalObject.PoseOverride_Touch.gameObject.activeSelf)
+                //{
+                //    itemPhysicalObject.PoseOverride_Touch = null;
+                //}
                 itemPhysicalObject.QBPoseOverride = itemPrefab.transform.GetChild(2);
                 itemPhysicalObject.UseGrabPointChild = true; // Makes sure the item will be held where the player grabs it instead of at pose override
 
@@ -859,8 +859,22 @@ namespace EFM
                     customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.configurationRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
 
-                    customItemWrapper.rightHandPoseOverride = itemPhysicalObject.PoseOverride;
-                    customItemWrapper.leftHandPoseOverride = itemPhysicalObject.PoseOverride.GetChild(0);
+                    //if (Mod.rightHand.fvrHand.CMode == ControlMode.Index || Mod.rightHand.fvrHand.CMode == ControlMode.Oculus)
+                    //{
+                    //    customItemWrapper.rightHandPoseOverride = itemPhysicalObject.PoseOverride_Touch;
+                    //    if (customItemWrapper.rightHandPoseOverride != null)
+                    //    {
+                    //        customItemWrapper.leftHandPoseOverride = itemPhysicalObject.PoseOverride_Touch.GetChild(0);
+                    //    }
+                    //}
+                    //else
+                    {
+                        customItemWrapper.rightHandPoseOverride = itemPhysicalObject.PoseOverride;
+                        if (customItemWrapper.rightHandPoseOverride != null)
+                        {
+                            customItemWrapper.leftHandPoseOverride = itemPhysicalObject.PoseOverride.GetChild(0);
+                        }
+                    }
                 }
 
                 // Backpack
@@ -878,12 +892,23 @@ namespace EFM
                         mainContainerRenderers[mainContainerRenderers.Count - 1].material = quickSlotConstantMaterial;
                     }
                     customItemWrapper.mainContainerRenderers = mainContainerRenderers.ToArray();
-                    
+
                     // Set pose overrides
-                    customItemWrapper.rightHandPoseOverride = itemPhysicalObject.PoseOverride;
-                    if (customItemWrapper.rightHandPoseOverride != null)
+                    //if (Mod.rightHand.fvrHand.CMode == ControlMode.Index || Mod.rightHand.fvrHand.CMode == ControlMode.Oculus)
+                    //{
+                    //    customItemWrapper.rightHandPoseOverride = itemPhysicalObject.PoseOverride_Touch;
+                    //    if (customItemWrapper.rightHandPoseOverride != null)
+                    //    {
+                    //        customItemWrapper.leftHandPoseOverride = itemPhysicalObject.PoseOverride_Touch.GetChild(0);
+                    //    }
+                    //}
+                    //else
                     {
-                        customItemWrapper.leftHandPoseOverride = itemPhysicalObject.PoseOverride.GetChild(0);
+                        customItemWrapper.rightHandPoseOverride = itemPhysicalObject.PoseOverride;
+                        if (customItemWrapper.rightHandPoseOverride != null)
+                        {
+                            customItemWrapper.leftHandPoseOverride = itemPhysicalObject.PoseOverride.GetChild(0);
+                        }
                     }
 
                     // Set backpack settings
@@ -1527,7 +1552,14 @@ namespace EFM
                         }
                         else
                         {
-                            magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            if (magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            }
                         }
                     }
                     else
@@ -1548,7 +1580,14 @@ namespace EFM
                         }
                         else
                         {
-                            clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            if (clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            }
                         }
                     }
                     else
@@ -2391,8 +2430,6 @@ namespace EFM
             // Stop here if dropping in a quick belt slot or if this is a door
             if ((__instance is FVRPhysicalObject && (__instance as FVRPhysicalObject).QuickbeltSlot != null))
             {
-                Mod.instance.LogInfo("Dropping item in qs");
-
                 // Check if area slot
                 if ((__instance as FVRPhysicalObject).QuickbeltSlot is EFM_AreaSlot)
                 {
@@ -3618,6 +3655,7 @@ namespace EFM
                                 if (EFM_EquipmentSlot.currentRig.itemsInSlots[i] == __instance.gameObject)
                                 {
                                     EFM_EquipmentSlot.currentRig.itemsInSlots[i] = null;
+                                    EFM_EquipmentSlot.currentRig.UpdateRigMode();
                                     return;
                                 }
                             }
@@ -3726,7 +3764,8 @@ namespace EFM
                     if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex].Equals(slot))
                     {
                         EFM_CustomItemWrapper equipmentItemWrapper = EFM_EquipmentSlot.currentRig;
-                        equipmentItemWrapper.itemsInSlots[slotIndex] = __instance.gameObject;
+                        equipmentItemWrapper.itemsInSlots[slotIndex - 4] = __instance.gameObject;
+                        equipmentItemWrapper.UpdateRigMode();
 
                         // Update rig weight
                         equipmentItemWrapper.currentWeight += __instance.RootRigidbody.mass;
@@ -4962,8 +5001,8 @@ namespace EFM
             {
                 flag = __instance.Input.BYButtonDown;
 
-                // Want grab laser if the default BYButtonPressed (vanilla) OR if the description is touched
-                flag2 = __instance.Input.BYButtonPressed || (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange);
+                // Want grab laser if the default BYButtonPressed (vanilla) (TODO: On main hand, right for now) OR if the description is touched
+                flag2 = (__instance.IsThisTheRightHand && __instance.Input.BYButtonPressed) || (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange);
 
                 // Check if we move touch from bottom (touch range) to top of touch pad this frame
                 fullDescInput = touchpadTouched && touchpadAxisY > 0 && (__instance.IsThisTheRightHand ? rightPreviousFrameTPAxisY <= 0 : leftPreviousFrameTPAxisY <= 0);
@@ -5873,6 +5912,9 @@ namespace EFM
             Mod.stamina = Mathf.Max(Mod.stamina - Mod.jumpStaminaDrain, 0);
             Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
 
+            // Reset stamina timer
+            Mod.staminaTimer = 2;
+
             return false;
         }
     }
@@ -6151,7 +6193,8 @@ namespace EFM
                 {
                     if (GM.Options.MovementOptions.TwinStickSprintToggleState == MovementOptions.TwinStickSprintToggleMode.Disabled)
                     {
-                        if (flag4)
+                        // Also check stamina for sprinting
+                        if (flag4 && Mod.stamina > 0)
                         {
                             ___m_sprintingEngaged = true;
                         }

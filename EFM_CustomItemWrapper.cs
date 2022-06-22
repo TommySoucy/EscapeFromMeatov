@@ -57,7 +57,7 @@ namespace EFM
 
 		// Equipment
 		// 0: Open (Model should be as orginal in tarkov), 1: ClosedFull (Closed but only folded to the point that any container/armor is not folded), 2: ClosedEmpty (Folded and flattened as much as is realistic)
-		private int _mode;
+		private int _mode = 2;
 		public int mode
 		{
 			set
@@ -185,6 +185,7 @@ namespace EFM
 		private void Awake()
 		{
 			physObj = gameObject.GetComponent<FVRPhysicalObject>();
+			_mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
 		}
 
 		private void Start()
@@ -1469,7 +1470,7 @@ namespace EFM
 				{
 					SetMode(containingVolume > 0 ? 1 : 2);
 					SetContainerOpen(false, isRightHand);
-					volumeIndicator.SetActive(true);
+					volumeIndicator.SetActive(false);
 				}
 				else if (itemType == Mod.ItemType.BodyArmor)
 				{
@@ -1478,7 +1479,7 @@ namespace EFM
 				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
 				{
 					SetContainerOpen(false, isRightHand);
-					volumeIndicator.SetActive(true);
+					volumeIndicator.SetActive(false);
 				}
 			}
 		}
@@ -1549,6 +1550,28 @@ namespace EFM
 			}
 		}
 
+		// A rig may need to change mode while closed because it will be closed in the quipment slot while we wear it but we are still able to put items in it
+		public void UpdateRigMode()
+		{
+			// Return right away if not a rig or if open
+			if (!(itemType == Mod.ItemType.Rig || itemType == Mod.ItemType.ArmoredRig) || mode == 0)
+            {
+				return;
+            }
+
+			for(int i=0; i < itemsInSlots.Length; ++i)
+            {
+				if(itemsInSlots[i] != null)
+				{
+					SetMode(1);
+					return;
+                }
+            }
+
+			// If we get this far it is because no items in slots, so set to closed empty
+			SetMode(2);
+        }
+
 		private void CloseRig(bool processslots, bool isRightHand = false)
 		{
 			configurationRoot.gameObject.SetActive(false);
@@ -1594,7 +1617,6 @@ namespace EFM
 		public DescriptionPack GetDescriptionPack()
         {
 			descriptionPack.amount = (Mod.baseInventory.ContainsKey(ID) ? Mod.baseInventory[ID] : 0) + (Mod.playerInventory.ContainsKey(ID) ? Mod.playerInventory[ID] : 0);
-			Mod.instance.LogInfo("Item " + ID + " description amount = " + descriptionPack.amount);
 			descriptionPack.amountRequired = 0;
 			for (int i=0; i < 22; ++i)
 			{

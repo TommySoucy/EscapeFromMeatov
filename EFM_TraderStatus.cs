@@ -552,9 +552,9 @@ namespace EFM
                 }
 
                 JObject taskSaveData = null;
-                if(traderData != null && traderData[index] != null && traderData[index][rawTask.Value] != null)
+                if(traderData != null && traderData[rawTask.Value] != null)
                 {
-                    taskSaveData = (JObject)traderData[index]["tasks"][rawTask.Value];
+                    taskSaveData = (JObject)traderData["tasks"][rawTask.Value];
                 }
 
                 // Find quest in questDB

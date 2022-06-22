@@ -27,36 +27,39 @@ namespace EFM
                 if (stackableWrapper.ID == otherItemWrapper.ID)
                 {
                     // Check that both are held
-                    if((Mod.leftHand.fvrHand.CurrentInteractable.gameObject.Equals(stackableWrapper.gameObject) &&
-                       Mod.rightHand.fvrHand.CurrentInteractable.gameObject.Equals(otherItemWrapper.gameObject)) || 
-                       (Mod.leftHand.fvrHand.CurrentInteractable.gameObject.Equals(otherItemWrapper.gameObject) &&
-                       Mod.rightHand.fvrHand.CurrentInteractable.gameObject.Equals(stackableWrapper.gameObject)))
+                    if (Mod.leftHand.fvrHand.CurrentInteractable != null && Mod.rightHand.fvrHand.CurrentInteractable != null)
                     {
-                        // Decide which direction to stack, we want to stack on greatest amount, if amount is same, stack in lowest Y, else stack in this one
-                        if(stackableWrapper.stack > otherItemWrapper.stack)
+                        if ((Mod.leftHand.fvrHand.CurrentInteractable.gameObject.Equals(stackableWrapper.gameObject) &&
+                           Mod.rightHand.fvrHand.CurrentInteractable.gameObject.Equals(otherItemWrapper.gameObject)) ||
+                           (Mod.leftHand.fvrHand.CurrentInteractable.gameObject.Equals(otherItemWrapper.gameObject) &&
+                           Mod.rightHand.fvrHand.CurrentInteractable.gameObject.Equals(stackableWrapper.gameObject)))
                         {
-                            // Stack on this one
-                            StackOnThis(otherStackTrigger);
-                        }
-                        else if(stackableWrapper.stack < otherItemWrapper.stack)
-                        {
-                            // Stack on other
-                            StackOnOther(otherStackTrigger);
-                        }
-                        else if(transform.position.y < otherStackTrigger.transform.position.y)
-                        {
-                            // Stack on this one
-                            StackOnThis(otherStackTrigger);
-                        }
-                        else if(transform.position.y > otherStackTrigger.transform.position.y)
-                        {
-                            // Stack on other
-                            StackOnOther(otherStackTrigger);
-                        }
-                        else // Same amount in both stacks and same height
-                        {
-                            // Stack on this one
-                            StackOnThis(otherStackTrigger);
+                            // Decide which direction to stack, we want to stack on greatest amount, if amount is same, stack in lowest Y, else stack in this one
+                            if (stackableWrapper.stack > otherItemWrapper.stack)
+                            {
+                                // Stack on this one
+                                StackOnThis(otherStackTrigger);
+                            }
+                            else if (stackableWrapper.stack < otherItemWrapper.stack)
+                            {
+                                // Stack on other
+                                StackOnOther(otherStackTrigger);
+                            }
+                            else if (transform.position.y < otherStackTrigger.transform.position.y)
+                            {
+                                // Stack on this one
+                                StackOnThis(otherStackTrigger);
+                            }
+                            else if (transform.position.y > otherStackTrigger.transform.position.y)
+                            {
+                                // Stack on other
+                                StackOnOther(otherStackTrigger);
+                            }
+                            else // Same amount in both stacks and same height
+                            {
+                                // Stack on this one
+                                StackOnThis(otherStackTrigger);
+                            }
                         }
                     }
                 }
