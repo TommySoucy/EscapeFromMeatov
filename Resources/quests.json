@@ -23303,20 +23303,6 @@
           "target": "61e1da5da7d12143174dacca",
           "traderId": "5a7c2eca46aef81a7ca2145d",
           "type": "AssortmentUnlock"
-        },
-        {
-          "id": "60b8f61d81c51328c56d7714",
-          "index": 6,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174daccb",
-              "_tpl": "5a33e75ac4a2826c6e06d759"
-            }
-          ],
-          "loyaltyLevel": 4,
-          "target": "61e1da5da7d12143174daccb",
-          "traderId": "5a7c2eca46aef81a7ca2145d",
-          "type": "AssortmentUnlock"
         }
       ]
     },
@@ -23514,20 +23500,6 @@
           "target": "61e1da5da7d12143174daccf",
           "type": "Item",
           "value": "1"
-        },
-        {
-          "id": "5b48e6b086f774517c2e6442",
-          "index": 6,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dacd0",
-              "_tpl": "5b07db875acfc40dc528a5f6"
-            }
-          ],
-          "loyaltyLevel": 3,
-          "target": "61e1da5da7d12143174dacd0",
-          "traderId": "5a7c2eca46aef81a7ca2145d",
-          "type": "AssortmentUnlock"
         }
       ]
     },
@@ -24198,7 +24170,7 @@
           "items": [
             {
               "_id": "61e1da5da7d12143174dacf1",
-              "_tpl": "5a1eaa87fcdbcb001865f75e"
+              "_tpl": "5aa66be6e5b5b0214e506e97"
             }
           ],
           "loyaltyLevel": 4,
@@ -26781,20 +26753,6 @@
           "type": "AssortmentUnlock"
         },
         {
-          "id": "5bcf22b986f7746a45695afb",
-          "index": 3,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad29",
-              "_tpl": "5bbde409d4351e003562b036"
-            }
-          ],
-          "loyaltyLevel": 2,
-          "target": "61e1da5da7d12143174dad29",
-          "traderId": "5c0647fdd443bc2504c2d371",
-          "type": "AssortmentUnlock"
-        },
-        {
           "id": "5bc47e1986f7741b81600bf5",
           "index": 4,
           "items": [
@@ -26823,22 +26781,6 @@
             }
           ],
           "target": "61e1da5da7d12143174dad2b",
-          "type": "Item",
-          "value": "1"
-        },
-        {
-          "id": "5bcf2bd086f774723055e996",
-          "index": 6,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad2c",
-              "_tpl": "5bbde409d4351e003562b036",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dad2c",
           "type": "Item",
           "value": "1"
         },
@@ -26960,66 +26902,6 @@
           "target": "5c0647fdd443bc2504c2d371",
           "type": "TraderStanding",
           "value": "0.02"
-        },
-        {
-          "id": "5bcf233486f7746a486b84c4",
-          "index": 3,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad30",
-              "_tpl": "5bbdb811d4351e45020113c7"
-            }
-          ],
-          "loyaltyLevel": 2,
-          "target": "61e1da5da7d12143174dad30",
-          "traderId": "5c0647fdd443bc2504c2d371",
-          "type": "AssortmentUnlock"
-        },
-        {
-          "id": "5bcf235486f7746a45695afc",
-          "index": 4,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad31",
-              "_tpl": "5bbde41ed4351e003562b038"
-            }
-          ],
-          "loyaltyLevel": 2,
-          "target": "61e1da5da7d12143174dad31",
-          "traderId": "5c0647fdd443bc2504c2d371",
-          "type": "AssortmentUnlock"
-        },
-        {
-          "id": "5bcf2b8f86f774722d789e55",
-          "index": 5,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad32",
-              "_tpl": "5bbdb811d4351e45020113c7",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dad32",
-          "type": "Item",
-          "value": "1"
-        },
-        {
-          "id": "5bcf2ba086f774723055e995",
-          "index": 6,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad33",
-              "_tpl": "5bbde41ed4351e003562b038",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dad33",
-          "type": "Item",
-          "value": "1"
         }
       ]
     },
@@ -27157,22 +27039,6 @@
           "value": "1"
         },
         {
-          "id": "60cc9cafac6eb02bc726de5f",
-          "index": 4,
-          "items": [
-            {
-              "_id": "6131fda2738f614b2f2bc708",
-              "_tpl": "5c0696830db834001d23f5da",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "6131fda2738f614b2f2bc708",
-          "type": "Item",
-          "value": "1"
-        },
-        {
           "id": "60cc9cc7f81cc57f471718a0",
           "index": 5,
           "items": [
@@ -27300,22 +27166,6 @@
           "value": "85000"
         },
         {
-          "id": "5bcf259a86f7746a45695b05",
-          "index": 3,
-          "items": [
-            {
-              "_id": "6131fda2738f614b2f2bc70b",
-              "_tpl": "5bbdb870d4351e00367fb67d",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "6131fda2738f614b2f2bc70b",
-          "type": "Item",
-          "value": "1"
-        },
-        {
           "id": "60cc9d1e20a6283a506aeb40",
           "index": 4,
           "items": [
@@ -27330,20 +27180,6 @@
           "target": "6131fda2738f614b2f2bc70c",
           "type": "Item",
           "value": "1"
-        },
-        {
-          "id": "5bcf25a586f7746a464c5682",
-          "index": 5,
-          "items": [
-            {
-              "_id": "6131fda2738f614b2f2bc70d",
-              "_tpl": "5bbdb870d4351e00367fb67d"
-            }
-          ],
-          "loyaltyLevel": 3,
-          "target": "6131fda2738f614b2f2bc70d",
-          "traderId": "5c0647fdd443bc2504c2d371",
-          "type": "AssortmentUnlock"
         }
       ]
     },
@@ -27399,7 +27235,6 @@
                       ["59fb257e86f7742981561852"],
                       ["5dfa3d2b0dee1b22f862eade"],
                       ["5c4eecc32e221602b412b440"],
-                      ["5888945a2459774bf43ba385"],
                       ["5a9fbb74a2750c0032157181"],
                       ["5fbe7618d6fa9c00c571bb6c"],
                       ["5fbe760793164a5b6278efc8"]
@@ -27645,22 +27480,6 @@
           "value": "200000"
         },
         {
-          "id": "5bcf266986f7746a45695b09",
-          "index": 3,
-          "items": [
-            {
-              "_id": "5d34df2788a4504526796dbd",
-              "_tpl": "5bae13bad4351e00320204af",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "5d34df2788a4504526796dbd",
-          "type": "Item",
-          "value": "1"
-        },
-        {
           "id": "5bcf267786f7746a486b85e7",
           "index": 4,
           "items": [
@@ -27687,20 +27506,6 @@
           ],
           "loyaltyLevel": 4,
           "target": "5d34df2788a4504526796dbf",
-          "traderId": "5c0647fdd443bc2504c2d371",
-          "type": "AssortmentUnlock"
-        },
-        {
-          "id": "5bcf269286f7746a472ad9f7",
-          "index": 6,
-          "items": [
-            {
-              "_id": "5d34df2788a4504526796dc0",
-              "_tpl": "5bae13bad4351e00320204af"
-            }
-          ],
-          "loyaltyLevel": 4,
-          "target": "5d34df2788a4504526796dc0",
           "traderId": "5c0647fdd443bc2504c2d371",
           "type": "AssortmentUnlock"
         }
@@ -30747,22 +30552,6 @@
           "value": "30"
         },
         {
-          "id": "5c1a274586f774382929219e",
-          "index": 3,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad97",
-              "_tpl": "5c0558060db834001b735271",
-              "upd": {
-                "StackObjectsCount": 2
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dad97",
-          "type": "Item",
-          "value": "2"
-        },
-        {
           "id": "60cc732f6a2a1958fc5231fb",
           "index": 4,
           "target": "5935c25fb3acc3127c3d8cd9",
@@ -31141,20 +30930,6 @@
           "type": "AssortmentUnlock"
         },
         {
-          "id": "5c19318086f7745fa96afd4a",
-          "index": 4,
-          "items": [
-            {
-              "_id": "5d34df2788a4504526796d5f",
-              "_tpl": "5c0e66e2d174af02a96252f4"
-            }
-          ],
-          "loyaltyLevel": 4,
-          "target": "5d34df2788a4504526796d5f",
-          "traderId": "5935c25fb3acc3127c3d8cd9",
-          "type": "AssortmentUnlock"
-        },
-        {
           "id": "5c19319686f7747ce71bcbe7",
           "index": 5,
           "items": [
@@ -31181,22 +30956,6 @@
             }
           ],
           "target": "5d34df2788a4504526796d61",
-          "type": "Item",
-          "value": "1"
-        },
-        {
-          "id": "5c1ce81a86f774716e34081f",
-          "index": 7,
-          "items": [
-            {
-              "_id": "5d34df2788a4504526796d62",
-              "_tpl": "5c0e66e2d174af02a96252f4",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "5d34df2788a4504526796d62",
           "type": "Item",
           "value": "1"
         },
@@ -31892,22 +31651,6 @@
           "value": "1"
         },
         {
-          "id": "60cc9a3cac6eb02bc726de59",
-          "index": 4,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dada2",
-              "_tpl": "5aa7e373e5b5b000137b76f0",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dada2",
-          "type": "Item",
-          "value": "1"
-        },
-        {
           "id": "60cc9a11826ca0323464bd0c",
           "index": 5,
           "target": "5ac3b934156ae10c4430e83c",
@@ -32541,7 +32284,7 @@
           "items": [
             {
               "_id": "61e1da5da7d12143174dada9",
-              "_tpl": "5a1eaa87fcdbcb001865f75e",
+              "_tpl": "5aa66be6e5b5b0214e506e97",
               "upd": {
                 "StackObjectsCount": 1
               }
@@ -41365,20 +41108,6 @@
           "value": "1"
         },
         {
-          "id": "60b8ef7481c51328c56d7712",
-          "index": 5,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dae68",
-              "_tpl": "5a16b7e1fcdbcb00165aa6c9"
-            }
-          ],
-          "loyaltyLevel": 4,
-          "target": "61e1da5da7d12143174dae68",
-          "traderId": "5935c25fb3acc3127c3d8cd9",
-          "type": "AssortmentUnlock"
-        },
-        {
           "id": "60b8ef82634af3128020392e",
           "index": 6,
           "items": [
@@ -42071,20 +41800,6 @@
           ],
           "loyaltyLevel": 4,
           "target": "61e1da5da7d12143174dae7b",
-          "traderId": "5935c25fb3acc3127c3d8cd9",
-          "type": "AssortmentUnlock"
-        },
-        {
-          "id": "60b8efa281c51328c56d7713",
-          "index": 7,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dae7c",
-              "_tpl": "5ef1ba28c64c5d0dfc0571a5"
-            }
-          ],
-          "loyaltyLevel": 4,
-          "target": "61e1da5da7d12143174dae7c",
           "traderId": "5935c25fb3acc3127c3d8cd9",
           "type": "AssortmentUnlock"
         }
