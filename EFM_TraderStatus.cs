@@ -49,7 +49,7 @@ namespace EFM
             public float nextMinStanding;
         }
 
-        public EFM_TraderStatus(JToken traderData, int index, string name, int salesSum, float standing, bool unlocked, string currency, JObject assortData, JArray categoriesData, JObject questAssortData)
+        public EFM_TraderStatus(JToken traderData, int index, string name, int salesSum, float standing, bool unlocked, string currency, JObject assortData, JArray categoriesData)
         {
             if(waitingQuestConditions == null)
             {
@@ -77,7 +77,7 @@ namespace EFM
                 insuranceRate = index == 0 ? 0.25f : 0.35f;
             }
 
-            BuildTasks(questAssortData);
+            BuildTasks();
 
             //categories = categoriesData.ToObject<List<string>>();
             categories = new List<string>();
@@ -309,10 +309,43 @@ namespace EFM
                             {
                                 string actualPriceID = Mod.itemMap[priceID];
                                 int priceCount = (int)price["count"];
+
+                                // DEBUG: Check if this price has more data to it (like dogtag level for example)
+                                Dictionary<string, JToken> priceData = price.ToObject<Dictionary<string, JToken>>();
+                                List<string> additionalDataList = new List<string>();
+                                foreach (KeyValuePair<string, JToken> priceProperty in priceData)
+                                {
+                                    if (!(priceProperty.Key.Equals("_tpl") || priceProperty.Key.Equals("count")))
+                                    {
+                                        additionalDataList.Add(priceProperty.Key);
+                                    }
+                                }
+                                if (additionalDataList.Count > 0)
+                                {
+                                    Mod.instance.LogError("Assort entry: " + entry.Key + " price ID: " + actualPriceID + " with additional data: ");
+                                    foreach (string s in additionalDataList)
+                                    {
+                                        Mod.instance.LogError("\t" + s);
+                                    }
+                                }
+
                                 if (currentPrices.ContainsKey(actualPriceID))
                                 {
-                                    Mod.instance.LogError("Assort entry: " + entry.Key + " has duplicate price ID: " + actualPriceID + ". There must be some other data specified we ignored that should be used to differenciate the prices (ex.: dogtag levels)");
-                                    currentPrices[actualPriceID] += priceCount;
+                                    // Check if this price has more data to it (like dogtag level for example)
+                                    // or if it is just two prices that map to save item
+                                    if(additionalDataList.Count > 0)
+                                    {
+                                        Mod.instance.LogError("Assort entry: " + entry.Key + " has duplicate price ID: " + actualPriceID + " with additional data: ");
+                                        foreach(string s in additionalDataList)
+                                        {
+                                            Mod.instance.LogError("\t"+s);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // This is just a price that maps to the same ID as another, so just increment the count
+                                        currentPrices[actualPriceID] += priceCount;
+                                    }
                                 }
                                 else
                                 {
@@ -397,10 +430,43 @@ namespace EFM
                             {
                                 string actualPriceID = Mod.itemMap[priceID];
                                 int priceCount = (int)price["count"];
+
+                                // DEBUG: Check if this price has more data to it (like dogtag level for example)
+                                Dictionary<string, JToken> priceData = price.ToObject<Dictionary<string, JToken>>();
+                                List<string> additionalDataList = new List<string>();
+                                foreach (KeyValuePair<string, JToken> priceProperty in priceData)
+                                {
+                                    if (!(priceProperty.Key.Equals("_tpl") || priceProperty.Key.Equals("count")))
+                                    {
+                                        additionalDataList.Add(priceProperty.Key);
+                                    }
+                                }
+                                if (additionalDataList.Count > 0)
+                                {
+                                    Mod.instance.LogError("Assort entry: " + entry.Key + " price ID: " + actualPriceID + " with additional data: ");
+                                    foreach (string s in additionalDataList)
+                                    {
+                                        Mod.instance.LogError("\t" + s);
+                                    }
+                                }
+
                                 if (currentPrices.ContainsKey(actualPriceID))
                                 {
-                                    Mod.instance.LogError("Assort entry: " + entry.Key + " has duplicate price ID: " + actualPriceID + ". There must be some other data specified we ignored that should be used to differenciate the prices (ex.: dogtag levels)");
-                                    currentPrices[actualPriceID] += priceCount;
+                                    // Check if this price has more data to it (like dogtag level for example)
+                                    // or if it is just two prices that map to save item
+                                    if (additionalDataList.Count > 0)
+                                    {
+                                        Mod.instance.LogError("Assort entry: " + entry.Key + " has duplicate price ID: " + actualPriceID + " with additional data: ");
+                                        foreach (string s in additionalDataList)
+                                        {
+                                            Mod.instance.LogError("\t" + s);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // This is just a price that maps to the same ID as another, so just increment the count
+                                        currentPrices[actualPriceID] += priceCount;
+                                    }
                                 }
                                 else
                                 {
@@ -534,50 +600,42 @@ namespace EFM
             return true;
         }
 
-        private void BuildTasks(JObject tasksData)
+        private void BuildTasks()
         {
             tasks = new List<TraderTask>();
             if (conditionsByItem == null)
             {
                 conditionsByItem = new Dictionary<string, List<TraderTaskCondition>>();
             }
-            Dictionary<string, string> rawTasks = tasksData["success"].ToObject<Dictionary<string, string>>();
+
+            // Get raw tasks
+            Dictionary<string, JObject> rawTasks = new Dictionary<string, JObject>();
+            foreach (JObject rawTask in Mod.questDB)
+            {
+                if (rawTask["traderId"].ToString().Equals(id))
+                {
+                    rawTasks.Add(rawTask["_id"].ToString(), rawTask);
+                }
+            }
+
+            // Get quest locales
             Dictionary<string, JObject> questLocales = Mod.localDB["quest"].ToObject<Dictionary<string, JObject>>();
 
-            foreach (KeyValuePair<string, string> rawTask in rawTasks)
+            foreach (KeyValuePair<string, JObject> rawTask in rawTasks)
             {
-                if (foundTasks.ContainsKey(rawTask.Value))
-                {
-                    continue;
-                }
-
                 JObject taskSaveData = null;
-                if(traderData != null && traderData["tasks"] != null && traderData["tasks"][rawTask.Value] != null)
+                if(traderData != null && traderData["tasks"] != null && traderData["tasks"][rawTask.Key] != null)
                 {
-                    taskSaveData = (JObject)traderData["tasks"][rawTask.Value];
+                    taskSaveData = (JObject)traderData["tasks"][rawTask.Key];
                 }
 
-                // Find quest in questDB
-                JObject questData = null;
-                foreach(JObject quest in Mod.questDB)
-                {
-                    if (quest["_id"].ToString().Equals(rawTask.Value))
-                    {
-                        questData = quest;
-                        break;
-                    }
-                }
-                if (questData == null)
-                {
-                    Mod.instance.LogError("Could not find quest with ID: "+rawTask.Value+" in questDB");
-                    continue;
-                }
+                JObject questData = rawTask.Value;
 
                 // Find quest locale
                 JObject questLocale = null;
                 foreach (KeyValuePair<string, JObject> quest in questLocales)
                 {
-                    if (quest.Key.Equals(rawTask.Value))
+                    if (quest.Key.Equals(rawTask.Key))
                     {
                         questLocale = quest.Value;
                         break;
@@ -585,14 +643,14 @@ namespace EFM
                 }
                 if(questLocale == null)
                 {
-                    Mod.instance.LogError("Could not find quest with ID: "+rawTask.Value+" in locale");
+                    Mod.instance.LogError("Could not find quest with ID: "+rawTask.Key + " in locale");
                     continue;
                 }
 
                 TraderTask newTask = new TraderTask();
                 tasks.Add(newTask);
 
-                newTask.ID = rawTask.Value;
+                newTask.ID = rawTask.Key;
                 newTask.ownerTraderIndex = index;
                 newTask.name = questLocale["name"].ToString();
                 newTask.description = Mod.localDB["mail"][questLocale["description"].ToString()].ToString();
@@ -701,14 +759,14 @@ namespace EFM
                 }
 
                 // Add task to found tasks and update condition waiting for it if any
-                foundTasks.Add(rawTask.Value, newTask);
-                if (waitingQuestConditions.ContainsKey(rawTask.Value))
+                foundTasks.Add(rawTask.Key, newTask);
+                if (waitingQuestConditions.ContainsKey(rawTask.Key))
                 {
-                    foreach(TraderTaskCondition condition in waitingQuestConditions[rawTask.Value])
+                    foreach(TraderTaskCondition condition in waitingQuestConditions[rawTask.Key])
                     {
                         condition.target = newTask;
                     }
-                    waitingQuestConditions.Remove(rawTask.Value);
+                    waitingQuestConditions.Remove(rawTask.Key);
                 }
             }
         }

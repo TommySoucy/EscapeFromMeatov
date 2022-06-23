@@ -202,7 +202,6 @@ namespace EFM
         public static Dictionary<string, string> itemMap;
         public static JObject[] traderBaseDB;
         public static JObject[] traderAssortDB;
-        public static JObject[] traderTasksDB;
         public static JArray[] traderCategoriesDB;
         public static JObject globalDB;
         public static JArray questDB;
@@ -1242,14 +1241,12 @@ namespace EFM
             ParseItemMap();
             traderBaseDB = new JObject[8];
             traderAssortDB = new JObject[8];
-            traderTasksDB = new JObject[8];
             traderCategoriesDB = new JArray[8];
             for (int i=0; i < 8; ++i)
             {
                 string traderID = EFM_TraderStatus.IndexToID(i);
                 traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/base.json"));
                 traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/assort.json"));
-                traderTasksDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/questassort.json"));
                 traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/categories.json"));
             }
             globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/globals.json"));

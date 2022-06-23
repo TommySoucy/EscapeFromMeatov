@@ -1407,7 +1407,7 @@ namespace EFM
                 Mod.traderStatuses = new EFM_TraderStatus[8];
                 for (int i = 0; i < 8; i++)
                 {
-                    Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                    Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
                 }
                 for (int i = 0; i < 8; i++)
                 {
@@ -1546,7 +1546,7 @@ namespace EFM
                 {
                     for (int i = 0; i < 8; i++)
                     {
-                        Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                        Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
                     }
                 }
                 else
@@ -1554,7 +1554,7 @@ namespace EFM
                     JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
                     for (int i = 0; i < 8; i++)
                     {
-                        Mod.traderStatuses[i] = new EFM_TraderStatus(data["traderStatuses"][i], i, Mod.traderBaseDB[i]["nickname"].ToString(), (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i], Mod.traderTasksDB[i]);
+                        Mod.traderStatuses[i] = new EFM_TraderStatus(data["traderStatuses"][i], i, Mod.traderBaseDB[i]["nickname"].ToString(), (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
                     }
                 }
                 for (int i = 0; i < 8; i++)
