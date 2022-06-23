@@ -552,7 +552,7 @@ namespace EFM
                 }
 
                 JObject taskSaveData = null;
-                if(traderData != null && traderData[rawTask.Value] != null)
+                if(traderData != null && traderData["tasks"] != null && traderData["tasks"][rawTask.Value] != null)
                 {
                     taskSaveData = (JObject)traderData["tasks"][rawTask.Value];
                 }
@@ -692,7 +692,7 @@ namespace EFM
                     SetReward(newReward, rewardData, newTask, newTask.failureRewards);
                 }
 
-                // Fill start rewards
+                // Fill start rewards (initial equipment)
                 newTask.startingEquipment = new List<TraderTaskReward>();
                 foreach (JObject rewardData in questData["rewards"]["Started"])
                 {

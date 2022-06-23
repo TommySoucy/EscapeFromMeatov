@@ -110,6 +110,17 @@ namespace EFM
                 Mod.saveSlotIndex = slotIndex;
             }
 
+            //TODO: Continue fro here, to make sure this isnt additive, do everything Begin() does here ourselves:
+
+            //SteamVR_LoadLevel steamVR_LoadLevel = new GameObject("loader").AddComponent<SteamVR_LoadLevel>();
+            //steamVR_LoadLevel.levelName = levelName;
+            //steamVR_LoadLevel.showGrid = showGrid;
+            //steamVR_LoadLevel.fadeOutTime = fadeOutTime;
+            //steamVR_LoadLevel.backgroundColor = new Color(r, g, b, a);
+            //steamVR_LoadLevel.loadAdditive = false
+            //steamVR_LoadLevel.Trigger();
+
+            // with this, we can set loadAdditive = false; 
             SteamVR_LoadLevel.Begin("MeatovHideoutScene", false, 0.5f, 0f, 0f, 0f, 1f);
         }
 

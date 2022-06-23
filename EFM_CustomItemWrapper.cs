@@ -379,9 +379,9 @@ namespace EFM
 					resetColPairs.Add(resetColPair);
 				}
 				Mod.instance.LogInfo("\t\tsetup reset col pairs");
-				item.SetParentage(itemObjectsRoot);
+				item.transform.parent = itemObjectsRoot;
 				Mod.instance.LogInfo("\t\tset parentage");
-				item.RootRigidbody.isKinematic = true;
+				item.GetComponent<Rigidbody>().isKinematic = true;
 				Mod.instance.LogInfo("\t\tset RB kinematic");
 
 				// Add volume to backpack

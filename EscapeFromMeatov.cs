@@ -86,6 +86,7 @@ namespace EFM
         public static Dictionary<string, int> lowestBuyValueByItem;
         public static bool amountChoiceUIUp;
         public static EFM_CustomItemWrapper splittingItem;
+        public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
 
         // Player
         public static GameObject playerStatusUI;
@@ -1845,8 +1846,9 @@ namespace EFM
             // FireArmEjectMagPatch
             MethodInfo fireArmEjectMagPatchOriginal = typeof(FVRFireArm).GetMethod("EjectMag", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo fireArmEjectMagPatchPrefix = typeof(FireArmEjectMagPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo fireArmEjectMagPatchPostfix = typeof(FireArmEjectMagPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(fireArmEjectMagPatchOriginal, new HarmonyMethod(fireArmEjectMagPatchPrefix));
+            harmony.Patch(fireArmEjectMagPatchOriginal, new HarmonyMethod(fireArmEjectMagPatchPrefix), new HarmonyMethod(fireArmEjectMagPatchPostfix));
 
             // FireArmLoadClipPatch
             MethodInfo fireArmLoadClipPatchOriginal = typeof(FVRFireArm).GetMethod("LoadClip", BindingFlags.Public | BindingFlags.Instance);
@@ -1857,8 +1859,9 @@ namespace EFM
             // FireArmEjectClipPatch
             MethodInfo fireArmEjectClipPatchOriginal = typeof(FVRFireArm).GetMethod("EjectClip", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo fireArmEjectClipPatchPrefix = typeof(FireArmEjectClipPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo fireArmEjectClipPatchPostfix = typeof(FireArmEjectClipPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(fireArmEjectClipPatchOriginal, new HarmonyMethod(fireArmEjectClipPatchPrefix));
+            harmony.Patch(fireArmEjectClipPatchOriginal, new HarmonyMethod(fireArmEjectClipPatchPrefix), new HarmonyMethod(fireArmEjectClipPatchPostfix));
 
             // MagAddRoundPatch
             MethodInfo magAddRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool) }, null);
@@ -2400,10 +2403,18 @@ namespace EFM
     // Patches FVRInteractiveObject.EndInteraction so we know when we drop an item so we can set its parent to the items transform so it can be saved properly later
     class EndInteractionPatch
     {
+        public static bool ignoreEndInteraction; // Flag to be set to ignore endinteraction call because it is being handled elsewhere (see FireArmLoadMagPatch)
+
         static void Postfix(FVRViveHand hand, ref FVRInteractiveObject __instance)
         {
             if (!Mod.inMeatovScene)
             {
+                return;
+            }
+
+            if (ignoreEndInteraction)
+            {
+                ignoreEndInteraction = false;
                 return;
             }
 
@@ -6602,32 +6613,117 @@ namespace EFM
                 return;
             }
 
+            Mod.instance.LogInfo("FireArmLoadMagPatch called");
+
+            if (mag.m_hand != null)
+            {
+                EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the mag
+            }
+
             if (__instance.Magazine == null && mag != null)
             {
                 EFM_VanillaItemDescriptor magVID = mag.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
                 fireArmVID.currentWeight += magVID.currentWeight;
 
-                if(fireArmVID.locationIndex == 0)
+                if(magVID.locationIndex == 0) // Player
                 {
-                    // If went from outside player inventory into player inventory
-                    if (magVID.locationIndex != 0)
+                    Mod.instance.LogInfo("\tplayer");
+                    // Went from player to firearm location index
+                    if (fireArmVID.locationIndex == 0) // Player
                     {
-                        Mod.weight += magVID.currentWeight;
+                        Mod.instance.LogInfo("\t\tplayer");
+                        // Even if transfered from player to player, we don't want to consider it in inventory anymore
+                        if (!Mod.preventLoadMagUpdateLists)
+                        {
+                            Mod.playerInventory[magVID.H3ID] -= 1;
+                            Mod.playerInventoryObjects[magVID.H3ID].Remove(magVID.gameObject);
+                            if (Mod.playerInventory[magVID.H3ID] == 0)
+                            {
+                                Mod.playerInventory.Remove(magVID.H3ID);
+                                Mod.playerInventoryObjects.Remove(magVID.H3ID);
+                            }
+                        }
 
-                        BeginInteractionPatch.SetItemLocationIndex(0, null, magVID);
+                        // No difference to weight
                     }
-                }
-                else // Fire arm not on player
-                {
-                    // If went from player inventory to outside player inventory
-                    if (magVID.locationIndex == 0)
+                    else // Hideout/Raid
                     {
+                        Mod.instance.LogInfo("\t\traid");
+                        // Transfered from player to hideout or raid but we dont want to consider it in baseinventory because it is inside a firearm
+                        if (!Mod.preventLoadMagUpdateLists)
+                        {
+                            Mod.playerInventory[magVID.H3ID] -= 1;
+                            Mod.playerInventoryObjects[magVID.H3ID].Remove(magVID.gameObject);
+                            if (Mod.playerInventory[magVID.H3ID] == 0)
+                            {
+                                Mod.playerInventory.Remove(magVID.H3ID);
+                                Mod.playerInventoryObjects.Remove(magVID.H3ID);
+                            }
+                        }
+
+                        // Update player weight
                         Mod.weight -= magVID.currentWeight;
-
-                        BeginInteractionPatch.SetItemLocationIndex(fireArmVID.locationIndex, null, magVID);
                     }
                 }
+                else if(magVID.locationIndex == 1) // Hideout
+                {
+                    Mod.instance.LogInfo("\thideout");
+                    // Went from hideout to firearm locationIndex
+                    if (fireArmVID.locationIndex == 0) // Player
+                    {
+                        Mod.instance.LogInfo("\t\tplayer");
+                        // Transfered from hideout to player, dont want to consider it in player inventory because it is in firearm
+                        if (!Mod.preventLoadMagUpdateLists)
+                        {
+                            Mod.baseInventory[magVID.H3ID] -= 1;
+                            Mod.currentBaseManager.baseInventoryObjects[magVID.H3ID].Remove(magVID.gameObject);
+                            if (Mod.baseInventory[magVID.H3ID] == 0)
+                            {
+                                Mod.baseInventory.Remove(magVID.H3ID);
+                                Mod.currentBaseManager.baseInventoryObjects.Remove(magVID.H3ID);
+                            }
+                        }
+
+                        // Update player weight
+                        Mod.weight += magVID.currentWeight;
+                    }
+                    else if(fireArmVID.locationIndex == 1) // Hideout
+                    {
+                        Mod.instance.LogInfo("\t\thideout");
+                        // Transfered from hideout to hideout, dont want to consider it in base inventory because it is in firearm
+                        if (!Mod.preventLoadMagUpdateLists)
+                        {
+                            Mod.baseInventory[magVID.H3ID] -= 1;
+                            Mod.currentBaseManager.baseInventoryObjects[magVID.H3ID].Remove(magVID.gameObject);
+                            if (Mod.baseInventory[magVID.H3ID] == 0)
+                            {
+                                Mod.baseInventory.Remove(magVID.H3ID);
+                                Mod.currentBaseManager.baseInventoryObjects.Remove(magVID.H3ID);
+                            }
+                        }
+
+                        // No change to player weight
+                    }
+                    else // Raid
+                    {
+                        Mod.instance.LogError("Fire arm load mag patch impossible case: Mag loaded from hideout to raid, meaning mag had wrong location index while on player");
+                    }
+                }
+                else // Raid
+                {
+                    Mod.instance.LogInfo("\traid");
+                    if (fireArmVID.locationIndex == 0) // Player
+                    {
+                        Mod.instance.LogInfo("\t\tplayer");
+                        // Transfered from raid to player, dont want to add to inventory because it is in firearm
+
+                        // Update player weight
+                        Mod.weight += magVID.currentWeight;
+                    }
+                }
+
+                BeginInteractionPatch.SetItemLocationIndex(fireArmVID.locationIndex, null, magVID);
             }
         }
     }
@@ -6635,6 +6731,9 @@ namespace EFM
     // Patches FVRFireArm.EjectMag to keep track of weight of mag on firearm and its location index
     class FireArmEjectMagPatch
     {
+        static int preLocationIndex;
+        static EFM_VanillaItemDescriptor preMagVID;
+
         static void Prefix(ref FVRFireArm __instance)
         {
             if (!Mod.inMeatovScene)
@@ -6645,30 +6744,143 @@ namespace EFM
             if (__instance.Magazine != null)
             {
                 EFM_VanillaItemDescriptor magVID = __instance.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
-                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                fireArmVID.currentWeight -= magVID.currentWeight;
 
-                if(fireArmVID.locationIndex == 0)
+                preLocationIndex = magVID.locationIndex;
+                preMagVID = magVID;
+            }
+        }
+
+        static void Postfix(ref FVRFireArm __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            fireArmVID.currentWeight -= preMagVID.currentWeight;
+
+            int currentLocationIndex = 0;
+            if(preMagVID.physObj.m_hand == null) // Not in a hand
+            {
+                currentLocationIndex = Mod.currentLocationIndex;
+            }
+
+            if(preLocationIndex == 0)
+            {
+                if(currentLocationIndex == 0)
                 {
-                    // Went from player to out of player
-                    if (__instance.Magazine.m_hand == null)
+                    // Transfered from player to player, from firearm to hand
+                    if (Mod.playerInventory.ContainsKey(preMagVID.H3ID))
                     {
-                        Mod.weight -= magVID.currentWeight;
-
-                        BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, magVID);
+                        Mod.playerInventory[preMagVID.H3ID] += 1;
+                        Mod.playerInventoryObjects[preMagVID.H3ID].Add(preMagVID.gameObject);
                     }
+                    else
+                    {
+                        Mod.playerInventory.Add(preMagVID.H3ID, 1);
+                        Mod.playerInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
+                    }
+
+                    // No change to player weight
+                }
+                else if(currentLocationIndex == 1)
+                {
+                    // Transfered from player to hideout
+                    if (Mod.baseInventory.ContainsKey(preMagVID.H3ID))
+                    {
+                        Mod.baseInventory[preMagVID.H3ID] += 1;
+                        Mod.currentBaseManager.baseInventoryObjects[preMagVID.H3ID].Add(preMagVID.gameObject);
+                    }
+                    else
+                    {
+                        Mod.baseInventory.Add(preMagVID.H3ID, 1);
+                        Mod.currentBaseManager.baseInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
+                    }
+
+                    // Update player weight
+                    Mod.weight -= preMagVID.currentWeight;
                 }
                 else
                 {
-                    // Went from out of player to player
-                    if (__instance.Magazine.m_hand != null)
-                    {
-                        Mod.weight += magVID.currentWeight;
+                    // Transfered from player to raid, no list to update
 
-                        BeginInteractionPatch.SetItemLocationIndex(0, null, magVID);
-                    }
+                    // Update player weight
+                    Mod.weight -= preMagVID.currentWeight;
                 }
             }
+            else if(preLocationIndex == 1)
+            {
+                if (currentLocationIndex == 0)
+                {
+                    // Transfered from hideout to player, from firearm to hand
+                    if (Mod.playerInventory.ContainsKey(preMagVID.H3ID))
+                    {
+                        Mod.playerInventory[preMagVID.H3ID] += 1;
+                        Mod.playerInventoryObjects[preMagVID.H3ID].Add(preMagVID.gameObject);
+                    }
+                    else
+                    {
+                        Mod.playerInventory.Add(preMagVID.H3ID, 1);
+                        Mod.playerInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
+                    }
+
+                    // Update player weight
+                    Mod.weight += preMagVID.currentWeight;
+                }
+                else if (currentLocationIndex == 1)
+                {
+                    // Transfered from hideout to hideout
+                    if (Mod.baseInventory.ContainsKey(preMagVID.H3ID))
+                    {
+                        Mod.baseInventory[preMagVID.H3ID] += 1;
+                        Mod.currentBaseManager.baseInventoryObjects[preMagVID.H3ID].Add(preMagVID.gameObject);
+                    }
+                    else
+                    {
+                        Mod.baseInventory.Add(preMagVID.H3ID, 1);
+                        Mod.currentBaseManager.baseInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
+                    }
+
+                    // No change to player weight
+                }
+                else
+                {
+                    // Transfered from hideout to raid
+                    Mod.instance.LogError("Fire arm eject mag patch impossible case: Mag ejected from hideout to raid, meaning mag had wrong location index while on player or in raid");
+                }
+            }
+            else
+            {
+                if (currentLocationIndex == 0)
+                {
+                    // Transfered from raid to player, from firearm to hand
+                    if (Mod.playerInventory.ContainsKey(preMagVID.H3ID))
+                    {
+                        Mod.playerInventory[preMagVID.H3ID] += 1;
+                        Mod.playerInventoryObjects[preMagVID.H3ID].Add(preMagVID.gameObject);
+                    }
+                    else
+                    {
+                        Mod.playerInventory.Add(preMagVID.H3ID, 1);
+                        Mod.playerInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
+                    }
+
+                    // Update player weight
+                    Mod.weight += preMagVID.currentWeight;
+                }
+                else if (currentLocationIndex == 1)
+                {
+                    // Transfered from raid to hideout
+                    Mod.instance.LogError("Fire arm eject mag patch impossible case: Mag ejected from raid to hideout, meaning mag had wrong location index while on player or in hideout");
+                }
+                else
+                {
+                    // Transfered from raid to raid, nothing to update
+                }
+            }
+
+            BeginInteractionPatch.SetItemLocationIndex(currentLocationIndex, null, preMagVID);
         }
     }
 
@@ -6682,32 +6894,107 @@ namespace EFM
                 return;
             }
 
+            if (clip.m_hand != null)
+            {
+                EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the mag
+            }
+
             if (__instance.Clip == null && clip != null)
             {
                 EFM_VanillaItemDescriptor clipVID = clip.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
                 fireArmVID.currentWeight += clipVID.currentWeight;
 
-                if(fireArmVID.locationIndex == 0)
+                if (clipVID.locationIndex == 0) // Player
                 {
-                    // If went from outside player inventory into player inventory
-                    if (clipVID.locationIndex != 0)
+                    // Went from player to firearm location index
+                    if (fireArmVID.locationIndex == 0) // Player
                     {
-                        Mod.weight += clipVID.currentWeight;
+                        // Even if transfered from player to player, we don't want to consider it in inventory anymore
+                        if (!Mod.preventLoadMagUpdateLists)
+                        {
+                            Mod.playerInventory[clipVID.H3ID] -= 1;
+                            Mod.playerInventoryObjects[clipVID.H3ID].Remove(clipVID.gameObject);
+                            if (Mod.playerInventory[clipVID.H3ID] == 0)
+                            {
+                                Mod.playerInventory.Remove(clipVID.H3ID);
+                                Mod.playerInventoryObjects.Remove(clipVID.H3ID);
+                            }
+                        }
 
-                        BeginInteractionPatch.SetItemLocationIndex(0, null, clipVID);
+                        // No difference to weight
                     }
-                }
-                else // Fire arm not on player
-                {
-                    // If went from player inventory to outside player inventory
-                    if (clipVID.locationIndex == 0)
+                    else // Hideout/Raid
                     {
+                        // Transfered from player to hideout or raid but we dont want to consider it in baseinventory because it is inside a firearm
+                        if (!Mod.preventLoadMagUpdateLists)
+                        {
+                            Mod.playerInventory[clipVID.H3ID] -= 1;
+                            Mod.playerInventoryObjects[clipVID.H3ID].Remove(clipVID.gameObject);
+                            if (Mod.playerInventory[clipVID.H3ID] == 0)
+                            {
+                                Mod.playerInventory.Remove(clipVID.H3ID);
+                                Mod.playerInventoryObjects.Remove(clipVID.H3ID);
+                            }
+                        }
+
+                        // Update player weight
                         Mod.weight -= clipVID.currentWeight;
-
-                        BeginInteractionPatch.SetItemLocationIndex(fireArmVID.locationIndex, null, clipVID);
                     }
                 }
+                else if (clipVID.locationIndex == 1) // Hideout
+                {
+                    // Went from hideout to firearm locationIndex
+                    if (fireArmVID.locationIndex == 0) // Player
+                    {
+                        // Transfered from hideout to player, dont want to consider it in player inventory because it is in firearm
+                        if (!Mod.preventLoadMagUpdateLists)
+                        {
+                            Mod.baseInventory[clipVID.H3ID] -= 1;
+                            Mod.currentBaseManager.baseInventoryObjects[clipVID.H3ID].Remove(clipVID.gameObject);
+                            if (Mod.baseInventory[clipVID.H3ID] == 0)
+                            {
+                                Mod.baseInventory.Remove(clipVID.H3ID);
+                                Mod.currentBaseManager.baseInventoryObjects.Remove(clipVID.H3ID);
+                            }
+                        }
+
+                        // Update player weight
+                        Mod.weight += clipVID.currentWeight;
+                    }
+                    else if (fireArmVID.locationIndex == 1) // Hideout
+                    {
+                        // Transfered from hideout to hideout, dont want to consider it in base inventory because it is in firearm
+                        if (!Mod.preventLoadMagUpdateLists)
+                        {
+                            Mod.baseInventory[clipVID.H3ID] -= 1;
+                            Mod.currentBaseManager.baseInventoryObjects[clipVID.H3ID].Remove(clipVID.gameObject);
+                            if (Mod.baseInventory[clipVID.H3ID] == 0)
+                            {
+                                Mod.baseInventory.Remove(clipVID.H3ID);
+                                Mod.currentBaseManager.baseInventoryObjects.Remove(clipVID.H3ID);
+                            }
+                        }
+
+                        // No change to player weight
+                    }
+                    else // Raid
+                    {
+                        Mod.instance.LogError("Fire arm load clip patch impossible case: Mag loaded from hideout to raid, meaning mag had wrong location index while on player");
+                    }
+                }
+                else // Raid
+                {
+                    if (fireArmVID.locationIndex == 0) // Player
+                    {
+                        // Transfered from raid to player, dont want to add to inventory because it is in firearm
+
+                        // Update player weight
+                        Mod.weight += clipVID.currentWeight;
+                    }
+                }
+
+                BeginInteractionPatch.SetItemLocationIndex(fireArmVID.locationIndex, null, clipVID);
             }
         }
     }
@@ -6715,6 +7002,9 @@ namespace EFM
     // Patches FVRFireArm.EjectClip to keep track of weight of clip on firearm and its location index
     class FireArmEjectClipPatch
     {
+        static int preLocationIndex;
+        static EFM_VanillaItemDescriptor preClipVID;
+
         static void Prefix(ref FVRFireArm __instance)
         {
             if (!Mod.inMeatovScene)
@@ -6725,30 +7015,143 @@ namespace EFM
             if (__instance.Clip != null)
             {
                 EFM_VanillaItemDescriptor clipVID = __instance.Clip.GetComponent<EFM_VanillaItemDescriptor>();
-                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                fireArmVID.currentWeight -= clipVID.currentWeight;
 
-                if(fireArmVID.locationIndex == 0)
+                preLocationIndex = clipVID.locationIndex;
+                preClipVID = clipVID;
+            }
+        }
+
+        static void Postfix(ref FVRFireArm __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            fireArmVID.currentWeight -= preClipVID.currentWeight;
+
+            int currentLocationIndex = 0;
+            if (preClipVID.physObj.m_hand == null) // Not in a hand
+            {
+                currentLocationIndex = Mod.currentLocationIndex;
+            }
+
+            if (preLocationIndex == 0)
+            {
+                if (currentLocationIndex == 0)
                 {
-                    // Went from player to out of player
-                    if (__instance.Clip.m_hand == null)
+                    // Transfered from player to player, from firearm to hand
+                    if (Mod.playerInventory.ContainsKey(preClipVID.H3ID))
                     {
-                        Mod.weight -= clipVID.currentWeight;
-
-                        BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, clipVID);
+                        Mod.playerInventory[preClipVID.H3ID] += 1;
+                        Mod.playerInventoryObjects[preClipVID.H3ID].Add(preClipVID.gameObject);
                     }
+                    else
+                    {
+                        Mod.playerInventory.Add(preClipVID.H3ID, 1);
+                        Mod.playerInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
+                    }
+
+                    // No change to player weight
+                }
+                else if (currentLocationIndex == 1)
+                {
+                    // Transfered from player to hideout
+                    if (Mod.baseInventory.ContainsKey(preClipVID.H3ID))
+                    {
+                        Mod.baseInventory[preClipVID.H3ID] += 1;
+                        Mod.currentBaseManager.baseInventoryObjects[preClipVID.H3ID].Add(preClipVID.gameObject);
+                    }
+                    else
+                    {
+                        Mod.baseInventory.Add(preClipVID.H3ID, 1);
+                        Mod.currentBaseManager.baseInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
+                    }
+
+                    // Update player weight
+                    Mod.weight -= preClipVID.currentWeight;
                 }
                 else
                 {
-                    // Went from out of player to player
-                    if (__instance.Clip.m_hand != null)
-                    {
-                        Mod.weight += clipVID.currentWeight;
+                    // Transfered from player to raid, no list to update
 
-                        BeginInteractionPatch.SetItemLocationIndex(0, null, clipVID);
-                    }
+                    // Update player weight
+                    Mod.weight -= preClipVID.currentWeight;
                 }
             }
+            else if (preLocationIndex == 1)
+            {
+                if (currentLocationIndex == 0)
+                {
+                    // Transfered from hideout to player, from firearm to hand
+                    if (Mod.playerInventory.ContainsKey(preClipVID.H3ID))
+                    {
+                        Mod.playerInventory[preClipVID.H3ID] += 1;
+                        Mod.playerInventoryObjects[preClipVID.H3ID].Add(preClipVID.gameObject);
+                    }
+                    else
+                    {
+                        Mod.playerInventory.Add(preClipVID.H3ID, 1);
+                        Mod.playerInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
+                    }
+
+                    // Update player weight
+                    Mod.weight += preClipVID.currentWeight;
+                }
+                else if (currentLocationIndex == 1)
+                {
+                    // Transfered from hideout to hideout
+                    if (Mod.baseInventory.ContainsKey(preClipVID.H3ID))
+                    {
+                        Mod.baseInventory[preClipVID.H3ID] += 1;
+                        Mod.currentBaseManager.baseInventoryObjects[preClipVID.H3ID].Add(preClipVID.gameObject);
+                    }
+                    else
+                    {
+                        Mod.baseInventory.Add(preClipVID.H3ID, 1);
+                        Mod.currentBaseManager.baseInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
+                    }
+
+                    // No change to player weight
+                }
+                else
+                {
+                    // Transfered from hideout to raid
+                    Mod.instance.LogError("Fire arm eject clip patch impossible case: Clip ejected from hideout to raid, meaning mag had wrong location index while on player or in raid");
+                }
+            }
+            else
+            {
+                if (currentLocationIndex == 0)
+                {
+                    // Transfered from raid to player, from firearm to hand
+                    if (Mod.playerInventory.ContainsKey(preClipVID.H3ID))
+                    {
+                        Mod.playerInventory[preClipVID.H3ID] += 1;
+                        Mod.playerInventoryObjects[preClipVID.H3ID].Add(preClipVID.gameObject);
+                    }
+                    else
+                    {
+                        Mod.playerInventory.Add(preClipVID.H3ID, 1);
+                        Mod.playerInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
+                    }
+
+                    // Update player weight
+                    Mod.weight += preClipVID.currentWeight;
+                }
+                else if (currentLocationIndex == 1)
+                {
+                    // Transfered from raid to hideout
+                    Mod.instance.LogError("Fire arm eject clip patch impossible case: Clip ejected from raid to hideout, meaning mag had wrong location index while on player or in hideout");
+                }
+                else
+                {
+                    // Transfered from raid to raid, nothing to update
+                }
+            }
+
+            BeginInteractionPatch.SetItemLocationIndex(currentLocationIndex, null, preClipVID);
         }
     }
 

@@ -923,8 +923,6 @@ namespace EFM
 
         private void SetupPlayerRig()
         {
-            Mod.instance.LogInfo("Setup player rig called");
-
             // Player status
             Mod.playerStatusUI = Instantiate(Mod.playerStatusUIPrefab, GM.CurrentPlayerRoot);
             Mod.playerStatusManager = Mod.playerStatusUI.AddComponent<EFM_PlayerStatusManager>();
@@ -1042,6 +1040,8 @@ namespace EFM
 
         public void ProcessData()
         {
+            Mod.preventLoadMagUpdateLists = true;
+
             // Check if we have loaded data
             if (data == null)
             {
@@ -1438,6 +1438,8 @@ namespace EFM
                 Mod.playerInventory.Clear();
                 Mod.playerInventoryObjects.Clear();
 
+                Mod.preventLoadMagUpdateLists = false;
+
                 return;
             }
 
@@ -1493,6 +1495,8 @@ namespace EFM
             // Count each type of item we have
             UpdateBaseInventory();
             Mod.UpdatePlayerInventory();
+
+            Mod.preventLoadMagUpdateLists = false;
 
             // Instantiate areas
             baseAreaManagers = new List<EFM_BaseAreaManager>();
@@ -1603,11 +1607,9 @@ namespace EFM
 
         private void AddToBaseInventory(Transform item)
         {
-            Mod.instance.LogInfo("Adding " + item.name + " to base inventory");
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
             string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
-            Mod.instance.LogInfo("0");
             if (Mod.baseInventory.ContainsKey(itemID))
             {
                 Mod.baseInventory[itemID] += customItemWrapper != null ? (customItemWrapper.stack > 0 ? customItemWrapper.stack : 1) : 1;
@@ -1618,14 +1620,11 @@ namespace EFM
                 Mod.baseInventory.Add(itemID, customItemWrapper != null ? (customItemWrapper.stack > 0 ? customItemWrapper.stack : 1) : 1);
                 baseInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
             }
-            Mod.instance.LogInfo("0");
 
             if (customItemWrapper != null)
             {
-                Mod.instance.LogInfo("1");
                 if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
                 {
-                    Mod.instance.LogInfo("2");
                     FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
                     foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                     {
@@ -1662,11 +1661,9 @@ namespace EFM
                     }
                 }
             }
-            Mod.instance.LogInfo("0");
 
             if (vanillaItemDescriptor != null)
             {
-                Mod.instance.LogInfo("1");
                 if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
                 {
                     Mod.instance.LogInfo("2");
@@ -1755,7 +1752,6 @@ namespace EFM
                     }
                 }
             }
-            Mod.instance.LogInfo("0");
 
             // Check for more items that may be contained inside this one
             if (customItemWrapper != null && customItemWrapper.itemObjectsRoot != null)
@@ -1857,10 +1853,10 @@ namespace EFM
 
                     if (firearmPhysicalObject.UsesClips && containerPhysicalObject is FVRFireArmClip)
                     {
-                        Transform gunClipTransform = firearmPhysicalObject.ClipMountPos;
+                        //Transform gunClipTransform = firearmPhysicalObject.ClipMountPos;
 
-                        containerObject.transform.position = gunClipTransform.position;
-                        containerObject.transform.rotation = gunClipTransform.rotation;
+                        //containerObject.transform.localPosition = gunClipTransform.localPosition;
+                        //containerObject.transform.localRotation = gunClipTransform.localRotation;
 
                         FVRFireArmClip clipPhysicalObject = containerPhysicalObject as FVRFireArmClip;
 
@@ -1881,6 +1877,10 @@ namespace EFM
                             }
                         }
 
+                        // Make sure the clip doesnt take the current location index once awake
+                        EFM_VanillaItemDescriptor clipVID = clipPhysicalObject.GetComponent<EFM_VanillaItemDescriptor>();
+                        clipVID.takeCurrentLocation = false;
+
                         clipPhysicalObject.Load(firearmPhysicalObject);
                         clipPhysicalObject.IsInfinite = false;
                     }
@@ -1889,11 +1889,11 @@ namespace EFM
                         Mod.instance.LogInfo("\tFirearm has mag");
                         FVRFireArmMagazine magPhysicalObject = containerPhysicalObject as FVRFireArmMagazine;
                         Mod.instance.LogInfo("\tis mag null?: " + (magPhysicalObject == null));
-                        Transform gunMagTransform = firearmPhysicalObject.GetMagMountPos(magPhysicalObject.IsBeltBox);
-                        Mod.instance.LogInfo("\tgunMagTransform null?: " + (gunMagTransform == null));
+                        //Transform gunMagTransform = firearmPhysicalObject.GetMagMountPos(magPhysicalObject.IsBeltBox);
+                        //Mod.instance.LogInfo("\tgunMagTransform null?: " + (gunMagTransform == null));
 
-                        containerObject.transform.position = gunMagTransform.position;
-                        containerObject.transform.rotation = gunMagTransform.rotation;
+                        //containerObject.transform.localPosition = gunMagTransform.localPosition;
+                        //containerObject.transform.localRotation = gunMagTransform.localRotation;
 
                         if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
                         {
@@ -1913,6 +1913,10 @@ namespace EFM
                                 magPhysicalObject.RemoveRound();
                             }
                         }
+
+                        // Make sure the mag doesnt take the current location index once awake
+                        EFM_VanillaItemDescriptor magVID = magPhysicalObject.GetComponent<EFM_VanillaItemDescriptor>();
+                        magVID.takeCurrentLocation = false;
 
                         magPhysicalObject.Load(firearmPhysicalObject);
                         magPhysicalObject.IsInfinite = false;
@@ -2067,6 +2071,8 @@ namespace EFM
                                 }
                             }
                         }
+
+                        customItemWrapper.UpdateRigMode();
                     }
                 }
 
@@ -2265,6 +2271,14 @@ namespace EFM
             if(item["inTradeVolume"] != null)
             {
                 itemObject.transform.parent = transform.GetChild(1).GetChild(24).GetChild(1);
+            }
+            else if(parent.parent != null) // Add to container in case parent is one
+            {
+                EFM_CustomItemWrapper parentCIW = parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                if(parentCIW != null)
+                {
+                    parentCIW.AddItemToContainer(itemPhysicalObject);
+                }
             }
 
             // GameObject
@@ -2724,10 +2738,11 @@ namespace EFM
             }
 
             // Unload base assets bundle without unloading loaded assets, if necessary
-            if (Mod.baseAssetsBundle != null)
-            {
-                Mod.baseAssetsBundle.Unload(false);
-            }
+            // TODO: will have to review the asset loading process, because if already in hideout, if we load a save, this unload causes assets to be missing because the hideout assets only get loaded once, on the first hideout load
+            //if (Mod.baseAssetsBundle != null)
+            //{
+            //    Mod.baseAssetsBundle.Unload(false);
+            //}
 
             Mod.instance.LogInfo("Initializing area managers");
             // Init all area managers after UI is prepped
