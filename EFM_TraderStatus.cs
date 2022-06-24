@@ -1253,6 +1253,20 @@ namespace EFM
                     condition.value = (int)conditionData["_props"]["value"];
                     condition.skillIndex = Mod.SkillNameToIndex(conditionData["_props"]["target"].ToString());
                     break;
+                case "VisitPlace":
+                    condition.conditionType = TraderTaskCondition.ConditionType.VisitPlace;
+                    condition.targetPlaceName = conditionData["_props"]["target"].ToString();
+                    break;
+                case "WeaponAssembly":
+                    condition.conditionType = TraderTaskCondition.ConditionType.WeaponAssembly;
+                    condition.targetWeapon = conditionData["_props"]["targetWeapon"].ToString();
+                    condition.targetAttachmentTypes = conditionData["_props"]["targetAttachmentTypes"].ToObject<List<string>>();
+                    condition.targetAttachments = conditionData["_props"]["targetAttachments"].ToObject<List<string>>();
+                    condition.suppressed = (bool)conditionData["_props"]["suppressed"];
+                    condition.gripped = (bool)conditionData["_props"]["gripped"];
+                    condition.braked = (bool)conditionData["_props"]["braked"];
+                    condition.scoped = (bool)conditionData["_props"]["scoped"];
+                    break;
                 default:
                     Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has unexpected condition type: " + conditionData["_parent"].ToString());
                     return false;
@@ -1511,12 +1525,8 @@ namespace EFM
 
         public static void UpdateConditionFulfillment(TraderTaskCondition condition)
         {
-            // Return right away if condition is already fulfilled TODO: This assumes conditions cannot be unfulfilled, ensure that we will never need to unfulfill conditions
-            if (condition.fulfilled)
-            {
-                return;
-            }
-
+            // TODO: Might need to implement unfulfilling conditions by checking if the conditions are met and if not calling UnfulfillCondition or something similar
+            // in order to properly update everything
             switch (condition.conditionType)
             {
                 case TraderTaskCondition.ConditionType.CounterCreator:
@@ -1570,6 +1580,24 @@ namespace EFM
                     break;
                 case TraderTaskCondition.ConditionType.Skill:
                     if(condition.value >= Mod.skills[condition.skillIndex].progress / 100)
+                    {
+                        FulfillCondition(condition);
+                    }
+                    break;
+                case TraderTaskCondition.ConditionType.VisitPlace:
+                    // VisitPlace conditions are not dependent on some other variable, so to update its fulfillment, we assume that fulfilled var would be set prior to 
+                    // calling this method on it, so this is all we have to check
+                    if(condition.fulfilled)
+                    {
+                        FulfillCondition(condition);
+                    }
+                    break;
+                case TraderTaskCondition.ConditionType.WeaponAssembly:
+                    // WeaponAssembly conditions are dependent on other variables but these will be checked when
+                    // the player adds a weapon to the trade volume, the weapon will be checked against all weaponAssembly type
+                    // conditions and if the weapon matches one, they will be given the option to hand it in
+                    // Once handed in, fulfilled will be set to true on the condition and this method called on it.
+                    if (condition.fulfilled)
                     {
                         FulfillCondition(condition);
                     }
@@ -1668,7 +1696,9 @@ namespace EFM
             Quest,
             LeaveItemAtLocation,
             TraderLoyalty,
-            Skill
+            Skill,
+            VisitPlace,
+            WeaponAssembly
         }
         public ConditionType conditionType;
         public bool fulfilled;
@@ -1705,6 +1735,18 @@ namespace EFM
 
         // Skill
         public int skillIndex;
+
+        // VisitPlace
+        public string targetPlaceName;
+
+        // WeaponAssembly
+        public string targetWeapon;
+        public List<string> targetAttachmentTypes; // Attachment categories that the weapon must have one of each
+        public List<string> targetAttachments; // Specific attachments the weapon must have
+        public bool suppressed;
+        public bool gripped; // Whether the weapon should have an added grip of any kind
+        public bool braked; // Whether the weapon should have a muzzle brake of any kind
+        public bool scoped; // Whether the weapon should have a sight or scope of any kind
 
         public void Init()
         {
