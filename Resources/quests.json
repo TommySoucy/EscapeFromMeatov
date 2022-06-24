@@ -7031,10 +7031,8 @@
                     "target": "Savage",
                     "value": "1",
                     "weaponModsInclusive": [
-                      ["59bffc1f86f77435b128b872"],
                       ["5a32a064c4a28200741e22de"],
                       ["59bffbb386f77435b379b9c2"],
-                      ["54490a4d4bdc2dbc018b4573"],
                       ["5b363dd25acfc4001a598fd2"],
                       ["5b363dea5acfc4771e1c5e7e"],
                       ["5b363e1b5acfc4771e1c5e80"],
@@ -7083,9 +7081,7 @@
                       ["5a9fbb84a2750c00137fa685"],
                       ["593d489686f7745c6255d58a"],
                       ["5e208b9842457a4a7a33d074"],
-                      ["5dfa3cd1b33c0951220c079b"],
                       ["5e01ea19e9dc277128008c0b"],
-                      ["5c7fb51d2e2216001219ce11"],
                       ["5fbe7618d6fa9c00c571bb6c"],
                       ["5fbe760793164a5b6278efc8"],
                       ["5fc4b9b17283c4046c5814d7"],
@@ -7096,8 +7092,7 @@
                       ["6130c4d51cb55961fa0fd49f"],
                       ["602a97060ddce744014caf6f"],
                       ["5de8f2d5b74cd90030650c72"],
-                      ["615d8f8567085e45ef1409ca"],
-                      ["58889c7324597754281f9439"]
+                      ["615d8f8567085e45ef1409ca"]
                     ]
                   }
                 },
@@ -12922,7 +12917,6 @@
                       ["5a9fbb84a2750c00137fa685"],
                       ["5a34fe59c4a282000b1521a2"],
                       ["5cff9e5ed7ad1a09407397d4"],
-                      ["5ea172e498dacb342978818e"],
                       ["5ea17bbc09aa976f2e7a51cd"],
                       ["5d44064fa4b9361e4f6eb8b5"],
                       ["60926df0132d4d12c81fd9df"]
@@ -22628,86 +22622,6 @@
           "value": "0.03"
         },
         {
-          "id": "60cc978198b49270603645fd",
-          "index": 3,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dacb7",
-              "_tpl": "5b3f16c486f7747c327f55f7",
-              "upd": {
-                "StackObjectsCount": 2
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dacb7",
-          "type": "Item",
-          "value": "2"
-        },
-        {
-          "id": "60cc97969f89812e5b6aa879",
-          "index": 4,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dacb8",
-              "_tpl": "5b3f3b0e86f7746752107cda",
-              "upd": {
-                "StackObjectsCount": 2
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dacb8",
-          "type": "Item",
-          "value": "2"
-        },
-        {
-          "id": "60cc97a5b2736c24b2118b99",
-          "index": 5,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dacb9",
-              "_tpl": "5b3f3b0186f774021a2afef7",
-              "upd": {
-                "StackObjectsCount": 2
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dacb9",
-          "type": "Item",
-          "value": "2"
-        },
-        {
-          "id": "60cc97b1646f74055e27652a",
-          "index": 6,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dacba",
-              "_tpl": "5b3f3ade86f7746b6b790d8e",
-              "upd": {
-                "StackObjectsCount": 2
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dacba",
-          "type": "Item",
-          "value": "2"
-        },
-        {
-          "id": "60cc97c0f81cc57f47171897",
-          "index": 7,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dacbb",
-              "_tpl": "5b3f3af486f774679e752c1f",
-              "upd": {
-                "StackObjectsCount": 2
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dacbb",
-          "type": "Item",
-          "value": "2"
-        },
-        {
           "id": "60cc97cfa7d63f18200a250c",
           "index": 8,
           "items": [
@@ -25569,38 +25483,6 @@
           "value": "45000"
         },
         {
-          "id": "5b4873f686f7741cba3d59bb",
-          "index": 3,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad09",
-              "_tpl": "5b04473a5acfc40018632f70",
-              "upd": {
-                "StackObjectsCount": 2
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dad09",
-          "type": "Item",
-          "value": "2"
-        },
-        {
-          "id": "60cb60407c496e588343a1b6",
-          "index": 4,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad0a",
-              "_tpl": "5e21ca18e4d47f0da15e77dd",
-              "upd": {
-                "StackObjectsCount": 4
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dad0a",
-          "type": "Item",
-          "value": "4"
-        },
-        {
           "id": "60cb605377dc197c77424fa5",
           "index": 5,
           "items": [
@@ -25871,22 +25753,6 @@
           "target": "61e1da5da7d12143174dad0c",
           "type": "Item",
           "value": "3000"
-        },
-        {
-          "id": "60cb60d6e3d0247e625da190",
-          "index": 3,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad0d",
-              "_tpl": "5c066e3a0db834001b7353f0",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dad0d",
-          "type": "Item",
-          "value": "1"
         },
         {
           "id": "60b90bea81c51328c56d7717",
@@ -26399,38 +26265,6 @@
             }
           ],
           "target": "61e1da5da7d12143174dad21",
-          "type": "Item",
-          "value": "2"
-        },
-        {
-          "id": "5bcf2d4886f774723055e998",
-          "index": 4,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad22",
-              "_tpl": "5b3f7c005acfc4704b4a1de8",
-              "upd": {
-                "StackObjectsCount": 2
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dad22",
-          "type": "Item",
-          "value": "2"
-        },
-        {
-          "id": "5bd7018286f77410f65dc659",
-          "index": 5,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dad23",
-              "_tpl": "5b3f7bf05acfc433000ecf6b",
-              "upd": {
-                "StackObjectsCount": 2
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dad23",
           "type": "Item",
           "value": "2"
         }
@@ -28151,22 +27985,6 @@
           "target": "5d34df2788a4504526796d5a",
           "type": "Item",
           "value": "85000"
-        },
-        {
-          "id": "5c17c4ae86f77430a70d1982",
-          "index": 3,
-          "items": [
-            {
-              "_id": "5d34df2788a4504526796d5b",
-              "_tpl": "5c0696830db834001d23f5da",
-              "upd": {
-                "StackObjectsCount": 3
-              }
-            }
-          ],
-          "target": "5d34df2788a4504526796d5b",
-          "type": "Item",
-          "value": "3"
         }
       ]
     },
@@ -32917,38 +32735,6 @@
           "_props": {
             "dogtagLevel": 0,
             "dynamicLocale": false,
-            "id": "60cfa1031bdece56c249cbf4",
-            "index": 36,
-            "maxDurability": 0,
-            "minDurability": 0,
-            "onlyFoundInRaid": true,
-            "parentId": "",
-            "target": ["60b0f988c4449e4cb624c1da"],
-            "value": "1"
-          },
-          "dynamicLocale": false
-        },
-        {
-          "_parent": "HandoverItem",
-          "_props": {
-            "dogtagLevel": 0,
-            "dynamicLocale": false,
-            "id": "60cfa136f81cc57f471718cb",
-            "index": 37,
-            "maxDurability": 0,
-            "minDurability": 0,
-            "onlyFoundInRaid": true,
-            "parentId": "",
-            "target": ["60b0f988c4449e4cb624c1da"],
-            "value": "1"
-          },
-          "dynamicLocale": false
-        },
-        {
-          "_parent": "FindItem",
-          "_props": {
-            "dogtagLevel": 0,
-            "dynamicLocale": false,
             "id": "60d06de320a6283a506aeb67",
             "index": 38,
             "maxDurability": 0,
@@ -36952,7 +36738,7 @@
           "items": [
             {
               "_id": "5e230f11fabc1e7f3745a490",
-              "_tpl": "5a1eaa87fcdbcb001865f75e",
+              "_tpl": "5aa66be6e5b5b0214e506e97",
               "upd": {
                 "StackObjectsCount": 1
               }
@@ -42416,40 +42202,6 @@
           "target": "61e1da5da7d12143174dae92",
           "type": "Item",
           "value": "25000"
-        },
-        {
-          "id": "60cb5889e3d0247e625da17c",
-          "index": 5,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dae93",
-              "_tpl": "5648ae314bdc2d3d1c8b457f",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dae93",
-          "type": "Item",
-          "unknown": true,
-          "value": "1"
-        },
-        {
-          "id": "60cb589a3e4e974efa3452c1",
-          "index": 6,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dae94",
-              "_tpl": "5cf50fc5d7f00c056c53f83c",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dae94",
-          "type": "Item",
-          "unknown": true,
-          "value": "1"
         }
       ]
     },
@@ -42835,22 +42587,6 @@
           "target": "61e1da5da7d12143174dae99",
           "type": "Item",
           "value": "22000"
-        },
-        {
-          "id": "5fdc85c47e3ca316bd3b806d",
-          "index": 3,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dae9a",
-              "_tpl": "5f4f9eb969cdc30ff33f09db",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dae9a",
-          "type": "Item",
-          "value": "1"
         },
         {
           "id": "60cb58e277dc197c77424f93",
@@ -43824,19 +43560,6 @@
           "target": "54cb50c76803fa8b248b4571",
           "type": "TraderStanding",
           "value": "0.04"
-        },
-        {
-          "id": "NSPUM",
-          "index": 3,
-          "items": [
-            {
-              "_id": "NSPUMScope",
-              "_tpl": "5a7c74b3e899ef0014332c29"
-            }
-          ],
-          "target": "NSPUMScope",
-          "type": "Item",
-          "value": "1"
         },
         {
           "id": "PKlesh",

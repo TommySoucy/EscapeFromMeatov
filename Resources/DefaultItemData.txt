@@ -33931,7 +33931,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.25
       ],
@@ -34012,7 +34012,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.2
       ],
@@ -34093,7 +34093,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.2
       ],
@@ -34174,7 +34174,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.2
       ],
@@ -34255,7 +34255,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.2
       ],
@@ -34336,7 +34336,7 @@
       ]
     },
     {
-      "ItemType": 4,
+      "ItemType": 15,
       "Volumes": [
         1.8
       ],
@@ -34421,7 +34421,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.45
       ],
@@ -34502,7 +34502,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         1.25
       ],
@@ -34583,7 +34583,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         1.5
       ],
@@ -34664,7 +34664,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.95
       ],
@@ -34745,7 +34745,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.6
       ],
@@ -34826,7 +34826,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.3
       ],
@@ -34907,7 +34907,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.3
       ],
@@ -34988,7 +34988,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.3
       ],
@@ -35069,7 +35069,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.25
       ],
@@ -35150,7 +35150,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         1
       ],
@@ -35231,7 +35231,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.15
       ],
@@ -35312,7 +35312,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.15
       ],
@@ -35393,7 +35393,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.85
       ],
@@ -35474,7 +35474,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.23
       ],
@@ -35555,7 +35555,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.23
       ],
@@ -35636,7 +35636,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.15
       ],
@@ -35717,7 +35717,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.15
       ],
@@ -35798,7 +35798,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         1.1
       ],
@@ -35879,7 +35879,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.2
       ],
@@ -35960,7 +35960,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         1.2
       ],
@@ -36041,7 +36041,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         1.2
       ],
@@ -36122,7 +36122,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.35
       ],
@@ -36203,7 +36203,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -36284,7 +36284,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -36365,7 +36365,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -36446,7 +36446,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -36527,7 +36527,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -36608,7 +36608,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -36689,7 +36689,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -36770,7 +36770,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -36851,7 +36851,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -36932,7 +36932,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -37013,7 +37013,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.15
       ],
@@ -37094,7 +37094,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 14,
       "Volumes": [
         0.2
       ],
@@ -37175,7 +37175,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.2
       ],
@@ -37256,7 +37256,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.5
       ],
@@ -37337,7 +37337,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.5
       ],
@@ -37418,7 +37418,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.5
       ],
@@ -37499,12 +37499,30 @@
       ]
     },
     {
-      "ItemType": 0,
-      "Volumes": [
-        0.25
+      "parents": [
+        "5a341c4086f77401f2541505",
+        "57bef4c42459772e8d35a53b",
+        "543be5f84bdc2dd4348b456a",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
       ],
-      "ArmorAndRigProperties": {},
-      "BackpackProperties": {},
+      "MaterialProperties": {
+        "PMaterial": "Cloth",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "BlocksHeadwear": false,
+      "BlocksFaceCover": false,
+      "BlocksEyewear": false,
+      "BlocksEarpiece": false,
+      "ContainerProperties": {},
+      "stackMaxSize": 1,
+      "itemSound": "gear_generic",
+      "spawnChance": 2,
+      "rarity": "Rare",
+      "lootExperience": 20,
+      "description": "Just a black beret.",
+      "idToUse": "5f60e6403b85f6263c14558c",
       "DefaultPhysicalObject": {
         "DefaultObjectWrapper": {
           "DisplayName": "Beret (Black)",
@@ -37554,33 +37572,15 @@
         "OverridesObjectToHand": 0,
         "CheckDestroyTick": 1
       },
-      "idToUse": "5f60e6403b85f6263c14558c",
-      "description": "Just a black beret.",
-      "lootExperience": 20,
-      "rarity": "Rare",
-      "spawnChance": 2,
-      "itemSound": "gear_generic",
-      "stackMaxSize": 1,
-      "ContainerProperties": {},
-      "BlocksEarpiece": false,
-      "BlocksEyewear": false,
-      "BlocksFaceCover": false,
-      "BlocksHeadwear": false,
-      "MaterialProperties": {
-        "PMaterial": "Cloth",
-        "PMatSoundCategory": "Soft",
-        "PMatImpactEffectCategory": "Generic"
-      },
-      "parents": [
-        "5a341c4086f77401f2541505",
-        "57bef4c42459772e8d35a53b",
-        "543be5f84bdc2dd4348b456a",
-        "566162e44bdc2d3f298b4573",
-        "54009119af1c881c07000029"
-      ]
+      "BackpackProperties": {},
+      "ArmorAndRigProperties": {},
+      "Volumes": [
+        0.25
+      ],
+      "ItemType": 15
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.25
       ],
@@ -37661,7 +37661,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.25
       ],
@@ -37742,7 +37742,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.25
       ],
@@ -37823,7 +37823,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.4
       ],
@@ -37904,7 +37904,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         1
       ],
@@ -37985,7 +37985,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.25
       ],
@@ -38066,7 +38066,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.75
       ],
@@ -38147,7 +38147,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.25
       ],
@@ -38228,7 +38228,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         5
       ],
@@ -38309,7 +38309,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.25
       ],
@@ -38390,7 +38390,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.25
       ],
@@ -38471,7 +38471,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.25
       ],
@@ -38552,7 +38552,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.3
       ],
@@ -38633,7 +38633,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.35
       ],
@@ -38714,7 +38714,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.35
       ],
@@ -38795,7 +38795,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.35
       ],
@@ -38876,7 +38876,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.35
       ],
@@ -38957,7 +38957,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.35
       ],
@@ -39038,7 +39038,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.35
       ],
@@ -39119,7 +39119,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.35
       ],
@@ -39200,7 +39200,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.4
       ],
@@ -39281,7 +39281,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.4
       ],
@@ -39362,7 +39362,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.4
       ],
@@ -39443,7 +39443,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.5
       ],
@@ -39524,7 +39524,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.3
       ],
@@ -39605,7 +39605,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.25
       ],
@@ -39686,7 +39686,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.5
       ],
@@ -39767,7 +39767,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.3
       ],
@@ -39848,7 +39848,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.5
       ],
@@ -39929,7 +39929,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.5
       ],
@@ -40010,7 +40010,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 15,
       "Volumes": [
         0.65
       ],
@@ -40091,7 +40091,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 12,
       "Volumes": [
         0.8
       ],
@@ -40171,7 +40171,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 12,
       "Volumes": [
         0.8
       ],
@@ -40251,7 +40251,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 12,
       "Volumes": [
         0.8
       ],
@@ -40331,7 +40331,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 12,
       "Volumes": [
         0.8
       ],
@@ -40411,7 +40411,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 12,
       "Volumes": [
         0.8
       ],
@@ -40491,7 +40491,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 12,
       "Volumes": [
         0.8
       ],
@@ -40571,7 +40571,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 12,
       "Volumes": [
         0.8
       ],
@@ -43541,7 +43541,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         1
       ],
@@ -43622,7 +43622,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.1
       ],
@@ -57718,7 +57718,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 13,
       "Volumes": [
         0.2
       ],
@@ -57943,6 +57943,899 @@
       "parents": [
         "5c99f98d86f7745c314214b3",
         "543be5e94bdc2df1348b4568",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        0.25
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Secure Folder 0060",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 0,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "5a6860d886f77411cd3a9e47",
+      "description": "A special protected folder for storing important documents. Almost impossible to break open or destroy. It has the number 0060 and a strange symbol on it.",
+      "lootExperience": 40,
+      "rarity": "Not_exist",
+      "spawnChance": 1,
+      "itemSound": "item_plastic_generic",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Plastic",
+        "PMatSoundCategory": "Thud",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448ecbe4bdc2d60728b4568",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        1.8
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Laptop with information",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 4500,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 1,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "619252352be33f26043400a7",
+      "description": "A laptop in a special protected case. Used by military and private companies in the face of increased danger of damage to the device.",
+      "lootExperience": 30,
+      "rarity": "Not_exist",
+      "spawnChance": 17,
+      "itemSound": "smallmetal",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Titanium",
+        "PMatSoundCategory": "Metal",
+        "PMatImpactEffectCategory": "Sparks"
+      },
+      "parents": [
+        "57864a66245977548f04a81f",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 10,
+      "Volumes": [
+        0.23
+      ],
+      "ArmorAndRigProperties": {},
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Can of RatCola",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 12048,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": true,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "60b0f93284c20f0feb453da7",
+      "description": "Limited edition RatCola from the General Sam brand. The secret recipe of this cola still remains a mystery.",
+      "lootExperience": 10,
+      "rarity": "Superrare",
+      "spawnChance": 1,
+      "itemSound": "food_soda_can",
+      "stackMaxSize": 1,
+      "effects_health": {
+        "Energy": {
+          "value": 20
+        },
+        "Hydration": {
+          "value": 20
+        }
+      },
+      "consumableUseTime": 4,
+      "MaxAmount": 1,
+      "stimulatorBuffs": "Buffs_drink_tarcola",
+      "hpResourceRate": 0,
+      "MaterialProperties": {
+        "PMaterial": "Aluminum",
+        "PMatSoundCategory": "Metal",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448e8d64bdc2dce718b4568",
+        "543be6674bdc2df1348b4569",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        0.05
+      ],
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Syringe with a chemical",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 16200,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": true,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "593a87af86f774122f54a951",
+      "description": "Syringe with a chemical",
+      "lootExperience": 20,
+      "rarity": "Rare",
+      "spawnChance": 2,
+      "itemSound": "med_stimulator",
+      "stackMaxSize": 1,
+      "consumableUseTime": 2,
+      "MaxAmount": 1,
+      "hpResourceRate": 0,
+      "MaterialProperties": {
+        "PMaterial": "Plastic",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "590c745b86f7743cc433c5f2",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        0.45
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Chemical container",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 2150,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "5b4c81a086f77417d26be63f",
+      "description": "Hermetic container for storing various chemicals.",
+      "lootExperience": 20,
+      "rarity": "Not_exist",
+      "spawnChance": 1,
+      "itemSound": "generic",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Plastic",
+        "PMatSoundCategory": "Thud",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "590c745b86f7743cc433c5f2",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        0.45
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Chemical container",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 2150,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "5b4c81bd86f77418a75ae159",
+      "description": "Hermetic container for storing various chemicals.",
+      "lootExperience": 20,
+      "rarity": "Not_exist",
+      "spawnChance": 1,
+      "itemSound": "generic",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Plastic",
+        "PMatSoundCategory": "Thud",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "590c745b86f7743cc433c5f2",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        3
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Motor Controller",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 4500,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 1,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "5b4c72b386f7745b453af9c0",
+      "description": "Motor controllers have been developed for use on weapons stations or main battle tanks. The system power, I/O, performance and assembly have been designed for the most demanding dynamics and precision requirements and can be easily modified. Motor controller includes EMI filtering, power electronics, embedded system software, control algorithm, a common service tool, and the electrical interfaces required.",
+      "lootExperience": 30,
+      "rarity": "Not_exist",
+      "spawnChance": 17,
+      "itemSound": "smallmetal",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Steel",
+        "PMatSoundCategory": "Metal",
+        "PMatImpactEffectCategory": "Sparks"
+      },
+      "parents": [
+        "57864a66245977548f04a81f",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        3
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Motor Controller",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 4500,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 1,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "5b4c72c686f77462ac37e907",
+      "description": "Motor controllers have been developed for use on weapons stations or main battle tanks. The system power, I/O, performance and assembly have been designed for the most demanding dynamics and precision requirements and can be easily modified. Motor controller includes EMI filtering, power electronics, embedded system software, control algorithm, a common service tool, and the electrical interfaces required.",
+      "lootExperience": 30,
+      "rarity": "Not_exist",
+      "spawnChance": 17,
+      "itemSound": "smallmetal",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Steel",
+        "PMatSoundCategory": "Metal",
+        "PMatImpactEffectCategory": "Sparks"
+      },
+      "parents": [
+        "57864a66245977548f04a81f",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        90
+      ],
+      "ArmorAndRigProperties": null,
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "T-90M Commander Control Panel",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 20361,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 1,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "609267a2bb3f46069c3e6c7d",
+      "description": "A tank commander control panel for controlling tank artillery. Allows the control of T-90M main cannon.",
+      "lootExperience": 30,
+      "rarity": "Not_exist",
+      "spawnChance": 5,
+      "itemSound": "smallmetal",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Steel",
+        "PMatSoundCategory": "Metal",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "57864a66245977548f04a81f",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        3
+      ],
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "MBT Integrated Navigation System",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 4500,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 1,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "60c080eb991ac167ad1c3ad4",
+      "description": "The central control block of the GALS-DZ navigational complex for T-72 and T-90 tanks.",
+      "lootExperience": 30,
+      "rarity": "Not_exist",
+      "spawnChance": 5,
+      "itemSound": "smallmetal",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Steel",
+        "PMatSoundCategory": "Metal",
+        "PMatImpactEffectCategory": "Sparks"
+      },
+      "parents": [
+        "57864a66245977548f04a81f",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        0.25
+      ],
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Water pump operation data",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 0,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "619268de2be33f2604340159",
+      "description": "A document containing data about water pumps at the water treatment plant.",
+      "lootExperience": 40,
+      "rarity": "Not_exist",
+      "spawnChance": 1,
+      "itemSound": "item_paper",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Cardboard",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448ecbe4bdc2d60728b4568",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        0.25
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "IDEA cargo manifests",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 0,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "5ae9a1b886f77404c8537c62",
+      "description": "IDEA cargo manifests, partially torn up, but the shipment information can still be read.",
+      "lootExperience": 40,
+      "rarity": "Not_exist",
+      "spawnChance": 1,
+      "itemSound": "item_paper",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Cardboard",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448ecbe4bdc2d60728b4568",
         "54009119af1c881c07000029"
       ]
     }
