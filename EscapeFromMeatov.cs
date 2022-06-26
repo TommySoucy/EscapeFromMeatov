@@ -237,7 +237,9 @@ namespace EFM
             Eyewear = 14,
             Headwear = 15,
 
-            LootContainer = 16
+            LootContainer = 16,
+
+            DogTag = 17
         }
 
         public enum ItemRarity
@@ -1151,6 +1153,12 @@ namespace EFM
                     // Setup lock key script
                     LockKey lockKey = (LockKey)itemPhysicalObject;
                     lockKey.KeyTipPoint = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
+                }
+
+                // Dogtag
+                if (itemType == 17)
+                {
+                    customItemWrapper.USEC = (bool)defaultItemsData["ItemDefaults"][i]["USEC"];
                 }
             }
 

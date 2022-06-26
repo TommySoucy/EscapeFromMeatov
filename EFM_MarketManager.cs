@@ -30,12 +30,12 @@ namespace EFM
         public Dictionary<string, List<GameObject>> tradeVolumeInventoryObjects;
         public string cartItem;
         public int cartItemCount;
-        public Dictionary<string, int> prices;
-        public Dictionary<string, GameObject> buyPriceElements;
+        public List<AssortmentPriceData> prices;
+        public List<GameObject> buyPriceElements;
         public string ragfairCartItem;
         public int ragfairCartItemCount;
-        public Dictionary<string, int> ragfairPrices;
-        public Dictionary<string, GameObject> ragfairBuyPriceElements;
+        public List<AssortmentPriceData> ragfairPrices;
+        public List<GameObject> ragfairBuyPriceElements;
         public Dictionary<string, GameObject> sellItemShowcaseElements;
         public Dictionary<string, GameObject> insureItemShowcaseElements;
         public int currentTotalSellingPrice = 0;
@@ -128,12 +128,12 @@ namespace EFM
                     Transform pricesParent = cartShowcase.GetChild(3).GetChild(0).GetChild(0);
                     int priceElementIndex = 1;
                     bool canDeal = true;
-                    foreach (KeyValuePair<string, int> price in prices)
+                    foreach (AssortmentPriceData price in prices)
                     {
                         Transform priceElement = pricesParent.GetChild(priceElementIndex++).transform;
-                        priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = (price.Value * cartItemCount).ToString();
+                        priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = (price.count * cartItemCount).ToString();
 
-                        if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= price.Value)
+                        if (tradeVolumeInventory.ContainsKey(price.ID) && tradeVolumeInventory[price.ID] >= price.count)
                         {
                             priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
                             priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
@@ -649,7 +649,7 @@ namespace EFM
                     TraderAssortment assort = trader.assortmentByLevel[i];
 
                     AssortmentItem lastAssortItem = null;
-                    Dictionary<string, int> lastPriceList = null;
+                    List<AssortmentPriceData> lastPriceList = null;
                     Sprite lastSprite = null;
                     foreach (KeyValuePair<string, AssortmentItem> item in assort.itemsByID)
                     {
@@ -668,7 +668,7 @@ namespace EFM
                             item.Value.currentShowcaseElements.Clear();
                         }
                         // Add a new item entry, in a new horizontal if necessary
-                        foreach (Dictionary<string, int> priceList in item.Value.prices)
+                        foreach (List<AssortmentPriceData> priceList in item.Value.prices)
                         {
                             Transform currentHorizontal = buyHorizontalsParent.GetChild(buyHorizontalsParent.childCount - 1);
                             if (buyHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
@@ -716,20 +716,20 @@ namespace EFM
                             int totalPriceCount = 0;
                             Sprite currencySprite = null;
                             bool barterSprite = false;
-                            foreach (KeyValuePair<string, int> currentPrice in priceList)
+                            foreach (AssortmentPriceData currentPrice in priceList)
                             {
-                                totalPriceCount += currentPrice.Value;
+                                totalPriceCount += currentPrice.count;
                                 if (!barterSprite)
                                 {
-                                    if (currentPrice.Key.Equals("201"))
+                                    if (currentPrice.ID.Equals("201"))
                                     {
                                         currencySprite = EFM_Base_Manager.dollarCurrencySprite;
                                     }
-                                    else if (currentPrice.Key.Equals("202"))
+                                    else if (currentPrice.ID.Equals("202"))
                                     {
                                         currencySprite = EFM_Base_Manager.euroCurrencySprite;
                                     }
-                                    else if (currentPrice.Key.Equals("203"))
+                                    else if (currentPrice.ID.Equals("203"))
                                     {
                                         currencySprite = EFM_Base_Manager.roubleCurrencySprite;
                                     }
@@ -2273,79 +2273,181 @@ namespace EFM
 
                 // IN BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
                 Mod.instance.LogInfo("trader buy");
-                if (prices != null && prices.ContainsKey(itemID))
+                if (prices != null)
                 {
-                    Mod.instance.LogInfo("Updating prices");
-                    // Go through each price because need to check if all are fulfilled anyway
-                    bool canDeal = true;
-                    foreach (KeyValuePair<string, int> price in prices)
+                    bool foundID = false;
+                    AssortmentPriceData foundPriceData = null;
+                    foreach (AssortmentPriceData otherAssortPriceData in prices)
                     {
-                        if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= (price.Value * cartItemCount))
+                        if (otherAssortPriceData.ID.Equals(itemID))
                         {
-                            // If this is the item we are adding, make sure the requirement fulfilled icon is active
-                            if (price.Key.Equals(itemID))
-                            {
-                                Transform priceElement = buyPriceElements[price.Key].transform;
-                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
-                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
-                            }
-                        }
-                        else
-                        {
-                            // If this is the item we are adding, no need to make sure the unfulfilled icon is active we cause we are adding it to the inventory
-                            // So for sure if not fulfilled now, the icon is already set to unfulfilled
-                            canDeal = false;
+                            foundPriceData = otherAssortPriceData;
+                            foundID = true;
+                            break;
                         }
                     }
-                    Transform dealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
-                    if (canDeal)
+                    bool matchesType = false;
+                    if(foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                     {
-                        dealButton.GetComponent<Collider>().enabled = true;
-                        dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                        matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
                     }
                     else
                     {
-                        dealButton.GetComponent<Collider>().enabled = false;
-                        dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                        matchesType = true;
+                    }
+                    if (foundID && matchesType)
+                    {
+
+                        Mod.instance.LogInfo("Updating prices");
+                        // Go through each price because need to check if all are fulfilled anyway
+                        bool canDeal = true;
+                        for(int i=0; i<prices.Count;++i)
+                        {
+                            AssortmentPriceData priceData = prices[i];
+                            if (tradeVolumeInventory.ContainsKey(priceData.ID))
+                            {
+                                // Find how many we have in trade inventory
+                                // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
+                                int matchingCountInInventory = 0;
+                                if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                {
+                                    foreach(GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
+                                    {
+                                        EFM_CustomItemWrapper priceCIW = priceObject.GetComponent<EFM_CustomItemWrapper>();
+                                        if(priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
+                                        {
+                                            ++matchingCountInInventory;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    matchingCountInInventory = priceData.count;
+                                }
+
+                                // If this is the item we are adding, make sure the requirement fulfilled icon is active
+                                if (matchingCountInInventory >= (priceData.count * cartItemCount))
+                                {
+                                    if (priceData.ID.Equals(itemID))
+                                    {
+                                        Transform priceElement = buyPriceElements[i].transform;
+                                        priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
+                                        priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
+                                    }
+                                }
+                                else
+                                {
+                                    canDeal = false;
+                                }
+                            }
+                            else
+                            {
+                                // If this is the item we are adding, no need to make sure the unfulfilled icon is active we cause we are adding it to the inventory
+                                // So for sure if not fulfilled now, the icon is already set to unfulfilled
+                                canDeal = false;
+                            }
+                        }
+                        Transform dealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
+                        if (canDeal)
+                        {
+                            dealButton.GetComponent<Collider>().enabled = true;
+                            dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                        }
+                        else
+                        {
+                            dealButton.GetComponent<Collider>().enabled = false;
+                            dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                        }
                     }
                 }
 
                 Mod.instance.LogInfo("rag buy");
                 // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
-                if (ragfairPrices != null && ragfairPrices.ContainsKey(itemID))
+                if (ragfairPrices != null)
                 {
-                    Mod.instance.LogInfo("updating rag buy prices");
-                    // Go through each price because need to check if all are fulfilled anyway
-                    bool canDeal = true;
-                    foreach (KeyValuePair<string, int> price in ragfairPrices)
+                    bool foundID = false;
+                    AssortmentPriceData foundPriceData = null;
+                    foreach (AssortmentPriceData otherAssortPriceData in ragfairPrices)
                     {
-                        if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= (price.Value * ragfairCartItemCount))
+                        if (otherAssortPriceData.ID.Equals(itemID))
                         {
-                            // If this is the item we are adding, make sure the requirement fulfilled icon is active
-                            if (price.Key.Equals(itemID))
-                            {
-                                Transform priceElement = ragfairBuyPriceElements[price.Key].transform;
-                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
-                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
-                            }
-                        }
-                        else
-                        {
-                            // If this is the item we are adding, no need to make sure the unfulfilled icon is active we cause we are adding it to the inventory
-                            // So for sure if not fulfilled now, the icon is already set to unfulfilled
-                            canDeal = false;
+                            foundPriceData = otherAssortPriceData;
+                            foundID = true;
+                            break;
                         }
                     }
-                    Transform dealButton = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(2).GetChild(0).GetChild(0);
-                    if (canDeal)
+                    bool matchesType = false;
+                    if (foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                     {
-                        dealButton.GetComponent<Collider>().enabled = true;
-                        dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                        matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
                     }
                     else
                     {
-                        dealButton.GetComponent<Collider>().enabled = false;
-                        dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                        matchesType = true;
+                    }
+                    if (foundID && matchesType)
+                    {
+
+                        Mod.instance.LogInfo("updating rag buy prices");
+                        // Go through each price because need to check if all are fulfilled anyway
+                        bool canDeal = true;
+                        for (int i = 0; i < ragfairPrices.Count; ++i)
+                        {
+                            AssortmentPriceData priceData = ragfairPrices[i];
+                            if (tradeVolumeInventory.ContainsKey(priceData.ID))
+                            {
+                                // Find how many we have in trade inventory
+                                // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
+                                int matchingCountInInventory = 0;
+                                if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                {
+                                    foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
+                                    {
+                                        EFM_CustomItemWrapper priceCIW = priceObject.GetComponent<EFM_CustomItemWrapper>();
+                                        if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
+                                        {
+                                            ++matchingCountInInventory;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    matchingCountInInventory = priceData.count;
+                                }
+
+                                // If this is the item we are adding, make sure the requirement fulfilled icon is active
+                                if (matchingCountInInventory >= (priceData.count * ragfairCartItemCount))
+                                {
+                                    if (priceData.ID.Equals(itemID))
+                                    {
+                                        Transform priceElement = ragfairBuyPriceElements[i].transform;
+                                        priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
+                                        priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
+                                    }
+                                }
+                                else
+                                {
+                                    canDeal = false;
+                                }
+                            }
+                            else
+                            {
+                                // If this is the item we are adding, no need to make sure the unfulfilled icon is active we cause we are adding it to the inventory
+                                // So for sure if not fulfilled now, the icon is already set to unfulfilled
+                                canDeal = false;
+                            }
+                        }
+                        Transform dealButton = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(2).GetChild(0).GetChild(0);
+                        if (canDeal)
+                        {
+                            dealButton.GetComponent<Collider>().enabled = true;
+                            dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                        }
+                        else
+                        {
+                            dealButton.GetComponent<Collider>().enabled = false;
+                            dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                        }
                     }
                 }
 
@@ -2533,9 +2635,75 @@ namespace EFM
                     Mod.instance.LogInfo("updating task conditions with this item");
                     foreach (TraderTaskCondition condition in EFM_TraderStatus.conditionsByItem[itemID])
                     {
-                        if (condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem && !condition.fulfilled && condition.marketListElement != null)
+                        if (!condition.fulfilled && condition.marketListElement != null)
                         {
-                            condition.marketListElement.transform.GetChild(0).GetChild(0).GetChild(5).gameObject.SetActive(true);
+                            if (condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem)
+                            {
+                                condition.marketListElement.transform.GetChild(0).GetChild(0).GetChild(5).gameObject.SetActive(true);
+                            }
+                            else if(condition.conditionType == TraderTaskCondition.ConditionType.WeaponAssembly)
+                            {
+                                // Make sure all requirements are fulfilled, set them as fulfilled by default if they werent a requirement to begin with
+                                bool[] typesFulfilled = condition.targetAttachmentTypes.Count == 0 ? new bool[] { true } : new bool[condition.targetAttachmentTypes.Count];
+                                bool[] attachmentsFulfilled = condition.targetAttachments.Count == 0 ? new bool[] { true } : new bool[condition.targetAttachments.Count];
+                                bool supressedFulfilled = !condition.suppressed || (VID.physObj as FVRFireArm).IsSuppressed();
+                                bool brakedFulfilled = !condition.braked || (VID.physObj as FVRFireArm).IsBraked();
+
+                                // Only care to check everything if braked and supressed are both fulfilled
+                                if (supressedFulfilled && brakedFulfilled)
+                                {
+                                    // WeaponAssembly items must be vanilla
+                                    FVRPhysicalObject[] physObjs = VID.GetComponentsInChildren<FVRPhysicalObject>();
+                                    foreach (FVRPhysicalObject physObj in physObjs)
+                                    {
+                                        string attachmentID = physObj.ObjectWrapper.ItemID;
+
+                                        // Check types
+                                        for (int i = 0; i < condition.targetAttachmentTypes.Count; ++i)
+                                        {
+                                            if (!typesFulfilled[i])
+                                            {
+                                                // Format list
+                                                List<string> actualAttachments = new List<string>();
+                                                foreach (string attachmentTypeID in condition.targetAttachmentTypes[i])
+                                                {
+                                                    if (Mod.itemsByParents.TryGetValue(attachmentTypeID, out List<string> items))
+                                                    {
+                                                        actualAttachments.AddRange(items);
+                                                    }
+                                                    else
+                                                    {
+                                                        actualAttachments.Add(attachmentTypeID);
+                                                    }
+                                                }
+
+                                                // Check list
+                                                if (actualAttachments.Contains(attachmentID))
+                                                {
+                                                    typesFulfilled[i] = true;
+                                                }
+                                            }
+                                        }
+
+                                        // Check specific attachments
+                                        for (int i = 0; i < condition.targetAttachments.Count; ++i)
+                                        {
+                                            if (!attachmentsFulfilled[i])
+                                            {
+                                                if (condition.targetAttachments[i].Equals(attachmentID))
+                                                {
+                                                    attachmentsFulfilled[i] = true;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (!typesFulfilled.Contains(false) && !attachmentsFulfilled.Contains(false) && supressedFulfilled && brakedFulfilled)
+                                    {
+                                        condition.marketListElement.transform.GetChild(0).GetChild(0).GetChild(5).gameObject.SetActive(true);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -2758,71 +2926,184 @@ namespace EFM
 
                 Mod.instance.LogInfo("updating trader buy");
                 // IN BUY, check if item corresponds to price, update fulfilled icon and deactivate deal! button if necessary
-                if (prices != null && prices.ContainsKey(itemID))
+                if (prices != null)
                 {
-                    Mod.instance.LogInfo("have prices and removed item is a price");
-                    // Go through each price because need to check if all are fulfilled anyway
-                    bool canDeal = true;
-                    foreach (KeyValuePair<string, int> price in prices)
+                    bool foundID = false;
+                    AssortmentPriceData foundPriceData = null;
+                    foreach (AssortmentPriceData otherAssortPriceData in prices)
                     {
-                        Mod.instance.LogInfo("Updating price: "+price.Key+":"+price.Value);
-                        if (!tradeVolumeInventory.ContainsKey(price.Key) || tradeVolumeInventory[price.Key] < price.Value)
+                        if (otherAssortPriceData.ID.Equals(itemID))
                         {
-                            // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
-                            if (price.Key.Equals(itemID))
-                            {
-                                Transform priceElement = buyPriceElements[price.Key].transform;
-                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
-                            }
-                            canDeal = false;
+                            foundPriceData = otherAssortPriceData;
+                            foundID = true;
+                            break;
                         }
-                        // else no need to check this because we are removing item, price obviously cannot become fulfilled
                     }
-                    Transform dealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
-                    if (canDeal)
+                    bool matchesType = false;
+                    if (foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                     {
-                        dealButton.GetComponent<Collider>().enabled = true;
-                        dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                        matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
                     }
                     else
                     {
-                        dealButton.GetComponent<Collider>().enabled = false;
-                        dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                        matchesType = true;
+                    }
+                    if (foundID && matchesType)
+                    {
+                        Mod.instance.LogInfo("have prices and removed item is a price");
+                        // Go through each price because need to check if all are fulfilled anyway
+                        bool canDeal = true;
+                        for (int i = 0; i < prices.Count; ++i)
+                        {
+                            AssortmentPriceData priceData = prices[i];
+                            if (tradeVolumeInventory.ContainsKey(priceData.ID))
+                            {
+                                // Find how many we have in trade inventory
+                                // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
+                                int matchingCountInInventory = 0;
+                                if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                {
+                                    foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
+                                    {
+                                        EFM_CustomItemWrapper priceCIW = priceObject.GetComponent<EFM_CustomItemWrapper>();
+                                        if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
+                                        {
+                                            ++matchingCountInInventory;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    matchingCountInInventory = priceData.count;
+                                }
+
+                                // If this is the item we are removing, make sure the requirement fulfilled icon is active
+                                if (matchingCountInInventory < (priceData.count * cartItemCount))
+                                {
+                                    // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
+                                    if (priceData.ID.Equals(itemID))
+                                    {
+                                        Transform priceElement = buyPriceElements[i].transform;
+                                        priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
+                                        priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
+                                    }
+                                    canDeal = false;
+                                }
+                            }
+                            else
+                            {
+                                // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
+                                if (priceData.ID.Equals(itemID))
+                                {
+                                    Transform priceElement = buyPriceElements[i].transform;
+                                    priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
+                                    priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
+                                }
+                                canDeal = false;
+                            }
+                        }
+                        Transform dealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
+                        if (canDeal)
+                        {
+                            dealButton.GetComponent<Collider>().enabled = true;
+                            dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                        }
+                        else
+                        {
+                            dealButton.GetComponent<Collider>().enabled = false;
+                            dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                        }
                     }
                 }
 
                 Mod.instance.LogInfo("0");
                 // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icon and deactivate deal! button if necessary
-                if (ragfairPrices != null && ragfairPrices.ContainsKey(itemID))
+                if (ragfairPrices != null)
                 {
-                    // Go through each price because need to check if all are fulfilled anyway
-                    bool canDeal = true;
-                    foreach (KeyValuePair<string, int> price in ragfairPrices)
+                    bool foundID = false;
+                    AssortmentPriceData foundPriceData = null;
+                    foreach (AssortmentPriceData otherAssortPriceData in ragfairPrices)
                     {
-                        if (tradeVolumeInventory.ContainsKey(price.Key) || tradeVolumeInventory[price.Key] < price.Value)
+                        if (otherAssortPriceData.ID.Equals(itemID))
                         {
-                            // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
-                            if (price.Key.Equals(itemID))
-                            {
-                                Transform priceElement = ragfairBuyPriceElements[price.Key].transform;
-                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
-                            }
-                            canDeal = false;
+                            foundPriceData = otherAssortPriceData;
+                            foundID = true;
+                            break;
                         }
-                        // else no need to check this because we are removing item, price obviously cannot become fulfilled
                     }
-                    Transform dealButton = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(2).GetChild(0).GetChild(0);
-                    if (canDeal)
+                    bool matchesType = false;
+                    if (foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                     {
-                        dealButton.GetComponent<Collider>().enabled = true;
-                        dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                        matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
                     }
                     else
                     {
-                        dealButton.GetComponent<Collider>().enabled = false;
-                        dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                        matchesType = true;
+                    }
+                    if (foundID && matchesType)
+                    {
+                        // Go through each price because need to check if all are fulfilled anyway
+                        bool canDeal = true;
+                        for (int i = 0; i < ragfairPrices.Count; ++i)
+                        {
+                            AssortmentPriceData priceData = ragfairPrices[i];
+                            if (tradeVolumeInventory.ContainsKey(priceData.ID))
+                            {
+                                // Find how many we have in trade inventory
+                                // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
+                                int matchingCountInInventory = 0;
+                                if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                {
+                                    foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
+                                    {
+                                        EFM_CustomItemWrapper priceCIW = priceObject.GetComponent<EFM_CustomItemWrapper>();
+                                        if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
+                                        {
+                                            ++matchingCountInInventory;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    matchingCountInInventory = priceData.count;
+                                }
+
+                                // If this is the item we are removing, make sure the requirement fulfilled icon is active
+                                if (matchingCountInInventory < (priceData.count * ragfairCartItemCount))
+                                {
+                                    // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
+                                    if (priceData.ID.Equals(itemID))
+                                    {
+                                        Transform priceElement = ragfairBuyPriceElements[i].transform;
+                                        priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
+                                        priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
+                                    }
+                                    canDeal = false;
+                                }
+                            }
+                            else
+                            {
+                                // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
+                                if (priceData.ID.Equals(itemID))
+                                {
+                                    Transform priceElement = ragfairBuyPriceElements[i].transform;
+                                    priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
+                                    priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
+                                }
+                                canDeal = false;
+                            }
+                        }
+                        Transform dealButton = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(2).GetChild(0).GetChild(0);
+                        if (canDeal)
+                        {
+                            dealButton.GetComponent<Collider>().enabled = true;
+                            dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+                        }
+                        else
+                        {
+                            dealButton.GetComponent<Collider>().enabled = false;
+                            dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                        }
                     }
                 }
 
@@ -2925,7 +3206,8 @@ namespace EFM
                 {
                     foreach (TraderTaskCondition condition in EFM_TraderStatus.conditionsByItem[itemID])
                     {
-                        if (condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem && !condition.fulfilled && condition.marketListElement != null)
+                        if ((condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem || condition.conditionType == TraderTaskCondition.ConditionType.WeaponAssembly) &&
+                            !condition.fulfilled && condition.marketListElement != null)
                         {
                             if (!tradeVolumeInventory.ContainsKey(itemID) || tradeVolumeInventory[itemID] == 0)
                             {
@@ -3070,7 +3352,7 @@ namespace EFM
             // TODO: Will also need to check if level 15 then we also want to add player items to flea market
         }
 
-        public void OnBuyItemClick(AssortmentItem item, Dictionary<string, int> priceList, Sprite itemIcon)
+        public void OnBuyItemClick(AssortmentItem item, List<AssortmentPriceData> priceList, Sprite itemIcon)
         {
             cartItem = item.ID;
             cartItemCount = 1;
@@ -3106,41 +3388,46 @@ namespace EFM
             }
             if (buyPriceElements == null)
             {
-                buyPriceElements = new Dictionary<string, GameObject>();
+                buyPriceElements = new List<GameObject>();
             }
             else
             {
                 buyPriceElements.Clear();
             }
             bool canDeal = true;
-            foreach(KeyValuePair<string, int> price in priceList)
+            foreach(AssortmentPriceData price in priceList)
             {
                 priceHeight += 50;
                 Transform priceElement = Instantiate(priceTemplate, pricesParent).transform;
                 priceElement.gameObject.SetActive(true);
 
-                if (Mod.itemIcons.ContainsKey(price.Key))
+                if (Mod.itemIcons.ContainsKey(price.ID))
                 {
-                    priceElement.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[price.Key];
+                    priceElement.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[price.ID];
                 }
                 else
                 {
-                    AnvilManager.Run(Mod.SetVanillaIcon(price.Key, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
+                    AnvilManager.Run(Mod.SetVanillaIcon(price.ID, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
                 }
-                priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.Value.ToString();
-                string priceName = Mod.itemNames[price.Key];
+                priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.count.ToString();
+                string priceName = Mod.itemNames[price.ID];
                 priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = priceName;
-                buyPriceElements.Add(price.Key, priceElement.gameObject);
+                if(price.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                {
+                    priceElement.GetChild(0).GetChild(3).GetChild(7).GetChild(2).gameObject.SetActive(true);
+                    priceElement.GetChild(0).GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = ">= lvl "+price.dogtagLevel;
+                }
+                buyPriceElements.Add(priceElement.gameObject);
 
                 // Setup ItemIcon
                 EFM_ItemIcon priceIconScript = priceElement.gameObject.AddComponent<EFM_ItemIcon>();
-                priceIconScript.itemID = price.Key;
+                priceIconScript.itemID = price.ID;
                 priceIconScript.itemName = priceName;
-                priceIconScript.description = Mod.itemDescriptions[price.Key];
-                priceIconScript.weight = Mod.itemWeights[price.Key];
-                priceIconScript.volume = Mod.itemVolumes[price.Key];
+                priceIconScript.description = Mod.itemDescriptions[price.ID];
+                priceIconScript.weight = Mod.itemWeights[price.ID];
+                priceIconScript.volume = Mod.itemVolumes[price.ID];
 
-                if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= price.Value)
+                if (tradeVolumeInventory.ContainsKey(price.ID) && tradeVolumeInventory[price.ID] >= price.count)
                 {
                     priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
                     priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
@@ -3181,11 +3468,11 @@ namespace EFM
         public void OnBuyDealClick()
         {
             // Remove price from trade volume
-            foreach(KeyValuePair<string, int> price in prices)
+            foreach(AssortmentPriceData price in prices)
             {
-                int amountToRemove = price.Value;
-                tradeVolumeInventory[price.Key] -= (price.Value * cartItemCount);
-                List<GameObject> objectList = tradeVolumeInventoryObjects[price.Key];
+                int amountToRemove = price.count;
+                tradeVolumeInventory[price.ID] -= (price.count * cartItemCount);
+                List<GameObject> objectList = tradeVolumeInventoryObjects[price.ID];
                 while (amountToRemove > 0)
                 {
                     GameObject currentItemObject = objectList[objectList.Count - 1];
@@ -3221,20 +3508,44 @@ namespace EFM
                         }
                         else // Doesnt have stack, its a single item
                         {
-                            --amountToRemove;
-
-                            // Destroy item
-                            objectList.RemoveAt(objectList.Count - 1);
-                            Mod.baseInventory[CIW.ID] -= 1;
-                            baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
-                            if (Mod.baseInventory[CIW.ID] == 0)
+                            // If dogtag must only delete the ones that match the required level
+                            if(CIW.itemType == Mod.ItemType.DogTag)
                             {
-                                Mod.baseInventory.Remove(CIW.ID);
-                                baseManager.baseInventoryObjects.Remove(CIW.ID);
+                                if (CIW.dogtagLevel >= price.dogtagLevel)
+                                {
+                                    --amountToRemove;
+
+                                    // Destroy item
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    Mod.baseInventory[CIW.ID] -= 1;
+                                    baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
+                                    if (Mod.baseInventory[CIW.ID] == 0)
+                                    {
+                                        Mod.baseInventory.Remove(CIW.ID);
+                                        baseManager.baseInventoryObjects.Remove(CIW.ID);
+                                    }
+                                    CIW.destroyed = true;
+                                    currentItemObject.transform.parent = null;
+                                    Destroy(currentItemObject);
+                                }
                             }
-                            CIW.destroyed = true;
-                            currentItemObject.transform.parent = null;
-                            Destroy(currentItemObject);
+                            else
+                            {
+                                --amountToRemove;
+
+                                // Destroy item
+                                objectList.RemoveAt(objectList.Count - 1);
+                                Mod.baseInventory[CIW.ID] -= 1;
+                                baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
+                                if (Mod.baseInventory[CIW.ID] == 0)
+                                {
+                                    Mod.baseInventory.Remove(CIW.ID);
+                                    baseManager.baseInventoryObjects.Remove(CIW.ID);
+                                }
+                                CIW.destroyed = true;
+                                currentItemObject.transform.parent = null;
+                                Destroy(currentItemObject);
+                            }
                         }
                     }
                     else // Vanilla item cannot have stack
@@ -3243,12 +3554,12 @@ namespace EFM
 
                         // Destroy item
                         objectList.RemoveAt(objectList.Count - 1);
-                        Mod.baseInventory[price.Key] -= 1;
-                        baseManager.baseInventoryObjects[price.Key].Remove(currentItemObject);
-                        if (Mod.baseInventory[price.Key] == 0)
+                        Mod.baseInventory[price.ID] -= 1;
+                        baseManager.baseInventoryObjects[price.ID].Remove(currentItemObject);
+                        if (Mod.baseInventory[price.ID] == 0)
                         {
-                            Mod.baseInventory.Remove(price.Key);
-                            baseManager.baseInventoryObjects.Remove(price.Key);
+                            Mod.baseInventory.Remove(price.ID);
+                            baseManager.baseInventoryObjects.Remove(price.ID);
                         }
                         currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
                         currentItemObject.transform.parent = null;
@@ -3257,17 +3568,17 @@ namespace EFM
                 }
 
                 // Remove this item from lists if dont have anymore in inventory
-                if (tradeVolumeInventory[price.Key] == 0)
+                if (tradeVolumeInventory[price.ID] == 0)
                 {
-                    tradeVolumeInventory.Remove(price.Key);
-                    tradeVolumeInventoryObjects.Remove(price.Key);
+                    tradeVolumeInventory.Remove(price.ID);
+                    tradeVolumeInventoryObjects.Remove(price.ID);
                     // TODO: In this case, we could just destroy all objects in tradeVolumeInventoryObjects[price.Key] right away without having to check stacks like in the while loop above
                 }
 
                 // Update area managers based on item we just removed
                 foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
                 {
-                    areaManager.UpdateBasedOnItem(price.Key);
+                    areaManager.UpdateBasedOnItem(price.ID);
                 }
             }
 
@@ -4236,7 +4547,7 @@ namespace EFM
                         if (assortItems[traderIndex] != null)
                         {
                             // Make an entry for each price of this assort item
-                            foreach (Dictionary<string, int> priceList in assortItems[traderIndex].prices)
+                            foreach (List<AssortmentPriceData> priceList in assortItems[traderIndex].prices)
                             {
                                 GameObject itemElement = Instantiate(itemTemplate, listParent);
                                 itemElement.SetActive(true);
@@ -4261,10 +4572,10 @@ namespace EFM
                                 int currencyIndex = -1; // Rouble, Dollar, Euro, Barter
                                 Sprite priceLabelSprite = EFM_Base_Manager.roubleCurrencySprite;
                                 int totalPriceCount = 0;
-                                foreach(KeyValuePair<string, int> price in priceList)
+                                foreach(AssortmentPriceData price in priceList)
                                 {
-                                    totalPriceCount += price.Value;
-                                    switch (price.Key)
+                                    totalPriceCount += price.count;
+                                    switch (price.ID)
                                     {
                                         case "201":
                                             if (currencyIndex != 1)
@@ -4460,7 +4771,7 @@ namespace EFM
                 if (assortItems[i] != null)
                 {
                     // Make an entry for each price of this assort item
-                    foreach (Dictionary<string, int> priceList in assortItems[i].prices)
+                    foreach (List<AssortmentPriceData> priceList in assortItems[i].prices)
                     {
                         GameObject itemElement = Instantiate(itemTemplate, listParent);
                         itemElement.SetActive(true);
@@ -4574,7 +4885,7 @@ namespace EFM
             Mod.wishList.Remove(ID);
         }
 
-        public void OnRagFairBuyItemBuyClick(int traderIndex, AssortmentItem item, Dictionary<string, int> priceList, Sprite itemIcon)
+        public void OnRagFairBuyItemBuyClick(int traderIndex, AssortmentItem item, List<AssortmentPriceData> priceList, Sprite itemIcon)
         {
             Mod.instance.LogInfo("OnRagFairBuyItemBuyClick called on item: "+item.ID);
             // Set rag fair cart item, icon, amount, name
@@ -4626,13 +4937,13 @@ namespace EFM
             Mod.instance.LogInfo("0");
             if (ragfairBuyPriceElements == null)
             {
-                ragfairBuyPriceElements = new Dictionary<string, GameObject>();
+                ragfairBuyPriceElements = new List<GameObject>();
             }
             else
             {
                 ragfairBuyPriceElements.Clear();
             }
-            foreach (KeyValuePair<string, int> price in priceList)
+            foreach (AssortmentPriceData price in priceList)
             {
                 Mod.instance.LogInfo("\t0");
                 priceHeight += 50;
@@ -4640,23 +4951,28 @@ namespace EFM
                 priceElement.gameObject.SetActive(true);
 
                 Mod.instance.LogInfo("\t0");
-                if (Mod.itemIcons.ContainsKey(price.Key))
+                if (Mod.itemIcons.ContainsKey(price.ID))
                 {
-                    priceElement.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[price.Key];
+                    priceElement.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[price.ID];
                 }
                 else
                 {
-                    AnvilManager.Run(Mod.SetVanillaIcon(price.Key, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
+                    AnvilManager.Run(Mod.SetVanillaIcon(price.ID, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
                 }
                 Mod.instance.LogInfo("\t0");
-                priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.Value.ToString();
-                string priceItemName = Mod.itemNames[price.Key];
+                priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.count.ToString();
+                string priceItemName = Mod.itemNames[price.ID];
                 priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = priceItemName;
                 Mod.instance.LogInfo("\t0");
-                ragfairBuyPriceElements.Add(price.Key, priceElement.gameObject);
+                if (price.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                {
+                    priceElement.GetChild(0).GetChild(3).GetChild(7).GetChild(2).gameObject.SetActive(true);
+                    priceElement.GetChild(0).GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = ">= lvl " + price.dogtagLevel;
+                }
+                ragfairBuyPriceElements.Add(priceElement.gameObject);
 
                 Mod.instance.LogInfo("\t0");
-                if (tradeVolumeInventory.ContainsKey(price.Key) && tradeVolumeInventory[price.Key] >= price.Value)
+                if (tradeVolumeInventory.ContainsKey(price.ID) && tradeVolumeInventory[price.ID] >= price.count)
                 {
                     priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
                     priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
@@ -4668,11 +4984,11 @@ namespace EFM
 
                 // Setup price ItemIcon
                 EFM_ItemIcon ragfairCartPriceItemIconScript = priceElement.GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
-                ragfairCartPriceItemIconScript.itemID = price.Key;
+                ragfairCartPriceItemIconScript.itemID = price.ID;
                 ragfairCartPriceItemIconScript.itemName = priceItemName;
-                ragfairCartPriceItemIconScript.description = Mod.itemDescriptions[price.Key];
-                ragfairCartPriceItemIconScript.weight = Mod.itemWeights[price.Key];
-                ragfairCartPriceItemIconScript.volume = Mod.itemVolumes[price.Key];
+                ragfairCartPriceItemIconScript.description = Mod.itemDescriptions[price.ID];
+                ragfairCartPriceItemIconScript.weight = Mod.itemWeights[price.ID];
+                ragfairCartPriceItemIconScript.volume = Mod.itemVolumes[price.ID];
             }
             Mod.instance.LogInfo("0");
             EFM_HoverScroll downHoverScroll = cartShowcase.GetChild(3).GetChild(3).GetComponent<EFM_HoverScroll>();
@@ -4851,11 +5167,11 @@ namespace EFM
         public void OnRagfairBuyDealClick(int traderIndex)
         {
             // Remove price from trade volume
-            foreach (KeyValuePair<string, int> price in ragfairPrices)
+            foreach (AssortmentPriceData price in ragfairPrices)
             {
-                int amountToRemove = price.Value;
-                tradeVolumeInventory[price.Key] -= (price.Value * cartItemCount);
-                List<GameObject> objectList = tradeVolumeInventoryObjects[price.Key];
+                int amountToRemove = price.count;
+                tradeVolumeInventory[price.ID] -= (price.count * cartItemCount);
+                List<GameObject> objectList = tradeVolumeInventoryObjects[price.ID];
                 while (amountToRemove > 0)
                 {
                     GameObject currentItemObject = objectList[objectList.Count - 1];
@@ -4891,20 +5207,43 @@ namespace EFM
                         }
                         else // Doesnt have stack, its a single item
                         {
-                            --amountToRemove;
-
-                            // Destroy item
-                            objectList.RemoveAt(objectList.Count - 1);
-                            Mod.baseInventory[CIW.ID] -= 1;
-                            baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
-                            if (Mod.baseInventory[CIW.ID] == 0)
+                            if (CIW.itemType == Mod.ItemType.DogTag)
                             {
-                                Mod.baseInventory.Remove(CIW.ID);
-                                baseManager.baseInventoryObjects.Remove(CIW.ID);
+                                if (CIW.dogtagLevel >= price.dogtagLevel)
+                                {
+                                    --amountToRemove;
+
+                                    // Destroy item
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    Mod.baseInventory[CIW.ID] -= 1;
+                                    baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
+                                    if (Mod.baseInventory[CIW.ID] == 0)
+                                    {
+                                        Mod.baseInventory.Remove(CIW.ID);
+                                        baseManager.baseInventoryObjects.Remove(CIW.ID);
+                                    }
+                                    CIW.destroyed = true;
+                                    currentItemObject.transform.parent = null;
+                                    Destroy(currentItemObject);
+                                }
                             }
-                            CIW.destroyed = true;
-                            currentItemObject.transform.parent = null;
-                            Destroy(currentItemObject);
+                            else
+                            {
+                                --amountToRemove;
+
+                                // Destroy item
+                                objectList.RemoveAt(objectList.Count - 1);
+                                Mod.baseInventory[CIW.ID] -= 1;
+                                baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
+                                if (Mod.baseInventory[CIW.ID] == 0)
+                                {
+                                    Mod.baseInventory.Remove(CIW.ID);
+                                    baseManager.baseInventoryObjects.Remove(CIW.ID);
+                                }
+                                CIW.destroyed = true;
+                                currentItemObject.transform.parent = null;
+                                Destroy(currentItemObject);
+                            }
                         }
                     }
                     else // Vanilla item cannot have stack
@@ -4913,12 +5252,12 @@ namespace EFM
 
                         // Destroy item
                         objectList.RemoveAt(objectList.Count - 1);
-                        Mod.baseInventory[price.Key] -= 1;
-                        baseManager.baseInventoryObjects[price.Key].Remove(currentItemObject);
-                        if (Mod.baseInventory[price.Key] == 0)
+                        Mod.baseInventory[price.ID] -= 1;
+                        baseManager.baseInventoryObjects[price.ID].Remove(currentItemObject);
+                        if (Mod.baseInventory[price.ID] == 0)
                         {
-                            Mod.baseInventory.Remove(price.Key);
-                            baseManager.baseInventoryObjects.Remove(price.Key);
+                            Mod.baseInventory.Remove(price.ID);
+                            baseManager.baseInventoryObjects.Remove(price.ID);
                         }
                         currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
                         currentItemObject.transform.parent = null;
@@ -4929,7 +5268,7 @@ namespace EFM
                 // Update area managers based on item we just removed
                 foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
                 {
-                    areaManager.UpdateBasedOnItem(price.Key);
+                    areaManager.UpdateBasedOnItem(price.ID);
                 }
             }
 

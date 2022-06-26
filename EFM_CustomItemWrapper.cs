@@ -182,6 +182,10 @@ namespace EFM
 		private bool validConsumePress;
         public int targettedPart = -1;
 
+		// DogTag
+		public bool USEC;
+		public int dogtagLevel = 1;
+
 		private void Awake()
 		{
 			physObj = gameObject.GetComponent<FVRPhysicalObject>();

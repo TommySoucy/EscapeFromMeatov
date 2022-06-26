@@ -299,7 +299,7 @@ namespace EFM
                         }
 
                         // Build entry's pricelist
-                        Dictionary<string, int> currentPrices = new Dictionary<string, int>();
+                        List<AssortmentPriceData> currentPrices = new List<AssortmentPriceData>();
                         bool onlyCurrency = true;
                         int totalRoubles = 0;
                         foreach (JObject price in entry.Value["barter_scheme"][0])
@@ -307,58 +307,63 @@ namespace EFM
                             string priceID = price["_tpl"].ToString();
                             if (Mod.itemMap.ContainsKey(priceID))
                             {
-                                string actualPriceID = Mod.itemMap[priceID];
-                                int priceCount = (int)price["count"];
+                                AssortmentPriceData priceData = new AssortmentPriceData();
+                                priceData.ID = Mod.itemMap[priceID];
+                                priceData.count = (int)price["count"];
 
-                                // DEBUG: Check if this price has more data to it (like dogtag level for example)
-                                Dictionary<string, JToken> priceData = price.ToObject<Dictionary<string, JToken>>();
-                                List<string> additionalDataList = new List<string>();
-                                foreach (KeyValuePair<string, JToken> priceProperty in priceData)
+                                if(priceData.ID.Equals("11") || priceData.ID.Equals("12"))
                                 {
-                                    if (!(priceProperty.Key.Equals("_tpl") || priceProperty.Key.Equals("count")))
-                                    {
-                                        additionalDataList.Add(priceProperty.Key);
-                                    }
+                                    priceData.priceItemType = AssortmentPriceData.PriceItemType.Dogtag;
+                                    priceData.USEC = price["side"].ToString().Equals("usec");
+                                    priceData.dogtagLevel = (int)price["level"];
                                 }
-                                if (additionalDataList.Count > 0)
+                                else
                                 {
-                                    Mod.instance.LogError("Assort entry: " + entry.Key + " price ID: " + actualPriceID + " with additional data: ");
-                                    foreach (string s in additionalDataList)
-                                    {
-                                        Mod.instance.LogError("\t" + s);
-                                    }
+                                    priceData.priceItemType = AssortmentPriceData.PriceItemType.Other;
                                 }
 
-                                if (currentPrices.ContainsKey(actualPriceID))
+                                bool alreadyContainsID = false;
+                                AssortmentPriceData otherPriceData = null;
+                                foreach(AssortmentPriceData otherAssortPriceData in currentPrices)
                                 {
-                                    // Check if this price has more data to it (like dogtag level for example)
-                                    // or if it is just two prices that map to save item
-                                    if(additionalDataList.Count > 0)
+                                    if (otherAssortPriceData.ID.Equals(priceData.ID))
                                     {
-                                        Mod.instance.LogError("Assort entry: " + entry.Key + " has duplicate price ID: " + actualPriceID + " with additional data: ");
-                                        foreach(string s in additionalDataList)
+                                        otherPriceData = otherAssortPriceData;
+                                        alreadyContainsID = true;
+                                        break;
+                                    }
+                                }
+                                if (alreadyContainsID)
+                                {
+                                    if(priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                    {
+                                        if(otherPriceData.dogtagLevel == priceData.dogtagLevel && otherPriceData.USEC == priceData.USEC)
                                         {
-                                            Mod.instance.LogError("\t"+s);
+                                            otherPriceData.count += priceData.count;
+                                        }
+                                        else
+                                        {
+                                            currentPrices.Add(priceData);
                                         }
                                     }
-                                    else
+                                    else if(priceData.priceItemType == AssortmentPriceData.PriceItemType.Other)
                                     {
-                                        // This is just a price that maps to the same ID as another, so just increment the count
-                                        currentPrices[actualPriceID] += priceCount;
+                                        // This should just be a price that maps to the same ID as another, so just increment the count
+                                        otherPriceData.count += priceData.count;
                                     }
                                 }
                                 else
                                 {
-                                    currentPrices.Add(actualPriceID, priceCount);
+                                    currentPrices.Add(priceData);
                                 }
 
-                                if (actualPriceID.Equals("203"))
+                                if (priceData.ID.Equals("203"))
                                 {
-                                    totalRoubles += priceCount;
+                                    totalRoubles += priceData.count;
                                 }
-                                else if (actualPriceID.Equals("201"))
+                                else if (priceData.ID.Equals("201"))
                                 {
-                                    totalRoubles += priceCount * 125;
+                                    totalRoubles += priceData.count * 125;
                                 }
                                 else
                                 {
@@ -373,15 +378,38 @@ namespace EFM
 
                         // Ensure that this exact pricelist doesn't already exist, only add the pricelist if it isnt there yet
                         bool priceListFound = false;
-                        foreach (Dictionary<string, int> existingPriceList in currentAssort.itemsByID[actualParentItemID].prices)
+                        foreach (List<AssortmentPriceData> existingPriceList in currentAssort.itemsByID[actualParentItemID].prices)
                         {
                             bool allFound = true;
-                            foreach (KeyValuePair<string, int> price in currentPrices)
+                            foreach (AssortmentPriceData price in currentPrices)
                             {
-                                if (!existingPriceList.ContainsKey(price.Key))
+                                bool foundID = false;
+                                AssortmentPriceData otherPriceData = null;
+                                foreach (AssortmentPriceData otherAssortPriceData in existingPriceList)
                                 {
-                                    allFound = false;
-                                    break;
+                                    if (otherAssortPriceData.ID.Equals(price.ID))
+                                    {
+                                        otherPriceData = otherAssortPriceData;
+                                        foundID = true;
+                                        break;
+                                    }
+                                }
+
+                                if (price.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                {
+                                    if (!foundID || otherPriceData.dogtagLevel != price.dogtagLevel || otherPriceData.USEC != price.USEC)
+                                    {
+                                        allFound = false;
+                                        break;
+                                    }
+                                }
+                                else if(price.priceItemType == AssortmentPriceData.PriceItemType.Other)
+                                {
+                                    if (!foundID)
+                                    {
+                                        allFound = false;
+                                        break;
+                                    }
                                 }
                             }
                             if (allFound)
@@ -418,8 +446,8 @@ namespace EFM
                     {
                         AssortmentItem item = new AssortmentItem();
                         item.ID = actualParentItemID;
-                        item.prices = new List<Dictionary<string, int>>();
-                        Dictionary<string, int> currentPrices = new Dictionary<string, int>();
+                        item.prices = new List<List<AssortmentPriceData>>();
+                        List<AssortmentPriceData> currentPrices = new List<AssortmentPriceData>();
                         item.prices.Add(currentPrices);
                         bool onlyCurrency = true;
                         int totalRoubles = 0;
@@ -428,58 +456,63 @@ namespace EFM
                             string priceID = price["_tpl"].ToString();
                             if (Mod.itemMap.ContainsKey(priceID))
                             {
-                                string actualPriceID = Mod.itemMap[priceID];
-                                int priceCount = (int)price["count"];
+                                AssortmentPriceData priceData = new AssortmentPriceData();
+                                priceData.ID = Mod.itemMap[priceID];
+                                priceData.count = (int)price["count"];
 
-                                // DEBUG: Check if this price has more data to it (like dogtag level for example)
-                                Dictionary<string, JToken> priceData = price.ToObject<Dictionary<string, JToken>>();
-                                List<string> additionalDataList = new List<string>();
-                                foreach (KeyValuePair<string, JToken> priceProperty in priceData)
+                                if (priceData.ID.Equals("11") || priceData.ID.Equals("12"))
                                 {
-                                    if (!(priceProperty.Key.Equals("_tpl") || priceProperty.Key.Equals("count")))
-                                    {
-                                        additionalDataList.Add(priceProperty.Key);
-                                    }
+                                    priceData.priceItemType = AssortmentPriceData.PriceItemType.Dogtag;
+                                    priceData.USEC = price["side"].ToString().Equals("usec");
+                                    priceData.dogtagLevel = (int)price["level"];
                                 }
-                                if (additionalDataList.Count > 0)
+                                else
                                 {
-                                    Mod.instance.LogError("Assort entry: " + entry.Key + " price ID: " + actualPriceID + " with additional data: ");
-                                    foreach (string s in additionalDataList)
-                                    {
-                                        Mod.instance.LogError("\t" + s);
-                                    }
+                                    priceData.priceItemType = AssortmentPriceData.PriceItemType.Other;
                                 }
 
-                                if (currentPrices.ContainsKey(actualPriceID))
+                                bool alreadyContainsID = false;
+                                AssortmentPriceData otherPriceData = null;
+                                foreach (AssortmentPriceData otherAssortPriceData in currentPrices)
                                 {
-                                    // Check if this price has more data to it (like dogtag level for example)
-                                    // or if it is just two prices that map to save item
-                                    if (additionalDataList.Count > 0)
+                                    if (otherAssortPriceData.ID.Equals(priceData.ID))
                                     {
-                                        Mod.instance.LogError("Assort entry: " + entry.Key + " has duplicate price ID: " + actualPriceID + " with additional data: ");
-                                        foreach (string s in additionalDataList)
+                                        otherPriceData = otherAssortPriceData;
+                                        alreadyContainsID = true;
+                                        break;
+                                    }
+                                }
+                                if (alreadyContainsID)
+                                {
+                                    if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                    {
+                                        if (otherPriceData.dogtagLevel == priceData.dogtagLevel && otherPriceData.USEC == priceData.USEC)
                                         {
-                                            Mod.instance.LogError("\t" + s);
+                                            otherPriceData.count += priceData.count;
+                                        }
+                                        else
+                                        {
+                                            currentPrices.Add(priceData);
                                         }
                                     }
-                                    else
+                                    else if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Other)
                                     {
-                                        // This is just a price that maps to the same ID as another, so just increment the count
-                                        currentPrices[actualPriceID] += priceCount;
+                                        // This should just be a price that maps to the same ID as another, so just increment the count
+                                        otherPriceData.count += priceData.count;
                                     }
                                 }
                                 else
                                 {
-                                    currentPrices.Add(actualPriceID, priceCount);
+                                    currentPrices.Add(priceData);
                                 }
 
-                                if (actualPriceID.Equals("203"))
+                                if (priceData.ID.Equals("203"))
                                 {
-                                    totalRoubles += priceCount;
+                                    totalRoubles += priceData.count;
                                 }
-                                else if (actualPriceID.Equals("201"))
+                                else if (priceData.ID.Equals("201"))
                                 {
-                                    totalRoubles += priceCount * 125;
+                                    totalRoubles += priceData.count * 125;
                                 }
                                 else
                                 {
@@ -1259,13 +1292,28 @@ namespace EFM
                     break;
                 case "WeaponAssembly":
                     condition.conditionType = TraderTaskCondition.ConditionType.WeaponAssembly;
-                    condition.targetWeapon = conditionData["_props"]["targetWeapon"].ToString();
-                    condition.targetAttachmentTypes = conditionData["_props"]["targetAttachmentTypes"].ToObject<List<string>>();
+                    condition.targetAttachmentTypes = conditionData["_props"]["targetAttachmentTypes"].ToObject<List<List<string>>>();
                     condition.targetAttachments = conditionData["_props"]["targetAttachments"].ToObject<List<string>>();
                     condition.suppressed = (bool)conditionData["_props"]["suppressed"];
-                    condition.gripped = (bool)conditionData["_props"]["gripped"];
                     condition.braked = (bool)conditionData["_props"]["braked"];
-                    condition.scoped = (bool)conditionData["_props"]["scoped"];
+                    string originalTargetWeaponID = conditionData["_props"]["target"][0].ToString();
+                    if (Mod.itemMap.ContainsKey(originalTargetWeaponID))
+                    {
+                        condition.targetWeapon = Mod.itemMap[originalTargetWeaponID];
+                        if (conditionsByItem.ContainsKey(condition.targetWeapon))
+                        {
+                            conditionsByItem[condition.targetWeapon].Add(condition);
+                        }
+                        else
+                        {
+                            conditionsByItem.Add(condition.targetWeapon, new List<TraderTaskCondition>() { condition });
+                        }
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalTargetWeaponID);
+                        return false;
+                    }
                     break;
                 default:
                     Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has unexpected condition type: " + conditionData["_parent"].ToString());
@@ -1618,11 +1666,28 @@ namespace EFM
 
         public string ID;
 
-        public List<Dictionary<string, int>> prices;
+        public List<List<AssortmentPriceData>> prices;
 
         public int stack = 1;
         public int buyRestrictionMax = -1;
         public int buyRestrictionCurrent;
+    }
+
+    public class AssortmentPriceData
+    {
+        public enum PriceItemType
+        {
+            Other,
+            Dogtag
+        }
+        public PriceItemType priceItemType;
+
+        public string ID;
+        public int count;
+
+        // Dogtag
+        public bool USEC;
+        public int dogtagLevel;
     }
 
     public class TraderTask
@@ -1741,12 +1806,10 @@ namespace EFM
 
         // WeaponAssembly
         public string targetWeapon;
-        public List<string> targetAttachmentTypes; // Attachment categories that the weapon must have one of each
+        public List<List<string>> targetAttachmentTypes; // Attachment categories that the weapon must have one of each
         public List<string> targetAttachments; // Specific attachments the weapon must have
         public bool suppressed;
-        public bool gripped; // Whether the weapon should have an added grip of any kind
-        public bool braked; // Whether the weapon should have a muzzle brake of any kind
-        public bool scoped; // Whether the weapon should have a sight or scope of any kind
+        public bool braked;
 
         public void Init()
         {
