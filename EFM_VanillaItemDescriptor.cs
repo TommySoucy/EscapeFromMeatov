@@ -97,7 +97,22 @@ namespace EFM
             descriptionPack.vanillaItem = this;
             descriptionPack.name = itemName;
             descriptionPack.description = description;
-            descriptionPack.icon = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+            try
+            {
+                // Some vanilla items have custom icons, look there first
+                if (Mod.itemIcons.ContainsKey(H3ID))
+                {
+                    descriptionPack.icon = Mod.itemIcons[H3ID];
+                }
+                else
+                {
+                    descriptionPack.icon = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+                }
+            }
+            catch(Exception)
+            {
+                Mod.instance.LogError("Could not get spawner ID for icon for vanilla item: " + H3ID);
+            }
             descriptionPack.amountRequiredPerArea = new int[22];
 
             // Set init weight

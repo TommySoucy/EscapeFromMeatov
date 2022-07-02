@@ -83,7 +83,6 @@ namespace EFM
         private bool countdownDeploy;
         private float deployTimer;
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
-        AssetBundleCreateRequest currentRaidBundleRequest;
         public List<EFM_BaseAreaManager> baseAreaManagers;
         public Dictionary<string, List<GameObject>> baseInventoryObjects;
         public float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
@@ -123,11 +122,11 @@ namespace EFM
                 countdownDeploy = false;
 
                 // Wait until the raid map is done loading before unloading it
-                if (currentRaidBundleRequest.isDone)
+                if (Mod.currentRaidBundleRequest.isDone)
                 {
-                    if(currentRaidBundleRequest.assetBundle != null)
+                    if(Mod.currentRaidBundleRequest.assetBundle != null)
                     {
-                        currentRaidBundleRequest.assetBundle.Unload(true);
+                        Mod.currentRaidBundleRequest.assetBundle.Unload(true);
                         cancelRaidLoad = false;
                     }
                     else
@@ -147,6 +146,10 @@ namespace EFM
 
                 if (deployTimer <= 0)
                 {
+                    // Autosave before starting the raid
+                    Mod.saveSlotIndex = 5;
+                    SaveBase();
+
                     Mod.currentLocationIndex = 2;
                     SteamVR_LoadLevel.Begin("Meatov"+ chosenMap.text+ "Scene", false, 0.5f, 0f, 0f, 0f, 1f);
                     countdownDeploy = false;
@@ -154,9 +157,9 @@ namespace EFM
             }
             else if (loadingRaid)
             {
-                if(currentRaidBundleRequest.isDone)
+                if(Mod.currentRaidBundleRequest.isDone)
                 {
-                    if(currentRaidBundleRequest.assetBundle != null)
+                    if(Mod.currentRaidBundleRequest.assetBundle != null)
                     {
                         // Load the asset of the map
                         // currentRaidMapRequest = currentRaidBundleRequest.assetBundle.LoadAllAssetsAsync<GameObject>();
@@ -174,7 +177,7 @@ namespace EFM
                 else
                 {
                     raidCountdownTitle.text = "Loading map:";
-                    raidCountdown.text = (currentRaidBundleRequest.progress * 100).ToString() + "%";
+                    raidCountdown.text = (Mod.currentRaidBundleRequest.progress * 100).ToString() + "%";
                 }
             }
         }
@@ -879,6 +882,7 @@ namespace EFM
             Mod.currentBaseManager = this;
             GM.CurrentSceneSettings.MaxPointingDistance = 30;
             GM.CurrentSceneSettings.IsSpawnLockingEnabled = false;
+            GM.CurrentSceneSettings.AreQuickbeltSlotsEnabled = false; // To prevent them from resetting when switching scene, we can still manually set config
 
             // Don't want to setup player rig if just got out of raid
             if (!Mod.justFinishedRaid)
@@ -895,12 +899,16 @@ namespace EFM
 
             ProcessData();
 
+            InitUI();
+
+            InitTime();
+
             if (Mod.justFinishedRaid)
             {
                 FinishRaid(Mod.raidState); // This will save on autosave
 
                 // Set any parts health to 1 if they are at 0
-                for(int i=0; i < 7; ++i)
+                for (int i = 0; i < 7; ++i)
                 {
                     if (Mod.health[i] == 0)
                     {
@@ -908,10 +916,6 @@ namespace EFM
                     }
                 }
             }
-
-            InitUI();
-
-            InitTime();
 
             // Manager GC ourselves
             GCManager = gameObject.AddComponent<EFM_GCManager>();
@@ -1454,6 +1458,12 @@ namespace EFM
             Mod.stamina = (float)data["stamina"];
             Mod.maxStamina = (float)data["maxStamina"];
             Mod.weight = (float)data["weight"];
+            Mod.totalRaidCount = (int)data["totalRaidCount"];
+            Mod.runThroughRaidCount = (int)data["runThroughRaidCount"];
+            Mod.survivedRaidCount = (int)data["survivedRaidCount"];
+            Mod.MIARaidCount = (int)data["MIARaidCount"];
+            Mod.KIARaidCount = (int)data["KIARaidCount"];
+            Mod.failedRaidCount = (int)data["failedRaidCount"];
             Mod.skills = new EFM_Skill[64];
             for(int i=0; i<64; ++i)
             {
@@ -1485,7 +1495,7 @@ namespace EFM
                 JToken item = loadedItems[i];
 
                 // If just finished raid, skip any items that are on player since we want to keep what player found in raid
-                if (Mod.justFinishedRaid && ((int)item["PhysicalObject"]["equipSlot"] != -1 || (int)item["PhysicalObject"]["heldMode"] != 0 || (int)item["PhysicalObject"]["m_quickBeltSlot"] != -1))
+                if (Mod.justFinishedRaid && ((item["PhysicalObject"]["equipSlot"] != null && (int)item["PhysicalObject"]["equipSlot"] != -1) || (int)item["PhysicalObject"]["heldMode"] != 0 || (int)item["PhysicalObject"]["m_quickBeltSlot"] != -1 || item["pocketSlotIndex"] != null))
                 {
                     continue;
                 }
@@ -1666,7 +1676,6 @@ namespace EFM
             {
                 if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
                 {
-                    Mod.instance.LogInfo("2");
                     FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
                     if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
                     {
@@ -1754,18 +1763,31 @@ namespace EFM
             }
 
             // Check for more items that may be contained inside this one
-            if (customItemWrapper != null && customItemWrapper.itemObjectsRoot != null)
+            if (customItemWrapper != null)
             {
-                foreach (Transform innerItem in customItemWrapper.itemObjectsRoot)
+                if (customItemWrapper.itemType == Mod.ItemType.Backpack || customItemWrapper.itemType == Mod.ItemType.Container || customItemWrapper.itemType == Mod.ItemType.Pouch)
                 {
-                    AddToBaseInventory(innerItem);
+                    foreach (Transform innerItem in customItemWrapper.containerItemRoot)
+                    {
+                        AddToBaseInventory(innerItem);
+                    }
+                }
+                else if (customItemWrapper.itemType == Mod.ItemType.Rig || customItemWrapper.itemType == Mod.ItemType.ArmoredRig)
+                {
+                    foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
+                    {
+                        if (innerItem != null)
+                        {
+                            AddToBaseInventory(innerItem.transform);
+                        }
+                    }
                 }
             }
         }
 
         private GameObject LoadSavedItem(Transform parent, JToken item, int locationIndex = -1)
         {
-            Mod.instance.LogInfo("Loading item "+item["PhysicalObject"]["ObjectWrapper"]["ItemID"] +", on parent "+parent.name);
+            Mod.instance.LogInfo("Loading item "+item["PhysicalObject"]["ObjectWrapper"]["ItemID"]);
             int parsedID = -1;
             GameObject prefabToUse = null;
             if (int.TryParse(item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString(), out parsedID))
@@ -1889,11 +1911,6 @@ namespace EFM
                         Mod.instance.LogInfo("\tFirearm has mag");
                         FVRFireArmMagazine magPhysicalObject = containerPhysicalObject as FVRFireArmMagazine;
                         Mod.instance.LogInfo("\tis mag null?: " + (magPhysicalObject == null));
-                        //Transform gunMagTransform = firearmPhysicalObject.GetMagMountPos(magPhysicalObject.IsBeltBox);
-                        //Mod.instance.LogInfo("\tgunMagTransform null?: " + (gunMagTransform == null));
-
-                        //containerObject.transform.localPosition = gunMagTransform.localPosition;
-                        //containerObject.transform.localRotation = gunMagTransform.localRotation;
 
                         if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
                         {
@@ -1920,6 +1937,10 @@ namespace EFM
 
                         magPhysicalObject.Load(firearmPhysicalObject);
                         magPhysicalObject.IsInfinite = false;
+
+                        Transform gunMagTransform = firearmPhysicalObject.GetMagMountPos(magPhysicalObject.IsBeltBox);
+                        containerObject.transform.localPosition = gunMagTransform.localPosition;
+                        containerObject.transform.localRotation = gunMagTransform.localRotation;
                     }
                 }
             }
@@ -2052,7 +2073,7 @@ namespace EFM
                             }
                             else
                             {
-                                customItemWrapper.itemsInSlots[j] = LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedQBContents[j], customItemWrapper.locationIndex);
+                                customItemWrapper.itemsInSlots[j] = LoadSavedItem(null, loadedQBContents[j], customItemWrapper.locationIndex);
                             }
                         }
 
@@ -2092,7 +2113,7 @@ namespace EFM
                         JArray loadedBPContents = (JArray)item["PhysicalObject"]["backpackContents"];
                         for (int j = 0; j < loadedBPContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedBPContents[j], customItemWrapper.locationIndex);
+                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedBPContents[j], customItemWrapper.locationIndex);
                         }
                     }
                 }
@@ -2113,7 +2134,7 @@ namespace EFM
                         JArray loadedContainerContents = (JArray)item["PhysicalObject"]["containerContents"];
                         for (int j = 0; j < loadedContainerContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedContainerContents[j], customItemWrapper.locationIndex);
+                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedContainerContents[j], customItemWrapper.locationIndex);
                         }
                     }
                 }
@@ -2134,7 +2155,7 @@ namespace EFM
                         JArray loadedPouchContents = (JArray)item["PhysicalObject"]["containerContents"];
                         for (int j = 0; j < loadedPouchContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.itemObjectsRoot, loadedPouchContents[j], customItemWrapper.locationIndex);
+                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedPouchContents[j], customItemWrapper.locationIndex);
                         }
                     }
                 }
@@ -2214,15 +2235,17 @@ namespace EFM
                     }
                 }
 
+                Mod.instance.LogInfo("putting in equip slot if necessary");
                 // Equip the item if it has an equip slot
                 if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                 {
                     customItemWrapper.takeCurrentLocation = false;
 
                     int equipSlotIndex = (int)item["PhysicalObject"]["equipSlot"];
+                    Mod.instance.LogInfo("Item has equip slot: "+ equipSlotIndex);
                     FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[equipSlotIndex];
                     itemPhysicalObject.SetQuickBeltSlot(equipSlot);
-                    itemPhysicalObject.SetParentage(equipSlot.QuickbeltRoot);
+                    itemPhysicalObject.SetParentage(null);
 
                     if(equipSlotIndex == 0)
                     {
@@ -2230,7 +2253,10 @@ namespace EFM
                     }
 
                     EFM_EquipmentSlot.WearEquipment(customItemWrapper);
+
+                    itemPhysicalObject.gameObject.SetActive(Mod.playerStatusManager.displayed);
                 }
+                Mod.instance.LogInfo("put in equip slot if necessary, putting in pocket if necessary");
 
                 // Put item in pocket if it has pocket index
                 if (item["pocketSlotIndex"] != null)
@@ -2240,8 +2266,9 @@ namespace EFM
 
                     FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
                     itemPhysicalObject.SetQuickBeltSlot(pocketSlot);
-                    itemPhysicalObject.SetParentage(pocketSlot.QuickbeltRoot);
+                    itemPhysicalObject.SetParentage(null);
                 }
+                Mod.instance.LogInfo("put in pocket if necessary");
             }
 
             EFM_VanillaItemDescriptor vanillaItemDescriptor = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
@@ -2263,16 +2290,16 @@ namespace EFM
 
                     FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
                     itemPhysicalObject.SetQuickBeltSlot(pocketSlot);
-                    itemPhysicalObject.SetParentage(pocketSlot.QuickbeltRoot);
                 }
             }
 
+            Mod.instance.LogInfo("Checking if in trade volume");
             // Place in tradeVolume
-            if(item["inTradeVolume"] != null)
+            if (item["inTradeVolume"] != null)
             {
                 itemObject.transform.parent = transform.GetChild(1).GetChild(24).GetChild(1);
             }
-            else if(parent.parent != null) // Add to container in case parent is one
+            else if(parent != null && parent.parent != null) // Add to container in case parent is one
             {
                 EFM_CustomItemWrapper parentCIW = parent.parent.GetComponent<EFM_CustomItemWrapper>();
                 if(parentCIW != null)
@@ -2281,10 +2308,12 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("positioning");
             // GameObject
             itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
             itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
 
+            Mod.instance.LogInfo("done");
             return itemObject;
         }
 
@@ -2454,7 +2483,7 @@ namespace EFM
             // Set buttons activated depending on presence of save files
             if (availableSaveFiles.Count > 0)
             {
-                for (int i = 0; i < 5; ++i)
+                for (int i = 0; i < 6; ++i)
                 {
                     buttons[1][i].gameObject.SetActive(availableSaveFiles.Contains(i));
                 }
@@ -2802,6 +2831,23 @@ namespace EFM
             }
         }
 
+        private void UpdateSaveButtonList()
+        {
+            // Set buttons activated depending on presence of save files
+            FetchAvailableSaveFiles();
+            if (availableSaveFiles.Count > 0)
+            {
+                for (int i = 0; i < 6; ++i)
+                {
+                    buttons[1][i].gameObject.SetActive(availableSaveFiles.Contains(i));
+                }
+            }
+            else
+            {
+                buttons[0][2].gameObject.SetActive(false);
+            }
+        }
+
         public long GetTimeSeconds()
         {
             DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -2931,7 +2977,7 @@ namespace EFM
             {
                 case 0:
                     loadingRaid = true;
-                    currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
+                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
                     break;
                 default:
                     loadingRaid = true;
@@ -2939,7 +2985,7 @@ namespace EFM
                     chosenCharIndex = 0;
                     chosenTimeIndex = 0;
                     chosenMap.text = "Factory";
-                    currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
+                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
                     break;
             }
         }
@@ -2984,6 +3030,12 @@ namespace EFM
             saveObject["level"] = Mod.level;
             saveObject["experience"] = Mod.experience;
             saveObject["weight"] = Mod.weight;
+            saveObject["totalRaidCount"] = Mod.totalRaidCount;
+            saveObject["runThroughRaidCount"] = Mod.runThroughRaidCount;
+            saveObject["survivedRaidCount"] = Mod.survivedRaidCount;
+            saveObject["MIARaidCount"] = Mod.MIARaidCount;
+            saveObject["KIARaidCount"] = Mod.KIARaidCount;
+            saveObject["failedRaidCount"] = Mod.failedRaidCount;
             Mod.instance.LogInfo("\tWrote basic data");
 
             // Write skills
@@ -3197,6 +3249,7 @@ namespace EFM
             Mod.instance.LogInfo("\tWriting save data to file");
             SaveDataToFile();
             Mod.instance.LogInfo("Saved base");
+            UpdateSaveButtonList();
         }
 
         private void SaveItem(JArray listToAddTo, Transform item, FVRViveHand hand = null, int quickBeltSlotIndex = -1)
@@ -3529,10 +3582,10 @@ namespace EFM
                         savedItem["PhysicalObject"]["backpackContents"] = new JArray();
                     }
                     JArray saveBPContents = (JArray)savedItem["PhysicalObject"]["backpackContents"];
-                    for (int i=0; i < customItemWrapper.itemObjectsRoot.childCount; ++i)
+                    for (int i=0; i < customItemWrapper.containerItemRoot.childCount; ++i)
                     {
-                        Mod.instance.LogInfo("Item in backpack " + i + ": "+ customItemWrapper.itemObjectsRoot.GetChild(i).name);
-                        SaveItem(saveBPContents, customItemWrapper.itemObjectsRoot.GetChild(i));
+                        Mod.instance.LogInfo("Item in backpack " + i + ": "+ customItemWrapper.containerItemRoot.GetChild(i).name);
+                        SaveItem(saveBPContents, customItemWrapper.containerItemRoot.GetChild(i));
                     }
                 }
 
@@ -3546,10 +3599,10 @@ namespace EFM
                         savedItem["PhysicalObject"]["containerContents"] = new JArray();
                     }
                     JArray saveContainerContents = (JArray)savedItem["PhysicalObject"]["containerContents"];
-                    for (int i = 0; i < customItemWrapper.itemObjectsRoot.childCount; ++i)
+                    for (int i = 0; i < customItemWrapper.containerItemRoot.childCount; ++i)
                     {
-                        Mod.instance.LogInfo("Item in container " + i + ": " + customItemWrapper.itemObjectsRoot.GetChild(i).name);
-                        SaveItem(saveContainerContents, customItemWrapper.itemObjectsRoot.GetChild(i));
+                        Mod.instance.LogInfo("Item in container " + i + ": " + customItemWrapper.containerItemRoot.GetChild(i).name);
+                        SaveItem(saveContainerContents, customItemWrapper.containerItemRoot.GetChild(i));
                     }
                 }
 
@@ -3568,10 +3621,10 @@ namespace EFM
                         savedItem["PhysicalObject"]["containerContents"] = new JArray();
                     }
                     JArray savePouchContents = (JArray)savedItem["PhysicalObject"]["containerContents"];
-                    for (int i = 0; i < customItemWrapper.itemObjectsRoot.childCount; ++i)
+                    for (int i = 0; i < customItemWrapper.containerItemRoot.childCount; ++i)
                     {
-                        Mod.instance.LogInfo("Item in pouch " + i + ": " + customItemWrapper.itemObjectsRoot.GetChild(i).name);
-                        SaveItem(savePouchContents, customItemWrapper.itemObjectsRoot.GetChild(i));
+                        Mod.instance.LogInfo("Item in pouch " + i + ": " + customItemWrapper.containerItemRoot.GetChild(i).name);
+                        SaveItem(savePouchContents, customItemWrapper.containerItemRoot.GetChild(i));
                     }
                 }
 
@@ -3706,23 +3759,23 @@ namespace EFM
         public void FinishRaid(FinishRaidState state)
         {
             // Increment raid counters
-            data["totalRaidCount"] = (int)data["totalRaidCount"] + 1;
+            ++Mod.totalRaidCount;
             switch (state)
             {
                 case FinishRaidState.RunThrough:
-                    data["runThroughRaidCount"] = (int)data["runThroughRaidCount"] + 1;
-                    data["survivedRaidCount"] = (int)data["survivedRaidCount"] + 1;
+                    ++Mod.runThroughRaidCount;
+                    ++Mod.survivedRaidCount;
                     break;
                 case FinishRaidState.Survived:
-                    data["survivedRaidCount"] = (int)data["survivedRaidCount"] + 1;
+                    ++Mod.survivedRaidCount;
                     break;
                 case FinishRaidState.MIA:
-                    data["MIARaidCount"] = (int)data["MIARaidCount"] + 1;
-                    data["failedRaidCount"] = (int)data["failedRaidCount"] + 1;
+                    ++Mod.MIARaidCount;
+                    ++Mod.failedRaidCount;
                     break;
                 case FinishRaidState.KIA:
-                    data["KIARaidCount"] = (int)data["KIARaidCount"] + 1;
-                    data["failedRaidCount"] = (int)data["failedRaidCount"] + 1;
+                    ++Mod.KIARaidCount;
+                    ++Mod.failedRaidCount;
                     break;
                 default:
                     break;

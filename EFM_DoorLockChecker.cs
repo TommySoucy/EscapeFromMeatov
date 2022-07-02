@@ -16,6 +16,7 @@ namespace EFM
 
         private void FixedUpdate()
         {
+
             if (!disabledBlocks && (deadBolt.State == SideHingedDestructibleDoorDeadBolt.DeadBoltState.Open || deadBolt.State == SideHingedDestructibleDoorDeadBolt.DeadBoltState.Broken))
             {
                 blocks.SetActive(false);

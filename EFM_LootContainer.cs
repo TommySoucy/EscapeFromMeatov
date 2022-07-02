@@ -18,12 +18,16 @@ namespace EFM
 		private bool spawnCustomItems;
 		public FVRInteractiveObject interactable;
 		public Collider mainContainerCollider;
+		public Transform itemObjectsRoot;
+		public bool shouldSpawnItems;
 
 		public void Init(List<string> spawnFilter, int maxSuccessfulAttempts)
 		{
+			Mod.instance.LogInfo("\tInitializing loot container: " + name);
 			// Apply 10% chance of empty container
 			if(UnityEngine.Random.value <= 0.1 || spawnFilter == null || spawnFilter.Count == 0)
-            {
+			{
+				Mod.instance.LogInfo("\t\tLoot container empty");
 				m_containsItems = false;
 				return;
             }
@@ -35,6 +39,7 @@ namespace EFM
 			vanillaIDs = new List<string>();
 			customIDs = new List<int>();
 			stackSizes = new List<int>();
+			itemObjectsRoot = transform.GetChild(transform.childCount - 2);
 
 			// Set vanillaIDs and customIDs lists with ID of items to spawn when opened
 			int successfulAttempts = 0;
@@ -54,7 +59,7 @@ namespace EFM
                 {
 					// TODO: If we have no item of a particular ancestor implemented, we will come here. 
 					// Maybe in this case we want to spawn a single random round instead
-					Mod.instance.LogError("Loot container has spawn filter ID: " + randomFilterID + " not present in both itemMap and parents dict.");
+					Mod.instance.LogError("\t\tLoot container has spawn filter ID: " + randomFilterID + " not present in both itemMap and parents dict.");
 					continue;
                 }
 
@@ -68,7 +73,9 @@ namespace EFM
 
 						customIDs.Add(result);
 
-						if(prefabCIW.itemType == Mod.ItemType.AmmoBox)
+						Mod.instance.LogInfo("\t\t"+ result);
+
+						if (prefabCIW.itemType == Mod.ItemType.AmmoBox)
                         {
 							stackSizes.Add(-1); // -1 indicates maxAmount, actual ammo boxes should always spawn with max amount in them
                         }
@@ -98,6 +105,8 @@ namespace EFM
 
 							customIDs.Add(actualItemID);
 
+							Mod.instance.LogInfo("\t\t" + actualItemID);
+
 							stackSizes.Add(stackSize);
 						}
 					}
@@ -108,6 +117,8 @@ namespace EFM
 							++successfulAttempts;
 
 							vanillaIDs.Add(itemID);
+
+							Mod.instance.LogInfo("\t\t" + itemID);
 						}
 					}
 				}
@@ -122,11 +133,14 @@ namespace EFM
 
 		private void Update()
 		{
-			if (m_containsItems && interactable.IsHeld && !m_hasSpawnedContents)
+			if (m_containsItems && !m_hasSpawnedContents && ((interactable != null && interactable.IsHeld) || shouldSpawnItems))
 			{
 				m_hasSpawnedContents = true;
 				spawnCustomItems = true;
 				AnvilManager.Run(SpawnVanillaItems());
+
+				mainContainerCollider.gameObject.SetActive(true);
+				itemObjectsRoot.gameObject.SetActive(true);
 			}
 
             if (spawnCustomItems)
@@ -135,13 +149,14 @@ namespace EFM
                 {
 					int itemID = customIDs[customIDs.Count - 1];
 					customIDs.RemoveAt(customIDs.Count - 1);
-					GameObject itemObject = Instantiate(Mod.itemPrefabs[itemID], mainContainerCollider.transform);
+					GameObject itemObject = Instantiate(Mod.itemPrefabs[itemID], itemObjectsRoot);
+					itemObject.GetComponent<Rigidbody>().isKinematic = true;
 					if (mainContainerCollider is BoxCollider)
 					{
 						BoxCollider boxCollider = mainContainerCollider as BoxCollider;
-						itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-boxCollider.size.x / 2, boxCollider.size.x / 2),
-																		 UnityEngine.Random.Range(-boxCollider.size.y / 2, boxCollider.size.y / 2),
-																		 UnityEngine.Random.Range(-boxCollider.size.z / 2, boxCollider.size.z / 2));
+						itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-boxCollider.size.x * mainContainerCollider.transform.localScale.x / 2, boxCollider.size.x * mainContainerCollider.transform.localScale.x / 2),
+																		 UnityEngine.Random.Range(-boxCollider.size.y * mainContainerCollider.transform.localScale.y / 2, boxCollider.size.y * mainContainerCollider.transform.localScale.y / 2),
+																		 UnityEngine.Random.Range(-boxCollider.size.z * mainContainerCollider.transform.localScale.z / 2, boxCollider.size.z * mainContainerCollider.transform.localScale.z / 2));
 					}
 					else
 					{
@@ -190,13 +205,14 @@ namespace EFM
 			foreach(string vanillaID in vanillaIDs)
 			{
 				yield return IM.OD[vanillaID].GetGameObjectAsync();
-				GameObject itemObject = Instantiate(IM.OD[vanillaID].GetGameObject(), mainContainerCollider.transform);
+				GameObject itemObject = Instantiate(IM.OD[vanillaID].GetGameObject(), itemObjectsRoot);
+				itemObject.GetComponent<Rigidbody>().isKinematic = true;
 				if (mainContainerCollider is BoxCollider)
 				{
 					BoxCollider boxCollider = mainContainerCollider as BoxCollider;
-					itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-boxCollider.size.x / 2, boxCollider.size.x / 2),
-																	 UnityEngine.Random.Range(-boxCollider.size.y / 2, boxCollider.size.y / 2),
-																	 UnityEngine.Random.Range(-boxCollider.size.z / 2, boxCollider.size.z / 2));
+					itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-boxCollider.size.x * mainContainerCollider.transform.localScale.x / 2, boxCollider.size.x * mainContainerCollider.transform.localScale.x / 2),
+																	 UnityEngine.Random.Range(-boxCollider.size.y * mainContainerCollider.transform.localScale.y / 2, boxCollider.size.y * mainContainerCollider.transform.localScale.y / 2),
+																	 UnityEngine.Random.Range(-boxCollider.size.z * mainContainerCollider.transform.localScale.z / 2, boxCollider.size.z * mainContainerCollider.transform.localScale.z / 2));
 				}
 				else
 				{

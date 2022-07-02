@@ -26,6 +26,7 @@ namespace EFM
 
         public static void WearEquipment(EFM_CustomItemWrapper customItemWrapper)
         {
+            Mod.instance.LogInfo("WearEquipment called on " + customItemWrapper.gameObject.name);
             //EFM_CustomItemWrapper customItemWrapper = CurObject.GetComponentInChildren<EFM_CustomItemWrapper>();
             if (customItemWrapper != null)
             {
@@ -132,7 +133,6 @@ namespace EFM
                             if(customItemWrapper.itemsInSlots[i] != null)
                             {
                                 customItemWrapper.itemsInSlots[i].SetActive(false);
-                                customItemWrapper.itemsInSlots[i].transform.parent = customItemWrapper.itemObjectsRoot;
                             }
                         }
                         GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
@@ -150,7 +150,6 @@ namespace EFM
                             if (customItemWrapper.itemsInSlots[i] != null)
                             {
                                 customItemWrapper.itemsInSlots[i].SetActive(false);
-                                customItemWrapper.itemsInSlots[i].transform.parent = customItemWrapper.itemObjectsRoot;
                             }
                         }
                         GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
@@ -191,6 +190,7 @@ namespace EFM
 
         private static void EquipRig(EFM_CustomItemWrapper customItemWrapper)
         {
+            Mod.instance.LogInfo("Equip rig called on "+customItemWrapper.gameObject.name);
             // Load the config
             GM.CurrentPlayerBody.ConfigureQuickbelt(customItemWrapper.configurationIndex);
 
@@ -201,7 +201,7 @@ namespace EFM
                 {
                     FVRPhysicalObject physicalObject = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
                     physicalObject.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i + 4]);
-                    physicalObject.SetParentage(GM.CurrentPlayerBody.QBSlots_Internal[i + 4].gameObject.transform);
+                    physicalObject.SetParentage(null);
                     physicalObject.transform.localScale = Vector3.one;
                     customItemWrapper.itemsInSlots[i].transform.localPosition = Vector3.zero;
                     customItemWrapper.itemsInSlots[i].transform.localRotation = Quaternion.identity;

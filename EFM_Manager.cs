@@ -27,7 +27,7 @@ namespace EFM
         }
 
         // This should be called everytime we save because there may be a new save available
-        private void FetchAvailableSaveFiles()
+        protected void FetchAvailableSaveFiles()
         {
             if(availableSaveFiles == null)
             {
@@ -40,9 +40,16 @@ namespace EFM
             string[] allFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov");
             foreach (string path in allFiles)
             {
-                if (path.IndexOf(".sav") == path.Length - 4) // If .sav is present as the last part of the path
+                if (path.EndsWith(".sav")) // If .sav is present as the last part of the path
                 {
-                    availableSaveFiles.Add(int.Parse("" + path[path.Length - 5]));
+                    if(int.TryParse(path[path.Length - 5].ToString(), out int parseResult))
+                    {
+                        availableSaveFiles.Add(parseResult);
+                    }
+                    else // AutoSave.sav
+                    {
+                        availableSaveFiles.Add(5);
+                    }
                 }
             }
         }
@@ -92,7 +99,8 @@ namespace EFM
                     long currentLatestTime = 0;
                     for (int i = 0; i < availableSaveFiles.Count; ++i)
                     {
-                        JObject current = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/" + (i == 5 ? "AutoSave" : "Slot" + availableSaveFiles[i]) + ".sav"));
+                        int fileIndex = availableSaveFiles[i];
+                        JObject current = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/" + (fileIndex == 5 ? "AutoSave" : "Slot" + fileIndex) + ".sav"));
                         long saveTime = (long)current["time"];
                         if (saveTime > currentLatestTime)
                         {
@@ -110,17 +118,6 @@ namespace EFM
                 Mod.saveSlotIndex = slotIndex;
             }
 
-            //TODO: Continue fro here, to make sure this isnt additive, do everything Begin() does here ourselves:
-
-            //SteamVR_LoadLevel steamVR_LoadLevel = new GameObject("loader").AddComponent<SteamVR_LoadLevel>();
-            //steamVR_LoadLevel.levelName = levelName;
-            //steamVR_LoadLevel.showGrid = showGrid;
-            //steamVR_LoadLevel.fadeOutTime = fadeOutTime;
-            //steamVR_LoadLevel.backgroundColor = new Color(r, g, b, a);
-            //steamVR_LoadLevel.loadAdditive = false
-            //steamVR_LoadLevel.Trigger();
-
-            // with this, we can set loadAdditive = false; 
             SteamVR_LoadLevel.Begin("MeatovHideoutScene", false, 0.5f, 0f, 0f, 0f, 1f);
         }
 

@@ -57,6 +57,7 @@ namespace EFM
 
 		// Equipment
 		// 0: Open (Model should be as orginal in tarkov), 1: ClosedFull (Closed but only folded to the point that any container/armor is not folded), 2: ClosedEmpty (Folded and flattened as much as is realistic)
+		public bool modeInitialized;
 		private int _mode = 2;
 		public int mode
 		{
@@ -91,7 +92,6 @@ namespace EFM
 		public float armor;
 
 		// Rig and Backpacks
-		public Transform itemObjectsRoot;
 		public bool open;
 		public Transform rightHandPoseOverride;
 		public Transform leftHandPoseOverride;
@@ -104,6 +104,7 @@ namespace EFM
 		private int activeSlotsSetIndex;
 
 		// Backpacks, Containers, Pouches
+		public Transform containerItemRoot;
 		public GameObject mainContainer;
 		public Renderer[] mainContainerRenderers;
 		public bool canInsertItems = true;
@@ -189,28 +190,39 @@ namespace EFM
 		private void Awake()
 		{
 			physObj = gameObject.GetComponent<FVRPhysicalObject>();
-			_mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
+			if (itemType != Mod.ItemType.LootContainer)
+			{
+				_mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
+			}
+			modeInitialized = true;
 		}
 
 		private void Start()
 		{
-			if (takeCurrentLocation)
-			{
-				locationIndex = Mod.currentLocationIndex;
-			}
-
-			prefabCIW = Mod.itemPrefabs[int.Parse(ID)].GetComponent<EFM_CustomItemWrapper>();
-
 			descriptionPack = new DescriptionPack();
-			descriptionPack.isCustom = true;
-			descriptionPack.isPhysical = true;
-			descriptionPack.customItem = this;
-			descriptionPack.name = itemName;
-			descriptionPack.description = description;
-			descriptionPack.icon = Mod.itemIcons[ID];
-			descriptionPack.amountRequiredPerArea = new int[22];
+			if (itemType == Mod.ItemType.LootContainer)
+			{
+				descriptionPack.itemType = Mod.ItemType.LootContainer;
+			}
+			else
+			{
+				if (takeCurrentLocation)
+				{
+					locationIndex = Mod.currentLocationIndex;
+				}
 
-			SetCurrentWeight(this);
+				prefabCIW = Mod.itemPrefabs[int.Parse(ID)].GetComponent<EFM_CustomItemWrapper>();
+
+				descriptionPack.isCustom = true;
+				descriptionPack.isPhysical = true;
+				descriptionPack.customItem = this;
+				descriptionPack.name = itemName;
+				descriptionPack.description = description;
+				descriptionPack.icon = Mod.itemIcons[ID];
+				descriptionPack.amountRequiredPerArea = new int[22];
+
+				SetCurrentWeight(this);
+			}
 		}
 
 		public static float SetCurrentWeight(EFM_CustomItemWrapper item)
@@ -220,7 +232,7 @@ namespace EFM
 				return 0;
 			}
 
-			item.currentWeight = item.physObj.RootRigidbody.mass;
+			item.currentWeight = item.GetComponent<Rigidbody>().mass;
 
 			if (item.itemType == Mod.ItemType.Rig || item.itemType == Mod.ItemType.ArmoredRig)
 			{
@@ -243,7 +255,7 @@ namespace EFM
 			}
 			else if(item.itemType == Mod.ItemType.Backpack || item.itemType == Mod.ItemType.Container || item.itemType == Mod.ItemType.Pouch)
 			{
-				foreach (Transform containedItem in item.itemObjectsRoot)
+				foreach (Transform containedItem in item.containerItemRoot)
 				{
 					if (containedItem != null)
 					{
@@ -274,40 +286,43 @@ namespace EFM
 
 		private void Update()
 		{
-			if (physObj.m_hand != null)
+			if (itemType != Mod.ItemType.LootContainer)
 			{
-				TakeInput();
-			}
-
-			// Update splitting stack flag
-			if(physObj.m_hand == null && splittingStack)
-			{
-				CancelSplit();
-			}
-
-			// Update based on splitting stack
-            if (splittingStack)
-            {
-				Vector3 handVector = physObj.m_hand.transform.position - stackSplitStartPosition;
-				float angle = Vector3.Angle(stackSplitRightVector, handVector);
-				float distanceFromCenter = Mathf.Clamp(handVector.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad), -0.19f, 0.19f);
-
-				// Scale is from -0.19 (0) to 0.19 (stack)
-				if (distanceFromCenter <= -0.19f)
+				if (physObj.m_hand != null)
 				{
-					splitAmount = 0;
-				}
-				else if (distanceFromCenter >= 0.19f)
-				{
-					splitAmount = stack;
-				}
-				else
-				{
-					splitAmount = Mathf.Max(1, (int)(Mathf.InverseLerp(-0.19f, 0.19f, distanceFromCenter) * stack));
+					TakeInput();
 				}
 
-				Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
-				Mod.stackSplitUIText.text = splitAmount.ToString()+"/"+stack;
+				// Update splitting stack flag
+				if (physObj.m_hand == null && splittingStack)
+				{
+					CancelSplit();
+				}
+
+				// Update based on splitting stack
+				if (splittingStack)
+				{
+					Vector3 handVector = physObj.m_hand.transform.position - stackSplitStartPosition;
+					float angle = Vector3.Angle(stackSplitRightVector, handVector);
+					float distanceFromCenter = Mathf.Clamp(handVector.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad), -0.19f, 0.19f);
+
+					// Scale is from -0.19 (0) to 0.19 (stack)
+					if (distanceFromCenter <= -0.19f)
+					{
+						splitAmount = 0;
+					}
+					else if (distanceFromCenter >= 0.19f)
+					{
+						splitAmount = stack;
+					}
+					else
+					{
+						splitAmount = Mathf.Max(1, (int)(Mathf.InverseLerp(-0.19f, 0.19f, distanceFromCenter) * stack));
+					}
+
+					Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
+					Mod.stackSplitUIText.text = splitAmount.ToString() + "/" + stack;
+				}
 			}
 		}
 
@@ -339,6 +354,12 @@ namespace EFM
 			EFM_VanillaItemDescriptor VID = item.GetComponent<EFM_VanillaItemDescriptor>();
 			if (wrapper != null)
 			{
+                if (!wrapper.modeInitialized)
+                {
+					wrapper.mode = wrapper.volumes.Length - 1;
+					wrapper.modeInitialized = true;
+
+				}
 				volumeToUse = wrapper.volumes[wrapper.mode];
 				IDToUse = wrapper.ID;
 				parentsToUse = wrapper.parents;
@@ -383,7 +404,7 @@ namespace EFM
 					resetColPairs.Add(resetColPair);
 				}
 				Mod.instance.LogInfo("\t\tsetup reset col pairs");
-				item.transform.parent = itemObjectsRoot;
+				item.transform.parent = containerItemRoot;
 				Mod.instance.LogInfo("\t\tset parentage");
 				item.GetComponent<Rigidbody>().isKinematic = true;
 				Mod.instance.LogInfo("\t\tset RB kinematic");
@@ -1423,7 +1444,6 @@ namespace EFM
 			open = !open;
 			if (open)
 			{
-
 				if (itemType == Mod.ItemType.ArmoredRig || itemType == Mod.ItemType.Rig)
 				{
 					// Set active the open model and interactive set, and set all others inactive
@@ -1446,6 +1466,7 @@ namespace EFM
 				else if(itemType == Mod.ItemType.LootContainer)
 				{
 					SetContainerOpen(true, isRightHand);
+					gameObject.GetComponent<EFM_LootContainer>().shouldSpawnItems = true;
 				}
 			}
 			else
@@ -1457,7 +1478,7 @@ namespace EFM
 						int modelIndex = 2; // Empty by default
 						for (int i = 0; i < itemsInSlots.Length; ++i)
 						{
-							if (itemsInSlots != null)
+							if (itemsInSlots[i] != null)
 							{
 								modelIndex = 1; // Full if item is found
 								break;
@@ -1530,7 +1551,7 @@ namespace EFM
 				{
 					FVRPhysicalObject physicalObject = itemsInSlots[i].GetComponent<FVRPhysicalObject>();
 					physicalObject.SetQuickBeltSlot(rigSlots[i]);
-					physicalObject.SetParentage(rigSlots[i].gameObject.transform);
+					physicalObject.SetParentage(null);
 					physicalObject.transform.localScale = Vector3.one;
 					rigSlots[i].transform.localPosition = Vector3.zero;
 					rigSlots[i].transform.localRotation = Quaternion.identity;
@@ -1557,9 +1578,11 @@ namespace EFM
 		// A rig may need to change mode while closed because it will be closed in the quipment slot while we wear it but we are still able to put items in it
 		public void UpdateRigMode()
 		{
+			Mod.instance.LogInfo("Update rig mode called");
 			// Return right away if not a rig or if open
 			if (!(itemType == Mod.ItemType.Rig || itemType == Mod.ItemType.ArmoredRig) || mode == 0)
-            {
+			{
+				Mod.instance.LogInfo("Not a rig or mode "+mode+" not 0");
 				return;
             }
 
@@ -1567,11 +1590,13 @@ namespace EFM
             {
 				if(itemsInSlots[i] != null)
 				{
+					Mod.instance.LogInfo("Found item in slot");
 					SetMode(1);
 					return;
                 }
             }
 
+			Mod.instance.LogInfo("Rig empty");
 			// If we get this far it is because no items in slots, so set to closed empty
 			SetMode(2);
         }
@@ -1589,16 +1614,17 @@ namespace EFM
 				if (itemsInSlots[i] != null)
 				{
 					itemsInSlots[i].SetActive(false);
-					itemsInSlots[i].transform.parent = itemObjectsRoot;
 				}
 			}
-			GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
+
+			// TODO: Review if this is necessary, why should we be clearing the slots above pockets of their contents when we close a rig?
+			//GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
 		}
 
 		private void SetContainerOpen(bool open, bool isRightHand = false)
 		{
 			mainContainer.SetActive(open);
-			itemObjectsRoot.gameObject.SetActive(open);
+			containerItemRoot.gameObject.SetActive(open);
 		}
 
 		public void UpdateStackModel()
@@ -1620,6 +1646,11 @@ namespace EFM
 	
 		public DescriptionPack GetDescriptionPack()
         {
+			if(itemType == Mod.ItemType.LootContainer)
+            {
+				return descriptionPack;
+            }
+
 			descriptionPack.amount = (Mod.baseInventory.ContainsKey(ID) ? Mod.baseInventory[ID] : 0) + (Mod.playerInventory.ContainsKey(ID) ? Mod.playerInventory[ID] : 0);
 			descriptionPack.amountRequired = 0;
 			for (int i=0; i < 22; ++i)
@@ -1674,6 +1705,10 @@ namespace EFM
                     }
                 }
             }
+			else if(itemType == Mod.ItemType.DogTag)
+			{
+				descriptionPack.stack = dogtagLevel;
+			}
 			descriptionPack.weight = currentWeight;
 			descriptionPack.volume = volumes[mode];
 			descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(ID) ? Mod.requiredForQuest[ID] : 0;

@@ -3359,6 +3359,7 @@ namespace EFM
             prices = priceList;
             Mod.instance.LogInfo("on buy item click called, with ID: " + item.ID);
             string itemName = Mod.itemNames[item.ID];
+            Mod.instance.LogInfo("Got item name: " + itemName);
 
             Transform cartShowcase = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1);
             cartShowcase.GetChild(0).GetComponent<Text>().text = itemName;
@@ -3374,6 +3375,7 @@ namespace EFM
             itemIconScript.itemID = item.ID;
             itemIconScript.itemName = itemName;
             itemIconScript.description = Mod.itemDescriptions[item.ID];
+            Mod.instance.LogInfo("Got item description");
             itemIconScript.weight = Mod.itemWeights[item.ID];
             itemIconScript.volume = Mod.itemVolumes[item.ID];
 
@@ -3397,6 +3399,7 @@ namespace EFM
             bool canDeal = true;
             foreach(AssortmentPriceData price in priceList)
             {
+                Mod.instance.LogInfo("\tSetting price: "+price.ID);
                 priceHeight += 50;
                 Transform priceElement = Instantiate(priceTemplate, pricesParent).transform;
                 priceElement.gameObject.SetActive(true);
@@ -3411,6 +3414,7 @@ namespace EFM
                 }
                 priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.count.ToString();
                 string priceName = Mod.itemNames[price.ID];
+                Mod.instance.LogInfo("\t\tGot name: " + priceName);
                 priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = priceName;
                 if(price.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                 {
@@ -3424,6 +3428,7 @@ namespace EFM
                 priceIconScript.itemID = price.ID;
                 priceIconScript.itemName = priceName;
                 priceIconScript.description = Mod.itemDescriptions[price.ID];
+                Mod.instance.LogInfo("\t\tGot description");
                 priceIconScript.weight = Mod.itemWeights[price.ID];
                 priceIconScript.volume = Mod.itemVolumes[price.ID];
 

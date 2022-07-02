@@ -29,7 +29,7 @@ namespace EFM
             {
                 if (fvrHand.IsInStreamlinedMode)
                 {
-                    if (fvrHand.Input.AXButtonDown)
+                    if (fvrHand.Input.TriggerDown || fvrHand.Input.IsGrabDown)
                     {
                         switch (collidingTogglableWrapper.itemType)
                         {
@@ -39,6 +39,24 @@ namespace EFM
                             case Mod.ItemType.BodyArmor:
                             case Mod.ItemType.Container:
                             case Mod.ItemType.Pouch:
+                            case Mod.ItemType.LootContainer:
+                                collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    else if (fvrHand.Input.AXButtonDown)
+                    {
+                        switch (collidingTogglableWrapper.itemType)
+                        {
+                            case Mod.ItemType.ArmoredRig:
+                            case Mod.ItemType.Rig:
+                            case Mod.ItemType.Backpack:
+                            case Mod.ItemType.BodyArmor:
+                            case Mod.ItemType.Container:
+                            case Mod.ItemType.Pouch:
+                            case Mod.ItemType.LootContainer:
                                 collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
                                 break;
                             default:
@@ -48,28 +66,49 @@ namespace EFM
                 }
                 else
                 {
-                    Vector2 touchpadAxes = fvrHand.Input.TouchpadAxes;
-
-                    // If touchpad has started being pressed this frame
-                    if (fvrHand.Input.TouchpadDown)
+                    if (fvrHand.Input.TriggerDown || fvrHand.Input.IsGrabDown)
                     {
-                        Vector2 TouchpadClickInitiation = touchpadAxes;
-                        if (touchpadAxes.magnitude > 0.2f)
+                        switch (collidingTogglableWrapper.itemType)
                         {
-                            if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
+                            case Mod.ItemType.ArmoredRig:
+                            case Mod.ItemType.Rig:
+                            case Mod.ItemType.Backpack:
+                            case Mod.ItemType.BodyArmor:
+                            case Mod.ItemType.Container:
+                            case Mod.ItemType.Pouch:
+                            case Mod.ItemType.LootContainer:
+                                collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        Vector2 touchpadAxes = fvrHand.Input.TouchpadAxes;
+
+                        // If touchpad has started being pressed this frame
+                        if (fvrHand.Input.TouchpadDown)
+                        {
+                            Vector2 TouchpadClickInitiation = touchpadAxes;
+                            if (touchpadAxes.magnitude > 0.2f)
                             {
-                                switch (collidingTogglableWrapper.itemType)
+                                if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
                                 {
-                                    case Mod.ItemType.ArmoredRig:
-                                    case Mod.ItemType.Rig:
-                                    case Mod.ItemType.Backpack:
-                                    case Mod.ItemType.BodyArmor:
-                                    case Mod.ItemType.Container:
-                                    case Mod.ItemType.Pouch:
-                                        collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
-                                        break;
-                                    default:
-                                        break;
+                                    switch (collidingTogglableWrapper.itemType)
+                                    {
+                                        case Mod.ItemType.ArmoredRig:
+                                        case Mod.ItemType.Rig:
+                                        case Mod.ItemType.Backpack:
+                                        case Mod.ItemType.BodyArmor:
+                                        case Mod.ItemType.Container:
+                                        case Mod.ItemType.Pouch:
+                                        case Mod.ItemType.LootContainer:
+                                            collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                            break;
+                                        default:
+                                            break;
+                                    }
                                 }
                             }
                         }

@@ -33,9 +33,32 @@ namespace EFM
         private float currentHydrationRate = 0;
 
         private List<GameObject> extractionCards;
+        private bool extracted;
 
         private void Update()
         {
+            if (extracted)
+            {
+                return;
+            }
+
+            if (Mod.instance.debug)
+            {
+                if (Input.GetKeyDown(KeyCode.U))
+                {
+                    Mod.justFinishedRaid = true;
+                    Mod.raidState = EFM_Base_Manager.FinishRaidState.Survived;
+
+                    // Disable extraction list and timer
+                    Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+                    Mod.extractionUI.SetActive(false);
+
+                    EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
+
+                    extracted = true;
+                }
+            }
+
             if(currentExtraction != null && currentExtraction.active)
             {
                 string missingRequirement = currentExtraction.extraction.RequirementsMet();
@@ -55,9 +78,17 @@ namespace EFM
                     {
                         Mod.extractionUI.SetActive(true);
                     }
-                    Mod.extractionUI.transform.localPosition = GM.CurrentPlayerBody.Head.localPosition;
-                    Mod.extractionUI.transform.GetChild(0).localPosition = Vector3.forward;
                     Mod.extractionUIText.text = string.Format("Extraction in {0:0.#}", Mathf.Max(0, extractionTime - extractionTimer));
+
+                    // Position extraction UI
+                    Vector3 vector = GM.CurrentPlayerBody.Head.position + Vector3.up * 0.4f;
+                    Vector3 vector2 = GM.CurrentPlayerBody.Head.forward;
+                    vector2.y = 0f;
+                    vector2.Normalize();
+                    vector2 *= 0.25f;
+                    vector += vector2;
+                    Mod.extractionUI.transform.position = vector;
+                    Mod.extractionUI.transform.rotation = Quaternion.LookRotation(vector2, Vector3.up);
 
                     if (extractionTimer >= extractionTime)
                     {
@@ -65,7 +96,13 @@ namespace EFM
                         Mod.raidState = EFM_Base_Manager.FinishRaidState.Survived; // TODO: Will have to call with runthrough if exp is less than threshold
                         //TODO: Give experience depending on raid state
 
+                        // Disable extraction list
+                        Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+                        Mod.extractionUI.SetActive(false);
+
                         EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
+
+                        extracted = true;
                     }
                 }
                 else
@@ -1040,13 +1077,10 @@ namespace EFM
                     Mod.instance.LogInfo("\t\tAdding this extraction to list possible extractions");
                     possibleExtractions.Add(currentExtraction);
 
-                    //Add an extraction manager to each of the extraction's volumes
-                    foreach (Transform volume in currentExtraction.gameObject.transform)
-                    {
-                        ExtractionManager extractionManager = volume.gameObject.AddComponent<ExtractionManager>();
-                        extractionManager.extraction = currentExtraction;
-                        extractionManager.raidManager = this;
-                    }
+                    //Add an extraction manager
+                    ExtractionManager extractionManager = currentExtraction.gameObject.AddComponent<ExtractionManager>();
+                    extractionManager.extraction = currentExtraction;
+                    extractionManager.raidManager = this;
                 }
                    
                 // Best candidate will be farthest because if there is at least one extraction point, we don't want to always have the nearest
@@ -1059,22 +1093,20 @@ namespace EFM
             {
                 if(!possibleExtractions.Contains(bestCandidate))
                 {
-                    Mod.instance.LogInfo("\t\tAdding candidate to list possible extractions");
                     possibleExtractions.Add(bestCandidate);
 
-                    //Add an extraction manager to each of the extraction's volumes
-                    foreach (Transform volume in bestCandidate.gameObject.transform)
-                    {
-                        ExtractionManager extractionManager = volume.gameObject.AddComponent<ExtractionManager>();
-                        extractionManager.extraction = bestCandidate;
-                        extractionManager.raidManager = this;
-                    }
+                    //Add an extraction manager
+                    ExtractionManager extractionManager = bestCandidate.gameObject.AddComponent<ExtractionManager>();
+                    extractionManager.extraction = bestCandidate;
+                    extractionManager.raidManager = this;
                 }
             }
             else
             {
                 Mod.instance.LogError("No minimum extraction found");
             }
+
+            Mod.instance.LogInfo("Got extractions");
 
             // Init extraction cards
             Transform extractionParent = Mod.playerStatusUI.transform.GetChild(0).GetChild(9);
@@ -1093,6 +1125,8 @@ namespace EFM
 
                 possibleExtractions[i].card = currentExtractionCard;
             }
+            extractionParent.gameObject.SetActive(true);
+            Mod.instance.LogInfo("Inited extract cards");
 
             // Initialize doors
             Mod.initDoors = true;
@@ -1111,9 +1145,11 @@ namespace EFM
             metalMatDef.ImpactEffectType = BallisticImpactEffectType.Sparks;
             metalMatDef.SoundType = MatSoundType.Metal;
 
+            Mod.instance.LogInfo("Initializing doors");
             foreach (JToken doorData in Mod.mapData["maps"][Mod.chosenMapIndex]["doors"])
             {
                 GameObject doorObject = doorRoot.GetChild(doorIndex).gameObject;
+                Mod.instance.LogInfo("\t"+doorObject.name);
                 GameObject doorInstance = null;
                 if (doorData["type"].ToString().Equals("left"))
                 {
@@ -1130,6 +1166,9 @@ namespace EFM
                 doorInstance.transform.localPosition = doorObject.transform.localPosition;
                 doorInstance.transform.localRotation = doorObject.transform.localRotation;
                 doorInstance.transform.localScale = doorObject.transform.localScale;
+
+                // Set door to active to awake and Init it
+                doorInstance.SetActive(true);
 
                 // Get relevant components
                 SideHingedDestructibleDoorDeadBolt deadBolt = doorInstance.GetComponentInChildren<SideHingedDestructibleDoorDeadBolt>();
@@ -1157,10 +1196,8 @@ namespace EFM
                     if ((bool)doorData["hasFrame"])
                     {
                         doorInstance.GetComponent<MeshRenderer>().material = doorObject.GetComponent<MeshRenderer>().material;
-                        Mod.instance.LogInfo("\tTransfered mat to frame");
                     }
                     doorInstance.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material = doorObject.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material;
-                    Mod.instance.LogInfo("\tTransfered mat to door");
                 }
 
                 // Set PMat if necessary
@@ -1169,7 +1206,6 @@ namespace EFM
                     doorInstance.GetComponent<PMat>().MatDef = metalMatDef;
                     doorInstance.transform.GetChild(0).GetComponent<PMat>().MatDef = metalMatDef;
                     doorInstance.transform.GetChild(0).GetChild(0).GetComponent<PMat>().MatDef = metalMatDef;
-                    Mod.instance.LogInfo("\tSet PMat to metal");
                 }
 
                 // Flip lock if necessary
@@ -1187,9 +1223,6 @@ namespace EFM
                 {
                     Destroy(doorInstance.transform.GetChild(0).GetComponent<UberShatterable>()); // TODO: Verify if this works
                 }
-
-                // Set door to active
-                doorInstance.SetActive(true);
 
                 // Set door angle
                 //bool hasAngle = (bool)doorData["angle"];
@@ -1235,7 +1268,6 @@ namespace EFM
                 //    //hingeJointsToDisableLimits.Add(doorScript.HingeLower);
                 //    //hingeJointsToDisableLimits.Add(doorScript.HingeUpper);
                 //}
-                Mod.instance.LogInfo("\tSet door angle");
 
                 // Set key
                 int keyIndex = (int)doorData["keyIndex"];
@@ -1267,13 +1299,16 @@ namespace EFM
                 ++doorIndex;
             }
 
+            Mod.instance.LogInfo("Initialized doors, spawning loose loot");
+
             // Spawn loose loot
             JObject locationDB = Mod.locationsDB[GetLocationDataIndex(Mod.chosenMapIndex)];
             Transform itemsRoot = transform.GetChild(1).GetChild(1).GetChild(2);
             List<string> missingForced = new List<string>();
             List<string> missingDynamic = new List<string>();
             // Forced, always spawns TODO: Unless player has it already? Unless player doesnt have the quest yet?
-            foreach(JToken forced in locationDB["forced"])
+            Mod.instance.LogInfo("Spawning forced loot");
+            foreach (JToken forced in locationDB["forced"])
             {
                 JArray items = forced["Items"].Value<JArray>();
                 Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
@@ -1314,6 +1349,7 @@ namespace EFM
             }
 
             // Dynamic, has chance of spawning
+            Mod.instance.LogInfo("Spawning dynamic loot");
             foreach (JToken dynamicSpawn in locationDB["dynamic"])
             {
                 JArray items = dynamicSpawn["Items"].Value<JArray>();
@@ -1354,10 +1390,12 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("Done spawning loose loot, initializing container");
+
             // Init containers
             Transform containersRoot = transform.GetChild(1).GetChild(1).GetChild(1);
             JArray mapContainerData = (JArray)Mod.mapData["maps"][Mod.chosenMapIndex]["containers"];
-            for(int i=0; i< containersRoot.childCount;++i)
+            for(int i=0; i < containersRoot.childCount;++i)
             {
                 Transform container = containersRoot.GetChild(i);
 
@@ -1371,11 +1409,19 @@ namespace EFM
                     case "MedBag":
                     case "SportBag":
                         // Static containers that can be toggled open closed by hovering hand overthem and pressing interact button
+                        container.gameObject.SetActive(false); // Disable temporarily so CIW doesnt Awake before we set the itemType
                         EFM_CustomItemWrapper containerCIW = container.gameObject.AddComponent<EFM_CustomItemWrapper>();
                         containerCIW.itemType = Mod.ItemType.LootContainer;
+                        container.gameObject.SetActive(true);
                         containerCIW.canInsertItems = false;
                         containerCIW.mainContainer = mainContainer.gameObject;
-                        containerCIW.itemObjectsRoot = mainContainer;
+                        containerCIW.containerItemRoot = container.GetChild(container.childCount - 2);
+
+                        EFM_LootContainer containerScript = container.gameObject.AddComponent<EFM_LootContainer>();
+                        containerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
+                        JToken gridProps = containerData["_props"]["Grids"][0]["_props"];
+                        containerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)gridProps["cellsH"] * (int)gridProps["cellsV"]);
+
                         mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
                         break;
                     case "Safe":
@@ -1390,15 +1436,17 @@ namespace EFM
                         EFM_LootContainerCover cover = container.GetChild(0).gameObject.AddComponent<EFM_LootContainerCover>();
                         cover.keyID = mapContainerData[i]["keyID"].ToString();
                         cover.hasKey = !cover.keyID.Equals("");
-                        cover.Root = cover.transform;
+                        cover.Root = container.GetChild(container.childCount - 3);
                         cover.MinRot = -90;
                         cover.MaxRot = 0;
 
-                        EFM_LootContainer containerScript = container.gameObject.AddComponent<EFM_LootContainer>();
-                        containerScript.interactable = cover;
-                        containerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
-                        JToken gridProps = containerData["_props"]["Grids"]["_props"];
-                        containerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)gridProps["cellsH"] * (int)gridProps["cellsV"]);
+                        EFM_LootContainer openableContainerScript = container.gameObject.AddComponent<EFM_LootContainer>();
+                        openableContainerScript.interactable = cover;
+                        openableContainerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
+                        JToken openableContainergridProps = containerData["_props"]["Grids"][0]["_props"];
+                        openableContainerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)openableContainergridProps["cellsH"] * (int)openableContainergridProps["cellsV"]);
+
+                        mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
                         break;
                     case "Drawer":
                         // Containers that must be slid open
@@ -1416,8 +1464,11 @@ namespace EFM
                             EFM_LootContainer drawerScript = drawerTransform.gameObject.AddComponent<EFM_LootContainer>();
                             drawerScript.interactable = slider;
                             drawerScript.mainContainerCollider = drawerTransform.GetChild(drawerTransform.childCount - 1).GetComponent<Collider>();
-                            JToken drawerGridProps = containerData["_props"]["Grids"]["_props"];
+                            JToken drawerGridProps = containerData["_props"]["Grids"][0]["_props"];
                             drawerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)drawerGridProps["cellsH"] * (int)drawerGridProps["cellsV"]);
+
+                            Transform drawerContainer = drawerTransform.GetChild(drawerTransform.childCount - 1);
+                            drawerContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
                         }
                         break;
                     default:
@@ -1513,10 +1564,10 @@ namespace EFM
                                          Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs, Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs,
                                          List<string> unspawnedParents, JToken spawnData, string originalID, bool useChance)
         {
+            Mod.instance.LogInfo("Spawn loot item called with ID: " + itemID);
             GameObject itemObject = null;
-            if (itemObject == null)
+            if (itemPrefab == null)
             {
-                Mod.instance.LogError("Could not instantiate item prefab: " + itemID);
                 return null;
             }
 
@@ -1527,31 +1578,31 @@ namespace EFM
             FVRPhysicalObject itemPhysObj = null;
             EFM_CustomItemWrapper itemCIW = null;
             EFM_VanillaItemDescriptor itemVID = null;
+            FireArmRoundType roundType = FireArmRoundType.a106_25mmR;
+            FireArmRoundClass roundClass = FireArmRoundClass.a20AP;
+            int amount = 0;
             if (prefabCIW != null)
             {
-                if(useChance && UnityEngine.Random.value > prefabCIW.spawnChance / 100)
-                {
-                    unspawnedParents.Add(itemData["_id"].ToString());
-                    return null;
-                }
-
                 itemObject = GameObject.Instantiate(itemPrefab);
                 itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-                itemPhysObj = itemCIW.physObj;
+                itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                 // Get amount
-                int amount = itemData["upd"]["StackObjectsCount"] != null ? (int)itemData["upd"]["StackObjectsCount"] : 1;
+                amount = (itemData["upd"] != null && itemData["upd"]["StackObjectsCount"] != null) ? (int)itemData["upd"]["StackObjectsCount"] : 1;
                 if (itemCIW.itemType == Mod.ItemType.Money)
                 {
                     itemCIW.stack = amount;
                 }
                 else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
                 {
-                    FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                    // TODO: Ammo is specified as separate item with the ammobox as its parent, so the ammobox will be filled up separately? Need to confirm
+                    /*
+                    FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                     for (int j = 0; j < itemCIW.maxAmount; ++j)
                     {
                         asMagazine.AddRound(itemCIW.roundClass, false, false);
                     }
+                    */
                 }
                 else if (itemCIW.maxAmount > 0)
                 {
@@ -1560,25 +1611,25 @@ namespace EFM
             }
             else
             {
-                if (useChance && UnityEngine.Random.value > prefabVID.spawnChance / 100)
-                {
-                    unspawnedParents.Add(itemData["_id"].ToString());
-                    return null;
-                }
-
                 if (Mod.usedRoundIDs.Contains(prefabVID.H3ID))
                 {
+                    Mod.instance.LogInfo("\tSpawning round with ID: " + prefabVID.H3ID);
                     // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of rounds
-                    int amount = itemData["upd"]["StackObjectsCount"] != null ? (int)itemData["upd"]["StackObjectsCount"] : 1;
+                    amount = (itemData["upd"] != null && itemData["upd"]["StackObjectsCount"] != null) ? (int)itemData["upd"]["StackObjectsCount"] : 1;
+                    FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
+                    roundType = round.RoundType;
+                    roundClass = round.RoundClass;
                     if (amount > 1)
                     {
+                        Mod.instance.LogInfo("\t\tStack > 1");
                         if (Mod.ammoBoxByAmmoID.ContainsKey(prefabVID.H3ID))
                         {
+                            Mod.instance.LogInfo("\t\t\tSpecific box");
                             itemObject = GameObject.Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[prefabVID.H3ID]]);
                             itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-                            itemPhysObj = itemCIW.physObj;
+                            itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
-                            FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                            FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                             for (int j = 0; j < amount; ++j)
                             {
                                 asMagazine.AddRound(itemCIW.roundClass, false, false);
@@ -1586,7 +1637,8 @@ namespace EFM
                         }
                         else // Spawn in generic box
                         {
-                            if(amount > 30)
+                            Mod.instance.LogInfo("\t\t\tGeneric box");
+                            if (amount > 30)
                             {
                                 itemObject = GameObject.Instantiate(Mod.itemPrefabs[716]);
                             }
@@ -1596,9 +1648,11 @@ namespace EFM
                             }
 
                             itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-                            itemPhysObj = itemCIW.physObj;
+                            itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>(); 
 
-                            FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                            FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                            asMagazine.RoundType = roundType;
+                            itemCIW.roundClass = roundClass;
                             for (int j = 0; j < amount; ++j)
                             {
                                 asMagazine.AddRound(itemCIW.roundClass, false, false);
@@ -1607,23 +1661,26 @@ namespace EFM
                     }
                     else // Single round, spawn as normal
                     {
+                        Mod.instance.LogInfo("\t\tSingle round");
                         itemObject = GameObject.Instantiate(itemPrefab);
                         itemVID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
-                        itemPhysObj = itemVID.physObj;
+                        itemPhysObj = itemVID.GetComponent<FVRPhysicalObject>();
                     }
                 }
                 else // Not a round, spawn as normal
                 {
                     itemObject = GameObject.Instantiate(itemPrefab);
                     itemVID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
-                    itemPhysObj = itemVID.physObj;
+                    itemPhysObj = itemVID.GetComponent<FVRPhysicalObject>();
                 }
             }
 
             // Position and rotate item
             if (itemData["parentId"] != null)
             {
-                if (unspawnedParents.Contains(itemData["parentID"].ToString()))
+                Mod.instance.LogInfo("\t\tHas parent ID");
+                string parentID = itemData["parentId"].ToString();
+                if (unspawnedParents.Contains(parentID))
                 {
                     Destroy(itemObject);
                     unspawnedParents.Add(itemData["_id"].ToString());
@@ -1632,9 +1689,9 @@ namespace EFM
 
                 // Item has a parent which should be a previously spawned item
                 // This parent should be a container of some sort so we need to add this item to the container
-                string parentID = itemData["parentId"].ToString();
                 if (spawnedItemCIWs.ContainsKey(parentID))
                 {
+                    Mod.instance.LogInfo("\t\tParent exists");
                     EFM_CustomItemWrapper parent = spawnedItemCIWs[parentID];
 
                     // Check which type of item the parent is, because how we instantiate it depends on that
@@ -1653,8 +1710,6 @@ namespace EFM
 
                         if(fittingSlotIndices.Count > 0)
                         {
-                            itemObject.transform.parent = parent.itemObjectsRoot;
-
                             int randomIndex = fittingSlotIndices[UnityEngine.Random.Range(0, fittingSlotIndices.Count - 1)];
 
                             parent.itemsInSlots[randomIndex] = itemObject;
@@ -1670,7 +1725,7 @@ namespace EFM
                         bool boxMainContainer = parent.mainContainer.GetComponent<BoxCollider>() != null;
                         if (parent.AddItemToContainer(itemObject.GetComponent<EFM_CustomItemWrapper>().physObj))
                         {
-                            itemObject.transform.parent = parent.itemObjectsRoot;
+                            itemObject.transform.parent = parent.containerItemRoot;
 
                             if (boxMainContainer)
                             {
@@ -1702,17 +1757,16 @@ namespace EFM
                     }
                     else if(parent.itemType == Mod.ItemType.AmmoBox)
                     {
+                        Mod.instance.LogInfo("\t\tParent is ammo box, itemObject null?: "+(itemObject == null));
                         // Destroy itemObject, Set the ammo box's magazine script's ammo to the one specified and of specified count
-                        FireArmRoundClass roundClass = (itemVID.physObj as FVRFireArmRound).RoundClass;
                         Destroy(itemObject);
                         itemCIW = null;
                         itemVID = null;
                         itemObject = null;
 
-                        FVRFireArmMagazine parentAsMagazine = parent.physObj as FVRFireArmMagazine;
+                        FVRFireArmMagazine parentAsMagazine = parent.GetComponent<FVRFireArmMagazine>();
 
-                        int stack = (itemData["upd"]["StackObjectsCount"] != null ? (int)itemData["upd"]["StackObjectsCount"] : 1);
-                        for (int i = 0; i < stack; ++i)
+                        for (int i = 0; i < amount; ++i)
                         {
                             parentAsMagazine.AddRound(roundClass, false, false);
                         }
@@ -1725,6 +1779,13 @@ namespace EFM
             }
             else
             {
+                if (useChance && UnityEngine.Random.value > (prefabCIW != null ? prefabCIW.spawnChance : prefabVID.spawnChance) / 100)
+                {
+                    Destroy(itemObject);
+                    unspawnedParents.Add(itemData["_id"].ToString());
+                    return null;
+                }
+
                 if (spawnData["Position"].Type == JTokenType.Array)
                 {
                     Vector3 position = new Vector3((float)spawnData["Position"][0], (float)spawnData["Position"][1], (float)spawnData["Position"][2]);
@@ -1735,6 +1796,12 @@ namespace EFM
                     Vector3 rotation = new Vector3((float)spawnData["Rotation"][0], (float)spawnData["Rotation"][1], (float)spawnData["Rotation"][2]);
                     itemObject.transform.rotation = Quaternion.Euler(rotation);
                 }
+                itemObject.transform.parent = itemsRoot;
+            }
+
+            if (itemObject != null)
+            {
+                Mod.instance.LogInfo("Spawned loose loot: " + itemObject.name);
             }
 
             // Add item wrapper or descriptor to spawned items dict with _id as key
@@ -1742,7 +1809,7 @@ namespace EFM
             {
                 spawnedItemCIWs.Add(itemData["_id"].ToString(), itemCIW);
             }
-            else // itemVID should not be null
+            else if(itemVID != null)
             {
                 spawnedItemVIDs.Add(itemData["_id"].ToString(), itemVID);
             }
@@ -1865,37 +1932,12 @@ namespace EFM
 
         private void OnTriggerEnter(Collider collider)
         {
-            Mod.instance.LogInfo("Trigger enter called on "+gameObject.name+": "+collider.name);
-            if (EFM_Raid_Manager.currentManager.currentExtraction == null)
-            {
-                if (collider.gameObject.name.Equals("Controller (left)") ||
-                   collider.gameObject.name.Equals("Controller (left)") ||
-                   collider.gameObject.name.Equals("Hitbox_Neck") ||
-                   collider.gameObject.name.Equals("Hitbox_Head") ||
-                   collider.gameObject.name.Equals("Hitbox_Torso"))
-                {
-                    Mod.instance.LogInfo("Collider is player");
-                    if (playerColliders.Count == 0)
-                    {
-                        EFM_Raid_Manager.currentManager.currentExtraction = this;
-                    }
-
-                    playerColliders.Add(collider);
-                }
-            }
+            EFM_Raid_Manager.currentManager.currentExtraction = this;
         }
 
         private void OnTriggerExit(Collider collider)
         {
-            if (playerColliders.Count > 0)
-            {
-                playerColliders.Remove(collider);
-
-                if (playerColliders.Count == 0 && EFM_Raid_Manager.currentManager.currentExtraction == this)
-                {
-                    EFM_Raid_Manager.currentManager.currentExtraction = null;
-                }
-            }
+            EFM_Raid_Manager.currentManager.currentExtraction = null;
         }
     }
 

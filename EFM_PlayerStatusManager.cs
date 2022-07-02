@@ -31,7 +31,7 @@ namespace EFM
         private Dictionary<string, TraderTask> taskByID;
         private Dictionary<string, GameObject> taskUIByID;
 
-        private bool displayed;
+        public bool displayed;
         private int mustUpdateTaskListHeight;
 
         public void Init()
@@ -181,6 +181,14 @@ namespace EFM
 
                     displayed = true;
                 }
+
+                foreach(EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
+                {
+                    if(equipSlot.CurObject != null)
+                    {
+                        equipSlot.CurObject.gameObject.SetActive(displayed);
+                    }
+                }
             }
             if (Mod.leftHand.fvrHand.Input.BYButtonPressed && displayed)
             {
@@ -314,6 +322,14 @@ namespace EFM
             transform.GetChild(0).gameObject.SetActive(false);
             transform.GetChild(1).gameObject.SetActive(false);
             transform.GetChild(2).gameObject.SetActive(false);
+
+            foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
+            {
+                if (equipSlot.CurObject != null)
+                {
+                    equipSlot.CurObject.gameObject.SetActive(false);
+                }
+            }
         }
 
         private void OnToggleTaskListClick()

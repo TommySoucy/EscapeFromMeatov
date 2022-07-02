@@ -70,7 +70,7 @@ namespace EFM
             // Set buttons activated depending on presence of save files
             if(availableSaveFiles.Count > 0)
             {
-                for (int i = 0; i < 5; ++i)
+                for (int i = 0; i < 6; ++i)
                 {
                     buttons[1][i].gameObject.SetActive(availableSaveFiles.Contains(i));
                 }

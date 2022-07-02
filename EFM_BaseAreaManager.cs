@@ -2105,7 +2105,7 @@ namespace EFM
                                     }
                                     else if(CIW.itemType == Mod.ItemType.Backpack ||CIW.itemType == Mod.ItemType.Container ||CIW.itemType == Mod.ItemType.Pouch)
                                     {
-                                        if (CIW.itemObjectsRoot.childCount == 0)
+                                        if (CIW.containerItemRoot.childCount == 0)
                                         {
                                             ++itemAmountInInventory;
                                         }
@@ -2151,7 +2151,7 @@ namespace EFM
                                     }
                                     else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
                                     {
-                                        if (CIW.itemObjectsRoot.childCount == 0)
+                                        if (CIW.containerItemRoot.childCount == 0)
                                         {
                                             ++itemAmountInInventory;
                                         }
@@ -2229,7 +2229,7 @@ namespace EFM
                                 }
                                 else if(CIW.itemType == Mod.ItemType.Backpack ||CIW.itemType == Mod.ItemType.Container ||CIW.itemType == Mod.ItemType.Pouch)
                                 {
-                                    if (CIW.itemObjectsRoot.childCount == 0)
+                                    if (CIW.containerItemRoot.childCount == 0)
                                     {
                                         ++itemAmountInInventory;
                                     }
@@ -2275,7 +2275,7 @@ namespace EFM
                                 }
                                 else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
                                 {
-                                    if (CIW.itemObjectsRoot.childCount == 0)
+                                    if (CIW.containerItemRoot.childCount == 0)
                                     {
                                         ++itemAmountInInventory;
                                     }
@@ -2585,7 +2585,7 @@ namespace EFM
                                 }
                                 else if(CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
                                 {
-                                    if (CIW.itemObjectsRoot.childCount == 0)
+                                    if (CIW.containerItemRoot.childCount == 0)
                                     {
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
@@ -2667,7 +2667,7 @@ namespace EFM
                                 }
                                 else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
                                 {
-                                    if (CIW.itemObjectsRoot.childCount == 0)
+                                    if (CIW.containerItemRoot.childCount == 0)
                                     {
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
@@ -3694,7 +3694,7 @@ namespace EFM
                             }
                             else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
                             {
-                                if (CIW.itemObjectsRoot.childCount == 0)
+                                if (CIW.containerItemRoot.childCount == 0)
                                 {
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
@@ -3769,7 +3769,7 @@ namespace EFM
                             }
                             else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
                             {
-                                if (CIW.itemObjectsRoot.childCount == 0)
+                                if (CIW.containerItemRoot.childCount == 0)
                                 {
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);

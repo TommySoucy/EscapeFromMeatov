@@ -38,6 +38,7 @@ namespace EFM
         public static AssetBundle menuBundle;
         public static AssetBundle baseAssetsBundle;
         public static AssetBundle baseBundle;
+        public static AssetBundleCreateRequest currentRaidBundleRequest;
         public static MainMenuSceneDef sceneDef;
         public static List<GameObject> securedObjects;
         public static int saveSlotIndex = -1;
@@ -138,6 +139,12 @@ namespace EFM
         public static GameObject rightDescriptionUI;
         public static EFM_DescriptionManager rightDescriptionManager;
         public static GameObject staminaBarUI;
+        public static int totalRaidCount;
+        public static int runThroughRaidCount;
+        public static int survivedRaidCount;
+        public static int MIARaidCount;
+        public static int KIARaidCount;
+        public static int failedRaidCount;
         private static float _weight = 0;
         public static float weight
         {
@@ -282,54 +289,6 @@ namespace EFM
                     EFM_Manager.LoadBase();
                 }
 
-                if (Input.GetKeyDown(KeyCode.U))
-                {
-                    GameObject armoredRig = itemPrefabs[375];
-                    GameObject armoredRigObject = GameObject.Instantiate(armoredRig, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.5f, Quaternion.identity);
-                    FVRObject armoredRigObjectWrapper = armoredRigObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    armoredRigObjectWrapper.ItemID = "375";
-                    if (GameObject.Find("MeatovBase") != null)
-                    {
-                        armoredRigObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    }
-
-                    GameObject basicArmoredRig = itemPrefabs[1];
-                    GameObject basicArmoredRigObject = GameObject.Instantiate(basicArmoredRig, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.7f, Quaternion.identity);
-                    FVRObject basicArmoredRigObjectWrapper = basicArmoredRigObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    basicArmoredRigObjectWrapper.ItemID = "1";
-                    if (GameObject.Find("MeatovBase") != null)
-                    {
-                        basicArmoredRigObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    }
-
-                    GameObject battery = itemPrefabs[5];
-                    GameObject batteryObject = GameObject.Instantiate(battery, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward, Quaternion.identity);
-                    FVRObject batteryObjectWrapper = batteryObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    batteryObjectWrapper.ItemID = "5";
-                    if (GameObject.Find("MeatovBase") != null)
-                    {
-                        batteryObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    }
-
-                    GameObject pack = itemPrefabs[2];
-                    GameObject packObject = GameObject.Instantiate(pack, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.3f, Quaternion.identity);
-                    FVRObject packObjectWrapper = packObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    packObjectWrapper.ItemID = "2";
-                    if (GameObject.Find("MeatovBase") != null)
-                    {
-                        packObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    }
-
-                    GameObject m1911Mag = IM.OD["MagazineStanag20rnd"].GetGameObject();
-                    GameObject m1911MagObject = GameObject.Instantiate(m1911Mag, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.2f, Quaternion.identity);
-                    FVRObject m1911MagObjectWrapper = m1911MagObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    m1911MagObjectWrapper.ItemID = "MagazineStanag20rnd";
-                    if (GameObject.Find("MeatovBase") != null)
-                    {
-                        m1911MagObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    }
-                }
-
                 if (Input.GetKeyDown(KeyCode.N))
                 {
                     SteamVR_LoadLevel.Begin("Grillhouse_2Story", false, 0.5f, 0f, 0f, 0f, 1f);
@@ -348,41 +307,7 @@ namespace EFM
 
                 if (Input.GetKeyDown(KeyCode.J))
                 {
-                    GameObject m1911Mag = IM.OD["MagazineStanag20rnd"].GetGameObject();
-                    GameObject m1911MagObject = GameObject.Instantiate(m1911Mag, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.2f, Quaternion.identity);
-                    FVRObject m1911MagObjectWrapper = m1911MagObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    m1911MagObjectWrapper.ItemID = "MagazineStanag20rnd";
-                    if (GameObject.Find("MeatovBase") != null)
-                    {
-                        m1911MagObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    }
-
-                    GameObject round = IM.OD["45ACPCartridgeTracer"].GetGameObject();
-                    GameObject roundObject = GameObject.Instantiate(round, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.25f, Quaternion.identity);
-                    FVRObject roundObjectWrapper = roundObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    roundObjectWrapper.ItemID = "45ACPCartridgeTracer";
-                    if (GameObject.Find("MeatovBase") != null)
-                    {
-                        roundObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    }
-
-                    GameObject fl = IM.OD["TacticalFlashlight"].GetGameObject();
-                    GameObject flObject = GameObject.Instantiate(fl, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.30f, Quaternion.identity);
-                    FVRObject flObjectWrapper = flObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    flObjectWrapper.ItemID = "TacticalFlashlight";
-                    if (GameObject.Find("MeatovBase") != null)
-                    {
-                        flObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    }
-
-                    GameObject fg = IM.OD["ForegripAngledBlack"].GetGameObject();
-                    GameObject fgObject = GameObject.Instantiate(fg, GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.40f, Quaternion.identity);
-                    FVRObject fgObjectWrapper = fgObject.GetComponent<FVRPhysicalObject>().ObjectWrapper;
-                    fgObjectWrapper.ItemID = "ForegripAngledBlack";
-                    if (GameObject.Find("MeatovBase") != null)
-                    {
-                        fgObject.transform.parent = GameObject.Find("MeatovBase").transform.GetChild(2);
-                    }
+                    EFM_Manager.LoadBase(4);
                 }
 
                 if (Input.GetKeyDown(KeyCode.K))
@@ -858,7 +783,6 @@ namespace EFM
 
                     customItemWrapper.configurationIndex = ManagerSingleton<GM>.Instance.QuickbeltConfigurations.Length + rigIndex++;
                     customItemWrapper.itemsInSlots = new GameObject[slotCount];
-                    customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.configurationRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2);
 
                     //if (Mod.rightHand.fvrHand.CMode == ControlMode.Index || Mod.rightHand.fvrHand.CMode == ControlMode.Oculus)
@@ -916,7 +840,7 @@ namespace EFM
                     // Set backpack settings
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
-                    customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
+                    customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["BackpackProperties"]["MaxVolume"];
 
                     // Set filter lists
@@ -937,7 +861,7 @@ namespace EFM
                     // Set container settings
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
-                    customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
+                    customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
 
                     // Set filter lists
@@ -958,7 +882,7 @@ namespace EFM
                     // Set pouch settings
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
-                    customItemWrapper.itemObjectsRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
+                    customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
 
                     // Set filter lists
@@ -1277,12 +1201,21 @@ namespace EFM
 
         private void SetVanillaItems()
         {
+            // Start by loading custom-vanilla icons
+            itemIcons.Add("DingPack", assetsBundle.LoadAsset<Sprite>("ItemDingPack_Icon"));
+            itemIcons.Add("FlipzoLighter", assetsBundle.LoadAsset<Sprite>("ItemFlipzoLighter_Icon"));
+            itemIcons.Add("GarageTool_FlatheadScrewdriver", assetsBundle.LoadAsset<Sprite>("ItemGarageTool_FlatheadScrewdriver_Icon"));
+            itemIcons.Add("GarageTool_WrenchTwoSided", assetsBundle.LoadAsset<Sprite>("ItemGarageTool_WrenchTwoSided_Icon"));
+            itemIcons.Add("HairsprayCan", assetsBundle.LoadAsset<Sprite>("ItemHairsprayCan_Icon"));
+            itemIcons.Add("Matchbox", assetsBundle.LoadAsset<Sprite>("ItemMatchbox_Icon"));
+
             vanillaItems = new Dictionary<string, EFM_VanillaItemDescriptor>();
             JArray vanillaItemsRaw = (JArray)defaultItemsData["VanillaItems"];
 
             foreach(JToken vanillaItemRaw in vanillaItemsRaw)
             {
                 string H3ID = vanillaItemRaw["H3ID"].ToString();
+                Mod.instance.LogInfo("Setting vanilla Item: " + H3ID);
                 GameObject itemPrefab = IM.OD[H3ID].GetGameObject();
                 EFM_VanillaItemDescriptor descriptor = itemPrefab.AddComponent<EFM_VanillaItemDescriptor>();
                 itemWeights.Add(H3ID, itemPrefab.GetComponent<Rigidbody>().mass);
@@ -1633,11 +1566,24 @@ namespace EFM
             }
 
             // Check for more items that may be contained inside this one
-            if (customItemWrapper != null && customItemWrapper.itemObjectsRoot != null)
+            if(customItemWrapper != null)
             {
-                foreach (Transform innerItem in customItemWrapper.itemObjectsRoot)
+                if(customItemWrapper.itemType == ItemType.Backpack || customItemWrapper.itemType == ItemType.Container || customItemWrapper.itemType == ItemType.Pouch)
                 {
-                    AddToPlayerInventory(innerItem);
+                    foreach (Transform innerItem in customItemWrapper.containerItemRoot)
+                    {
+                        AddToPlayerInventory(innerItem);
+                    }
+                }
+                else if(customItemWrapper.itemType == ItemType.Rig || customItemWrapper.itemType == ItemType.ArmoredRig)
+                {
+                    foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
+                    {
+                        if(innerItem != null)
+                        {
+                            AddToPlayerInventory(innerItem.transform);
+                        }
+                    }
                 }
             }
         }
@@ -2047,6 +1993,9 @@ namespace EFM
 
                 GM.CurrentMovementManager.TeleportToPoint(raidManager.spawnPoint.position, true, raidManager.spawnPoint.rotation.eulerAngles);
 
+                // Unload the map's asset bundle
+                Mod.currentRaidBundleRequest.assetBundle.Unload(false);
+
                 // Call a GC collect
                 raidRoot.GetComponent<EFM_Raid_Manager>().GCManager.gc_collect();
             }
@@ -2077,7 +2026,7 @@ namespace EFM
         private void LoadMeatov()
         {
             // Set LOD bias
-            QualitySettings.lodBias = 5;
+            QualitySettings.lodBias = 15;
 
             // Get root
             GameObject menuRoot = GameObject.Find("Menu");
@@ -2104,6 +2053,7 @@ namespace EFM
 
             foreach (GameObject go in securedObjects)
             {
+                Mod.instance.LogInfo("Unsecuring " + go.name);
                 SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
             }
             securedObjects.Clear();
@@ -2293,14 +2243,39 @@ namespace EFM
                     secureObjects();
                 }
             }
-            else if (levelName.Equals("MeatovHideoutScene") ||
-                     levelName.Equals("MeatovFactoryScene") /*|| TODO: other raid scenes*/)
+            else if (levelName.Equals("MeatovHideoutScene"))
             {
-                secureObjects();
+                secureObjects(Mod.justFinishedRaid);
+            }
+            else if (levelName.Equals("MeatovFactoryScene") /*TODO: || Other raid scenes*/)
+            {
+                secureObjects(true);
             }
         }
 
-        public static void secureObjects()
+        private static void SecureObject(GameObject objectToSecure)
+        {
+            Mod.instance.LogInfo("Securing " + objectToSecure.name);
+            Mod.securedObjects.Add(objectToSecure);
+            GameObject.DontDestroyOnLoad(objectToSecure);
+            EFM_CustomItemWrapper CIW  = objectToSecure.GetComponent<EFM_CustomItemWrapper>();
+            if (CIW != null)
+            {
+                // Items inside a rig will not be attached to the rig, so much secure them separately
+                if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                {
+                    foreach (GameObject innerItem in CIW.itemsInSlots)
+                    {
+                        if (innerItem != null)
+                        {
+                            SecureObject(innerItem);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void secureObjects(bool secureEquipment = false)
         {
             if (Mod.securedObjects == null)
             {
@@ -2312,6 +2287,39 @@ namespace EFM
             GameObject cameraRig = GameObject.Find("[CameraRig]Fixed");
             Mod.securedObjects.Add(cameraRig);
             GameObject.DontDestroyOnLoad(cameraRig);
+
+            if (secureEquipment)
+            {
+                // Secure equipment
+                if (Mod.equipmentSlots != null)
+                {
+                    foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
+                    {
+                        if (equipSlot != null && equipSlot.CurObject != null)
+                        {
+                            SecureObject(equipSlot.CurObject.gameObject);
+                        }
+                    }
+                }
+
+                // Secure pocket contents
+                if (Mod.itemsInPocketSlots != null)
+                {
+                    foreach (GameObject itemInPocket in Mod.itemsInPocketSlots)
+                    {
+                        if (itemInPocket != null)
+                        {
+                            SecureObject(itemInPocket);
+                        }
+                    }
+                }
+
+                // Secure right shoulder content
+                if (Mod.rightShoulderObject != null)
+                {
+                    SecureObject(Mod.rightShoulderObject);
+                }
+            }
 
             // Secure sceneSettings
             GameObject sceneSettings = GameObject.Find("[SceneSettings_ModBlank_Simple]");
@@ -2451,7 +2459,7 @@ namespace EFM
                 {
                     EFM_CustomItemWrapper heldCustomItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
                     EFM_VanillaItemDescriptor heldVanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                    BeginInteractionPatch.SetItemLocationIndex(3, null, heldVanillaItemDescriptor);
+                    BeginInteractionPatch.SetItemLocationIndex(3, null, heldVanillaItemDescriptor, true);
                     if (heldCustomItemWrapper != null)
                     {
                         // Was on player
@@ -2735,7 +2743,7 @@ namespace EFM
                 {
                     if(collidingContainerWrapper.locationIndex == 1)
                     {
-                        BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                        BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
 
                         if(heldCustomItemWrapper != null)
                         {
@@ -2810,7 +2818,7 @@ namespace EFM
                     }
                     else if(collidingContainerWrapper.locationIndex == 2)
                     {
-                        BeginInteractionPatch.SetItemLocationIndex(2, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                        BeginInteractionPatch.SetItemLocationIndex(2, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
 
                         if (heldCustomItemWrapper != null)
                         {
@@ -2917,7 +2925,7 @@ namespace EFM
 
                 collidingTradeVolume.market.UpdateBasedOnItem(true, heldCustomItemWrapper, heldVanillaItemDescriptor);
 
-                BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
 
                 if (heldCustomItemWrapper != null)
                 {
@@ -3000,7 +3008,7 @@ namespace EFM
             EFM_Raid_Manager raidManager = sceneRoot.GetComponent<EFM_Raid_Manager>();
             if (baseManager != null)
             {
-                BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
 
                 // Update lists
                 if (heldCustomItemWrapper != null)
@@ -3074,7 +3082,7 @@ namespace EFM
             }
             else if (raidManager != null)
             {
-                BeginInteractionPatch.SetItemLocationIndex(2, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                BeginInteractionPatch.SetItemLocationIndex(2, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
 
                 // Update lists
                 if (heldCustomItemWrapper != null)
@@ -3093,17 +3101,16 @@ namespace EFM
                 }
                 else
                 {
+                    Mod.instance.LogInfo("Dropping vanilla item in raid: "+heldVanillaItemDescriptor.H3ID);
                     // Was on player
                     Mod.playerInventory[heldVanillaItemDescriptor.H3ID] -= 1;
+                    Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
                     if (Mod.playerInventory[heldVanillaItemDescriptor.H3ID] == 0)
                     {
                         Mod.playerInventory.Remove(heldVanillaItemDescriptor.H3ID);
-                    }
-                    Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Remove(heldVanillaItemDescriptor.gameObject);
-                    if (Mod.playerInventoryObjects[heldVanillaItemDescriptor.H3ID].Count == 0)
-                    {
                         Mod.playerInventoryObjects.Remove(heldVanillaItemDescriptor.H3ID);
                     }
+                    Mod.instance.LogInfo("Removed from player inventory");
 
                     // MagazinesByType/ClipsbyType
                     if (primary is FVRFireArmMagazine)
@@ -3146,6 +3153,7 @@ namespace EFM
                     }
                     else if (primary is FVRFireArmRound)
                     {
+                        Mod.instance.LogInfo("\tItem is a round");
                         FVRFireArmRound asRound = primary as FVRFireArmRound;
                         Mod.roundsByType[asRound.RoundType][primary.ObjectWrapper.DisplayName] -= 1;
                         if (Mod.roundsByType[asRound.RoundType][primary.ObjectWrapper.DisplayName] == 0)
@@ -3371,9 +3379,9 @@ namespace EFM
                 }
             }
 
-            // Check equip slots
+            // Check equip slots if status UI is active
             int equipmentSlotIndex = -1;
-            if (fvrquickBeltSlot == null && Mod.equipmentSlots != null)
+            if (Mod.playerStatusManager != null && Mod.playerStatusManager.displayed && fvrquickBeltSlot == null && Mod.equipmentSlots != null)
             {
                 for (int i = 0; i < Mod.equipmentSlots.Count; ++i) 
                 {
@@ -3704,8 +3712,13 @@ namespace EFM
                 return;
             }
 
+            // Ensure the item's parent is null
+            // TODO: EndInteractionInInventorySlot is supposed to attach the item to quick belt root but this was only happening to equipment in equip slots and not on rig slots
+            // So should we attach them to the slots or no? because it causes extreme lag and is clearly unnecessary
+            __instance.SetParentage(null);
+
             // Check if pocket slot
-            for(int i=0; i < 4; ++i)
+            for (int i=0; i < 4; ++i)
             {
                 if (Mod.pocketSlots[i].Equals(slot))
                 {
@@ -3844,6 +3857,11 @@ namespace EFM
                 return;
             }
 
+            // Ensure the object is active
+            // This is more specifically for the case of using the left shoulder slot to access the backpack slot
+            // while the equipment slots arent displayed, so the backpack is inactive, we must activate it
+            __instance.gameObject.SetActive(true);
+
             hand.GetComponent<EFM_Hand>().currentHeldItem = __instance.gameObject;
 
             EFM_VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
@@ -3957,7 +3975,7 @@ namespace EFM
                     }
 
                     // Update locationIndex
-                    SetItemLocationIndex(0, customItemWrapper, null);
+                    SetItemLocationIndex(0, customItemWrapper, null, true);
                 }
                 else if(customItemWrapper.locationIndex == 2)
                 {
@@ -3981,7 +3999,7 @@ namespace EFM
                     }
 
                     // Update locationIndex
-                    SetItemLocationIndex(0, customItemWrapper, null);
+                    SetItemLocationIndex(0, customItemWrapper, null, true);
                 }
                 else if(customItemWrapper.locationIndex == 3)
                 {
@@ -4005,7 +4023,7 @@ namespace EFM
                     }
 
                     // Update locationIndex
-                    SetItemLocationIndex(0, customItemWrapper, null);
+                    SetItemLocationIndex(0, customItemWrapper, null, true);
 
                     //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentBaseManager.baseAreaManagers)
                     //{
@@ -4062,7 +4080,7 @@ namespace EFM
                     }
 
                     // Update locationIndex
-                    SetItemLocationIndex(0, null, vanillaItemDescriptor);
+                    SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
                 }
                 else if(vanillaItemDescriptor.locationIndex == 2)
                 {
@@ -4163,7 +4181,7 @@ namespace EFM
                     }
 
                     // Update locationIndex
-                    SetItemLocationIndex(0, null, vanillaItemDescriptor);
+                    SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
                 }
                 else if (vanillaItemDescriptor.locationIndex == 3)
                 {
@@ -4187,7 +4205,7 @@ namespace EFM
                     }
 
                     // Update locationIndex
-                    SetItemLocationIndex(0, null, vanillaItemDescriptor);
+                    SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
 
                     //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentBaseManager.baseAreaManagers)
                     //{
@@ -4250,7 +4268,8 @@ namespace EFM
 
         public static void SetItemLocationIndex(int locationIndex, EFM_CustomItemWrapper customItemWrapper, EFM_VanillaItemDescriptor vanillaItemDescriptor, bool updateWeight = true)
         {
-            if(customItemWrapper != null)
+            Mod.instance.LogInfo("Set location index called with " + locationIndex + ", on CIW?: " + (customItemWrapper != null) + ", on VID?: " + (vanillaItemDescriptor != null));
+            if (customItemWrapper != null)
             {
                 if (updateWeight)
                 {
@@ -4280,7 +4299,7 @@ namespace EFM
                 }
                 else if (customItemWrapper.itemType == Mod.ItemType.Container || customItemWrapper.itemType == Mod.ItemType.Pouch || customItemWrapper.itemType == Mod.ItemType.Backpack)
                 {
-                    foreach (Transform innerItem in customItemWrapper.itemObjectsRoot)
+                    foreach (Transform innerItem in customItemWrapper.containerItemRoot)
                     {
                         SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
                     }
@@ -4288,8 +4307,10 @@ namespace EFM
             }
             else
             {
+                Mod.instance.LogInfo("\tVID");
                 if (updateWeight)
                 {
+                    Mod.instance.LogInfo("\t\tUpdating weight");
                     if (vanillaItemDescriptor.locationIndex == 0 && locationIndex != 0)
                     {
                         // Taken out of player inventory
@@ -4303,28 +4324,34 @@ namespace EFM
                 }
 
                 vanillaItemDescriptor.locationIndex = locationIndex;
+                Mod.instance.LogInfo("\tvanillaItemDescriptor.locationIndex = "+ vanillaItemDescriptor.locationIndex);
 
                 FVRPhysicalObject physObj = vanillaItemDescriptor.GetComponent<FVRPhysicalObject>();
                 if(physObj != null)
                 {
-                    if(physObj is FVRFireArm)
+                    Mod.instance.LogInfo("\t\tphysObj not null");
+                    if (physObj is FVRFireArm)
                     {
+                        Mod.instance.LogInfo("\t\t\tis firearm");
                         FVRFireArm asFireArm = (FVRFireArm)physObj;
 
                         // Ammo container
                         if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                         {
+                            Mod.instance.LogInfo("\t\t\t\tHas mag");
                             asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>().locationIndex = locationIndex;
                         }
                         else if(asFireArm.UsesClips && asFireArm.Clip != null)
                         {
+                            Mod.instance.LogInfo("\t\t\t\tHas clip");
                             asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>().locationIndex = locationIndex;
                         }
 
                         // Attachments
                         if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
                         {
-                            foreach(FVRFireArmAttachment attachment in asFireArm.Attachments)
+                            Mod.instance.LogInfo("\t\t\t\tHas attachmnets");
+                            foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
                             {
                                 SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
                             }
@@ -4650,7 +4677,9 @@ namespace EFM
     {
         static bool Prefix(ref SideHingedDestructibleDoor __instance)
         {
-            if (!Mod.inMeatovScene)
+            // If grillhouseSecure, it means we are currently loading into grillhouse but it is not a meatov scene, so need to check also because
+            // although this is not a meatov scene, we still dont want to init doors if initDoors == false
+            if (!Mod.inMeatovScene && !Mod.grillHouseSecure)
             {
                 return true;
             }
@@ -5030,10 +5059,6 @@ namespace EFM
                 {
                     leftPreviousFrameTPAxisY = touchpadAxisY;
                 }
-                if (fullDescInput)
-                {
-                    Mod.instance.LogInfo("fulldescinput is true");
-                }
             }
             else if(__instance.CMode == ControlMode.Vive)
             {
@@ -5102,7 +5127,14 @@ namespace EFM
                                 manager.SetDescriptionPack(describable.GetDescriptionPack());
                             }
 
-                            manager.gameObject.SetActive(true);
+                            if (manager.descriptionPack.itemType == Mod.ItemType.LootContainer)
+                            {
+                                manager.gameObject.SetActive(false);
+                            }
+                            else
+                            {
+                                manager.gameObject.SetActive(true);
+                            }
                         }
                     }
                 }
@@ -5248,7 +5280,14 @@ namespace EFM
                                 manager.SetDescriptionPack(describable.GetDescriptionPack());
                             }
 
-                            manager.gameObject.SetActive(true);
+                            if (manager.descriptionPack.itemType == Mod.ItemType.LootContainer)
+                            {
+                                manager.gameObject.SetActive(false);
+                            }
+                            else
+                            {
+                                manager.gameObject.SetActive(true);
+                            }
                         }
 
                         if (!__instance.BlueLaser.activeSelf)
@@ -5317,7 +5356,14 @@ namespace EFM
                                 manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
                             }
 
-                            manager.gameObject.SetActive(true);
+                            if (manager.descriptionPack.itemType == Mod.ItemType.LootContainer)
+                            {
+                                manager.gameObject.SetActive(false);
+                            }
+                            else
+                            {
+                                manager.gameObject.SetActive(true);
+                            }
                         }
 
                         if (!__instance.BlueLaser.activeSelf)
@@ -5680,9 +5726,15 @@ namespace EFM
 
             if (latestEjectedRound != null)
             {
+                Mod.instance.LogInfo("Ejected round");
                 EFM_VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<EFM_VanillaItemDescriptor>();
-                if (latestEjectedRoundLocation == 0) 
+
+                // Set a default location of 0, we assume the round was ejected from a mag in one of the hands, so should begin with a loc index of 0
+                BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor, false);
+
+                if (latestEjectedRoundLocation == 0)
                 {
+                    Mod.instance.LogInfo("\tNow in hand");
                     BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor);
 
                     // Now on player
@@ -5703,9 +5755,29 @@ namespace EFM
                         Mod.playerInventoryObjects.Add(vanillaItemDescriptor.H3ID, new List<GameObject>());
                         Mod.playerInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
                     }
+
+                    // Even if goes from player to player, rounds in mags are not counted in roundsByType, so need to add it now
+                    FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                    if (Mod.roundsByType.ContainsKey(asRound.RoundType))
+                    {
+                        if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                        {
+                            Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                        }
+                        else
+                        {
+                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                        }
+                    }
+                    else
+                    {
+                        Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                        Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                    }
                 }
                 else // Could be in raid or base
                 {
+                    Mod.instance.LogInfo("\tNow in raid or base");
                     BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor);
 
                     GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
@@ -5728,6 +5800,25 @@ namespace EFM
                         {
                             Mod.currentBaseManager.baseInventoryObjects.Add(vanillaItemDescriptor.H3ID, new List<GameObject>());
                             Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
+                        }
+
+                        // Even if goes from player to player, rounds in mags are not counted in roundsByType, so need to add it now
+                        FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                        if (Mod.roundsByType.ContainsKey(asRound.RoundType))
+                        {
+                            if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                            {
+                                Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                        else
+                        {
+                            Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
                         }
 
                         latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(2);
@@ -5803,6 +5894,10 @@ namespace EFM
             if (latestEjectedRound != null)
             {
                 EFM_VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<EFM_VanillaItemDescriptor>();
+
+                // Set a default location of 0, we assume the round was ejected from a clip in one of the hands, so should begin with a loc index of 0
+                BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor, false);
+
                 if (latestEjectedRoundLocation == 0) 
                 {
                     BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor);
@@ -5824,6 +5919,25 @@ namespace EFM
                     {
                         Mod.playerInventoryObjects.Add(vanillaItemDescriptor.H3ID, new List<GameObject>());
                         Mod.playerInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
+                    }
+
+                    // Even if goes from player to player, rounds in clips are not counted in roundsByType, so need to add it now
+                    FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                    if (Mod.roundsByType.ContainsKey(asRound.RoundType))
+                    {
+                        if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                        {
+                            Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                        }
+                        else
+                        {
+                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                        }
+                    }
+                    else
+                    {
+                        Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                        Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
                     }
                 }
                 else // Could be in raid or base
@@ -5850,6 +5964,25 @@ namespace EFM
                         {
                             Mod.currentBaseManager.baseInventoryObjects.Add(vanillaItemDescriptor.H3ID, new List<GameObject>());
                             Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
+                        }
+
+                        // Even if goes from player to player, rounds in clips are not counted in roundsByType, so need to add it now
+                        FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                        if (Mod.roundsByType.ContainsKey(asRound.RoundType))
+                        {
+                            if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                            {
+                                Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                        else
+                        {
+                            Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
                         }
 
                         latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(2);
@@ -6622,7 +6755,8 @@ namespace EFM
 
             if (mag.m_hand != null)
             {
-                EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the mag
+                // TODO: Might have to do this for ammo when putting it into a mag?
+                EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the mag when inserting in into a firearm
             }
 
             if (__instance.Magazine == null && mag != null)
@@ -6648,6 +6782,17 @@ namespace EFM
                                 Mod.playerInventory.Remove(magVID.H3ID);
                                 Mod.playerInventoryObjects.Remove(magVID.H3ID);
                             }
+
+                            FVRFireArmMagazine asMagazine = magVID.physObj as FVRFireArmMagazine;
+                            Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] -= 1;
+                            if (Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] == 0)
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Remove(asMagazine.ObjectWrapper.DisplayName);
+                                if(Mod.magazinesByType[asMagazine.MagazineType].Count == 0)
+                                {
+                                    Mod.magazinesByType.Remove(asMagazine.MagazineType);
+                                }
+                            }
                         }
 
                         // No difference to weight
@@ -6664,6 +6809,17 @@ namespace EFM
                             {
                                 Mod.playerInventory.Remove(magVID.H3ID);
                                 Mod.playerInventoryObjects.Remove(magVID.H3ID);
+                            }
+
+                            FVRFireArmMagazine asMagazine = magVID.physObj as FVRFireArmMagazine;
+                            Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] -= 1;
+                            if (Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] == 0)
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Remove(asMagazine.ObjectWrapper.DisplayName);
+                                if (Mod.magazinesByType[asMagazine.MagazineType].Count == 0)
+                                {
+                                    Mod.magazinesByType.Remove(asMagazine.MagazineType);
+                                }
                             }
                         }
 
@@ -6688,6 +6844,17 @@ namespace EFM
                                 Mod.baseInventory.Remove(magVID.H3ID);
                                 Mod.currentBaseManager.baseInventoryObjects.Remove(magVID.H3ID);
                             }
+
+                            FVRFireArmMagazine asMagazine = magVID.physObj as FVRFireArmMagazine;
+                            Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] -= 1;
+                            if (Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] == 0)
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Remove(asMagazine.ObjectWrapper.DisplayName);
+                                if (Mod.magazinesByType[asMagazine.MagazineType].Count == 0)
+                                {
+                                    Mod.magazinesByType.Remove(asMagazine.MagazineType);
+                                }
+                            }
                         }
 
                         // Update player weight
@@ -6705,6 +6872,17 @@ namespace EFM
                             {
                                 Mod.baseInventory.Remove(magVID.H3ID);
                                 Mod.currentBaseManager.baseInventoryObjects.Remove(magVID.H3ID);
+                            }
+
+                            FVRFireArmMagazine asMagazine = magVID.physObj as FVRFireArmMagazine;
+                            Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] -= 1;
+                            if (Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] == 0)
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Remove(asMagazine.ObjectWrapper.DisplayName);
+                                if (Mod.magazinesByType[asMagazine.MagazineType].Count == 0)
+                                {
+                                    Mod.magazinesByType.Remove(asMagazine.MagazineType);
+                                }
                             }
                         }
 
@@ -6787,6 +6965,32 @@ namespace EFM
                         Mod.playerInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
                     }
 
+                    FVRFireArmMagazine asMagazine = preMagVID.physObj as FVRFireArmMagazine;
+                    if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
+                    {
+                        if (Mod.magazinesByType[asMagazine.MagazineType] == null)
+                        {
+                            Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
+                        Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                    }
+
                     // No change to player weight
                 }
                 else if(currentLocationIndex == 1)
@@ -6801,6 +7005,32 @@ namespace EFM
                     {
                         Mod.baseInventory.Add(preMagVID.H3ID, 1);
                         Mod.currentBaseManager.baseInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
+                    }
+
+                    FVRFireArmMagazine asMagazine = preMagVID.physObj as FVRFireArmMagazine;
+                    if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
+                    {
+                        if (Mod.magazinesByType[asMagazine.MagazineType] == null)
+                        {
+                            Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
+                        Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                     }
 
                     // Update player weight
@@ -6830,6 +7060,32 @@ namespace EFM
                         Mod.playerInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
                     }
 
+                    FVRFireArmMagazine asMagazine = preMagVID.physObj as FVRFireArmMagazine;
+                    if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
+                    {
+                        if (Mod.magazinesByType[asMagazine.MagazineType] == null)
+                        {
+                            Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
+                        Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                    }
+
                     // Update player weight
                     Mod.weight += preMagVID.currentWeight;
                 }
@@ -6845,6 +7101,32 @@ namespace EFM
                     {
                         Mod.baseInventory.Add(preMagVID.H3ID, 1);
                         Mod.currentBaseManager.baseInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
+                    }
+
+                    FVRFireArmMagazine asMagazine = preMagVID.physObj as FVRFireArmMagazine;
+                    if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
+                    {
+                        if (Mod.magazinesByType[asMagazine.MagazineType] == null)
+                        {
+                            Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
+                        Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                     }
 
                     // No change to player weight
@@ -6869,6 +7151,32 @@ namespace EFM
                     {
                         Mod.playerInventory.Add(preMagVID.H3ID, 1);
                         Mod.playerInventoryObjects.Add(preMagVID.H3ID, new List<GameObject>() { preMagVID.gameObject });
+                    }
+
+                    FVRFireArmMagazine asMagazine = preMagVID.physObj as FVRFireArmMagazine;
+                    if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
+                    {
+                        if (Mod.magazinesByType[asMagazine.MagazineType] == null)
+                        {
+                            Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
+                        Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                     }
 
                     // Update player weight
@@ -6925,6 +7233,17 @@ namespace EFM
                                 Mod.playerInventory.Remove(clipVID.H3ID);
                                 Mod.playerInventoryObjects.Remove(clipVID.H3ID);
                             }
+
+                            FVRFireArmClip asClip = clipVID.physObj as FVRFireArmClip;
+                            Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] -= 1;
+                            if (Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] == 0)
+                            {
+                                Mod.clipsByType[asClip.ClipType].Remove(asClip.ObjectWrapper.DisplayName);
+                                if (Mod.clipsByType[asClip.ClipType].Count == 0)
+                                {
+                                    Mod.clipsByType.Remove(asClip.ClipType);
+                                }
+                            }
                         }
 
                         // No difference to weight
@@ -6940,6 +7259,17 @@ namespace EFM
                             {
                                 Mod.playerInventory.Remove(clipVID.H3ID);
                                 Mod.playerInventoryObjects.Remove(clipVID.H3ID);
+                            }
+
+                            FVRFireArmClip asClip = clipVID.physObj as FVRFireArmClip;
+                            Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] -= 1;
+                            if (Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] == 0)
+                            {
+                                Mod.clipsByType[asClip.ClipType].Remove(asClip.ObjectWrapper.DisplayName);
+                                if (Mod.clipsByType[asClip.ClipType].Count == 0)
+                                {
+                                    Mod.clipsByType.Remove(asClip.ClipType);
+                                }
                             }
                         }
 
@@ -6962,6 +7292,17 @@ namespace EFM
                                 Mod.baseInventory.Remove(clipVID.H3ID);
                                 Mod.currentBaseManager.baseInventoryObjects.Remove(clipVID.H3ID);
                             }
+
+                            FVRFireArmClip asClip = clipVID.physObj as FVRFireArmClip;
+                            Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] -= 1;
+                            if (Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] == 0)
+                            {
+                                Mod.clipsByType[asClip.ClipType].Remove(asClip.ObjectWrapper.DisplayName);
+                                if (Mod.clipsByType[asClip.ClipType].Count == 0)
+                                {
+                                    Mod.clipsByType.Remove(asClip.ClipType);
+                                }
+                            }
                         }
 
                         // Update player weight
@@ -6978,6 +7319,17 @@ namespace EFM
                             {
                                 Mod.baseInventory.Remove(clipVID.H3ID);
                                 Mod.currentBaseManager.baseInventoryObjects.Remove(clipVID.H3ID);
+                            }
+
+                            FVRFireArmClip asClip = clipVID.physObj as FVRFireArmClip;
+                            Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] -= 1;
+                            if (Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] == 0)
+                            {
+                                Mod.clipsByType[asClip.ClipType].Remove(asClip.ObjectWrapper.DisplayName);
+                                if (Mod.clipsByType[asClip.ClipType].Count == 0)
+                                {
+                                    Mod.clipsByType.Remove(asClip.ClipType);
+                                }
                             }
                         }
 
@@ -7058,6 +7410,32 @@ namespace EFM
                         Mod.playerInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
                     }
 
+                    FVRFireArmClip asClip = preClipVID.physObj as FVRFireArmClip;
+                    if (Mod.clipsByType.ContainsKey(asClip.ClipType))
+                    {
+                        if (Mod.clipsByType[asClip.ClipType] == null)
+                        {
+                            Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
+                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                        Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                    }
+
                     // No change to player weight
                 }
                 else if (currentLocationIndex == 1)
@@ -7072,6 +7450,32 @@ namespace EFM
                     {
                         Mod.baseInventory.Add(preClipVID.H3ID, 1);
                         Mod.currentBaseManager.baseInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
+                    }
+
+                    FVRFireArmClip asClip = preClipVID.physObj as FVRFireArmClip;
+                    if (Mod.clipsByType.ContainsKey(asClip.ClipType))
+                    {
+                        if (Mod.clipsByType[asClip.ClipType] == null)
+                        {
+                            Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
+                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                        Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
                     }
 
                     // Update player weight
@@ -7101,6 +7505,32 @@ namespace EFM
                         Mod.playerInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
                     }
 
+                    FVRFireArmClip asClip = preClipVID.physObj as FVRFireArmClip;
+                    if (Mod.clipsByType.ContainsKey(asClip.ClipType))
+                    {
+                        if (Mod.clipsByType[asClip.ClipType] == null)
+                        {
+                            Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
+                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                        Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                    }
+
                     // Update player weight
                     Mod.weight += preClipVID.currentWeight;
                 }
@@ -7116,6 +7546,32 @@ namespace EFM
                     {
                         Mod.baseInventory.Add(preClipVID.H3ID, 1);
                         Mod.currentBaseManager.baseInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
+                    }
+
+                    FVRFireArmClip asClip = preClipVID.physObj as FVRFireArmClip;
+                    if (Mod.clipsByType.ContainsKey(asClip.ClipType))
+                    {
+                        if (Mod.clipsByType[asClip.ClipType] == null)
+                        {
+                            Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
+                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                        Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
                     }
 
                     // No change to player weight
@@ -7140,6 +7596,32 @@ namespace EFM
                     {
                         Mod.playerInventory.Add(preClipVID.H3ID, 1);
                         Mod.playerInventoryObjects.Add(preClipVID.H3ID, new List<GameObject>() { preClipVID.gameObject });
+                    }
+
+                    FVRFireArmClip asClip = preClipVID.physObj as FVRFireArmClip;
+                    if (Mod.clipsByType.ContainsKey(asClip.ClipType))
+                    {
+                        if (Mod.clipsByType[asClip.ClipType] == null)
+                        {
+                            Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
+                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                        Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
                     }
 
                     // Update player weight

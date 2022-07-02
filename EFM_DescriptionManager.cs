@@ -184,6 +184,12 @@ namespace EFM
             else
             {
                 this.descriptionPack = descriptionPack;
+
+                if(this.descriptionPack.itemType == Mod.ItemType.LootContainer)
+                {
+                    return;
+                }
+
                 if (this.descriptionPack.isPhysical)
                 {
                     if (this.descriptionPack.isCustom)
