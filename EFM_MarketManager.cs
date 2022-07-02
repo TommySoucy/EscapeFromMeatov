@@ -2287,7 +2287,7 @@ namespace EFM
                         }
                     }
                     bool matchesType = false;
-                    if(foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                    if(foundID && foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                     {
                         matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
                     }
@@ -2377,7 +2377,7 @@ namespace EFM
                         }
                     }
                     bool matchesType = false;
-                    if (foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                    if (foundID && foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                     {
                         matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
                     }
@@ -2940,7 +2940,7 @@ namespace EFM
                         }
                     }
                     bool matchesType = false;
-                    if (foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                    if (foundID && foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                     {
                         matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
                     }
@@ -2950,7 +2950,6 @@ namespace EFM
                     }
                     if (foundID && matchesType)
                     {
-                        Mod.instance.LogInfo("have prices and removed item is a price");
                         // Go through each price because need to check if all are fulfilled anyway
                         bool canDeal = true;
                         for (int i = 0; i < prices.Count; ++i)
@@ -3032,7 +3031,7 @@ namespace EFM
                         }
                     }
                     bool matchesType = false;
-                    if (foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                    if (foundID && foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                     {
                         matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
                     }
@@ -3692,6 +3691,13 @@ namespace EFM
             yield return IM.OD[ID].GetGameObjectAsync();
             Mod.instance.LogInfo("spawn vanilla got GO");
             GameObject itemPrefab = IM.OD[ID].GetGameObject();
+            if (itemPrefab == null)
+            {
+                Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
+
+                IM.OD[ID].RefreshCache();
+                itemPrefab = IM.OD[ID].GetGameObject();
+            }
             Mod.instance.LogInfo("-1");
             EFM_VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<EFM_VanillaItemDescriptor>();
             Mod.instance.LogInfo("-1");

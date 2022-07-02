@@ -984,6 +984,16 @@ namespace EFM
                 }
                 this.productions.Clear();
             }
+            if (farmingViewByItemID == null)
+            {
+                farmingViewByItemID = new Dictionary<string, List<Transform>>();
+                produceViewByItemID = new Dictionary<string, List<Transform>>();
+            }
+            else
+            {
+                farmingViewByItemID.Clear();
+                produceViewByItemID.Clear();
+            }
             Mod.instance.LogInfo("0");
 
             // Get all productions for this area including previous levels
@@ -1361,10 +1371,6 @@ namespace EFM
                         newFarmingView.transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = amountInInventory.ToString() + " (STASH)";
 
                         Mod.instance.LogInfo("3");
-                        if (farmingViewByItemID == null)
-                        {
-                            farmingViewByItemID = new Dictionary<string, List<Transform>>();
-                        }
                         if (farmingViewByItemID.ContainsKey(currentRequirement.ID))
                         {
                             farmingViewByItemID[currentRequirement.ID].Add(newFarmingView.transform);
@@ -1405,10 +1411,6 @@ namespace EFM
                                 AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
                             }
 
-                            if (farmingViewByItemID == null)
-                            {
-                                farmingViewByItemID = new Dictionary<string, List<Transform>>();
-                            }
                             if (farmingViewByItemID.ContainsKey(currentRequirement.ID))
                             {
                                 farmingViewByItemID[currentRequirement.ID].Add(newFarmingView.transform);
@@ -1454,10 +1456,6 @@ namespace EFM
                                 newRequirement.transform.GetChild(1).GetChild(1).GetChild(1).gameObject.SetActive(true);
                             }
 
-                            if(produceViewByItemID == null)
-                            {
-                                produceViewByItemID = new Dictionary<string, List<Transform>>();
-                            }
                             if (produceViewByItemID.ContainsKey(currentRequirement.ID))
                             {
                                 produceViewByItemID[currentRequirement.ID].Add(newProduceView.transform);
@@ -1550,6 +1548,14 @@ namespace EFM
                 itemRequirements.Clear();
                 traderRequirements.Clear();
                 skillRequirements.Clear();
+            }
+            if (itemRequirementsByItemID == null)
+            {
+                itemRequirementsByItemID = new Dictionary<string, List<Transform>>();
+            }
+            else
+            {
+                itemRequirementsByItemID.Clear();
             }
 
             Mod.instance.LogInfo("set requirements called with list of "+((JArray)requirements).Count+" requirements");
@@ -1745,10 +1751,6 @@ namespace EFM
                                 Mod.instance.LogInfo("\t\t0");
                                 itemRequirement.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = Mathf.Min(itemAmountNeeded, itemAmountInInventory).ToString() + "/" + itemAmountNeeded; // Area level
 
-                                if (itemRequirementsByItemID == null)
-                                {
-                                    itemRequirementsByItemID = new Dictionary<string, List<Transform>>();
-                                }
                                 if (itemRequirementsByItemID.ContainsKey(actualID))
                                 {
                                     itemRequirementsByItemID[actualID].Add(itemRequirement.transform);
@@ -3882,6 +3884,13 @@ namespace EFM
         {
             yield return IM.OD[ID].GetGameObjectAsync();
             GameObject itemPrefab = IM.OD[ID].GetGameObject();
+            if (itemPrefab == null)
+            {
+                Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
+
+                IM.OD[ID].RefreshCache();
+                itemPrefab = IM.OD[ID].GetGameObject();
+            }
             EFM_VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<EFM_VanillaItemDescriptor>();
             GameObject itemObject = null;
             bool spawnedSmallBox = false;

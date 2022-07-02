@@ -205,7 +205,15 @@ namespace EFM
 			foreach(string vanillaID in vanillaIDs)
 			{
 				yield return IM.OD[vanillaID].GetGameObjectAsync();
-				GameObject itemObject = Instantiate(IM.OD[vanillaID].GetGameObject(), itemObjectsRoot);
+				GameObject itemPrefab = IM.OD[vanillaID].GetGameObject();
+				if(itemPrefab == null)
+				{
+					Mod.instance.LogWarning("Attempted to get vanilla prefab for " + vanillaID + ", but the prefab had been destroyed, refreshing cache...");
+
+					IM.OD[vanillaID].RefreshCache();
+					itemPrefab = IM.OD[vanillaID].GetGameObject();
+				}
+				GameObject itemObject = Instantiate(itemPrefab, itemObjectsRoot);
 				itemObject.GetComponent<Rigidbody>().isKinematic = true;
 				if (mainContainerCollider is BoxCollider)
 				{

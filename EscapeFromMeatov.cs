@@ -1128,6 +1128,13 @@ namespace EFM
             image.sprite = null;
             yield return IM.OD[ID].GetGameObjectAsync();
             GameObject itemPrefab = IM.OD[ID].GetGameObject();
+            if (itemPrefab == null)
+            {
+                Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
+
+                IM.OD[ID].RefreshCache();
+                itemPrefab = IM.OD[ID].GetGameObject();
+            }
             FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
             image.sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
         }
@@ -5757,7 +5764,7 @@ namespace EFM
                     }
 
                     // Even if goes from player to player, rounds in mags are not counted in roundsByType, so need to add it now
-                    FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                    FVRFireArmRound asRound = vanillaItemDescriptor.GetComponent<FVRPhysicalObject>() as FVRFireArmRound;
                     if (Mod.roundsByType.ContainsKey(asRound.RoundType))
                     {
                         if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
