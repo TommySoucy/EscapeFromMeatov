@@ -1938,9 +1938,9 @@ namespace EFM
                         magPhysicalObject.Load(firearmPhysicalObject);
                         magPhysicalObject.IsInfinite = false;
 
-                        Transform gunMagTransform = firearmPhysicalObject.GetMagMountPos(magPhysicalObject.IsBeltBox);
-                        containerObject.transform.localPosition = gunMagTransform.localPosition;
-                        containerObject.transform.localRotation = gunMagTransform.localRotation;
+                        //Transform gunMagTransform = firearmPhysicalObject.GetMagMountPos(magPhysicalObject.IsBeltBox);
+                        //containerObject.transform.localPosition = gunMagTransform.localPosition;
+                        //containerObject.transform.localRotation = gunMagTransform.localRotation;
                     }
                 }
             }
@@ -2025,6 +2025,7 @@ namespace EFM
 
             // Custom item
             EFM_CustomItemWrapper customItemWrapper = itemObject.GetComponent<EFM_CustomItemWrapper>();
+            bool slotted = false;
             if (customItemWrapper != null)
             {
                 customItemWrapper.itemType = (Mod.ItemType)(int)item["itemType"];
@@ -2239,6 +2240,7 @@ namespace EFM
                 // Equip the item if it has an equip slot
                 if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                 {
+                    slotted = true;
                     customItemWrapper.takeCurrentLocation = false;
 
                     int equipSlotIndex = (int)item["PhysicalObject"]["equipSlot"];
@@ -2261,6 +2263,7 @@ namespace EFM
                 // Put item in pocket if it has pocket index
                 if (item["pocketSlotIndex"] != null)
                 {
+                    slotted = true;
                     Mod.instance.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
                     customItemWrapper.takeCurrentLocation = false;
 
@@ -2310,9 +2313,11 @@ namespace EFM
 
             Mod.instance.LogInfo("positioning");
             // GameObject
-            itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
-            itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
-
+            if (!slotted)
+            {
+                itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
+                itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
+            }
             Mod.instance.LogInfo("done");
             return itemObject;
         }

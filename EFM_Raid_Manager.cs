@@ -996,6 +996,8 @@ namespace EFM
 
         public void UpdateSun()
         {
+            UpdateTime();
+
             // Considering that 21600 (0600) is sunrise and that 64800 (1800) is sunset
             UpdateSunAngle();
 
@@ -1006,7 +1008,8 @@ namespace EFM
         {
             // Sun's X axis must rotate by 180 degrees in 43200 seconds
             // so 0.004166 degree in 1 second with an offset of 21600
-            sun.transform.rotation = Quaternion.Euler(0.004166f * time + 21600, sun.transform.rotation.eulerAngles.y, sun.transform.rotation.eulerAngles.z);
+            float angle = 0.004166f * time + 21600;
+            sun.transform.rotation = Quaternion.Euler(angle, 0, 0);
         }
 
         public void UpdateSunIntensity()
@@ -1497,6 +1500,7 @@ namespace EFM
 
             // Get sun
             sun = transform.GetChild(1).GetChild(0).GetComponent<Light>();
+            sun.gameObject.SetActive(true);
 
             inRaid = true;
 

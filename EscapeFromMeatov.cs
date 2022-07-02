@@ -2461,6 +2461,19 @@ namespace EFM
             // Stop here if dropping in a quick belt slot or if this is a door
             if ((__instance is FVRPhysicalObject && (__instance as FVRPhysicalObject).QuickbeltSlot != null))
             {
+                // If the item is harnessed to the quickbelt slot, must scale it appropriately
+                if ((__instance as FVRPhysicalObject).m_isHardnessed)
+                {
+                    if ((__instance as FVRPhysicalObject).QuickbeltSlot is EFM_EquipmentSlot)
+                    {
+                        // Make equipment the size of its QBPoseOverride because by default the game only sets rotation
+                        if (__instance.QBPoseOverride != null)
+                        {
+                            __instance.transform.localScale = __instance.QBPoseOverride.localScale;
+                        }
+                    }
+                }
+
                 // Check if area slot
                 if ((__instance as FVRPhysicalObject).QuickbeltSlot is EFM_AreaSlot)
                 {
@@ -3790,6 +3803,8 @@ namespace EFM
                 }
 
                 EFM_EquipmentSlot.WearEquipment(__instance.GetComponent<EFM_CustomItemWrapper>());
+
+                __instance.gameObject.SetActive(Mod.playerStatusManager.displayed);
             }
             else if (EFM_EquipmentSlot.wearingArmoredRig || EFM_EquipmentSlot.wearingRig) // We are wearing custom quick belt, check if slot is in there, update if it is
             {
@@ -3870,6 +3885,12 @@ namespace EFM
             __instance.gameObject.SetActive(true);
 
             hand.GetComponent<EFM_Hand>().currentHeldItem = __instance.gameObject;
+
+            // If the item is harnessed to a quickbelt slot, must sacle it to 1 while interacting with it in case it was scaled down in the slot
+            if(__instance.QuickbeltSlot != null && __instance.m_isHardnessed)
+            {
+                __instance.transform.localScale = Vector3.one;
+            }
 
             EFM_VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
             EFM_CustomItemWrapper customItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();

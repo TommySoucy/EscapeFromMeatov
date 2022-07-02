@@ -17,6 +17,12 @@ namespace EFM
 		public float posZ;
 		private bool m_forceOpen;
 
+		protected override void Awake()
+		{
+			base.Awake();
+			EndInteractionIfDistant = false;
+		}
+
 		public void ForceOpen()
 		{
 			m_forceOpen = true;

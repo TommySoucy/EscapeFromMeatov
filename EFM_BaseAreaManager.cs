@@ -4306,7 +4306,7 @@ namespace EFM
                     EFM_AreaRequirement requirementScript = currentItemRequirement.GetComponent<EFM_AreaRequirement>();
                     currentItemRequirement.GetChild(1).GetChild(0).GetComponent<Text>().text = Mathf.Min(totalAmount, requirementScript.count).ToString() + "/" + requirementScript.count;
 
-                    if (totalAmount > requirementScript.count)
+                    if (totalAmount >= requirementScript.count)
                     {
                         currentItemRequirement.GetChild(1).GetChild(1).GetComponent<Image>().sprite = EFM_Base_Manager.requirementFulfilled;
                     }
