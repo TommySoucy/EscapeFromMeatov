@@ -1935,6 +1935,7 @@ namespace EFM
                         EFM_VanillaItemDescriptor magVID = magPhysicalObject.GetComponent<EFM_VanillaItemDescriptor>();
                         magVID.takeCurrentLocation = false;
 
+                        magPhysicalObject.UsesVizInterp = false;
                         magPhysicalObject.Load(firearmPhysicalObject);
                         magPhysicalObject.IsInfinite = false;
 
@@ -1942,6 +1943,15 @@ namespace EFM
                         //containerObject.transform.localPosition = gunMagTransform.localPosition;
                         //containerObject.transform.localRotation = gunMagTransform.localRotation;
                     }
+                }
+
+                // Set to right shoulder if this was saved in it
+                if (item["isRightShoulder"] != null)
+                {
+                    itemPhysicalObject.SetQuickBeltSlot(Mod.rightShoulderSlot);
+
+                    Mod.rightShoulderObject = itemObject;
+                    itemObject.SetActive(false);
                 }
             }
             else if (itemPhysicalObject is FVRFireArmMagazine)
@@ -2025,7 +2035,6 @@ namespace EFM
 
             // Custom item
             EFM_CustomItemWrapper customItemWrapper = itemObject.GetComponent<EFM_CustomItemWrapper>();
-            bool slotted = false;
             if (customItemWrapper != null)
             {
                 customItemWrapper.itemType = (Mod.ItemType)(int)item["itemType"];
@@ -2240,7 +2249,6 @@ namespace EFM
                 // Equip the item if it has an equip slot
                 if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                 {
-                    slotted = true;
                     customItemWrapper.takeCurrentLocation = false;
 
                     int equipSlotIndex = (int)item["PhysicalObject"]["equipSlot"];
@@ -2263,7 +2271,6 @@ namespace EFM
                 // Put item in pocket if it has pocket index
                 if (item["pocketSlotIndex"] != null)
                 {
-                    slotted = true;
                     Mod.instance.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
                     customItemWrapper.takeCurrentLocation = false;
 
@@ -2313,11 +2320,9 @@ namespace EFM
 
             Mod.instance.LogInfo("positioning");
             // GameObject
-            if (!slotted)
-            {
-                itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
-                itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
-            }
+            itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
+            itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
+
             Mod.instance.LogInfo("done");
             return itemObject;
         }
@@ -3423,6 +3428,12 @@ namespace EFM
                         }
                         savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInMag;
                     }
+                }
+
+                // Save to shoulder if necessary
+                if(Mod.rightShoulderObject.Equals(item.gameObject))
+                {
+                    savedItem["isRightShoulder"] = true;
                 }
             }
             else if (itemPhysicalObject is FVRFireArmMagazine)
