@@ -124,7 +124,10 @@ namespace EFM
 
             UpdateEffects();
 
-            UpdateSun();
+            // TODO: Reneable these once we figure out efficient way to rotate sun with time for realistic day/night cycle
+            //UpdateTime();
+
+            //UpdateSun();
         }
 
         private void UpdateEffects()
@@ -996,12 +999,54 @@ namespace EFM
 
         public void UpdateSun()
         {
-            UpdateTime();
-
             // Considering that 21600 (0600) is sunrise and that 64800 (1800) is sunset
             UpdateSunAngle();
 
             UpdateSunIntensity();
+        }
+
+        private void InitTime()
+        {
+            long longTime = GetTimeSeconds();
+            long clampedTime = longTime % 86400; // Clamp to 24 hours because thats the relevant range
+            int scaledTime = (int)((clampedTime * EFM_Manager.meatovTimeMultiplier) % 86400);
+            time = (scaledTime + Mod.chosenTimeIndex == 0 ? 0 : 43200) % 86400;
+        }
+
+        private void InitSun()
+        {
+            // Get sun
+            sun = transform.GetChild(1).GetChild(0).GetComponent<Light>();
+
+            // Check if should be active and set intensity
+            if (time >= 23400 && time <= 63000) // Day
+            {
+                sun.intensity = 1;
+            }
+            else if (time > 63000 && time < 64800) // Setting
+            {
+                sun.intensity = (64800 - time) / 1800;
+            }
+            else if ((time > 64800 && time <= 86400) || (time >= 0 && time <= 21600)) // Night
+            {
+                return; // Intensity should be 0
+            }
+            else //(time > 21600 && time < 23400) // Rising
+            {
+                sun.intensity = 1800 / (time - 21600);
+            }
+            sun.gameObject.SetActive(true);
+
+            // Set angle
+            float angle = 0.004166f * time + 21600;
+            sun.transform.rotation = Quaternion.Euler(angle, 45, 45);
+        }
+
+        private void UpdateTime()
+        {
+            time += UnityEngine.Time.deltaTime * EFM_Manager.meatovTimeMultiplier;
+
+            time %= 86400;
         }
 
         public void UpdateSunAngle()
@@ -1009,7 +1054,7 @@ namespace EFM
             // Sun's X axis must rotate by 180 degrees in 43200 seconds
             // so 0.004166 degree in 1 second with an offset of 21600
             float angle = 0.004166f * time + 21600;
-            sun.transform.rotation = Quaternion.Euler(angle, 0, 0);
+            sun.transform.rotation = Quaternion.Euler(angle, 45, 45);
         }
 
         public void UpdateSunIntensity()
@@ -1498,9 +1543,8 @@ namespace EFM
             // Init time
             InitTime();
 
-            // Get sun
-            sun = transform.GetChild(1).GetChild(0).GetComponent<Light>();
-            sun.gameObject.SetActive(true);
+            // Init sun
+            InitSun();
 
             inRaid = true;
 
@@ -1543,25 +1587,10 @@ namespace EFM
             }
         }
 
-        private void InitTime()
-        {
-            long longTime = GetTimeSeconds();
-            long clampedTime = longTime % 86400; // Clamp to 24 hours because thats the relevant range
-            int scaledTime = (int)((clampedTime * EFM_Manager.meatovTimeMultiplier) % 86400);
-            time = (scaledTime + Mod.chosenTimeIndex == 0 ? 0 : 43200) % 86400;
-        }
-
         public long GetTimeSeconds()
         {
             DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalSeconds);
-        }
-
-        private void UpdateTime()
-        {
-            time += UnityEngine.Time.deltaTime * EFM_Manager.meatovTimeMultiplier;
-
-            time %= 86400;
         }
 
         private GameObject SpawnLootItem(GameObject itemPrefab, Transform itemsRoot, string itemID, JToken itemData,
