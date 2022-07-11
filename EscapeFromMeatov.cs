@@ -214,7 +214,8 @@ namespace EFM
         public static JArray questDB;
         public static JArray XPPerLevel;
         public static JObject mapData;
-        public static JObject[] locationsDB;
+        public static JObject[] locationsLootDB;
+        public static JObject[] locationsBaseDB;
         public static JArray lootContainerDB;
         public static JObject defaultItemsData;
         public static Dictionary<string, EFM_VanillaItemDescriptor> vanillaItems;
@@ -1192,11 +1193,17 @@ namespace EFM
             questDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/quests.json"));
             XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
             mapData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/EscapeFromMeatovMapData.txt"));
-            locationsDB = new JObject[9];
-            string[] locationFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/Locations/");
-            for (int i = 0; i < locationFiles.Length; ++i)
+            locationsLootDB = new JObject[9];
+            string[] locationLootFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/Locations/loot");
+            for (int i = 0; i < locationLootFiles.Length; ++i)
             {
-                locationsDB[i] = JObject.Parse(File.ReadAllText(locationFiles[i]));
+                locationsLootDB[i] = JObject.Parse(File.ReadAllText(locationLootFiles[i]));
+            }
+            locationsBaseDB = new JObject[9];
+            string[] locationBaseFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/Locations/base");
+            for (int i = 0; i < locationBaseFiles.Length; ++i)
+            {
+                locationsBaseDB[i] = JObject.Parse(File.ReadAllText(locationBaseFiles[i]));
             }
             lootContainerDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/LootContainer.json"));
             lootContainersByName = new Dictionary<string, JObject>();

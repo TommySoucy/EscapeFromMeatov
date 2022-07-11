@@ -8,11 +8,14 @@ namespace EFM
     {
         public EFM_Hand otherHand;
         public EFM_CustomItemWrapper collidingContainerWrapper;
+        private List<Collider> containerColliders;
         public EFM_CustomItemWrapper collidingTogglableWrapper;
+        private List<Collider> togglableColliders;
         public EFM_TradeVolume collidingTradeVolume;
+        private Collider tradeVolumeCollider;
         public EFM_Switch collidingSwitch;
+        private List<Collider> switchColliders;
         public bool hoverValid;
-        private List<Collider> colliders;
         public FVRViveHand fvrHand;
         public bool consuming;
         public GameObject currentHeldItem;
@@ -20,7 +23,9 @@ namespace EFM
         private void Awake()
         {
             fvrHand = transform.GetComponent<FVRViveHand>();
-            colliders = new List<Collider>();
+            containerColliders = new List<Collider>();
+            togglableColliders = new List<Collider>();
+            switchColliders = new List<Collider>();
         }
 
         private void Update()
@@ -161,18 +166,17 @@ namespace EFM
             Transform mainContainerTransform = null;
             if (collider.gameObject.name.Equals("MainContainer"))
             {
-                Mod.instance.LogInfo("Hand entered collider named MainContainer");
                 mainContainerTransform = collider.transform;
             }
             else if (collider.gameObject.GetComponent<EFM_Switch>() != null)
             {
                 collidingSwitch = collider.gameObject.GetComponent<EFM_Switch>();
-                colliders.Add(collider);
+                switchColliders.Add(collider);
             }
             else if (collider.transform.parent != null && collider.transform.parent.GetComponent<EFM_TradeVolume>() != null)
             {
                 collidingTradeVolume = collider.transform.parent.GetComponent<EFM_TradeVolume>();
-                colliders.Add(collider);
+                tradeVolumeCollider = collider;
             }
             else if (collider.transform.parent != null)
             {
@@ -186,7 +190,7 @@ namespace EFM
                     if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
                     {
                         collidingTogglableWrapper = lootContainerCIW;
-                        colliders.Add(collider);
+                        togglableColliders.Add(collider);
                     }
                 }
                 else if (collider.transform.parent.name.Equals("Interactives") && collider.transform.parent.parent != null)
@@ -195,7 +199,7 @@ namespace EFM
                     if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
                     {
                         collidingTogglableWrapper = lootContainerCIW;
-                        colliders.Add(collider);
+                        togglableColliders.Add(collider);
                     }
                 }
                 else if (collider.transform.parent.parent != null)
@@ -209,7 +213,7 @@ namespace EFM
                              itemCIW.itemType == Mod.ItemType.Pouch))
                         {
                             collidingTogglableWrapper = itemCIW;
-                            colliders.Add(collider);
+                            togglableColliders.Add(collider);
                         }
                     }
                 }
@@ -223,24 +227,28 @@ namespace EFM
                      customItemWrapper.itemType == Mod.ItemType.Container ||
                      customItemWrapper.itemType == Mod.ItemType.Pouch))
                 {
-                    Mod.instance.LogInfo("\tMainCollider is part of some kind of container");
+                    // Clear the previous colliding container if we had one
+                    if(collidingContainerWrapper != null)
+                    {
+                        hoverValid = false;
+                        collidingContainerWrapper.SetContainerHovered(false);
+                        containerColliders.Clear();
+                    }
+
                     collidingContainerWrapper = customItemWrapper;
-                    colliders.Add(collider);
+                    containerColliders.Add(collider);
                 }
             }
 
             // Set container hovered if necessary
             if (collidingContainerWrapper != null && collidingContainerWrapper.canInsertItems)
             {
-                Mod.instance.LogInfo("\tCna insert items into this container");
                 // Verify container mode
                 if (collidingContainerWrapper.mainContainer.activeSelf)
                 {
-                    Mod.instance.LogInfo("\t\tContainer is active");
                     // Set material, if this hand is also holding something that fits in the container, set the material to hovered
                     if (fvrHand.CurrentInteractable != null && fvrHand.CurrentInteractable is FVRPhysicalObject)
                     {
-                        Mod.instance.LogInfo("\t\t\tThis hand is holding an item");
                         float volumeToUse = 0;
                         string IDToUse = "";
                         List<string> parentsToUse = null;
@@ -265,7 +273,6 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogError("Non described item held in hand while entering container!");
                                 return;
                             }
                         }
@@ -273,14 +280,12 @@ namespace EFM
                         // Check if volume fits in bag
                         if (collidingContainerWrapper.containingVolume + volumeToUse <= collidingContainerWrapper.maxVolume)
                         {
-                            Mod.instance.LogInfo("\t\t\t\tVolume fits");
                             // Also check if the container can contain the item through filters
                             if (collidingContainerWrapper.whiteList != null)
                             {
                                 // If whitelist includes item and blacklist doesn't
                                 if (EFM_CustomItemWrapper.ItemFitsInContainer(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
                                 {
-                                    Mod.instance.LogInfo("\t\t\t\tpasses filter");
                                     hoverValid = true;
                                     collidingContainerWrapper.SetContainerHovered(true);
                                     fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
@@ -293,7 +298,6 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogInfo("\t\t\t\t\tContainer does not have whitelist");
                                 hoverValid = true;
                                 collidingContainerWrapper.SetContainerHovered(true);
                                 fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
@@ -358,7 +362,7 @@ namespace EFM
 
         private void OnTriggerExit(Collider collider)
         {
-            if(collidingContainerWrapper != null && colliders.Remove(collider))
+            if (collidingContainerWrapper != null && containerColliders.Remove(collider) && containerColliders.Count == 0)
             {
                 if (!otherHand.hoverValid)
                 {
@@ -368,16 +372,17 @@ namespace EFM
 
                 collidingContainerWrapper = null;
             }
-            else if(collidingSwitch != null && colliders.Remove(collider))
+            else if (collidingSwitch != null && switchColliders.Remove(collider) && switchColliders.Count == 0)
             {
                 collidingSwitch = null;
             }
-            else if(collidingTradeVolume != null && colliders.Remove(collider))
+            else if (collidingTradeVolume != null && tradeVolumeCollider.Equals(collider))
             {
                 collidingTradeVolume.SetContainerHovered(false);
                 collidingTradeVolume = null;
+                tradeVolumeCollider = null;
             }
-            else if (collidingTogglableWrapper != null && colliders.Remove(collider))
+            else if (collidingTogglableWrapper != null && togglableColliders.Remove(collider) && togglableColliders.Count == 0)
             {
                 collidingTogglableWrapper = null;
             }

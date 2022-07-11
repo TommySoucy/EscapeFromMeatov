@@ -11,7 +11,7 @@ namespace EFM
 {
     public class EFM_Raid_Manager : EFM_Manager
     {
-        public static readonly float extractionTime = 10; 
+        public static readonly float extractionTime = 10;
 
         public static EFM_Raid_Manager currentManager;
         public static float extractionTimer;
@@ -34,6 +34,486 @@ namespace EFM
 
         private List<GameObject> extractionCards;
         private bool extracted;
+
+        // AI
+        private float initSpawnTimer = 5; // Will only start spawning AI once this much time has elapsed at start of raid
+
+        public override void Init()
+        {
+            Mod.currentRaidManager = this;
+
+            // Init player state
+            currentHealthRates = new float[7];
+            currentNonLethalHealthRates = new float[7];
+
+            // Manager GC ourselves
+            GCManager = gameObject.AddComponent<EFM_GCManager>();
+
+            // Init effects that were already active before the raid to make sure their effects are applied
+            InitEffects();
+
+            Mod.instance.LogInfo("Raid init called");
+            currentManager = this;
+
+            LoadMapData();
+            Mod.instance.LogInfo("Map data read");
+
+            // Choose spawnpoints
+            Transform spawnRoot = transform.GetChild(transform.childCount - 1).GetChild(Mod.chosenCharIndex);
+            spawnPoint = spawnRoot.GetChild(UnityEngine.Random.Range(0, spawnRoot.childCount));
+
+            Mod.instance.LogInfo("Got spawn");
+
+            // Find extractions
+            possibleExtractions = new List<Extraction>();
+            Extraction bestCandidate = null; // Must be an extraction without appearance times (always available) and no other requirements. This will be the minimum extraction
+            float farthestDistance = float.MinValue;
+            Mod.instance.LogInfo("Init raid with map index: " + Mod.chosenMapIndex + ", which has " + extractions.Count + " extractions");
+            for (int extractionIndex = 0; extractionIndex < extractions.Count; ++extractionIndex)
+            {
+                Extraction currentExtraction = extractions[extractionIndex];
+                currentExtraction.gameObject = gameObject.transform.GetChild(gameObject.transform.childCount - 2).GetChild(extractionIndex).gameObject;
+
+                bool canBeMinimum = (currentExtraction.times == null || currentExtraction.times.Count == 0) &&
+                                    (currentExtraction.itemRequirements == null || currentExtraction.itemRequirements.Count == 0) &&
+                                    (currentExtraction.equipmentRequirements == null || currentExtraction.equipmentRequirements.Count == 0) &&
+                                    (currentExtraction.role == Mod.chosenCharIndex || currentExtraction.role == 2) &&
+                                    !currentExtraction.accessRequirement;
+                float currentDistance = Vector3.Distance(spawnPoint.position, currentExtraction.gameObject.transform.position);
+                Mod.instance.LogInfo("\tExtraction at index: " + extractionIndex + " has " + currentExtraction.times.Count + " times and " + currentExtraction.itemRequirements.Count + " items reqs. Its current distance from player is: " + currentDistance);
+                if (UnityEngine.Random.value <= ExtractionChanceByDist(currentDistance))
+                {
+                    Mod.instance.LogInfo("\t\tAdding this extraction to list possible extractions");
+                    possibleExtractions.Add(currentExtraction);
+
+                    //Add an extraction manager
+                    ExtractionManager extractionManager = currentExtraction.gameObject.AddComponent<ExtractionManager>();
+                    extractionManager.extraction = currentExtraction;
+                    extractionManager.raidManager = this;
+                }
+
+                // Best candidate will be farthest because if there is at least one extraction point, we don't want to always have the nearest
+                if (canBeMinimum && currentDistance > farthestDistance)
+                {
+                    bestCandidate = currentExtraction;
+                }
+            }
+            if (bestCandidate != null)
+            {
+                if (!possibleExtractions.Contains(bestCandidate))
+                {
+                    possibleExtractions.Add(bestCandidate);
+
+                    //Add an extraction manager
+                    ExtractionManager extractionManager = bestCandidate.gameObject.AddComponent<ExtractionManager>();
+                    extractionManager.extraction = bestCandidate;
+                    extractionManager.raidManager = this;
+                }
+            }
+            else
+            {
+                Mod.instance.LogError("No minimum extraction found");
+            }
+
+            Mod.instance.LogInfo("Got extractions");
+
+            // Init extraction cards
+            Transform extractionParent = Mod.playerStatusUI.transform.GetChild(0).GetChild(9);
+            extractionCards = new List<GameObject>();
+            for (int i = 0; i < possibleExtractions.Count; ++i)
+            {
+                GameObject currentExtractionCard = Instantiate(Mod.extractionCardPrefab, extractionParent);
+                extractionCards.Add(currentExtractionCard);
+
+                currentExtractionCard.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = String.Format("EXFIL{0:00} {1}", i, possibleExtractions[i].name);
+                if (possibleExtractions[i].times != null && possibleExtractions[i].times.Count > 0 ||
+                   possibleExtractions[i].raidTimes != null && possibleExtractions[i].raidTimes.Count > 0)
+                {
+                    currentExtractionCard.transform.GetChild(1).GetChild(0).gameObject.SetActive(true);
+                }
+
+                possibleExtractions[i].card = currentExtractionCard;
+            }
+            extractionParent.gameObject.SetActive(true);
+            Mod.instance.LogInfo("Inited extract cards");
+
+            // Initialize doors
+            Mod.initDoors = true;
+            Transform worldRoot = transform.GetChild(1);
+            Transform modelRoot = worldRoot.GetChild(1);
+            Transform doorRoot = modelRoot.GetChild(0);
+            Transform logicRoot = modelRoot.GetChild(3);
+            Transform playerBlocksRoot = logicRoot.GetChild(2);
+            int doorIndex = 0;
+
+            MatDef metalMatDef = new MatDef();
+            metalMatDef.name = "Door_Metal";
+            metalMatDef.BallisticType = MatBallisticType.MetalThick;
+            metalMatDef.BulletHoleType = BulletHoleDecalType.Metal;
+            metalMatDef.BulletImpactSound = BulletImpactSoundType.MetalThick;
+            metalMatDef.ImpactEffectType = BallisticImpactEffectType.Sparks;
+            metalMatDef.SoundType = MatSoundType.Metal;
+
+            Mod.instance.LogInfo("Initializing doors");
+            foreach (JToken doorData in Mod.mapData["maps"][Mod.chosenMapIndex]["doors"])
+            {
+                GameObject doorObject = doorRoot.GetChild(doorIndex).gameObject;
+                Mod.instance.LogInfo("\t" + doorObject.name);
+                GameObject doorInstance = null;
+                if (doorData["type"].ToString().Equals("left"))
+                {
+                    doorInstance = GameObject.Instantiate(Mod.doorLeftPrefab, doorRoot);
+                }
+                else if (doorData["type"].ToString().Equals("right"))
+                {
+                    doorInstance = GameObject.Instantiate(Mod.doorRightPrefab, doorObject.transform.position, doorObject.transform.rotation, doorRoot);
+                }
+                else if (doorData["type"].ToString().Equals("double"))
+                {
+                    doorInstance = GameObject.Instantiate(Mod.doorDoublePrefab, doorObject.transform.position, doorObject.transform.rotation, doorRoot);
+                }
+                doorInstance.transform.localPosition = doorObject.transform.localPosition;
+                doorInstance.transform.localRotation = doorObject.transform.localRotation;
+                doorInstance.transform.localScale = doorObject.transform.localScale;
+
+                // Set door to active to awake and Init it
+                doorInstance.SetActive(true);
+
+                // Get relevant components
+                SideHingedDestructibleDoorDeadBolt deadBolt = doorInstance.GetComponentInChildren<SideHingedDestructibleDoorDeadBolt>();
+                SideHingedDestructibleDoor doorScript = doorInstance.transform.GetChild(0).GetComponent<SideHingedDestructibleDoor>();
+
+                // Add a doorWrapper
+                EFM_DoorWrapper doorWrapper = doorInstance.AddComponent<EFM_DoorWrapper>();
+
+                // Transfer grill if it exists
+                if (doorObject.transform.GetChild(0).childCount == 3)
+                {
+                    doorObject.transform.GetChild(0).GetChild(2).parent = doorInstance.transform.GetChild(0).GetChild(0);
+                }
+
+                // Remove frame if necessary
+                if (!(bool)doorData["hasFrame"])
+                {
+                    Destroy(doorInstance.GetComponent<MeshFilter>());
+                    Destroy(doorInstance.GetComponent<MeshRenderer>());
+                }
+
+                // Transfer material if necessary
+                if ((bool)doorData["customMat"])
+                {
+                    if ((bool)doorData["hasFrame"])
+                    {
+                        doorInstance.GetComponent<MeshRenderer>().material = doorObject.GetComponent<MeshRenderer>().material;
+                    }
+                    doorInstance.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material = doorObject.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material;
+                }
+
+                // Set PMat if necessary
+                if (doorData["mat"].ToString().Equals("metal"))
+                {
+                    doorInstance.GetComponent<PMat>().MatDef = metalMatDef;
+                    doorInstance.transform.GetChild(0).GetComponent<PMat>().MatDef = metalMatDef;
+                    doorInstance.transform.GetChild(0).GetChild(0).GetComponent<PMat>().MatDef = metalMatDef;
+                }
+
+                // Flip lock if necessary
+                if ((bool)doorData["flipLock"])
+                {
+                    doorWrapper.flipLock = true;
+                    if (deadBolt != null)
+                    {
+                        deadBolt.transform.Rotate(0, 180, 0);
+                    }
+                }
+
+                // Set destructable
+                if (!(bool)doorData["destructable"])
+                {
+                    Destroy(doorInstance.transform.GetChild(0).GetComponent<UberShatterable>()); // TODO: Verify if this works
+                }
+
+                // Set door angle
+                //bool hasAngle = (bool)doorData["angle"];
+                //if (hasAngle)
+                //{
+                //    //Transform doorPlaceholder = doorObject.transform.GetChild(0);
+                //    //Transform fakeHingePlaceholder = doorObject.transform.GetChild(1);
+                //    //Transform door = doorInstance.transform.GetChild(0);
+                //    //Transform fakeHinge = doorInstance.transform.GetChild(1);
+                //    //door.gameObject.SetActive(false);
+                //    //door.localPosition = doorPlaceholder.localPosition;
+                //    //door.localRotation = doorPlaceholder.localRotation;
+                //    //if (disabledDoors == null)
+                //    //{
+                //    //    disabledDoors = new List<GameObject>();
+                //    //}
+                //    //disabledDoors.Add(door.gameObject);
+
+                //    //if (hingeJointsToDisableLimits == null)
+                //    //{
+                //    //    hingeJointsToDisableLimits = new List<HingeJoint>();
+                //    //}
+                //    //if (correspondingLimits == null)
+                //    //{
+                //    //    correspondingLimits = new List<JointLimits>();
+                //    //}
+
+                //    //float angleToUse = fakeHingePlaceholder.eulerAngles.y;
+                //    ////if (doorData["type"].ToString().Equals("left"))
+                //    ////{
+                //    ////    angleToUse = -angleToUse;
+                //    ////}
+                //    //JointLimits jl = new JointLimits();
+                //    //jl.min = angleToUse;
+                //    //jl.max = angleToUse + 1;
+
+                //    //correspondingLimits.Add(doorScript.HingeLower.limits);
+                //    //correspondingLimits.Add(doorScript.HingeUpper.limits);
+
+                //    //doorScript.HingeLower.limits = jl;
+                //    //doorScript.HingeUpper.limits = jl;
+
+                //    //hingeJointsToDisableLimits.Add(doorScript.HingeLower);
+                //    //hingeJointsToDisableLimits.Add(doorScript.HingeUpper);
+                //}
+
+                // Set key
+                int keyIndex = (int)doorData["keyIndex"];
+                if (keyIndex > -1)
+                {
+                    doorWrapper.keyID = keyIndex.ToString();
+                    if ((bool)doorData["locked"])
+                    {
+                        EFM_DoorLockChecker doorLockChecker = doorInstance.AddComponent<EFM_DoorLockChecker>();
+                        doorLockChecker.deadBolt = deadBolt;
+                        doorLockChecker.blocks = playerBlocksRoot.GetChild((int)doorData["blockIndex"]).gameObject;
+                    }
+                    else
+                    {
+                        // Make sure door is unlocked
+                        doorScript.ForceUnlock();
+                    }
+                }
+                else
+                {
+                    // Make sure door is unlocked
+                    doorScript.ForceUnlock();
+                }
+
+                // Destroy placeholder door
+                doorObject.SetActive(false);
+                //Destroy(doorObject);
+
+                ++doorIndex;
+            }
+
+            Mod.instance.LogInfo("Initialized doors, spawning loose loot");
+
+            // Spawn loose loot
+            JObject locationDB = Mod.locationsLootDB[GetLocationDataIndex(Mod.chosenMapIndex)];
+            Transform itemsRoot = transform.GetChild(1).GetChild(1).GetChild(2);
+            List<string> missingForced = new List<string>();
+            List<string> missingDynamic = new List<string>();
+            // Forced, always spawns TODO: Unless player has it already? Unless player doesnt have the quest yet?
+            Mod.instance.LogInfo("Spawning forced loot");
+            foreach (JToken forced in locationDB["forced"])
+            {
+                JArray items = forced["Items"].Value<JArray>();
+                Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
+                Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
+                List<string> unspawnedParents = new List<string>();
+
+                for (int i = 0; i < items.Count; ++i)
+                {
+                    // Get item from item map
+                    string originalID = items[i]["_tpl"].ToString();
+                    string itemID = null;
+                    if (Mod.itemMap.ContainsKey(originalID))
+                    {
+                        itemID = Mod.itemMap[originalID];
+                    }
+                    else
+                    {
+                        missingForced.Add(originalID);
+
+                        // Spawn random round instead
+                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
+                    }
+
+                    // Get item prefab
+                    GameObject itemPrefab = null;
+                    if (int.TryParse(itemID, out int index))
+                    {
+                        itemPrefab = Mod.itemPrefabs[index];
+                    }
+                    else
+                    {
+                        itemPrefab = IM.OD[itemID].GetGameObject();
+                    }
+
+                    // Spawn item
+                    SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItemCIWs, spawnedItemVIDs, unspawnedParents, forced, originalID, false);
+                }
+            }
+
+            // Dynamic, has chance of spawning
+            Mod.instance.LogInfo("Spawning dynamic loot");
+            foreach (JToken dynamicSpawn in locationDB["dynamic"])
+            {
+                JArray items = dynamicSpawn["Items"].Value<JArray>();
+                Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
+                Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
+                List<string> unspawnedParents = new List<string>();
+
+                for (int i = 0; i < items.Count; ++i)
+                {
+                    // Get item from item map
+                    string originalID = items[i]["_tpl"].ToString();
+                    string itemID = null;
+                    if (Mod.itemMap.ContainsKey(originalID))
+                    {
+                        itemID = Mod.itemMap[originalID];
+                    }
+                    else
+                    {
+                        missingForced.Add(originalID);
+
+                        // Spawn random round instead
+                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
+                    }
+
+                    // Get item prefab
+                    GameObject itemPrefab = null;
+                    if (int.TryParse(itemID, out int index))
+                    {
+                        itemPrefab = Mod.itemPrefabs[index];
+                    }
+                    else
+                    {
+                        itemPrefab = IM.OD[itemID].GetGameObject();
+                    }
+
+                    // Spawn item
+                    SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItemCIWs, spawnedItemVIDs, unspawnedParents, dynamicSpawn, originalID, true);
+                }
+            }
+
+            Mod.instance.LogInfo("Done spawning loose loot, initializing container");
+
+            // Init containers
+            Transform containersRoot = transform.GetChild(1).GetChild(1).GetChild(1);
+            JArray mapContainerData = (JArray)Mod.mapData["maps"][Mod.chosenMapIndex]["containers"];
+            for (int i = 0; i < containersRoot.childCount; ++i)
+            {
+                Transform container = containersRoot.GetChild(i);
+
+                // Setup the container
+                JObject containerData = Mod.lootContainersByName[container.name];
+                Transform mainContainer = container.GetChild(container.childCount - 1);
+                switch (container.name)
+                {
+                    case "Jacket":
+                    case "scavDead":
+                    case "MedBag":
+                    case "SportBag":
+                        // Static containers that can be toggled open closed by hovering hand overthem and pressing interact button
+                        container.gameObject.SetActive(false); // Disable temporarily so CIW doesnt Awake before we set the itemType
+                        EFM_CustomItemWrapper containerCIW = container.gameObject.AddComponent<EFM_CustomItemWrapper>();
+                        containerCIW.itemType = Mod.ItemType.LootContainer;
+                        container.gameObject.SetActive(true);
+                        containerCIW.canInsertItems = false;
+                        containerCIW.mainContainer = mainContainer.gameObject;
+                        containerCIW.containerItemRoot = container.GetChild(container.childCount - 2);
+
+                        EFM_LootContainer containerScript = container.gameObject.AddComponent<EFM_LootContainer>();
+                        containerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
+                        JToken gridProps = containerData["_props"]["Grids"][0]["_props"];
+                        containerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)gridProps["cellsH"] * (int)gridProps["cellsV"]);
+
+                        mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
+                        break;
+                    case "Safe":
+                    case "meds&other":
+                    case "tools&other":
+                    case "GrenadeBox":
+                    case "terraWBoxLongBig":
+                    case "terraWBoxLong":
+                    case "WeaponCrate":
+                    case "ToolBox":
+                        // Containers that must be physically opened (Door, Cover, Cap, Lid...)
+                        EFM_LootContainerCover cover = container.GetChild(0).gameObject.AddComponent<EFM_LootContainerCover>();
+                        cover.keyID = mapContainerData[i]["keyID"].ToString();
+                        cover.hasKey = !cover.keyID.Equals("");
+                        cover.Root = container.GetChild(container.childCount - 3);
+                        cover.MinRot = -90;
+                        cover.MaxRot = 0;
+
+                        EFM_LootContainer openableContainerScript = container.gameObject.AddComponent<EFM_LootContainer>();
+                        openableContainerScript.interactable = cover;
+                        openableContainerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
+                        JToken openableContainergridProps = containerData["_props"]["Grids"][0]["_props"];
+                        openableContainerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)openableContainergridProps["cellsH"] * (int)openableContainergridProps["cellsV"]);
+
+                        mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
+                        break;
+                    case "Drawer":
+                        // Containers that must be slid open
+                        for (int drawerIndex = 0; drawerIndex < 4; ++drawerIndex)
+                        {
+                            Transform drawerTransform = container.GetChild(drawerIndex);
+                            EFM_LootContainerSlider slider = drawerTransform.gameObject.AddComponent<EFM_LootContainerSlider>();
+                            slider.keyID = mapContainerData[i]["keyID"].ToString();
+                            slider.hasKey = !slider.keyID.Equals("");
+                            slider.Root = slider.transform;
+                            slider.MinY = -0.3f;
+                            slider.MaxY = 0.2f;
+                            slider.posZ = container.GetChild(drawerIndex).localPosition.z;
+
+                            EFM_LootContainer drawerScript = drawerTransform.gameObject.AddComponent<EFM_LootContainer>();
+                            drawerScript.interactable = slider;
+                            drawerScript.mainContainerCollider = drawerTransform.GetChild(drawerTransform.childCount - 1).GetComponent<Collider>();
+                            JToken drawerGridProps = containerData["_props"]["Grids"][0]["_props"];
+                            drawerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)drawerGridProps["cellsH"] * (int)drawerGridProps["cellsV"]);
+
+                            Transform drawerContainer = drawerTransform.GetChild(drawerTransform.childCount - 1);
+                            drawerContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // Output missing items
+            if (Mod.instance.debug)
+            {
+                string text = "Raid with map index = " + Mod.chosenMapIndex + " was missing FORCED loose loot:\n";
+                foreach (string id in missingForced)
+                {
+                    text += id + "\n";
+                }
+                text += "Raid with map index = " + Mod.chosenMapIndex + " was missing DYNAMIC loose loot:\n";
+                foreach (string id in missingDynamic)
+                {
+                    text += id + "\n";
+                }
+                File.WriteAllText("BepinEx/Plugins/EscapeFromMeatov/ErrorLog.txt", text);
+            }
+
+            // Init time
+            InitTime();
+
+            // Init sun
+            InitSun();
+
+            // Init AI
+            InitAI();
+
+            inRaid = true;
+
+            init = true;
+        }
 
         private void Update()
         {
@@ -124,10 +604,258 @@ namespace EFM
 
             UpdateEffects();
 
-            // TODO: Reneable these once we figure out efficient way to rotate sun with time for realistic day/night cycle
+            UpdateAI();
+
+            // TODO: Reeneable these once we figure out efficient way to rotate sun with time for realistic day/night cycle
             //UpdateTime();
 
             //UpdateSun();
+        }
+
+        private void UpdateAI()
+        {
+            if(initSpawnTimer <= 0)
+            {
+                TODO: spawn initial spawns, and start counting down next one
+            }
+            else
+            {
+                initSpawnTimer -= Time.deltaTime;
+            }
+        }
+
+        private void InitAI()
+        {
+            // Get spawnpoints parent transforms
+            // Prep a queue of spawns to produce throughout the raid time up to something like 5 mins before the end
+            // These spawns should contain data like which sosig to spawn with what equipment at what time
+            // For spawn times, we can take the (total raid time - 5 mins) / number of spawns, then jitter those times a little to make it more realistic
+            // There should be some initial spawns to happen right at start of raid, like bosses and some scavs across the map should already be there at beginning
+            // but not too close to player
+            // It should be taken into consideration that spawns of a certain type of enemy shouldnt happen if there are already too many of those on the map
+            // Scavs for example, could keep spawning to fill up the map, to prevent this we want to only have a number of them active at a time
+            // As they die, slots become vacant for us to spawn more of them
+            // In the case of PMCs this should not be a problem since the PMC AI should go for extraction so they will release slots on their own
+            // Same goes for raider squads
+            // The data for the pathing of the AI should also be included: patrol paths for scavs, and raid paths for PMCs and raiders
+
+            //Cult priest - sectantpriest
+            bool spawnCultPriest = false;
+            int cultPriestFollowerCount = 0;
+            //Glukhar - bossgluhar
+            bool spawnGlukhar = false;
+            //Killa - bosskilla
+            bool spawnKilla = false;
+            //Reshala - bossbully
+            bool spawnReshala = false;
+            //Sanitar - bosssanitar
+            bool spawnSanitar = false;
+            //Shturman - bosskojaniy
+            bool spawnShturman = false;
+            //Tagilla - bosstagilla
+            bool spawnTagilla = false;
+
+            int raiderSpawnCount = 0; // TODO: Should set this number depending on map, raiders can only spawn on reserve and lab
+
+            switch (Mod.chosenMapIndex)
+            {
+                case 0: // Factory
+                    if(time >= 21600 && time <= 64800 && UnityEngine.Random.value <= 0.02f)
+                    {
+                        spawnCultPriest = true;
+                        cultPriestFollowerCount = UnityEngine.Random.Range(2, 4);
+                    }
+                    if(UnityEngine.Random.value <= 0.1f)
+                    {
+                        spawnTagilla = true;
+                    }
+                    break;
+
+                // TODO: Add other maps
+
+                default:
+                    break;
+            }
+
+            // Get location's base data
+            JObject locationData = Mod.locationsBaseDB[GetLocationDataIndex(Mod.chosenMapIndex)];
+            float averageLevel = (float)locationData["AveragePlayerLevel"];
+
+            List<AISpawn> AISpawns = new List<AISpawn>();
+
+            // PMC
+            int PMCSpawnCount = UnityEngine.Random.Range((int)locationData["MinPlayers"], (int)locationData["MaxPlayers"]); // Amount of PMCs to spawn during raid
+            if (PMCSpawnCount > 0)
+            {
+                BotData pmcBotData = GetBotData("pmcbot");
+                for (int i = 0; i < PMCSpawnCount; ++i)
+                {
+                    AISpawn newAISpawn = new AISpawn();
+                    newAISpawn.type = AISpawn.AISpawnType.PMC;
+                    newAISpawn.inventory = new AIInventory();
+                    newAISpawn.inventory.generic = new List<string>();
+                    newAISpawn.outfitByLink = new Dictionary<int, List<string>>();
+
+                    float level = Mathf.Min(80, ExpDistrRandOnAvg(averageLevel));
+
+                    // Get inventory data corresponding to level
+                    JObject inventoryDataToUse = null;
+                    for (int j = 0; j < pmcBotData.minInventoryLevels.Length; ++j)
+                    {
+                        if (level >= pmcBotData.minInventoryLevels[j])
+                        {
+                            inventoryDataToUse = pmcBotData.inventoryDB[j];
+                            break;
+                        }
+                    }
+
+                    // Set equipment
+                    string[] headSlots = { "Headwear", "Earpiece", "FaceCover", "Eyewear" };
+                    bool[] headEquipImpossible = new bool[4];
+                    List<int> headOrder = new List<int> { 0, 1, 2, 3 };
+                    headOrder.Shuffle();
+                    for (int j = 0; j < 4; ++j)
+                    {
+                        int actualEquipIndex = headOrder[j];
+                        if (headEquipImpossible[actualEquipIndex])
+                        {
+                            continue;
+                        }
+                        string actualEquipName = headSlots[actualEquipIndex];
+
+                        if (UnityEngine.Random.value <= ((float)pmcBotData.chances["equipment"][actualEquipName]) / 100)
+                        {
+                            JArray possibleHeadEquip = inventoryDataToUse["equipment"][actualEquipName] as JArray;
+                            if (possibleHeadEquip.Count > 0)
+                            {
+                                string headEquipID = possibleHeadEquip[UnityEngine.Random.Range(0, possibleHeadEquip.Count)].ToString();
+                                if (Mod.itemMap.ContainsKey(headEquipID))
+                                {
+                                    string actualHeadEquipID = Mod.itemMap[headEquipID];
+                                    newAISpawn.inventory.generic.Add(actualHeadEquipID);
+
+                                    // Add sosig outfit item if applicable
+                                    if (Mod.globalDB["AIItemMap"][actualHeadEquipID] != null)
+                                    {
+                                        JObject outfitItemData = Mod.globalDB["AIItemMap"][actualHeadEquipID] as JObject;
+                                        int linkIndex = (int)outfitItemData["Link"];
+                                        List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
+                                        if (newAISpawn.outfitByLink.ContainsKey(linkIndex))
+                                        {
+                                            newAISpawn.outfitByLink[linkIndex].Add(equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)]);
+                                        }
+                                        else
+                                        {
+                                            newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
+                                        }
+                                    }
+
+                                    // Add any restrictions implied by this item
+                                    int parsedEquipID = int.Parse(actualHeadEquipID);
+                                    if (Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["BlocksEarpiece"] != null)
+                                    {
+                                        for(int k=0; k < 4; ++k)
+                                        {
+                                            headEquipImpossible[k] = headEquipImpossible[k] || (bool)Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["Blocks" + headSlots[k]];
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Missing item: " + headEquipID + " for PMC AI spawn "+ actualEquipName);
+                                }
+                            }
+                        }
+                    }
+                    if (UnityEngine.Random.value <= ((float)pmcBotData.chances["equipment"]["TacticalVest"]) / 100)
+                    {
+                        JArray possibleRigs = inventoryDataToUse["equipment"]["TacticalVest"] as JArray;
+                        if (possibleRigs.Count > 0)
+                        {
+                            string rigID = possibleRigs[UnityEngine.Random.Range(0, possibleRigs.Count)].ToString();
+                            if (Mod.itemMap.ContainsKey(rigID))
+                            {
+                                string actualRigID = Mod.itemMap[rigID];
+                                newAISpawn.inventory.rig = actualRigID;
+
+                                // Add sosig outfit item if applicable
+                                if (Mod.globalDB["AIItemMap"][actualRigID] != null)
+                                {
+                                    JObject outfitItemData = Mod.globalDB["AIItemMap"][actualRigID] as JObject;
+                                    int linkIndex = (int)outfitItemData["Link"];
+                                    List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
+                                    if (newAISpawn.outfitByLink.ContainsKey(linkIndex))
+                                    {
+                                        newAISpawn.outfitByLink[linkIndex].Add(equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)]);
+                                    }
+                                    else
+                                    {
+                                        newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
+                                    }
+                                }
+
+                                Continue from here, get the prefab of the rig to get the sizes and number of slots
+                                // Keep sizes in an array here to use to decide where to spawn what item when we set those
+                                // Set number of slots by initializing aispawn.inventory.rigcontents array with the correct length
+                                // also keep the whitelist and blacklist from default item data so we can decide if can actually spawn items in this rig later on
+                                // also based on whether this is an itemtype 2 (rig) or 3 (armored rig), ste a bool to tell whether we can spawn a equipment of type ArmorVest after this
+                                int parsedEquipID = int.Parse(actualRigID);
+                                if (Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["BlocksEarpiece"] != null)
+                                {
+                                    for (int k = 0; k < 4; ++k)
+                                    {
+                                        headEquipImpossible[k] = headEquipImpossible[k] || (bool)Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["Blocks" + headSlots[k]];
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Mod.instance.LogError("Missing item: " + rigID + " for PMC AI spawn Rig");
+                            }
+                        }
+                    }
+
+                    // Depending on those and the geenration data, spawn necessary items
+                    // Fill equipement and pockets, like we do for loot containers, only certain attempts, if fail go to next one, etc
+                }
+            }
+
+            int scavInitSpawnCount = UnityEngine.Random.Range(5, 10); // Amount of scavs to spawn at start of raid
+            int scavSpawnCount = 40; // Amount of scavs to spawn during raid
+
+
+            
+        }
+
+        private BotData GetBotData(string name)
+        {
+            BotData botData = new BotData();
+
+            // Get inventory data
+            string[] pmcInventoryFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/bots/"+ name + "/inventory/");
+            botData.minInventoryLevels = new int[pmcInventoryFiles.Length];
+            botData.inventoryDB = new JObject[pmcInventoryFiles.Length];
+            for (int i = pmcInventoryFiles.Length - 1; i >= 0; --i)
+            {
+                string[] pathSplit = pmcInventoryFiles[i].Split('/', '\\');
+                string[] split = pathSplit[pathSplit.Length - 1].Split('_');
+                botData.minInventoryLevels[i] = int.Parse(split[0]);
+                botData.inventoryDB[i] = JObject.Parse(File.ReadAllText(pmcInventoryFiles[i]));
+            }
+
+            // Get other data
+            botData.chances = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/chances.json"));
+            botData.experience = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/experience.json"));
+            botData.generation = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/generation.json"));
+            botData.health = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/health.json"));
+            botData.names = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/names.json"));
+
+            return botData;
+        }
+
+        private float ExpDistrRandOnAvg(float average)
+        {
+            return -average * Mathf.Log(UnityEngine.Random.value);
         }
 
         private void UpdateEffects()
@@ -1077,480 +1805,6 @@ namespace EFM
             }
         }
 
-        public override void Init()
-        {
-            Mod.currentRaidManager = this;
-
-            // Init player state
-            currentHealthRates = new float[7];
-            currentNonLethalHealthRates = new float[7];
-
-            // Manager GC ourselves
-            GCManager = gameObject.AddComponent<EFM_GCManager>();
-
-            // Init effects that were already active before the raid to make sure their effects are applied
-            InitEffects();
-
-            Mod.instance.LogInfo("Raid init called");
-            currentManager = this;
-
-            LoadMapData();
-            Mod.instance.LogInfo("Map data read");
-
-            // Choose spawnpoints
-            Transform spawnRoot = transform.GetChild(transform.childCount - 1).GetChild(Mod.chosenCharIndex);
-            spawnPoint = spawnRoot.GetChild(UnityEngine.Random.Range(0, spawnRoot.childCount));
-
-            Mod.instance.LogInfo("Got spawn");
-
-            // Find extractions
-            possibleExtractions = new List<Extraction>();
-            Extraction bestCandidate = null; // Must be an extraction without appearance times (always available) and no other requirements. This will be the minimum extraction
-            float farthestDistance = float.MinValue;
-            Mod.instance.LogInfo("Init raid with map index: "+Mod.chosenMapIndex+", which has "+extractions.Count+" extractions");
-            for(int extractionIndex = 0; extractionIndex < extractions.Count; ++extractionIndex)
-            {
-                Extraction currentExtraction = extractions[extractionIndex];
-                currentExtraction.gameObject = gameObject.transform.GetChild(gameObject.transform.childCount - 2).GetChild(extractionIndex).gameObject;
-
-                bool canBeMinimum = (currentExtraction.times == null || currentExtraction.times.Count == 0) &&
-                                    (currentExtraction.itemRequirements == null || currentExtraction.itemRequirements.Count == 0) && 
-                                    (currentExtraction.equipmentRequirements == null || currentExtraction.equipmentRequirements.Count == 0) &&
-                                    (currentExtraction.role == Mod.chosenCharIndex || currentExtraction.role == 2) &&
-                                    !currentExtraction.accessRequirement;
-                float currentDistance = Vector3.Distance(spawnPoint.position, currentExtraction.gameObject.transform.position);
-                Mod.instance.LogInfo("\tExtraction at index: "+extractionIndex+" has "+ currentExtraction.times.Count + " times and "+ currentExtraction.itemRequirements.Count+" items reqs. Its current distance from player is: "+ currentDistance);
-                if (UnityEngine.Random.value <= ExtractionChanceByDist(currentDistance))
-                {
-                    Mod.instance.LogInfo("\t\tAdding this extraction to list possible extractions");
-                    possibleExtractions.Add(currentExtraction);
-
-                    //Add an extraction manager
-                    ExtractionManager extractionManager = currentExtraction.gameObject.AddComponent<ExtractionManager>();
-                    extractionManager.extraction = currentExtraction;
-                    extractionManager.raidManager = this;
-                }
-                   
-                // Best candidate will be farthest because if there is at least one extraction point, we don't want to always have the nearest
-                if(canBeMinimum && currentDistance > farthestDistance)
-                {
-                    bestCandidate = currentExtraction;
-                }
-            }
-            if(bestCandidate != null)
-            {
-                if(!possibleExtractions.Contains(bestCandidate))
-                {
-                    possibleExtractions.Add(bestCandidate);
-
-                    //Add an extraction manager
-                    ExtractionManager extractionManager = bestCandidate.gameObject.AddComponent<ExtractionManager>();
-                    extractionManager.extraction = bestCandidate;
-                    extractionManager.raidManager = this;
-                }
-            }
-            else
-            {
-                Mod.instance.LogError("No minimum extraction found");
-            }
-
-            Mod.instance.LogInfo("Got extractions");
-
-            // Init extraction cards
-            Transform extractionParent = Mod.playerStatusUI.transform.GetChild(0).GetChild(9);
-            extractionCards = new List<GameObject>();
-            for(int i=0; i < possibleExtractions.Count; ++i)
-            {
-                GameObject currentExtractionCard = Instantiate(Mod.extractionCardPrefab, extractionParent);
-                extractionCards.Add(currentExtractionCard);
-
-                currentExtractionCard.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = String.Format("EXFIL{0:00} {1}", i, possibleExtractions[i].name);
-                if(possibleExtractions[i].times != null && possibleExtractions[i].times.Count > 0||
-                   possibleExtractions[i].raidTimes != null && possibleExtractions[i].raidTimes.Count > 0)
-                {
-                    currentExtractionCard.transform.GetChild(1).GetChild(0).gameObject.SetActive(true);
-                }
-
-                possibleExtractions[i].card = currentExtractionCard;
-            }
-            extractionParent.gameObject.SetActive(true);
-            Mod.instance.LogInfo("Inited extract cards");
-
-            // Initialize doors
-            Mod.initDoors = true;
-            Transform worldRoot = transform.GetChild(1);
-            Transform modelRoot = worldRoot.GetChild(1);
-            Transform doorRoot = modelRoot.GetChild(0);
-            Transform logicRoot = modelRoot.GetChild(3);
-            Transform playerBlocksRoot = logicRoot.GetChild(2);
-            int doorIndex = 0;
-
-            MatDef metalMatDef = new MatDef();
-            metalMatDef.name = "Door_Metal";
-            metalMatDef.BallisticType = MatBallisticType.MetalThick;
-            metalMatDef.BulletHoleType = BulletHoleDecalType.Metal;
-            metalMatDef.BulletImpactSound = BulletImpactSoundType.MetalThick;
-            metalMatDef.ImpactEffectType = BallisticImpactEffectType.Sparks;
-            metalMatDef.SoundType = MatSoundType.Metal;
-
-            Mod.instance.LogInfo("Initializing doors");
-            foreach (JToken doorData in Mod.mapData["maps"][Mod.chosenMapIndex]["doors"])
-            {
-                GameObject doorObject = doorRoot.GetChild(doorIndex).gameObject;
-                Mod.instance.LogInfo("\t"+doorObject.name);
-                GameObject doorInstance = null;
-                if (doorData["type"].ToString().Equals("left"))
-                {
-                    doorInstance = GameObject.Instantiate(Mod.doorLeftPrefab, doorRoot);
-                }
-                else if (doorData["type"].ToString().Equals("right"))
-                {
-                    doorInstance = GameObject.Instantiate(Mod.doorRightPrefab, doorObject.transform.position, doorObject.transform.rotation, doorRoot);
-                }
-                else if (doorData["type"].ToString().Equals("double"))
-                {
-                    doorInstance = GameObject.Instantiate(Mod.doorDoublePrefab, doorObject.transform.position, doorObject.transform.rotation, doorRoot);
-                }
-                doorInstance.transform.localPosition = doorObject.transform.localPosition;
-                doorInstance.transform.localRotation = doorObject.transform.localRotation;
-                doorInstance.transform.localScale = doorObject.transform.localScale;
-
-                // Set door to active to awake and Init it
-                doorInstance.SetActive(true);
-
-                // Get relevant components
-                SideHingedDestructibleDoorDeadBolt deadBolt = doorInstance.GetComponentInChildren<SideHingedDestructibleDoorDeadBolt>();
-                SideHingedDestructibleDoor doorScript = doorInstance.transform.GetChild(0).GetComponent<SideHingedDestructibleDoor>();
-
-                // Add a doorWrapper
-                EFM_DoorWrapper doorWrapper = doorInstance.AddComponent<EFM_DoorWrapper>();
-
-                // Transfer grill if it exists
-                if (doorObject.transform.GetChild(0).childCount == 3)
-                {
-                    doorObject.transform.GetChild(0).GetChild(2).parent = doorInstance.transform.GetChild(0).GetChild(0);
-                }
-
-                // Remove frame if necessary
-                if (!(bool)doorData["hasFrame"])
-                {
-                    Destroy(doorInstance.GetComponent<MeshFilter>());
-                    Destroy(doorInstance.GetComponent<MeshRenderer>());
-                }
-
-                // Transfer material if necessary
-                if ((bool)doorData["customMat"])
-                {
-                    if ((bool)doorData["hasFrame"])
-                    {
-                        doorInstance.GetComponent<MeshRenderer>().material = doorObject.GetComponent<MeshRenderer>().material;
-                    }
-                    doorInstance.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material = doorObject.transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material;
-                }
-
-                // Set PMat if necessary
-                if (doorData["mat"].ToString().Equals("metal"))
-                {
-                    doorInstance.GetComponent<PMat>().MatDef = metalMatDef;
-                    doorInstance.transform.GetChild(0).GetComponent<PMat>().MatDef = metalMatDef;
-                    doorInstance.transform.GetChild(0).GetChild(0).GetComponent<PMat>().MatDef = metalMatDef;
-                }
-
-                // Flip lock if necessary
-                if ((bool)doorData["flipLock"])
-                {
-                    doorWrapper.flipLock = true;
-                    if(deadBolt != null)
-                    {
-                        deadBolt.transform.Rotate(0, 180, 0);
-                    }
-                }
-
-                // Set destructable
-                if (!(bool)doorData["destructable"])
-                {
-                    Destroy(doorInstance.transform.GetChild(0).GetComponent<UberShatterable>()); // TODO: Verify if this works
-                }
-
-                // Set door angle
-                //bool hasAngle = (bool)doorData["angle"];
-                //if (hasAngle)
-                //{
-                //    //Transform doorPlaceholder = doorObject.transform.GetChild(0);
-                //    //Transform fakeHingePlaceholder = doorObject.transform.GetChild(1);
-                //    //Transform door = doorInstance.transform.GetChild(0);
-                //    //Transform fakeHinge = doorInstance.transform.GetChild(1);
-                //    //door.gameObject.SetActive(false);
-                //    //door.localPosition = doorPlaceholder.localPosition;
-                //    //door.localRotation = doorPlaceholder.localRotation;
-                //    //if (disabledDoors == null)
-                //    //{
-                //    //    disabledDoors = new List<GameObject>();
-                //    //}
-                //    //disabledDoors.Add(door.gameObject);
-
-                //    //if (hingeJointsToDisableLimits == null)
-                //    //{
-                //    //    hingeJointsToDisableLimits = new List<HingeJoint>();
-                //    //}
-                //    //if (correspondingLimits == null)
-                //    //{
-                //    //    correspondingLimits = new List<JointLimits>();
-                //    //}
-
-                //    //float angleToUse = fakeHingePlaceholder.eulerAngles.y;
-                //    ////if (doorData["type"].ToString().Equals("left"))
-                //    ////{
-                //    ////    angleToUse = -angleToUse;
-                //    ////}
-                //    //JointLimits jl = new JointLimits();
-                //    //jl.min = angleToUse;
-                //    //jl.max = angleToUse + 1;
-
-                //    //correspondingLimits.Add(doorScript.HingeLower.limits);
-                //    //correspondingLimits.Add(doorScript.HingeUpper.limits);
-
-                //    //doorScript.HingeLower.limits = jl;
-                //    //doorScript.HingeUpper.limits = jl;
-
-                //    //hingeJointsToDisableLimits.Add(doorScript.HingeLower);
-                //    //hingeJointsToDisableLimits.Add(doorScript.HingeUpper);
-                //}
-
-                // Set key
-                int keyIndex = (int)doorData["keyIndex"];
-                if (keyIndex > -1)
-                {
-                    doorWrapper.keyID = keyIndex.ToString();
-                    if ((bool)doorData["locked"])
-                    {
-                        EFM_DoorLockChecker doorLockChecker = doorInstance.AddComponent<EFM_DoorLockChecker>();
-                        doorLockChecker.deadBolt = deadBolt;
-                        doorLockChecker.blocks = playerBlocksRoot.GetChild((int)doorData["blockIndex"]).gameObject;
-                    }
-                    else
-                    {
-                        // Make sure door is unlocked
-                        doorScript.ForceUnlock();
-                    }
-                }
-                else
-                {
-                    // Make sure door is unlocked
-                    doorScript.ForceUnlock();
-                }
-
-                // Destroy placeholder door
-                doorObject.SetActive(false);
-                //Destroy(doorObject);
-
-                ++doorIndex;
-            }
-
-            Mod.instance.LogInfo("Initialized doors, spawning loose loot");
-
-            // Spawn loose loot
-            JObject locationDB = Mod.locationsDB[GetLocationDataIndex(Mod.chosenMapIndex)];
-            Transform itemsRoot = transform.GetChild(1).GetChild(1).GetChild(2);
-            List<string> missingForced = new List<string>();
-            List<string> missingDynamic = new List<string>();
-            // Forced, always spawns TODO: Unless player has it already? Unless player doesnt have the quest yet?
-            Mod.instance.LogInfo("Spawning forced loot");
-            foreach (JToken forced in locationDB["forced"])
-            {
-                JArray items = forced["Items"].Value<JArray>();
-                Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
-                Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
-                List<string> unspawnedParents = new List<string>();
-
-                for (int i = 0; i < items.Count; ++i)
-                {
-                    // Get item from item map
-                    string originalID = items[i]["_tpl"].ToString();
-                    string itemID = null;
-                    if (Mod.itemMap.ContainsKey(originalID))
-                    {
-                        itemID = Mod.itemMap[originalID];
-                    }
-                    else
-                    {
-                        missingForced.Add(originalID);
-
-                        // Spawn random round instead
-                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
-                    }
-
-                    // Get item prefab
-                    GameObject itemPrefab = null;
-                    if (int.TryParse(itemID, out int index))
-                    {
-                        itemPrefab = Mod.itemPrefabs[index];
-                    }
-                    else
-                    {
-                        itemPrefab = IM.OD[itemID].GetGameObject();
-                    }
-
-                    // Spawn item
-                    SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItemCIWs, spawnedItemVIDs, unspawnedParents, forced, originalID, false);
-                }
-            }
-
-            // Dynamic, has chance of spawning
-            Mod.instance.LogInfo("Spawning dynamic loot");
-            foreach (JToken dynamicSpawn in locationDB["dynamic"])
-            {
-                JArray items = dynamicSpawn["Items"].Value<JArray>();
-                Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
-                Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
-                List<string> unspawnedParents = new List<string>();
-
-                for (int i = 0; i < items.Count; ++i)
-                {
-                    // Get item from item map
-                    string originalID = items[i]["_tpl"].ToString();
-                    string itemID = null;
-                    if (Mod.itemMap.ContainsKey(originalID))
-                    {
-                        itemID = Mod.itemMap[originalID];
-                    }
-                    else
-                    {
-                        missingForced.Add(originalID);
-
-                        // Spawn random round instead
-                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
-                    }
-
-                    // Get item prefab
-                    GameObject itemPrefab = null;
-                    if (int.TryParse(itemID, out int index))
-                    {
-                        itemPrefab = Mod.itemPrefabs[index];
-                    }
-                    else
-                    {
-                        itemPrefab = IM.OD[itemID].GetGameObject();
-                    }
-
-                    // Spawn item
-                    SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItemCIWs, spawnedItemVIDs, unspawnedParents, dynamicSpawn, originalID, true);
-                }
-            }
-
-            Mod.instance.LogInfo("Done spawning loose loot, initializing container");
-
-            // Init containers
-            Transform containersRoot = transform.GetChild(1).GetChild(1).GetChild(1);
-            JArray mapContainerData = (JArray)Mod.mapData["maps"][Mod.chosenMapIndex]["containers"];
-            for(int i=0; i < containersRoot.childCount;++i)
-            {
-                Transform container = containersRoot.GetChild(i);
-
-                // Setup the container
-                JObject containerData = Mod.lootContainersByName[container.name];
-                Transform mainContainer = container.GetChild(container.childCount - 1);
-                switch (container.name)
-                {
-                    case "Jacket":
-                    case "scavDead":
-                    case "MedBag":
-                    case "SportBag":
-                        // Static containers that can be toggled open closed by hovering hand overthem and pressing interact button
-                        container.gameObject.SetActive(false); // Disable temporarily so CIW doesnt Awake before we set the itemType
-                        EFM_CustomItemWrapper containerCIW = container.gameObject.AddComponent<EFM_CustomItemWrapper>();
-                        containerCIW.itemType = Mod.ItemType.LootContainer;
-                        container.gameObject.SetActive(true);
-                        containerCIW.canInsertItems = false;
-                        containerCIW.mainContainer = mainContainer.gameObject;
-                        containerCIW.containerItemRoot = container.GetChild(container.childCount - 2);
-
-                        EFM_LootContainer containerScript = container.gameObject.AddComponent<EFM_LootContainer>();
-                        containerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
-                        JToken gridProps = containerData["_props"]["Grids"][0]["_props"];
-                        containerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)gridProps["cellsH"] * (int)gridProps["cellsV"]);
-
-                        mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
-                        break;
-                    case "Safe":
-                    case "meds&other":
-                    case "tools&other":
-                    case "GrenadeBox":
-                    case "terraWBoxLongBig":
-                    case "terraWBoxLong":
-                    case "WeaponCrate":
-                    case "ToolBox":
-                        // Containers that must be physically opened (Door, Cover, Cap, Lid...)
-                        EFM_LootContainerCover cover = container.GetChild(0).gameObject.AddComponent<EFM_LootContainerCover>();
-                        cover.keyID = mapContainerData[i]["keyID"].ToString();
-                        cover.hasKey = !cover.keyID.Equals("");
-                        cover.Root = container.GetChild(container.childCount - 3);
-                        cover.MinRot = -90;
-                        cover.MaxRot = 0;
-
-                        EFM_LootContainer openableContainerScript = container.gameObject.AddComponent<EFM_LootContainer>();
-                        openableContainerScript.interactable = cover;
-                        openableContainerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
-                        JToken openableContainergridProps = containerData["_props"]["Grids"][0]["_props"];
-                        openableContainerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)openableContainergridProps["cellsH"] * (int)openableContainergridProps["cellsV"]);
-
-                        mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
-                        break;
-                    case "Drawer":
-                        // Containers that must be slid open
-                        for (int drawerIndex = 0; drawerIndex < 4; ++drawerIndex)
-                        {
-                            Transform drawerTransform = container.GetChild(drawerIndex);
-                            EFM_LootContainerSlider slider = drawerTransform.gameObject.AddComponent<EFM_LootContainerSlider>();
-                            slider.keyID = mapContainerData[i]["keyID"].ToString();
-                            slider.hasKey = !slider.keyID.Equals("");
-                            slider.Root = slider.transform;
-                            slider.MinY = -0.3f;
-                            slider.MaxY = 0.2f;
-                            slider.posZ = container.GetChild(drawerIndex).localPosition.z;
-
-                            EFM_LootContainer drawerScript = drawerTransform.gameObject.AddComponent<EFM_LootContainer>();
-                            drawerScript.interactable = slider;
-                            drawerScript.mainContainerCollider = drawerTransform.GetChild(drawerTransform.childCount - 1).GetComponent<Collider>();
-                            JToken drawerGridProps = containerData["_props"]["Grids"][0]["_props"];
-                            drawerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)drawerGridProps["cellsH"] * (int)drawerGridProps["cellsV"]);
-
-                            Transform drawerContainer = drawerTransform.GetChild(drawerTransform.childCount - 1);
-                            drawerContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            // Output missing items
-            if (Mod.instance.debug)
-            {
-                string text = "Raid with map index = " + Mod.chosenMapIndex + " was missing FORCED loose loot:\n";
-                foreach(string id in missingForced)
-                {
-                    text += id + "\n";
-                }
-                text += "Raid with map index = " + Mod.chosenMapIndex + " was missing DYNAMIC loose loot:\n";
-                foreach(string id in missingDynamic)
-                {
-                    text += id + "\n";
-                }
-                File.WriteAllText("BepinEx/Plugins/EscapeFromMeatov/ErrorLog.txt", text);
-            }
-
-            // Init time
-            InitTime();
-
-            // Init sun
-            InitSun();
-
-            inRaid = true;
-
-            init = true;
-        }
-
         public void InitEffects()
         {
             foreach(EFM_Effect effect in EFM_Effect.effects)
@@ -2116,5 +2370,49 @@ namespace EFM
     {
         public Transform placeholder;
         public Transform actual;
+    }
+
+    public class AISpawn
+    {
+        public enum AISpawnType
+        {
+            Scav,
+            PMC,
+            Raider
+        }
+        public AISpawnType type;
+
+        public AIInventory inventory;
+
+        public Dictionary<int, List<string>> outfitByLink;
+
+        public List<Transform> path;
+
+        public float timer;
+
+        // Raider
+        public int squadSize;
+    }
+
+    public class AIInventory
+    {
+        public List<string> generic; // All items that don't require specific logic, just spawn those directly on death of AI
+
+        public string rig;
+        public string[] rigContents;
+
+        public string backpack;
+        public string[] backpackContents;
+    }
+
+    public class BotData
+    {
+        public int[] minInventoryLevels;
+        public JObject[] inventoryDB;
+        public JObject chances;
+        public JObject experience;
+        public JObject names;
+        public JObject health;
+        public JObject generation;
     }
 }

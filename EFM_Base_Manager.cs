@@ -1495,7 +1495,7 @@ namespace EFM
                 JToken item = loadedItems[i];
 
                 // If just finished raid, skip any items that are on player since we want to keep what player found in raid
-                if (Mod.justFinishedRaid && ((item["PhysicalObject"]["equipSlot"] != null && (int)item["PhysicalObject"]["equipSlot"] != -1) || (int)item["PhysicalObject"]["heldMode"] != 0 || (int)item["PhysicalObject"]["m_quickBeltSlot"] != -1 || item["pocketSlotIndex"] != null))
+                if (Mod.justFinishedRaid && ((item["PhysicalObject"]["equipSlot"] != null && (int)item["PhysicalObject"]["equipSlot"] != -1) || (int)item["PhysicalObject"]["heldMode"] != 0 || (int)item["PhysicalObject"]["m_quickBeltSlot"] != -1 || item["pocketSlotIndex"] != null || item["isRightShoulder"] != null))
                 {
                     continue;
                 }
@@ -1908,13 +1908,10 @@ namespace EFM
                     }
                     else if (containerPhysicalObject is FVRFireArmMagazine)
                     {
-                        Mod.instance.LogInfo("\tFirearm has mag");
                         FVRFireArmMagazine magPhysicalObject = containerPhysicalObject as FVRFireArmMagazine;
-                        Mod.instance.LogInfo("\tis mag null?: " + (magPhysicalObject == null));
 
                         if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
                         {
-                            Mod.instance.LogInfo("\t\tmag has rounds list");
                             List<FireArmRoundClass> newLoadedRoundsInMag = new List<FireArmRoundClass>();
                             foreach (int round in item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"])
                             {
@@ -1924,7 +1921,6 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogInfo("\t\tmag has no rounds list, removing all default rounds");
                             while (magPhysicalObject.m_numRounds > 0)
                             {
                                 magPhysicalObject.RemoveRound();
