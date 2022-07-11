@@ -690,133 +690,7 @@ namespace EFM
                 BotData pmcBotData = GetBotData("pmcbot");
                 for (int i = 0; i < PMCSpawnCount; ++i)
                 {
-                    AISpawn newAISpawn = new AISpawn();
-                    newAISpawn.type = AISpawn.AISpawnType.PMC;
-                    newAISpawn.inventory = new AIInventory();
-                    newAISpawn.inventory.generic = new List<string>();
-                    newAISpawn.outfitByLink = new Dictionary<int, List<string>>();
-
-                    float level = Mathf.Min(80, ExpDistrRandOnAvg(averageLevel));
-
-                    // Get inventory data corresponding to level
-                    JObject inventoryDataToUse = null;
-                    for (int j = 0; j < pmcBotData.minInventoryLevels.Length; ++j)
-                    {
-                        if (level >= pmcBotData.minInventoryLevels[j])
-                        {
-                            inventoryDataToUse = pmcBotData.inventoryDB[j];
-                            break;
-                        }
-                    }
-
-                    // Set equipment
-                    string[] headSlots = { "Headwear", "Earpiece", "FaceCover", "Eyewear" };
-                    bool[] headEquipImpossible = new bool[4];
-                    List<int> headOrder = new List<int> { 0, 1, 2, 3 };
-                    headOrder.Shuffle();
-                    for (int j = 0; j < 4; ++j)
-                    {
-                        int actualEquipIndex = headOrder[j];
-                        if (headEquipImpossible[actualEquipIndex])
-                        {
-                            continue;
-                        }
-                        string actualEquipName = headSlots[actualEquipIndex];
-
-                        if (UnityEngine.Random.value <= ((float)pmcBotData.chances["equipment"][actualEquipName]) / 100)
-                        {
-                            JArray possibleHeadEquip = inventoryDataToUse["equipment"][actualEquipName] as JArray;
-                            if (possibleHeadEquip.Count > 0)
-                            {
-                                string headEquipID = possibleHeadEquip[UnityEngine.Random.Range(0, possibleHeadEquip.Count)].ToString();
-                                if (Mod.itemMap.ContainsKey(headEquipID))
-                                {
-                                    string actualHeadEquipID = Mod.itemMap[headEquipID];
-                                    newAISpawn.inventory.generic.Add(actualHeadEquipID);
-
-                                    // Add sosig outfit item if applicable
-                                    if (Mod.globalDB["AIItemMap"][actualHeadEquipID] != null)
-                                    {
-                                        JObject outfitItemData = Mod.globalDB["AIItemMap"][actualHeadEquipID] as JObject;
-                                        int linkIndex = (int)outfitItemData["Link"];
-                                        List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
-                                        if (newAISpawn.outfitByLink.ContainsKey(linkIndex))
-                                        {
-                                            newAISpawn.outfitByLink[linkIndex].Add(equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)]);
-                                        }
-                                        else
-                                        {
-                                            newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
-                                        }
-                                    }
-
-                                    // Add any restrictions implied by this item
-                                    int parsedEquipID = int.Parse(actualHeadEquipID);
-                                    if (Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["BlocksEarpiece"] != null)
-                                    {
-                                        for(int k=0; k < 4; ++k)
-                                        {
-                                            headEquipImpossible[k] = headEquipImpossible[k] || (bool)Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["Blocks" + headSlots[k]];
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    Mod.instance.LogError("Missing item: " + headEquipID + " for PMC AI spawn "+ actualEquipName);
-                                }
-                            }
-                        }
-                    }
-                    if (UnityEngine.Random.value <= ((float)pmcBotData.chances["equipment"]["TacticalVest"]) / 100)
-                    {
-                        JArray possibleRigs = inventoryDataToUse["equipment"]["TacticalVest"] as JArray;
-                        if (possibleRigs.Count > 0)
-                        {
-                            string rigID = possibleRigs[UnityEngine.Random.Range(0, possibleRigs.Count)].ToString();
-                            if (Mod.itemMap.ContainsKey(rigID))
-                            {
-                                string actualRigID = Mod.itemMap[rigID];
-                                newAISpawn.inventory.rig = actualRigID;
-
-                                // Add sosig outfit item if applicable
-                                if (Mod.globalDB["AIItemMap"][actualRigID] != null)
-                                {
-                                    JObject outfitItemData = Mod.globalDB["AIItemMap"][actualRigID] as JObject;
-                                    int linkIndex = (int)outfitItemData["Link"];
-                                    List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
-                                    if (newAISpawn.outfitByLink.ContainsKey(linkIndex))
-                                    {
-                                        newAISpawn.outfitByLink[linkIndex].Add(equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)]);
-                                    }
-                                    else
-                                    {
-                                        newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
-                                    }
-                                }
-
-                                Continue from here, get the prefab of the rig to get the sizes and number of slots
-                                // Keep sizes in an array here to use to decide where to spawn what item when we set those
-                                // Set number of slots by initializing aispawn.inventory.rigcontents array with the correct length
-                                // also keep the whitelist and blacklist from default item data so we can decide if can actually spawn items in this rig later on
-                                // also based on whether this is an itemtype 2 (rig) or 3 (armored rig), ste a bool to tell whether we can spawn a equipment of type ArmorVest after this
-                                int parsedEquipID = int.Parse(actualRigID);
-                                if (Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["BlocksEarpiece"] != null)
-                                {
-                                    for (int k = 0; k < 4; ++k)
-                                    {
-                                        headEquipImpossible[k] = headEquipImpossible[k] || (bool)Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["Blocks" + headSlots[k]];
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                Mod.instance.LogError("Missing item: " + rigID + " for PMC AI spawn Rig");
-                            }
-                        }
-                    }
-
-                    // Depending on those and the geenration data, spawn necessary items
-                    // Fill equipement and pockets, like we do for loot containers, only certain attempts, if fail go to next one, etc
+                    AISpawn newAISpawn = GenerateAISpawn(pmcBotData, AISpawn.AISpawnType.PMC, averageLevel);
                 }
             }
 
@@ -825,6 +699,474 @@ namespace EFM
 
 
             
+        }
+
+        private AISpawn GenerateAISpawn(BotData botData, AISpawn.AISpawnType AIType, float averageLevel)
+        {
+            AISpawn newAISpawn = new AISpawn();
+            newAISpawn.type = AISpawn.AISpawnType.PMC;
+            newAISpawn.inventory = new AIInventory();
+            newAISpawn.inventory.generic = new List<string>();
+            newAISpawn.outfitByLink = new Dictionary<int, List<string>>();
+
+            float level = Mathf.Min(80, ExpDistrRandOnAvg(averageLevel));
+
+            // Get inventory data corresponding to level
+            JObject inventoryDataToUse = null;
+            for (int j = 0; j < botData.minInventoryLevels.Length; ++j)
+            {
+                if (level >= botData.minInventoryLevels[j])
+                {
+                    inventoryDataToUse = botData.inventoryDB[j];
+                    break;
+                }
+            }
+
+            // Set equipment
+            string[] headSlots = { "Headwear", "Earpiece", "FaceCover", "Eyewear" };
+            bool[] headEquipImpossible = new bool[4];
+            List<int> headOrder = new List<int> { 0, 1, 2, 3 };
+            headOrder.Shuffle();
+            for (int j = 0; j < 4; ++j)
+            {
+                int actualEquipIndex = headOrder[j];
+                if (headEquipImpossible[actualEquipIndex])
+                {
+                    continue;
+                }
+                string actualEquipName = headSlots[actualEquipIndex];
+
+                if (UnityEngine.Random.value <= ((float)botData.chances["equipment"][actualEquipName]) / 100)
+                {
+                    JArray possibleHeadEquip = inventoryDataToUse["equipment"][actualEquipName] as JArray;
+                    if (possibleHeadEquip.Count > 0)
+                    {
+                        string headEquipID = possibleHeadEquip[UnityEngine.Random.Range(0, possibleHeadEquip.Count)].ToString();
+                        if (Mod.itemMap.ContainsKey(headEquipID))
+                        {
+                            string actualHeadEquipID = Mod.itemMap[headEquipID];
+                            newAISpawn.inventory.generic.Add(actualHeadEquipID);
+
+                            // Add sosig outfit item if applicable
+                            if (Mod.globalDB["AIItemMap"][actualHeadEquipID] != null)
+                            {
+                                JObject outfitItemData = Mod.globalDB["AIItemMap"][actualHeadEquipID] as JObject;
+                                int linkIndex = (int)outfitItemData["Link"];
+                                List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
+                                if (newAISpawn.outfitByLink.ContainsKey(linkIndex))
+                                {
+                                    newAISpawn.outfitByLink[linkIndex].Add(equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)]);
+                                }
+                                else
+                                {
+                                    newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
+                                }
+                            }
+
+                            // Add any restrictions implied by this item
+                            int parsedEquipID = int.Parse(actualHeadEquipID);
+                            if (Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["BlocksEarpiece"] != null)
+                            {
+                                for (int k = 0; k < 4; ++k)
+                                {
+                                    headEquipImpossible[k] = headEquipImpossible[k] || (bool)Mod.defaultItemsData["ItemDefaults"][parsedEquipID]["Blocks" + headSlots[k]];
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Missing item: " + headEquipID + " for PMC AI spawn " + actualEquipName);
+                        }
+                    }
+                }
+            }
+
+            FVRPhysicalObject.FVRPhysicalObjectSize[] rigSlotSizes = null;
+            List<string> rigWhitelist = new List<string>();
+            List<string> rigBlacklist = new List<string>();
+            bool rigArmored = false;
+            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["TacticalVest"]) / 100)
+            {
+                JArray possibleRigs = inventoryDataToUse["equipment"]["TacticalVest"] as JArray;
+                if (possibleRigs.Count > 0)
+                {
+                    string rigID = possibleRigs[UnityEngine.Random.Range(0, possibleRigs.Count)].ToString();
+                    if (Mod.itemMap.ContainsKey(rigID))
+                    {
+                        string actualRigID = Mod.itemMap[rigID];
+                        newAISpawn.inventory.rig = actualRigID;
+
+                        // Add sosig outfit item if applicable
+                        if (Mod.globalDB["AIItemMap"][actualRigID] != null)
+                        {
+                            JObject outfitItemData = Mod.globalDB["AIItemMap"][actualRigID] as JObject;
+                            int linkIndex = (int)outfitItemData["Link"];
+                            List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
+                            if (newAISpawn.outfitByLink.ContainsKey(linkIndex))
+                            {
+                                newAISpawn.outfitByLink[linkIndex].Add(equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)]);
+                            }
+                            else
+                            {
+                                newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
+                            }
+                        }
+
+                        // Get prefab of the rig to get the sizes and number of slots
+                        // Keep sizes in an array here to use to decide where to spawn what item when we set those
+                        // Set number of slots by initializing aispawn.inventory.rigcontents array with the correct length
+                        // also keep the whitelist and blacklist from default item data so we can decide if can actually spawn items in this rig later on
+                        // also based on whether this is an itemtype 2 (rig) or 3 (armored rig), set a bool to tell whether we can spawn a equipment of type ArmorVest after this
+                        int parsedEquipID = int.Parse(actualRigID);
+                        GameObject rigPrefab = Mod.itemPrefabs[parsedEquipID];
+                        EFM_CustomItemWrapper rigCIW = rigPrefab.GetComponent<EFM_CustomItemWrapper>();
+                        rigSlotSizes = new FVRPhysicalObject.FVRPhysicalObjectSize[rigCIW.rigSlots.Count];
+                        for (int j = 0; j < rigCIW.rigSlots.Count; ++j)
+                        {
+                            rigSlotSizes[j] = rigCIW.rigSlots[j].SizeLimit;
+                        }
+                        newAISpawn.inventory.rigContents = new string[rigCIW.rigSlots.Count];
+                        rigWhitelist = rigCIW.whiteList;
+                        rigBlacklist = rigCIW.blackList;
+                        rigArmored = rigCIW.itemType == Mod.ItemType.ArmoredRig;
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Missing item: " + rigID + " for PMC AI spawn Rig");
+                    }
+                }
+            }
+
+            if (!rigArmored)
+            {
+                if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["ArmorVest"]) / 100)
+                {
+                    JArray possibleArmors = inventoryDataToUse["equipment"]["ArmorVest"] as JArray;
+                    if (possibleArmors.Count > 0)
+                    {
+                        string armorID = possibleArmors[UnityEngine.Random.Range(0, possibleArmors.Count)].ToString();
+                        if (Mod.itemMap.ContainsKey(armorID))
+                        {
+                            string actualArmorID = Mod.itemMap[armorID];
+                            newAISpawn.inventory.generic.Add(actualArmorID);
+
+                            // Add sosig outfit item if applicable
+                            if (Mod.globalDB["AIItemMap"][actualArmorID] != null)
+                            {
+                                JObject outfitItemData = Mod.globalDB["AIItemMap"][actualArmorID] as JObject;
+                                int linkIndex = (int)outfitItemData["Link"];
+                                List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
+                                if (newAISpawn.outfitByLink.ContainsKey(linkIndex))
+                                {
+                                    newAISpawn.outfitByLink[linkIndex].Add(equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)]);
+                                }
+                                else
+                                {
+                                    newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Missing item: " + armorID + " for PMC AI spawn Armor");
+                        }
+                    }
+                }
+            }
+
+            List<string> backpackWhitelist = new List<string>();
+            List<string> backpackBlacklist = new List<string>();
+            float maxBackpackVolume = -1;
+            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["Backpack"]) / 100)
+            {
+                JArray possibleBackpacks = inventoryDataToUse["equipment"]["Backpack"] as JArray;
+                if (possibleBackpacks.Count > 0)
+                {
+                    string backpackID = possibleBackpacks[UnityEngine.Random.Range(0, possibleBackpacks.Count)].ToString();
+                    if (Mod.itemMap.ContainsKey(backpackID))
+                    {
+                        string actualBackpackID = Mod.itemMap[backpackID];
+                        newAISpawn.inventory.backpack = actualBackpackID;
+
+                        // Add sosig outfit item if applicable
+                        if (Mod.globalDB["AIItemMap"][actualBackpackID] != null)
+                        {
+                            JObject outfitItemData = Mod.globalDB["AIItemMap"][actualBackpackID] as JObject;
+                            int linkIndex = (int)outfitItemData["Link"];
+                            List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
+                            if (newAISpawn.outfitByLink.ContainsKey(linkIndex))
+                            {
+                                newAISpawn.outfitByLink[linkIndex].Add(equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)]);
+                            }
+                            else
+                            {
+                                newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
+                            }
+                        }
+
+                        // Get backpack data
+                        int parsedEquipID = int.Parse(actualBackpackID);
+                        JObject defaultBackpackData = Mod.defaultItemsData["ItemDefaults"][parsedEquipID] as JObject;
+                        backpackWhitelist = defaultBackpackData["ContainerProperties"]["WhiteList"].ToObject<List<string>>();
+                        backpackBlacklist = defaultBackpackData["ContainerProperties"]["BlackList"].ToObject<List<string>>();
+                        maxBackpackVolume = (float)defaultBackpackData["BackpackProperties"]["MaxVolume"];
+                        newAISpawn.inventory.backpackContents = new List<string>();
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Missing item: " + backpackID + " for PMC AI spawn Rig");
+                    }
+                }
+            }
+
+            bool hasSosigWeapon = false;
+            string primaryWeaponAmmoContainer = null;
+            string primaryWeaponCartridges = null;
+            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["FirstPrimaryWeapon"]) / 100)
+            {
+                JArray possiblePW = inventoryDataToUse["equipment"]["FirstPrimaryWeapon"] as JArray;
+                if (possiblePW.Count > 0)
+                {
+                    string PWID = possiblePW[UnityEngine.Random.Range(0, possiblePW.Count)].ToString();
+                    if (Mod.itemMap.ContainsKey(PWID))
+                    {
+                        string actualPWID = Mod.itemMap[PWID];
+                        newAISpawn.inventory.primaryWeapon = actualPWID;
+
+                        // Add sosig weapon
+                        if (Mod.globalDB["AIWeaponMap"][actualPWID] != null)
+                        {
+                            newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualPWID].ToString();
+                            hasSosigWeapon = true;
+                        }
+
+                        // Get firearm data
+                        GameObject PWPrefab = IM.OD[actualPWID].GetGameObject();
+                        FVRFireArm PWFirearm = PWPrefab.GetComponent<FVRFireArm>();
+                        if(PWFirearm != null)
+                        {
+                            continue from here, this is probably done, but might want to handle the case in which in tarkov the barrel is a mod
+                            //but we will not bei pmlpementing the barrels, so barrel mod will not be in itemmap, but supressors are barrel mods
+                            //so if no barrel, them no supressor, so we will never have muzzle mods because of this, we must handle this case in BuildModTree
+                            //Then implement the mod tree building to secondary and holster weapons
+                            AIInventoryWeaponMod weaponModTree = new AIInventoryWeaponMod(null, actualPWID, null); ;
+                            newAISpawn.inventory.primaryWeaponMods = weaponModTree;
+                            BuildModTree(ref weaponModTree, botData, inventoryDataToUse, PWID, ref primaryWeaponAmmoContainer, ref primaryWeaponCartridges);
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("AI FirstPrimaryWeapon with ID: "+ actualPWID +" is not a firearm");
+                        }
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Missing item: " + PWID + " for PMC AI spawn Primary weapon");
+                    }
+                }
+            }
+
+            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["SecondPrimaryWeapon"]) / 100)
+            {
+                JArray possibleSW = inventoryDataToUse["equipment"]["SecondPrimaryWeapon"] as JArray;
+                if (possibleSW.Count > 0)
+                {
+                    string SWID = possibleSW[UnityEngine.Random.Range(0, possibleSW.Count)].ToString();
+                    if (Mod.itemMap.ContainsKey(SWID))
+                    {
+                        string actualSWID = Mod.itemMap[SWID];
+                        newAISpawn.inventory.generic.Add(actualSWID);
+
+                        // Add sosig weapon if necessary
+                        if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualSWID] != null)
+                        {
+                            newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualSWID].ToString();
+                            hasSosigWeapon = true;
+                        }
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Missing item: " + SWID + " for PMC AI spawn Secondary weapon");
+                    }
+                }
+            }
+
+            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["Holster"]) / 100)
+            {
+                JArray possibleHolster = inventoryDataToUse["equipment"]["Holster"] as JArray;
+                if (possibleHolster.Count > 0)
+                {
+                    string holsterID = possibleHolster[UnityEngine.Random.Range(0, possibleHolster.Count)].ToString();
+                    if (Mod.itemMap.ContainsKey(holsterID))
+                    {
+                        string actualHolsterID = Mod.itemMap[holsterID];
+                        newAISpawn.inventory.generic.Add(actualHolsterID);
+
+                        // Add sosig weapon if necessary
+                        if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualHolsterID] != null)
+                        {
+                            newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualHolsterID].ToString();
+                            hasSosigWeapon = true;
+                        }
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Missing item: " + holsterID + " for PMC AI spawn Holster");
+                    }
+                }
+            }
+
+            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["Scabbard"]) / 100)
+            {
+                JArray possibleScabbard = inventoryDataToUse["equipment"]["Scabbard"] as JArray;
+                if (possibleScabbard.Count > 0)
+                {
+                    string scabbardID = possibleScabbard[UnityEngine.Random.Range(0, possibleScabbard.Count)].ToString();
+                    if (Mod.itemMap.ContainsKey(scabbardID))
+                    {
+                        string actualScabbardID = Mod.itemMap[scabbardID];
+                        newAISpawn.inventory.generic.Add(actualScabbardID);
+
+                        // Add sosig weapon if necessary
+                        if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualScabbardID] != null)
+                        {
+                            newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualScabbardID].ToString();
+                            hasSosigWeapon = true;
+                        }
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Missing item: " + scabbardID + " for PMC AI spawn Scabbard");
+                    }
+                }
+            }
+
+            // Set items depending on generation limits
+            int pocketsUsed = 0;
+            float currentBackpackVolume = 0;
+            //continue from here, spawn magazines/clip, depending on amount from generation, that are same as the one we put in the firearm
+            // TODO: Implement specialItems generation when we know what those are
+            int healingItemMin = (int)botData.generation["items"]["healing"]["min"];
+            int healingItemMax = (int)botData.generation["items"]["healing"]["max"];
+            List<string> healingItemKeyList = new List<string>(Mod.AIHealingItems.Keys);
+            if (healingItemMax > 0)
+            {
+                for(int i=0; i < healingItemMax; ++i)
+                {
+                    string healingItemID = healingItemKeyList[UnityEngine.Random.Range(0, healingItemKeyList.Count)];
+                    string[] healingItemData = Mod.AIHealingItems[healingItemID];
+
+                    if (i >= healingItemMin && UnityEngine.Random.value > (float.Parse(healingItemData[2]) / 100))
+                    {
+                        continue;
+                    }
+
+                    FVRPhysicalObject.FVRPhysicalObjectSize healingItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(healingItemData[0]);
+                    float healingItemVolume = float.Parse(healingItemData[1]);
+
+                    // First try to put in pockets, then backpack, then rig
+                    if(healingItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    {
+                        newAISpawn.inventory.generic.Add(healingItemID);
+                        ++pocketsUsed;
+                    }
+                    else if(maxBackpackVolume > 0 && currentBackpackVolume + healingItemVolume <= maxBackpackVolume)
+                    {
+                        newAISpawn.inventory.backpackContents.Add(healingItemID);
+                        currentBackpackVolume += healingItemVolume;
+                    }
+                    else if(rigSlotSizes != null)
+                    {
+                        for(int j=0; j< rigSlotSizes.Length; ++j)
+                        {
+                            if(newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)healingItemSize)
+                            {
+                                newAISpawn.inventory.rigContents[j] = healingItemID;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            int looseLootItemMin = (int)botData.generation["items"]["looseLoot"]["min"];
+            int looseLootItemMax = (int)botData.generation["items"]["looseLoot"]["max"];
+            List<string> looseLootItemKeyList = new List<string>(Mod.AILooseLootItems.Keys);
+            if (looseLootItemMax > 0)
+            {
+                for(int i=0; i < looseLootItemMax; ++i)
+                {
+                    string looseLootItemID = looseLootItemKeyList[UnityEngine.Random.Range(0, looseLootItemKeyList.Count)];
+                    string[] looseLootItemData = Mod.AILooseLootItems[looseLootItemID];
+
+                    if (i >= looseLootItemMin && UnityEngine.Random.value > (float.Parse(looseLootItemData[2]) / 100))
+                    {
+                        continue;
+                    }
+
+                    FVRPhysicalObject.FVRPhysicalObjectSize looseLootItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(looseLootItemData[0]);
+                    float looseLootItemVolume = float.Parse(looseLootItemData[1]);
+
+                    // First try to put in backpack, then pockets, then rig
+                    if(maxBackpackVolume > 0 && currentBackpackVolume + looseLootItemVolume <= maxBackpackVolume)
+                    {
+                        newAISpawn.inventory.backpackContents.Add(looseLootItemID);
+                        currentBackpackVolume += looseLootItemVolume;
+                    }
+                    else if (looseLootItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    {
+                        newAISpawn.inventory.generic.Add(looseLootItemID);
+                        ++pocketsUsed;
+                    }
+                    else if(rigSlotSizes != null)
+                    {
+                        for(int j=0; j< rigSlotSizes.Length; ++j)
+                        {
+                            if(newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)looseLootItemSize)
+                            {
+                                newAISpawn.inventory.rigContents[j] = looseLootItemID;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Set other items
+
+
+            return newAISpawn;
+        }
+
+        private void BuildModTree(ref AIInventoryWeaponMod root, BotData botData, JObject inventoryDataToUse, string ID, ref string ammoContainerID, ref string cartridgeID)
+        {
+            if (inventoryDataToUse["mods"][ID] != null)
+            {
+                Dictionary<string, List<string>> mods = inventoryDataToUse["mods"][ID].ToObject<Dictionary<string, List<string>>>();
+
+                foreach (KeyValuePair<string, List<string>> modEntry in mods)
+                {
+                    if (UnityEngine.Random.value <= ((float)botData.chances["mods"][modEntry.Key]) / 100)
+                    {
+                        string modID = modEntry.Value[UnityEngine.Random.Range(0, modEntry.Value.Count)];
+                        if (Mod.itemMap.ContainsKey(modID))
+                        {
+                            string actualModID = Mod.itemMap[modID];
+                            if (modEntry.Key.Equals("mod_magazine"))
+                            {
+                                ammoContainerID = actualModID;
+                            }
+                            else if (modEntry.Key.Equals("cartridges"))
+                            {
+                                cartridgeID = actualModID;
+                            }
+
+                            AIInventoryWeaponMod newChild = new AIInventoryWeaponMod(root, actualModID, modEntry.Key);
+                            root.children.Add(newChild);
+                            BuildModTree(ref newChild, botData, inventoryDataToUse, modID, ref ammoContainerID, ref cartridgeID);
+                        }
+                    }
+                }
+            }
         }
 
         private BotData GetBotData(string name)
@@ -2385,6 +2727,7 @@ namespace EFM
         public AIInventory inventory;
 
         public Dictionary<int, List<string>> outfitByLink;
+        public string sosigWeapon;
 
         public List<Transform> path;
 
@@ -2402,7 +2745,46 @@ namespace EFM
         public string[] rigContents;
 
         public string backpack;
-        public string[] backpackContents;
+        public List<string> backpackContents;
+
+        public string primaryWeapon;
+        public AIInventoryWeaponMod primaryWeaponMods;
+
+        public string secondaryWeapon;
+        public AIInventoryWeaponMod secondaryWeaponMods;
+
+        public string holster;
+        public AIInventoryWeaponMod holsterMods;
+    }
+
+    public class AIInventoryWeaponMod
+    {
+        public AIInventoryWeaponMod parent;
+        public List<AIInventoryWeaponMod> children;
+
+        public string ID;
+        public string type;
+
+        public AIInventoryWeaponMod(AIInventoryWeaponMod parent, string ID, string type)
+        {
+            this.parent = parent;
+            children = new List<AIInventoryWeaponMod>();
+
+            this.ID = ID;
+            this.type = type;
+        }
+
+        public AIInventoryWeaponMod FindChild(string ID)
+        {
+            foreach (AIInventoryWeaponMod child in children)
+            {
+                if (child.ID.Equals(ID))
+                {
+                    return child;
+                }
+            }
+            return null;
+        }
     }
 
     public class BotData

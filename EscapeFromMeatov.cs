@@ -88,6 +88,8 @@ namespace EFM
         public static bool amountChoiceUIUp;
         public static EFM_CustomItemWrapper splittingItem;
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
+        public static Dictionary<string, string[]> AIHealingItems;
+        public static Dictionary<string, string[]> AILooseLootItems;
 
         // Player
         public static GameObject playerStatusUI;
@@ -517,6 +519,8 @@ namespace EFM
             itemWeights = new Dictionary<string, float>();
             itemVolumes = new Dictionary<string, float>();
             itemIcons = new Dictionary<string, Sprite>();
+            AIHealingItems = new Dictionary<string, string[]>();
+            AILooseLootItems = new Dictionary<string, string[]>();
             defaultItemsData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DefaultItemData.txt"));
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
             quickSlotConstantMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Renderer>().material;
@@ -614,7 +618,15 @@ namespace EFM
                 customItemWrapper.volumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
                 itemVolumes.Add(i.ToString(), customItemWrapper.volumes[0]);
                 customItemWrapper.parents = defaultItemsData["ItemDefaults"][i]["parents"] != null ? defaultItemsData["ItemDefaults"][i]["parents"].ToObject<List<String>>() : new List<string>();
-                if(itemAncestors == null)
+                if (customItemWrapper.parents.Contains("5448f3ac4bdc2dce718b4569")) // Medical item
+                {
+                    AIHealingItems.Add(i.ToString(), new string[] { ((int)itemPhysicalObject.Size).ToString(), customItemWrapper.volumes[0].ToString(), defaultItemsData["ItemDefaults"][i]["spawnChance"].ToString() }); ;
+                }
+                else if (customItemWrapper.parents.Contains("5448eb774bdc2d0a728b4567")) // Barter item
+                {
+                    AILooseLootItems.Add(i.ToString(), new string[] { ((int)itemPhysicalObject.Size).ToString(), customItemWrapper.volumes[0].ToString(), defaultItemsData["ItemDefaults"][i]["spawnChance"].ToString() });
+                }
+                if (itemAncestors == null)
                 {
                     itemAncestors = new Dictionary<string, List<string>>();
                 }
