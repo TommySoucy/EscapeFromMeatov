@@ -16,6 +16,7 @@ namespace EFM
         public static EFM_Raid_Manager currentManager;
         public static float extractionTimer;
         public static bool inRaid;
+        public static JObject locationData;
 
         private List<Extraction> extractions;
         private List<Extraction> possibleExtractions;
@@ -59,7 +60,7 @@ namespace EFM
             Mod.instance.LogInfo("Map data read");
 
             // Choose spawnpoints
-            Transform spawnRoot = transform.GetChild(transform.childCount - 1).GetChild(Mod.chosenCharIndex);
+            Transform spawnRoot = transform.GetChild(transform.childCount - 1).GetChild(0);
             spawnPoint = spawnRoot.GetChild(UnityEngine.Random.Range(0, spawnRoot.childCount));
 
             Mod.instance.LogInfo("Got spawn");
@@ -616,7 +617,30 @@ namespace EFM
         {
             if(initSpawnTimer <= 0)
             {
-                TODO: spawn initial spawns, and start counting down next one
+                // Check if time is >= spawnTime on next AISpawn in list, if it is, spawn it at spawnpoint depending on AIType
+
+                switch (AIType)
+                {
+                    case AISpawn.AISpawnType.Scav:
+                        Transform zoneRoot = transform.GetChild(transform.childCount - 1).GetChild(0);
+                        int randZoneIndex = UnityEngine.Random.Range(0, zoneRoot.childCount);
+                        Transform currentZone = zoneRoot.GetChild(randZoneIndex);
+                        EFM_BotZone zoneScript = currentZone.GetComponent<EFM_BotZone>();
+                        if (zoneScript.botCount >= (int)locationData["MaxBotPerZone"])
+                        {
+                            for ()
+                    }
+                        break;
+                    case AISpawn.AISpawnType.PMC:
+                        transform.GetChild(transform.childCount - 1).GetChild(0);
+                        break;
+                    case AISpawn.AISpawnType.Raider:
+                        break;
+                    case AISpawn.AISpawnType.Boss:
+                        break;
+                    default:
+                        break;
+                }
             }
             else
             {
@@ -677,9 +701,16 @@ namespace EFM
                     break;
             }
 
+            // Prep scav spawn zones
+            foreach(Transform zone in transform.GetChild(transform.childCount - 1).GetChild(1))
+            {
+                zone.gameObject.AddComponent<EFM_BotZone>();
+            }
+
             // Get location's base data
-            JObject locationData = Mod.locationsBaseDB[GetLocationDataIndex(Mod.chosenMapIndex)];
+            locationData = Mod.locationsBaseDB[GetLocationDataIndex(Mod.chosenMapIndex)];
             float averageLevel = (float)locationData["AveragePlayerLevel"];
+            float maxRaidTime = (float)locationData["escape_time_limit"] * 60;
 
             List<AISpawn> AISpawns = new List<AISpawn>();
 
@@ -691,14 +722,16 @@ namespace EFM
                 for (int i = 0; i < PMCSpawnCount; ++i)
                 {
                     AISpawn newAISpawn = GenerateAISpawn(pmcBotData, AISpawn.AISpawnType.PMC, averageLevel);
+                    newAISpawn.spawnTime = UnityEngine.Random.Range(0, maxRaidTime - 600);
+
+                    TODO: Add the spawn data in a lsit of spawns
                 }
             }
 
             int scavInitSpawnCount = UnityEngine.Random.Range(5, 10); // Amount of scavs to spawn at start of raid
             int scavSpawnCount = 40; // Amount of scavs to spawn during raid
 
-
-            
+            TODO: Generate AI spawns for Scav and raiders if applicable to map
         }
 
         private AISpawn GenerateAISpawn(BotData botData, AISpawn.AISpawnType AIType, float averageLevel)
@@ -1012,12 +1045,11 @@ namespace EFM
                         newAISpawn.inventory.holster = actualHolsterID;
 
                         // Set to holster slot in rig
-                        continue from here, make sure the holster is set to proper slot in rig THEN CONTINUE WITH SETTING OTHER ITEMS
                         for (int i = 0; i < rigSlotSizes.Length; ++i)
                         {
-                            if (newAISpawn.inventory.rigContents[i] == null && (int)rigSlotSizes[i] >= (int)ammoContainerItemSize)
+                            if (newAISpawn.inventory.rigContents[i] == null && rigSlotSizes[i] >= FVRPhysicalObject.FVRPhysicalObjectSize.Medium)
                             {
-                                newAISpawn.inventory.rigContents[i] = ammoContainerItemID;
+                                newAISpawn.inventory.rigContents[i] = actualHolsterID;
                                 break;
                             }
                         }
@@ -1078,7 +1110,7 @@ namespace EFM
             // Set items depending on generation limits
             int pocketsUsed = 0;
             float currentBackpackVolume = 0;
-            // TODO: Implement specialItems generation when we know what those are
+
             int ammoContainerItemMin = (int)botData.generation["items"]["magazines"]["min"];
             int ammoContainerItemMax = (int)botData.generation["items"]["magazines"]["max"];
             if (ammoContainerItemMax > 0)
@@ -1093,15 +1125,15 @@ namespace EFM
                     for (int i = 0; i < ammoContainerItemMax; ++i)
                     {
                         string ammoContainerItemID = ammoContainers[k];
-                        string[] ammoContainerItemData = Mod.AIAmmoContainerItems[ammoContainerItemID];
+                        object[] ammoContainerItemData = GetItemData(ammoContainerItemID);
 
-                        if (i >= ammoContainerItemMin && UnityEngine.Random.value > (float.Parse(ammoContainerItemData[2]) / 100))
+                        if (i >= ammoContainerItemMin && UnityEngine.Random.value > (float.Parse(ammoContainerItemData[2] as string) / 100))
                         {
                             continue;
                         }
 
-                        FVRPhysicalObject.FVRPhysicalObjectSize ammoContainerItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(ammoContainerItemData[0]);
-                        float ammoContainerItemVolume = float.Parse(ammoContainerItemData[1]);
+                        FVRPhysicalObject.FVRPhysicalObjectSize ammoContainerItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(ammoContainerItemData[0] as string);
+                        float ammoContainerItemVolume = float.Parse(ammoContainerItemData[1] as string);
 
                         // First try to put in rig, then pockets, then backpack
                         if (rigSlotSizes != null)
@@ -1129,36 +1161,114 @@ namespace EFM
                 }
             }
 
+            // Fill lists of possible types of items for specific parts
+            Dictionary<string, object[]> possibleHealingItems = new Dictionary<string, object[]>(); // 0 - List of part indices, 1 - size, 2 - volume, 3 - spawn chance
+            Dictionary<string, object[]> possibleGrenades = new Dictionary<string, object[]>();
+            Dictionary<string, object[]> possibleLooseLoot = new Dictionary<string, object[]>();
+            string[] itemParts = new string[] { "TacticalVest", "Pockets", "Backpack" };
+            for (int i = 0; i < 3; ++i) 
+            {
+                foreach (string itemID in inventoryDataToUse["items"][itemParts[i]])
+                {
+                    string actualItemID = Mod.itemMap[itemID];
+                    GameObject itemPrefab = null;
+                    bool custom = false;
+                    if(int.TryParse(actualItemID, out int parseResult))
+                    {
+                        itemPrefab = Mod.itemPrefabs[parseResult];
+                        custom = true;
+                    }
+                    else
+                    {
+                        itemPrefab = IM.OD[actualItemID].GetGameObject();
+                    }
+                    List<string> itemParents = null;
+                    float itemVolume = 0;
+                    float itemSpawnChance = 0;
+                    FVRPhysicalObject itemPhysObj = null;
+                    if (custom)
+                    {
+                        EFM_CustomItemWrapper itemCIW = itemPrefab.GetComponentInChildren<EFM_CustomItemWrapper>();
+                        itemParents = itemCIW.parents;
+                        itemVolume = itemCIW.volumes[0];
+                        itemSpawnChance = itemCIW.spawnChance;
+                    }
+                    else
+                    {
+                        EFM_VanillaItemDescriptor itemVID = itemPrefab.GetComponentInChildren<EFM_VanillaItemDescriptor>();
+                        itemParents = itemVID.parents;
+                        itemVolume = Mod.itemVolumes[actualItemID];
+                        itemSpawnChance = itemVID.spawnChance;
+                    }
+                    itemPhysObj = itemPrefab.GetComponentInChildren<FVRPhysicalObject>();
+
+                    if (itemParents.Contains("5448f3ac4bdc2dce718b4569")) // Medical item
+                    {
+                        if (possibleHealingItems.ContainsKey(actualItemID))
+                        {
+                            (possibleHealingItems[actualItemID][0] as List<int>).Add(i);
+                        }
+                        else
+                        {
+                            possibleHealingItems.Add(actualItemID, new object[] { new List<int> { i }, ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() });
+                        }
+                    }
+                    else if (itemParents.Contains("543be6564bdc2df4348b4568")) // Grenade
+                    {
+                        if (possibleGrenades.ContainsKey(actualItemID))
+                        {
+                            (possibleGrenades[actualItemID][0] as List<int>).Add(i);
+                        }
+                        else
+                        {
+                            possibleGrenades.Add(actualItemID, new object[] { new List<int> { i }, ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() });
+                        }
+                    }
+                    else
+                    {
+                        if (possibleLooseLoot.ContainsKey(actualItemID))
+                        {
+                            (possibleLooseLoot[actualItemID][0] as List<int>).Add(i);
+                        }
+                        else
+                        {
+                            possibleLooseLoot.Add(actualItemID, new object[] { new List<int> { i }, ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() });
+                        }
+                    }
+                }
+            }
+
             int healingItemMin = (int)botData.generation["items"]["healing"]["min"];
             int healingItemMax = (int)botData.generation["items"]["healing"]["max"];
-            List<string> healingItemKeyList = new List<string>(Mod.AIHealingItems.Keys);
             if (healingItemMax > 0)
             {
-                for(int i=0; i < healingItemMax; ++i)
+                List<string> healingItemKeyList = new List<string>(possibleHealingItems.Keys);
+                for (int i=0; i < healingItemMax; ++i)
                 {
                     string healingItemID = healingItemKeyList[UnityEngine.Random.Range(0, healingItemKeyList.Count)];
-                    string[] healingItemData = Mod.AIHealingItems[healingItemID];
+                    object[] healingItemData = possibleHealingItems[healingItemID];
+                    List<int> possibleParts = possibleHealingItems[healingItemID][0] as List<int>;
 
-                    if (i >= healingItemMin && UnityEngine.Random.value > (float.Parse(healingItemData[2]) / 100))
+                    if (i >= healingItemMin && UnityEngine.Random.value > (float.Parse(healingItemData[3] as string) / 100))
                     {
                         continue;
                     }
 
-                    FVRPhysicalObject.FVRPhysicalObjectSize healingItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(healingItemData[0]);
-                    float healingItemVolume = float.Parse(healingItemData[1]);
+                    FVRPhysicalObject.FVRPhysicalObjectSize healingItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(healingItemData[1] as string);
+                    float healingItemVolume = float.Parse(healingItemData[2] as string);
 
                     // First try to put in pockets, then backpack, then rig
-                    if(healingItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    if(possibleParts.Contains(1) && healingItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
                     {
                         newAISpawn.inventory.generic.Add(healingItemID);
                         ++pocketsUsed;
                     }
-                    else if(maxBackpackVolume > 0 && currentBackpackVolume + healingItemVolume <= maxBackpackVolume)
+                    else if(possibleParts.Contains(2) && maxBackpackVolume > 0 && currentBackpackVolume + healingItemVolume <= maxBackpackVolume)
                     {
                         newAISpawn.inventory.backpackContents.Add(healingItemID);
                         currentBackpackVolume += healingItemVolume;
                     }
-                    else if(rigSlotSizes != null)
+                    else if(possibleParts.Contains(0) && rigSlotSizes != null)
                     {
                         for(int j=0; j< rigSlotSizes.Length; ++j)
                         {
@@ -1172,36 +1282,84 @@ namespace EFM
                 }
             }
 
-            int looseLootItemMin = (int)botData.generation["items"]["looseLoot"]["min"];
-            int looseLootItemMax = (int)botData.generation["items"]["looseLoot"]["max"];
-            List<string> looseLootItemKeyList = new List<string>(Mod.AILooseLootItems.Keys);
-            if (looseLootItemMax > 0)
+            int grenadeItemMin = (int)botData.generation["items"]["grenades"]["min"];
+            int grenadeItemMax = (int)botData.generation["items"]["grenades"]["max"];
+            if (grenadeItemMax > 0)
             {
-                for(int i=0; i < looseLootItemMax; ++i)
+                List<string> grenadeItemKeyList = new List<string>(possibleGrenades.Keys);
+                for (int i=0; i < grenadeItemMax; ++i)
                 {
-                    string looseLootItemID = looseLootItemKeyList[UnityEngine.Random.Range(0, looseLootItemKeyList.Count)];
-                    string[] looseLootItemData = Mod.AILooseLootItems[looseLootItemID];
+                    string grenadeItemID = grenadeItemKeyList[UnityEngine.Random.Range(0, grenadeItemKeyList.Count)];
+                    object[] grenadeItemData = possibleGrenades[grenadeItemID];
+                    List<int> possibleParts = possibleGrenades[grenadeItemID][0] as List<int>;
 
-                    if (i >= looseLootItemMin && UnityEngine.Random.value > (float.Parse(looseLootItemData[2]) / 100))
+                    if (i >= grenadeItemMin && UnityEngine.Random.value > (float.Parse(grenadeItemData[3] as string) / 100))
                     {
                         continue;
                     }
 
-                    FVRPhysicalObject.FVRPhysicalObjectSize looseLootItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(looseLootItemData[0]);
-                    float looseLootItemVolume = float.Parse(looseLootItemData[1]);
+                    FVRPhysicalObject.FVRPhysicalObjectSize grenadeItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(grenadeItemData[1] as string);
+                    float grenadeItemVolume = float.Parse(grenadeItemData[2] as string);
+
+                    // First try to put in pockets, then backpack, then rig
+                    if (possibleParts.Contains(0) && rigSlotSizes != null)
+                    {
+                        for (int j = 0; j < rigSlotSizes.Length; ++j)
+                        {
+                            if (newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)grenadeItemSize)
+                            {
+                                newAISpawn.inventory.rigContents[j] = grenadeItemID;
+                                newAISpawn.sosigGrenade = Mod.globalDB["AIWeaponMap"][grenadeItemID].ToString();
+                                break;
+                            }
+                        }
+                    }
+                    else if (possibleParts.Contains(1) && grenadeItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    {
+                        newAISpawn.inventory.generic.Add(grenadeItemID);
+                        newAISpawn.sosigGrenade = Mod.globalDB["AIWeaponMap"][grenadeItemID].ToString();
+                        ++pocketsUsed;
+                    }
+                    else if(possibleParts.Contains(2) && maxBackpackVolume > 0 && currentBackpackVolume + grenadeItemVolume <= maxBackpackVolume)
+                    {
+                        newAISpawn.inventory.backpackContents.Add(grenadeItemID);
+                        newAISpawn.sosigGrenade = Mod.globalDB["AIWeaponMap"][grenadeItemID].ToString();
+                        currentBackpackVolume += grenadeItemVolume;
+                    }
+                }
+            }
+
+            int looseLootItemMin = (int)botData.generation["items"]["looseLoot"]["min"];
+            int looseLootItemMax = (int)botData.generation["items"]["looseLoot"]["max"];
+            if (looseLootItemMax > 0)
+            {
+                List<string> looseLootItemKeyList = new List<string>(possibleLooseLoot.Keys);
+                for (int i=0; i < looseLootItemMax; ++i)
+                {
+                    string looseLootItemID = looseLootItemKeyList[UnityEngine.Random.Range(0, looseLootItemKeyList.Count)];
+                    object[] looseLootItemData = possibleLooseLoot[looseLootItemID];
+                    List<int> possibleParts = possibleLooseLoot[looseLootItemID][0] as List<int>;
+
+                    if (i >= looseLootItemMin && UnityEngine.Random.value > (float.Parse(looseLootItemData[3] as string) / 100))
+                    {
+                        continue;
+                    }
+
+                    FVRPhysicalObject.FVRPhysicalObjectSize looseLootItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(looseLootItemData[1] as string);
+                    float looseLootItemVolume = float.Parse(looseLootItemData[2] as string);
 
                     // First try to put in backpack, then pockets, then rig
-                    if(maxBackpackVolume > 0 && currentBackpackVolume + looseLootItemVolume <= maxBackpackVolume)
+                    if(possibleParts.Contains(2) && maxBackpackVolume > 0 && currentBackpackVolume + looseLootItemVolume <= maxBackpackVolume)
                     {
                         newAISpawn.inventory.backpackContents.Add(looseLootItemID);
                         currentBackpackVolume += looseLootItemVolume;
                     }
-                    else if (looseLootItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    else if (possibleParts.Contains(1) && looseLootItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
                     {
                         newAISpawn.inventory.generic.Add(looseLootItemID);
                         ++pocketsUsed;
                     }
-                    else if(rigSlotSizes != null)
+                    else if(possibleParts.Contains(0) && rigSlotSizes != null)
                     {
                         for(int j=0; j< rigSlotSizes.Length; ++j)
                         {
@@ -1215,10 +1373,89 @@ namespace EFM
                 }
             }
 
-            // Set other items
+            int specialItemMin = (int)botData.generation["items"]["specialItems"]["min"];
+            int specialItemMax = (int)botData.generation["items"]["specialItems"]["max"];
+            if (specialItemMax > 0)
+            {
+                List<string> possibleSpecialItems = inventoryDataToUse["items"]["SpecialLoot"].ToObject<List<string>>();
+                for (int i = 0; i < specialItemMax; ++i)
+                {
+                    string specialItemID = Mod.itemMap[possibleSpecialItems[UnityEngine.Random.Range(0, possibleSpecialItems.Count)]];
+                    object[] specialItemData = GetItemData(specialItemID);
 
+                    if (i >= specialItemMin && UnityEngine.Random.value > (float.Parse(specialItemData[2] as string) / 100))
+                    {
+                        continue;
+                    }
+
+                    FVRPhysicalObject.FVRPhysicalObjectSize specialItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(specialItemData[0] as string);
+                    float specialItemVolume = float.Parse(specialItemData[1] as string);
+
+                    // First try to put in backpack, then pockets, then rig
+                    if (maxBackpackVolume > 0 && currentBackpackVolume + specialItemVolume <= maxBackpackVolume)
+                    {
+                        newAISpawn.inventory.backpackContents.Add(specialItemID);
+                        currentBackpackVolume += specialItemVolume;
+                    }
+                    else if (specialItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    {
+                        newAISpawn.inventory.generic.Add(specialItemID);
+                        ++pocketsUsed;
+                    }
+                    else if (rigSlotSizes != null)
+                    {
+                        for (int j = 0; j < rigSlotSizes.Length; ++j)
+                        {
+                            if (newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)specialItemSize)
+                            {
+                                newAISpawn.inventory.rigContents[j] = specialItemID;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Generate path depending on AIType
+            finish adding AIPaths to factory asset
 
             return newAISpawn;
+        }
+
+        private object[] GetItemData(string ID)
+        {
+            GameObject itemPrefab = null;
+            bool custom = false;
+            if (int.TryParse(ID, out int parseResult))
+            {
+                itemPrefab = Mod.itemPrefabs[parseResult];
+                custom = true;
+            }
+            else
+            {
+                itemPrefab = IM.OD[ID].GetGameObject();
+            }
+            List<string> itemParents = null;
+            float itemVolume = 0;
+            float itemSpawnChance = 0;
+            FVRPhysicalObject itemPhysObj = null;
+            if (custom)
+            {
+                EFM_CustomItemWrapper itemCIW = itemPrefab.GetComponentInChildren<EFM_CustomItemWrapper>();
+                itemParents = itemCIW.parents;
+                itemVolume = itemCIW.volumes[0];
+                itemSpawnChance = itemCIW.spawnChance;
+            }
+            else
+            {
+                EFM_VanillaItemDescriptor itemVID = itemPrefab.GetComponentInChildren<EFM_VanillaItemDescriptor>();
+                itemParents = itemVID.parents;
+                itemVolume = Mod.itemVolumes[ID];
+                itemSpawnChance = itemVID.spawnChance;
+            }
+            itemPhysObj = itemPrefab.GetComponentInChildren<FVRPhysicalObject>();
+
+            return new object[] { ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() };
         }
 
         private void BuildModTree(ref AIInventoryWeaponMod root, BotData botData, JObject inventoryDataToUse, string ID, ref string ammoContainerID, ref string cartridgeID)
@@ -2823,7 +3060,8 @@ namespace EFM
         {
             Scav,
             PMC,
-            Raider
+            Raider,
+            Boss
         }
         public AISpawnType type;
 
@@ -2831,10 +3069,11 @@ namespace EFM
 
         public Dictionary<int, List<string>> outfitByLink;
         public string sosigWeapon;
+        public string sosigGrenade;
 
         public List<Transform> path;
 
-        public float timer;
+        public float spawnTime;
 
         // Raider
         public int squadSize;
