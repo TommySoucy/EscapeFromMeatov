@@ -90,6 +90,7 @@ namespace EFM
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
         public static Dictionary<string, string[]> AIHealingItems;
         public static Dictionary<string, string[]> AILooseLootItems;
+        public static Dictionary<string, string[]> AIAmmoContainerItems;
 
         // Player
         public static GameObject playerStatusUI;
@@ -1303,11 +1304,15 @@ namespace EFM
                 {
                     descriptor.compatibilityValue = 1;
                     descriptor.roundType = (physObj as FVRFireArmMagazine).RoundType;
+
+                    AIAmmoContainerItems.Add(descriptor.H3ID, new string[] { ((int)physObj.Size).ToString(), sizeVolumes[(int)physObj.Size].ToString(), descriptor.spawnChance.ToString() });
                 }
                 else if(physObj is FVRFireArmClip)
                 {
                     descriptor.compatibilityValue = 1;
                     descriptor.roundType = (physObj as FVRFireArmClip).RoundType;
+
+                    AIAmmoContainerItems.Add(descriptor.H3ID, new string[] { ((int)physObj.Size).ToString(), sizeVolumes[(int)physObj.Size].ToString(), descriptor.spawnChance.ToString() });
                 }
                 else if(physObj is Speedloader)
                 {

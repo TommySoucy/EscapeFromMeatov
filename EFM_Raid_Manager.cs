@@ -920,8 +920,8 @@ namespace EFM
             }
 
             bool hasSosigWeapon = false;
-            string primaryWeaponAmmoContainer = null;
-            string primaryWeaponCartridges = null;
+            string[] ammoContainers = new string[3];
+            string[] weaponCartridges = new string[3];
             if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["FirstPrimaryWeapon"]) / 100)
             {
                 JArray possiblePW = inventoryDataToUse["equipment"]["FirstPrimaryWeapon"] as JArray;
@@ -945,13 +945,9 @@ namespace EFM
                         FVRFireArm PWFirearm = PWPrefab.GetComponent<FVRFireArm>();
                         if(PWFirearm != null)
                         {
-                            continue from here, this is probably done, but might want to handle the case in which in tarkov the barrel is a mod
-                            //but we will not bei pmlpementing the barrels, so barrel mod will not be in itemmap, but supressors are barrel mods
-                            //so if no barrel, them no supressor, so we will never have muzzle mods because of this, we must handle this case in BuildModTree
-                            //Then implement the mod tree building to secondary and holster weapons
                             AIInventoryWeaponMod weaponModTree = new AIInventoryWeaponMod(null, actualPWID, null); ;
                             newAISpawn.inventory.primaryWeaponMods = weaponModTree;
-                            BuildModTree(ref weaponModTree, botData, inventoryDataToUse, PWID, ref primaryWeaponAmmoContainer, ref primaryWeaponCartridges);
+                            BuildModTree(ref weaponModTree, botData, inventoryDataToUse, PWID, ref ammoContainers[0], ref weaponCartridges[0]);
                         }
                         else
                         {
@@ -974,13 +970,27 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(SWID))
                     {
                         string actualSWID = Mod.itemMap[SWID];
-                        newAISpawn.inventory.generic.Add(actualSWID);
+                        newAISpawn.inventory.secondaryWeapon = actualSWID;
 
                         // Add sosig weapon if necessary
                         if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualSWID] != null)
                         {
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualSWID].ToString();
                             hasSosigWeapon = true;
+                        }
+
+                        // Get firearm data
+                        GameObject SWPrefab = IM.OD[actualSWID].GetGameObject();
+                        FVRFireArm SWFirearm = SWPrefab.GetComponent<FVRFireArm>();
+                        if (SWFirearm != null)
+                        {
+                            AIInventoryWeaponMod weaponModTree = new AIInventoryWeaponMod(null, actualSWID, null); ;
+                            newAISpawn.inventory.secondaryWeaponMods = weaponModTree;
+                            BuildModTree(ref weaponModTree, botData, inventoryDataToUse, SWID, ref ammoContainers[1], ref weaponCartridges[1]);
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("AI SecondPrimaryWeapon with ID: " + actualSWID + " is not a firearm");
                         }
                     }
                     else
@@ -990,7 +1000,7 @@ namespace EFM
                 }
             }
 
-            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["Holster"]) / 100)
+            if (rigSlotSizes != null && UnityEngine.Random.value <= ((float)botData.chances["equipment"]["Holster"]) / 100)
             {
                 JArray possibleHolster = inventoryDataToUse["equipment"]["Holster"] as JArray;
                 if (possibleHolster.Count > 0)
@@ -999,13 +1009,38 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(holsterID))
                     {
                         string actualHolsterID = Mod.itemMap[holsterID];
-                        newAISpawn.inventory.generic.Add(actualHolsterID);
+                        newAISpawn.inventory.holster = actualHolsterID;
+
+                        // Set to holster slot in rig
+                        continue from here, make sure the holster is set to proper slot in rig THEN CONTINUE WITH SETTING OTHER ITEMS
+                        for (int i = 0; i < rigSlotSizes.Length; ++i)
+                        {
+                            if (newAISpawn.inventory.rigContents[i] == null && (int)rigSlotSizes[i] >= (int)ammoContainerItemSize)
+                            {
+                                newAISpawn.inventory.rigContents[i] = ammoContainerItemID;
+                                break;
+                            }
+                        }
 
                         // Add sosig weapon if necessary
                         if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualHolsterID] != null)
                         {
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualHolsterID].ToString();
                             hasSosigWeapon = true;
+                        }
+
+                        // Get firearm data
+                        GameObject holsterPrefab = IM.OD[actualHolsterID].GetGameObject();
+                        FVRFireArm holsterFirearm = holsterPrefab.GetComponent<FVRFireArm>();
+                        if (holsterFirearm != null)
+                        {
+                            AIInventoryWeaponMod weaponModTree = new AIInventoryWeaponMod(null, actualHolsterID, null); ;
+                            newAISpawn.inventory.holsterMods = weaponModTree;
+                            BuildModTree(ref weaponModTree, botData, inventoryDataToUse, holsterID, ref ammoContainers[2], ref weaponCartridges[2]);
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("AI Holster with ID: " + actualHolsterID + " is not a firearm");
                         }
                     }
                     else
@@ -1043,8 +1078,57 @@ namespace EFM
             // Set items depending on generation limits
             int pocketsUsed = 0;
             float currentBackpackVolume = 0;
-            //continue from here, spawn magazines/clip, depending on amount from generation, that are same as the one we put in the firearm
             // TODO: Implement specialItems generation when we know what those are
+            int ammoContainerItemMin = (int)botData.generation["items"]["magazines"]["min"];
+            int ammoContainerItemMax = (int)botData.generation["items"]["magazines"]["max"];
+            if (ammoContainerItemMax > 0)
+            {
+                for (int k = 0; k < 3; ++k)
+                {
+                    if(ammoContainers[k] == null)
+                    {
+                        continue;
+                    }
+
+                    for (int i = 0; i < ammoContainerItemMax; ++i)
+                    {
+                        string ammoContainerItemID = ammoContainers[k];
+                        string[] ammoContainerItemData = Mod.AIAmmoContainerItems[ammoContainerItemID];
+
+                        if (i >= ammoContainerItemMin && UnityEngine.Random.value > (float.Parse(ammoContainerItemData[2]) / 100))
+                        {
+                            continue;
+                        }
+
+                        FVRPhysicalObject.FVRPhysicalObjectSize ammoContainerItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(ammoContainerItemData[0]);
+                        float ammoContainerItemVolume = float.Parse(ammoContainerItemData[1]);
+
+                        // First try to put in rig, then pockets, then backpack
+                        if (rigSlotSizes != null)
+                        {
+                            for (int j = 0; j < rigSlotSizes.Length; ++j)
+                            {
+                                if (newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)ammoContainerItemSize)
+                                {
+                                    newAISpawn.inventory.rigContents[j] = ammoContainerItemID;
+                                    break;
+                                }
+                            }
+                        }
+                        else if (ammoContainerItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                        {
+                            newAISpawn.inventory.generic.Add(ammoContainerItemID);
+                            ++pocketsUsed;
+                        }
+                        else if (maxBackpackVolume > 0 && currentBackpackVolume + ammoContainerItemVolume <= maxBackpackVolume)
+                        {
+                            newAISpawn.inventory.backpackContents.Add(ammoContainerItemID);
+                            currentBackpackVolume += ammoContainerItemVolume;
+                        }
+                    }
+                }
+            }
+
             int healingItemMin = (int)botData.generation["items"]["healing"]["min"];
             int healingItemMax = (int)botData.generation["items"]["healing"]["max"];
             List<string> healingItemKeyList = new List<string>(Mod.AIHealingItems.Keys);
@@ -1145,22 +1229,41 @@ namespace EFM
 
                 foreach (KeyValuePair<string, List<string>> modEntry in mods)
                 {
-                    if (UnityEngine.Random.value <= ((float)botData.chances["mods"][modEntry.Key]) / 100)
+                    // Barrels arent implemented but the muzzles attached to them might
+                    // So need to check if can get a muzzle mod instead
+                    KeyValuePair<string, List<string>> modEntryToUse = modEntry;
+                    if (modEntry.Key.Equals("mod_barrel"))
                     {
+                        // Take a random barrel from the list
                         string modID = modEntry.Value[UnityEngine.Random.Range(0, modEntry.Value.Count)];
+                        if (inventoryDataToUse["mods"][modID] != null)
+                        {
+                            // If it has mods and one of those is muzzle, take this muzzle entry instead of the barrel one
+                            Dictionary<string, List<string>> barrelMods = inventoryDataToUse["mods"][modID].ToObject<Dictionary<string, List<string>>>();
+                            if (barrelMods.ContainsKey("mod_muzzle"))
+                            {
+                                modEntryToUse = new KeyValuePair<string, List<string>>("mod_muzzle", barrelMods["mod_muzzle"]);
+                            }
+                        }
+                    }
+
+                    // Add this mod to root if necessary
+                    if (UnityEngine.Random.value <= ((float)botData.chances["mods"][modEntryToUse.Key]) / 100)
+                    {
+                        string modID = modEntryToUse.Value[UnityEngine.Random.Range(0, modEntryToUse.Value.Count)];
                         if (Mod.itemMap.ContainsKey(modID))
                         {
                             string actualModID = Mod.itemMap[modID];
-                            if (modEntry.Key.Equals("mod_magazine"))
+                            if (modEntryToUse.Key.Equals("mod_magazine"))
                             {
                                 ammoContainerID = actualModID;
                             }
-                            else if (modEntry.Key.Equals("cartridges"))
+                            else if (modEntryToUse.Key.Equals("cartridges"))
                             {
                                 cartridgeID = actualModID;
                             }
 
-                            AIInventoryWeaponMod newChild = new AIInventoryWeaponMod(root, actualModID, modEntry.Key);
+                            AIInventoryWeaponMod newChild = new AIInventoryWeaponMod(root, actualModID, modEntryToUse.Key);
                             root.children.Add(newChild);
                             BuildModTree(ref newChild, botData, inventoryDataToUse, modID, ref ammoContainerID, ref cartridgeID);
                         }
