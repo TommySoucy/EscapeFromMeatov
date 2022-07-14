@@ -1,5 +1,6 @@
 ﻿using FistVR;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace EFM
         public static float extractionTimer;
         public static bool inRaid;
         public static JObject locationData;
+        public static int maxBotPerZone;
 
         private List<Extraction> extractions;
         private List<Extraction> possibleExtractions;
@@ -33,8 +35,16 @@ namespace EFM
         private float currentEnergyRate = 0;
         private float currentHydrationRate = 0;
 
+        private List<AISpawn> AISpawns;
+        private Dictionary<string, Transform> AISquadSpawnTransforms;
+        private List<int> availableIFFs;
+        private int[] spawnedIFFs;
+        private Dictionary<string, int> AISquadIFFs;
+
         private List<GameObject> extractionCards;
         private bool extracted;
+        private bool spawning;
+        private float raidTime = 0;
 
         // AI
         private float initSpawnTimer = 5; // Will only start spawning AI once this much time has elapsed at start of raid
@@ -523,6 +533,8 @@ namespace EFM
                 return;
             }
 
+            raidTime += Time.deltaTime;
+
             if (Mod.instance.debug)
             {
                 if (Input.GetKeyDown(KeyCode.U))
@@ -618,28 +630,10 @@ namespace EFM
             if(initSpawnTimer <= 0)
             {
                 // Check if time is >= spawnTime on next AISpawn in list, if it is, spawn it at spawnpoint depending on AIType
-
-                switch (AIType)
+                if(AISpawns.Count > 0 && !spawning && AISpawns[AISpawns.Count - 1].spawnTime <= raidTime)
                 {
-                    case AISpawn.AISpawnType.Scav:
-                        Transform zoneRoot = transform.GetChild(transform.childCount - 1).GetChild(0);
-                        int randZoneIndex = UnityEngine.Random.Range(0, zoneRoot.childCount);
-                        Transform currentZone = zoneRoot.GetChild(randZoneIndex);
-                        EFM_BotZone zoneScript = currentZone.GetComponent<EFM_BotZone>();
-                        if (zoneScript.botCount >= (int)locationData["MaxBotPerZone"])
-                        {
-                            for ()
-                    }
-                        break;
-                    case AISpawn.AISpawnType.PMC:
-                        transform.GetChild(transform.childCount - 1).GetChild(0);
-                        break;
-                    case AISpawn.AISpawnType.Raider:
-                        break;
-                    case AISpawn.AISpawnType.Boss:
-                        break;
-                    default:
-                        break;
+                    SpawnAI(AISpawns[AISpawns.Count - 1]);
+                    AISpawns.RemoveAt(AISpawns.Count - 1);
                 }
             }
             else
@@ -648,21 +642,224 @@ namespace EFM
             }
         }
 
+        private IEnumerator SpawnAI(AISpawn spawnData)
+        {
+            spawning = true;
+            yield return IM.OD["SosigBody_Default"].GetGameObjectAsync();
+            GameObject sosigPrefab = IM.OD["SosigBody_Default"].GetGameObject();
+
+            GameObject sosigObject = Instantiate(sosigPrefab);
+            Sosig sosigScript = sosigObject.GetComponentInChildren<Sosig>();
+            sosigScript.InitHands();
+            sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for weapon
+            sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for grenade
+            sosigScript.Inventory.Init();
+
+            // TODO: Make sure that wherever we spawn a bot, it is far enough from player, and there is no direct line of sight between player and potential spawnpoint
+            Transform AISpawnPoint = null;
+            switch (spawnData.type)
+            {
+                case AISpawn.AISpawnType.Scav:
+                    List<Transform> mostAvailableScavBotZones = GetMostAvailableBotZones();
+                    Transform currentScavZone = mostAvailableScavBotZones[UnityEngine.Random.Range(0, mostAvailableScavBotZones.Count)];
+                    EFM_BotZone scavZoneScript = currentScavZone.GetComponent<EFM_BotZone>();
+                    ++scavZoneScript.botCount;
+
+                    AISpawnPoint = currentScavZone.GetChild(UnityEngine.Random.Range(0, currentScavZone.childCount));
+                    break;
+                case AISpawn.AISpawnType.PMC:
+                    Transform PMCSpawnPointRoot = transform.GetChild(transform.childCount - 1).GetChild(0);
+
+                    AISpawnPoint = PMCSpawnPointRoot.GetChild(UnityEngine.Random.Range(0, PMCSpawnPointRoot.childCount));
+                    break;
+                case AISpawn.AISpawnType.Raider:
+                    if (AISquadSpawnTransforms.ContainsKey(spawnData.leaderName))
+                    {
+                        Transform raiderZone = AISquadSpawnTransforms[spawnData.leaderName];
+
+                        AISpawnPoint = raiderZone.GetChild(UnityEngine.Random.Range(0, raiderZone.childCount));
+                    }
+                    else
+                    {
+                        List<Transform> mostAvailableBotZones = GetMostAvailableBotZones();
+                        Transform randomRaiderZone = mostAvailableBotZones[UnityEngine.Random.Range(0, mostAvailableBotZones.Count)];
+                        EFM_BotZone raiderBotZoneScript = randomRaiderZone.GetComponent<EFM_BotZone>();
+                        ++raiderBotZoneScript.botCount;
+
+                        AISpawnPoint = randomRaiderZone.GetChild(UnityEngine.Random.Range(0, randomRaiderZone.childCount));
+
+                        AISquadSpawnTransforms.Add(spawnData.leaderName, randomRaiderZone);
+                    }
+                    break;
+                case AISpawn.AISpawnType.Boss:
+                case AISpawn.AISpawnType.Follower:
+                    if (AISquadSpawnTransforms.ContainsKey(spawnData.leaderName))
+                    {
+                        Transform bossZone = AISquadSpawnTransforms[spawnData.leaderName];
+
+                        AISpawnPoint = bossZone.GetChild(UnityEngine.Random.Range(0, bossZone.childCount));
+
+                        AISquadSpawnTransforms.Add(spawnData.leaderName, bossZone);
+                    }
+                    else
+                    {
+                        Transform bossZoneRootRoot = transform.GetChild(transform.childCount - 1).GetChild(2);
+                        Transform bossZoneRoot = bossZoneRootRoot.Find(spawnData.leaderName);
+                        Transform randomBossZone = null;
+                        if (bossZoneRoot != null)
+                        {
+                            randomBossZone = bossZoneRoot.GetChild(UnityEngine.Random.Range(0, bossZoneRoot.childCount));
+                        }
+                        else
+                        {
+                            List<Transform> mostAvailableBotZones = GetMostAvailableBotZones();
+                            randomBossZone = mostAvailableBotZones[UnityEngine.Random.Range(0, mostAvailableBotZones.Count)];
+                        }
+                        EFM_BotZone bossBotZoneScript = randomBossZone.GetComponent<EFM_BotZone>();
+                        ++bossBotZoneScript.botCount;
+
+                        AISpawnPoint = randomBossZone.GetChild(UnityEngine.Random.Range(0, randomBossZone.childCount));
+
+                        AISquadSpawnTransforms.Add(spawnData.leaderName, randomBossZone);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            // Spawn outfit
+            foreach(KeyValuePair<int, List<string>> outfitEntry in spawnData.outfitByLink)
+            {
+                SosigLink link = sosigScript.Links[outfitEntry.Key];
+                foreach (string outfitItemID in outfitEntry.Value)
+                {
+                    yield return IM.OD[outfitItemID].GetGameObjectAsync();
+                    GameObject outfitItemObject = Instantiate(IM.OD[outfitItemID].GetGameObject(), link.transform.position, link.transform.rotation, link.transform);
+                    SosigWearable wearableScript = outfitItemObject.GetComponent<SosigWearable>();
+                    wearableScript.RegisterWearable(link);
+                }
+            }
+
+            // Spawn sosig weapon and grenade
+            yield return IM.OD[spawnData.sosigWeapon].GetGameObjectAsync();
+            GameObject weaponObject = Instantiate(IM.OD[spawnData.sosigWeapon].GetGameObject());
+            SosigWeapon sosigWeapon = weaponObject.GetComponent<SosigWeapon>();
+            sosigWeapon.SetAutoDestroy(true);
+            sosigScript.ForceEquip(sosigWeapon);
+            if (sosigWeapon.Type == SosigWeapon.SosigWeaponType.Gun)
+            {
+                sosigScript.Inventory.FillAmmoWithType(sosigWeapon.AmmoType);
+            }
+
+            yield return IM.OD[spawnData.sosigGrenade].GetGameObjectAsync();
+            GameObject grenadeObject = Instantiate(IM.OD[spawnData.sosigGrenade].GetGameObject());
+            SosigWeapon sosigGrenade = grenadeObject.GetComponent<SosigWeapon>();
+            sosigGrenade.SetAutoDestroy(true);
+            sosigScript.ForceEquip(sosigWeapon);
+
+            // Set sosig logic (IFF, path, TODO: difficulty vars, etc)
+            int iff = 0;
+            switch (spawnData.type)
+            {
+                case AISpawn.AISpawnType.Scav:
+                    if(Mod.chosenCharIndex == 0)
+                    {
+                        iff = 1;
+                    }
+                    else // Player is scav
+                    {
+                        iff = 0;
+                    }
+
+                    sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
+                    sosigScript.FallbackOrder = Sosig.SosigOrder.Wander;
+                    break;
+                case AISpawn.AISpawnType.PMC:
+                    if (availableIFFs.Count > 0)
+                    {
+                        iff = availableIFFs[availableIFFs.Count - 1];
+                        availableIFFs.RemoveAt(availableIFFs.Count - 1);
+                    }
+                    else
+                    {
+                        iff = UnityEngine.Random.Range(2, 32);
+                    }
+                    ++spawnedIFFs[iff];
+
+                    sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
+                    sosigScript.FallbackOrder = Sosig.SosigOrder.Wander;
+                    break;
+                case AISpawn.AISpawnType.Boss:
+                case AISpawn.AISpawnType.Follower:
+                case AISpawn.AISpawnType.Raider:
+                    if (AISquadIFFs.ContainsKey(spawnData.leaderName))
+                    {
+                        iff = AISquadIFFs[spawnData.leaderName];
+                    }
+                    else
+                    {
+                        if (availableIFFs.Count > 0)
+                        {
+                            iff = availableIFFs[availableIFFs.Count - 1];
+                            availableIFFs.RemoveAt(availableIFFs.Count - 1);
+                        }
+                        else
+                        {
+                            iff = UnityEngine.Random.Range(2, 32);
+                        }
+                        AISquadIFFs.Add(spawnData.leaderName, iff);
+                    }
+                    ++spawnedIFFs[iff];
+
+                    sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
+                    sosigScript.FallbackOrder = Sosig.SosigOrder.Wander;
+                    break;
+
+            }
+            sosigScript.SetIFF(iff); // 0 - Player, 1 - Scav, Increment after that for each PMC and squads of raiders or boss/followers
+            sosigScript.SetOriginalIFFTeam(iff);
+
+            sosigScript.SetCurrentOrder(sosigScript.FallbackOrder);
+
+            spawning = false;
+            yield break;
+        }
+
+        public void OnBotKill(Sosig sosig)
+        {
+            TODO: call this on sosig kill
+            --spawnedIFFs[sosig.GetIFF()];
+            if(spawnedIFFs[sosig.GetIFF()] == 0)
+            {
+                availableIFFs.Add(sosig.GetIFF());
+            }
+        }
+
+        private List<Transform> GetMostAvailableBotZones()
+        {
+            // Compile list of least filled spawn points, take a random one from the list
+            Transform raiderZoneRoot = transform.GetChild(transform.childCount - 1).GetChild(1);
+            List<Transform> availableBotZones = new List<Transform>();
+            int least = int.MaxValue;
+            for (int i = 0; i < raiderZoneRoot.childCount; ++i)
+            {
+                EFM_BotZone botZoneScript = raiderZoneRoot.GetChild(i).GetComponent<EFM_BotZone>();
+                if(botZoneScript.botCount < least)
+                {
+                    least = botZoneScript.botCount;
+                    availableBotZones.Clear();
+                    availableBotZones.Add(botZoneScript.transform);
+                }
+                else if(botZoneScript.botCount == least)
+                {
+                    availableBotZones.Add(botZoneScript.transform);
+                }
+            }
+            return availableBotZones;
+        }
+
         private void InitAI()
         {
-            // Get spawnpoints parent transforms
-            // Prep a queue of spawns to produce throughout the raid time up to something like 5 mins before the end
-            // These spawns should contain data like which sosig to spawn with what equipment at what time
-            // For spawn times, we can take the (total raid time - 5 mins) / number of spawns, then jitter those times a little to make it more realistic
-            // There should be some initial spawns to happen right at start of raid, like bosses and some scavs across the map should already be there at beginning
-            // but not too close to player
-            // It should be taken into consideration that spawns of a certain type of enemy shouldnt happen if there are already too many of those on the map
-            // Scavs for example, could keep spawning to fill up the map, to prevent this we want to only have a number of them active at a time
-            // As they die, slots become vacant for us to spawn more of them
-            // In the case of PMCs this should not be a problem since the PMC AI should go for extraction so they will release slots on their own
-            // Same goes for raider squads
-            // The data for the pathing of the AI should also be included: patrol paths for scavs, and raid paths for PMCs and raiders
-
             //Cult priest - sectantpriest
             bool spawnCultPriest = false;
             int cultPriestFollowerCount = 0;
@@ -679,7 +876,7 @@ namespace EFM
             //Tagilla - bosstagilla
             bool spawnTagilla = false;
 
-            int raiderSpawnCount = 0; // TODO: Should set this number depending on map, raiders can only spawn on reserve and lab
+            int raiderSpawnCount = 0;
 
             switch (Mod.chosenMapIndex)
             {
@@ -687,7 +884,7 @@ namespace EFM
                     if(time >= 21600 && time <= 64800 && UnityEngine.Random.value <= 0.02f)
                     {
                         spawnCultPriest = true;
-                        cultPriestFollowerCount = UnityEngine.Random.Range(2, 4);
+                        cultPriestFollowerCount = UnityEngine.Random.Range(2, 5);
                     }
                     if(UnityEngine.Random.value <= 0.1f)
                     {
@@ -695,7 +892,7 @@ namespace EFM
                     }
                     break;
 
-                // TODO: Add other maps
+                // TODO: Add other maps and number of raider squads if applicable to the map
 
                 default:
                     break;
@@ -711,49 +908,300 @@ namespace EFM
             locationData = Mod.locationsBaseDB[GetLocationDataIndex(Mod.chosenMapIndex)];
             float averageLevel = (float)locationData["AveragePlayerLevel"];
             float maxRaidTime = (float)locationData["escape_time_limit"] * 60;
+            maxBotPerZone = (int)locationData["MaxBotPerZone"];
 
-            List<AISpawn> AISpawns = new List<AISpawn>();
+            AISpawns = new List<AISpawn>();
+            AISquadSpawnTransforms = new Dictionary<string, Transform>();
+            availableIFFs = new List<int> { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 ,22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+            spawnedIFFs = new int[32];
+            AISquadIFFs = new Dictionary<string, int>();
+
+            // Bosses
+            if (spawnCultPriest)
+            {
+                BotData bossPriestData = GetBotData("sectantpriest");
+                BotData bossPriestFollowerData = GetBotData("sectantwarrior");
+                AISpawn newAISpawn = GenerateAISpawn(bossPriestData, AISpawn.AISpawnType.Boss, averageLevel, "CultPriest");
+                newAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newAISpawn);
+
+                for(int i=0; i< cultPriestFollowerCount; ++i)
+                {
+                    AISpawn newFollowerAISpawn = GenerateAISpawn(bossPriestFollowerData, AISpawn.AISpawnType.Follower, averageLevel, "CultPriest");
+                    newFollowerAISpawn.spawnTime = 0;
+
+                    AISpawns.Add(newFollowerAISpawn);
+                }
+            }
+            if (spawnGlukhar)
+            {
+                BotData bossGlukharData = GetBotData("bossgluhar");
+                BotData bossGlukharAssaultFollowerData = GetBotData("followergluharassault");
+                BotData bossGlukharScoutFollowerData = GetBotData("followergluharscout");
+                BotData bossGlukharSecurityFollowerData = GetBotData("followergluharsecurity");
+                BotData bossGlukharSniperFollowerData = GetBotData("followergluharsnipe");
+                AISpawn newAISpawn = GenerateAISpawn(bossGlukharData, AISpawn.AISpawnType.Boss, averageLevel, "Glukhar");
+                newAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newAISpawn);
+
+                // Spawn 3 assault and 1 of each other type
+                for (int i = 0; i < 3; ++i)
+                {
+                    AISpawn newAssaultFollowerAISpawn = GenerateAISpawn(bossGlukharAssaultFollowerData, AISpawn.AISpawnType.Follower, averageLevel, "Glukhar");
+                    newAssaultFollowerAISpawn.spawnTime = 0;
+
+                    AISpawns.Add(newAssaultFollowerAISpawn);
+                }
+                AISpawn newScoutFollowerAISpawn = GenerateAISpawn(bossGlukharScoutFollowerData, AISpawn.AISpawnType.Follower, averageLevel, "Glukhar");
+                newScoutFollowerAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newScoutFollowerAISpawn);
+
+                AISpawn newSecurityFollowerAISpawn = GenerateAISpawn(bossGlukharSecurityFollowerData, AISpawn.AISpawnType.Follower, averageLevel, "Glukhar");
+                newSecurityFollowerAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newSecurityFollowerAISpawn);
+
+                AISpawn newSniperFollowerAISpawn = GenerateAISpawn(bossGlukharSniperFollowerData, AISpawn.AISpawnType.Follower, averageLevel, "Glukhar");
+                newSniperFollowerAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newSniperFollowerAISpawn);
+            }
+            if (spawnKilla)
+            {
+                BotData bossKillaData = GetBotData("bosskilla");
+                AISpawn newAISpawn = GenerateAISpawn(bossKillaData, AISpawn.AISpawnType.Boss, averageLevel, "Killa");
+                newAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newAISpawn);
+            }
+            if (spawnReshala)
+            {
+                BotData bossReshalaData = GetBotData("bossbully");
+                BotData bossReshalaFollowerData = GetBotData("followerbully");
+                AISpawn newAISpawn = GenerateAISpawn(bossReshalaData, AISpawn.AISpawnType.Boss, averageLevel, "Reshala");
+                newAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newAISpawn);
+
+                for (int i = 0; i < 4; ++i)
+                {
+                    AISpawn newFollowerAISpawn = GenerateAISpawn(bossReshalaFollowerData, AISpawn.AISpawnType.Follower, averageLevel, "Reshala");
+                    newFollowerAISpawn.spawnTime = 0;
+
+                    AISpawns.Add(newFollowerAISpawn);
+                }
+            }
+            if (spawnSanitar)
+            {
+                BotData bossSanitarData = GetBotData("bosssanitar");
+                BotData bossSanitarFollowerData = GetBotData("followersanitar");
+                AISpawn newAISpawn = GenerateAISpawn(bossSanitarData, AISpawn.AISpawnType.Boss, averageLevel, "Sanitar");
+                newAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newAISpawn);
+
+                for (int i = 0; i < 2; ++i)
+                {
+                    AISpawn newFollowerAISpawn = GenerateAISpawn(bossSanitarFollowerData, AISpawn.AISpawnType.Follower, averageLevel, "Sanitar");
+                    newFollowerAISpawn.spawnTime = 0;
+
+                    AISpawns.Add(newFollowerAISpawn);
+                }
+            }
+            if (spawnShturman)
+            {
+                BotData bossShturmanData = GetBotData("bosskojaniy");
+                BotData bossShturmanFollowerData = GetBotData("followerkojaniy");
+                AISpawn newAISpawn = GenerateAISpawn(bossShturmanData, AISpawn.AISpawnType.Boss, averageLevel, "Shturman");
+                newAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newAISpawn);
+
+                for (int i = 0; i < 2; ++i)
+                {
+                    AISpawn newFollowerAISpawn = GenerateAISpawn(bossShturmanFollowerData, AISpawn.AISpawnType.Follower, averageLevel, "Shturman");
+                    newFollowerAISpawn.spawnTime = 0;
+
+                    AISpawns.Add(newFollowerAISpawn);
+                }
+            }
+            if (spawnTagilla)
+            {
+                BotData bossTagillaData = GetBotData("bosstagilla");
+                AISpawn newAISpawn = GenerateAISpawn(bossTagillaData, AISpawn.AISpawnType.Boss, averageLevel, "Tagilla");
+                newAISpawn.spawnTime = 0;
+
+                AISpawns.Add(newAISpawn);
+            }
 
             // PMC
-            int PMCSpawnCount = UnityEngine.Random.Range((int)locationData["MinPlayers"], (int)locationData["MaxPlayers"]); // Amount of PMCs to spawn during raid
+            int PMCSpawnCount = UnityEngine.Random.Range((int)locationData["MinPlayers"], (int)locationData["MaxPlayers"] + 1); // Amount of PMCs to spawn during raid
             if (PMCSpawnCount > 0)
             {
-                BotData pmcBotData = GetBotData("pmcbot");
                 for (int i = 0; i < PMCSpawnCount; ++i)
                 {
-                    AISpawn newAISpawn = GenerateAISpawn(pmcBotData, AISpawn.AISpawnType.PMC, averageLevel);
+                    AISpawn newAISpawn = GenerateAISpawn(null, AISpawn.AISpawnType.PMC, averageLevel);
                     newAISpawn.spawnTime = UnityEngine.Random.Range(0, maxRaidTime - 600);
 
-                    TODO: Add the spawn data in a lsit of spawns
+                    AISpawns.Add(newAISpawn);
                 }
             }
 
-            int scavInitSpawnCount = UnityEngine.Random.Range(5, 10); // Amount of scavs to spawn at start of raid
-            int scavSpawnCount = 40; // Amount of scavs to spawn during raid
+            // Scav
+            BotData assaultBotData = GetBotData("assault");
+            BotData marksmanBotData = GetBotData("marksman");
+            foreach (JObject wave in locationData["waves"])
+            {
+                int scavSpawnCount = UnityEngine.Random.Range((int)wave["slots_min"], (int)locationData["slots_max"] + 1);
+                string spawnType = wave["WildSpawnType"].ToString();
+                BotData botDataToUse = null;
+                switch (spawnType)
+                {
+                    case "assault":
+                        botDataToUse = assaultBotData;
+                        break;
+                    case "marksman":
+                        botDataToUse = marksmanBotData;
+                        break;
+                    default:
+                        Mod.instance.LogError("Unexpected scav spawn type: "+spawnType);
+                        continue;
+                }
 
-            TODO: Generate AI spawns for Scav and raiders if applicable to map
+                for (int i = 0; i < scavSpawnCount; ++i)
+                {
+                    AISpawn newAISpawn = GenerateAISpawn(botDataToUse, AISpawn.AISpawnType.Scav, averageLevel);
+                    float waveTimeMin = (float)wave["time_min"];
+                    float waveTimeMax = (float)wave["time_max"];
+                    if (waveTimeMin == -1)
+                    {
+                        newAISpawn.spawnTime = 0;
+                    }
+                    else
+                    {
+                        newAISpawn.spawnTime = UnityEngine.Random.Range(waveTimeMin, waveTimeMax);
+                    }
+
+                    AISpawns.Add(newAISpawn);
+                }
+            }
+
+            // Raiders
+            int raiderSquadIndex = 0;
+            BotData raiderBotData = GetBotData("pmcbot");
+            foreach (JObject wave in locationData["BossLocationSpawn"])
+            {
+                if (!wave["BossName"].ToString().Equals("pmcBot") || UnityEngine.Random.value > ((float)wave["BossChance"]) / 100) 
+                {
+                    continue;
+                }
+
+                int escortSize = (int)wave["BossEscortAmount"][UnityEngine.Random.Range(0, (wave["BossEscortAmount"] as JArray).Count)];
+                
+                AISpawn newAISpawn = GenerateAISpawn(raiderBotData, AISpawn.AISpawnType.Boss, averageLevel, "Raider" + raiderSquadIndex);
+                float spawnTime = (float)wave["Time"];
+                if (spawnTime == -1)
+                {
+                    newAISpawn.spawnTime = 0;
+                }
+                else
+                {
+                    newAISpawn.spawnTime = spawnTime;
+                }
+
+                AISpawns.Add(newAISpawn);
+
+                for (int i = 0; i < escortSize; ++i)
+                {
+                    AISpawn newFollowerAISpawn = GenerateAISpawn(raiderBotData, AISpawn.AISpawnType.Follower, averageLevel, "Raider");
+                    newFollowerAISpawn.spawnTime = newAISpawn.spawnTime;
+
+                    AISpawns.Add(newFollowerAISpawn);
+                }
+            }
+
+            // Sort the spawns by spawn time decreasing
+            SortAISpawns();
         }
 
-        private AISpawn GenerateAISpawn(BotData botData, AISpawn.AISpawnType AIType, float averageLevel)
+        private void SortAISpawns()
+        {
+            bool sorted = false;
+            while (!sorted)
+            {
+                bool moved = false;
+                for (int i = 1; i < AISpawns.Count; ++i)
+                {
+                    if(AISpawns[i].spawnTime > AISpawns[i - 1].spawnTime)
+                    {
+                        AISpawn temp = AISpawns[i];
+                        AISpawns[i] = AISpawns[i - 1];
+                        AISpawns[i - 1] = temp;
+                    }
+                }
+                sorted = !moved;
+            }
+        }
+
+        private AISpawn GenerateAISpawn(BotData botData, AISpawn.AISpawnType AIType, float averageLevel, string leaderName = null)
         {
             AISpawn newAISpawn = new AISpawn();
-            newAISpawn.type = AISpawn.AISpawnType.PMC;
+            newAISpawn.type = AIType;
             newAISpawn.inventory = new AIInventory();
             newAISpawn.inventory.generic = new List<string>();
             newAISpawn.outfitByLink = new Dictionary<int, List<string>>();
 
+            bool USEC = UnityEngine.Random.value <= 0.5;
+            BotData botDataToUse = botData;
+            if (AIType == AISpawn.AISpawnType.PMC)
+            {
+                if (USEC)
+                {
+                    botDataToUse = GetBotData("usec");
+                }
+                else
+                {
+                    botDataToUse = GetBotData("bear");
+                }
+            }
+
             float level = Mathf.Min(80, ExpDistrRandOnAvg(averageLevel));
+
+            newAISpawn.name = botDataToUse.names[UnityEngine.Random.Range(0, botDataToUse.names.Count)].ToString();
+
+            if (AIType == AISpawn.AISpawnType.PMC)
+            {
+                if (USEC)
+                {
+                    newAISpawn.inventory.dogtag = "12";
+                }
+                else
+                {
+                    newAISpawn.inventory.dogtag = "11";
+                }
+                newAISpawn.inventory.dogtagLevel = (int)level;
+                newAISpawn.inventory.dogtagName = newAISpawn.name;
+            }
+            else if(AIType == AISpawn.AISpawnType.Boss || AIType == AISpawn.AISpawnType.Follower)
+            {
+                newAISpawn.leaderName = leaderName;
+            }
 
             // Get inventory data corresponding to level
             JObject inventoryDataToUse = null;
-            for (int j = 0; j < botData.minInventoryLevels.Length; ++j)
+            for (int j = 0; j < botDataToUse.minInventoryLevels.Length; ++j)
             {
-                if (level >= botData.minInventoryLevels[j])
+                if (level >= botDataToUse.minInventoryLevels[j])
                 {
-                    inventoryDataToUse = botData.inventoryDB[j];
+                    inventoryDataToUse = botDataToUse.inventoryDB[j];
                     break;
                 }
             }
+
+            // TODO: Set variables for difficulty
 
             // Set equipment
             string[] headSlots = { "Headwear", "Earpiece", "FaceCover", "Eyewear" };
@@ -769,7 +1217,7 @@ namespace EFM
                 }
                 string actualEquipName = headSlots[actualEquipIndex];
 
-                if (UnityEngine.Random.value <= ((float)botData.chances["equipment"][actualEquipName]) / 100)
+                if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"][actualEquipName]) / 100)
                 {
                     JArray possibleHeadEquip = inventoryDataToUse["equipment"][actualEquipName] as JArray;
                     if (possibleHeadEquip.Count > 0)
@@ -818,7 +1266,7 @@ namespace EFM
             List<string> rigWhitelist = new List<string>();
             List<string> rigBlacklist = new List<string>();
             bool rigArmored = false;
-            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["TacticalVest"]) / 100)
+            if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["TacticalVest"]) / 100)
             {
                 JArray possibleRigs = inventoryDataToUse["equipment"]["TacticalVest"] as JArray;
                 if (possibleRigs.Count > 0)
@@ -872,7 +1320,7 @@ namespace EFM
 
             if (!rigArmored)
             {
-                if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["ArmorVest"]) / 100)
+                if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["ArmorVest"]) / 100)
                 {
                     JArray possibleArmors = inventoryDataToUse["equipment"]["ArmorVest"] as JArray;
                     if (possibleArmors.Count > 0)
@@ -910,7 +1358,7 @@ namespace EFM
             List<string> backpackWhitelist = new List<string>();
             List<string> backpackBlacklist = new List<string>();
             float maxBackpackVolume = -1;
-            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["Backpack"]) / 100)
+            if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["Backpack"]) / 100)
             {
                 JArray possibleBackpacks = inventoryDataToUse["equipment"]["Backpack"] as JArray;
                 if (possibleBackpacks.Count > 0)
@@ -955,7 +1403,7 @@ namespace EFM
             bool hasSosigWeapon = false;
             string[] ammoContainers = new string[3];
             string[] weaponCartridges = new string[3];
-            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["FirstPrimaryWeapon"]) / 100)
+            if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["FirstPrimaryWeapon"]) / 100)
             {
                 JArray possiblePW = inventoryDataToUse["equipment"]["FirstPrimaryWeapon"] as JArray;
                 if (possiblePW.Count > 0)
@@ -980,7 +1428,7 @@ namespace EFM
                         {
                             AIInventoryWeaponMod weaponModTree = new AIInventoryWeaponMod(null, actualPWID, null); ;
                             newAISpawn.inventory.primaryWeaponMods = weaponModTree;
-                            BuildModTree(ref weaponModTree, botData, inventoryDataToUse, PWID, ref ammoContainers[0], ref weaponCartridges[0]);
+                            BuildModTree(ref weaponModTree, botDataToUse, inventoryDataToUse, PWID, ref ammoContainers[0], ref weaponCartridges[0]);
                         }
                         else
                         {
@@ -994,7 +1442,7 @@ namespace EFM
                 }
             }
 
-            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["SecondPrimaryWeapon"]) / 100)
+            if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["SecondPrimaryWeapon"]) / 100)
             {
                 JArray possibleSW = inventoryDataToUse["equipment"]["SecondPrimaryWeapon"] as JArray;
                 if (possibleSW.Count > 0)
@@ -1019,7 +1467,7 @@ namespace EFM
                         {
                             AIInventoryWeaponMod weaponModTree = new AIInventoryWeaponMod(null, actualSWID, null); ;
                             newAISpawn.inventory.secondaryWeaponMods = weaponModTree;
-                            BuildModTree(ref weaponModTree, botData, inventoryDataToUse, SWID, ref ammoContainers[1], ref weaponCartridges[1]);
+                            BuildModTree(ref weaponModTree, botDataToUse, inventoryDataToUse, SWID, ref ammoContainers[1], ref weaponCartridges[1]);
                         }
                         else
                         {
@@ -1033,7 +1481,7 @@ namespace EFM
                 }
             }
 
-            if (rigSlotSizes != null && UnityEngine.Random.value <= ((float)botData.chances["equipment"]["Holster"]) / 100)
+            if (rigSlotSizes != null && UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["Holster"]) / 100)
             {
                 JArray possibleHolster = inventoryDataToUse["equipment"]["Holster"] as JArray;
                 if (possibleHolster.Count > 0)
@@ -1068,7 +1516,7 @@ namespace EFM
                         {
                             AIInventoryWeaponMod weaponModTree = new AIInventoryWeaponMod(null, actualHolsterID, null); ;
                             newAISpawn.inventory.holsterMods = weaponModTree;
-                            BuildModTree(ref weaponModTree, botData, inventoryDataToUse, holsterID, ref ammoContainers[2], ref weaponCartridges[2]);
+                            BuildModTree(ref weaponModTree, botDataToUse, inventoryDataToUse, holsterID, ref ammoContainers[2], ref weaponCartridges[2]);
                         }
                         else
                         {
@@ -1082,7 +1530,7 @@ namespace EFM
                 }
             }
 
-            if (UnityEngine.Random.value <= ((float)botData.chances["equipment"]["Scabbard"]) / 100)
+            if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["Scabbard"]) / 100)
             {
                 JArray possibleScabbard = inventoryDataToUse["equipment"]["Scabbard"] as JArray;
                 if (possibleScabbard.Count > 0)
@@ -1111,8 +1559,8 @@ namespace EFM
             int pocketsUsed = 0;
             float currentBackpackVolume = 0;
 
-            int ammoContainerItemMin = (int)botData.generation["items"]["magazines"]["min"];
-            int ammoContainerItemMax = (int)botData.generation["items"]["magazines"]["max"];
+            int ammoContainerItemMin = (int)botDataToUse.generation["items"]["magazines"]["min"];
+            int ammoContainerItemMax = (int)botDataToUse.generation["items"]["magazines"]["max"];
             if (ammoContainerItemMax > 0)
             {
                 for (int k = 0; k < 3; ++k)
@@ -1238,8 +1686,8 @@ namespace EFM
                 }
             }
 
-            int healingItemMin = (int)botData.generation["items"]["healing"]["min"];
-            int healingItemMax = (int)botData.generation["items"]["healing"]["max"];
+            int healingItemMin = (int)botDataToUse.generation["items"]["healing"]["min"];
+            int healingItemMax = (int)botDataToUse.generation["items"]["healing"]["max"];
             if (healingItemMax > 0)
             {
                 List<string> healingItemKeyList = new List<string>(possibleHealingItems.Keys);
@@ -1282,8 +1730,8 @@ namespace EFM
                 }
             }
 
-            int grenadeItemMin = (int)botData.generation["items"]["grenades"]["min"];
-            int grenadeItemMax = (int)botData.generation["items"]["grenades"]["max"];
+            int grenadeItemMin = (int)botDataToUse.generation["items"]["grenades"]["min"];
+            int grenadeItemMax = (int)botDataToUse.generation["items"]["grenades"]["max"];
             if (grenadeItemMax > 0)
             {
                 List<string> grenadeItemKeyList = new List<string>(possibleGrenades.Keys);
@@ -1329,8 +1777,8 @@ namespace EFM
                 }
             }
 
-            int looseLootItemMin = (int)botData.generation["items"]["looseLoot"]["min"];
-            int looseLootItemMax = (int)botData.generation["items"]["looseLoot"]["max"];
+            int looseLootItemMin = (int)botDataToUse.generation["items"]["looseLoot"]["min"];
+            int looseLootItemMax = (int)botDataToUse.generation["items"]["looseLoot"]["max"];
             if (looseLootItemMax > 0)
             {
                 List<string> looseLootItemKeyList = new List<string>(possibleLooseLoot.Keys);
@@ -1373,8 +1821,8 @@ namespace EFM
                 }
             }
 
-            int specialItemMin = (int)botData.generation["items"]["specialItems"]["min"];
-            int specialItemMax = (int)botData.generation["items"]["specialItems"]["max"];
+            int specialItemMin = (int)botDataToUse.generation["items"]["specialItems"]["min"];
+            int specialItemMax = (int)botDataToUse.generation["items"]["specialItems"]["max"];
             if (specialItemMax > 0)
             {
                 List<string> possibleSpecialItems = inventoryDataToUse["items"]["SpecialLoot"].ToObject<List<string>>();
@@ -1415,9 +1863,6 @@ namespace EFM
                     }
                 }
             }
-
-            // Generate path depending on AIType
-            finish adding AIPaths to factory asset
 
             return newAISpawn;
         }
@@ -1530,7 +1975,7 @@ namespace EFM
             botData.experience = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/experience.json"));
             botData.generation = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/generation.json"));
             botData.health = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/health.json"));
-            botData.names = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/names.json"));
+            botData.names = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/names.json"));
 
             return botData;
         }
@@ -3061,9 +3506,12 @@ namespace EFM
             Scav,
             PMC,
             Raider,
-            Boss
+            Boss,
+            Follower
         }
         public AISpawnType type;
+        public string name;
+        public string leaderName;
 
         public AIInventory inventory;
 
@@ -3085,6 +3533,10 @@ namespace EFM
 
         public string rig;
         public string[] rigContents;
+
+        public string dogtag;
+        public int dogtagLevel;
+        public string dogtagName;
 
         public string backpack;
         public List<string> backpackContents;
@@ -3135,7 +3587,7 @@ namespace EFM
         public JObject[] inventoryDB;
         public JObject chances;
         public JObject experience;
-        public JObject names;
+        public JArray names;
         public JObject health;
         public JObject generation;
     }
