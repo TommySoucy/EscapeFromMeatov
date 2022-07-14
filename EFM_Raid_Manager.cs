@@ -40,6 +40,7 @@ namespace EFM
         private List<int> availableIFFs;
         private int[] spawnedIFFs;
         private Dictionary<string, int> AISquadIFFs;
+        private Dictionary<string, List<Sosig>> AISquads;
 
         private List<GameObject> extractionCards;
         private bool extracted;
@@ -773,6 +774,8 @@ namespace EFM
 
                     sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
                     sosigScript.FallbackOrder = Sosig.SosigOrder.Wander;
+
+                    sosigScript.SetCurrentOrder(sosigScript.FallbackOrder);
                     break;
                 case AISpawn.AISpawnType.PMC:
                     if (availableIFFs.Count > 0)
@@ -786,8 +789,7 @@ namespace EFM
                     }
                     ++spawnedIFFs[iff];
 
-                    sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
-                    sosigScript.FallbackOrder = Sosig.SosigOrder.Wander;
+                    TODO: Command pathto
                     break;
                 case AISpawn.AISpawnType.Boss:
                 case AISpawn.AISpawnType.Follower:
@@ -811,15 +813,25 @@ namespace EFM
                     }
                     ++spawnedIFFs[iff];
 
+                    if (AISquads.ContainsKey(spawnData.leaderName))
+                    {
+                        AISquads[spawnData.leaderName].Add(sosigScript);
+                    }
+                    else
+                    {
+                        AISquads.Add(spawnData.leaderName, new List<Sosig> { sosigScript });
+                        TODO: Figure out how to commandpathto on a squad, must wait until they are all spawned so we can path them together
+                    }
+
                     sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
                     sosigScript.FallbackOrder = Sosig.SosigOrder.Wander;
+
+                    sosigScript.SetCurrentOrder(sosigScript.FallbackOrder);
                     break;
 
             }
             sosigScript.SetIFF(iff); // 0 - Player, 1 - Scav, Increment after that for each PMC and squads of raiders or boss/followers
             sosigScript.SetOriginalIFFTeam(iff);
-
-            sosigScript.SetCurrentOrder(sosigScript.FallbackOrder);
 
             spawning = false;
             yield break;
@@ -915,6 +927,7 @@ namespace EFM
             availableIFFs = new List<int> { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 ,22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
             spawnedIFFs = new int[32];
             AISquadIFFs = new Dictionary<string, int>();
+            AISquads = new Dictionary<string, List<Sosig>>();
 
             // Bosses
             if (spawnCultPriest)
