@@ -41,6 +41,7 @@ namespace EFM
         private int[] spawnedIFFs;
         private Dictionary<string, int> AISquadIFFs;
         private Dictionary<string, List<Sosig>> AISquads;
+        private Dictionary<string, int> AISquadSizes;
 
         private List<GameObject> extractionCards;
         private bool extracted;
@@ -649,13 +650,6 @@ namespace EFM
             yield return IM.OD["SosigBody_Default"].GetGameObjectAsync();
             GameObject sosigPrefab = IM.OD["SosigBody_Default"].GetGameObject();
 
-            GameObject sosigObject = Instantiate(sosigPrefab);
-            Sosig sosigScript = sosigObject.GetComponentInChildren<Sosig>();
-            sosigScript.InitHands();
-            sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for weapon
-            sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for grenade
-            sosigScript.Inventory.Init();
-
             // TODO: Make sure that wherever we spawn a bot, it is far enough from player, and there is no direct line of sight between player and potential spawnpoint
             Transform AISpawnPoint = null;
             switch (spawnData.type)
@@ -728,8 +722,18 @@ namespace EFM
                     break;
             }
 
+            GameObject sosigObject = Instantiate(sosigPrefab, AISpawnPoint.position, AISpawnPoint.rotation);
+            Sosig sosigScript = sosigObject.GetComponentInChildren<Sosig>();
+            sosigScript.InitHands();
+            sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for weapon
+            sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for grenade
+            sosigScript.Inventory.Init();
+
+            EFM_AI AIScript = sosigObject.AddComponent<EFM_AI>();
+            AIScript.experienceReward = spawnData.experienceReward;
+
             // Spawn outfit
-            foreach(KeyValuePair<int, List<string>> outfitEntry in spawnData.outfitByLink)
+            foreach (KeyValuePair<int, List<string>> outfitEntry in spawnData.outfitByLink)
             {
                 SosigLink link = sosigScript.Links[outfitEntry.Key];
                 foreach (string outfitItemID in outfitEntry.Value)
@@ -789,7 +793,27 @@ namespace EFM
                     }
                     ++spawnedIFFs[iff];
 
-                    TODO: Command pathto
+                    // Generate a path to random points in the map
+                    Transform PMCPointsParentsRoot = transform.GetChild(transform.childCount - 3);
+                    Transform PMCContainerPoints = PMCPointsParentsRoot.GetChild(0);
+                    Transform PMCExtractionPoints = PMCPointsParentsRoot.GetChild(1);
+                    Transform PMCPointsOfInterest = PMCPointsParentsRoot.GetChild(2);
+                    List<Transform> PMCPoints = new List<Transform>();
+                    //TODO: Decide length of path depending on sosig speed, should look how long it takes them to navigate 5 points or something and base ourselves off of that
+                    //TODO: Make sure there are no duplicate points being used
+                    // For now just use default of 15 containers and 25 PoIs
+                    for (int i = 0; i < 15; ++i)
+                    {
+                        PMCPoints.Add(PMCContainerPoints.GetChild(UnityEngine.Random.Range(0, PMCContainerPoints.childCount)));
+                    }
+                    for (int i = 0; i < 25; ++i)
+                    {
+                        PMCPoints.Add(PMCPointsOfInterest.GetChild(UnityEngine.Random.Range(0, PMCPointsOfInterest.childCount)));
+                    }
+                    PMCPoints.Add(PMCExtractionPoints.GetChild(UnityEngine.Random.Range(0, PMCExtractionPoints.childCount)));
+
+                    // Send the path to sosigs using Sosig.CommandPathTo
+                    sosigScript.CommandPathTo(PMCPoints, 0.1f, new Vector2(2, 5), 0.5f, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Once, AISquads[spawnData.leaderName], 45, 1, true, 5);
                     break;
                 case AISpawn.AISpawnType.Boss:
                 case AISpawn.AISpawnType.Follower:
@@ -813,6 +837,39 @@ namespace EFM
                     }
                     ++spawnedIFFs[iff];
 
+                    if(AISquadSizes[spawnData.leaderName] == AISquads[spawnData.leaderName].Count + 1)
+                    {
+                        // Generate a path to random points in the map
+                        Transform pointsParentsRoot = transform.GetChild(transform.childCount - 3);
+                        Transform containerPoints = pointsParentsRoot.GetChild(0);
+                        Transform extractionPoints = pointsParentsRoot.GetChild(1);
+                        Transform pointsOfInterest = pointsParentsRoot.GetChild(2);
+                        List<Transform> points = new List<Transform>();
+                        //TODO: Decide length of path depending on sosig speed, should look how long it takes them to navigate 5 points or something and base ourselves off of that
+                        //TODO: Make sure there are no duplicate points being used
+                        // For now just use default of 15 containers and 25 PoIs
+                        for(int i = 0; i < 15; ++i)
+                        {
+                            points.Add(containerPoints.GetChild(UnityEngine.Random.Range(0, containerPoints.childCount)));
+                        }
+                        for(int i = 0; i < 25; ++i)
+                        {
+                            points.Add(pointsOfInterest.GetChild(UnityEngine.Random.Range(0, pointsOfInterest.childCount)));
+                        }
+                        points.Add(extractionPoints.GetChild(UnityEngine.Random.Range(0, extractionPoints.childCount)));
+
+                        // Send the path to sosigs using Sosig.CommandPathTo
+                        sosigScript.CommandPathTo(points, 0.1f, new Vector2(2, 5), 0.5f, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Once, AISquads[spawnData.leaderName], 45, 1, true, 5);
+                    }
+                    else
+                    {
+                        sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
+                        sosigScript.FallbackOrder = Sosig.SosigOrder.Wander;
+
+                        sosigScript.SetCurrentOrder(sosigScript.FallbackOrder);
+                    }
+
+                    // Add it to the list after so the pathTo pathWith doesnt include itself
                     if (AISquads.ContainsKey(spawnData.leaderName))
                     {
                         AISquads[spawnData.leaderName].Add(sosigScript);
@@ -820,17 +877,11 @@ namespace EFM
                     else
                     {
                         AISquads.Add(spawnData.leaderName, new List<Sosig> { sosigScript });
-                        TODO: Figure out how to commandpathto on a squad, must wait until they are all spawned so we can path them together
                     }
-
-                    sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
-                    sosigScript.FallbackOrder = Sosig.SosigOrder.Wander;
-
-                    sosigScript.SetCurrentOrder(sosigScript.FallbackOrder);
                     break;
 
             }
-            sosigScript.SetIFF(iff); // 0 - Player, 1 - Scav, Increment after that for each PMC and squads of raiders or boss/followers
+            sosigScript.SetIFF(iff);
             sosigScript.SetOriginalIFFTeam(iff);
 
             spawning = false;
@@ -839,11 +890,17 @@ namespace EFM
 
         public void OnBotKill(Sosig sosig)
         {
-            TODO: call this on sosig kill
             --spawnedIFFs[sosig.GetIFF()];
             if(spawnedIFFs[sosig.GetIFF()] == 0)
             {
                 availableIFFs.Add(sosig.GetIFF());
+            }
+
+            // If player killed this bot
+            if(sosig.GetDiedFromIFF() == 0)
+            {
+                Mod.AddExperience(sosig.GetComponent<EFM_AI>().experienceReward);
+                // TODO: Also add to kill list so we can show to player after the raid
             }
         }
 
@@ -916,6 +973,9 @@ namespace EFM
                 zone.gameObject.AddComponent<EFM_BotZone>();
             }
 
+            // Subscribe to events
+            GM.CurrentSceneSettings.SosigKillEvent += this.OnBotKill;
+
             // Get location's base data
             locationData = Mod.locationsBaseDB[GetLocationDataIndex(Mod.chosenMapIndex)];
             float averageLevel = (float)locationData["AveragePlayerLevel"];
@@ -928,6 +988,7 @@ namespace EFM
             spawnedIFFs = new int[32];
             AISquadIFFs = new Dictionary<string, int>();
             AISquads = new Dictionary<string, List<Sosig>>();
+            AISquadSizes = new Dictionary<string, int>();
 
             // Bosses
             if (spawnCultPriest)
@@ -946,6 +1007,8 @@ namespace EFM
 
                     AISpawns.Add(newFollowerAISpawn);
                 }
+
+                AISquadSizes.Add("CultPriest", cultPriestFollowerCount + 1);
             }
             if (spawnGlukhar)
             {
@@ -981,6 +1044,8 @@ namespace EFM
                 newSniperFollowerAISpawn.spawnTime = 0;
 
                 AISpawns.Add(newSniperFollowerAISpawn);
+
+                AISquadSizes.Add("Glukhar", 7);
             }
             if (spawnKilla)
             {
@@ -1006,6 +1071,8 @@ namespace EFM
 
                     AISpawns.Add(newFollowerAISpawn);
                 }
+
+                AISquadSizes.Add("Reshala", 5);
             }
             if (spawnSanitar)
             {
@@ -1023,6 +1090,8 @@ namespace EFM
 
                     AISpawns.Add(newFollowerAISpawn);
                 }
+
+                AISquadSizes.Add("Sanitar", 3);
             }
             if (spawnShturman)
             {
@@ -1040,6 +1109,8 @@ namespace EFM
 
                     AISpawns.Add(newFollowerAISpawn);
                 }
+
+                AISquadSizes.Add("Shturman", 3);
             }
             if (spawnTagilla)
             {
@@ -1113,8 +1184,10 @@ namespace EFM
                 }
 
                 int escortSize = (int)wave["BossEscortAmount"][UnityEngine.Random.Range(0, (wave["BossEscortAmount"] as JArray).Count)];
-                
-                AISpawn newAISpawn = GenerateAISpawn(raiderBotData, AISpawn.AISpawnType.Boss, averageLevel, "Raider" + raiderSquadIndex);
+                string raiderSquadName = "Raider" + raiderSquadIndex;
+
+
+                AISpawn newAISpawn = GenerateAISpawn(raiderBotData, AISpawn.AISpawnType.Boss, averageLevel, raiderSquadName);
                 float spawnTime = (float)wave["Time"];
                 if (spawnTime == -1)
                 {
@@ -1129,11 +1202,13 @@ namespace EFM
 
                 for (int i = 0; i < escortSize; ++i)
                 {
-                    AISpawn newFollowerAISpawn = GenerateAISpawn(raiderBotData, AISpawn.AISpawnType.Follower, averageLevel, "Raider");
+                    AISpawn newFollowerAISpawn = GenerateAISpawn(raiderBotData, AISpawn.AISpawnType.Follower, averageLevel, raiderSquadName);
                     newFollowerAISpawn.spawnTime = newAISpawn.spawnTime;
 
                     AISpawns.Add(newFollowerAISpawn);
                 }
+
+                AISquadSizes.Add(raiderSquadName, escortSize);
             }
 
             // Sort the spawns by spawn time decreasing
@@ -1163,6 +1238,7 @@ namespace EFM
         {
             AISpawn newAISpawn = new AISpawn();
             newAISpawn.type = AIType;
+            newAISpawn.experienceReward = UnityEngine.Random.Range((int)botData.experience["reward"]["min"], (int)botData.experience["reward"]["max"]);
             newAISpawn.inventory = new AIInventory();
             newAISpawn.inventory.generic = new List<string>();
             newAISpawn.outfitByLink = new Dictionary<int, List<string>>();
@@ -3525,6 +3601,7 @@ namespace EFM
         public AISpawnType type;
         public string name;
         public string leaderName;
+        public int experienceReward;
 
         public AIInventory inventory;
 
