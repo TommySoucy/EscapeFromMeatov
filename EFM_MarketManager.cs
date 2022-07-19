@@ -961,17 +961,17 @@ namespace EFM
 
                     // Write price to item icon and set correct currency icon
                     Sprite currencySprite = null;
-                    string currencyItemID = "";
+                    //string currencyItemID = "";
                     if (trader.currency == 0)
                     {
                         currencySprite = EFM_Base_Manager.roubleCurrencySprite;
-                        currencyItemID = "203";
+                        //currencyItemID = "203";
                     }
                     else if (trader.currency == 1)
                     {
                         currencySprite = EFM_Base_Manager.dollarCurrencySprite;
                         itemValue = (int)Mathf.Max(itemValue * 0.008f, 1); // Adjust item value
-                        currencyItemID = "201";
+                        //currencyItemID = "201";
                     }
                     marketItemView.value = itemValue;
                     totalSellingPrice += itemValue;

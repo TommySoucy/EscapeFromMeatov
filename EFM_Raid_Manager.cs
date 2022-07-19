@@ -617,7 +617,7 @@ namespace EFM
                 Mod.extractionUI.SetActive(false);
             }
 
-            UpdateEffects();
+            //UpdateEffects();
 
             UpdateAI();
 
@@ -634,7 +634,7 @@ namespace EFM
                 // Check if time is >= spawnTime on next AISpawn in list, if it is, spawn it at spawnpoint depending on AIType
                 if(AISpawns.Count > 0 && !spawning && AISpawns[AISpawns.Count - 1].spawnTime <= raidTime)
                 {
-                    SpawnAI(AISpawns[AISpawns.Count - 1]);
+                    AnvilManager.Run(SpawnAI(AISpawns[AISpawns.Count - 1]));
                     AISpawns.RemoveAt(AISpawns.Count - 1);
                 }
             }
@@ -646,9 +646,11 @@ namespace EFM
 
         private IEnumerator SpawnAI(AISpawn spawnData)
         {
+            Mod.instance.LogInfo("SPAWNAI: SpawnAI called with name "+spawnData.name+" of type: "+spawnData.type);
             spawning = true;
             yield return IM.OD["SosigBody_Default"].GetGameObjectAsync();
             GameObject sosigPrefab = IM.OD["SosigBody_Default"].GetGameObject();
+            Mod.instance.LogInfo("SPAWNAI " + spawnData.name+": \tGot sosig body prefab, null?: "+(sosigPrefab == null));
 
             // TODO: Make sure that wherever we spawn a bot, it is far enough from player, and there is no direct line of sight between player and potential spawnpoint
             Transform AISpawnPoint = null;
@@ -722,15 +724,21 @@ namespace EFM
                     break;
             }
 
+            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tGot spawnpoint at " + AISpawnPoint.position);
+
             GameObject sosigObject = Instantiate(sosigPrefab, AISpawnPoint.position, AISpawnPoint.rotation);
+            sosigObject.name = spawnData.type.ToString() + " AI ("+spawnData.name+")";
+            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tInstantiated sosig, position: " + sosigObject.transform.position);
             Sosig sosigScript = sosigObject.GetComponentInChildren<Sosig>();
             sosigScript.InitHands();
+            sosigScript.CanBeKnockedOut = false;
             sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for weapon
             sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for grenade
             sosigScript.Inventory.Init();
 
             EFM_AI AIScript = sosigObject.AddComponent<EFM_AI>();
             AIScript.experienceReward = spawnData.experienceReward;
+            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tAdded EFM_AI script");
 
             // Spawn outfit
             foreach (KeyValuePair<int, List<string>> outfitEntry in spawnData.outfitByLink)
@@ -744,23 +752,37 @@ namespace EFM
                     wearableScript.RegisterWearable(link);
                 }
             }
+            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawned outfit items");
 
             // Spawn sosig weapon and grenade
-            yield return IM.OD[spawnData.sosigWeapon].GetGameObjectAsync();
-            GameObject weaponObject = Instantiate(IM.OD[spawnData.sosigWeapon].GetGameObject());
-            SosigWeapon sosigWeapon = weaponObject.GetComponent<SosigWeapon>();
-            sosigWeapon.SetAutoDestroy(true);
-            sosigScript.ForceEquip(sosigWeapon);
-            if (sosigWeapon.Type == SosigWeapon.SosigWeaponType.Gun)
+            if (spawnData.sosigWeapon != null)
             {
-                sosigScript.Inventory.FillAmmoWithType(sosigWeapon.AmmoType);
+                yield return IM.OD[spawnData.sosigWeapon].GetGameObjectAsync();
+                GameObject weaponObject = Instantiate(IM.OD[spawnData.sosigWeapon].GetGameObject());
+                SosigWeapon sosigWeapon = weaponObject.GetComponent<SosigWeapon>();
+                Destroy(sosigWeapon.GetComponent<SosigWeaponPlayerInterface>());
+                sosigWeapon.SetAutoDestroy(true);
+                sosigScript.ForceEquip(sosigWeapon);
+                if (sosigWeapon.Type == SosigWeapon.SosigWeaponType.Gun)
+                {
+                    sosigScript.Inventory.FillAmmoWithType(sosigWeapon.AmmoType);
+                }
+            }
+            else
+            {
+                Mod.instance.LogError(spawnData.type.ToString() + " type AI with name: " + spawnData.name + ", has no weapon");
             }
 
-            yield return IM.OD[spawnData.sosigGrenade].GetGameObjectAsync();
-            GameObject grenadeObject = Instantiate(IM.OD[spawnData.sosigGrenade].GetGameObject());
-            SosigWeapon sosigGrenade = grenadeObject.GetComponent<SosigWeapon>();
-            sosigGrenade.SetAutoDestroy(true);
-            sosigScript.ForceEquip(sosigWeapon);
+            if (spawnData.sosigGrenade != null)
+            {
+                yield return IM.OD[spawnData.sosigGrenade].GetGameObjectAsync();
+                GameObject grenadeObject = Instantiate(IM.OD[spawnData.sosigGrenade].GetGameObject());
+                SosigWeapon sosigGrenade = grenadeObject.GetComponent<SosigWeapon>();
+                Destroy(sosigGrenade.GetComponent<SosigWeaponPlayerInterface>());
+                sosigGrenade.SetAutoDestroy(true);
+                sosigScript.ForceEquip(sosigGrenade);
+            }
+            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawned weapons");
 
             // Set sosig logic (IFF, path, TODO: difficulty vars, etc)
             int iff = 0;
@@ -813,7 +835,7 @@ namespace EFM
                     PMCPoints.Add(PMCExtractionPoints.GetChild(UnityEngine.Random.Range(0, PMCExtractionPoints.childCount)));
 
                     // Send the path to sosigs using Sosig.CommandPathTo
-                    sosigScript.CommandPathTo(PMCPoints, 0.1f, new Vector2(2, 5), 0.5f, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Once, AISquads[spawnData.leaderName], 45, 1, true, 5);
+                    sosigScript.CommandPathTo(PMCPoints, 0.1f, new Vector2(2, 5), 0.5f, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Once, null, 45, 1, true, 5);
                     break;
                 case AISpawn.AISpawnType.Boss:
                 case AISpawn.AISpawnType.Follower:
@@ -837,7 +859,7 @@ namespace EFM
                     }
                     ++spawnedIFFs[iff];
 
-                    if(AISquadSizes[spawnData.leaderName] == AISquads[spawnData.leaderName].Count + 1)
+                    if((AISquads.ContainsKey(spawnData.leaderName) && AISquadSizes[spawnData.leaderName] == AISquads[spawnData.leaderName].Count + 1) || AISquadSizes[spawnData.leaderName] == 1)
                     {
                         // Generate a path to random points in the map
                         Transform pointsParentsRoot = transform.GetChild(transform.childCount - 3);
@@ -881,8 +903,11 @@ namespace EFM
                     break;
 
             }
+            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawning with IFF: "+iff);
             sosigScript.SetIFF(iff);
             sosigScript.SetOriginalIFFTeam(iff);
+
+            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tConfigured AI");
 
             spawning = false;
             yield break;
@@ -890,10 +915,11 @@ namespace EFM
 
         public void OnBotKill(Sosig sosig)
         {
-            --spawnedIFFs[sosig.GetIFF()];
-            if(spawnedIFFs[sosig.GetIFF()] == 0)
+            // Here we use GetOriginalIFFTeam instead of GetIFF because the actual IFF gets set to -3 on sosig death, original doesn't change
+            --spawnedIFFs[sosig.GetOriginalIFFTeam()];
+            if(spawnedIFFs[sosig.GetOriginalIFFTeam()] == 0)
             {
-                availableIFFs.Add(sosig.GetIFF());
+                availableIFFs.Add(sosig.GetOriginalIFFTeam());
             }
 
             // If player killed this bot
@@ -945,8 +971,6 @@ namespace EFM
             //Tagilla - bosstagilla
             bool spawnTagilla = false;
 
-            int raiderSpawnCount = 0;
-
             switch (Mod.chosenMapIndex)
             {
                 case 0: // Factory
@@ -981,6 +1005,11 @@ namespace EFM
             float averageLevel = (float)locationData["AveragePlayerLevel"];
             float maxRaidTime = (float)locationData["escape_time_limit"] * 60;
             maxBotPerZone = (int)locationData["MaxBotPerZone"];
+
+            // Add AIManager to map
+            gameObject.AddComponent<AIManager>();
+            GM.CurrentAIManager.SonicThresholdDecayCurve = AnimationCurve.Linear(0, 1, 1, 0);
+            GM.CurrentAIManager.LoudnessFalloff = AnimationCurve.Linear(0, 1, 1, 0);
 
             AISpawns = new List<AISpawn>();
             AISquadSpawnTransforms = new Dictionary<string, Transform>();
@@ -1137,9 +1166,9 @@ namespace EFM
             // Scav
             BotData assaultBotData = GetBotData("assault");
             BotData marksmanBotData = GetBotData("marksman");
-            foreach (JObject wave in locationData["waves"])
+            foreach (JObject wave in (locationData["waves"] as JArray))
             {
-                int scavSpawnCount = UnityEngine.Random.Range((int)wave["slots_min"], (int)locationData["slots_max"] + 1);
+                int scavSpawnCount = UnityEngine.Random.Range((int)wave["slots_min"], (int)wave["slots_max"] + 1);
                 string spawnType = wave["WildSpawnType"].ToString();
                 BotData botDataToUse = null;
                 switch (spawnType)
@@ -1151,7 +1180,7 @@ namespace EFM
                         botDataToUse = marksmanBotData;
                         break;
                     default:
-                        Mod.instance.LogError("Unexpected scav spawn type: "+spawnType);
+                        Mod.instance.LogError("Unexpected scav spawn type: " + spawnType);
                         continue;
                 }
 
@@ -1176,14 +1205,14 @@ namespace EFM
             // Raiders
             int raiderSquadIndex = 0;
             BotData raiderBotData = GetBotData("pmcbot");
-            foreach (JObject wave in locationData["BossLocationSpawn"])
+            foreach (JObject wave in (locationData["BossLocationSpawn"] as JArray))
             {
                 if (!wave["BossName"].ToString().Equals("pmcBot") || UnityEngine.Random.value > ((float)wave["BossChance"]) / 100) 
                 {
                     continue;
                 }
 
-                int escortSize = (int)wave["BossEscortAmount"][UnityEngine.Random.Range(0, (wave["BossEscortAmount"] as JArray).Count)];
+                int escortSize = (int)wave["BossEscortAmount"][UnityEngine.Random.Range(0, (wave["BossEscortAmount"] as JArray).Count)] + 1;
                 string raiderSquadName = "Raider" + raiderSquadIndex;
 
 
@@ -1228,6 +1257,8 @@ namespace EFM
                         AISpawn temp = AISpawns[i];
                         AISpawns[i] = AISpawns[i - 1];
                         AISpawns[i - 1] = temp;
+
+                        moved = true;
                     }
                 }
                 sorted = !moved;
@@ -1236,12 +1267,6 @@ namespace EFM
 
         private AISpawn GenerateAISpawn(BotData botData, AISpawn.AISpawnType AIType, float averageLevel, string leaderName = null)
         {
-            AISpawn newAISpawn = new AISpawn();
-            newAISpawn.type = AIType;
-            newAISpawn.experienceReward = UnityEngine.Random.Range((int)botData.experience["reward"]["min"], (int)botData.experience["reward"]["max"]);
-            newAISpawn.inventory = new AIInventory();
-            newAISpawn.inventory.generic = new List<string>();
-            newAISpawn.outfitByLink = new Dictionary<int, List<string>>();
 
             bool USEC = UnityEngine.Random.value <= 0.5;
             BotData botDataToUse = botData;
@@ -1255,11 +1280,22 @@ namespace EFM
                 {
                     botDataToUse = GetBotData("bear");
                 }
+                Mod.instance.LogInfo("\tGot PMC bot data");
             }
+
+            Mod.instance.LogInfo("GenerateAISpawn called, botData null?: " + (botDataToUse == null) + ", with type: " + AIType + " and name: " + (leaderName != null ? leaderName : "None"));
+            AISpawn newAISpawn = new AISpawn();
+            newAISpawn.type = AIType;
+            newAISpawn.experienceReward = UnityEngine.Random.Range((int)botDataToUse.experience["reward"]["min"], (int)botDataToUse.experience["reward"]["max"]);
+            newAISpawn.inventory = new AIInventory();
+            newAISpawn.inventory.generic = new List<string>();
+            newAISpawn.outfitByLink = new Dictionary<int, List<string>>();
+            Mod.instance.LogInfo("\tInited newAISpawn");
 
             float level = Mathf.Min(80, ExpDistrRandOnAvg(averageLevel));
 
             newAISpawn.name = botDataToUse.names[UnityEngine.Random.Range(0, botDataToUse.names.Count)].ToString();
+            Mod.instance.LogInfo("\tgot level: "+level+" and name: "+newAISpawn.name);
 
             if (AIType == AISpawn.AISpawnType.PMC)
             {
@@ -1273,10 +1309,12 @@ namespace EFM
                 }
                 newAISpawn.inventory.dogtagLevel = (int)level;
                 newAISpawn.inventory.dogtagName = newAISpawn.name;
+                Mod.instance.LogInfo("\tSet dogtag");
             }
-            else if(AIType == AISpawn.AISpawnType.Boss || AIType == AISpawn.AISpawnType.Follower)
+            else if(AIType == AISpawn.AISpawnType.Boss || AIType == AISpawn.AISpawnType.Follower || AIType == AISpawn.AISpawnType.Raider)
             {
                 newAISpawn.leaderName = leaderName;
+                Mod.instance.LogInfo("\tSet leader name");
             }
 
             // Get inventory data corresponding to level
@@ -1289,10 +1327,12 @@ namespace EFM
                     break;
                 }
             }
+            Mod.instance.LogInfo("\tGot inventory data");
 
             // TODO: Set variables for difficulty
 
             // Set equipment
+            Mod.instance.LogInfo("\tSetting head equipment");
             string[] headSlots = { "Headwear", "Earpiece", "FaceCover", "Eyewear" };
             bool[] headEquipImpossible = new bool[4];
             List<int> headOrder = new List<int> { 0, 1, 2, 3 };
@@ -1305,6 +1345,7 @@ namespace EFM
                     continue;
                 }
                 string actualEquipName = headSlots[actualEquipIndex];
+                Mod.instance.LogInfo("\t\tSetting "+actualEquipName);
 
                 if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"][actualEquipName]) / 100)
                 {
@@ -1315,11 +1356,13 @@ namespace EFM
                         if (Mod.itemMap.ContainsKey(headEquipID))
                         {
                             string actualHeadEquipID = Mod.itemMap[headEquipID];
+                            Mod.instance.LogInfo("\t\t\tChosen ID: " + actualHeadEquipID);
                             newAISpawn.inventory.generic.Add(actualHeadEquipID);
 
                             // Add sosig outfit item if applicable
                             if (Mod.globalDB["AIItemMap"][actualHeadEquipID] != null)
                             {
+                                Mod.instance.LogInfo("\t\t\t\tGot in AIItemMap");
                                 JObject outfitItemData = Mod.globalDB["AIItemMap"][actualHeadEquipID] as JObject;
                                 int linkIndex = (int)outfitItemData["Link"];
                                 List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
@@ -1331,6 +1374,7 @@ namespace EFM
                                 {
                                     newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
                                 }
+                                Mod.instance.LogInfo("\t\t\t\tAdded to outfitByLink");
                             }
 
                             // Add any restrictions implied by this item
@@ -1351,6 +1395,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting tact vest");
             FVRPhysicalObject.FVRPhysicalObjectSize[] rigSlotSizes = null;
             List<string> rigWhitelist = new List<string>();
             List<string> rigBlacklist = new List<string>();
@@ -1364,11 +1409,13 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(rigID))
                     {
                         string actualRigID = Mod.itemMap[rigID];
+                        Mod.instance.LogInfo("\t\tChosen ID: " + actualRigID);
                         newAISpawn.inventory.rig = actualRigID;
 
                         // Add sosig outfit item if applicable
                         if (Mod.globalDB["AIItemMap"][actualRigID] != null)
                         {
+                            Mod.instance.LogInfo("\t\t\tGot in AIItemMap");
                             JObject outfitItemData = Mod.globalDB["AIItemMap"][actualRigID] as JObject;
                             int linkIndex = (int)outfitItemData["Link"];
                             List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
@@ -1380,6 +1427,7 @@ namespace EFM
                             {
                                 newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
                             }
+                            Mod.instance.LogInfo("\t\t\tAdded to outfitByLink");
                         }
 
                         // Get prefab of the rig to get the sizes and number of slots
@@ -1399,6 +1447,7 @@ namespace EFM
                         rigWhitelist = rigCIW.whiteList;
                         rigBlacklist = rigCIW.blackList;
                         rigArmored = rigCIW.itemType == Mod.ItemType.ArmoredRig;
+                        Mod.instance.LogInfo("\t\tProcessed data from rig CIW");
                     }
                     else
                     {
@@ -1409,6 +1458,7 @@ namespace EFM
 
             if (!rigArmored)
             {
+                Mod.instance.LogInfo("\tSetting armor");
                 if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["ArmorVest"]) / 100)
                 {
                     JArray possibleArmors = inventoryDataToUse["equipment"]["ArmorVest"] as JArray;
@@ -1418,11 +1468,13 @@ namespace EFM
                         if (Mod.itemMap.ContainsKey(armorID))
                         {
                             string actualArmorID = Mod.itemMap[armorID];
+                            Mod.instance.LogInfo("\t\tChosen ID: " + actualArmorID);
                             newAISpawn.inventory.generic.Add(actualArmorID);
 
                             // Add sosig outfit item if applicable
                             if (Mod.globalDB["AIItemMap"][actualArmorID] != null)
                             {
+                                Mod.instance.LogInfo("\t\t\tGot in AIItemMap");
                                 JObject outfitItemData = Mod.globalDB["AIItemMap"][actualArmorID] as JObject;
                                 int linkIndex = (int)outfitItemData["Link"];
                                 List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
@@ -1434,6 +1486,7 @@ namespace EFM
                                 {
                                     newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
                                 }
+                                Mod.instance.LogInfo("\t\t\tAdded to outfitByLink");
                             }
                         }
                         else
@@ -1444,6 +1497,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting backpack");
             List<string> backpackWhitelist = new List<string>();
             List<string> backpackBlacklist = new List<string>();
             float maxBackpackVolume = -1;
@@ -1456,11 +1510,13 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(backpackID))
                     {
                         string actualBackpackID = Mod.itemMap[backpackID];
+                        Mod.instance.LogInfo("\t\tChosen ID: " + actualBackpackID);
                         newAISpawn.inventory.backpack = actualBackpackID;
 
                         // Add sosig outfit item if applicable
                         if (Mod.globalDB["AIItemMap"][actualBackpackID] != null)
                         {
+                            Mod.instance.LogInfo("\t\t\tGot in AIItemMap");
                             JObject outfitItemData = Mod.globalDB["AIItemMap"][actualBackpackID] as JObject;
                             int linkIndex = (int)outfitItemData["Link"];
                             List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
@@ -1472,6 +1528,7 @@ namespace EFM
                             {
                                 newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
                             }
+                            Mod.instance.LogInfo("\t\t\tAdded to outfitByLink");
                         }
 
                         // Get backpack data
@@ -1481,6 +1538,7 @@ namespace EFM
                         backpackBlacklist = defaultBackpackData["ContainerProperties"]["BlackList"].ToObject<List<string>>();
                         maxBackpackVolume = (float)defaultBackpackData["BackpackProperties"]["MaxVolume"];
                         newAISpawn.inventory.backpackContents = new List<string>();
+                        Mod.instance.LogInfo("\tProcessed backpack data");
                     }
                     else
                     {
@@ -1489,6 +1547,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting weapon");
             bool hasSosigWeapon = false;
             string[] ammoContainers = new string[3];
             string[] weaponCartridges = new string[3];
@@ -1501,11 +1560,13 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(PWID))
                     {
                         string actualPWID = Mod.itemMap[PWID];
+                        Mod.instance.LogInfo("\t\tChosen ID: " + actualPWID);
                         newAISpawn.inventory.primaryWeapon = actualPWID;
 
                         // Add sosig weapon
                         if (Mod.globalDB["AIWeaponMap"][actualPWID] != null)
                         {
+                            Mod.instance.LogInfo("\t\t\tGot in AIWeaponMap");
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualPWID].ToString();
                             hasSosigWeapon = true;
                         }
@@ -1523,6 +1584,7 @@ namespace EFM
                         {
                             Mod.instance.LogError("AI FirstPrimaryWeapon with ID: "+ actualPWID +" is not a firearm");
                         }
+                        Mod.instance.LogInfo("\t\tProcessed weapon data and mods");
                     }
                     else
                     {
@@ -1531,6 +1593,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting secondary weapon");
             if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["SecondPrimaryWeapon"]) / 100)
             {
                 JArray possibleSW = inventoryDataToUse["equipment"]["SecondPrimaryWeapon"] as JArray;
@@ -1540,11 +1603,13 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(SWID))
                     {
                         string actualSWID = Mod.itemMap[SWID];
+                        Mod.instance.LogInfo("\t\tChosen ID: " + actualSWID);
                         newAISpawn.inventory.secondaryWeapon = actualSWID;
 
                         // Add sosig weapon if necessary
                         if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualSWID] != null)
                         {
+                            Mod.instance.LogInfo("\t\t\tGot in AIWeaponMap");
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualSWID].ToString();
                             hasSosigWeapon = true;
                         }
@@ -1562,6 +1627,7 @@ namespace EFM
                         {
                             Mod.instance.LogError("AI SecondPrimaryWeapon with ID: " + actualSWID + " is not a firearm");
                         }
+                        Mod.instance.LogInfo("\t\tProcessed weapon data and mods");
                     }
                     else
                     {
@@ -1570,6 +1636,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting holster");
             if (rigSlotSizes != null && UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["Holster"]) / 100)
             {
                 JArray possibleHolster = inventoryDataToUse["equipment"]["Holster"] as JArray;
@@ -1579,6 +1646,7 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(holsterID))
                     {
                         string actualHolsterID = Mod.itemMap[holsterID];
+                        Mod.instance.LogInfo("\t\tChosen ID: " + actualHolsterID);
                         newAISpawn.inventory.holster = actualHolsterID;
 
                         // Set to holster slot in rig
@@ -1594,6 +1662,7 @@ namespace EFM
                         // Add sosig weapon if necessary
                         if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualHolsterID] != null)
                         {
+                            Mod.instance.LogInfo("\t\t\tGot in AIWeaponMap");
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualHolsterID].ToString();
                             hasSosigWeapon = true;
                         }
@@ -1611,6 +1680,7 @@ namespace EFM
                         {
                             Mod.instance.LogError("AI Holster with ID: " + actualHolsterID + " is not a firearm");
                         }
+                        Mod.instance.LogInfo("\t\tProcessed weapon data and mods");
                     }
                     else
                     {
@@ -1619,6 +1689,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting Scabbard");
             if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["Scabbard"]) / 100)
             {
                 JArray possibleScabbard = inventoryDataToUse["equipment"]["Scabbard"] as JArray;
@@ -1628,11 +1699,13 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(scabbardID))
                     {
                         string actualScabbardID = Mod.itemMap[scabbardID];
+                        Mod.instance.LogInfo("\t\tChosen ID: " + actualScabbardID);
                         newAISpawn.inventory.generic.Add(actualScabbardID);
 
                         // Add sosig weapon if necessary
                         if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualScabbardID] != null)
                         {
+                            Mod.instance.LogInfo("\t\t\tGot in AIWeaponMap");
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualScabbardID].ToString();
                             hasSosigWeapon = true;
                         }
@@ -1644,10 +1717,16 @@ namespace EFM
                 }
             }
 
+            if (!hasSosigWeapon)
+            {
+                Mod.instance.LogError(AIType.ToString() + " typr AI with name: " + newAISpawn.name+", has no weapon");
+            }
+
             // Set items depending on generation limits
             int pocketsUsed = 0;
             float currentBackpackVolume = 0;
 
+            Mod.instance.LogInfo("\tSetting magazines");
             int ammoContainerItemMin = (int)botDataToUse.generation["items"]["magazines"]["min"];
             int ammoContainerItemMax = (int)botDataToUse.generation["items"]["magazines"]["max"];
             if (ammoContainerItemMax > 0)
@@ -1659,9 +1738,11 @@ namespace EFM
                         continue;
                     }
 
+                    Mod.instance.LogInfo("\t\tFor weapon index: "+ k);
                     for (int i = 0; i < ammoContainerItemMax; ++i)
                     {
                         string ammoContainerItemID = ammoContainers[k];
+                        Mod.instance.LogInfo("\t\t\tGot ammoContainerItemID: "+ ammoContainerItemID);
                         object[] ammoContainerItemData = GetItemData(ammoContainerItemID);
 
                         if (i >= ammoContainerItemMin && UnityEngine.Random.value > (float.Parse(ammoContainerItemData[2] as string) / 100))
@@ -1673,6 +1754,7 @@ namespace EFM
                         float ammoContainerItemVolume = float.Parse(ammoContainerItemData[1] as string);
 
                         // First try to put in rig, then pockets, then backpack
+                        bool success = false;
                         if (rigSlotSizes != null)
                         {
                             for (int j = 0; j < rigSlotSizes.Length; ++j)
@@ -1680,104 +1762,116 @@ namespace EFM
                                 if (newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)ammoContainerItemSize)
                                 {
                                     newAISpawn.inventory.rigContents[j] = ammoContainerItemID;
+                                    success = true;
                                     break;
                                 }
                             }
                         }
-                        else if (ammoContainerItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                        if (!success && ammoContainerItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
                         {
                             newAISpawn.inventory.generic.Add(ammoContainerItemID);
                             ++pocketsUsed;
+                            success = true;
                         }
-                        else if (maxBackpackVolume > 0 && currentBackpackVolume + ammoContainerItemVolume <= maxBackpackVolume)
+                        if (!success && maxBackpackVolume > 0 && currentBackpackVolume + ammoContainerItemVolume <= maxBackpackVolume)
                         {
                             newAISpawn.inventory.backpackContents.Add(ammoContainerItemID);
                             currentBackpackVolume += ammoContainerItemVolume;
                         }
+                        Mod.instance.LogInfo("\t\t\tAdded to inventory");
                     }
                 }
             }
 
             // Fill lists of possible types of items for specific parts
+            Mod.instance.LogInfo("\tGetting part specific content");
             Dictionary<string, object[]> possibleHealingItems = new Dictionary<string, object[]>(); // 0 - List of part indices, 1 - size, 2 - volume, 3 - spawn chance
             Dictionary<string, object[]> possibleGrenades = new Dictionary<string, object[]>();
             Dictionary<string, object[]> possibleLooseLoot = new Dictionary<string, object[]>();
             string[] itemParts = new string[] { "TacticalVest", "Pockets", "Backpack" };
-            for (int i = 0; i < 3; ++i) 
+            for (int i = 0; i < 3; ++i)
             {
                 foreach (string itemID in inventoryDataToUse["items"][itemParts[i]])
                 {
-                    string actualItemID = Mod.itemMap[itemID];
-                    GameObject itemPrefab = null;
-                    bool custom = false;
-                    if(int.TryParse(actualItemID, out int parseResult))
+                    if (Mod.itemMap.ContainsKey(itemID))
                     {
-                        itemPrefab = Mod.itemPrefabs[parseResult];
-                        custom = true;
-                    }
-                    else
-                    {
-                        itemPrefab = IM.OD[actualItemID].GetGameObject();
-                    }
-                    List<string> itemParents = null;
-                    float itemVolume = 0;
-                    float itemSpawnChance = 0;
-                    FVRPhysicalObject itemPhysObj = null;
-                    if (custom)
-                    {
-                        EFM_CustomItemWrapper itemCIW = itemPrefab.GetComponentInChildren<EFM_CustomItemWrapper>();
-                        itemParents = itemCIW.parents;
-                        itemVolume = itemCIW.volumes[0];
-                        itemSpawnChance = itemCIW.spawnChance;
-                    }
-                    else
-                    {
-                        EFM_VanillaItemDescriptor itemVID = itemPrefab.GetComponentInChildren<EFM_VanillaItemDescriptor>();
-                        itemParents = itemVID.parents;
-                        itemVolume = Mod.itemVolumes[actualItemID];
-                        itemSpawnChance = itemVID.spawnChance;
-                    }
-                    itemPhysObj = itemPrefab.GetComponentInChildren<FVRPhysicalObject>();
+                        string actualItemID = Mod.itemMap[itemID];
+                        GameObject itemPrefab = null;
+                        bool custom = false;
+                        if (int.TryParse(actualItemID, out int parseResult))
+                        {
+                            itemPrefab = Mod.itemPrefabs[parseResult];
+                            custom = true;
+                        }
+                        else
+                        {
+                            itemPrefab = IM.OD[actualItemID].GetGameObject();
+                        }
+                        List<string> itemParents = null;
+                        float itemVolume = 0;
+                        float itemSpawnChance = 0;
+                        FVRPhysicalObject itemPhysObj = null;
+                        if (custom)
+                        {
+                            EFM_CustomItemWrapper itemCIW = itemPrefab.GetComponentInChildren<EFM_CustomItemWrapper>();
+                            itemParents = itemCIW.parents;
+                            itemVolume = itemCIW.volumes[0];
+                            itemSpawnChance = itemCIW.spawnChance;
+                        }
+                        else
+                        {
+                            EFM_VanillaItemDescriptor itemVID = itemPrefab.GetComponentInChildren<EFM_VanillaItemDescriptor>();
+                            itemParents = itemVID.parents;
+                            itemVolume = Mod.itemVolumes[actualItemID];
+                            itemSpawnChance = itemVID.spawnChance;
+                        }
+                        itemPhysObj = itemPrefab.GetComponentInChildren<FVRPhysicalObject>();
 
-                    if (itemParents.Contains("5448f3ac4bdc2dce718b4569")) // Medical item
-                    {
-                        if (possibleHealingItems.ContainsKey(actualItemID))
+                        if (itemParents.Contains("5448f3ac4bdc2dce718b4569")) // Medical item
                         {
-                            (possibleHealingItems[actualItemID][0] as List<int>).Add(i);
+                            if (possibleHealingItems.ContainsKey(actualItemID))
+                            {
+                                (possibleHealingItems[actualItemID][0] as List<int>).Add(i);
+                            }
+                            else
+                            {
+                                possibleHealingItems.Add(actualItemID, new object[] { new List<int> { i }, ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() });
+                            }
                         }
-                        else
+                        else if (itemParents.Contains("543be6564bdc2df4348b4568")) // Grenade
                         {
-                            possibleHealingItems.Add(actualItemID, new object[] { new List<int> { i }, ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() });
+                            if (possibleGrenades.ContainsKey(actualItemID))
+                            {
+                                (possibleGrenades[actualItemID][0] as List<int>).Add(i);
+                            }
+                            else
+                            {
+                                possibleGrenades.Add(actualItemID, new object[] { new List<int> { i }, ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() });
+                            }
                         }
-                    }
-                    else if (itemParents.Contains("543be6564bdc2df4348b4568")) // Grenade
-                    {
-                        if (possibleGrenades.ContainsKey(actualItemID))
+                        else // Loose loot
                         {
-                            (possibleGrenades[actualItemID][0] as List<int>).Add(i);
-                        }
-                        else
-                        {
-                            possibleGrenades.Add(actualItemID, new object[] { new List<int> { i }, ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() });
-                        }
-                    }
-                    else
-                    {
-                        if (possibleLooseLoot.ContainsKey(actualItemID))
-                        {
-                            (possibleLooseLoot[actualItemID][0] as List<int>).Add(i);
-                        }
-                        else
-                        {
-                            possibleLooseLoot.Add(actualItemID, new object[] { new List<int> { i }, ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() });
+                            if (possibleLooseLoot.ContainsKey(actualItemID))
+                            {
+                                (possibleLooseLoot[actualItemID][0] as List<int>).Add(i);
+                            }
+                            else
+                            {
+                                possibleLooseLoot.Add(actualItemID, new object[] { new List<int> { i }, ((int)itemPhysObj.Size).ToString(), itemVolume.ToString(), itemSpawnChance.ToString() });
+                            }
                         }
                     }
                 }
             }
 
+            Mod.instance.LogInfo("\t Got a list of " + possibleHealingItems.Count + " possible healing items");
+            Mod.instance.LogInfo("\t Got a list of " + possibleGrenades.Count + " possible grenades");
+            Mod.instance.LogInfo("\t Got a list of " + possibleLooseLoot.Count + " possible loose loot items");
+
+            Mod.instance.LogInfo("\tSetting healing items");
             int healingItemMin = (int)botDataToUse.generation["items"]["healing"]["min"];
             int healingItemMax = (int)botDataToUse.generation["items"]["healing"]["max"];
-            if (healingItemMax > 0)
+            if (healingItemMax > 0 && possibleHealingItems.Count > 0)
             {
                 List<string> healingItemKeyList = new List<string>(possibleHealingItems.Keys);
                 for (int i=0; i < healingItemMax; ++i)
@@ -1795,23 +1889,27 @@ namespace EFM
                     float healingItemVolume = float.Parse(healingItemData[2] as string);
 
                     // First try to put in pockets, then backpack, then rig
-                    if(possibleParts.Contains(1) && healingItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    bool success = false;
+                    if (possibleParts.Contains(1) && healingItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
                     {
                         newAISpawn.inventory.generic.Add(healingItemID);
                         ++pocketsUsed;
+                        success = true;
                     }
-                    else if(possibleParts.Contains(2) && maxBackpackVolume > 0 && currentBackpackVolume + healingItemVolume <= maxBackpackVolume)
+                    if(!success && possibleParts.Contains(2) && maxBackpackVolume > 0 && currentBackpackVolume + healingItemVolume <= maxBackpackVolume)
                     {
                         newAISpawn.inventory.backpackContents.Add(healingItemID);
                         currentBackpackVolume += healingItemVolume;
+                        success = true;
                     }
-                    else if(possibleParts.Contains(0) && rigSlotSizes != null)
+                    if(!success && possibleParts.Contains(0) && rigSlotSizes != null)
                     {
                         for(int j=0; j< rigSlotSizes.Length; ++j)
                         {
                             if(newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)healingItemSize)
                             {
                                 newAISpawn.inventory.rigContents[j] = healingItemID;
+                                success = true;
                                 break;
                             }
                         }
@@ -1819,9 +1917,10 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting grenades");
             int grenadeItemMin = (int)botDataToUse.generation["items"]["grenades"]["min"];
             int grenadeItemMax = (int)botDataToUse.generation["items"]["grenades"]["max"];
-            if (grenadeItemMax > 0)
+            if (grenadeItemMax > 0 && possibleGrenades.Count > 0)
             {
                 List<string> grenadeItemKeyList = new List<string>(possibleGrenades.Keys);
                 for (int i=0; i < grenadeItemMax; ++i)
@@ -1839,6 +1938,7 @@ namespace EFM
                     float grenadeItemVolume = float.Parse(grenadeItemData[2] as string);
 
                     // First try to put in pockets, then backpack, then rig
+                    bool success = false;
                     if (possibleParts.Contains(0) && rigSlotSizes != null)
                     {
                         for (int j = 0; j < rigSlotSizes.Length; ++j)
@@ -1847,28 +1947,32 @@ namespace EFM
                             {
                                 newAISpawn.inventory.rigContents[j] = grenadeItemID;
                                 newAISpawn.sosigGrenade = Mod.globalDB["AIWeaponMap"][grenadeItemID].ToString();
+                                success = true;
                                 break;
                             }
                         }
                     }
-                    else if (possibleParts.Contains(1) && grenadeItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    if (!success && possibleParts.Contains(1) && grenadeItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
                     {
                         newAISpawn.inventory.generic.Add(grenadeItemID);
                         newAISpawn.sosigGrenade = Mod.globalDB["AIWeaponMap"][grenadeItemID].ToString();
                         ++pocketsUsed;
+                        success = true;
                     }
-                    else if(possibleParts.Contains(2) && maxBackpackVolume > 0 && currentBackpackVolume + grenadeItemVolume <= maxBackpackVolume)
+                    if(!success && possibleParts.Contains(2) && maxBackpackVolume > 0 && currentBackpackVolume + grenadeItemVolume <= maxBackpackVolume)
                     {
                         newAISpawn.inventory.backpackContents.Add(grenadeItemID);
                         newAISpawn.sosigGrenade = Mod.globalDB["AIWeaponMap"][grenadeItemID].ToString();
                         currentBackpackVolume += grenadeItemVolume;
+                        success = true;
                     }
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting looseloot");
             int looseLootItemMin = (int)botDataToUse.generation["items"]["looseLoot"]["min"];
             int looseLootItemMax = (int)botDataToUse.generation["items"]["looseLoot"]["max"];
-            if (looseLootItemMax > 0)
+            if (looseLootItemMax > 0 && possibleLooseLoot.Count > 0)
             {
                 List<string> looseLootItemKeyList = new List<string>(possibleLooseLoot.Keys);
                 for (int i=0; i < looseLootItemMax; ++i)
@@ -1886,23 +1990,27 @@ namespace EFM
                     float looseLootItemVolume = float.Parse(looseLootItemData[2] as string);
 
                     // First try to put in backpack, then pockets, then rig
-                    if(possibleParts.Contains(2) && maxBackpackVolume > 0 && currentBackpackVolume + looseLootItemVolume <= maxBackpackVolume)
+                    bool success = false;
+                    if (possibleParts.Contains(2) && maxBackpackVolume > 0 && currentBackpackVolume + looseLootItemVolume <= maxBackpackVolume)
                     {
                         newAISpawn.inventory.backpackContents.Add(looseLootItemID);
                         currentBackpackVolume += looseLootItemVolume;
+                        success = true;
                     }
-                    else if (possibleParts.Contains(1) && looseLootItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    if (!success && possibleParts.Contains(1) && looseLootItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
                     {
                         newAISpawn.inventory.generic.Add(looseLootItemID);
                         ++pocketsUsed;
+                        success = true;
                     }
-                    else if(possibleParts.Contains(0) && rigSlotSizes != null)
+                    if (!success && possibleParts.Contains(0) && rigSlotSizes != null)
                     {
                         for(int j=0; j< rigSlotSizes.Length; ++j)
                         {
                             if(newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)looseLootItemSize)
                             {
                                 newAISpawn.inventory.rigContents[j] = looseLootItemID;
+                                success = true;
                                 break;
                             }
                         }
@@ -1910,11 +2018,12 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting special items");
             int specialItemMin = (int)botDataToUse.generation["items"]["specialItems"]["min"];
             int specialItemMax = (int)botDataToUse.generation["items"]["specialItems"]["max"];
-            if (specialItemMax > 0)
+            List<string> possibleSpecialItems = inventoryDataToUse["items"]["SpecialLoot"].ToObject<List<string>>();
+            if (specialItemMax > 0 && possibleSpecialItems.Count > 0)
             {
-                List<string> possibleSpecialItems = inventoryDataToUse["items"]["SpecialLoot"].ToObject<List<string>>();
                 for (int i = 0; i < specialItemMax; ++i)
                 {
                     string specialItemID = Mod.itemMap[possibleSpecialItems[UnityEngine.Random.Range(0, possibleSpecialItems.Count)]];
@@ -1929,23 +2038,27 @@ namespace EFM
                     float specialItemVolume = float.Parse(specialItemData[1] as string);
 
                     // First try to put in backpack, then pockets, then rig
+                    bool success = false;
                     if (maxBackpackVolume > 0 && currentBackpackVolume + specialItemVolume <= maxBackpackVolume)
                     {
                         newAISpawn.inventory.backpackContents.Add(specialItemID);
                         currentBackpackVolume += specialItemVolume;
+                        success = true;
                     }
-                    else if (specialItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                    if (!success && specialItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
                     {
                         newAISpawn.inventory.generic.Add(specialItemID);
                         ++pocketsUsed;
+                        success = true;
                     }
-                    else if (rigSlotSizes != null)
+                    if (!success && rigSlotSizes != null)
                     {
                         for (int j = 0; j < rigSlotSizes.Length; ++j)
                         {
                             if (newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)specialItemSize)
                             {
                                 newAISpawn.inventory.rigContents[j] = specialItemID;
+                                success = true;
                                 break;
                             }
                         }
@@ -1953,6 +2066,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tDone");
             return newAISpawn;
         }
 
@@ -2019,7 +2133,7 @@ namespace EFM
                     }
 
                     // Add this mod to root if necessary
-                    if (UnityEngine.Random.value <= ((float)botData.chances["mods"][modEntryToUse.Key]) / 100)
+                    if (botData.chances["mods"][modEntryToUse.Key] == null || UnityEngine.Random.value <= ((float)botData.chances["mods"][modEntryToUse.Key]) / 100)
                     {
                         string modID = modEntryToUse.Value[UnityEngine.Random.Range(0, modEntryToUse.Value.Count)];
                         if (Mod.itemMap.ContainsKey(modID))
@@ -2048,15 +2162,15 @@ namespace EFM
             BotData botData = new BotData();
 
             // Get inventory data
-            string[] pmcInventoryFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/bots/"+ name + "/inventory/");
-            botData.minInventoryLevels = new int[pmcInventoryFiles.Length];
-            botData.inventoryDB = new JObject[pmcInventoryFiles.Length];
-            for (int i = pmcInventoryFiles.Length - 1; i >= 0; --i)
+            string[] botInventoryFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/bots/"+ name + "/inventory/");
+            botData.minInventoryLevels = new int[botInventoryFiles.Length];
+            botData.inventoryDB = new JObject[botInventoryFiles.Length];
+            for (int i = botInventoryFiles.Length - 1; i >= 0; --i)
             {
-                string[] pathSplit = pmcInventoryFiles[i].Split('/', '\\');
+                string[] pathSplit = botInventoryFiles[i].Split('/', '\\');
                 string[] split = pathSplit[pathSplit.Length - 1].Split('_');
                 botData.minInventoryLevels[i] = int.Parse(split[0]);
-                botData.inventoryDB[i] = JObject.Parse(File.ReadAllText(pmcInventoryFiles[i]));
+                botData.inventoryDB[i] = JObject.Parse(File.ReadAllText(botInventoryFiles[i]));
             }
 
             // Get other data
@@ -3327,7 +3441,7 @@ namespace EFM
         public void LoadMapData()
         {
             extractions = new List<Extraction>();
-            Transform extractionRoot = transform.GetChild(3);
+            Transform extractionRoot = transform.GetChild(transform.childCount - 2);
 
             int extractionIndex = 0;
             foreach(JToken extractionData in Mod.mapData["maps"][Mod.chosenMapIndex]["extractions"])
@@ -3608,8 +3722,6 @@ namespace EFM
         public Dictionary<int, List<string>> outfitByLink;
         public string sosigWeapon;
         public string sosigGrenade;
-
-        public List<Transform> path;
 
         public float spawnTime;
 

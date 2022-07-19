@@ -3427,7 +3427,7 @@ namespace EFM
                 }
 
                 // Save to shoulder if necessary
-                if(Mod.rightShoulderObject.Equals(item.gameObject))
+                if (Mod.rightShoulderObject != null && Mod.rightShoulderObject.Equals(item.gameObject))
                 {
                     savedItem["isRightShoulder"] = true;
                 }

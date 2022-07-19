@@ -159,6 +159,13 @@ namespace EFM
                     }
                 }
             }
+            else if(fvrHand.CurrentInteractable != null)
+            {
+                if (fvrHand.CurrentInteractable.GetComponent<EFM_CustomItemWrapper>())
+                {
+                    fvrHand.CurrentInteractable.GetComponent<EFM_CustomItemWrapper>().TakeInput();
+                }
+            }
         }
 
         private void OnTriggerEnter(Collider collider)

@@ -286,43 +286,34 @@ namespace EFM
 
 		private void Update()
 		{
-			if (itemType != Mod.ItemType.LootContainer)
+			// Update based on splitting stack
+			if (splittingStack)
 			{
-				if (physObj.m_hand != null)
-				{
-					TakeInput();
-				}
-
-				// Update splitting stack flag
-				if (physObj.m_hand == null && splittingStack)
+				if(physObj.m_hand == null)
 				{
 					CancelSplit();
 				}
 
-				// Update based on splitting stack
-				if (splittingStack)
+				Vector3 handVector = physObj.m_hand.transform.position - stackSplitStartPosition;
+				float angle = Vector3.Angle(stackSplitRightVector, handVector);
+				float distanceFromCenter = Mathf.Clamp(handVector.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad), -0.19f, 0.19f);
+
+				// Scale is from -0.19 (0) to 0.19 (stack)
+				if (distanceFromCenter <= -0.19f)
 				{
-					Vector3 handVector = physObj.m_hand.transform.position - stackSplitStartPosition;
-					float angle = Vector3.Angle(stackSplitRightVector, handVector);
-					float distanceFromCenter = Mathf.Clamp(handVector.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad), -0.19f, 0.19f);
-
-					// Scale is from -0.19 (0) to 0.19 (stack)
-					if (distanceFromCenter <= -0.19f)
-					{
-						splitAmount = 0;
-					}
-					else if (distanceFromCenter >= 0.19f)
-					{
-						splitAmount = stack;
-					}
-					else
-					{
-						splitAmount = Mathf.Max(1, (int)(Mathf.InverseLerp(-0.19f, 0.19f, distanceFromCenter) * stack));
-					}
-
-					Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
-					Mod.stackSplitUIText.text = splitAmount.ToString() + "/" + stack;
+					splitAmount = 0;
 				}
+				else if (distanceFromCenter >= 0.19f)
+				{
+					splitAmount = stack;
+				}
+				else
+				{
+					splitAmount = Mathf.Max(1, (int)(Mathf.InverseLerp(-0.19f, 0.19f, distanceFromCenter) * stack));
+				}
+
+				Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
+				Mod.stackSplitUIText.text = splitAmount.ToString() + "/" + stack;
 			}
 		}
 
@@ -460,7 +451,7 @@ namespace EFM
 			return false;
 		}
 
-		private void TakeInput()
+		public void TakeInput()
 		{
 			FVRViveHand hand = physObj.m_hand;
 			if (hand.CMode == ControlMode.Index)

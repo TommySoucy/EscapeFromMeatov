@@ -63,6 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EFM_AI.cs" />
     <Compile Include="EFM_AreaBonus.cs" />
     <Compile Include="EFM_AreaProduction.cs" />
     <Compile Include="EFM_AreaRequirement.cs" />
