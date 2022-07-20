@@ -36,6 +36,7 @@ namespace EFM
         private float currentHydrationRate = 0;
 
         private List<AISpawn> AISpawns;
+        private AISpawn nextSpawn;
         private Dictionary<string, Transform> AISquadSpawnTransforms;
         private List<int> availableIFFs;
         private int[] spawnedIFFs;
@@ -170,6 +171,8 @@ namespace EFM
             metalMatDef.SoundType = MatSoundType.Metal;
 
             Mod.instance.LogInfo("Initializing doors");
+            // TODO: Uncomment and delete what comes after once doors aren't as laggy. Will also have to put vanilla doors first in hierarchy in map asset
+            /*
             foreach (JToken doorData in Mod.mapData["maps"][Mod.chosenMapIndex]["doors"])
             {
                 GameObject doorObject = doorRoot.GetChild(doorIndex).gameObject;
@@ -319,6 +322,29 @@ namespace EFM
                 // Destroy placeholder door
                 doorObject.SetActive(false);
                 //Destroy(doorObject);
+
+                ++doorIndex;
+            }
+            */
+
+            foreach (JToken doorData in Mod.mapData["maps"][Mod.chosenMapIndex]["doors"])
+            {
+                GameObject doorObject = doorRoot.GetChild(doorIndex).GetChild(0).gameObject;
+
+                // Add a doorWrapper
+                EFM_DoorWrapper doorWrapper = doorObject.AddComponent<EFM_DoorWrapper>();
+
+                // Set key
+                int keyIndex = (int)doorData["keyIndex"];
+                if (keyIndex > -1)
+                {
+                    doorWrapper.keyID = keyIndex.ToString();
+                    doorWrapper.open = true;
+                    doorWrapper.openAngleX = (float)doorData["openAngleX"];
+                    doorWrapper.openAngleY = (float)doorData["openAngleY"];
+                    doorWrapper.openAngleZ = (float)doorData["openAngleZ"];
+                }
+                continue from here, need to make sure that our items dont get added to interactiveObject.All and only added when we grab them
 
                 ++doorIndex;
             }
@@ -520,7 +546,7 @@ namespace EFM
             InitTime();
 
             // Init sun
-            //InitSun();
+            InitSun();
 
             // Init reverb system
             InitReverb();
@@ -637,10 +663,11 @@ namespace EFM
             if(initSpawnTimer <= 0)
             {
                 // Check if time is >= spawnTime on next AISpawn in list, if it is, spawn it at spawnpoint depending on AIType
-                if(AISpawns.Count > 0 && !spawning && AISpawns[AISpawns.Count - 1].spawnTime <= raidTime)
+                if(!spawning && nextSpawn != null && nextSpawn.spawnTime <= raidTime)
                 {
-                    AnvilManager.Run(SpawnAI(AISpawns[AISpawns.Count - 1]));
+                    AnvilManager.Run(SpawnAI(nextSpawn));
                     AISpawns.RemoveAt(AISpawns.Count - 1);
+                    nextSpawn = AISpawns.Count > 0 ? AISpawns[AISpawns.Count - 1] : null;
                 }
             }
             else
@@ -1116,6 +1143,8 @@ namespace EFM
                 newAISpawn.spawnTime = 0;
 
                 AISpawns.Add(newAISpawn);
+
+                AISquadSizes.Add("Killa", 1);
             }
             if (spawnReshala)
             {
@@ -1181,6 +1210,8 @@ namespace EFM
                 newAISpawn.spawnTime = 0;
 
                 AISpawns.Add(newAISpawn);
+
+                AISquadSizes.Add("Tagilla", 1);
             }
 
             // PMC
@@ -1275,6 +1306,9 @@ namespace EFM
 
             // Sort the spawns by spawn time decreasing
             SortAISpawns();
+
+            // Set the first spawn
+            nextSpawn = AISpawns.Count > 0 ? AISpawns[AISpawns.Count - 1] : null;
         }
 
         private void SortAISpawns()
@@ -3106,31 +3140,33 @@ namespace EFM
 
         private void InitSun()
         {
-            // Get sun
-            sun = transform.GetChild(1).GetChild(0).GetComponent<Light>();
+            Destroy(transform.GetChild(1).GetChild(0).GetComponent<Light>());
+            Destroy(transform.GetChild(1).GetChild(0).GetComponent<AlloyAreaLight>());
+            //// Get sun
+            //sun = transform.GetChild(1).GetChild(0).GetComponent<Light>();
 
-            // Check if should be active and set intensity
-            if (time >= 23400 && time <= 63000) // Day
-            {
-                sun.intensity = 1;
-            }
-            else if (time > 63000 && time < 64800) // Setting
-            {
-                sun.intensity = (64800 - time) / 1800;
-            }
-            else if ((time > 64800 && time <= 86400) || (time >= 0 && time <= 21600)) // Night
-            {
-                return; // Intensity should be 0
-            }
-            else //(time > 21600 && time < 23400) // Rising
-            {
-                sun.intensity = 1800 / (time - 21600);
-            }
-            sun.gameObject.SetActive(true);
+            //// Check if should be active and set intensity
+            //if (time >= 23400 && time <= 63000) // Day
+            //{
+            //    sun.intensity = 1;
+            //}
+            //else if (time > 63000 && time < 64800) // Setting
+            //{
+            //    sun.intensity = (64800 - time) / 1800;
+            //}
+            //else if ((time > 64800 && time <= 86400) || (time >= 0 && time <= 21600)) // Night
+            //{
+            //    return; // Intensity should be 0
+            //}
+            //else //(time > 21600 && time < 23400) // Rising
+            //{
+            //    sun.intensity = 1800 / (time - 21600);
+            //}
+            //sun.gameObject.SetActive(true);
 
-            // Set angle
-            float angle = 0.004166f * time + 21600;
-            sun.transform.rotation = Quaternion.Euler(angle, 45, 45);
+            //// Set angle
+            //float angle = 0.004166f * time + 21600;
+            //sun.transform.rotation = Quaternion.Euler(angle, 45, 45);
         }
 
         private void UpdateTime()

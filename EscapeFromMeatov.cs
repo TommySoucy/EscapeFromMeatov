@@ -4160,11 +4160,6 @@ namespace EFM
                             Mod.magazinesByType.Add(asMag.MagazineType, new Dictionary<string, int>());
                             Mod.magazinesByType[asMag.MagazineType].Add(__instance.ObjectWrapper.DisplayName, 1);
                         }
-
-                        foreach(EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                        {
-                            descManager.SetDescriptionPack();
-                        }
                     }
                     else if (__instance is FVRFireArmClip)
                     {
@@ -4185,11 +4180,6 @@ namespace EFM
                             Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
                             Mod.clipsByType[asClip.ClipType].Add(__instance.ObjectWrapper.DisplayName, 1);
                         }
-
-                        foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                        {
-                            descManager.SetDescriptionPack();
-                        }
                     }
                     else if (__instance is FVRFireArmRound)
                     {
@@ -4209,11 +4199,6 @@ namespace EFM
                         {
                             Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
                             Mod.roundsByType[asRound.RoundType].Add(__instance.ObjectWrapper.DisplayName, 1);
-                        }
-
-                        foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                        {
-                            descManager.SetDescriptionPack();
                         }
                     }
 
@@ -4305,7 +4290,6 @@ namespace EFM
 
         public static void SetItemLocationIndex(int locationIndex, EFM_CustomItemWrapper customItemWrapper, EFM_VanillaItemDescriptor vanillaItemDescriptor, bool updateWeight = true)
         {
-            Mod.instance.LogInfo("Set location index called with " + locationIndex + ", on CIW?: " + (customItemWrapper != null) + ", on VID?: " + (vanillaItemDescriptor != null));
             if (customItemWrapper != null)
             {
                 if (updateWeight)
@@ -4344,10 +4328,8 @@ namespace EFM
             }
             else
             {
-                Mod.instance.LogInfo("\tVID");
                 if (updateWeight)
                 {
-                    Mod.instance.LogInfo("\t\tUpdating weight");
                     if (vanillaItemDescriptor.locationIndex == 0 && locationIndex != 0)
                     {
                         // Taken out of player inventory
@@ -4361,12 +4343,10 @@ namespace EFM
                 }
 
                 vanillaItemDescriptor.locationIndex = locationIndex;
-                Mod.instance.LogInfo("\tvanillaItemDescriptor.locationIndex = "+ vanillaItemDescriptor.locationIndex);
 
                 FVRPhysicalObject physObj = vanillaItemDescriptor.GetComponent<FVRPhysicalObject>();
                 if(physObj != null)
                 {
-                    Mod.instance.LogInfo("\t\tphysObj not null");
                     if (physObj is FVRFireArm)
                     {
                         Mod.instance.LogInfo("\t\t\tis firearm");
