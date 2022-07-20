@@ -75,6 +75,8 @@ namespace EFM
             Transform spawnRoot = transform.GetChild(transform.childCount - 1).GetChild(0);
             spawnPoint = spawnRoot.GetChild(UnityEngine.Random.Range(0, spawnRoot.childCount));
 
+            GM.CurrentSceneSettings.DeathResetPoint = spawnPoint;
+
             Mod.instance.LogInfo("Got spawn");
 
             // Find extractions
@@ -518,7 +520,10 @@ namespace EFM
             InitTime();
 
             // Init sun
-            InitSun();
+            //InitSun();
+
+            // Init reverb system
+            InitReverb();
 
             // Init AI
             InitAI();
@@ -617,7 +622,7 @@ namespace EFM
                 Mod.extractionUI.SetActive(false);
             }
 
-            //UpdateEffects();
+            UpdateEffects();
 
             UpdateAI();
 
@@ -907,6 +912,9 @@ namespace EFM
             sosigScript.SetIFF(iff);
             sosigScript.SetOriginalIFFTeam(iff);
 
+            sosigScript.Priority.SetAllEnemy();
+            sosigScript.Priority.MakeFriendly(iff);
+
             Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tConfigured AI");
 
             spawning = false;
@@ -951,6 +959,30 @@ namespace EFM
                 }
             }
             return availableBotZones;
+        }
+
+        private void InitReverb()
+        {
+            GameObject reverbSystemObject = transform.GetChild(transform.childCount - 4).gameObject;
+            reverbSystemObject.SetActive(false); // Set inactive to prevent reverb system from awaking yet
+            FVRReverbSystem reverbSystem = reverbSystemObject.AddComponent<FVRReverbSystem>();
+            reverbSystem.Environments = new List<FVRReverbEnvironment>();
+            bool setDefault = false;
+            foreach (Transform t in reverbSystem.transform)
+            {
+                FVRSoundEnvironment soundEnvType = (FVRSoundEnvironment)Enum.Parse(typeof(FVRSoundEnvironment), t.name);
+                FVRReverbEnvironment newReverbEnv = t.gameObject.AddComponent<FVRReverbEnvironment>();
+                newReverbEnv.Environment = soundEnvType;
+                newReverbEnv.SetPriorityBasedOnType();
+                reverbSystem.Environments.Add(newReverbEnv);
+
+                if (!setDefault)
+                {
+                    reverbSystem.DefaultEnvironment = newReverbEnv;
+                    setDefault = true;
+                }
+            }
+            reverbSystemObject.SetActive(true);
         }
 
         private void InitAI()
@@ -1010,6 +1042,7 @@ namespace EFM
             gameObject.AddComponent<AIManager>();
             GM.CurrentAIManager.SonicThresholdDecayCurve = AnimationCurve.Linear(0, 1, 1, 0);
             GM.CurrentAIManager.LoudnessFalloff = AnimationCurve.Linear(0, 1, 1, 0);
+            GM.CurrentAIManager.LM_Entity = LayerMask.GetMask("AIEntity");
 
             AISpawns = new List<AISpawn>();
             AISquadSpawnTransforms = new Dictionary<string, Transform>();

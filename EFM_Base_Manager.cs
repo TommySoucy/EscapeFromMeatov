@@ -922,6 +922,9 @@ namespace EFM
 
             Mod.justFinishedRaid = false;
 
+            // Also set respawn to spawn point
+            GM.CurrentSceneSettings.DeathResetPoint = transform.GetChild(transform.childCount - 1).GetChild(0);
+
             init = true;
         }
 

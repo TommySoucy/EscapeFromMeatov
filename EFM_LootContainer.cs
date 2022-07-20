@@ -15,6 +15,8 @@ namespace EFM
 		private List<string> vanillaIDs;
 		private List<int> customIDs;
 		private List<int> stackSizes;
+		private List<FireArmRoundClass> roundClasses;
+		private List<FireArmRoundType> roundTypes;
 		private bool spawnCustomItems;
 		public FVRInteractiveObject interactable;
 		public Collider mainContainerCollider;
@@ -39,6 +41,8 @@ namespace EFM
 			vanillaIDs = new List<string>();
 			customIDs = new List<int>();
 			stackSizes = new List<int>();
+			roundClasses = new List<FireArmRoundClass>();
+			roundTypes = new List<FireArmRoundType>();
 			itemObjectsRoot = transform.GetChild(transform.childCount - 2);
 
 			// Set vanillaIDs and customIDs lists with ID of items to spawn when opened
@@ -108,6 +112,9 @@ namespace EFM
 							Mod.instance.LogInfo("\t\t" + actualItemID);
 
 							stackSizes.Add(stackSize);
+							FVRFireArmRound roundScript = IM.OD[itemID].GetGameObject().GetComponent<FVRFireArmRound>();
+							roundClasses.Add(roundScript.RoundClass);
+							roundTypes.Add(roundScript.RoundType);
 						}
 					}
                     else
@@ -181,8 +188,16 @@ namespace EFM
 					else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
 					{
 						int stackSize = stackSizes[stackSizes.Count - 1];
+						stackSizes.Remove(stackSizes.Count - 1);
 						int actualStackSize = stackSize == -1 ? itemCIW.maxAmount : stackSize;
 						FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+						if(itemID.Equals("715") || itemID.Equals("716"))
+                        {
+							asMagazine.RoundType = roundTypes[roundTypes.Count - 1];
+							itemCIW.roundClass = roundClasses[roundClasses.Count - 1];
+							roundTypes.RemoveAt(roundTypes.Count - 1);
+							roundClasses.RemoveAt(roundClasses.Count - 1);
+						}
 						for (int j = 0; j < actualStackSize; ++j)
 						{
 							asMagazine.AddRound(itemCIW.roundClass, false, false);
