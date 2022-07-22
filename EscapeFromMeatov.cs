@@ -1451,24 +1451,29 @@ namespace EFM
                 }
             }
 
-            // Check quickbelt slots
-            foreach (FVRQuickBeltSlot beltSlot in GM.CurrentPlayerBody.QBSlots_Internal)
+            // Check quickbelt slots, only the first 4, the rest will be processed directly from the equipped rig while processing equipment above
+            for(int i=0; i < 4; ++i)
             {
-                if (beltSlot.CurObject != null)
+                if (GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject != null)
                 {
-                    AddToPlayerInventory(beltSlot.CurObject.transform);
+                    AddToPlayerInventory(GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.transform);
                 }
             }
 
+            // Check right shoulder slot, left not necessary because already processed with backpack while processing equipment above
+            if(rightShoulderObject != null)
+            {
+                AddToPlayerInventory(rightShoulderObject.transform);
+            }
+
             // Check hands
-            EFM_Hand leftHand = GM.CurrentPlayerBody.LeftHand.GetComponent<EFM_Hand>();
             if (leftHand.currentHeldItem != null)
             {
                 AddToPlayerInventory(leftHand.currentHeldItem.transform);
             }
-            if (leftHand.otherHand.currentHeldItem != null)
+            if (rightHand.currentHeldItem != null)
             {
-                AddToPlayerInventory(leftHand.otherHand.currentHeldItem.transform);
+                AddToPlayerInventory(rightHand.currentHeldItem.transform);
             }
         }
 

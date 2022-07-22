@@ -3261,7 +3261,7 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\t\tWriting right shoulder items");
+            Mod.instance.LogInfo("\t\tWriting right shoulder item");
             // Save right shoulder
             if (Mod.rightShoulderObject != null)
             {
