@@ -43,6 +43,7 @@ namespace EFM
         private Dictionary<string, int> AISquadIFFs;
         private Dictionary<string, List<Sosig>> AISquads;
         private Dictionary<string, int> AISquadSizes;
+        public static List<AIEntity> entities;
 
         private List<GameObject> extractionCards;
         private bool extracted;
@@ -344,7 +345,6 @@ namespace EFM
                     doorWrapper.openAngleY = (float)doorData["openAngleY"];
                     doorWrapper.openAngleZ = (float)doorData["openAngleZ"];
                 }
-                continue from here, need to make sure that our items dont get added to interactiveObject.All and only added when we grab them
 
                 ++doorIndex;
             }
@@ -727,8 +727,6 @@ namespace EFM
                         Transform bossZone = AISquadSpawnTransforms[spawnData.leaderName];
 
                         AISpawnPoint = bossZone.GetChild(UnityEngine.Random.Range(0, bossZone.childCount));
-
-                        AISquadSpawnTransforms.Add(spawnData.leaderName, bossZone);
                     }
                     else
                     {
@@ -770,7 +768,10 @@ namespace EFM
 
             EFM_AI AIScript = sosigObject.AddComponent<EFM_AI>();
             AIScript.experienceReward = spawnData.experienceReward;
+            AIScript.entityIndex = entities.Count;
             Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tAdded EFM_AI script");
+
+            entities.Add(sosigScript.E);
 
             // Spawn outfit
             foreach (KeyValuePair<int, List<string>> outfitEntry in spawnData.outfitByLink)
@@ -958,11 +959,17 @@ namespace EFM
             }
 
             // If player killed this bot
-            if(sosig.GetDiedFromIFF() == 0)
+            EFM_AI AIScript = sosig.GetComponent<EFM_AI>();
+            if (sosig.GetDiedFromIFF() == 0)
             {
-                Mod.AddExperience(sosig.GetComponent<EFM_AI>().experienceReward);
+                Mod.AddExperience(AIScript.experienceReward);
                 // TODO: Also add to kill list so we can show to player after the raid
             }
+
+            // Remove entity from list
+            entities[AIScript.entityIndex] = entities[entities.Count - 1];
+            entities[AIScript.entityIndex].GetComponent<EFM_AI>().entityIndex = AIScript.entityIndex;
+            entities.RemoveAt(entities.Count - 1);
         }
 
         private List<Transform> GetMostAvailableBotZones()
@@ -1078,6 +1085,7 @@ namespace EFM
             AISquadIFFs = new Dictionary<string, int>();
             AISquads = new Dictionary<string, List<Sosig>>();
             AISquadSizes = new Dictionary<string, int>();
+            entities = new List<AIEntity>();
 
             // Bosses
             if (spawnCultPriest)
@@ -3140,8 +3148,8 @@ namespace EFM
 
         private void InitSun()
         {
-            Destroy(transform.GetChild(1).GetChild(0).GetComponent<Light>());
             Destroy(transform.GetChild(1).GetChild(0).GetComponent<AlloyAreaLight>());
+            Destroy(transform.GetChild(1).GetChild(0).GetComponent<Light>());
             //// Get sun
             //sun = transform.GetChild(1).GetChild(0).GetComponent<Light>();
 
@@ -3273,6 +3281,9 @@ namespace EFM
                 itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                 itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
+                // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                Mod.RemoveFromAll(itemCIW, null);
+
                 // Get amount
                 amount = (itemData["upd"] != null && itemData["upd"]["StackObjectsCount"] != null) ? (int)itemData["upd"]["StackObjectsCount"] : 1;
                 if (itemCIW.itemType == Mod.ItemType.Money)
@@ -3343,6 +3354,9 @@ namespace EFM
                             {
                                 asMagazine.AddRound(itemCIW.roundClass, false, false);
                             }
+
+                            // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                            Mod.RemoveFromAll(itemCIW, null);
                         }
                     }
                     else // Single round, spawn as normal

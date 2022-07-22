@@ -1399,6 +1399,38 @@ namespace EFM
             return root.gameObject;
         }
 
+        public static void AddToAll(EFM_CustomItemWrapper CIW, FVRInteractiveObject interactiveObject)
+        {
+            if (!CIW.inAll)
+            {
+                typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(interactiveObject, FVRInteractiveObject.All.Count);
+                FVRInteractiveObject.All.Add(interactiveObject); 
+
+                CIW.inAll = true;
+            }
+        }
+
+        public static void RemoveFromAll(EFM_CustomItemWrapper CIW, FVRInteractiveObject interactiveObject)
+        {
+            if (CIW.inAll || interactiveObject == null)
+            {
+                if (interactiveObject == null)
+                {
+                    interactiveObject = FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1];
+                }
+                FieldInfo indexField = typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic);
+                int currentIndex = (int)indexField.GetValue(interactiveObject);
+
+                FVRInteractiveObject.All[currentIndex] = FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1];
+                indexField.SetValue(FVRInteractiveObject.All[currentIndex], currentIndex);
+                FVRInteractiveObject.All.RemoveAt(FVRInteractiveObject.All.Count - 1);
+
+                indexField.SetValue(interactiveObject, -1);
+
+                CIW.inAll = false;
+            }
+        }
+
         public static void UpdatePlayerInventory()
         {
             if (playerInventory == null)
@@ -1869,6 +1901,12 @@ namespace EFM
             MethodInfo attachmentMountDeRegisterPatchPrefix = typeof(AttachmentMountDeRegisterPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(attachmentMountDeRegisterPatchOriginal, new HarmonyMethod(attachmentMountDeRegisterPatchPrefix));
+
+            // EntityCheckPatch
+            MethodInfo entityCheckPatchOriginal = typeof(AIManager).GetMethod("EntityCheck", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo entityCheckPatchPrefix = typeof(EntityCheckPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(entityCheckPatchOriginal, new HarmonyMethod(entityCheckPatchPrefix));
 
             //// DeadBoltPatch
             //MethodInfo deadBoltPatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("TurnBolt", BindingFlags.Public | BindingFlags.Instance);
@@ -2763,6 +2801,13 @@ namespace EFM
             }
 
             EFM_CustomItemWrapper heldCustomItemWrapper = primary.GetComponent<EFM_CustomItemWrapper>();
+
+            // Remove from All if necessary
+            if (heldCustomItemWrapper != null)
+            {
+                Mod.RemoveFromAll(heldCustomItemWrapper, primary);
+            }
+
             EFM_VanillaItemDescriptor heldVanillaItemDescriptor = primary.GetComponent<EFM_VanillaItemDescriptor>();
             if (collidingContainerWrapper != null && (heldCustomItemWrapper == null || !heldCustomItemWrapper.Equals(collidingContainerWrapper)))
             {
@@ -3726,6 +3771,13 @@ namespace EFM
                         slot = Mod.equipmentSlots[0]; // Set the slot as the backpack equip slot
                     }
                 }
+
+                // Add to All if necessary
+                EFM_CustomItemWrapper customItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
+                if(customItemWrapper != null)
+                {
+                    Mod.AddToAll(customItemWrapper, __instance);
+                }
             }
         }
 
@@ -3905,6 +3957,9 @@ namespace EFM
             EFM_CustomItemWrapper customItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (customItemWrapper != null)
             {
+                // Add to All if necessary
+                Mod.AddToAll(customItemWrapper, __instance);
+
                 if (customItemWrapper.hideoutSpawned)
                 {
                     customItemWrapper.hideoutSpawned = false;
@@ -4326,7 +4381,7 @@ namespace EFM
                     }
                 }
             }
-            else
+            else if(vanillaItemDescriptor != null)
             {
                 if (updateWeight)
                 {
@@ -4356,12 +4411,28 @@ namespace EFM
                         if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                         {
                             Mod.instance.LogInfo("\t\t\t\tHas mag");
-                            asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>().locationIndex = locationIndex;
+                            EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
+                            if(ammoContainerVID != null)
+                            {
+                                ammoContainerVID.locationIndex = locationIndex;
+                            }
+                            else
+                            {
+                                Mod.instance.LogError("Vanilla item: "+asFireArm.Magazine.name+" (ammo container in fire arm we just grabbed) has no VID");
+                            }
                         }
                         else if(asFireArm.UsesClips && asFireArm.Clip != null)
                         {
                             Mod.instance.LogInfo("\t\t\t\tHas clip");
-                            asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>().locationIndex = locationIndex;
+                            EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>();
+                            if (ammoContainerVID != null)
+                            {
+                                ammoContainerVID.locationIndex = locationIndex;
+                            }
+                            else
+                            {
+                                Mod.instance.LogError("Vanilla item: " + asFireArm.Clip.name + " (ammo container in fire arm we just grabbed) has no VID");
+                            }
                         }
 
                         // Attachments
@@ -4387,6 +4458,10 @@ namespace EFM
                         }
                     }
                 }
+            }
+            else
+            {
+                Mod.instance.LogError("Attempted to set location index on item without providing CIW or VID");
             }
         }
 
@@ -7865,6 +7940,80 @@ namespace EFM
                 parentVID.currentWeight -= attachmentVID.currentWeight;
 
                 BeginInteractionPatch.SetItemLocationIndex(0, null, attachmentVID);
+            }
+
+            return false;
+        }
+    }
+
+    // PAtches AIManager.EntityCheck to use our own entity lists instead of OverlapSphere to check other entities
+    // This completely replaces the original
+    class EntityCheckPatch
+    {
+        static bool Prefix(AIEntity e)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            e.ResetTick();
+            if (e.ReceivesEvent_Visual)
+            {
+                Vector3 pos = e.GetPos();
+                Vector3 forward = e.SensoryFrame.forward;
+                if (EFM_Raid_Manager.entities.Count > 0)
+                {
+                    for (int i = 0; i < EFM_Raid_Manager.entities.Count; i++)
+                    {
+                        AIEntity component = EFM_Raid_Manager.entities[i];
+                        if (!(component == null))
+                        {
+                            if (!(component == e))
+                            {
+                                if (component.IFFCode >= -1)
+                                {
+                                    if (!component.IsPassiveEntity || e.PerceivesPassiveEntities)
+                                    {
+                                        Vector3 pos2 = component.GetPos();
+                                        Vector3 to = pos2 - pos;
+                                        float num = to.magnitude;
+                                        float dist = num;
+                                        float num2 = e.MaximumSightRange;
+                                        if (num <= component.MaxDistanceVisibleFrom)
+                                        {
+                                            if (component.VisibilityMultiplier <= 2f)
+                                            {
+                                                if (component.VisibilityMultiplier > 1f)
+                                                {
+                                                    num = Mathf.Lerp(num, num2, component.VisibilityMultiplier - 1f);
+                                                }
+                                                else
+                                                {
+                                                    num = Mathf.Lerp(0f, num, component.VisibilityMultiplier);
+                                                }
+                                                if (!e.IsVisualCheckOmni)
+                                                {
+                                                    float num3 = Vector3.Angle(forward, to);
+                                                    num2 = e.MaximumSightRange * e.SightDistanceByFOVMultiplier.Evaluate(num3 / e.MaximumSightFOV);
+                                                }
+                                                if (num <= num2)
+                                                {
+                                                    if (!Physics.Linecast(pos, pos2, e.LM_VisualOcclusionCheck, QueryTriggerInteraction.Collide))
+                                                    {
+                                                        float v = num / e.MaximumSightRange * component.DangerMultiplier;
+                                                        AIEvent e2 = new AIEvent(component, AIEvent.AIEType.Visual, v, dist);
+                                                        e.OnAIEventReceive(e2);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             return false;

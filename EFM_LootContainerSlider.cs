@@ -19,7 +19,11 @@ namespace EFM
 
 		protected override void Awake()
 		{
-			base.Awake();
+			// Override interactive object awake entirely to prevent from being added to All because unnecessary
+			this.GameObject = gameObject;
+			this.Transform = transform;
+			this.m_colliders = GetComponentsInChildren<Collider>(true);
+
 			EndInteractionIfDistant = false;
 		}
 

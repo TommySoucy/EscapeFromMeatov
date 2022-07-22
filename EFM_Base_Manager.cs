@@ -1788,7 +1788,7 @@ namespace EFM
             }
         }
 
-        private GameObject LoadSavedItem(Transform parent, JToken item, int locationIndex = -1)
+        private GameObject LoadSavedItem(Transform parent, JToken item, int locationIndex = -1, bool inAll = false)
         {
             Mod.instance.LogInfo("Loading item "+item["PhysicalObject"]["ObjectWrapper"]["ItemID"]);
             int parsedID = -1;
@@ -1915,11 +1915,14 @@ namespace EFM
 
                         if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
                         {
+                            Mod.instance.LogInfo("\tLoading firearm's magazine: " + parsedContainerID + " with:");
                             List<FireArmRoundClass> newLoadedRoundsInMag = new List<FireArmRoundClass>();
                             foreach (int round in item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"])
                             {
+                                Mod.instance.LogInfo("\t\t"+((FireArmRoundClass)round));
                                 newLoadedRoundsInMag.Add((FireArmRoundClass)round);
                             }
+                            Mod.instance.LogInfo("\t\tFor type: "+ magPhysicalObject.RoundType);
                             magPhysicalObject.ReloadMagWithList(newLoadedRoundsInMag);
                         }
                         else
@@ -2036,6 +2039,16 @@ namespace EFM
             EFM_CustomItemWrapper customItemWrapper = itemObject.GetComponent<EFM_CustomItemWrapper>();
             if (customItemWrapper != null)
             {
+                if (inAll)
+                {
+                    customItemWrapper.inAll = true;
+                }
+                else
+                {
+                    // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                    Mod.RemoveFromAll(customItemWrapper, null);
+                }
+
                 customItemWrapper.itemType = (Mod.ItemType)(int)item["itemType"];
                 customItemWrapper.amount = (int)item["amount"];
                 customItemWrapper.looted = (bool)item["looted"];
@@ -2065,7 +2078,8 @@ namespace EFM
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
                 {
                     Mod.instance.LogInfo("is rig");
-                    if ((int)item["PhysicalObject"]["equipSlot"] != -1)
+                    bool equipped = (int)item["PhysicalObject"]["equipSlot"] != -1;
+                    if (equipped)
                     {
                         customItemWrapper.takeCurrentLocation = false;
                         customItemWrapper.locationIndex = 0;
@@ -2082,25 +2096,28 @@ namespace EFM
                             }
                             else
                             {
-                                customItemWrapper.itemsInSlots[j] = LoadSavedItem(null, loadedQBContents[j], customItemWrapper.locationIndex);
+                                customItemWrapper.itemsInSlots[j] = LoadSavedItem(null, loadedQBContents[j], customItemWrapper.locationIndex, equipped);
                             }
                         }
 
-                        // Put inner items in their slots
-                        for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
-                        {
-                            if (customItemWrapper.itemsInSlots[i] != null)
-                            {
-                                FVRPhysicalObject currentItemPhysObj = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
-                                if (currentItemPhysObj != null)
-                                {
-                                    // Attach item to quick slot
-                                    FVRQuickBeltSlot quickBeltSlot = customItemWrapper.rigSlots[i];
-                                    currentItemPhysObj.SetQuickBeltSlot(quickBeltSlot);
-                                    currentItemPhysObj.SetParentage(quickBeltSlot.QuickbeltRoot);
-                                }
-                            }
-                        }
+                        //if (equipped)
+                        //{
+                        //    // Put inner items in their slots
+                        //    for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
+                        //    {
+                        //        if (customItemWrapper.itemsInSlots[i] != null)
+                        //        {
+                        //            FVRPhysicalObject currentItemPhysObj = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
+                        //            if (currentItemPhysObj != null)
+                        //            {
+                        //                // Attach item to quick slot
+                        //                FVRQuickBeltSlot quickBeltSlot = customItemWrapper.rigSlots[i];
+                        //                currentItemPhysObj.SetQuickBeltSlot(quickBeltSlot);
+                        //                currentItemPhysObj.SetParentage(null);
+                        //            }
+                        //        }
+                        //    }
+                        //}
 
                         customItemWrapper.UpdateRigMode();
                     }
@@ -3391,16 +3408,9 @@ namespace EFM
                         if (firearmPhysicalObject.Clip.HasARound())
                         {
                             JArray newLoadedRoundsInClip = new JArray();
-                            foreach (FVRFireArmClip.FVRLoadedRound round in firearmPhysicalObject.Clip.LoadedRounds)
+                            for (int roundIndex = 0; roundIndex < firearmPhysicalObject.Clip.m_numRounds; ++roundIndex)
                             {
-                                if (round == null)
-                                {
-                                    break;
-                                }
-                                else
-                                {
-                                    newLoadedRoundsInClip.Add((int)round.LR_Class);
-                                }
+                                newLoadedRoundsInClip.Add((int)firearmPhysicalObject.Clip.LoadedRounds[roundIndex].LR_Class);
                             }
                             savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInClip;
                         }
@@ -3414,16 +3424,9 @@ namespace EFM
                     if (firearmPhysicalObject.Magazine.HasARound() && firearmPhysicalObject.Magazine.LoadedRounds != null)
                     {
                         JArray newLoadedRoundsInMag = new JArray();
-                        foreach (FVRLoadedRound round in firearmPhysicalObject.Magazine.LoadedRounds)
+                        for (int roundIndex = 0; roundIndex < firearmPhysicalObject.Magazine.m_numRounds; ++roundIndex)
                         {
-                            if (round == null)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                newLoadedRoundsInMag.Add((int)round.LR_Class);
-                            }
+                            newLoadedRoundsInMag.Add((int)firearmPhysicalObject.Magazine.LoadedRounds[roundIndex].LR_Class);
                         }
                         savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInMag;
                     }

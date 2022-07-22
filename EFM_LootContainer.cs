@@ -157,6 +157,7 @@ namespace EFM
 					int itemID = customIDs[customIDs.Count - 1];
 					customIDs.RemoveAt(customIDs.Count - 1);
 					GameObject itemObject = Instantiate(Mod.itemPrefabs[itemID], itemObjectsRoot);
+
 					itemObject.GetComponent<Rigidbody>().isKinematic = true;
 					if (mainContainerCollider is BoxCollider)
 					{
@@ -181,6 +182,10 @@ namespace EFM
 					}
 					itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
 					EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+
+					// When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+					Mod.RemoveFromAll(itemCIW, null);
+
 					if (itemCIW.itemType == Mod.ItemType.Money)
 					{
 						itemCIW.stack = UnityEngine.Random.Range(120, 2500);

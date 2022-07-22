@@ -29,6 +29,7 @@ namespace EFM
 		public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid, 3: Area slot. This is to keep track of where an item is in general
 		public EFM_DescriptionManager descriptionManager; // The current description manager displaying this item's description
 		public List<EFM_MarketItemView> marketItemViews;
+		public bool inAll;
 		private bool _insured;
 		public bool insured 
 		{
@@ -1541,6 +1542,14 @@ namespace EFM
 				if (itemsInSlots[i] != null)
 				{
 					FVRPhysicalObject physicalObject = itemsInSlots[i].GetComponent<FVRPhysicalObject>();
+					EFM_CustomItemWrapper CIW = itemsInSlots[i].GetComponent<EFM_CustomItemWrapper>();
+					if(CIW != null && !CIW.inAll)
+                    {
+						FVRInteractiveObject.All.Add(physicalObject);
+						typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1], FVRInteractiveObject.All.Count - 1);
+
+						CIW.inAll = true;
+					}
 					physicalObject.SetQuickBeltSlot(rigSlots[i]);
 					physicalObject.SetParentage(null);
 					physicalObject.transform.localScale = Vector3.one;
@@ -1604,7 +1613,7 @@ namespace EFM
 			{
 				if (itemsInSlots[i] != null)
 				{
-					itemsInSlots[i].SetActive(false);
+					itemsInSlots[i].SetActive(false); 
 				}
 			}
 

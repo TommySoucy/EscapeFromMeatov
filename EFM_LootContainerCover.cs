@@ -18,10 +18,14 @@ namespace EFM
 		private bool m_forceOpen;
 
 		protected override void Awake()
-        {
-			base.Awake();
-			EndInteractionIfDistant = false;
-        }
+		{
+			// Override interactive object awake entirely to prevent from being added to All because unnecessary
+			this.GameObject = gameObject;
+			this.Transform = transform;
+			this.m_colliders = GetComponentsInChildren<Collider>(true);
+
+			EndInteractionIfDistant = false; 
+		}
 
 		public void ForceOpen()
 		{

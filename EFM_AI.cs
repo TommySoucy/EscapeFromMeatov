@@ -9,5 +9,6 @@ namespace EFM
     public class EFM_AI : MonoBehaviour
     {
         public int experienceReward;
+        public int entityIndex;
     }
 }
