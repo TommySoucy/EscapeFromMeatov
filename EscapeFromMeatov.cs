@@ -41,6 +41,8 @@ namespace EFM
         public static AssetBundleCreateRequest currentRaidBundleRequest;
         public static MainMenuSceneDef sceneDef;
         public static List<GameObject> securedObjects;
+        public static FVRInteractiveObject securedLeftHandInteractable;
+        public static FVRInteractiveObject securedRightHandInteractable;
         public static int saveSlotIndex = -1;
         public static int currentQuickBeltConfiguration = -1;
         public static int firstCustomConfigIndex = -1;
@@ -1913,6 +1915,12 @@ namespace EFM
 
             harmony.Patch(entityCheckPatchOriginal, new HarmonyMethod(entityCheckPatchPrefix));
 
+            // ChamberEjectRoundPatch
+            MethodInfo chamberEjectRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("EjectRound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo chamberEjectRoundPatchPostfix = typeof(ChamberEjectRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(chamberEjectRoundPatchOriginal, null, new HarmonyMethod(chamberEjectRoundPatchPostfix));
+
             //// DeadBoltPatch
             //MethodInfo deadBoltPatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("TurnBolt", BindingFlags.Public | BindingFlags.Instance);
             //MethodInfo deadBoltPatchPrefix = typeof(DeadBoltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -2116,6 +2124,12 @@ namespace EFM
                 SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
             }
             securedObjects.Clear();
+
+            // Make sure secured hand objects are put in hands
+            leftHand.fvrHand.ForceSetInteractable(securedLeftHandInteractable);
+            securedLeftHandInteractable = null;
+            rightHand.fvrHand.ForceSetInteractable(securedRightHandInteractable);
+            securedRightHandInteractable = null;
         }
 
         public void LogError(string error)
@@ -2346,6 +2360,10 @@ namespace EFM
             GameObject cameraRig = GameObject.Find("[CameraRig]Fixed");
             Mod.securedObjects.Add(cameraRig);
             GameObject.DontDestroyOnLoad(cameraRig);
+
+            // Hand objects are secured but need to keep track of them to put them in the hands once we unsecure
+            Mod.securedLeftHandInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
+            Mod.securedRightHandInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
 
             if (secureEquipment)
             {
@@ -7951,7 +7969,7 @@ namespace EFM
         }
     }
 
-    // PAtches AIManager.EntityCheck to use our own entity lists instead of OverlapSphere to check other entities
+    // Patches AIManager.EntityCheck to use our own entity lists instead of OverlapSphere to check other entities
     // This completely replaces the original
     class EntityCheckPatch
     {
@@ -8022,6 +8040,73 @@ namespace EFM
             }
 
             return false;
+        }
+    }
+
+    // Patches FVRFireArmChamber.EjectRound to keep track of the ejected round
+    class ChamberEjectRoundPatch
+    {
+        static void Postfix(ref FVRFireArmRound __result)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (__result != null && !__result.IsSpent)
+            {
+                EFM_VanillaItemDescriptor vanillaItemDescriptor = __result.GetComponent<EFM_VanillaItemDescriptor>();
+
+                BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor, true);
+
+                GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
+                if (Mod.currentLocationIndex == 1)
+                {
+                    // Now in hideout
+                    if (Mod.baseInventory.ContainsKey(vanillaItemDescriptor.H3ID))
+                    {
+                        Mod.baseInventory[vanillaItemDescriptor.H3ID] += 1;
+                    }
+                    else
+                    {
+                        Mod.baseInventory.Add(vanillaItemDescriptor.H3ID, 1);
+                    }
+                    if (Mod.currentBaseManager.baseInventoryObjects.ContainsKey(vanillaItemDescriptor.H3ID))
+                    {
+                        Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
+                    }
+                    else
+                    {
+                        Mod.currentBaseManager.baseInventoryObjects.Add(vanillaItemDescriptor.H3ID, new List<GameObject>());
+                        Mod.currentBaseManager.baseInventoryObjects[vanillaItemDescriptor.H3ID].Add(vanillaItemDescriptor.gameObject);
+                    }
+
+                    // Even if goes from player to player, rounds in chambers are not counted in roundsByType, so need to add it now
+                    FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                    if (Mod.roundsByType.ContainsKey(asRound.RoundType))
+                    {
+                        if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                        {
+                            Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                        }
+                        else
+                        {
+                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                        }
+                    }
+                    else
+                    {
+                        Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                        Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                    }
+
+                    __result.transform.parent = sceneRoot.transform.GetChild(2);
+                }
+                else if (Mod.currentLocationIndex == 2)
+                {
+                    __result.transform.parent = sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2);
+                }
+            }
         }
     }
     #endregion

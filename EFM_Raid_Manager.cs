@@ -761,7 +761,6 @@ namespace EFM
             Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tInstantiated sosig, position: " + sosigObject.transform.position);
             Sosig sosigScript = sosigObject.GetComponentInChildren<Sosig>();
             sosigScript.InitHands();
-            sosigScript.CanBeKnockedOut = false;
             sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for weapon
             sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for grenade
             sosigScript.Inventory.Init();
@@ -769,6 +768,7 @@ namespace EFM
             EFM_AI AIScript = sosigObject.AddComponent<EFM_AI>();
             AIScript.experienceReward = spawnData.experienceReward;
             AIScript.entityIndex = entities.Count;
+            AIScript.inventory = spawnData.inventory;
             Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tAdded EFM_AI script");
 
             entities.Add(sosigScript.E);
@@ -943,6 +943,9 @@ namespace EFM
             sosigScript.Priority.SetAllEnemy();
             sosigScript.Priority.MakeFriendly(iff);
 
+            sosigScript.CanBeGrabbed = false;
+            sosigScript.CanBeKnockedOut = false;
+
             Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tConfigured AI");
 
             spawning = false;
@@ -970,6 +973,435 @@ namespace EFM
             entities[AIScript.entityIndex] = entities[entities.Count - 1];
             entities[AIScript.entityIndex].GetComponent<EFM_AI>().entityIndex = AIScript.entityIndex;
             entities.RemoveAt(entities.Count - 1);
+
+            sosig.TickDownToClear(5);
+
+            // Spawn inventory
+            AnvilManager.Run(SpawnAIInventory(AIScript.inventory, sosig.transform.position + Vector3.up));
+        }
+
+        private IEnumerator SpawnAIInventory(AIInventory inventory, Vector3 pos)
+        {
+            // Spawn generic items
+            foreach(string genericItem in inventory.generic)
+            {
+                bool custom = false;
+                GameObject itemPrefab = null;
+                int parsedID = -1;
+                if(int.TryParse(genericItem, out parsedID))
+                {
+                    itemPrefab = Mod.itemPrefabs[parsedID];
+                    custom = true;
+                }
+                else
+                {
+                    yield return IM.OD[genericItem].GetGameObjectAsync();
+                    itemPrefab = IM.OD[genericItem].GetGameObject();
+                }
+
+                if (custom)
+                {
+                    GameObject itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                    EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                    FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                    // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                    Mod.RemoveFromAll(itemCIW, null);
+
+                    // Get amount
+                    if (itemCIW.itemType == Mod.ItemType.Money)
+                    {
+                        if(parsedID == 201) // USD
+                        {
+                            itemCIW.stack = UnityEngine.Random.Range(20, 200);
+                        }
+                        else if(parsedID == 202) // Euro
+                        {
+                            itemCIW.stack = UnityEngine.Random.Range(10, 120);
+                        }
+                        else if(parsedID == 203) // Rouble
+                        {
+                            itemCIW.stack = UnityEngine.Random.Range(150, 5000);
+                        }
+                    }
+                    else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
+                    {
+                        FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                        for (int j = 0; j < itemCIW.maxAmount; ++j)
+                        {
+                            asMagazine.AddRound(itemCIW.roundClass, false, false);
+                        }
+                    }
+                    else if (itemCIW.maxAmount > 0)
+                    {
+                        itemCIW.amount = itemCIW.maxAmount;
+                    }
+                }
+                else // vanilla
+                {
+                    if (Mod.usedRoundIDs.Contains(genericItem))
+                    {
+                        // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of rounds
+                        int amount = UnityEngine.Random.Range(10, 121);
+                        FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
+                        FireArmRoundType roundType = round.RoundType;
+                        FireArmRoundClass roundClass = round.RoundClass;
+
+                        if (Mod.ammoBoxByAmmoID.ContainsKey(genericItem))
+                        {
+                            GameObject itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                            EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                            FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                            FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                            for (int j = 0; j < amount; ++j)
+                            {
+                                asMagazine.AddRound(itemCIW.roundClass, false, false);
+                            }
+
+                            // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                            Mod.RemoveFromAll(itemCIW, null);
+                        }
+                        else // Spawn in generic box
+                        {
+                            GameObject itemObject = null;
+                            if (amount > 30)
+                            {
+                                itemObject = Instantiate(Mod.itemPrefabs[716], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                            }
+                            else
+                            {
+                                itemObject = Instantiate(Mod.itemPrefabs[715], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                            }
+
+                            EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                            FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                            FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                            asMagazine.RoundType = roundType;
+                            itemCIW.roundClass = roundClass;
+                            for (int j = 0; j < amount; ++j)
+                            {
+                                asMagazine.AddRound(itemCIW.roundClass, false, false);
+                            }
+
+                            // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                            Mod.RemoveFromAll(itemCIW, null);
+                        }
+                    }
+                    else // Not a round, spawn as normal
+                    {
+                        Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                    }
+                }
+                yield return null;
+            }
+
+            // Spawn rig
+            if (inventory.rig != null) 
+            {
+                GameObject rigObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.rig)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                
+                yield return null;
+                
+                EFM_CustomItemWrapper rigCIW = rigObject.GetComponent<EFM_CustomItemWrapper>();
+
+                for(int slotIndex = 0; slotIndex < inventory.rigContents.Length; ++slotIndex)
+                {
+                    string itemID = inventory.rigContents[slotIndex];
+                    bool custom = false;
+                    GameObject itemPrefab = null;
+                    int parsedID = -1;
+                    if (int.TryParse(itemID, out parsedID))
+                    {
+                        itemPrefab = Mod.itemPrefabs[parsedID];
+                        custom = true;
+                    }
+                    else
+                    {
+                        yield return IM.OD[itemID].GetGameObjectAsync();
+                        itemPrefab = IM.OD[itemID].GetGameObject();
+                    }
+
+                    GameObject itemObject = null;
+                    if (custom)
+                    {
+                        itemObject = Instantiate(itemPrefab);
+                        EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                        FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                        // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                        Mod.RemoveFromAll(itemCIW, null);
+
+                        // Get amount
+                        if (itemCIW.itemType == Mod.ItemType.Money)
+                        {
+                            if (parsedID == 201) // USD
+                            {
+                                itemCIW.stack = UnityEngine.Random.Range(20, 200);
+                            }
+                            else if (parsedID == 202) // Euro
+                            {
+                                itemCIW.stack = UnityEngine.Random.Range(10, 120);
+                            }
+                            else if (parsedID == 203) // Rouble
+                            {
+                                itemCIW.stack = UnityEngine.Random.Range(150, 5000);
+                            }
+                        }
+                        else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
+                        {
+                            FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                            for (int j = 0; j < itemCIW.maxAmount; ++j)
+                            {
+                                asMagazine.AddRound(itemCIW.roundClass, false, false);
+                            }
+                        }
+                        else if (itemCIW.maxAmount > 0)
+                        {
+                            itemCIW.amount = itemCIW.maxAmount;
+                        }
+                    }
+                    else // vanilla
+                    {
+                        if (Mod.usedRoundIDs.Contains(itemID))
+                        {
+                            // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of rounds
+                            int amount = UnityEngine.Random.Range(10, 121);
+                            FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
+                            FireArmRoundType roundType = round.RoundType;
+                            FireArmRoundClass roundClass = round.RoundClass;
+
+                            if (Mod.ammoBoxByAmmoID.ContainsKey(itemID))
+                            {
+                                itemObject = Instantiate(itemPrefab);
+                                EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                for (int j = 0; j < amount; ++j)
+                                {
+                                    asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                }
+
+                                // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                Mod.RemoveFromAll(itemCIW, null);
+                            }
+                            else // Spawn in generic box
+                            {
+                                if (amount > 30)
+                                {
+                                    itemObject = Instantiate(Mod.itemPrefabs[716]);
+                                }
+                                else
+                                {
+                                    itemObject = Instantiate(Mod.itemPrefabs[715]);
+                                }
+
+                                EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                asMagazine.RoundType = roundType;
+                                itemCIW.roundClass = roundClass;
+                                for (int j = 0; j < amount; ++j)
+                                {
+                                    asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                }
+
+                                // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                Mod.RemoveFromAll(itemCIW, null);
+                            }
+                        }
+                        else // Not a round, spawn as normal
+                        {
+                            Instantiate(itemPrefab);
+                        }
+                    }
+
+                    itemObject.SetActive(false);
+                    rigCIW.itemsInSlots[slotIndex] = itemObject;
+
+                    yield return null;
+                }
+
+                rigCIW.UpdateRigMode();
+            }
+
+            // Spawn dogtags
+            if(inventory.dogtag != null)
+            {
+                GameObject dogtagObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.dogtag)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+
+                EFM_CustomItemWrapper dogtagCIW = dogtagObject.GetComponent<EFM_CustomItemWrapper>();
+                dogtagCIW.dogtagLevel = inventory.dogtagLevel;
+                dogtagCIW.dogtagName = inventory.dogtagName;
+
+                yield return null;
+            }
+
+            // Spawn backpack
+            if (inventory.backpack != null)
+            {
+                GameObject backpackObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.backpack)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+
+                yield return null;
+
+                EFM_CustomItemWrapper backpackCIW = backpackObject.GetComponent<EFM_CustomItemWrapper>();
+
+                foreach (string backpackItem in inventory.backpackContents)
+                {
+                    bool custom = false;
+                    GameObject itemPrefab = null;
+                    int parsedID = -1;
+                    if (int.TryParse(backpackItem, out parsedID))
+                    {
+                        itemPrefab = Mod.itemPrefabs[parsedID];
+                        custom = true;
+                    }
+                    else
+                    {
+                        yield return IM.OD[backpackItem].GetGameObjectAsync();
+                        itemPrefab = IM.OD[backpackItem].GetGameObject();
+                    }
+
+                    GameObject itemObject = null;
+                    if (custom)
+                    {
+                        itemObject = Instantiate(itemPrefab);
+                        EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                        FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                        // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                        Mod.RemoveFromAll(itemCIW, null);
+
+                        // Get amount
+                        if (itemCIW.itemType == Mod.ItemType.Money)
+                        {
+                            if (parsedID == 201) // USD
+                            {
+                                itemCIW.stack = UnityEngine.Random.Range(20, 200);
+                            }
+                            else if (parsedID == 202) // Euro
+                            {
+                                itemCIW.stack = UnityEngine.Random.Range(10, 120);
+                            }
+                            else if (parsedID == 203) // Rouble
+                            {
+                                itemCIW.stack = UnityEngine.Random.Range(150, 5000);
+                            }
+                        }
+                        else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
+                        {
+                            FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                            for (int j = 0; j < itemCIW.maxAmount; ++j)
+                            {
+                                asMagazine.AddRound(itemCIW.roundClass, false, false);
+                            }
+                        }
+                        else if (itemCIW.maxAmount > 0)
+                        {
+                            itemCIW.amount = itemCIW.maxAmount;
+                        }
+                    }
+                    else // vanilla
+                    {
+                        if (Mod.usedRoundIDs.Contains(backpackItem))
+                        {
+                            // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of rounds
+                            int amount = UnityEngine.Random.Range(10, 121);
+                            FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
+                            FireArmRoundType roundType = round.RoundType;
+                            FireArmRoundClass roundClass = round.RoundClass;
+
+                            if (Mod.ammoBoxByAmmoID.ContainsKey(backpackItem))
+                            {
+                                itemObject = Instantiate(itemPrefab);
+                                EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                for (int j = 0; j < amount; ++j)
+                                {
+                                    asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                }
+
+                                // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                Mod.RemoveFromAll(itemCIW, null);
+                            }
+                            else // Spawn in generic box
+                            {
+                                if (amount > 30)
+                                {
+                                    itemObject = Instantiate(Mod.itemPrefabs[716]);
+                                }
+                                else
+                                {
+                                    itemObject = Instantiate(Mod.itemPrefabs[715]);
+                                }
+
+                                EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                asMagazine.RoundType = roundType;
+                                itemCIW.roundClass = roundClass;
+                                for (int j = 0; j < amount; ++j)
+                                {
+                                    asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                }
+
+                                // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                Mod.RemoveFromAll(itemCIW, null);
+                            }
+                        }
+                        else // Not a round, spawn as normal
+                        {
+                            Instantiate(itemPrefab);
+                        }
+                    }
+
+                    itemObject.SetActive(false);
+                    
+                    // Set item in the container, at random pos and rot, if volume fits
+                    bool boxMainContainer = backpackCIW.mainContainer.GetComponent<BoxCollider>() != null;
+                    if (backpackCIW.AddItemToContainer(itemObject.GetComponent<EFM_CustomItemWrapper>().physObj))
+                    {
+                        itemObject.transform.parent = backpackCIW.containerItemRoot;
+
+                        if (boxMainContainer)
+                        {
+                            BoxCollider boxCollider = backpackCIW.mainContainer.GetComponent<BoxCollider>();
+                            itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-boxCollider.size.x / 2, boxCollider.size.x / 2),
+                                                                             UnityEngine.Random.Range(-boxCollider.size.y / 2, boxCollider.size.y / 2),
+                                                                             UnityEngine.Random.Range(-boxCollider.size.z / 2, boxCollider.size.z / 2));
+                        }
+                        else
+                        {
+                            CapsuleCollider capsuleCollider = backpackCIW.mainContainer.GetComponent<CapsuleCollider>();
+                            if (capsuleCollider != null)
+                            {
+                                itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-capsuleCollider.radius / 2, capsuleCollider.radius / 2),
+                                                                                 UnityEngine.Random.Range(-(capsuleCollider.height / 2 - capsuleCollider.radius), capsuleCollider.height / 2 - capsuleCollider.radius),
+                                                                                 0);
+                            }
+                            else
+                            {
+                                itemObject.transform.localPosition = Vector3.zero;
+                            }
+                        }
+                        itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
+                    }
+                    else // Could not add item to container, set it next to parent
+                    {
+                        itemObject.transform.position = backpackCIW.transform.position + Vector3.up; // 1m above parent
+                    }
+
+                    yield return null;
+                }
+            }
+
+            continue from here spawn the weapons, the holster weaopn should probably be put in a big enough slot in the rig
         }
 
         private List<Transform> GetMostAvailableBotZones()
@@ -1086,6 +1518,7 @@ namespace EFM
             AISquads = new Dictionary<string, List<Sosig>>();
             AISquadSizes = new Dictionary<string, int>();
             entities = new List<AIEntity>();
+            entities.Add(GM.CurrentPlayerBody.Hitboxes[0].MyE); // Add player as first entity
 
             // Bosses
             if (spawnCultPriest)
@@ -3331,6 +3764,9 @@ namespace EFM
                             {
                                 asMagazine.AddRound(itemCIW.roundClass, false, false);
                             }
+
+                            // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                            Mod.RemoveFromAll(itemCIW, null);
                         }
                         else // Spawn in generic box
                         {

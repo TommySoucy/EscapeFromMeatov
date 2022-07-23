@@ -10,5 +10,6 @@ namespace EFM
     {
         public int experienceReward;
         public int entityIndex;
+        public AIInventory inventory;
     }
 }

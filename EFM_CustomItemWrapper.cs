@@ -187,6 +187,7 @@ namespace EFM
 		// DogTag
 		public bool USEC;
 		public int dogtagLevel = 1;
+		public string dogtagName;
 
 		private void Awake()
 		{
@@ -1708,6 +1709,7 @@ namespace EFM
 			else if(itemType == Mod.ItemType.DogTag)
 			{
 				descriptionPack.stack = dogtagLevel;
+				descriptionPack.name = itemName + " ("+dogtagName+")";
 			}
 			descriptionPack.weight = currentWeight;
 			descriptionPack.volume = volumes[mode];
