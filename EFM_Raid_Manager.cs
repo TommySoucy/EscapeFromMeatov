@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json;
@@ -44,6 +45,7 @@ namespace EFM
         private Dictionary<string, List<Sosig>> AISquads;
         private Dictionary<string, int> AISquadSizes;
         public static List<AIEntity> entities;
+        public static List<EFM_AI> entityRelatedAI;
 
         private List<GameObject> extractionCards;
         private bool extracted;
@@ -56,6 +58,11 @@ namespace EFM
         public override void Init()
         {
             Mod.currentRaidManager = this;
+
+            // disable post processing
+            GM.Options.PerformanceOptions.IsPostEnabled_AO = false;
+            GM.Options.PerformanceOptions.IsPostEnabled_Bloom = false;
+            GM.Options.PerformanceOptions.IsPostEnabled_CC = false;
 
             // Init player state
             currentHealthRates = new float[7];
@@ -772,6 +779,7 @@ namespace EFM
             Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tAdded EFM_AI script");
 
             entities.Add(sosigScript.E);
+            entityRelatedAI.Add(AIScript);
 
             // Spawn outfit
             foreach (KeyValuePair<int, List<string>> outfitEntry in spawnData.outfitByLink)
@@ -914,7 +922,7 @@ namespace EFM
                         points.Add(extractionPoints.GetChild(UnityEngine.Random.Range(0, extractionPoints.childCount)));
 
                         // Send the path to sosigs using Sosig.CommandPathTo
-                        sosigScript.CommandPathTo(points, 0.1f, new Vector2(2, 5), 0.5f, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Once, AISquads[spawnData.leaderName], 45, 1, true, 5);
+                        sosigScript.CommandPathTo(points, 0.1f, new Vector2(2, 5), 0.5f, Sosig.SosigMoveSpeed.Walking, Sosig.PathLoopType.Once, AISquadSizes[spawnData.leaderName] == 1 ? null : AISquads[spawnData.leaderName], 45, 1, true, 5);
                     }
                     else
                     {
@@ -954,6 +962,8 @@ namespace EFM
 
         public void OnBotKill(Sosig sosig)
         {
+            Mod.instance.LogInfo("Sosig " + sosig.name + " killed");
+
             // Here we use GetOriginalIFFTeam instead of GetIFF because the actual IFF gets set to -3 on sosig death, original doesn't change
             --spawnedIFFs[sosig.GetOriginalIFFTeam()];
             if(spawnedIFFs[sosig.GetOriginalIFFTeam()] == 0)
@@ -971,8 +981,10 @@ namespace EFM
 
             // Remove entity from list
             entities[AIScript.entityIndex] = entities[entities.Count - 1];
-            entities[AIScript.entityIndex].GetComponent<EFM_AI>().entityIndex = AIScript.entityIndex;
+            entityRelatedAI[AIScript.entityIndex] = entityRelatedAI[entityRelatedAI.Count - 1];
+            entityRelatedAI[AIScript.entityIndex].entityIndex = AIScript.entityIndex;
             entities.RemoveAt(entities.Count - 1);
+            entityRelatedAI.RemoveAt(entityRelatedAI.Count - 1);
 
             sosig.TickDownToClear(5);
 
@@ -1049,7 +1061,7 @@ namespace EFM
 
                         if (Mod.ammoBoxByAmmoID.ContainsKey(genericItem))
                         {
-                            GameObject itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                            GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[genericItem]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                             EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                             FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
@@ -1101,13 +1113,18 @@ namespace EFM
             if (inventory.rig != null) 
             {
                 GameObject rigObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.rig)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
-                
+
                 yield return null;
                 
                 EFM_CustomItemWrapper rigCIW = rigObject.GetComponent<EFM_CustomItemWrapper>();
 
-                for(int slotIndex = 0; slotIndex < inventory.rigContents.Length; ++slotIndex)
+                for (int slotIndex = 0; slotIndex < inventory.rigContents.Length; ++slotIndex)
                 {
+                    if(inventory.rigContents[slotIndex] == null)
+                    {
+                        continue;
+                    }
+
                     string itemID = inventory.rigContents[slotIndex];
                     bool custom = false;
                     GameObject itemPrefab = null;
@@ -1174,7 +1191,7 @@ namespace EFM
 
                             if (Mod.ammoBoxByAmmoID.ContainsKey(itemID))
                             {
-                                itemObject = Instantiate(itemPrefab);
+                                itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[itemID]]);
                                 EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                 FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
@@ -1215,7 +1232,7 @@ namespace EFM
                         }
                         else // Not a round, spawn as normal
                         {
-                            Instantiate(itemPrefab);
+                            itemObject = Instantiate(itemPrefab);
                         }
                     }
 
@@ -1228,8 +1245,9 @@ namespace EFM
                 rigCIW.UpdateRigMode();
             }
 
+            Mod.instance.LogInfo("\tSpawning dogtag");
             // Spawn dogtags
-            if(inventory.dogtag != null)
+            if (inventory.dogtag != null)
             {
                 GameObject dogtagObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.dogtag)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -1240,6 +1258,7 @@ namespace EFM
                 yield return null;
             }
 
+            Mod.instance.LogInfo("\tSpawning backpack");
             // Spawn backpack
             if (inventory.backpack != null)
             {
@@ -1316,7 +1335,7 @@ namespace EFM
 
                             if (Mod.ammoBoxByAmmoID.ContainsKey(backpackItem))
                             {
-                                itemObject = Instantiate(itemPrefab);
+                                itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[backpackItem]]);
                                 EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                 FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
@@ -1401,7 +1420,542 @@ namespace EFM
                 }
             }
 
-            continue from here spawn the weapons, the holster weaopn should probably be put in a big enough slot in the rig
+            Mod.instance.LogInfo("\tSpawning primary");
+            // Spawn primary weapon
+            if (inventory.primaryWeapon != null)
+            {
+                yield return IM.OD[inventory.primaryWeapon].GetGameObjectAsync();
+                GameObject weaponObject = Instantiate(IM.OD[inventory.primaryWeapon].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+
+                yield return null;
+
+                // FireArmAttachment are attached to FVRFireArmAttachmentMount using attachment.AttachToMount
+                FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
+                if(weaponFireArm == null)
+                {
+                    Mod.instance.LogWarning("Sosig primary weapon not a firearm");
+                    yield break;
+                }
+                AIInventoryWeaponMod currentParent = inventory.primaryWeaponMods;
+                Stack<int> childIndices = new Stack<int>();
+                childIndices.Push(0);
+                while(currentParent != null)
+                {
+                    if (currentParent.children != null && childIndices.Peek() < currentParent.children.Count)
+                    {
+                        string modID = currentParent.children[childIndices.Peek()].ID;
+                        Mod.instance.LogInfo(String.Concat(Enumerable.Repeat("\t", childIndices.Count + 2).ToArray()) + modID);
+                        // Spawn child at index
+                        yield return IM.OD[modID].GetGameObjectAsync();
+                        GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
+                        FVRPhysicalObject attachmentPrefabPhysObj = attachmentPrefab.GetComponent<FVRPhysicalObject>();
+                        GameObject attachmentObject = null;
+
+                        // If mag or clip, must be loaded accordingly
+                        // If round, fill chambers and mag/clip if applicable
+                        // If attachment, attach to first mount that fits on the parent
+                        if (attachmentPrefabPhysObj is FVRFireArmMagazine)
+                        {
+                            attachmentObject = Instantiate(attachmentPrefab);
+                            EFM_VanillaItemDescriptor magVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            magVID.takeCurrentLocation = false;
+                            FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
+                            FireArmLoadMagPatch.ignoreLoadMag = true;
+                            attachmentMagazine.UsesVizInterp = false;
+                            attachmentMagazine.Load(weaponFireArm);
+                        }
+                        else if (attachmentPrefabPhysObj is FVRFireArmClip)
+                        {
+                            attachmentObject = Instantiate(attachmentPrefab);
+                            EFM_VanillaItemDescriptor clipVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            clipVID.takeCurrentLocation = false;
+                            FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
+                            FireArmLoadClipPatch.ignoreLoadClip = true;
+                            attachmentClip.Load(weaponFireArm);
+                        }
+                        else if(attachmentPrefabPhysObj is FVRFireArmRound)
+                        {
+                            FVRFireArmRound asRound = attachmentPrefabPhysObj as FVRFireArmRound;
+
+                            // Fill chamber(s) then fill mag/clip as necessary
+                            int chamberCount = weaponFireArm.GetChambers().Count;
+                            List<FireArmRoundClass> chamberRounds = new List<FireArmRoundClass>();
+                            for(int i = 0; i < chamberCount; ++i)
+                            {
+                                chamberRounds.Add(asRound.RoundClass);
+                            }
+                            weaponFireArm.SetLoadedChambers(chamberRounds);
+
+                            if (weaponFireArm.UsesMagazines)
+                            {
+                                if(weaponFireArm.Magazine != null)
+                                {
+                                    weaponFireArm.Magazine.ReloadMagWithType(asRound.RoundClass);
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Trying to load sosig drop primary weapon with round but mag using weapon does not have mag loaded");
+                                }
+                            }
+                            else if (weaponFireArm.UsesClips)
+                            {
+                                if (weaponFireArm.Clip != null)
+                                {
+                                    weaponFireArm.Clip.ReloadClipWithType(asRound.RoundClass);
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Trying to load sosig drop primary weapon with round but clip using weapon does not have clip loaded");
+                                }
+                            }
+                            else // No ammo container, meaning we haven't planned to spawn aditional ammo for this weapon in rest of inventory so spawn a box of it
+                            {
+                                int amount = UnityEngine.Random.Range(10, 61);
+
+                                if (Mod.ammoBoxByAmmoID.ContainsKey(modID))
+                                {
+                                    GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                                    EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                    FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                    for (int j = 0; j < amount; ++j)
+                                    {
+                                        asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                    }
+
+                                    // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                    Mod.RemoveFromAll(itemCIW, null);
+                                }
+                                else // Spawn in generic box
+                                {
+                                    GameObject itemObject = null;
+                                    if (amount > 30)
+                                    {
+                                        itemObject = Instantiate(Mod.itemPrefabs[716], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                                    }
+                                    else
+                                    {
+                                        itemObject = Instantiate(Mod.itemPrefabs[715], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                                    }
+
+                                    EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                    FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                    asMagazine.RoundType = asRound.RoundType;
+                                    itemCIW.roundClass = asRound.RoundClass;
+                                    for (int j = 0; j < amount; ++j)
+                                    {
+                                        asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                    }
+
+                                    // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                    Mod.RemoveFromAll(itemCIW, null);
+                                }
+                            }
+                        }
+                        else if(attachmentPrefabPhysObj is FVRFireArmAttachment)
+                        {
+                            attachmentObject = Instantiate(attachmentPrefab);
+                            FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
+                            bool mountFound = false;
+                            foreach(FVRFireArmAttachmentMount mount in weaponFireArm.AttachmentMounts)
+                            {
+                                if(mount.Type == asAttachment.Type)
+                                {
+                                    mountFound = true;
+                                    asAttachment.AttachToMount(mount, false);
+                                    break;
+                                }
+                            }
+                            if (!mountFound)
+                            {
+                                Mod.instance.LogError("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
+                        }
+
+                        // Increment top index
+                        childIndices.Push(childIndices.Pop() + 1);
+
+                        // Make this child the new parent
+                        currentParent = currentParent.children[childIndices.Peek()];
+
+                        // Push 0 on stack
+                        childIndices.Push(0);
+
+                        yield return null;
+                    }
+                    else // Spawned all children, go up hierarchy
+                    {
+                        childIndices.Pop();
+                        currentParent = currentParent.parent;
+                    }
+                }
+            }
+
+            Mod.instance.LogInfo("\tSpawning secondary");
+            // Spawn secondary weapon
+            if (inventory.secondaryWeapon != null)
+            {
+                yield return IM.OD[inventory.secondaryWeapon].GetGameObjectAsync();
+                GameObject weaponObject = Instantiate(IM.OD[inventory.secondaryWeapon].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+
+                yield return null;
+
+                // FireArmAttachment are attached to FVRFireArmAttachmentMount using attachment.AttachToMount
+                FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
+                if(weaponFireArm == null)
+                {
+                    Mod.instance.LogWarning("Sosig secondary weapon not a firearm");
+                    yield break;
+                }
+                AIInventoryWeaponMod currentParent = inventory.secondaryWeaponMods;
+                Stack<int> childIndices = new Stack<int>();
+                childIndices.Push(0);
+                while(currentParent != null)
+                {
+                    if (currentParent.children != null && childIndices.Peek() < currentParent.children.Count)
+                    {
+                        string modID = currentParent.children[childIndices.Peek()].ID;
+                        Mod.instance.LogInfo(String.Concat(Enumerable.Repeat("\t", childIndices.Count + 2).ToArray()) + modID);
+                        // Spawn child at index
+                        yield return IM.OD[modID].GetGameObjectAsync();
+                        GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
+                        FVRPhysicalObject attachmentPrefabPhysObj = attachmentPrefab.GetComponent<FVRPhysicalObject>();
+                        GameObject attachmentObject = null;
+
+                        // If mag or clip, must be loaded accordingly
+                        // If round, fill chambers and mag/clip if applicable
+                        // If attachment, attach to first mount that fits on the parent
+                        if (attachmentPrefabPhysObj is FVRFireArmMagazine)
+                        {
+                            attachmentObject = Instantiate(attachmentPrefab);
+                            EFM_VanillaItemDescriptor magVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            magVID.takeCurrentLocation = false;
+                            FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
+                            attachmentMagazine.UsesVizInterp = false;
+                            FireArmLoadMagPatch.ignoreLoadMag = true;
+                            attachmentMagazine.Load(weaponFireArm);
+                        }
+                        else if (attachmentPrefabPhysObj is FVRFireArmClip)
+                        {
+                            attachmentObject = Instantiate(attachmentPrefab);
+                            EFM_VanillaItemDescriptor clipVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            clipVID.takeCurrentLocation = false;
+                            FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
+                            FireArmLoadClipPatch.ignoreLoadClip = true;
+                            attachmentClip.Load(weaponFireArm);
+                        }
+                        else if(attachmentPrefabPhysObj is FVRFireArmRound)
+                        {
+                            FVRFireArmRound asRound = attachmentPrefabPhysObj as FVRFireArmRound;
+
+                            // Fill chamber(s) then fill mag/clip as necessary
+                            int chamberCount = weaponFireArm.GetChambers().Count;
+                            List<FireArmRoundClass> chamberRounds = new List<FireArmRoundClass>();
+                            for(int i = 0; i < chamberCount; ++i)
+                            {
+                                chamberRounds.Add(asRound.RoundClass);
+                            }
+                            weaponFireArm.SetLoadedChambers(chamberRounds);
+
+                            if (weaponFireArm.UsesMagazines)
+                            {
+                                if(weaponFireArm.Magazine != null)
+                                {
+                                    weaponFireArm.Magazine.ReloadMagWithType(asRound.RoundClass);
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Trying to load sosig drop secondary weapon with round but mag using weapon does not have mag loaded");
+                                }
+                            }
+                            else if (weaponFireArm.UsesClips)
+                            {
+                                if (weaponFireArm.Clip != null)
+                                {
+                                    weaponFireArm.Clip.ReloadClipWithType(asRound.RoundClass);
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Trying to load sosig drop secondary weapon with round but clip using weapon does not have clip loaded");
+                                }
+                            }
+                            else // No ammo container, meaning we haven't planned to spawn aditional ammo for this weapon in rest of inventory so spawn a box of it
+                            {
+                                int amount = UnityEngine.Random.Range(10, 61);
+
+                                if (Mod.ammoBoxByAmmoID.ContainsKey(modID))
+                                {
+                                    GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                                    EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                    FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                    for (int j = 0; j < amount; ++j)
+                                    {
+                                        asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                    }
+
+                                    // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                    Mod.RemoveFromAll(itemCIW, null);
+                                }
+                                else // Spawn in generic box
+                                {
+                                    GameObject itemObject = null;
+                                    if (amount > 30)
+                                    {
+                                        itemObject = Instantiate(Mod.itemPrefabs[716], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                                    }
+                                    else
+                                    {
+                                        itemObject = Instantiate(Mod.itemPrefabs[715], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                                    }
+
+                                    EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                    FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                    asMagazine.RoundType = asRound.RoundType;
+                                    itemCIW.roundClass = asRound.RoundClass;
+                                    for (int j = 0; j < amount; ++j)
+                                    {
+                                        asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                    }
+
+                                    // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                    Mod.RemoveFromAll(itemCIW, null);
+                                }
+                            }
+                        }
+                        else if(attachmentPrefabPhysObj is FVRFireArmAttachment)
+                        {
+                            attachmentObject = Instantiate(attachmentPrefab);
+                            FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
+                            bool mountFound = false;
+                            foreach(FVRFireArmAttachmentMount mount in weaponFireArm.AttachmentMounts)
+                            {
+                                if(mount.Type == asAttachment.Type)
+                                {
+                                    mountFound = true;
+                                    asAttachment.AttachToMount(mount, false);
+                                    break;
+                                }
+                            }
+                            if (!mountFound)
+                            {
+                                Mod.instance.LogError("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
+                        }
+
+                        // Increment top index
+                        childIndices.Push(childIndices.Pop() + 1);
+
+                        // Make this child the new parent
+                        currentParent = currentParent.children[childIndices.Peek()];
+
+                        // Push 0 on stack
+                        childIndices.Push(0);
+
+                        yield return null;
+                    }
+                    else // Spawned all children, go up hierarchy
+                    {
+                        childIndices.Pop();
+                        currentParent = currentParent.parent;
+                    }
+                }
+            }
+
+            Mod.instance.LogInfo("\tSpawning holster");
+            // Spawn holster weapon
+            if (inventory.holster != null)
+            {
+                yield return IM.OD[inventory.holster].GetGameObjectAsync();
+                GameObject weaponObject = Instantiate(IM.OD[inventory.holster].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+
+                yield return null;
+
+                // FireArmAttachment are attached to FVRFireArmAttachmentMount using attachment.AttachToMount
+                FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
+                if(weaponFireArm == null)
+                {
+                    Mod.instance.LogWarning("Sosig holster weapon not a firearm");
+                    yield break;
+                }
+                AIInventoryWeaponMod currentParent = inventory.holsterMods;
+                Stack<int> childIndices = new Stack<int>();
+                childIndices.Push(0);
+                while(currentParent != null)
+                {
+                    if (currentParent.children != null && childIndices.Peek() < currentParent.children.Count)
+                    {
+                        string modID = currentParent.children[childIndices.Peek()].ID;
+                        Mod.instance.LogInfo(String.Concat(Enumerable.Repeat("\t", childIndices.Count + 2).ToArray()) + modID);
+                        // Spawn child at index
+                        yield return IM.OD[modID].GetGameObjectAsync();
+                        GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
+                        FVRPhysicalObject attachmentPrefabPhysObj = attachmentPrefab.GetComponent<FVRPhysicalObject>();
+                        GameObject attachmentObject = null;
+
+                        // If mag or clip, must be loaded accordingly
+                        // If round, fill chambers and mag/clip if applicable
+                        // If attachment, attach to first mount that fits on the parent
+                        if (attachmentPrefabPhysObj is FVRFireArmMagazine)
+                        {
+                            attachmentObject = Instantiate(attachmentPrefab);
+                            EFM_VanillaItemDescriptor magVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            magVID.takeCurrentLocation = false;
+                            FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
+                            attachmentMagazine.UsesVizInterp = false;
+                            FireArmLoadMagPatch.ignoreLoadMag = true;
+                            attachmentMagazine.Load(weaponFireArm);
+                        }
+                        else if (attachmentPrefabPhysObj is FVRFireArmClip)
+                        {
+                            attachmentObject = Instantiate(attachmentPrefab);
+                            EFM_VanillaItemDescriptor clipVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            clipVID.takeCurrentLocation = false;
+                            FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
+                            FireArmLoadClipPatch.ignoreLoadClip = true;
+                            attachmentClip.Load(weaponFireArm);
+                        }
+                        else if(attachmentPrefabPhysObj is FVRFireArmRound)
+                        {
+                            FVRFireArmRound asRound = attachmentPrefabPhysObj as FVRFireArmRound;
+
+                            // Fill chamber(s) then fill mag/clip as necessary
+                            int chamberCount = weaponFireArm.GetChambers().Count;
+                            List<FireArmRoundClass> chamberRounds = new List<FireArmRoundClass>();
+                            for(int i = 0; i < chamberCount; ++i)
+                            {
+                                chamberRounds.Add(asRound.RoundClass);
+                            }
+                            weaponFireArm.SetLoadedChambers(chamberRounds);
+
+                            if (weaponFireArm.UsesMagazines)
+                            {
+                                if(weaponFireArm.Magazine != null)
+                                {
+                                    weaponFireArm.Magazine.ReloadMagWithType(asRound.RoundClass);
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Trying to load sosig drop holster weapon with round but mag using weapon does not have mag loaded");
+                                }
+                            }
+                            else if (weaponFireArm.UsesClips)
+                            {
+                                if (weaponFireArm.Clip != null)
+                                {
+                                    weaponFireArm.Clip.ReloadClipWithType(asRound.RoundClass);
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Trying to load sosig drop holster weapon with round but clip using weapon does not have clip loaded");
+                                }
+                            }
+                            else // No ammo container, meaning we haven't planned to spawn aditional ammo for this weapon in rest of inventory so spawn a box of it
+                            {
+                                int amount = UnityEngine.Random.Range(10, 61);
+
+                                if (Mod.ammoBoxByAmmoID.ContainsKey(currentParent.children[childIndices.Peek()].ID))
+                                {
+                                    GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                                    EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                    FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                    for (int j = 0; j < amount; ++j)
+                                    {
+                                        asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                    }
+
+                                    // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                    Mod.RemoveFromAll(itemCIW, null);
+                                }
+                                else // Spawn in generic box
+                                {
+                                    GameObject itemObject = null;
+                                    if (amount > 30)
+                                    {
+                                        itemObject = Instantiate(Mod.itemPrefabs[716], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                                    }
+                                    else
+                                    {
+                                        itemObject = Instantiate(Mod.itemPrefabs[715], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                                    }
+
+                                    EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+
+                                    FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
+                                    asMagazine.RoundType = asRound.RoundType;
+                                    itemCIW.roundClass = asRound.RoundClass;
+                                    for (int j = 0; j < amount; ++j)
+                                    {
+                                        asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                    }
+
+                                    // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                                    Mod.RemoveFromAll(itemCIW, null);
+                                }
+                            }
+                        }
+                        else if(attachmentPrefabPhysObj is FVRFireArmAttachment)
+                        {
+                            attachmentObject = Instantiate(attachmentPrefab);
+                            FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
+                            bool mountFound = false;
+                            foreach(FVRFireArmAttachmentMount mount in weaponFireArm.AttachmentMounts)
+                            {
+                                if(mount.Type == asAttachment.Type)
+                                {
+                                    mountFound = true;
+                                    asAttachment.AttachToMount(mount, false);
+                                    break;
+                                }
+                            }
+                            if (!mountFound)
+                            {
+                                Mod.instance.LogError("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
+                        }
+
+                        // Increment top index
+                        childIndices.Push(childIndices.Pop() + 1);
+
+                        // Make this child the new parent
+                        currentParent = currentParent.children[childIndices.Peek()];
+
+                        // Push 0 on stack
+                        childIndices.Push(0);
+
+                        yield return null;
+                    }
+                    else // Spawned all children, go up hierarchy
+                    {
+                        childIndices.Pop();
+                        currentParent = currentParent.parent;
+                    }
+                }
+            }
+
+            Mod.instance.LogInfo("\tDone spawning");
+            yield break;
         }
 
         private List<Transform> GetMostAvailableBotZones()
@@ -1519,6 +2073,8 @@ namespace EFM
             AISquadSizes = new Dictionary<string, int>();
             entities = new List<AIEntity>();
             entities.Add(GM.CurrentPlayerBody.Hitboxes[0].MyE); // Add player as first entity
+            entityRelatedAI = new List<EFM_AI>();
+            entityRelatedAI.Add(null); // Place holder for player entity
 
             // Bosses
             if (spawnCultPriest)

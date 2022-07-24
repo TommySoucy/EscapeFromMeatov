@@ -1921,6 +1921,18 @@ namespace EFM
 
             harmony.Patch(chamberEjectRoundPatchOriginal, null, new HarmonyMethod(chamberEjectRoundPatchPostfix));
 
+            //// DestroyPatch
+            //MethodInfo destroyPatchOriginal = typeof(UnityEngine.Object).GetMethod("Destroy", BindingFlags.Public | BindingFlags.Static, null, CallingConventions.Any, new Type[] { typeof(UnityEngine.Object) }, null);
+            //MethodInfo destroyPatchPrefix = typeof(DestroyPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            //harmony.Patch(destroyPatchOriginal, new HarmonyMethod(destroyPatchPrefix));
+
+            //// SetParentagePatch
+            //MethodInfo setParentagePatchOriginal = typeof(FVRPhysicalObject).GetMethod("SetParentage", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo setParentagePatchPrefix = typeof(SetParentagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            //harmony.Patch(setParentagePatchOriginal, new HarmonyMethod(setParentagePatchPrefix));
+
             //// DeadBoltPatch
             //MethodInfo deadBoltPatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("TurnBolt", BindingFlags.Public | BindingFlags.Instance);
             //MethodInfo deadBoltPatchPrefix = typeof(DeadBoltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -2118,18 +2130,33 @@ namespace EFM
                 return;
             }
 
+            Mod.instance.LogInfo("Usecuring secured items: ");
+            foreach (GameObject securedObject in Mod.securedObjects)
+            {
+                if (securedObject == null)
+                {
+                    Mod.instance.LogInfo("\tnull");
+                }
+                else
+                {
+                    Mod.instance.LogInfo("\t" + securedObject.name);
+                }
+            }
+
             foreach (GameObject go in securedObjects)
             {
-                Mod.instance.LogInfo("Unsecuring " + go.name);
                 SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
             }
             securedObjects.Clear();
 
             // Make sure secured hand objects are put in hands
-            leftHand.fvrHand.ForceSetInteractable(securedLeftHandInteractable);
-            securedLeftHandInteractable = null;
-            rightHand.fvrHand.ForceSetInteractable(securedRightHandInteractable);
-            securedRightHandInteractable = null;
+            if (leftHand != null && leftHand.fvrHand != null)
+            {
+                leftHand.fvrHand.ForceSetInteractable(securedLeftHandInteractable);
+                securedLeftHandInteractable = null;
+                rightHand.fvrHand.ForceSetInteractable(securedRightHandInteractable);
+                securedRightHandInteractable = null;
+            }
         }
 
         public void LogError(string error)
@@ -2361,9 +2388,33 @@ namespace EFM
             Mod.securedObjects.Add(cameraRig);
             GameObject.DontDestroyOnLoad(cameraRig);
 
-            // Hand objects are secured but need to keep track of them to put them in the hands once we unsecure
-            Mod.securedLeftHandInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
-            Mod.securedRightHandInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
+            // Secure held objects
+            if (Mod.leftHand != null && Mod.leftHand.fvrHand != null)
+            {
+                // harnessed will be a root item and will be secured alongside the rig
+                // not harnessed will be dropped in the world following endInteraction and needs to be secured separately
+                Mod.securedLeftHandInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
+                if (Mod.securedLeftHandInteractable != null)
+                {
+                    EndInteractionPatch.ignoreEndInteraction = true;
+                    Mod.securedLeftHandInteractable.EndInteraction(Mod.leftHand.fvrHand);
+                    if (Mod.securedLeftHandInteractable is FVRPhysicalObject && !(Mod.securedLeftHandInteractable as FVRPhysicalObject).m_isHardnessed)
+                    {
+                        SecureObject(Mod.securedLeftHandInteractable.gameObject);
+                    }
+                }
+
+                Mod.securedRightHandInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
+                if (Mod.securedRightHandInteractable != null)
+                {
+                    EndInteractionPatch.ignoreEndInteraction = true;
+                    Mod.securedRightHandInteractable.EndInteraction(Mod.rightHand.fvrHand);
+                    if (Mod.securedRightHandInteractable is FVRPhysicalObject && !(Mod.securedRightHandInteractable as FVRPhysicalObject).m_isHardnessed)
+                    {
+                        SecureObject(Mod.securedRightHandInteractable.gameObject);
+                    }
+                }
+            }
 
             if (secureEquipment)
             {
@@ -2471,6 +2522,19 @@ namespace EFM
                 Mod.doorDoublePrefab.SetActive(false);
                 Mod.doorDoublePrefab.name = "Door_KnobBolt_Double_Cherry";
                 GameObject.DontDestroyOnLoad(Mod.doorDoublePrefab);
+            }
+
+            Mod.instance.LogInfo("Secured items: ");
+            foreach(GameObject securedObject in Mod.securedObjects)
+            {
+                if(securedObject == null)
+                {
+                    Mod.instance.LogInfo("\tnull");
+                }
+                else
+                {
+                    Mod.instance.LogInfo("\t"+securedObject.name+", in: "+securedObject.scene.name);
+                }
             }
         }
 
@@ -6859,6 +6923,8 @@ namespace EFM
     // Patches FVRFireArm.LoadMag to keep track of weight of mag on firearm and its location index
     class FireArmLoadMagPatch
     {
+        public static bool ignoreLoadMag;
+
         static void Prefix(FVRFireArmMagazine mag, ref FVRFireArm __instance)
         {
             if (!Mod.inMeatovScene)
@@ -6867,6 +6933,12 @@ namespace EFM
             }
 
             Mod.instance.LogInfo("FireArmLoadMagPatch called");
+
+            if (ignoreLoadMag)
+            {
+                ignoreLoadMag = false;
+                return;
+            }
 
             if (mag.m_hand != null)
             {
@@ -7315,10 +7387,18 @@ namespace EFM
     // Patches FVRFireArm.LoadClip to keep track of weight of clip on firearm and its location index
     class FireArmLoadClipPatch
     {
+        public static bool ignoreLoadClip;
+
         static void Prefix(FVRFireArmClip clip, ref FVRFireArm __instance)
         {
             if (!Mod.inMeatovScene)
             {
+                return;
+            }
+
+            if (ignoreLoadClip)
+            {
+                ignoreLoadClip = false;
                 return;
             }
 
@@ -8132,6 +8212,25 @@ namespace EFM
             __instance.ActiveSources.Add(fvrpooledAudioSource);
             __result = fvrpooledAudioSource;
             return false;
+        }
+    }
+
+    class SetParentagePatch
+    {
+        static void Prefix(ref FVRPhysicalObject __instance, Transform t)
+        {
+            Mod.instance.LogInfo("SetParentage called on " + __instance.name+", setting parent to "+(t == null?"null":t.name));
+        }
+    }
+
+    class DestroyPatch
+    {
+        static void Prefix(UnityEngine.Object obj)
+        {
+            if (obj != null)
+            {
+                Mod.instance.LogInfo("Destroy called on " + obj.name+", stack:\n "+Environment.StackTrace);
+            }
         }
     }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
@@ -930,6 +931,13 @@ namespace EFM
 
         private void SetupPlayerRig()
         {
+            // Remove postprocess layer from rig because unnecessary? TODO: Review this once weve fixed cause of high CPU usage in raid, maybe post process doesnt actually affect it that much
+            PostProcessLayer PPLayer = GM.CurrentPlayerBody.GetComponentInChildren<PostProcessLayer>();
+            if(PPLayer != null)
+            {
+                Destroy(PPLayer);
+            }
+
             // Player status
             Mod.playerStatusUI = Instantiate(Mod.playerStatusUIPrefab, GM.CurrentPlayerRoot);
             Mod.playerStatusManager = Mod.playerStatusUI.AddComponent<EFM_PlayerStatusManager>();
@@ -1915,14 +1923,11 @@ namespace EFM
 
                         if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
                         {
-                            Mod.instance.LogInfo("\tLoading firearm's magazine: " + parsedContainerID + " with:");
                             List<FireArmRoundClass> newLoadedRoundsInMag = new List<FireArmRoundClass>();
                             foreach (int round in item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"])
                             {
-                                Mod.instance.LogInfo("\t\t"+((FireArmRoundClass)round));
                                 newLoadedRoundsInMag.Add((FireArmRoundClass)round);
                             }
-                            Mod.instance.LogInfo("\t\tFor type: "+ magPhysicalObject.RoundType);
                             magPhysicalObject.ReloadMagWithList(newLoadedRoundsInMag);
                         }
                         else
