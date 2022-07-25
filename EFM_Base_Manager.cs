@@ -938,6 +938,14 @@ namespace EFM
                 Destroy(PPLayer);
             }
 
+            // Set player's max health
+            float totalMaxHealth = 0;
+            foreach(float bodyPartMaxHealth in maxHealth)
+            {
+                totalMaxHealth += bodyPartMaxHealth;
+            }
+            GM.CurrentPlayerBody.SetHealthThreshold(totalMaxHealth);
+
             // Player status
             Mod.playerStatusUI = Instantiate(Mod.playerStatusUIPrefab, GM.CurrentPlayerRoot);
             Mod.playerStatusManager = Mod.playerStatusUI.AddComponent<EFM_PlayerStatusManager>();

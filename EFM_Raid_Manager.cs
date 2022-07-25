@@ -33,8 +33,10 @@ namespace EFM
         private float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
         private float[] currentHealthRates;
         private float[] currentNonLethalHealthRates;
-        private float currentEnergyRate = 0;
-        private float currentHydrationRate = 0;
+        private float currentEnergyRate = -3.2f;
+        private float energyRate = -3.2f;
+        private float currentHydrationRate = -2.6f;
+        private float hydrationRate = -2.6f;
 
         private List<AISpawn> AISpawns;
         private AISpawn nextSpawn;
@@ -1110,8 +1112,9 @@ namespace EFM
             }
 
             // Spawn rig
-            if (inventory.rig != null) 
+            if (inventory.rig != null)
             {
+                Mod.instance.LogInfo("\tSpawning rig: "+ inventory.rig);
                 GameObject rigObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.rig)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -1245,10 +1248,10 @@ namespace EFM
                 rigCIW.UpdateRigMode();
             }
 
-            Mod.instance.LogInfo("\tSpawning dogtag");
             // Spawn dogtags
             if (inventory.dogtag != null)
             {
+                Mod.instance.LogInfo("\tSpawning dogtag: " + inventory.dogtag);
                 GameObject dogtagObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.dogtag)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 EFM_CustomItemWrapper dogtagCIW = dogtagObject.GetComponent<EFM_CustomItemWrapper>();
@@ -1258,10 +1261,10 @@ namespace EFM
                 yield return null;
             }
 
-            Mod.instance.LogInfo("\tSpawning backpack");
             // Spawn backpack
             if (inventory.backpack != null)
             {
+                Mod.instance.LogInfo("\tSpawning backpack: "+ inventory.backpack);
                 GameObject backpackObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.backpack)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -1285,11 +1288,12 @@ namespace EFM
                     }
 
                     GameObject itemObject = null;
+                    FVRPhysicalObject itemPhysObj = null;
                     if (custom)
                     {
                         itemObject = Instantiate(itemPrefab);
                         EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-                        FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                        itemPhysObj = itemObject.GetComponent<FVRPhysicalObject>();
 
                         // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                         Mod.RemoveFromAll(itemCIW, null);
@@ -1337,7 +1341,7 @@ namespace EFM
                             {
                                 itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[backpackItem]]);
                                 EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-                                FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                                 FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                 for (int j = 0; j < amount; ++j)
@@ -1360,7 +1364,7 @@ namespace EFM
                                 }
 
                                 EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-                                FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                                 FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                 asMagazine.RoundType = roundType;
@@ -1376,7 +1380,8 @@ namespace EFM
                         }
                         else // Not a round, spawn as normal
                         {
-                            Instantiate(itemPrefab);
+                            itemObject = Instantiate(itemPrefab);
+                            itemPhysObj = itemObject.GetComponent<FVRPhysicalObject>();
                         }
                     }
 
@@ -1384,7 +1389,7 @@ namespace EFM
                     
                     // Set item in the container, at random pos and rot, if volume fits
                     bool boxMainContainer = backpackCIW.mainContainer.GetComponent<BoxCollider>() != null;
-                    if (backpackCIW.AddItemToContainer(itemObject.GetComponent<EFM_CustomItemWrapper>().physObj))
+                    if (backpackCIW.AddItemToContainer(itemPhysObj))
                     {
                         itemObject.transform.parent = backpackCIW.containerItemRoot;
 
@@ -1420,10 +1425,10 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSpawning primary");
             // Spawn primary weapon
             if (inventory.primaryWeapon != null)
             {
+                Mod.instance.LogInfo("\tSpawning primary: " + inventory.primaryWeapon);
                 yield return IM.OD[inventory.primaryWeapon].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[inventory.primaryWeapon].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -1492,10 +1497,8 @@ namespace EFM
                                 {
                                     weaponFireArm.Magazine.ReloadMagWithType(asRound.RoundClass);
                                 }
-                                else
-                                {
-                                    Mod.instance.LogError("Trying to load sosig drop primary weapon with round but mag using weapon does not have mag loaded");
-                                }
+                                //else This means we have a round before we have an ammocontainer. This round would probably be used to fill the chamber,
+                                //  but we just fill the chambers with wtv we have in the ammo container anyway so can just ignore this round
                             }
                             else if (weaponFireArm.UsesClips)
                             {
@@ -1503,10 +1506,8 @@ namespace EFM
                                 {
                                     weaponFireArm.Clip.ReloadClipWithType(asRound.RoundClass);
                                 }
-                                else
-                                {
-                                    Mod.instance.LogError("Trying to load sosig drop primary weapon with round but clip using weapon does not have clip loaded");
-                                }
+                                //else This means we have a round before we have an ammocontainer. This round would probably be used to fill the chamber,
+                                //  but we just fill the chambers with wtv we have in the ammo container anyway so can just ignore this round
                             }
                             else // No ammo container, meaning we haven't planned to spawn aditional ammo for this weapon in rest of inventory so spawn a box of it
                             {
@@ -1579,11 +1580,11 @@ namespace EFM
                             Mod.instance.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
                         }
 
-                        // Increment top index
-                        childIndices.Push(childIndices.Pop() + 1);
-
                         // Make this child the new parent
                         currentParent = currentParent.children[childIndices.Peek()];
+
+                        // Increment top index
+                        childIndices.Push(childIndices.Pop() + 1);
 
                         // Push 0 on stack
                         childIndices.Push(0);
@@ -1598,10 +1599,10 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSpawning secondary");
             // Spawn secondary weapon
             if (inventory.secondaryWeapon != null)
             {
+                Mod.instance.LogInfo("\tSpawning secondary: " + inventory.secondaryWeapon);
                 yield return IM.OD[inventory.secondaryWeapon].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[inventory.secondaryWeapon].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -1670,10 +1671,8 @@ namespace EFM
                                 {
                                     weaponFireArm.Magazine.ReloadMagWithType(asRound.RoundClass);
                                 }
-                                else
-                                {
-                                    Mod.instance.LogError("Trying to load sosig drop secondary weapon with round but mag using weapon does not have mag loaded");
-                                }
+                                //else This means we have a round before we have an ammocontainer. This round would probably be used to fill the chamber,
+                                //  but we just fill the chambers with wtv we have in the ammo container anyway so can just ignore this round
                             }
                             else if (weaponFireArm.UsesClips)
                             {
@@ -1681,10 +1680,8 @@ namespace EFM
                                 {
                                     weaponFireArm.Clip.ReloadClipWithType(asRound.RoundClass);
                                 }
-                                else
-                                {
-                                    Mod.instance.LogError("Trying to load sosig drop secondary weapon with round but clip using weapon does not have clip loaded");
-                                }
+                                //else This means we have a round before we have an ammocontainer. This round would probably be used to fill the chamber,
+                                //  but we just fill the chambers with wtv we have in the ammo container anyway so can just ignore this round
                             }
                             else // No ammo container, meaning we haven't planned to spawn aditional ammo for this weapon in rest of inventory so spawn a box of it
                             {
@@ -1757,11 +1754,11 @@ namespace EFM
                             Mod.instance.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
                         }
 
-                        // Increment top index
-                        childIndices.Push(childIndices.Pop() + 1);
-
                         // Make this child the new parent
                         currentParent = currentParent.children[childIndices.Peek()];
+
+                        // Increment top index
+                        childIndices.Push(childIndices.Pop() + 1);
 
                         // Push 0 on stack
                         childIndices.Push(0);
@@ -1776,10 +1773,10 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSpawning holster");
             // Spawn holster weapon
             if (inventory.holster != null)
             {
+                Mod.instance.LogInfo("\tSpawning holster: " + inventory.holster);
                 yield return IM.OD[inventory.holster].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[inventory.holster].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -1848,10 +1845,8 @@ namespace EFM
                                 {
                                     weaponFireArm.Magazine.ReloadMagWithType(asRound.RoundClass);
                                 }
-                                else
-                                {
-                                    Mod.instance.LogError("Trying to load sosig drop holster weapon with round but mag using weapon does not have mag loaded");
-                                }
+                                //else This means we have a round before we have an ammocontainer. This round would probably be used to fill the chamber,
+                                //  but we just fill the chambers with wtv we have in the ammo container anyway so can just ignore this round
                             }
                             else if (weaponFireArm.UsesClips)
                             {
@@ -1859,10 +1854,8 @@ namespace EFM
                                 {
                                     weaponFireArm.Clip.ReloadClipWithType(asRound.RoundClass);
                                 }
-                                else
-                                {
-                                    Mod.instance.LogError("Trying to load sosig drop holster weapon with round but clip using weapon does not have clip loaded");
-                                }
+                                //else This means we have a round before we have an ammocontainer. This round would probably be used to fill the chamber,
+                                //  but we just fill the chambers with wtv we have in the ammo container anyway so can just ignore this round
                             }
                             else // No ammo container, meaning we haven't planned to spawn aditional ammo for this weapon in rest of inventory so spawn a box of it
                             {
@@ -1935,11 +1928,11 @@ namespace EFM
                             Mod.instance.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
                         }
 
-                        // Increment top index
-                        childIndices.Push(childIndices.Pop() + 1);
-
                         // Make this child the new parent
                         currentParent = currentParent.children[childIndices.Peek()];
+
+                        // Increment top index
+                        childIndices.Push(childIndices.Pop() + 1);
 
                         // Push 0 on stack
                         childIndices.Push(0);
@@ -3853,8 +3846,6 @@ namespace EFM
                     Mod.health[i] = Mathf.Clamp(Mod.health[i] + currentHealthRates[i] * (Time.deltaTime / 60), 1, maxHealth[i]);
                 }
 
-                healthDelta += currentHealthRates[i];
-                health += Mod.health[i];
                 if (!lethal)
                 {
                     lethal = currentHealthRates[i] > 0;
@@ -3914,7 +3905,7 @@ namespace EFM
                 {
                     Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.hydrationDeltaText.text = (currentHydrationRate >= 0 ? "+ " : "- ") + currentHydrationRate + "/min";
+                Mod.playerStatusManager.hydrationDeltaText.text = (currentHydrationRate >= 0 ? "+ " : "- ") + String.Format("{0:0.#}/min", currentHydrationRate);
             }
             else if (Mod.playerStatusManager.hydrationDeltaText.gameObject.activeSelf)
             {
@@ -4013,7 +4004,7 @@ namespace EFM
                 {
                     Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.energyDeltaText.text = (currentEnergyRate >= 0 ? "+ " : "- ") + currentEnergyRate + "/min";
+                Mod.playerStatusManager.energyDeltaText.text = (currentEnergyRate >= 0 ? "+ " : "- ") + String.Format("{0:0.#}/min", currentEnergyRate);
             }
             else if (Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
             {

@@ -2130,19 +2130,6 @@ namespace EFM
                 return;
             }
 
-            Mod.instance.LogInfo("Usecuring secured items: ");
-            foreach (GameObject securedObject in Mod.securedObjects)
-            {
-                if (securedObject == null)
-                {
-                    Mod.instance.LogInfo("\tnull");
-                }
-                else
-                {
-                    Mod.instance.LogInfo("\t" + securedObject.name);
-                }
-            }
-
             foreach (GameObject go in securedObjects)
             {
                 SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
@@ -2522,19 +2509,6 @@ namespace EFM
                 Mod.doorDoublePrefab.SetActive(false);
                 Mod.doorDoublePrefab.name = "Door_KnobBolt_Double_Cherry";
                 GameObject.DontDestroyOnLoad(Mod.doorDoublePrefab);
-            }
-
-            Mod.instance.LogInfo("Secured items: ");
-            foreach(GameObject securedObject in Mod.securedObjects)
-            {
-                if(securedObject == null)
-                {
-                    Mod.instance.LogInfo("\tnull");
-                }
-                else
-                {
-                    Mod.instance.LogInfo("\t"+securedObject.name+", in: "+securedObject.scene.name);
-                }
             }
         }
 
@@ -3288,10 +3262,10 @@ namespace EFM
                             }
                         }
 
-                        foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                        {
-                            descManager.SetDescriptionPack();
-                        }
+                        //foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
+                        //{
+                        //    descManager.SetDescriptionPack();
+                        //}
                     }
                     else if (primary is FVRFireArmClip)
                     {
@@ -3307,10 +3281,10 @@ namespace EFM
                             }
                         }
 
-                        foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                        {
-                            descManager.SetDescriptionPack();
-                        }
+                        //foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
+                        //{
+                        //    descManager.SetDescriptionPack();
+                        //}
                     }
                     else if (primary is FVRFireArmRound)
                     {
@@ -3327,10 +3301,10 @@ namespace EFM
                             }
                         }
 
-                        foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
-                        {
-                            descManager.SetDescriptionPack();
-                        }
+                        //foreach (EFM_DescriptionManager descManager in Mod.activeDescriptions)
+                        //{
+                        //    descManager.SetDescriptionPack();
+                        //}
                     }
                 }
                 
@@ -4503,10 +4477,7 @@ namespace EFM
                             {
                                 ammoContainerVID.locationIndex = locationIndex;
                             }
-                            else
-                            {
-                                Mod.instance.LogError("Vanilla item: "+asFireArm.Magazine.name+" (ammo container in fire arm we just grabbed) has no VID");
-                            }
+                            //else Mag could be internal, not interactable, and so, no VID
                         }
                         else if(asFireArm.UsesClips && asFireArm.Clip != null)
                         {
@@ -4516,10 +4487,7 @@ namespace EFM
                             {
                                 ammoContainerVID.locationIndex = locationIndex;
                             }
-                            else
-                            {
-                                Mod.instance.LogError("Vanilla item: " + asFireArm.Clip.name + " (ammo container in fire arm we just grabbed) has no VID");
-                            }
+                            //else Clip could be internal, not interactable, and so, no VID
                         }
 
                         // Attachments
@@ -4608,8 +4576,12 @@ namespace EFM
             //    num2 *= damageResist;
             //}
 
+            // TODO: apply damage to specific body parts, if torso, have a chance of having hit stomach, arms, or legs instead
+            //       Then add up the total of damage done to all body parts and send taht over to RegisterPlayerHit instead
+            // TODO: Apply bleeding and other effects to relevant body parts
+
             // Apply damage resist/multiplier based on equipment and body part
-            if(__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Head)
+            if (__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Head)
             {
                 // Add a headshot damage multiplier
                 damage *= Mod.headshotDamageMultiplier;
@@ -6931,8 +6903,6 @@ namespace EFM
             {
                 return;
             }
-
-            Mod.instance.LogInfo("FireArmLoadMagPatch called");
 
             if (ignoreLoadMag)
             {

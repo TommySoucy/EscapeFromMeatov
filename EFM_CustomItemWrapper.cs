@@ -248,7 +248,7 @@ namespace EFM
                         {
 							item.currentWeight += SetCurrentWeight(containedItemCIW);
                         }
-                        else
+                        else if(containedItemVID != null)
                         {
 							item.currentWeight += EFM_VanillaItemDescriptor.SetCurrentWeight(containedItemVID);
                         }
@@ -267,7 +267,7 @@ namespace EFM
 						{
 							item.currentWeight += SetCurrentWeight(containedItemCIW);
 						}
-						else
+						else if (containedItemVID != null)
 						{
 							item.currentWeight += EFM_VanillaItemDescriptor.SetCurrentWeight(containedItemVID);
 						}
@@ -330,8 +330,6 @@ namespace EFM
 
 		public bool AddItemToContainer(FVRPhysicalObject item)
 		{
-			Mod.instance.LogInfo("\tAddItemToContainer called with item "+item.name+", on container item with actual type: "+itemType);
-
 			if (itemType != Mod.ItemType.Backpack &&
 			   itemType != Mod.ItemType.Container &&
 			   itemType != Mod.ItemType.Pouch)
@@ -363,11 +361,9 @@ namespace EFM
 				IDToUse = VID.H3ID;
 				parentsToUse = VID.parents;
 			}
-			Mod.instance.LogInfo("\tChecking if item fits, container containing vol: "+containingVolume+", volToUse: "+volumeToUse+", maxVol: "+maxVolume);
 
 			if (containingVolume + volumeToUse <= maxVolume && ItemFitsInContainer(IDToUse, parentsToUse, whiteList, blackList))
 			{
-				Mod.instance.LogInfo("\t\tItem fits");
 				// Attach item to container
 				// Set all non trigger colliders that are on default layer to trigger so they dont collide with anything
 				Collider[] cols = item.gameObject.GetComponentsInChildren<Collider>(true);
@@ -396,21 +392,16 @@ namespace EFM
 				{
 					resetColPairs.Add(resetColPair);
 				}
-				Mod.instance.LogInfo("\t\tsetup reset col pairs");
 				item.transform.parent = containerItemRoot;
-				Mod.instance.LogInfo("\t\tset parentage");
 				item.GetComponent<Rigidbody>().isKinematic = true;
-				Mod.instance.LogInfo("\t\tset RB kinematic");
 
 				// Add volume to backpack
 				containingVolume += volumeToUse;
-				Mod.instance.LogInfo("\t\tadded colume to container");
 
 				return true;
 			}
 			else
 			{
-				Mod.instance.LogInfo("\t\tItem DOES NOT fits");
 				return false;
 			}
 		}
@@ -1579,11 +1570,9 @@ namespace EFM
 		// A rig may need to change mode while closed because it will be closed in the quipment slot while we wear it but we are still able to put items in it
 		public void UpdateRigMode()
 		{
-			Mod.instance.LogInfo("Update rig mode called");
 			// Return right away if not a rig or if open
 			if (!(itemType == Mod.ItemType.Rig || itemType == Mod.ItemType.ArmoredRig) || mode == 0)
 			{
-				Mod.instance.LogInfo("Not a rig or mode "+mode+" not 0");
 				return;
             }
 
@@ -1591,13 +1580,11 @@ namespace EFM
             {
 				if(itemsInSlots[i] != null)
 				{
-					Mod.instance.LogInfo("Found item in slot");
 					SetMode(1);
 					return;
                 }
             }
 
-			Mod.instance.LogInfo("Rig empty");
 			// If we get this far it is because no items in slots, so set to closed empty
 			SetMode(2);
         }

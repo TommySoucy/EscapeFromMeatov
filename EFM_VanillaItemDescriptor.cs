@@ -138,11 +138,19 @@ namespace EFM
                 // Ammo container
                 if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                 {
-                    item.currentWeight += SetCurrentWeight(asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>());
+                    EFM_VanillaItemDescriptor magVID = asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
+                    if (magVID != null)
+                    {
+                        item.currentWeight += SetCurrentWeight(magVID);
+                    }
                 }
                 else if (asFireArm.UsesClips && asFireArm.Clip != null)
                 {
-                    item.currentWeight += SetCurrentWeight(asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>());
+                    EFM_VanillaItemDescriptor clipVID = asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>();
+                    if (clipVID != null)
+                    {
+                        item.currentWeight += SetCurrentWeight(clipVID);
+                    }
                 }
 
                 // Attachments
