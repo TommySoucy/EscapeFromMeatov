@@ -66,6 +66,7 @@ namespace EFM
                             EquipRig(customItemWrapper);
                             wearingArmoredRig = true;
                             currentArmor = customItemWrapper;
+                            currentRig = customItemWrapper;
                         }
                         break;
                     case Mod.ItemType.Backpack:

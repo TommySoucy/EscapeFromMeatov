@@ -2866,7 +2866,7 @@ namespace EFM
 
             if (Mod.justFinishedRaid)
             {
-                // TODO: Display raid results on UI
+                TODO: Display raid results on UI, first finish the asset, we are currently adding the hoverscrolls to kill list
             }
         }
 

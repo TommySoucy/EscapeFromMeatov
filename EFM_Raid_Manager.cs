@@ -30,13 +30,11 @@ namespace EFM
         public float time;
         public EFM_GCManager GCManager;
 
-        private float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
+        public float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
         private float[] currentHealthRates;
         private float[] currentNonLethalHealthRates;
         private float currentEnergyRate = -3.2f;
-        private float energyRate = -3.2f;
         private float currentHydrationRate = -2.6f;
-        private float hydrationRate = -2.6f;
 
         private List<AISpawn> AISpawns;
         private AISpawn nextSpawn;
@@ -978,7 +976,8 @@ namespace EFM
             if (sosig.GetDiedFromIFF() == 0)
             {
                 Mod.AddExperience(AIScript.experienceReward);
-                // TODO: Also add to kill list so we can show to player after the raid
+
+                Mod.killList.Add(sosig.name, AIScript.experienceReward);
             }
 
             // Remove entity from list
@@ -2064,6 +2063,7 @@ namespace EFM
             AISquadIFFs = new Dictionary<string, int>();
             AISquads = new Dictionary<string, List<Sosig>>();
             AISquadSizes = new Dictionary<string, int>();
+            Mod.killList = new Dictionary<string, int>();
             entities = new List<AIEntity>();
             entities.Add(GM.CurrentPlayerBody.Hitboxes[0].MyE); // Add player as first entity
             entityRelatedAI = new List<EFM_AI>();
@@ -4575,6 +4575,140 @@ namespace EFM
             {
                 return 0.00045f * distance + 0.55f; // 100% at 1000 meters
             }
+        }
+
+        public void KillPlayer()
+        {
+            TODO: Make sure insured items are recorded so they can be maybe given back to player later
+
+            // Drop items in hand
+            if (GM.CurrentMovementManager.Hands[0].CurrentInteractable != null && !(GM.CurrentMovementManager.Hands[0].CurrentInteractable is FVRPhysicalObject))
+            {
+                GM.CurrentMovementManager.Hands[0].CurrentInteractable.ForceBreakInteraction();
+            }
+            if (GM.CurrentMovementManager.Hands[1].CurrentInteractable != null && !(GM.CurrentMovementManager.Hands[1].CurrentInteractable is FVRPhysicalObject))
+            {
+                GM.CurrentMovementManager.Hands[1].CurrentInteractable.ForceBreakInteraction();
+            }
+
+            // Unequip and destroy all equipment apart from pouch
+            if (EFM_EquipmentSlot.wearingBackpack)
+            {
+                EFM_CustomItemWrapper backpackCIW = EFM_EquipmentSlot.currentBackpack;
+                FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
+                backpackPhysObj.SetQuickBeltSlot(null);
+                Mod.weight -= backpackCIW.currentWeight;
+                EFM_EquipmentSlot.TakeOffEquipment(backpackCIW);
+                backpackCIW.destroyed = true;
+                Destroy(backpackCIW.gameObject);
+            }
+            if (EFM_EquipmentSlot.wearingBodyArmor)
+            {
+                EFM_CustomItemWrapper bodyArmorCIW = EFM_EquipmentSlot.currentArmor;
+                FVRPhysicalObject bodyArmorPhysObj = bodyArmorCIW.GetComponent<FVRPhysicalObject>();
+                bodyArmorPhysObj.SetQuickBeltSlot(null);
+                Mod.weight -= bodyArmorCIW.currentWeight;
+                EFM_EquipmentSlot.TakeOffEquipment(bodyArmorCIW);
+                bodyArmorCIW.destroyed = true;
+                Destroy(bodyArmorCIW.gameObject);
+            }
+            if (EFM_EquipmentSlot.wearingEarpiece)
+            {
+                EFM_CustomItemWrapper earPieceCIW = EFM_EquipmentSlot.currentEarpiece;
+                FVRPhysicalObject earPiecePhysObj = earPieceCIW.GetComponent<FVRPhysicalObject>();
+                earPiecePhysObj.SetQuickBeltSlot(null);
+                Mod.weight -= earPieceCIW.currentWeight;
+                EFM_EquipmentSlot.TakeOffEquipment(earPieceCIW);
+                earPieceCIW.destroyed = true;
+                Destroy(earPieceCIW.gameObject);
+            }
+            if (EFM_EquipmentSlot.wearingHeadwear)
+            {
+                EFM_CustomItemWrapper headWearCIW = EFM_EquipmentSlot.currentHeadwear;
+                FVRPhysicalObject headWearPhysObj = headWearCIW.GetComponent<FVRPhysicalObject>();
+                headWearPhysObj.SetQuickBeltSlot(null);
+                Mod.weight -= headWearCIW.currentWeight;
+                EFM_EquipmentSlot.TakeOffEquipment(headWearCIW);
+                headWearCIW.destroyed = true;
+                Destroy(headWearCIW.gameObject);
+            }
+            if (EFM_EquipmentSlot.wearingFaceCover)
+            {
+                EFM_CustomItemWrapper faceCoverCIW = EFM_EquipmentSlot.currentFaceCover;
+                FVRPhysicalObject faceCoverPhysObj = faceCoverCIW.GetComponent<FVRPhysicalObject>();
+                faceCoverPhysObj.SetQuickBeltSlot(null);
+                Mod.weight -= faceCoverCIW.currentWeight;
+                EFM_EquipmentSlot.TakeOffEquipment(faceCoverCIW);
+                faceCoverCIW.destroyed = true;
+                Destroy(faceCoverCIW.gameObject);
+            }
+            if (EFM_EquipmentSlot.wearingEyewear)
+            {
+                EFM_CustomItemWrapper eyeWearCIW = EFM_EquipmentSlot.currentEyewear;
+                FVRPhysicalObject eyeWearPhysObj = eyeWearCIW.GetComponent<FVRPhysicalObject>();
+                eyeWearPhysObj.SetQuickBeltSlot(null);
+                Mod.weight -= eyeWearCIW.currentWeight;
+                EFM_EquipmentSlot.TakeOffEquipment(eyeWearCIW);
+                eyeWearCIW.destroyed = true;
+                Destroy(eyeWearCIW.gameObject);
+            }
+            if (EFM_EquipmentSlot.wearingRig)
+            {
+                EFM_CustomItemWrapper rigCIW = EFM_EquipmentSlot.currentRig;
+                FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
+                rigPhysObj.SetQuickBeltSlot(null);
+                Mod.weight -= rigCIW.currentWeight;
+                EFM_EquipmentSlot.TakeOffEquipment(rigCIW);
+                rigCIW.destroyed = true;
+                Destroy(rigCIW.gameObject);
+            }
+
+            // Destroy right shoulder object
+            if(Mod.rightShoulderObject != null)
+            {
+                EFM_VanillaItemDescriptor rightShoulderVID = Mod.rightShoulderObject.GetComponent<EFM_VanillaItemDescriptor>();
+                FVRPhysicalObject rightShoulderPhysObj = rightShoulderVID.GetComponent<FVRPhysicalObject>();
+                rightShoulderPhysObj.SetQuickBeltSlot(null);
+                Mod.weight -= rightShoulderVID.currentWeight;
+                rightShoulderVID.destroyed = true;
+                Mod.rightShoulderObject = null;
+                Destroy(Mod.rightShoulderObject);
+            }
+
+            // Destroy pockets' contents, note that the quick belt config went back to pockets only when we unequipped rig
+            for(int i=0; i < 4; ++i)
+            {
+                if(GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject != null)
+                {
+                    EFM_VanillaItemDescriptor pocketItemVID = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    EFM_CustomItemWrapper pocketItemCIW = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<EFM_CustomItemWrapper>();
+                    if(pocketItemCIW != null)
+                    {
+                        Mod.weight -= pocketItemCIW.currentWeight;
+                        pocketItemCIW.destroyed = true;
+                    }
+                    else if(pocketItemVID != null)
+                    {
+                        Mod.weight -= pocketItemVID.currentWeight;
+                        pocketItemVID.destroyed = true;
+                    }
+                    FVRPhysicalObject pocketItemPhysObj = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject;
+                    pocketItemPhysObj.SetQuickBeltSlot(null);
+                    Destroy(pocketItemPhysObj.gameObject);
+                }
+            }
+
+            // Set raid state
+            Mod.justFinishedRaid = true;
+            Mod.raidState = EFM_Base_Manager.FinishRaidState.KIA;
+
+            // Disable extraction list and timer
+            Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+            Mod.extractionUI.SetActive(false);
+
+            EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
+
+            extracted = true;
         }
     }
 
