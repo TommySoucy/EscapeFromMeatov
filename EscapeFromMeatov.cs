@@ -57,6 +57,9 @@ namespace EFM
         public static EFM_Base_Manager.FinishRaidState raidState;
         public static bool justFinishedRaid;
         public static Dictionary<string, int> killList;
+        public static int lootingExp = 0;
+        public static int healingExp = 0;
+        public static int explorationExp = 0;
         public static bool grillHouseSecure;
         public static bool isGrillhouse;
         public static bool inMeatovScene;
@@ -1644,7 +1647,7 @@ namespace EFM
             }
         }
 
-        public static void AddExperience(int xp)
+        public static void AddExperience(int xp, int type = 0 /*0: kill, 1: Looting, 2: Healing, 3: Exploration*/)
         {
             int preLevel = level;
             experience += xp;
@@ -1664,6 +1667,19 @@ namespace EFM
                 {
                     currentBaseManager.UpdateBasedOnPlayerLevel();
                 }
+            }
+
+            if(type == 1)
+            {
+                Mod.lootingExp += xp;
+            }
+            else if(type == 2)
+            {
+                Mod.healingExp += xp;
+            }
+            else if(type == 3)
+            {
+                Mod.explorationExp += xp;
             }
         }
 
@@ -2297,6 +2313,29 @@ namespace EFM
                 default:
                     Mod.instance.LogError("SkillNameToIndex received name: "+name);
                     return 0;
+            }
+        }
+
+        public static string GetBodyPartName(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return "Head";
+                case 1:
+                    return "Thorax";
+                case 2:
+                    return "Stomach";
+                case 3:
+                    return "Left Arm";
+                case 4:
+                    return "Right Arm";
+                case 5:
+                    return "Left Leg";
+                case 6:
+                    return "Right Leg";
+                default:
+                    return "None";
             }
         }
     }
@@ -4091,7 +4130,7 @@ namespace EFM
                 if (!customItemWrapper.looted)
                 {
                     customItemWrapper.looted = true;
-                    Mod.AddExperience(customItemWrapper.lootExperience);
+                    Mod.AddExperience(customItemWrapper.lootExperience, 1);
                 }
 
                 // Update lists
@@ -4196,7 +4235,7 @@ namespace EFM
                 if (!vanillaItemDescriptor.looted)
                 {
                     vanillaItemDescriptor.looted = true;
-                    Mod.AddExperience(vanillaItemDescriptor.lootExperience);
+                    Mod.AddExperience(vanillaItemDescriptor.lootExperience, 1);
                 }
 
                 // Update lists

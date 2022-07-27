@@ -2168,7 +2168,7 @@ namespace EFM
             initButtonsSet = true;
         }
 
-        public string FormatCompleteMoneyString(int amount)
+        public static string FormatCompleteMoneyString(int amount)
         {
             string s = amount.ToString();
             for(int i = s.Length-1; i >= 0; --i)
@@ -3474,6 +3474,7 @@ namespace EFM
             // Remove price from trade volume
             foreach(AssortmentPriceData price in prices)
             {
+                // TODO: Make removing items from hideout as a common utility inside base manager, ebcause we also use this in base manager and we could probably use it elsewhere
                 int amountToRemove = price.count;
                 tradeVolumeInventory[price.ID] -= (price.count * cartItemCount);
                 List<GameObject> objectList = tradeVolumeInventoryObjects[price.ID];

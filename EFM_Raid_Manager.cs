@@ -58,6 +58,9 @@ namespace EFM
         public override void Init()
         {
             Mod.currentRaidManager = this;
+            Mod.lootingExp = 0;
+            Mod.healingExp = 0;
+            Mod.explorationExp = 0;
 
             // disable post processing
             GM.Options.PerformanceOptions.IsPostEnabled_AO = false;
