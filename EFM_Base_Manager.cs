@@ -3298,7 +3298,17 @@ namespace EFM
                     medicalListDownHoverScroll.gameObject.SetActive(true);
                 }
 
-                TODO: Also set health hydration and energy depending on condition after death
+                // Spawn with less health and energy/hydration if killed or MIA
+                if(Mod.raidState == FinishRaidState.KIA || Mod.raidState == FinishRaidState.MIA)
+                {
+                    for(int i=0; i < Mod.health.Length; ++i)
+                    {
+                        Mod.health[i] = 0.3f * maxHealth[i];
+                    }
+
+                    Mod.hydration = 0.3f * Mod.maxHydration;
+                    Mod.energy = 0.3f * Mod.maxEnergy;
+                }
 
                 UpdateTreatmentApply();
 
