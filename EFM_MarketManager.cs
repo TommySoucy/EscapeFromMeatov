@@ -2171,12 +2171,14 @@ namespace EFM
         public static string FormatCompleteMoneyString(int amount)
         {
             string s = amount.ToString();
+            int charCount = 0;
             for(int i = s.Length-1; i >= 0; --i)
             {
-                if(i != s.Length - 1 && i % 3 == 0)
+                if(charCount != 0 && charCount % 3 == 0)
                 {
-                    s.Insert(i + 1, " ");
+                    s = s.Insert(i + 1, " ");
                 }
+                ++charCount;
             }
             return s;
         }

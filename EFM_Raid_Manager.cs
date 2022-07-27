@@ -31,10 +31,10 @@ namespace EFM
         public EFM_GCManager GCManager;
 
         public float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
-        private float[] currentHealthRates;
+        public float[] currentHealthRates;
         private float[] currentNonLethalHealthRates;
-        private float currentEnergyRate = -3.2f;
-        private float currentHydrationRate = -2.6f;
+        public float currentEnergyRate = -3.2f;
+        public float currentHydrationRate = -2.6f;
 
         private List<AISpawn> AISpawns;
         private AISpawn nextSpawn;
@@ -4582,6 +4582,12 @@ namespace EFM
 
         public void KillPlayer()
         {
+            if (Mod.dead)
+            {
+                return;
+            }
+            Mod.dead = true;
+
             // Register insured items that are currently on player
             if(Mod.insuredItems == null)
             {
@@ -4594,6 +4600,12 @@ namespace EFM
             {
                 foreach(GameObject itemObject in itemObjectList.Value)
                 {
+                    if(itemObject == null)
+                    {
+                        Mod.instance.LogError("ItemObject in player inventory with ID: "+itemObjectList.Key+" is null while building insured set, removing from list");
+                        itemObjectList.Value.Remove(itemObject);
+                        break;
+                    }
                     EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                     EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
                     if (CIW != null && CIW.insured && UnityEngine.Random.value <= 0.5) // TODO: Should have a chance depending on who insured the item
