@@ -100,6 +100,7 @@ namespace EFM
         public static EFM_PlayerStatusManager playerStatusManager;
         public static Dictionary<string, int> playerInventory;
         public static Dictionary<string, List<GameObject>> playerInventoryObjects;
+        public static List<InsuredSet> insuredItems;
         public static float[] health; // 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
         public static Text[] partHealthTexts;
         public static Image[] partHealthImages;

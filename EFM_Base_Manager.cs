@@ -84,6 +84,7 @@ namespace EFM
         private bool countdownDeploy;
         private float deployTimer;
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
+        private int insuredSetIndex = 0;
         public List<EFM_BaseAreaManager> baseAreaManagers;
         public Dictionary<string, List<GameObject>> baseInventoryObjects;
         private Dictionary<int, int[]> fullPartConditions;
@@ -118,6 +119,8 @@ namespace EFM
             }
 
             UpdateEffects();
+
+            UpdateInsuredSets();
 
             // Handle raid loading process
             if (cancelRaidLoad)
@@ -182,6 +185,125 @@ namespace EFM
                 {
                     raidCountdownTitle.text = "Loading map:";
                     raidCountdown.text = (Mod.currentRaidBundleRequest.progress * 100).ToString() + "%";
+                }
+            }
+        }
+
+        private void UpdateInsuredSets()
+        {
+            if(Mod.insuredItems != null && Mod.insuredItems.Count > 0)
+            {
+                if(insuredSetIndex >= Mod.insuredItems.Count)
+                {
+                    insuredSetIndex = 0;
+                }
+
+                if(Mod.insuredItems[insuredSetIndex].returnTime <= GetTimeSeconds())
+                {
+                    foreach(KeyValuePair<string, int> insuredToSpawn in Mod.insuredItems[insuredSetIndex].items)
+                    {
+                        int amountToSpawn = insuredToSpawn.Value;
+                        if (int.TryParse(insuredToSpawn.Key, out int parseResult))
+                        {
+                            GameObject itemPrefab = Mod.itemPrefabs[parseResult];
+                            EFM_CustomItemWrapper prefabCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
+                            BoxCollider tradeVolumeCollider = marketManager.tradeVolume.GetComponentInChildren<BoxCollider>();
+                            List<GameObject> objectsList = new List<GameObject>();
+                            while (amountToSpawn > 0)
+                            {
+                                GameObject spawnedItem = Instantiate(itemPrefab, marketManager.tradeVolume.itemsRoot);
+                                objectsList.Add(spawnedItem);
+                                float xSize = tradeVolumeCollider.size.x;
+                                float ySize = tradeVolumeCollider.size.y;
+                                float zSize = tradeVolumeCollider.size.z;
+                                spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
+                                                                                  UnityEngine.Random.Range(-ySize / 2, ySize / 2),
+                                                                                  UnityEngine.Random.Range(-zSize / 2, zSize / 2));
+                                spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
+
+                                // Setup CIW
+                                EFM_CustomItemWrapper itemCIW = spawnedItem.GetComponent<EFM_CustomItemWrapper>();
+                                if (itemCIW.maxAmount > 0)
+                                {
+                                    itemCIW.amount = itemCIW.maxAmount;
+                                }
+
+                                if (itemCIW.itemType == Mod.ItemType.AmmoBox)
+                                {
+                                    FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                                    for (int i = 0; i < itemCIW.maxAmount; ++i)
+                                    {
+                                        asMagazine.AddRound(itemCIW.roundClass, false, false);
+                                    }
+                                }
+
+                                // Set stack and remove amount to spawn
+                                if (itemCIW.maxStack > 1)
+                                {
+                                    if (amountToSpawn > itemCIW.maxStack)
+                                    {
+                                        itemCIW.stack = itemCIW.maxStack;
+                                        amountToSpawn -= itemCIW.maxStack;
+                                    }
+                                    else // amountToSpawn <= itemCIW.maxStack
+                                    {
+                                        itemCIW.stack = amountToSpawn;
+                                        amountToSpawn = 0;
+                                    }
+                                }
+                                else
+                                {
+                                    --amountToSpawn;
+                                }
+
+                                // Add item to tradevolume so it can set its reset cols and kinematic to true
+                                marketManager.tradeVolume.AddItem(itemCIW.physObj);
+
+                                BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
+                            }
+                            if (marketManager.tradeVolumeInventory.ContainsKey(insuredToSpawn.Key))
+                            {
+                                marketManager.tradeVolumeInventory[insuredToSpawn.Key] += insuredToSpawn.Value;
+                                marketManager.tradeVolumeInventoryObjects[insuredToSpawn.Key].AddRange(objectsList);
+                            }
+                            else
+                            {
+                                marketManager.tradeVolumeInventory.Add(insuredToSpawn.Key, insuredToSpawn.Value);
+                                marketManager.tradeVolumeInventoryObjects.Add(insuredToSpawn.Key, objectsList);
+                            }
+                            if (Mod.baseInventory.ContainsKey(insuredToSpawn.Key))
+                            {
+                                Mod.baseInventory[insuredToSpawn.Key] += insuredToSpawn.Value;
+                                baseInventoryObjects[insuredToSpawn.Key].AddRange(objectsList);
+                            }
+                            else
+                            {
+                                Mod.baseInventory.Add(insuredToSpawn.Key, insuredToSpawn.Value);
+                                baseInventoryObjects.Add(insuredToSpawn.Key, objectsList);
+                            }
+
+                            // Set trader immediately because we spawned a custom item
+                            marketManager.SetTrader(marketManager.currentTraderIndex, insuredToSpawn.Key);
+
+                            // Update area managers based on item we just added
+                            foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+                            {
+                                areaManager.UpdateBasedOnItem(insuredToSpawn.Key);
+                            }
+                        }
+                        else
+                        {
+                            // Spawn vanilla item will handle the updating of proper elements
+                            AnvilManager.Run(marketManager.SpawnVanillaItem(insuredToSpawn.Key, amountToSpawn));
+                        }
+                    }
+
+                    Mod.insuredItems[insuredSetIndex] = Mod.insuredItems[Mod.insuredItems.Count - 1];
+                    Mod.insuredItems.RemoveAt(insuredSetIndex);
+                }
+                else
+                {
+                    ++insuredSetIndex;
                 }
             }
         }
@@ -1524,6 +1646,22 @@ namespace EFM
 
                 LoadSavedItem(itemsRoot, item);
             }
+
+            // Check for insuredSets
+            Mod.insuredItems = new List<InsuredSet>();
+            if (data["insuredSets"] != null)
+            {
+                JArray loadedInsuredSets = (JArray)data["insuredSets"];
+
+                for (int i = 0; i < loadedInsuredSets.Count; ++i)
+                {
+                    InsuredSet newInsuredSet = new InsuredSet();
+                    newInsuredSet.returnTime = (long)loadedInsuredSets[i]["returnTime"];
+                    newInsuredSet.items = loadedInsuredSets[i]["items"].ToObject<Dictionary<string, int>>();
+                    Mod.insuredItems.Add(newInsuredSet);
+                }
+            }
+
             // Count each type of item we have
             UpdateBaseInventory();
             Mod.UpdatePlayerInventory();
@@ -3160,7 +3298,7 @@ namespace EFM
                     medicalListDownHoverScroll.gameObject.SetActive(true);
                 }
 
-                //TODO: Also set health hydration and energy depending on condition after death
+                TODO: Also set health hydration and energy depending on condition after death
 
                 UpdateTreatmentApply();
 
@@ -3912,6 +4050,23 @@ namespace EFM
                 SaveItem(saveItems, Mod.rightShoulderObject.transform);
             }
             Mod.instance.LogInfo("\tWrote items");
+
+
+            // Save insuredSets
+            Mod.insuredItems = new List<InsuredSet>();
+            if (Mod.insuredItems != null)
+            {
+                JArray savedInsuredSets = new JArray();
+                saveObject["insuredSets"] = savedInsuredSets;
+
+                for (int i = 0; i < Mod.insuredItems.Count; ++i)
+                {
+                    JObject newSavedInsuredSet = new JObject();
+                    newSavedInsuredSet["returnTime"] = Mod.insuredItems[i].returnTime;
+                    newSavedInsuredSet["items"] = JObject.FromObject(Mod.insuredItems[i].items);
+                    savedInsuredSets.Add(newSavedInsuredSet);
+                }
+            }
 
             // Replace data
             data = saveObject;

@@ -4582,7 +4582,48 @@ namespace EFM
 
         public void KillPlayer()
         {
-            TODO: Make sure insured items are recorded so they can be maybe given back to player later
+            // Register insured items that are currently on player
+            if(Mod.insuredItems == null)
+            {
+                Mod.insuredItems = new List<InsuredSet>();
+            }
+            InsuredSet insuredSet = new InsuredSet();
+            insuredSet.returnTime = GetTimeSeconds() + 86400; // Current time + 24 hours, TODO: Should be dependent on who insured it
+            insuredSet.items = new Dictionary<string, int>();
+            foreach(KeyValuePair<string, List<GameObject>> itemObjectList in Mod.playerInventoryObjects)
+            {
+                foreach(GameObject itemObject in itemObjectList.Value)
+                {
+                    EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                    EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    if (CIW != null && CIW.insured && UnityEngine.Random.value <= 0.5) // TODO: Should have a chance depending on who insured the item
+                    {
+                        if (insuredSet.items.ContainsKey(CIW.ID))
+                        {
+                            insuredSet.items[CIW.ID] += 1;
+                        }
+                        else
+                        {
+                            insuredSet.items.Add(CIW.ID, 1);
+                        }
+                    }
+                    else if(VID != null && VID.insured && UnityEngine.Random.value <= 0.5)
+                    {
+                        if (insuredSet.items.ContainsKey(VID.H3ID))
+                        {
+                            insuredSet.items[VID.H3ID] += 1;
+                        }
+                        else
+                        {
+                            insuredSet.items.Add(VID.H3ID, 1);
+                        }
+                    }
+                }
+            }
+            if(insuredSet.items.Count > 0)
+            {
+                Mod.insuredItems.Add(insuredSet);
+            }
 
             // Drop items in hand
             if (GM.CurrentMovementManager.Hands[0].CurrentInteractable != null && !(GM.CurrentMovementManager.Hands[0].CurrentInteractable is FVRPhysicalObject))
@@ -4713,6 +4754,12 @@ namespace EFM
 
             extracted = true;
         }
+    }
+
+    public class InsuredSet
+    {
+        public long returnTime;
+        public Dictionary<string, int> items;
     }
 
     public class ExtractionManager : MonoBehaviour

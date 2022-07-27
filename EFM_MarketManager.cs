@@ -3588,6 +3588,7 @@ namespace EFM
             }
 
             // Add bought amount of item to trade volume at random pos and rot within it
+            // TODO: Put this spawning item in trade volume functionnality in a method so we can use it from anywhere, we can use it in base to return insured items
             int amountToSpawn = cartItemCount;
             if(int.TryParse(cartItem, out int parseResult))
             {
@@ -3687,7 +3688,7 @@ namespace EFM
             Mod.traderStatuses[currentTraderIndex].assortmentByLevel[Mod.traderStatuses[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack -= amountToSpawn;
         }
 
-        private IEnumerator SpawnVanillaItem(string ID, int count)
+        public IEnumerator SpawnVanillaItem(string ID, int count)
         {
             yield return IM.OD[ID].GetGameObjectAsync();
             Mod.instance.LogInfo("spawn vanilla got GO");
