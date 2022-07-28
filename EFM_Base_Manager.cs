@@ -2624,7 +2624,7 @@ namespace EFM
             buttons[8][0] = canvas.GetChild(12).GetChild(1).GetComponent<Button>(); // Raid report Next
 
             buttons[9][0] = canvas.GetChild(13).GetChild(1).GetComponent<Button>(); // After raid treatment Next
-            buttons[9][1] = canvas.GetChild(13).GetChild(1).GetComponent<Button>(); // After raid treatment Apply
+            buttons[9][1] = canvas.GetChild(13).GetChild(2).GetComponent<Button>(); // After raid treatment Apply
 
             // Fetch audio sources
             AudioSource hoverAudio = canvas.transform.GetChild(10).GetComponent<AudioSource>();
@@ -3080,7 +3080,7 @@ namespace EFM
                 {
                     expForNextLevel += (int)Mod.XPPerLevel[Mod.level]["exp"];
                 }
-                raidReportScreen.GetChild(2).GetChild(1).GetChild(1).GetComponent<Image>().rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 450 * (Mod.experience / expForNextLevel));
+                raidReportScreen.GetChild(2).GetChild(1).GetChild(1).GetComponent<Image>().rectTransform.sizeDelta = new Vector2(450 * (Mod.experience / (float)expForNextLevel), 12.8f);
                 raidReportScreen.GetChild(2).GetChild(1).GetChild(2).GetComponent<Text>().text = Mod.experience.ToString()+"/"+expForNextLevel;
 
                 Transform listContent = raidReportScreen.GetChild(3).GetChild(0).GetChild(0);
@@ -3376,7 +3376,7 @@ namespace EFM
                 UpdateTreatmentApply();
 
                 // Enable after raid collider to keep player in security room until they're done with after raid report
-                transform.GetChild(1).GetChild(24).GetChild(3).gameObject.SetActive(true);
+                transform.GetChild(1).GetChild(23).GetChild(3).gameObject.SetActive(true);
             }
         }
 
@@ -3635,7 +3635,7 @@ namespace EFM
             transform.GetChild(0).GetChild(0).GetChild(0).gameObject.SetActive(true);
 
             // Disable after raid collider
-            transform.GetChild(1).GetChild(24).GetChild(3).gameObject.SetActive(false);
+            transform.GetChild(1).GetChild(23).GetChild(3).gameObject.SetActive(false);
         }
 
         public void OnMedicalApplyClicked()
