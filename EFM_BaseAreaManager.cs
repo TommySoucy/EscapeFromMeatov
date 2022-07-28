@@ -69,6 +69,17 @@ namespace EFM
                 generatorSwitch.mode = 1;
             }
 
+            if(areaIndex == 3 && level != 1)
+            {
+                transform.GetChild(1).gameObject.SetActive(false);
+                transform.GetChild(level).gameObject.SetActive(true);
+            }
+            else if(level != 0)
+            {
+                transform.GetChild(0).gameObject.SetActive(false);
+                transform.GetChild(level).gameObject.SetActive(true);
+            }
+
             init = true;
         }
 
@@ -87,24 +98,6 @@ namespace EFM
                 UpdateConsumption();
 
                 UpdateConstruction();
-
-                // Very demanding
-                //UpdateUIRotation();
-            }
-        }
-
-        private void UpdateUIRotation()
-        {
-            if (inSummary) // Look in all axes if in summary
-            {
-                areaCanvas.transform.rotation = Quaternion.LookRotation((areaCanvas.transform.position - GM.CurrentPlayerBody.Head.position).normalized);
-            }
-            else // Look only in X and Z if in full
-            {
-                Vector3 lookVector = areaCanvas.transform.position - GM.CurrentPlayerBody.Head.position;
-                lookVector.y = 0;
-                lookVector.Normalize();
-                areaCanvas.transform.rotation = Quaternion.LookRotation(lookVector);
             }
         }
 

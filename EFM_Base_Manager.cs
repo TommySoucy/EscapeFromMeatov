@@ -1979,7 +1979,12 @@ namespace EFM
                 prefabToUse = IM.OD[item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString()].GetGameObject();
             }
 
-            GameObject itemObject = Instantiate<GameObject>(prefabToUse, parent);
+            Vector3 itemSpawnPos = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
+            Quaternion itemSpawnRot = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
+            GameObject itemObject = Instantiate<GameObject>(prefabToUse, itemSpawnPos, itemSpawnRot);
+
+            Mod.instance.LogInfo("spawned, positioning");
+            itemObject.transform.parent = parent; // Set parent after so it can awake before doing anything, in case parent is inactive
 
             FVRPhysicalObject itemPhysicalObject = itemObject.GetComponentInChildren<FVRPhysicalObject>();
             FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
@@ -2084,7 +2089,7 @@ namespace EFM
                         clipPhysicalObject.Load(firearmPhysicalObject);
                         clipPhysicalObject.IsInfinite = false;
                     }
-                    else if (containerPhysicalObject is FVRFireArmMagazine)
+                    else if (firearmPhysicalObject.UsesMagazines && containerPhysicalObject is FVRFireArmMagazine)
                     {
                         FVRFireArmMagazine magPhysicalObject = containerPhysicalObject as FVRFireArmMagazine;
 
@@ -2111,11 +2116,6 @@ namespace EFM
 
                         magPhysicalObject.UsesVizInterp = false;
                         magPhysicalObject.Load(firearmPhysicalObject);
-                        magPhysicalObject.IsInfinite = false;
-
-                        //Transform gunMagTransform = firearmPhysicalObject.GetMagMountPos(magPhysicalObject.IsBeltBox);
-                        //containerObject.transform.localPosition = gunMagTransform.localPosition;
-                        //containerObject.transform.localRotation = gunMagTransform.localRotation;
                     }
                 }
 
@@ -2506,11 +2506,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("positioning");
-            // GameObject
-            itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
-            itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
-
             Mod.instance.LogInfo("done");
             return itemObject;
         }
@@ -2540,15 +2535,15 @@ namespace EFM
                     prefabToUse = IM.OD[currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString()].GetGameObject();
                 }
 
-                GameObject itemObject = Instantiate<GameObject>(prefabToUse, root);
+                GameObject itemObject = Instantiate<GameObject>(prefabToUse);
 
                 FVRPhysicalObject itemPhysicalObject = itemObject.GetComponentInChildren<FVRPhysicalObject>();
                 FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
 
                 // Fill data
                 // GameObject
-                itemObject.transform.localPosition = new Vector3((float)currentPhysicalObject["positionX"], (float)currentPhysicalObject["positionY"], (float)currentPhysicalObject["positionZ"]);
-                itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)currentPhysicalObject["rotationX"], (float)currentPhysicalObject["rotationY"], (float)currentPhysicalObject["rotationZ"]));
+                //itemObject.transform.localPosition = new Vector3((float)currentPhysicalObject["positionX"], (float)currentPhysicalObject["positionY"], (float)currentPhysicalObject["positionZ"]);
+                //itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)currentPhysicalObject["rotationX"], (float)currentPhysicalObject["rotationY"], (float)currentPhysicalObject["rotationZ"]));
 
                 // PhysicalObject
                 itemPhysicalObject.m_isSpawnLock = (bool)currentPhysicalObject["m_isSpawnLock"];
@@ -4205,9 +4200,11 @@ namespace EFM
             }
             else if (itemPhysicalObject is FVRFireArmMagazine)
             {
+                Mod.instance.LogInfo("\tSaving a mag");
                 FVRFireArmMagazine magPhysicalObject = (itemPhysicalObject as FVRFireArmMagazine);
                 if (magPhysicalObject.HasARound())
                 {
+                    Mod.instance.LogInfo("\t\tHas at least 1 round");
                     JArray newLoadedRoundsInMag = new JArray();
                     foreach (FVRLoadedRound round in magPhysicalObject.LoadedRounds)
                     {
@@ -4217,6 +4214,7 @@ namespace EFM
                         }
                         else
                         {
+                            Mod.instance.LogInfo("\t\t\tSaving round: " + round.LR_Class);
                             newLoadedRoundsInMag.Add((int)round.LR_Class);
                         }
                     }

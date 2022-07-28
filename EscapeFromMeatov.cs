@@ -4610,23 +4610,18 @@ namespace EFM
             float damage = d.Dam_TotalKinetic + d.Dam_TotalEnergetic;
             int partIndex = -1;
 
-            //if (GM.CurrentPlayerBody.IsDamResist || GM.CurrentPlayerBody.IsDamMult)
-            //{
-            //    float damageResist = GM.CurrentPlayerBody.GetDamageResist();
-            //    if (damageResist <= 0.01f)
-            //    {
-            //        return false;
-            //    }
-            //    num2 *= damageResist;
-            //}
+            // Apply damage resist
+            damage *= 0.05f; // For 500 to become 25
 
             Mod.instance.LogInfo("Player took " + damage + " damage");
 
             // Apply damage resist/multiplier based on equipment and body part
             if (__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Head)
             {
-                if(Mod.health[0] <= 0)
+                Mod.instance.LogInfo("\tTo Head");
+                if (Mod.health[0] <= 0)
                 {
+                    Mod.instance.LogInfo("\t\tHealth 0, killing player");
                     Mod.currentRaidManager.KillPlayer();
                 }
 
@@ -4653,6 +4648,7 @@ namespace EFM
                 float chance = UnityEngine.Random.value;
                 if (chance <= heavyBleedChance)
                 {
+                    Mod.instance.LogInfo("\t\tCaused heavy bleed");
                     EFM_Effect heavyBleedEffect = new EFM_Effect();
                     heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                     heavyBleedEffect.partIndex = 0;
@@ -4660,6 +4656,7 @@ namespace EFM
                 }
                 else if (chance <= lightBleedChance)
                 {
+                    Mod.instance.LogInfo("\t\tCaused light bleed");
                     EFM_Effect lightBleedEffect = new EFM_Effect();
                     lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                     lightBleedEffect.partIndex = 0;
@@ -4679,8 +4676,10 @@ namespace EFM
                 float partChance = UnityEngine.Random.value;
                 if(partChance >= 0 && partChance <= thoraxChance)
                 {
+                    Mod.instance.LogInfo("\tTo thorax");
                     if (Mod.health[1] <= 0)
                     {
+                        Mod.instance.LogInfo("\t\tHealth 0, killing player");
                         Mod.currentRaidManager.KillPlayer();
                     }
 
@@ -4702,6 +4701,7 @@ namespace EFM
                     float bleedValue = UnityEngine.Random.value;
                     if (bleedValue <= heavyBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
                         EFM_Effect heavyBleedEffect = new EFM_Effect();
                         heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = partIndex;
@@ -4709,6 +4709,7 @@ namespace EFM
                     }
                     else if (bleedValue <= lightBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
                         EFM_Effect lightBleedEffect = new EFM_Effect();
                         lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = partIndex;
@@ -4717,6 +4718,7 @@ namespace EFM
                 }
                 else if (partChance > thoraxChance && partChance <= stomachChance)
                 {
+                    Mod.instance.LogInfo("\tTo stomach");
                     partIndex = 2;
 
                     // Process damage resist from EFM_EquipmentSlot.CurrentArmor
@@ -4735,6 +4737,7 @@ namespace EFM
                     float bleedValue = UnityEngine.Random.value;
                     if (bleedValue <= heavyBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
                         EFM_Effect heavyBleedEffect = new EFM_Effect();
                         heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = partIndex;
@@ -4742,6 +4745,7 @@ namespace EFM
                     }
                     else if (bleedValue <= lightBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
                         EFM_Effect lightBleedEffect = new EFM_Effect();
                         lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = partIndex;
@@ -4750,6 +4754,7 @@ namespace EFM
                 }
                 else if(partChance > stomachChance && partChance <= rightArmChance)
                 {
+                    Mod.instance.LogInfo("\tTo right arm");
                     partIndex = 4;
 
                     float heavyBleedChance = 0.02f;
@@ -4761,6 +4766,7 @@ namespace EFM
                     float bleedValue = UnityEngine.Random.value;
                     if (bleedValue <= heavyBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
                         EFM_Effect heavyBleedEffect = new EFM_Effect();
                         heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = partIndex;
@@ -4768,6 +4774,7 @@ namespace EFM
                     }
                     else if (bleedValue <= lightBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
                         EFM_Effect lightBleedEffect = new EFM_Effect();
                         lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = partIndex;
@@ -4776,6 +4783,7 @@ namespace EFM
 
                     if(UnityEngine.Random.value < fractureChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
                         EFM_Effect fractureEffect = new EFM_Effect();
                         fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                         fractureEffect.partIndex = partIndex;
@@ -4784,6 +4792,7 @@ namespace EFM
                 }
                 else if(partChance > rightArmChance && partChance <= leftArmChance)
                 {
+                    Mod.instance.LogInfo("\tTo left arm");
                     partIndex = 3;
 
                     float heavyBleedChance = 0.02f;
@@ -4795,6 +4804,7 @@ namespace EFM
                     float bleedValue = UnityEngine.Random.value;
                     if (bleedValue <= heavyBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
                         EFM_Effect heavyBleedEffect = new EFM_Effect();
                         heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = partIndex;
@@ -4802,6 +4812,7 @@ namespace EFM
                     }
                     else if (bleedValue <= lightBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
                         EFM_Effect lightBleedEffect = new EFM_Effect();
                         lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = partIndex;
@@ -4810,6 +4821,7 @@ namespace EFM
 
                     if (UnityEngine.Random.value < fractureChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
                         EFM_Effect fractureEffect = new EFM_Effect();
                         fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                         fractureEffect.partIndex = partIndex;
@@ -4818,6 +4830,7 @@ namespace EFM
                 }
                 else if(partChance > leftArmChance && partChance <= rightLegChance)
                 {
+                    Mod.instance.LogInfo("\tTo right leg");
                     partIndex = 6;
 
                     float heavyBleedChance = 0.02f;
@@ -4829,6 +4842,7 @@ namespace EFM
                     float bleedValue = UnityEngine.Random.value;
                     if (bleedValue <= heavyBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
                         EFM_Effect heavyBleedEffect = new EFM_Effect();
                         heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = partIndex;
@@ -4836,6 +4850,7 @@ namespace EFM
                     }
                     else if (bleedValue <= lightBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
                         EFM_Effect lightBleedEffect = new EFM_Effect();
                         lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = partIndex;
@@ -4844,6 +4859,7 @@ namespace EFM
 
                     if (UnityEngine.Random.value < fractureChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
                         EFM_Effect fractureEffect = new EFM_Effect();
                         fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                         fractureEffect.partIndex = partIndex;
@@ -4852,6 +4868,7 @@ namespace EFM
                 }
                 else if(partChance > rightLegChance && partChance <= leftLegChance)
                 {
+                    Mod.instance.LogInfo("\tTo left leg");
                     partIndex = 5;
 
                     float heavyBleedChance = 0.02f;
@@ -4863,6 +4880,7 @@ namespace EFM
                     float bleedValue = UnityEngine.Random.value;
                     if (bleedValue <= heavyBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
                         EFM_Effect heavyBleedEffect = new EFM_Effect();
                         heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = partIndex;
@@ -4870,6 +4888,7 @@ namespace EFM
                     }
                     else if (bleedValue <= lightBleedChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
                         EFM_Effect lightBleedEffect = new EFM_Effect();
                         lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = partIndex;
@@ -4878,6 +4897,7 @@ namespace EFM
 
                     if (UnityEngine.Random.value < fractureChance)
                     {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
                         EFM_Effect fractureEffect = new EFM_Effect();
                         fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                         fractureEffect.partIndex = partIndex;
@@ -4888,10 +4908,11 @@ namespace EFM
             else if(__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Hand)
             {
                 partIndex = __instance.Hand.IsThisTheRightHand ? 3 : 4;
+                Mod.instance.LogInfo("\tTo hand, actual part: "+partIndex);
 
                 // Add a damage resist because should do less damage when hit to hand than when hit to torso
                 //damage *= Mod.handDamageResist;
-                
+
                 float heavyBleedChance = 0.02f;
                 float lightBleedChance = 0.1f;
                 float fractureChance = 0.02f;
@@ -4901,6 +4922,7 @@ namespace EFM
                 float bleedValue = UnityEngine.Random.value;
                 if (bleedValue <= heavyBleedChance)
                 {
+                    Mod.instance.LogInfo("\t\tCaused heavy bleed");
                     EFM_Effect heavyBleedEffect = new EFM_Effect();
                     heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                     heavyBleedEffect.partIndex = partIndex;
@@ -4908,6 +4930,7 @@ namespace EFM
                 }
                 else if (bleedValue <= lightBleedChance)
                 {
+                    Mod.instance.LogInfo("\t\tCaused light bleed");
                     EFM_Effect lightBleedEffect = new EFM_Effect();
                     lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                     lightBleedEffect.partIndex = partIndex;
@@ -4916,6 +4939,7 @@ namespace EFM
 
                 if (UnityEngine.Random.value < fractureChance)
                 {
+                    Mod.instance.LogInfo("\t\tCaused fracture");
                     EFM_Effect fractureEffect = new EFM_Effect();
                     fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                     fractureEffect.partIndex = partIndex;
@@ -6298,9 +6322,7 @@ namespace EFM
                 }
                 else // Could be in raid or base
                 {
-                    Mod.instance.LogInfo("\tNow in raid or base");
                     BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor);
-
                     GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
                     if (Mod.currentLocationIndex == 1)
                     {
@@ -6324,7 +6346,7 @@ namespace EFM
                         }
 
                         // Even if goes from player to player, rounds in mags are not counted in roundsByType, so need to add it now
-                        FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                        FVRFireArmRound asRound = latestEjectedRound.GetComponent<FVRFireArmRound>();
                         if (Mod.roundsByType.ContainsKey(asRound.RoundType))
                         {
                             if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
