@@ -1207,7 +1207,7 @@ namespace EFM
         public void ProcessData()
         {
             Mod.preventLoadMagUpdateLists = true;
-            Mod.attachmentLocalTransform = new List<KeyValuePair<GameObject, Vector3[]>>();
+            Mod.attachmentLocalTransform = new List<KeyValuePair<GameObject, object>>();
 
             // Check if we have loaded data
             if (data == null)
@@ -1571,6 +1571,20 @@ namespace EFM
                 }
 
                 // Instantiate other
+                if (EFM_TraderStatus.waitingQuestConditions == null)
+                {
+                    EFM_TraderStatus.foundTasks = new Dictionary<string, TraderTask>();
+                    EFM_TraderStatus.foundTaskConditions = new Dictionary<string, List<TraderTaskCondition>>();
+                    EFM_TraderStatus.waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
+                    EFM_TraderStatus.waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
+                }
+                else
+                {
+                    EFM_TraderStatus.foundTasks.Clear();
+                    EFM_TraderStatus.foundTaskConditions.Clear();
+                    EFM_TraderStatus.waitingQuestConditions.Clear();
+                    EFM_TraderStatus.waitingVisibilityConditions.Clear();
+                }
                 Mod.traderStatuses = new EFM_TraderStatus[8];
                 for (int i = 0; i < 8; i++)
                 {
@@ -1728,40 +1742,51 @@ namespace EFM
             }
 
             // Load trader statuses
-            if (Mod.traderStatuses == null)
+            if (EFM_TraderStatus.waitingQuestConditions == null)
             {
-                Mod.traderStatuses = new EFM_TraderStatus[8];
-                if (data["traderStatuses"] == null)
+                EFM_TraderStatus.foundTasks = new Dictionary<string, TraderTask>();
+                EFM_TraderStatus.foundTaskConditions = new Dictionary<string, List<TraderTaskCondition>>();
+                EFM_TraderStatus.waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
+                EFM_TraderStatus.waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
+            }
+            else
+            {
+                EFM_TraderStatus.foundTasks.Clear();
+                EFM_TraderStatus.foundTaskConditions.Clear();
+                EFM_TraderStatus.waitingQuestConditions.Clear();
+                EFM_TraderStatus.waitingVisibilityConditions.Clear();
+            }
+            Mod.traderStatuses = new EFM_TraderStatus[8];
+            if (data["traderStatuses"] == null)
+            {
+                for (int i = 0; i < 8; i++)
                 {
-                    for (int i = 0; i < 8; i++)
-                    {
-                        Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
-                    }
+                    Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
+                }
+            }
+            else
+            {
+                JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
+                for (int i = 0; i < 8; i++)
+                {
+                    Mod.traderStatuses[i] = new EFM_TraderStatus(data["traderStatuses"][i], i, Mod.traderBaseDB[i]["nickname"].ToString(), (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
+                }
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                Mod.traderStatuses[i].Init();
+            }
+
+            // Add tasks to player status
+            foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
+            {
+                if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
+                {
+                    Mod.playerStatusManager.AddTask(task.Value);
                 }
                 else
                 {
-                    JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
-                    for (int i = 0; i < 8; i++)
-                    {
-                        Mod.traderStatuses[i] = new EFM_TraderStatus(data["traderStatuses"][i], i, Mod.traderBaseDB[i]["nickname"].ToString(), (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
-                    }
-                }
-                for (int i = 0; i < 8; i++)
-                {
-                    Mod.traderStatuses[i].Init();
-                }
-
-                // Add tasks to player status
-                foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
-                {
-                    if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
-                    {
-                        Mod.playerStatusManager.AddTask(task.Value);
-                    }
-                    else
-                    {
-                        task.Value.statusListElement = null;
-                    }
+                    task.Value.statusListElement = null;
                 }
             }
         }
@@ -2091,7 +2116,7 @@ namespace EFM
                         clipPhysicalObject.IsInfinite = false;
 
                         // Store the clip's supposed local position so we can ensure it is correct later
-                        Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, Vector3[]>(containerObject, new Vector3[] { firearmPhysicalObject.ClipMountPos.localPosition, firearmPhysicalObject.ClipMountPos.localEulerAngles }));
+                        Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(containerObject, firearmPhysicalObject.ClipMountPos));
                         Mod.attachmentCheckNeeded = 5;
                     }
                     else if (firearmPhysicalObject.UsesMagazines && containerPhysicalObject is FVRFireArmMagazine)
@@ -2123,7 +2148,7 @@ namespace EFM
                         magPhysicalObject.Load(firearmPhysicalObject);
 
                         // Store the mag's supposed local position so we can ensure it is correct later
-                        Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, Vector3[]>(containerObject, new Vector3[] { firearmPhysicalObject.MagazineMountPos.localPosition, firearmPhysicalObject.MagazineMountPos.localEulerAngles }));
+                        Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(containerObject, firearmPhysicalObject.MagazineMountPos));
                         Mod.attachmentCheckNeeded = 5;
                     }
                 }
@@ -2571,7 +2596,7 @@ namespace EFM
                 itemObjectWrapper.ItemID = currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString();
 
                 // Store the attachment's supposed local position so we can ensure it is correct later
-                Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, Vector3[]>(itemObject, new Vector3[] { itemObject.transform.localPosition, itemObject.transform.localEulerAngles }));
+                Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(itemObject, new Vector3[] { itemObject.transform.localPosition, itemObject.transform.localEulerAngles }));
                 Mod.attachmentCheckNeeded = 5;
             }
         }

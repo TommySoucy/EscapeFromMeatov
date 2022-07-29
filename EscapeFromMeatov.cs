@@ -94,7 +94,7 @@ namespace EFM
         public static bool amountChoiceUIUp;
         public static EFM_CustomItemWrapper splittingItem;
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
-        public static List<KeyValuePair<GameObject, Vector3[]>> attachmentLocalTransform;
+        public static List<KeyValuePair<GameObject, object>> attachmentLocalTransform;
         public static int attachmentCheckNeeded;
 
         // Player
@@ -8571,13 +8571,24 @@ namespace EFM
             if (Mod.attachmentCheckNeeded >= 0) 
             {
                 --Mod.attachmentCheckNeeded;
+                Mod.instance.LogInfo("Mod.attachmentCheckNeeded now: "+ Mod.attachmentCheckNeeded);
 
                 if (Mod.attachmentCheckNeeded == 0)
                 {
-                    foreach (KeyValuePair<GameObject, Vector3[]> attachCheck in Mod.attachmentLocalTransform)
+                    foreach (KeyValuePair<GameObject, object> attachCheck in Mod.attachmentLocalTransform)
                     {
-                        attachCheck.Key.transform.localPosition = attachCheck.Value[0];
-                        attachCheck.Key.transform.localEulerAngles = attachCheck.Value[1];
+                        if(attachCheck.Value is Transform)
+                        {
+                            Mod.instance.LogInfo("Fixing position of " + attachCheck.Key.name + " from " + attachCheck.Key.transform.localPosition + " to " + (attachCheck.Value as Transform).localPosition);
+                            attachCheck.Key.transform.localPosition = (attachCheck.Value as Transform).localPosition;
+                            attachCheck.Key.transform.localRotation = (attachCheck.Value as Transform).localRotation;
+                        }
+                        else
+                        {
+                            Mod.instance.LogInfo("Fixing position of " + attachCheck.Key.name + " from " + attachCheck.Key.transform.localPosition + " to " + (attachCheck.Value as Vector3[])[0]);
+                            attachCheck.Key.transform.localPosition = (attachCheck.Value as Vector3[])[0];
+                            attachCheck.Key.transform.localEulerAngles = (attachCheck.Value as Vector3[])[1];
+                        }
                     }
                 }
             }

@@ -51,14 +51,6 @@ namespace EFM
 
         public EFM_TraderStatus(JToken traderData, int index, string name, int salesSum, float standing, bool unlocked, string currency, JObject assortData, JArray categoriesData)
         {
-            if(waitingQuestConditions == null)
-            {
-                foundTasks = new Dictionary<string, TraderTask>();
-                foundTaskConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
-            }
-
             this.traderData = traderData;
             this.id = IndexToID(index);
             this.index = index;
