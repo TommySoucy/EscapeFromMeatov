@@ -1207,6 +1207,7 @@ namespace EFM
         public void ProcessData()
         {
             Mod.preventLoadMagUpdateLists = true;
+            Mod.attachmentLocalTransform = new List<KeyValuePair<GameObject, Vector3[]>>();
 
             // Check if we have loaded data
             if (data == null)
@@ -2088,6 +2089,10 @@ namespace EFM
 
                         clipPhysicalObject.Load(firearmPhysicalObject);
                         clipPhysicalObject.IsInfinite = false;
+
+                        // Store the clip's supposed local position so we can ensure it is correct later
+                        Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, Vector3[]>(containerObject, new Vector3[] { firearmPhysicalObject.ClipMountPos.localPosition, firearmPhysicalObject.ClipMountPos.localEulerAngles }));
+                        Mod.attachmentCheckNeeded = 5;
                     }
                     else if (firearmPhysicalObject.UsesMagazines && containerPhysicalObject is FVRFireArmMagazine)
                     {
@@ -2116,6 +2121,10 @@ namespace EFM
 
                         magPhysicalObject.UsesVizInterp = false;
                         magPhysicalObject.Load(firearmPhysicalObject);
+
+                        // Store the mag's supposed local position so we can ensure it is correct later
+                        Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, Vector3[]>(containerObject, new Vector3[] { firearmPhysicalObject.MagazineMountPos.localPosition, firearmPhysicalObject.MagazineMountPos.localEulerAngles }));
+                        Mod.attachmentCheckNeeded = 5;
                     }
                 }
 
@@ -2560,6 +2569,10 @@ namespace EFM
                 
                 // ObjectWrapper
                 itemObjectWrapper.ItemID = currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString();
+
+                // Store the attachment's supposed local position so we can ensure it is correct later
+                Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, Vector3[]>(itemObject, new Vector3[] { itemObject.transform.localPosition, itemObject.transform.localEulerAngles }));
+                Mod.attachmentCheckNeeded = 5;
             }
         }
 

@@ -94,6 +94,8 @@ namespace EFM
         public static bool amountChoiceUIUp;
         public static EFM_CustomItemWrapper splittingItem;
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
+        public static List<KeyValuePair<GameObject, Vector3[]>> attachmentLocalTransform;
+        public static int attachmentCheckNeeded;
 
         // Player
         public static GameObject playerStatusUI;
@@ -1940,6 +1942,12 @@ namespace EFM
             MethodInfo chamberEjectRoundPatchPostfix = typeof(ChamberEjectRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(chamberEjectRoundPatchOriginal, null, new HarmonyMethod(chamberEjectRoundPatchPostfix));
+
+            // GlobalFixedUpdatePatch
+            MethodInfo globalFixedUpdatePatchOriginal = typeof(FVRInteractiveObject).GetMethod("GlobalFixedUpdate", BindingFlags.Public | BindingFlags.Static);
+            MethodInfo globalFixedUpdatePatchPostfix = typeof(GlobalFixedUpdatePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(globalFixedUpdatePatchOriginal, null, new HarmonyMethod(globalFixedUpdatePatchPostfix));
 
             //// DestroyPatch
             //MethodInfo destroyPatchOriginal = typeof(UnityEngine.Object).GetMethod("Destroy", BindingFlags.Public | BindingFlags.Static, null, CallingConventions.Any, new Type[] { typeof(UnityEngine.Object) }, null);
@@ -6217,11 +6225,9 @@ namespace EFM
     {
         static GameObject latestEjectedRound;
         static int latestEjectedRoundLocation; // IGNORE WARNING, Will be written by transpiler
-        static int callcount = 0;
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
-            Mod.instance.LogInfo("transpiler call count: "+ (callcount++));
             List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
             List<CodeInstruction> toInsert = new List<CodeInstruction>();
             toInsert.Add(new CodeInstruction(OpCodes.Stsfld, AccessTools.Field(typeof(MagazineUpdateInteractionPatch), "latestEjectedRound")));
@@ -8547,6 +8553,32 @@ namespace EFM
                 else if (Mod.currentLocationIndex == 2)
                 {
                     __result.transform.parent = sceneRoot.transform.GetChild(1).GetChild(1).GetChild(2);
+                }
+            }
+        }
+    }
+
+    // Patches FVRInteractiveObject.GlobalFixedUpdate to fix positioning of attachments after hideout load
+    class GlobalFixedUpdatePatch
+    {
+        static void Postfix()
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if (Mod.attachmentCheckNeeded >= 0) 
+            {
+                --Mod.attachmentCheckNeeded;
+
+                if (Mod.attachmentCheckNeeded == 0)
+                {
+                    foreach (KeyValuePair<GameObject, Vector3[]> attachCheck in Mod.attachmentLocalTransform)
+                    {
+                        attachCheck.Key.transform.localPosition = attachCheck.Value[0];
+                        attachCheck.Key.transform.localEulerAngles = attachCheck.Value[1];
+                    }
                 }
             }
         }

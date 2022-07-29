@@ -70,13 +70,21 @@ namespace EFM
 
         public void Start()
         {
-            weight = physObj.RootRigidbody.mass;
+            if(physObj.RootRigidbody == null)
+            {
+                // This has to be done because attachments and ammo container, when attached to a firearm, will have their rigidbodies detroyed
+                weight = ((FVRPhysicalObject.RigidbodyStoredParams)typeof(FVRPhysicalObject).GetField("StoredRBParams").GetValue(physObj)).Mass;
+            }
+            else
+            {
+                weight = physObj.RootRigidbody.mass;
+            }
 
-            if(physObj is FVRFireArm)
+            if (physObj is FVRFireArm)
             {
                 FVRFireArm asFireArm = physObj as FVRFireArm;
 
-                // Set chamber firearm vars
+                // Set chamber firearm vars TODO: Check if this is necessary, shouldnt already be done by h3?
                 if (asFireArm.GetChambers() != null && asFireArm.GetChambers().Count > 0)
                 {
                     foreach (FVRFireArmChamber chamber in asFireArm.GetChambers())
@@ -85,6 +93,7 @@ namespace EFM
                     }
                 }
             }
+
 
             if (takeCurrentLocation)
             {
@@ -97,6 +106,7 @@ namespace EFM
             descriptionPack.vanillaItem = this;
             descriptionPack.name = itemName;
             descriptionPack.description = description;
+
             try
             {
                 // Some vanilla items have custom icons, look there first
