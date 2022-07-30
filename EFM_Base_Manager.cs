@@ -265,6 +265,8 @@ namespace EFM
                                 // Add item to tradevolume so it can set its reset cols and kinematic to true
                                 marketManager.tradeVolume.AddItem(itemCIW.physObj);
 
+                                Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
+
                                 BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
                             }
                             if (marketManager.tradeVolumeInventory.ContainsKey(insuredToSpawn.Key))
@@ -276,16 +278,6 @@ namespace EFM
                             {
                                 marketManager.tradeVolumeInventory.Add(insuredToSpawn.Key, insuredToSpawn.Value);
                                 marketManager.tradeVolumeInventoryObjects.Add(insuredToSpawn.Key, objectsList);
-                            }
-                            if (Mod.baseInventory.ContainsKey(insuredToSpawn.Key))
-                            {
-                                Mod.baseInventory[insuredToSpawn.Key] += insuredToSpawn.Value;
-                                baseInventoryObjects[insuredToSpawn.Key].AddRange(objectsList);
-                            }
-                            else
-                            {
-                                Mod.baseInventory.Add(insuredToSpawn.Key, insuredToSpawn.Value);
-                                baseInventoryObjects.Add(insuredToSpawn.Key, objectsList);
                             }
 
                             // Set trader immediately because we spawned a custom item
@@ -1492,7 +1484,7 @@ namespace EFM
                 GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(16.01305f, 0.03210258f, -1.44519f), Quaternion.Euler(0.126526f, 213.6976f, 90.18571f), itemRoot);
                 GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(16.03705f, 0.03210258f, -1.57219f), Quaternion.Euler(0.1118922f, 218.1005f, 90.19489f), itemRoot);
                 GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(16.33705f, 0.03110254f, -1.62219f), Quaternion.Euler(0.2137769f, 140.0049f, 89.93072f), itemRoot);
-                GameObject.Instantiate(IM.OD["M4A1Classic"].GetGameObject(), new Vector3(8.036049f, 0.4011025f, -4.61919f), Quaternion.Euler(0.06372909f, 231.488f, 90.21549f), itemRoot);
+                GameObject.Instantiate(IM.OD["M4A1v2Rightie"].GetGameObject(), new Vector3(8.036049f, 0.4011025f, -4.61919f), Quaternion.Euler(0.06372909f, 231.488f, 90.21549f), itemRoot);
                 GameObject.Instantiate(IM.OD["MagazineStanag2"].GetGameObject(), new Vector3(7.859049f, 0.4021025f, -4.53319f), Quaternion.Euler(0.05014384f, 235.0685f, 90.21905f), itemRoot);
                 GameObject.Instantiate(IM.OD["MagazineStanag2"].GetGameObject(), new Vector3(7.761049f, 0.4021025f, -4.608191f), Quaternion.Euler(0.01802146f, 243.3631f, 90.22398f), itemRoot);
                 GameObject.Instantiate(IM.OD["MagazineStanag2"].GetGameObject(), new Vector3(8.064049f, 0.4021025f, -4.38819f), Quaternion.Euler(359.7971f, 312.504f, 90.0966f), itemRoot);
@@ -1809,17 +1801,17 @@ namespace EFM
 
             foreach (Transform item in itemsRoot)
             {
-                AddToBaseInventory(item);
+                AddToBaseInventory(item, true);
             }
 
             // Also add items in trade volume
             foreach(Transform item in transform.GetChild(1).GetChild(24).GetChild(1).GetChild(1))
             {
-                AddToBaseInventory(item);
+                AddToBaseInventory(item, true);
             }
         }
 
-        private void AddToBaseInventory(Transform item)
+        public void AddToBaseInventory(Transform item, bool updateTypeLists)
         {
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
@@ -1835,133 +1827,136 @@ namespace EFM
                 baseInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
             }
 
-            if (customItemWrapper != null)
+            if (updateTypeLists)
             {
-                if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                if (customItemWrapper != null)
                 {
-                    FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
-                    foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
+                    if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
                     {
-                        if(loadedRound == null)
+                        FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
+                        foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                         {
-                            continue;
-                        }
-                        string roundName = AM.GetFullRoundName(boxMagazine.RoundType, loadedRound.LR_Class);
-
-                        if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
-                        {
-                            if (Mod.roundsByType[boxMagazine.RoundType] == null)
+                            if (loadedRound == null)
                             {
-                                Mod.roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
-                                Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                                continue;
                             }
-                            else
+                            string roundName = AM.GetFullRoundName(boxMagazine.RoundType, loadedRound.LR_Class);
+
+                            if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
                             {
-                                if (Mod.roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
+                                if (Mod.roundsByType[boxMagazine.RoundType] == null)
                                 {
-                                    Mod.roundsByType[boxMagazine.RoundType][roundName] += 1;
+                                    Mod.roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
+                                    Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
                                 }
                                 else
                                 {
-                                    Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                                    if (Mod.roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
+                                    {
+                                        Mod.roundsByType[boxMagazine.RoundType][roundName] += 1;
+                                    }
+                                    else
+                                    {
+                                        Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Mod.roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
+                                Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                            }
+                        }
+                    }
+                }
+
+                if (vanillaItemDescriptor != null)
+                {
+                    if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
+                    {
+                        FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
+                        if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
+                        {
+                            if (Mod.magazinesByType[asMagazine.MagazineType] == null)
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                                Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                            }
+                            else
+                            {
+                                if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                                {
+                                    Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                                }
+                                else
+                                {
+                                    Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                                 }
                             }
                         }
                         else
                         {
-                            Mod.roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
-                            Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
-                        }
-                    }
-                }
-            }
-
-            if (vanillaItemDescriptor != null)
-            {
-                if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
-                {
-                    FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
-                    if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
-                    {
-                        if(Mod.magazinesByType[asMagazine.MagazineType] == null)
-                        {
-                            Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
                             Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                         }
-                        else
-                        {
-                            if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
-                            {
-                                Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
-                            }
-                            else
-                            {
-                                Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
-                            }
-                        }
                     }
-                    else
+                    else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
                     {
-                        Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
-                        Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
-                    }
-                }
-                else if(vanillaItemDescriptor.physObj is FVRFireArmClip)
-                {
-                    Mod.instance.LogInfo("3");
-                    FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
-                    if (Mod.clipsByType.ContainsKey(asClip.ClipType))
-                    {
-                        if (Mod.clipsByType[asClip.ClipType] == null)
+                        Mod.instance.LogInfo("3");
+                        FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
+                        if (Mod.clipsByType.ContainsKey(asClip.ClipType))
                         {
-                            Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
-                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
-                        }
-                        else
-                        {
-                            if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            if (Mod.clipsByType[asClip.ClipType] == null)
                             {
-                                Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
-                            }
-                            else
-                            {
+                                Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
                                 Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
                             }
-                        }
-                    }
-                    else
-                    {
-                        Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
-                        Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
-                    }
-                }
-                else if(vanillaItemDescriptor.physObj is FVRFireArmRound)
-                {
-                    Mod.instance.LogInfo("4");
-                    FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
-                    if (Mod.roundsByType.ContainsKey(asRound.RoundType))
-                    {
-                        if (Mod.roundsByType[asRound.RoundType] == null)
-                        {
-                            Mod.roundsByType[asRound.RoundType] = new Dictionary<string, int>();
-                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                            else
+                            {
+                                if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                                {
+                                    Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                                }
+                                else
+                                {
+                                    Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                                }
+                            }
                         }
                         else
                         {
-                            if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                            Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                            Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                        }
+                    }
+                    else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
+                    {
+                        Mod.instance.LogInfo("4");
+                        FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                        if (Mod.roundsByType.ContainsKey(asRound.RoundType))
+                        {
+                            if (Mod.roundsByType[asRound.RoundType] == null)
                             {
-                                Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                                Mod.roundsByType[asRound.RoundType] = new Dictionary<string, int>();
+                                Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
                             }
                             else
                             {
-                                Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                                if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                                {
+                                    Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                                }
+                                else
+                                {
+                                    Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
-                        Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                        else
+                        {
+                            Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                        }
                     }
                 }
             }
@@ -1973,7 +1968,7 @@ namespace EFM
                 {
                     foreach (Transform innerItem in customItemWrapper.containerItemRoot)
                     {
-                        AddToBaseInventory(innerItem);
+                        AddToBaseInventory(innerItem, updateTypeLists);
                     }
                 }
                 else if (customItemWrapper.itemType == Mod.ItemType.Rig || customItemWrapper.itemType == Mod.ItemType.ArmoredRig)
@@ -1982,7 +1977,174 @@ namespace EFM
                     {
                         if (innerItem != null)
                         {
-                            AddToBaseInventory(innerItem.transform);
+                            AddToBaseInventory(innerItem.transform, updateTypeLists);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void RemoveFromBaseInventory(Transform item, bool updateTypeLists)
+        {
+            EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
+            EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
+            string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
+            if (Mod.baseInventory.ContainsKey(itemID))
+            {
+                Mod.baseInventory[itemID] -= customItemWrapper != null ? customItemWrapper.stack : 1;
+                baseInventoryObjects[itemID].Remove(item.gameObject);
+            }
+            else
+            {
+                Mod.instance.LogError("Attempting to remove " + itemID + " from base inventory but key was not found in it:\n" + Environment.StackTrace);
+            }
+            if (Mod.baseInventory[itemID] == 0)
+            {
+                Mod.baseInventory.Remove(itemID);
+                baseInventoryObjects.Remove(itemID);
+            }
+
+            if (updateTypeLists)
+            {
+                if (customItemWrapper != null)
+                {
+                    if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                    {
+                        FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
+                        foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
+                        {
+                            string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
+
+                            if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
+                            {
+                                if (Mod.roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
+                                {
+                                    Mod.roundsByType[boxMagazine.RoundType][roundName] -= 1;
+                                    if (Mod.roundsByType[boxMagazine.RoundType][roundName] == 0)
+                                    {
+                                        Mod.roundsByType[boxMagazine.RoundType].Remove(roundName);
+                                    }
+                                    if (Mod.roundsByType[boxMagazine.RoundType].Count == 0)
+                                    {
+                                        Mod.roundsByType.Remove(boxMagazine.RoundType);
+                                    }
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from base inventory but ammo name was not found in roundsByType:\n" + Environment.StackTrace);
+                                }
+                            }
+                            else
+                            {
+                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from base inventory but ammo type was not found in roundsByType:\n" + Environment.StackTrace);
+                            }
+                        }
+                    }
+                }
+
+                if (vanillaItemDescriptor != null)
+                {
+                    if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
+                    {
+                        FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
+                        if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
+                        {
+                            if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] -= 1;
+                                if (Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] == 0)
+                                {
+                                    Mod.magazinesByType[asMagazine.MagazineType].Remove(asMagazine.ObjectWrapper.DisplayName);
+                                }
+                                if (Mod.magazinesByType[asMagazine.MagazineType].Count == 0)
+                                {
+                                    Mod.magazinesByType.Remove(asMagazine.MagazineType);
+                                }
+                            }
+                            else
+                            {
+                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is mag from base inventory but its name was not found in magazinesByType:\n" + Environment.StackTrace);
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Attempting to remove " + itemID + "  which is mag from base inventory but its type was not found in magazinesByType:\n" + Environment.StackTrace);
+                        }
+                    }
+                    else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
+                    {
+                        FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
+                        if (Mod.clipsByType.ContainsKey(asClip.ClipType))
+                        {
+                            if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] -= 1;
+                                if (Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] == 0)
+                                {
+                                    Mod.clipsByType[asClip.ClipType].Remove(asClip.ObjectWrapper.DisplayName);
+                                }
+                                if (Mod.clipsByType[asClip.ClipType].Count == 0)
+                                {
+                                    Mod.clipsByType.Remove(asClip.ClipType);
+                                }
+                            }
+                            else
+                            {
+                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is clip from base inventory but its name was not found in clipsByType:\n" + Environment.StackTrace);
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Attempting to remove " + itemID + "  which is clip from base inventory but its type was not found in clipsByType:\n" + Environment.StackTrace);
+                        }
+                    }
+                    else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
+                    {
+                        FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                        if (Mod.roundsByType.ContainsKey(asRound.RoundType))
+                        {
+                            if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                            {
+                                Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] -= 1;
+                                if (Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] == 0)
+                                {
+                                    Mod.roundsByType[asRound.RoundType].Remove(asRound.ObjectWrapper.DisplayName);
+                                }
+                                if (Mod.roundsByType[asRound.RoundType].Count == 0)
+                                {
+                                    Mod.roundsByType.Remove(asRound.RoundType);
+                                }
+                            }
+                            else
+                            {
+                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is round from base inventory but its name was not found in roundsByType:\n" + Environment.StackTrace);
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Attempting to remove " + itemID + "  which is round from base inventory but its type was not found in roundsByType:\n" + Environment.StackTrace);
+                        }
+                    }
+                }
+            }
+
+            // Check for more items that may be contained inside this one
+            if (customItemWrapper != null)
+            {
+                if (customItemWrapper.itemType == Mod.ItemType.Backpack || customItemWrapper.itemType == Mod.ItemType.Container || customItemWrapper.itemType == Mod.ItemType.Pouch)
+                {
+                    foreach (Transform innerItem in customItemWrapper.containerItemRoot)
+                    {
+                        RemoveFromBaseInventory(innerItem, updateTypeLists);
+                    }
+                }
+                else if (customItemWrapper.itemType == Mod.ItemType.Rig || customItemWrapper.itemType == Mod.ItemType.ArmoredRig)
+                {
+                    foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
+                    {
+                        if (innerItem != null)
+                        {
+                            RemoveFromBaseInventory(innerItem.transform, updateTypeLists);
                         }
                     }
                 }

@@ -3495,13 +3495,7 @@ namespace EFM
 
                                 // Destroy item
                                 objectList.RemoveAt(objectList.Count - 1);
-                                Mod.baseInventory[CIW.ID] -= stack;
-                                baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
-                                if (Mod.baseInventory[CIW.ID] == 0)
-                                {
-                                    Mod.baseInventory.Remove(CIW.ID);
-                                    baseManager.baseInventoryObjects.Remove(CIW.ID);
-                                }
+                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                                 CIW.destroyed = true;
                                 currentItemObject.transform.parent = null;
                                 Destroy(currentItemObject);
@@ -3510,6 +3504,7 @@ namespace EFM
                             {
                                 CIW.stack -= amountToRemove;
                                 Mod.baseInventory[CIW.ID] -= amountToRemove;
+                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                                 amountToRemove = 0;
                             }
                         }
@@ -3524,13 +3519,7 @@ namespace EFM
 
                                     // Destroy item
                                     objectList.RemoveAt(objectList.Count - 1);
-                                    Mod.baseInventory[CIW.ID] -= 1;
-                                    baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
-                                    if (Mod.baseInventory[CIW.ID] == 0)
-                                    {
-                                        Mod.baseInventory.Remove(CIW.ID);
-                                        baseManager.baseInventoryObjects.Remove(CIW.ID);
-                                    }
+                                    Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                                     CIW.destroyed = true;
                                     currentItemObject.transform.parent = null;
                                     Destroy(currentItemObject);
@@ -3542,13 +3531,7 @@ namespace EFM
 
                                 // Destroy item
                                 objectList.RemoveAt(objectList.Count - 1);
-                                Mod.baseInventory[CIW.ID] -= 1;
-                                baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
-                                if (Mod.baseInventory[CIW.ID] == 0)
-                                {
-                                    Mod.baseInventory.Remove(CIW.ID);
-                                    baseManager.baseInventoryObjects.Remove(CIW.ID);
-                                }
+                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                                 CIW.destroyed = true;
                                 currentItemObject.transform.parent = null;
                                 Destroy(currentItemObject);
@@ -3561,13 +3544,7 @@ namespace EFM
 
                         // Destroy item
                         objectList.RemoveAt(objectList.Count - 1);
-                        Mod.baseInventory[price.ID] -= 1;
-                        baseManager.baseInventoryObjects[price.ID].Remove(currentItemObject);
-                        if (Mod.baseInventory[price.ID] == 0)
-                        {
-                            Mod.baseInventory.Remove(price.ID);
-                            baseManager.baseInventoryObjects.Remove(price.ID);
-                        }
+                        Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                         currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
                         currentItemObject.transform.parent = null;
                         Destroy(currentItemObject);
@@ -3648,6 +3625,8 @@ namespace EFM
                     // Add item to tradevolume so it can set its reset cols and kinematic to true
                     tradeVolume.AddItem(itemCIW.physObj);
 
+                    Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
+
                     BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
                 }
                 if (tradeVolumeInventory.ContainsKey(cartItem))
@@ -3659,16 +3638,6 @@ namespace EFM
                 {
                     tradeVolumeInventory.Add(cartItem, cartItemCount);
                     tradeVolumeInventoryObjects.Add(cartItem, objectsList);
-                }
-                if (Mod.baseInventory.ContainsKey(cartItem))
-                {
-                    Mod.baseInventory[cartItem] += cartItemCount;
-                    baseManager.baseInventoryObjects[cartItem].AddRange(objectsList);
-                }
-                else
-                {
-                    Mod.baseInventory.Add(cartItem, cartItemCount);
-                    baseManager.baseInventoryObjects.Add(cartItem, objectsList);
                 }
 
                 // Set trader immediately because we spawned a custom item
@@ -3734,16 +3703,7 @@ namespace EFM
                                 tradeVolumeInventory.Add("716", 1);
                                 tradeVolumeInventoryObjects.Add("716", new List<GameObject>() { itemObject });
                             }
-                            if (Mod.baseInventory.ContainsKey("716"))
-                            {
-                                Mod.baseInventory["716"] += 1;
-                                baseManager.baseInventoryObjects["716"].Add(itemObject);
-                            }
-                            else
-                            {
-                                Mod.baseInventory.Add("716", 1);
-                                baseManager.baseInventoryObjects.Add("716", new List<GameObject> { itemObject });
-                            }
+                            Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
 
                             if (countLeft <= 120)
                             {
@@ -3772,16 +3732,7 @@ namespace EFM
                                 tradeVolumeInventory.Add("715", 1);
                                 tradeVolumeInventoryObjects.Add("715", new List<GameObject>() { itemObject });
                             }
-                            if (Mod.baseInventory.ContainsKey("715"))
-                            {
-                                Mod.baseInventory["715"] += 1;
-                                baseManager.baseInventoryObjects["715"].Add(itemObject);
-                            }
-                            else
-                            {
-                                Mod.baseInventory.Add("715", 1);
-                                baseManager.baseInventoryObjects.Add("715", new List<GameObject> { itemObject });
-                            }
+                            Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
 
                             amount = countLeft;
                             countLeft = 0;
@@ -3814,56 +3765,31 @@ namespace EFM
                 }
                 else // Single round, spawn as normal
                 {
-                    Mod.instance.LogInfo("Single round");
                     itemObject = GameObject.Instantiate(itemPrefab, tradeVolume.itemsRoot);
 
-                    Mod.instance.LogInfo("0");
                     EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
 
-                    Mod.instance.LogInfo("0");
                     // Add item to tradevolume so it can set its reset cols and kinematic to true
                     tradeVolume.AddItem(VID.physObj);
 
-                    Mod.instance.LogInfo("0");
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID, false);
 
-                    Mod.instance.LogInfo("0");
                     itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeCollider.size.x / 2, tradeVolumeCollider.size.x / 2),
                                                                      UnityEngine.Random.Range(-tradeVolumeCollider.size.y / 2, tradeVolumeCollider.size.y / 2),
                                                                      UnityEngine.Random.Range(-tradeVolumeCollider.size.z / 2, tradeVolumeCollider.size.z / 2));
-                    Mod.instance.LogInfo("0");
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
-                    Mod.instance.LogInfo("0");
                     if (tradeVolumeInventory.ContainsKey(VID.H3ID))
                     {
-                        Mod.instance.LogInfo("1");
                         tradeVolumeInventory[VID.H3ID] += 1;
                         tradeVolumeInventoryObjects[VID.H3ID].Add(itemObject);
-                        Mod.instance.LogInfo("1");
                     }
                     else
                     {
-                        Mod.instance.LogInfo("2");
                         tradeVolumeInventory.Add(VID.H3ID, 1);
                         tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { itemObject });
-                        Mod.instance.LogInfo("2");
                     }
-                    if (Mod.baseInventory.ContainsKey(VID.H3ID))
-                    {
-                        Mod.instance.LogInfo("3");
-                        Mod.baseInventory[VID.H3ID] += 1;
-                        baseManager.baseInventoryObjects[VID.H3ID].Add(itemObject);
-                        Mod.instance.LogInfo("3");
-                    }
-                    else
-                    {
-                        Mod.instance.LogInfo("4");
-                        Mod.baseInventory.Add(VID.H3ID, 1);
-                        baseManager.baseInventoryObjects.Add(VID.H3ID, new List<GameObject> { itemObject });
-                        Mod.instance.LogInfo("4");
-                    }
-                    Mod.instance.LogInfo("0");
+                    Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
                 }
             }
             else // Not a round, spawn as normal
@@ -3895,20 +3821,10 @@ namespace EFM
                         tradeVolumeInventory.Add(VID.H3ID, 1);
                         tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { itemObject });
                     }
-                    if (Mod.baseInventory.ContainsKey(VID.H3ID))
-                    {
-                        Mod.baseInventory[VID.H3ID] += 1;
-                        baseManager.baseInventoryObjects[VID.H3ID].Add(itemObject);
-                    }
-                    else
-                    {
-                        Mod.baseInventory.Add(VID.H3ID, 1);
-                        baseManager.baseInventoryObjects.Add(VID.H3ID, new List<GameObject> { itemObject });
-                    }
+                    Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
                 }
             }
 
-            Mod.instance.LogInfo("updating all area managers");
             // Update all areas based on the item
             foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
             {
@@ -3984,20 +3900,7 @@ namespace EFM
                     {
                         // Destroy item
                         EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-                        if (CIW != null)
-                        {
-                            Mod.baseInventory[item.Key] -= CIW.stack;
-                        }
-                        else
-                        {
-                            Mod.baseInventory[item.Key] -= 1;
-                        }
-                        baseManager.baseInventoryObjects[item.Key].Remove(itemObject);
-                        if (Mod.baseInventory[item.Key] == 0)
-                        {
-                            Mod.baseInventory.Remove(item.Key);
-                            baseManager.baseInventoryObjects.Remove(item.Key);
-                        };
+                        Mod.currentBaseManager.RemoveFromBaseInventory(itemObject.transform, true);
                         // Unparent object before destroying so it doesnt get processed by settrader
                         itemObject.transform.parent = null;
                         Destroy(itemObject);
@@ -4043,6 +3946,8 @@ namespace EFM
                 // Add item to tradevolume so it can set its reset cols and kinematic to true
                 tradeVolume.AddItem(itemCIW.physObj);
 
+                Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
+
                 BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
             }
             if (tradeVolumeInventory.ContainsKey(cartItem))
@@ -4054,16 +3959,6 @@ namespace EFM
             {
                 tradeVolumeInventory.Add(cartItem, cartItemCount);
                 tradeVolumeInventoryObjects.Add(cartItem, objectsList);
-            }
-            if (Mod.baseInventory.ContainsKey(cartItem))
-            {
-                Mod.baseInventory[cartItem] += cartItemCount;
-                baseManager.baseInventoryObjects[cartItem].AddRange(objectsList);
-            }
-            else
-            {
-                Mod.baseInventory.Add(cartItem, cartItemCount);
-                baseManager.baseInventoryObjects.Add(cartItem, objectsList);
             }
 
             // Update area managers based on item we just added
@@ -4125,13 +4020,7 @@ namespace EFM
 
                     // Destroy item
                     objectList.RemoveAt(objectList.Count - 1);
-                    Mod.baseInventory[CIW.ID] -= stack;
-                    baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
-                    if (Mod.baseInventory[CIW.ID] == 0)
-                    {
-                        Mod.baseInventory.Remove(CIW.ID);
-                        baseManager.baseInventoryObjects.Remove(CIW.ID);
-                    }
+                    Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                     CIW.destroyed = true;
                     currentItemObject.transform.parent = null;
                     Destroy(currentItemObject);
@@ -5202,13 +5091,7 @@ namespace EFM
 
                                 // Destroy item
                                 objectList.RemoveAt(objectList.Count - 1);
-                                Mod.baseInventory[CIW.ID] -= stack;
-                                baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
-                                if (Mod.baseInventory[CIW.ID] == 0)
-                                {
-                                    Mod.baseInventory.Remove(CIW.ID);
-                                    baseManager.baseInventoryObjects.Remove(CIW.ID);
-                                }
+                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                                 CIW.destroyed = true;
                                 currentItemObject.transform.parent = null;
                                 Destroy(currentItemObject);
@@ -5230,13 +5113,7 @@ namespace EFM
 
                                     // Destroy item
                                     objectList.RemoveAt(objectList.Count - 1);
-                                    Mod.baseInventory[CIW.ID] -= 1;
-                                    baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
-                                    if (Mod.baseInventory[CIW.ID] == 0)
-                                    {
-                                        Mod.baseInventory.Remove(CIW.ID);
-                                        baseManager.baseInventoryObjects.Remove(CIW.ID);
-                                    }
+                                    Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                                     CIW.destroyed = true;
                                     currentItemObject.transform.parent = null;
                                     Destroy(currentItemObject);
@@ -5249,12 +5126,7 @@ namespace EFM
                                 // Destroy item
                                 objectList.RemoveAt(objectList.Count - 1);
                                 Mod.baseInventory[CIW.ID] -= 1;
-                                baseManager.baseInventoryObjects[CIW.ID].Remove(currentItemObject);
-                                if (Mod.baseInventory[CIW.ID] == 0)
-                                {
-                                    Mod.baseInventory.Remove(CIW.ID);
-                                    baseManager.baseInventoryObjects.Remove(CIW.ID);
-                                }
+                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                                 CIW.destroyed = true;
                                 currentItemObject.transform.parent = null;
                                 Destroy(currentItemObject);
@@ -5267,13 +5139,7 @@ namespace EFM
 
                         // Destroy item
                         objectList.RemoveAt(objectList.Count - 1);
-                        Mod.baseInventory[price.ID] -= 1;
-                        baseManager.baseInventoryObjects[price.ID].Remove(currentItemObject);
-                        if (Mod.baseInventory[price.ID] == 0)
-                        {
-                            Mod.baseInventory.Remove(price.ID);
-                            baseManager.baseInventoryObjects.Remove(price.ID);
-                        }
+                        Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
                         currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
                         currentItemObject.transform.parent = null;
                         Destroy(currentItemObject);
@@ -5345,6 +5211,8 @@ namespace EFM
                     // Set rigidbody to kinematic so it stays in trade volume
                     itemCIW.physObj.RootRigidbody.isKinematic = true;
 
+                    Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
+
                     BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
                 }
                 if (tradeVolumeInventory.ContainsKey(ragfairCartItem))
@@ -5356,16 +5224,6 @@ namespace EFM
                 {
                     tradeVolumeInventory.Add(ragfairCartItem, ragfairCartItemCount);
                     tradeVolumeInventoryObjects.Add(cartItem, objectsList);
-                }
-                if (Mod.baseInventory.ContainsKey(ragfairCartItem))
-                {
-                    Mod.baseInventory[ragfairCartItem] += ragfairCartItemCount;
-                    baseManager.baseInventoryObjects[cartItem].AddRange(objectsList);
-                }
-                else
-                {
-                    Mod.baseInventory.Add(ragfairCartItem, ragfairCartItemCount);
-                    baseManager.baseInventoryObjects.Add(ragfairCartItem, objectsList);
                 }
 
                 // Update the whole thing

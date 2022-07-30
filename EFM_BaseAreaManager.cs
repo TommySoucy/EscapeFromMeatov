@@ -224,16 +224,7 @@ namespace EFM
                                         }
 
                                         // Add to inventory
-                                        if (Mod.baseInventory.ContainsKey(itemID))
-                                        {
-                                            Mod.baseInventory[itemID] += 1;
-                                            baseManager.baseInventoryObjects[itemID].Add(itemObject);
-                                        }
-                                        else
-                                        {
-                                            Mod.baseInventory.Add(itemID, 1);
-                                            baseManager.baseInventoryObjects.Add(itemID, new List<GameObject>() { itemObject });
-                                        }
+                                        Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
 
                                         // Update all areas based on the item
                                         foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
@@ -2888,31 +2879,13 @@ namespace EFM
                             BeginInteractionPatch.SetItemLocationIndex(3, instanceCIW, null);
                             if (preLocationIndex == 0) // If was on player
                             {
-                                Mod.playerInventory[requiredItemID] -= instanceCIW.stack;
                                 amountInInventory -= instanceCIW.stack;
-                                if (Mod.playerInventory[requiredItemID] == 0)
-                                {
-                                    Mod.playerInventory.Remove(requiredItemID);
-                                }
-                                Mod.playerInventoryObjects[requiredItemID].Remove(instanceCIW.gameObject);
-                                if (Mod.playerInventoryObjects[requiredItemID].Count == 0)
-                                {
-                                    Mod.playerInventoryObjects.Remove(requiredItemID);
-                                }
+                                Mod.RemoveFromPlayerInventory(instanceCIW.transform, true);
                             }
                             else // Was in hideout
                             {
-                                Mod.baseInventory[requiredItemID] -= instanceCIW.stack;
                                 amountInInventory -= instanceCIW.stack;
-                                if (Mod.baseInventory[requiredItemID] == 0)
-                                {
-                                    Mod.baseInventory.Remove(requiredItemID);
-                                }
-                                Mod.currentBaseManager.baseInventoryObjects[requiredItemID].Remove(instanceCIW.gameObject);
-                                if (Mod.currentBaseManager.baseInventoryObjects[requiredItemID].Count == 0)
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects.Remove(requiredItemID);
-                                }
+                                Mod.currentBaseManager.RemoveFromBaseInventory(instanceCIW.transform, true);
                             }
                             break;
                         }
@@ -2965,32 +2938,14 @@ namespace EFM
                             if (preLocationIndex == 0) // If was on player
                             {
                                 int amountToRemove = custom ? instanceCIW.stack : 1;
-                                Mod.playerInventory[requiredItemID] -= amountToRemove;
                                 amountInInventory -= amountToRemove;
-                                if (Mod.playerInventory[requiredItemID] == 0)
-                                {
-                                    Mod.playerInventory.Remove(requiredItemID);
-                                }
-                                Mod.playerInventoryObjects[requiredItemID].Remove(instanceObject);
-                                if (Mod.playerInventoryObjects[requiredItemID].Count == 0)
-                                {
-                                    Mod.playerInventoryObjects.Remove(requiredItemID);
-                                }
+                                Mod.RemoveFromPlayerInventory(instanceCIW.transform, true);
                             }
                             else // Was in hideout
                             {
                                 int amountToRemove = custom ? instanceCIW.stack : 1;
-                                Mod.baseInventory[requiredItemID] -= amountToRemove;
                                 amountInInventory -= amountToRemove;
-                                if (Mod.baseInventory[requiredItemID] == 0)
-                                {
-                                    Mod.baseInventory.Remove(requiredItemID);
-                                }
-                                Mod.currentBaseManager.baseInventoryObjects[requiredItemID].Remove(instanceObject);
-                                if (Mod.currentBaseManager.baseInventoryObjects[requiredItemID].Count == 0)
-                                {
-                                    Mod.currentBaseManager.baseInventoryObjects.Remove(requiredItemID);
-                                }
+                                Mod.currentBaseManager.RemoveFromBaseInventory(instanceObject.transform, true);
                             }
                             break;
                         }
@@ -3192,31 +3147,13 @@ namespace EFM
                         BeginInteractionPatch.SetItemLocationIndex(3, instanceCIW, null);
                         if (preLocationIndex == 0) // If was on player
                         {
-                            Mod.playerInventory[requiredItemID] -= instanceCIW.stack;
                             amountInInventory -= instanceCIW.stack;
-                            if (Mod.playerInventory[requiredItemID] == 0)
-                            {
-                                Mod.playerInventory.Remove(requiredItemID);
-                            }
-                            Mod.playerInventoryObjects[requiredItemID].Remove(instanceCIW.gameObject);
-                            if (Mod.playerInventoryObjects[requiredItemID].Count == 0)
-                            {
-                                Mod.playerInventoryObjects.Remove(requiredItemID);
-                            }
+                            Mod.RemoveFromPlayerInventory(instanceCIW.transform, true);
                         }
                         else // Was in hideout
                         {
-                            Mod.baseInventory[requiredItemID] -= instanceCIW.stack;
                             amountInInventory -= instanceCIW.stack;
-                            if (Mod.baseInventory[requiredItemID] == 0)
-                            {
-                                Mod.baseInventory.Remove(requiredItemID);
-                            }
-                            Mod.currentBaseManager.baseInventoryObjects[requiredItemID].Remove(instanceCIW.gameObject);
-                            if (Mod.currentBaseManager.baseInventoryObjects[requiredItemID].Count == 0)
-                            {
-                                Mod.currentBaseManager.baseInventoryObjects.Remove(requiredItemID);
-                            }
+                            Mod.currentBaseManager.RemoveFromBaseInventory(instanceCIW.transform, true);
                         }
                         break;
                     }
@@ -3266,32 +3203,14 @@ namespace EFM
                         if (preLocationIndex == 0) // If was on player
                         {
                             int amountToRemove = custom ? instanceCIW.stack : 1;
-                            Mod.playerInventory[requiredItemID] -= amountToRemove;
                             amountInInventory -= amountToRemove;
-                            if (Mod.playerInventory[requiredItemID] == 0)
-                            {
-                                Mod.playerInventory.Remove(requiredItemID);
-                            }
-                            Mod.playerInventoryObjects[requiredItemID].Remove(instanceObject);
-                            if (Mod.playerInventoryObjects[requiredItemID].Count == 0)
-                            {
-                                Mod.playerInventoryObjects.Remove(requiredItemID);
-                            }
+                            Mod.RemoveFromPlayerInventory(instanceCIW.transform, true);
                         }
                         else // Was in hideout
                         {
                             int amountToRemove = custom ? instanceCIW.stack : 1;
-                            Mod.baseInventory[requiredItemID] -= amountToRemove;
                             amountInInventory -= amountToRemove;
-                            if (Mod.baseInventory[requiredItemID] == 0)
-                            {
-                                Mod.baseInventory.Remove(requiredItemID);
-                            }
-                            Mod.currentBaseManager.baseInventoryObjects[requiredItemID].Remove(instanceObject);
-                            if (Mod.currentBaseManager.baseInventoryObjects[requiredItemID].Count == 0)
-                            {
-                                Mod.currentBaseManager.baseInventoryObjects.Remove(requiredItemID);
-                            }
+                            Mod.currentBaseManager.RemoveFromBaseInventory(instanceObject.transform, true);
                         }
                         break;
                     }
@@ -3901,16 +3820,7 @@ namespace EFM
                         if (countLeft > 30)
                         {
                             itemObject = GameObject.Instantiate(Mod.itemPrefabs[716], outputVolume.transform);
-                            if (Mod.baseInventory.ContainsKey("716"))
-                            {
-                                Mod.baseInventory["716"] += 1;
-                                baseManager.baseInventoryObjects["716"].Add(itemObject);
-                            }
-                            else
-                            {
-                                Mod.baseInventory.Add("716", 1);
-                                baseManager.baseInventoryObjects.Add("716", new List<GameObject> { itemObject });
-                            }
+                            Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
 
                             if (countLeft <= 120)
                             {
@@ -3929,16 +3839,7 @@ namespace EFM
                         {
                             itemObject = GameObject.Instantiate(Mod.itemPrefabs[715], outputVolume.transform);
 
-                            if (Mod.baseInventory.ContainsKey("715"))
-                            {
-                                Mod.baseInventory["715"] += 1;
-                                baseManager.baseInventoryObjects["715"].Add(itemObject);
-                            }
-                            else
-                            {
-                                Mod.baseInventory.Add("715", 1);
-                                baseManager.baseInventoryObjects.Add("715", new List<GameObject> { itemObject });
-                            }
+                            Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
 
                             amount = countLeft;
                             countLeft = 0;
@@ -3978,16 +3879,7 @@ namespace EFM
                     EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID);
 
-                    if (Mod.baseInventory.ContainsKey(VID.H3ID))
-                    {
-                        Mod.baseInventory[VID.H3ID] += 1;
-                        baseManager.baseInventoryObjects[VID.H3ID].Add(itemObject);
-                    }
-                    else
-                    {
-                        Mod.baseInventory.Add(VID.H3ID, 1);
-                        baseManager.baseInventoryObjects.Add(VID.H3ID, new List<GameObject> { itemObject });
-                    }
+                    Mod.currentBaseManager.AddToBaseInventory(VID.transform, true);
                 }
             }
             else // Not a round, spawn as normal
@@ -4004,16 +3896,7 @@ namespace EFM
                     EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID);
 
-                    if (Mod.baseInventory.ContainsKey(VID.H3ID))
-                    {
-                        Mod.baseInventory[VID.H3ID] += 1;
-                        baseManager.baseInventoryObjects[VID.H3ID].Add(itemObject);
-                    }
-                    else
-                    {
-                        Mod.baseInventory.Add(VID.H3ID, 1);
-                        baseManager.baseInventoryObjects.Add(VID.H3ID, new List<GameObject> { itemObject });
-                    }
+                    Mod.currentBaseManager.AddToBaseInventory(VID.transform, true);
                 }
             }
 

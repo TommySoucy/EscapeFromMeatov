@@ -124,12 +124,12 @@ namespace EFM
             downHoverScroll.hoverSound = exitButton.hoverSound;
             downHoverScroll.scrollbar = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
             downHoverScroll.other = upHoverScroll;
-            downHoverScroll.up = true;
             downHoverScroll.rate = 0.5f;
             upHoverScroll.MaxPointingRange = 30;
             upHoverScroll.hoverSound = exitButton.hoverSound;
             upHoverScroll.scrollbar = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<Scrollbar>();
             upHoverScroll.other = downHoverScroll;
+            upHoverScroll.up = true;
             upHoverScroll.rate = 0.5f;
 
             // Inactive by default

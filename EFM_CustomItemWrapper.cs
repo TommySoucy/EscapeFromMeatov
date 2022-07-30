@@ -646,13 +646,7 @@ namespace EFM
 						if (amount == 0)
 						{
 							// Update player inventory and weight
-							Mod.playerInventory[ID] -= 1;
-							Mod.playerInventoryObjects[ID].Remove(gameObject);
-							if (Mod.playerInventory[ID] == 0)
-							{
-								Mod.playerInventory.Remove(ID);
-								Mod.playerInventoryObjects.Remove(ID);
-							}
+							Mod.RemoveFromPlayerInventory(transform, true);
 							Mod.weight -= currentWeight;
 							destroyed = true;
 							physObj.ForceBreakInteraction();
@@ -888,13 +882,7 @@ namespace EFM
 						if (amount == 0)
 						{
 							// Update player inventory and weight
-							Mod.playerInventory[ID] -= 1;
-							Mod.playerInventoryObjects[ID].Remove(gameObject);
-							if (Mod.playerInventory[ID] == 0)
-							{
-								Mod.playerInventory.Remove(ID);
-								Mod.playerInventoryObjects.Remove(ID);
-							}
+							Mod.RemoveFromPlayerInventory(transform, true);
 							Mod.weight -= currentWeight;
 							destroyed = true;
 							Destroy(gameObject);
@@ -1725,5 +1713,10 @@ namespace EFM
         {
 			this.descriptionManager = descriptionManager;
         }
+    }
+
+	public class EFM_MainContainer : MonoBehaviour
+    {
+		public EFM_CustomItemWrapper parentCIW;
     }
 }
