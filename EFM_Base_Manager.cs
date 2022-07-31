@@ -2166,9 +2166,7 @@ namespace EFM
                 prefabToUse = IM.OD[item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString()].GetGameObject();
             }
 
-            Vector3 itemSpawnPos = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
-            Quaternion itemSpawnRot = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
-            GameObject itemObject = Instantiate<GameObject>(prefabToUse, itemSpawnPos, itemSpawnRot);
+            GameObject itemObject = Instantiate<GameObject>(prefabToUse);
 
             Mod.instance.LogInfo("spawned, positioning");
             itemObject.transform.parent = parent; // Set parent after so it can awake before doing anything, in case parent is inactive
@@ -2700,6 +2698,11 @@ namespace EFM
                     parentCIW.AddItemToContainer(itemPhysicalObject);
                 }
             }
+
+            Mod.instance.LogInfo("positioning");
+            // GameObject
+            itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
+            itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
 
             Mod.instance.LogInfo("done");
             return itemObject;
