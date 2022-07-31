@@ -76,22 +76,6 @@ namespace EFM
                 availableSaveFiles = new List<int>();
             }
 
-            // TODO: Review: was there a reason why we were destroying held items here? Either way, this is a problem because 
-            // We want to be able to come back from raid with held items and this prevents it
-            //FVRViveHand rh = GM.CurrentPlayerBody.RightHand.GetComponentInChildren<FVRViveHand>();
-            //if (rh.CurrentInteractable != null)
-            //{
-            //    FVRInteractiveObject currentInteractable = rh.CurrentInteractable;
-            //    currentInteractable.EndInteraction(rh);
-            //    Destroy(currentInteractable.gameObject);
-            //}
-            //if (rh.OtherHand.CurrentInteractable != null)
-            //{
-            //    FVRInteractiveObject currentInteractable = rh.OtherHand.CurrentInteractable;
-            //    currentInteractable.EndInteraction(rh.OtherHand);
-            //    Destroy(currentInteractable.gameObject);
-            //}
-
             // Get save data
             loadedData = null;
             if (slotIndex == -1)

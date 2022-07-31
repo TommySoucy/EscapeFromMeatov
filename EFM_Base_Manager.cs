@@ -1931,7 +1931,6 @@ namespace EFM
                     }
                     else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
                     {
-                        Mod.instance.LogInfo("4");
                         FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
                         if (Mod.roundsByType.ContainsKey(asRound.RoundType))
                         {
@@ -2507,7 +2506,7 @@ namespace EFM
                         JArray loadedBPContents = (JArray)item["PhysicalObject"]["backpackContents"];
                         for (int j = 0; j < loadedBPContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedBPContents[j], customItemWrapper.locationIndex);
+                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedBPContents[j], customItemWrapper.locationIndex, false);
                         }
                     }
                 }
@@ -2528,7 +2527,7 @@ namespace EFM
                         JArray loadedContainerContents = (JArray)item["PhysicalObject"]["containerContents"];
                         for (int j = 0; j < loadedContainerContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedContainerContents[j], customItemWrapper.locationIndex);
+                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedContainerContents[j], customItemWrapper.locationIndex, false);
                         }
                     }
                 }
@@ -2549,7 +2548,7 @@ namespace EFM
                         JArray loadedPouchContents = (JArray)item["PhysicalObject"]["containerContents"];
                         for (int j = 0; j < loadedPouchContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedPouchContents[j], customItemWrapper.locationIndex);
+                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedPouchContents[j], customItemWrapper.locationIndex, false);
                         }
                     }
                 }

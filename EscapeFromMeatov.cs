@@ -35,6 +35,7 @@ namespace EFM
         public static Mod instance;
         public static int currentLocationIndex = -1; // This will be used by custom item wrapper and vanilla item descr. in their Start(). Shoud only ever be 1(base) or 2(raid). If want to spawn an item in player inventory, will have to set it manually
         public static AssetBundle assetsBundle;
+        public static AssetBundle defaultAssetsBundle;
         public static AssetBundle menuBundle;
         public static AssetBundle baseAssetsBundle;
         public static AssetBundle baseBundle;
@@ -96,6 +97,8 @@ namespace EFM
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
         public static List<KeyValuePair<GameObject, object>> attachmentLocalTransform;
         public static int attachmentCheckNeeded;
+        public static List<FVRInteractiveObject> physObjColResetList;
+        public static int physObjColResetNeeded;
 
         // Player
         public static GameObject playerStatusUI;
@@ -276,6 +279,8 @@ namespace EFM
 
             LoadDB();
 
+            LoadDefaultAssets();
+
             DoPatching();
 
             Init();
@@ -443,8 +448,6 @@ namespace EFM
 
             LogInfo("Loading Main assets");
             // Load assets
-            sceneDefImage = assetsBundle.LoadAsset<Sprite>("Tumbnail");
-            mainMenuPointable = assetsBundle.LoadAsset<GameObject>("MeatovPointable");
             quickBeltSlotPrefab = assetsBundle.LoadAsset<GameObject>("QuickBeltSlot");
             rectQuickBeltSlotPrefab = assetsBundle.LoadAsset<GameObject>("RectQuickBeltSlot");
             playerStatusUIPrefab = assetsBundle.LoadAsset<GameObject>("StatusUI");
@@ -1228,6 +1231,14 @@ namespace EFM
             }
         }
 
+        private void LoadDefaultAssets()
+        {
+            defaultAssetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovDefaultAssets.ab");
+
+            sceneDefImage = defaultAssetsBundle.LoadAsset<Sprite>("MeatovThumbnail");
+            mainMenuPointable = defaultAssetsBundle.LoadAsset<GameObject>("MeatovPointable");
+        }
+
         private void SetVanillaItems()
         {
             // Start by loading custom-vanilla icons
@@ -1326,21 +1337,6 @@ namespace EFM
 
                 vanillaItems.Add(descriptor.H3ID, descriptor);
             }
-
-            // Get all item spawner object defs
-            //UnityEngine.Object[] array = Resources.LoadAll("ItemSpawnerDefinitions", typeof(ItemSpawnerObjectDefinition));
-            //LogInfo("VANILLA SPRITES COUNT=" + array.Length);
-            //foreach (ItemSpawnerObjectDefinition def in array)
-            //{
-            //    // Check if our vanilla items contain the ItemID of this object
-            //    FVRPhysicalObject physObj = def.Prefab.GetComponentInChildren<FVRPhysicalObject>();
-            //    if (physObj != null && vanillaItems.ContainsKey(physObj.ObjectWrapper.ItemID) && !itemIcons.ContainsKey(physObj.ObjectWrapper.ItemID))
-            //    {
-            //        // Add the sprite
-            //        itemIcons.Add(physObj.ObjectWrapper.ItemID, def.Sprite);
-            //        LogInfo("Added sprite for vanilla ID: " + physObj.ObjectWrapper.ItemID);
-            //    }
-            //}
         }
 
         private static ItemRarity ItemRarityStringToEnum(string name)
@@ -2212,7 +2208,6 @@ namespace EFM
             if (!loading && isGrillhouse && grillHouseSecure)
             {
                 isGrillhouse = false;
-                Mod.instance.LogInfo("proxying through grillhouse");
                 LoadLevelBeginPatch.secureObjects();
                 grillHouseSecure = false;
                 SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
@@ -2221,7 +2216,6 @@ namespace EFM
 
         public void OnSceneLoaded(Scene loadedScene, LoadSceneMode loadedSceneMode)
         {
-            Logger.LogInfo("OnSceneLoaded called with scene: "+loadedScene.name);
             if(loadedScene.name.Equals("MainMenu3"))
             {
                 Mod.currentLocationIndex = -1;
@@ -2295,12 +2289,12 @@ namespace EFM
         private void LoadMainMenu()
         {
             // Create a MainMenuScenePointable for our level
-            GameObject currentPointable = Instantiate<GameObject>(mainMenuPointable); // TODO: This does not exist yet anymore because we made it so assets are all loaded when we load meatov menu. So we have to make a specific asset bundle just to have the H3VR main menu button assets taht we can load at game start
+            GameObject currentPointable = Instantiate<GameObject>(mainMenuPointable);
             currentPointable.name = mainMenuPointable.name;
             MainMenuScenePointable pointableInstance = currentPointable.AddComponent<MainMenuScenePointable>();
             pointableInstance.Def = sceneDef;
             pointableInstance.Screen = GameObject.Find("LevelLoadScreen").GetComponent<MainMenuScreen>();
-            pointableInstance.MaxPointingRange = 16;
+            pointableInstance.MaxPointingRange = 30;
             currentPointable.transform.position = new Vector3(-12.14f, 9.5f, 4.88f);
             currentPointable.transform.rotation = Quaternion.Euler(0, 300, 0);
 
@@ -2343,10 +2337,32 @@ namespace EFM
             securedObjects.Clear();
 
             // Make sure secured hand objects are put in hands
+            if (Mod.physObjColResetList == null)
+            {
+                Mod.physObjColResetList = new List<FVRInteractiveObject>();
+            }
+            else
+            {
+                Mod.physObjColResetList.Clear();
+            }
             if (leftHand != null && leftHand.fvrHand != null)
             {
+                if (securedLeftHandInteractable != null)
+                {
+                    // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
+                    Mod.physObjColResetList.Add(securedLeftHandInteractable);
+                    Mod.physObjColResetNeeded = 5;
+                    EndInteractionPatch.ignoreEndInteraction = true;
+                }
                 leftHand.fvrHand.ForceSetInteractable(securedLeftHandInteractable);
                 securedLeftHandInteractable = null;
+                if (securedRightHandInteractable != null)
+                {
+                    // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
+                    Mod.physObjColResetList.Add(securedRightHandInteractable);
+                    Mod.physObjColResetNeeded = 5;
+                    EndInteractionPatch.ignoreEndInteraction = true;
+                }
                 rightHand.fvrHand.ForceSetInteractable(securedRightHandInteractable);
                 securedRightHandInteractable = null;
             }
@@ -3756,6 +3772,12 @@ namespace EFM
             if(__instance.QuickbeltSlot != null && __instance.m_isHardnessed)
             {
                 __instance.transform.localScale = Vector3.one;
+
+                if (__instance.QuickbeltSlot == Mod.rightShoulderSlot) 
+                {
+                    // Set the item's position to approx hand to ensure it doesn't have to collide with anything to get there
+                    __instance.transform.position = hand.transform.position;
+                }
             }
 
             EFM_VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
@@ -3889,10 +3911,10 @@ namespace EFM
                 if(vanillaItemDescriptor.locationIndex == 1)
                 {
                     // Was in hideout
-                    Mod.currentBaseManager.RemoveFromBaseInventory(customItemWrapper.transform, false);
+                    Mod.currentBaseManager.RemoveFromBaseInventory(vanillaItemDescriptor.transform, false);
 
                     // Now on player
-                    Mod.AddToPlayerInventory(customItemWrapper.transform, false);
+                    Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, false);
 
                     // Update locationIndex
                     SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
@@ -3900,7 +3922,7 @@ namespace EFM
                 else if(vanillaItemDescriptor.locationIndex == 2)
                 {
                     // Now on player
-                    Mod.AddToPlayerInventory(customItemWrapper.transform, true);
+                    Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
 
                     // Update locationIndex
                     SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
@@ -3908,7 +3930,7 @@ namespace EFM
                 else if (vanillaItemDescriptor.locationIndex == 3)
                 {
                     // Now on player
-                    Mod.AddToPlayerInventory(customItemWrapper.transform, true);
+                    Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
 
                     // Update locationIndex
                     SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
@@ -7434,6 +7456,19 @@ namespace EFM
                             attachCheck.Key.transform.localPosition = (attachCheck.Value as Vector3[])[0];
                             attachCheck.Key.transform.localEulerAngles = (attachCheck.Value as Vector3[])[1];
                         }
+                    }
+                }
+            }
+
+            if (Mod.physObjColResetNeeded >= 0) 
+            {
+                --Mod.physObjColResetNeeded;
+
+                if (Mod.physObjColResetNeeded == 0)
+                {
+                    foreach (FVRPhysicalObject physObj in Mod.physObjColResetList)
+                    {
+                        physObj.SetAllCollidersToLayer(false, "Default");
                     }
                 }
             }
