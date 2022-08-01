@@ -617,7 +617,7 @@ namespace EFM
                     Mod.extractionUIText.text = string.Format("Extraction in {0:0.#}", Mathf.Max(0, extractionTime - extractionTimer));
 
                     // Position extraction UI
-                    Vector3 vector = GM.CurrentPlayerBody.Head.position + Vector3.up * 0.4f;
+                    Vector3 vector = GM.CurrentPlayerBody.Head.position + Vector3.up * 0.3f;
                     Vector3 vector2 = GM.CurrentPlayerBody.Head.forward;
                     vector2.y = 0f;
                     vector2.Normalize();
@@ -625,6 +625,7 @@ namespace EFM
                     vector += vector2;
                     Mod.extractionUI.transform.position = vector;
                     Mod.extractionUI.transform.rotation = Quaternion.LookRotation(vector2, Vector3.up);
+                    Mod.extractionUI.transform.Rotate(Vector3.right, -20);
 
                     if (extractionTimer >= extractionTime)
                     {
@@ -3862,6 +3863,8 @@ namespace EFM
                 {
                     Mod.health[i] = Mathf.Clamp(Mod.health[i] + currentNonLethalHealthRates[i] * (Time.deltaTime / 60), 1, maxHealth[i]);
                 }
+                Mod.playerStatusManager.partHealthTexts[i].text = String.Format("{0:0}", Mod.health[i]) + "/" + String.Format("{0:0}", maxHealth[i]);
+                Mod.playerStatusManager.partHealthImages[i].color = Color.Lerp(Color.red, Color.white, Mod.health[i] / maxHealth[i]);
 
                 healthDelta += currentNonLethalHealthRates[i];
                 health += Mod.health[i];
@@ -3874,7 +3877,7 @@ namespace EFM
                 {
                     Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.healthDeltaText.text = (healthDelta >= 0 ? "+ " : "- ") + healthDelta + "/min";
+                Mod.playerStatusManager.healthDeltaText.text = (healthDelta >= 0 ? "+ " : "") + healthDelta + "/min";
                 if (lethal)
                 {
                     Mod.playerStatusManager.healthDeltaText.color = Color.red;
@@ -3888,7 +3891,7 @@ namespace EFM
             {
                 Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(false);
             }
-            Mod.playerStatusManager.healthText.text = health.ToString() + "/440";
+            Mod.playerStatusManager.healthText.text = String.Format("{0:0}/440", health);
 
             Mod.hydration = Mathf.Clamp(Mod.hydration + currentHydrationRate * (Time.deltaTime / 60), 0, Mod.maxHydration);
             if (currentHydrationRate != 0)
@@ -3897,13 +3900,13 @@ namespace EFM
                 {
                     Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.hydrationDeltaText.text = (currentHydrationRate >= 0 ? "+ " : "- ") + String.Format("{0:0.#}/min", currentHydrationRate);
+                Mod.playerStatusManager.hydrationDeltaText.text = (currentHydrationRate >= 0 ? "+ " : "") + String.Format("{0:0.#}/min", currentHydrationRate);
             }
             else if (Mod.playerStatusManager.hydrationDeltaText.gameObject.activeSelf)
             {
                 Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(false);
             }
-            Mod.playerStatusManager.hydrationText.text = Mod.hydration.ToString() + "/" + Mod.maxHydration;
+            Mod.playerStatusManager.hydrationText.text = String.Format("{0:0}/{1:0}", Mod.hydration, Mod.maxHydration);
             if (Mod.hydration == 0)
             {
                 if (Mod.dehydrationEffect == null)
@@ -3990,18 +3993,19 @@ namespace EFM
 
             Mod.energy = Mathf.Clamp(Mod.energy + currentEnergyRate * (Time.deltaTime / 60), 0, Mod.maxEnergy);
 
-            if (currentEnergyRate > 0)
+            if (currentEnergyRate != 0)
             {
                 if (!Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
                 {
                     Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.energyDeltaText.text = (currentEnergyRate >= 0 ? "+ " : "- ") + String.Format("{0:0.#}/min", currentEnergyRate);
+                Mod.playerStatusManager.energyDeltaText.text = (currentEnergyRate >= 0 ? "+ " : "") + String.Format("{0:0.#}/min", currentEnergyRate);
             }
             else if (Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
             {
                 Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(false);
             }
+            Mod.playerStatusManager.energyText.text = String.Format("{0:0}/{1:0}", Mod.energy, Mod.maxEnergy);
             if (Mod.energy == 0)
             {
                 if (Mod.fatigueEffect == null)

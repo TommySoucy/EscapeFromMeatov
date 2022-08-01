@@ -66,11 +66,8 @@ namespace EFM
         {
             // Set the reference to the physical object
             physObj = gameObject.GetComponent<FVRPhysicalObject>();
-        }
 
-        public void Start()
-        {
-            if(physObj.RootRigidbody == null)
+            if (physObj.RootRigidbody == null)
             {
                 // This has to be done because attachments and ammo container, when attached to a firearm, will have their rigidbodies detroyed
                 weight = ((FVRPhysicalObject.RigidbodyStoredParams)typeof(FVRPhysicalObject).GetField("StoredRBParams").GetValue(physObj)).Mass;
@@ -119,7 +116,7 @@ namespace EFM
                     descriptionPack.icon = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 Mod.instance.LogError("Could not get spawner ID for icon for vanilla item: " + H3ID);
             }

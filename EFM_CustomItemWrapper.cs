@@ -197,10 +197,7 @@ namespace EFM
 				_mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
 			}
 			modeInitialized = true;
-		}
 
-		private void Start()
-		{
 			descriptionPack = new DescriptionPack();
 			if (itemType == Mod.ItemType.LootContainer)
 			{

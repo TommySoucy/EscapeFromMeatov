@@ -1657,6 +1657,11 @@ namespace EFM
         {
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
+            FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
+            if(physObj == null || physObj.ObjectWrapper == null)
+            {
+                return; // Grenade pin for example, has no wrapper
+            }
             string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
             if (playerInventory.ContainsKey(itemID))
             {
@@ -1666,6 +1671,7 @@ namespace EFM
             else
             {
                 Mod.instance.LogError("Attempting to remove " + itemID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
+                return;
             }
             if(playerInventory[itemID] == 0)
             {
@@ -1905,6 +1911,18 @@ namespace EFM
 
             harmony.Patch(damagePatchOriginal, new HarmonyMethod(damagePatchPrefix));
 
+            // DamageFloatPatch
+            MethodInfo damageFloatPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(float) }, null);
+            MethodInfo damageFloatPatchPrefix = typeof(DamageFloatPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(damageFloatPatchOriginal, new HarmonyMethod(damageFloatPatchPrefix));
+
+            // DamageDealtPatch
+            MethodInfo damageDealtPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(DamageDealt) }, null);
+            MethodInfo damageDealtPatchPrefix = typeof(DamageDealtPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(damageDealtPatchOriginal, new HarmonyMethod(damageDealtPatchPrefix));
+
             // HandTestColliderPatch
             MethodInfo handTestColliderPatchOriginal = typeof(FVRViveHand).GetMethod("TestCollider", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo handTestColliderPatchPrefix = typeof(HandTestColliderPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -2116,6 +2134,12 @@ namespace EFM
             MethodInfo globalFixedUpdatePatchPostfix = typeof(GlobalFixedUpdatePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(globalFixedUpdatePatchOriginal, null, new HarmonyMethod(globalFixedUpdatePatchPostfix));
+
+            // IsPointInsideSphereGeoPatch
+            MethodInfo isPointInsideSphereGeoPatchOriginal = typeof(FVRQuickBeltSlot).GetMethod("IsPointInsideSphereGeo", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo isPointInsideSphereGeoPatchPrefix = typeof(IsPointInsideSphereGeoPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(isPointInsideSphereGeoPatchOriginal, new HarmonyMethod(isPointInsideSphereGeoPatchPrefix));
 
             //// SetActivePatch
             //MethodInfo setActivePatchOriginal = typeof(UnityEngine.GameObject).GetMethod("SetActive", BindingFlags.Public | BindingFlags.Instance);
@@ -2807,6 +2831,11 @@ namespace EFM
                 {
                     return;
                 }
+            }
+            else
+            {
+                Mod.instance.LogWarning("End interaction called on "+__instance+" which has no CIW or VID");
+                return; // No need to process Item that has neither
             }
 
             hand.GetComponent<EFM_Hand>().currentHeldItem = null;
@@ -4160,7 +4189,7 @@ namespace EFM
             // Apply damage resist
             damage *= 0.05f; // For 500 to become 25
 
-            Mod.instance.LogInfo("Player took " + damage + " damage");
+            Mod.instance.LogInfo("Player took " + damage + " damage (Damage)");
 
             // Apply damage resist/multiplier based on equipment and body part
             if (__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Head)
@@ -4564,6 +4593,752 @@ namespace EFM
                     Mod.health[partIndex] = Mathf.Clamp(Mod.health[partIndex] - totalDamage, 0, Mod.currentRaidManager.maxHealth[partIndex]);
                 }
             }
+            return false;
+        }
+    }
+
+    // Patches FVRPlayerHitbox.Damage(float) in order to implement our own armor's damage resistance
+    class DamageFloatPatch
+    {
+        static bool Prefix(float i, ref FVRPlayerHitbox __instance, ref AudioSource ___m_aud)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            if (!GM.CurrentSceneSettings.DoesDamageGetRegistered)
+            {
+                return false;
+            }
+            float damage = Mathf.Clamp(i * __instance.DamageMultiplier - __instance.DamageResist, 0f, 10000f);
+            int partIndex = -1;
+
+            // Apply damage resist
+            damage *= 0.05f; // For 500 to become 25
+
+            Mod.instance.LogInfo("Player took " + damage + " damage (float)");
+
+            // Apply damage resist/multiplier based on equipment and body part
+            if (__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Head)
+            {
+                Mod.instance.LogInfo("\tTo Head");
+                if (Mod.health[0] <= 0)
+                {
+                    Mod.instance.LogInfo("\t\tHealth 0, killing player");
+                    Mod.currentRaidManager.KillPlayer();
+                }
+
+                partIndex = 0;
+
+                // Add a headshot damage multiplier
+                //damage *= Mod.headshotDamageMultiplier;
+
+                // We will actually be applying normal damage to the head, considering if health <= 0 is instant death and it only has 35 HP
+
+                // Process damage resist from EFM_EquipmentSlot.CurrentHelmet
+                float heavyBleedChance = 0.02f;
+                float lightBleedChance = 0.1f;
+                if (EFM_EquipmentSlot.currentHeadwear != null && EFM_EquipmentSlot.currentHeadwear.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentHeadwear.coverage)
+                {
+                    heavyBleedChance /= 3;
+                    lightBleedChance /= 3;
+                    EFM_EquipmentSlot.currentHeadwear.armor -= damage - damage * EFM_EquipmentSlot.currentHeadwear.damageResist;
+                    damage *= EFM_EquipmentSlot.currentHeadwear.damageResist;
+                }
+
+                // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                float chance = UnityEngine.Random.value;
+                if (chance <= heavyBleedChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                    EFM_Effect heavyBleedEffect = new EFM_Effect();
+                    heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                    heavyBleedEffect.partIndex = 0;
+                    EFM_Effect.effects.Add(heavyBleedEffect);
+                }
+                else if (chance <= lightBleedChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused light bleed");
+                    EFM_Effect lightBleedEffect = new EFM_Effect();
+                    lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                    lightBleedEffect.partIndex = 0;
+                    EFM_Effect.effects.Add(lightBleedEffect);
+                }
+            }
+            else if(__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Torso)
+            {
+                // These numbers are cumulative
+                float thoraxChance = 0.3f;
+                float stomachChance = 0.55f;
+                float rightArmChance = 0.625f;
+                float leftArmChance = 0.7f;
+                float rightLegChance = 0.85f;
+                float leftLegChance = 1f;
+
+                float partChance = UnityEngine.Random.value;
+                if(partChance >= 0 && partChance <= thoraxChance)
+                {
+                    Mod.instance.LogInfo("\tTo thorax");
+                    if (Mod.health[1] <= 0)
+                    {
+                        Mod.instance.LogInfo("\t\tHealth 0, killing player");
+                        Mod.currentRaidManager.KillPlayer();
+                    }
+
+                    partIndex = 1;
+
+                    // Process damage resist from EFM_EquipmentSlot.CurrentArmor
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
+                    {
+                        heavyBleedChance /= 3;
+                        lightBleedChance /= 3;
+                        EFM_EquipmentSlot.currentArmor.armor -= damage - damage * EFM_EquipmentSlot.currentArmor.damageResist;
+                        damage *= EFM_EquipmentSlot.currentArmor.damageResist;
+                    }
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+                }
+                else if (partChance > thoraxChance && partChance <= stomachChance)
+                {
+                    Mod.instance.LogInfo("\tTo stomach");
+                    partIndex = 2;
+
+                    // Process damage resist from EFM_EquipmentSlot.CurrentArmor
+                    float heavyBleedChance = 0.05f;
+                    float lightBleedChance = 0.15f;
+                    if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
+                    {
+                        heavyBleedChance /= 3;
+                        lightBleedChance /= 3;
+                        EFM_EquipmentSlot.currentArmor.armor -= damage - damage * EFM_EquipmentSlot.currentArmor.damageResist;
+                        damage *= EFM_EquipmentSlot.currentArmor.damageResist;
+                    }
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+                }
+                else if(partChance > stomachChance && partChance <= rightArmChance)
+                {
+                    Mod.instance.LogInfo("\tTo right arm");
+                    partIndex = 4;
+
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    float fractureChance = 0.02f;
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+
+                    if(UnityEngine.Random.value < fractureChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(fractureEffect);
+                    }
+                }
+                else if(partChance > rightArmChance && partChance <= leftArmChance)
+                {
+                    Mod.instance.LogInfo("\tTo left arm");
+                    partIndex = 3;
+
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    float fractureChance = 0.02f;
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+
+                    if (UnityEngine.Random.value < fractureChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(fractureEffect);
+                    }
+                }
+                else if(partChance > leftArmChance && partChance <= rightLegChance)
+                {
+                    Mod.instance.LogInfo("\tTo right leg");
+                    partIndex = 6;
+
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    float fractureChance = 0.02f;
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+
+                    if (UnityEngine.Random.value < fractureChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(fractureEffect);
+                    }
+                }
+                else if(partChance > rightLegChance && partChance <= leftLegChance)
+                {
+                    Mod.instance.LogInfo("\tTo left leg");
+                    partIndex = 5;
+
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    float fractureChance = 0.02f;
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+
+                    if (UnityEngine.Random.value < fractureChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(fractureEffect);
+                    }
+                }
+            }
+            else if(__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Hand)
+            {
+                partIndex = __instance.Hand.IsThisTheRightHand ? 3 : 4;
+                Mod.instance.LogInfo("\tTo hand, actual part: "+partIndex);
+
+                // Add a damage resist because should do less damage when hit to hand than when hit to torso
+                //damage *= Mod.handDamageResist;
+
+                float heavyBleedChance = 0.02f;
+                float lightBleedChance = 0.1f;
+                float fractureChance = 0.02f;
+
+                // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                float bleedValue = UnityEngine.Random.value;
+                if (bleedValue <= heavyBleedChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                    EFM_Effect heavyBleedEffect = new EFM_Effect();
+                    heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                    heavyBleedEffect.partIndex = partIndex;
+                    EFM_Effect.effects.Add(heavyBleedEffect);
+                }
+                else if (bleedValue <= lightBleedChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused light bleed");
+                    EFM_Effect lightBleedEffect = new EFM_Effect();
+                    lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                    lightBleedEffect.partIndex = partIndex;
+                    EFM_Effect.effects.Add(lightBleedEffect);
+                }
+
+                if (UnityEngine.Random.value < fractureChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused fracture");
+                    EFM_Effect fractureEffect = new EFM_Effect();
+                    fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                    fractureEffect.partIndex = partIndex;
+                    EFM_Effect.effects.Add(fractureEffect);
+                }
+            }
+
+            // Apply damage res/mult base on status effects
+            // TODO: implement status effects, like drugs or broken limb
+
+            if (damage > 0.1f && __instance.IsActivated)
+            {
+                if (/*__instance.Body.RegisterPlayerHit(damage, false)*/ DamagePatch.RegisterPlayerHit(partIndex, damage, false))
+                {
+                    ___m_aud.PlayOneShot(__instance.AudClip_Reset, 0.4f);
+                }
+                else if (!GM.IsDead())
+                {
+                    ___m_aud.PlayOneShot(__instance.AudClip_Hit, 0.4f); 
+                }
+            }
+
+            return false;
+        }
+    }
+
+    // Patches FVRPlayerHitbox.Damage(DamageDealt) in order to implement our own armor's damage resistance
+    class DamageDealtPatch
+    {
+        static bool Prefix(DamageDealt dam, ref FVRPlayerHitbox __instance, ref AudioSource ___m_aud)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            if (!GM.CurrentSceneSettings.DoesDamageGetRegistered)
+            {
+                return false;
+            }
+            float damage = Mathf.Clamp(dam.PointsDamage * __instance.DamageMultiplier - __instance.DamageResist, 0f, 10000f);
+            int partIndex = -1;
+
+            // Apply damage resist
+            damage *= 0.05f; // For 500 to become 25
+
+            Mod.instance.LogInfo("Player took " + damage + " damage (Dealt)");
+
+            // Apply damage resist/multiplier based on equipment and body part
+            if (__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Head)
+            {
+                Mod.instance.LogInfo("\tTo Head");
+                if (Mod.health[0] <= 0)
+                {
+                    Mod.instance.LogInfo("\t\tHealth 0, killing player");
+                    Mod.currentRaidManager.KillPlayer();
+                }
+
+                partIndex = 0;
+
+                // Add a headshot damage multiplier
+                //damage *= Mod.headshotDamageMultiplier;
+
+                // We will actually be applying normal damage to the head, considering if health <= 0 is instant death and it only has 35 HP
+
+                // Process damage resist from EFM_EquipmentSlot.CurrentHelmet
+                float heavyBleedChance = 0.02f;
+                float lightBleedChance = 0.1f;
+                if (EFM_EquipmentSlot.currentHeadwear != null && EFM_EquipmentSlot.currentHeadwear.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentHeadwear.coverage)
+                {
+                    heavyBleedChance /= 3;
+                    lightBleedChance /= 3;
+                    EFM_EquipmentSlot.currentHeadwear.armor -= damage - damage * EFM_EquipmentSlot.currentHeadwear.damageResist;
+                    damage *= EFM_EquipmentSlot.currentHeadwear.damageResist;
+                }
+
+                // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                float chance = UnityEngine.Random.value;
+                if (chance <= heavyBleedChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                    EFM_Effect heavyBleedEffect = new EFM_Effect();
+                    heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                    heavyBleedEffect.partIndex = 0;
+                    EFM_Effect.effects.Add(heavyBleedEffect);
+                }
+                else if (chance <= lightBleedChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused light bleed");
+                    EFM_Effect lightBleedEffect = new EFM_Effect();
+                    lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                    lightBleedEffect.partIndex = 0;
+                    EFM_Effect.effects.Add(lightBleedEffect);
+                }
+            }
+            else if(__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Torso)
+            {
+                // These numbers are cumulative
+                float thoraxChance = 0.3f;
+                float stomachChance = 0.55f;
+                float rightArmChance = 0.625f;
+                float leftArmChance = 0.7f;
+                float rightLegChance = 0.85f;
+                float leftLegChance = 1f;
+
+                float partChance = UnityEngine.Random.value;
+                if(partChance >= 0 && partChance <= thoraxChance)
+                {
+                    Mod.instance.LogInfo("\tTo thorax");
+                    if (Mod.health[1] <= 0)
+                    {
+                        Mod.instance.LogInfo("\t\tHealth 0, killing player");
+                        Mod.currentRaidManager.KillPlayer();
+                    }
+
+                    partIndex = 1;
+
+                    // Process damage resist from EFM_EquipmentSlot.CurrentArmor
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
+                    {
+                        heavyBleedChance /= 3;
+                        lightBleedChance /= 3;
+                        EFM_EquipmentSlot.currentArmor.armor -= damage - damage * EFM_EquipmentSlot.currentArmor.damageResist;
+                        damage *= EFM_EquipmentSlot.currentArmor.damageResist;
+                    }
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+                }
+                else if (partChance > thoraxChance && partChance <= stomachChance)
+                {
+                    Mod.instance.LogInfo("\tTo stomach");
+                    partIndex = 2;
+
+                    // Process damage resist from EFM_EquipmentSlot.CurrentArmor
+                    float heavyBleedChance = 0.05f;
+                    float lightBleedChance = 0.15f;
+                    if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
+                    {
+                        heavyBleedChance /= 3;
+                        lightBleedChance /= 3;
+                        EFM_EquipmentSlot.currentArmor.armor -= damage - damage * EFM_EquipmentSlot.currentArmor.damageResist;
+                        damage *= EFM_EquipmentSlot.currentArmor.damageResist;
+                    }
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+                }
+                else if(partChance > stomachChance && partChance <= rightArmChance)
+                {
+                    Mod.instance.LogInfo("\tTo right arm");
+                    partIndex = 4;
+
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    float fractureChance = 0.02f;
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+
+                    if(UnityEngine.Random.value < fractureChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(fractureEffect);
+                    }
+                }
+                else if(partChance > rightArmChance && partChance <= leftArmChance)
+                {
+                    Mod.instance.LogInfo("\tTo left arm");
+                    partIndex = 3;
+
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    float fractureChance = 0.02f;
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+
+                    if (UnityEngine.Random.value < fractureChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(fractureEffect);
+                    }
+                }
+                else if(partChance > leftArmChance && partChance <= rightLegChance)
+                {
+                    Mod.instance.LogInfo("\tTo right leg");
+                    partIndex = 6;
+
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    float fractureChance = 0.02f;
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+
+                    if (UnityEngine.Random.value < fractureChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(fractureEffect);
+                    }
+                }
+                else if(partChance > rightLegChance && partChance <= leftLegChance)
+                {
+                    Mod.instance.LogInfo("\tTo left leg");
+                    partIndex = 5;
+
+                    float heavyBleedChance = 0.02f;
+                    float lightBleedChance = 0.1f;
+                    float fractureChance = 0.02f;
+
+                    // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                    // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                    float bleedValue = UnityEngine.Random.value;
+                    if (bleedValue <= heavyBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                        EFM_Effect heavyBleedEffect = new EFM_Effect();
+                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        heavyBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(heavyBleedEffect);
+                    }
+                    else if (bleedValue <= lightBleedChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused light bleed");
+                        EFM_Effect lightBleedEffect = new EFM_Effect();
+                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        lightBleedEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(lightBleedEffect);
+                    }
+
+                    if (UnityEngine.Random.value < fractureChance)
+                    {
+                        Mod.instance.LogInfo("\t\tCaused fracture");
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = partIndex;
+                        EFM_Effect.effects.Add(fractureEffect);
+                    }
+                }
+            }
+            else if(__instance.Type == FVRPlayerHitbox.PlayerHitBoxType.Hand)
+            {
+                partIndex = __instance.Hand.IsThisTheRightHand ? 3 : 4;
+                Mod.instance.LogInfo("\tTo hand, actual part: "+partIndex);
+
+                // Add a damage resist because should do less damage when hit to hand than when hit to torso
+                //damage *= Mod.handDamageResist;
+
+                float heavyBleedChance = 0.02f;
+                float lightBleedChance = 0.1f;
+                float fractureChance = 0.02f;
+
+                // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
+                // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
+                float bleedValue = UnityEngine.Random.value;
+                if (bleedValue <= heavyBleedChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused heavy bleed");
+                    EFM_Effect heavyBleedEffect = new EFM_Effect();
+                    heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                    heavyBleedEffect.partIndex = partIndex;
+                    EFM_Effect.effects.Add(heavyBleedEffect);
+                }
+                else if (bleedValue <= lightBleedChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused light bleed");
+                    EFM_Effect lightBleedEffect = new EFM_Effect();
+                    lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                    lightBleedEffect.partIndex = partIndex;
+                    EFM_Effect.effects.Add(lightBleedEffect);
+                }
+
+                if (UnityEngine.Random.value < fractureChance)
+                {
+                    Mod.instance.LogInfo("\t\tCaused fracture");
+                    EFM_Effect fractureEffect = new EFM_Effect();
+                    fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                    fractureEffect.partIndex = partIndex;
+                    EFM_Effect.effects.Add(fractureEffect);
+                }
+            }
+
+            // Apply damage res/mult base on status effects
+            // TODO: implement status effects, like drugs or broken limb
+
+            if (damage > 0.1f && __instance.IsActivated)
+            {
+                if (/*__instance.Body.RegisterPlayerHit(damage, false)*/ DamagePatch.RegisterPlayerHit(partIndex, damage, false))
+                {
+                    ___m_aud.PlayOneShot(__instance.AudClip_Reset, 0.4f);
+                }
+                else if (!GM.IsDead())
+                {
+                    ___m_aud.PlayOneShot(__instance.AudClip_Hit, 0.4f); 
+                }
+            }
+
             return false;
         }
     }
@@ -7502,6 +8277,23 @@ namespace EFM
             catch(NullReferenceException e)
             {
                 Mod.instance.LogError("DequeueAndPlayDebugPatch called but threw null exception, __instance.SourceQueue_Disabled null?: " + (__instance.SourceQueue_Disabled == null)+ ", __instance.ActiveSources null?: " + (__instance.ActiveSources == null)+":\n"+e.StackTrace);
+            }
+            return false;
+        }
+    }
+
+    class IsPointInsideSphereGeoPatch
+    {
+        static bool Prefix(ref FVRQuickBeltSlot __instance, ref bool __result, Vector3 p)
+        {
+            try
+            {
+                __result = __instance.HoverGeo.transform.InverseTransformPoint(p).magnitude < 0.5f;
+            }
+            catch(Exception e)
+            {
+                Mod.instance.LogInfo("Exception in IsPointInsideSphereGeo called on " + __instance.name+":\n"+e.StackTrace);
+                __result = false;
             }
             return false;
         }

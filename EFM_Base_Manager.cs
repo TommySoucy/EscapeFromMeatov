@@ -155,7 +155,7 @@ namespace EFM
                 deployTimer -= Time.deltaTime;
 
                 TimeSpan timeSpan = TimeSpan.FromSeconds(deployTimer);
-                raidCountdown.text = string.Format(@"{0:ss\.ff}", timeSpan);
+                raidCountdown.text = string.Format(@"{0:ss\\.ff}", timeSpan);
 
                 if (deployTimer <= 0)
                 {
@@ -1000,12 +1000,12 @@ namespace EFM
 
             // Update time texts
             TimeSpan timeSpan = TimeSpan.FromSeconds(time);
-            string formattedTime0 = string.Format(@"{0:hh\:mm}", timeSpan);
+            string formattedTime0 = string.Format(@"{0:hh\\:mm\\:ss}", timeSpan);
             timeChoice0.text = formattedTime0;
 
             float offsetTime = (time + 43200) % 86400; // Offset time by 12 hours
             TimeSpan offsetTimeSpan = TimeSpan.FromSeconds(offsetTime);
-            string formattedTime1 = string.Format(@"{0:hh\:mm}", offsetTimeSpan);
+            string formattedTime1 = string.Format(@"{0:hh\\:mm\\:ss}", offsetTimeSpan);
             timeChoice1.text = formattedTime1;
 
             chosenTime.text = chosenTimeIndex == 0 ? formattedTime0 : formattedTime1;
@@ -1996,6 +1996,7 @@ namespace EFM
             else
             {
                 Mod.instance.LogError("Attempting to remove " + itemID + " from base inventory but key was not found in it:\n" + Environment.StackTrace);
+                return;
             }
             if (Mod.baseInventory[itemID] == 0)
             {
