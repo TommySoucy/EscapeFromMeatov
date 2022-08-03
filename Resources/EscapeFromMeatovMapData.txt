@@ -86,7 +86,10 @@
           "mat": "metal",
           "customMat": true,
           "flipLock": false,
-          "blockIndex": 0
+          "blockIndex": 0,
+		  "openAngleX": -90,
+		  "openAngleY": 0,
+		  "openAngleZ": -16.16
         },
         {
           "angle": true,
@@ -110,7 +113,10 @@
           "mat": "metal",
           "customMat": true,
           "flipLock": false,
-          "blockIndex": 1
+          "blockIndex": 1,
+		  "openAngleX": 0,
+		  "openAngleY": 0,
+		  "openAngleZ": 75
         },
         {
           "angle": false,
@@ -254,7 +260,10 @@
           "mat": "wood",
           "customMat": false,
           "flipLock": true,
-          "blockIndex": 2
+          "blockIndex": 2,
+		  "openAngleX": 0,
+		  "openAngleY": 0,
+		  "openAngleZ": 70
         },
         {
           "angle": false,
@@ -446,7 +455,10 @@
           "mat": "wood",
           "customMat": false,
           "flipLock": false,
-          "blockIndex": 3
+          "blockIndex": 3,
+		  "openAngleX": 0,
+		  "openAngleY": 0,
+		  "openAngleZ": -90
         },
         {
           "angle": true,
@@ -518,7 +530,10 @@
           "mat": "metal",
           "customMat": true,
           "flipLock": true,
-          "blockIndex": 4
+          "blockIndex": 4,
+		  "openAngleX": 0,
+		  "openAngleY": 0,
+		  "openAngleZ": -80
         },
         {
           "angle": false,
@@ -578,7 +593,10 @@
           "mat": "metal",
           "customMat": true,
           "flipLock": true,
-          "blockIndex": 4
+          "blockIndex": 4,
+		  "openAngleX": 0,
+		  "openAngleY": 0,
+		  "openAngleZ": -77
         },
         {
           "angle": false,

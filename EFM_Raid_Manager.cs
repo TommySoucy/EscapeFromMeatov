@@ -999,12 +999,14 @@ namespace EFM
         private IEnumerator SpawnAIInventory(AIInventory inventory, Vector3 pos)
         {
             // Spawn generic items
+            Mod.instance.LogInfo("\tSpawning generic items");
             foreach(string genericItem in inventory.generic)
             {
                 bool custom = false;
                 GameObject itemPrefab = null;
                 int parsedID = -1;
-                if(int.TryParse(genericItem, out parsedID))
+                Mod.instance.LogInfo("\t\t"+genericItem);
+                if (int.TryParse(genericItem, out parsedID))
                 {
                     itemPrefab = Mod.itemPrefabs[parsedID];
                     custom = true;
@@ -1116,6 +1118,7 @@ namespace EFM
             // Spawn rig
             if (inventory.rig != null)
             {
+                Mod.instance.LogInfo("\tSpawning rig: "+inventory.rig);
                 GameObject rigObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.rig)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -1130,6 +1133,7 @@ namespace EFM
                     }
 
                     string itemID = inventory.rigContents[slotIndex];
+                    Mod.instance.LogInfo("\t\tSpawning rig content "+slotIndex+": " + itemID);
                     bool custom = false;
                     GameObject itemPrefab = null;
                     int parsedID = -1;
@@ -1252,6 +1256,7 @@ namespace EFM
             // Spawn dogtags
             if (inventory.dogtag != null)
             {
+                Mod.instance.LogInfo("\tSpawning dogtag: " + inventory.dogtag);
                 GameObject dogtagObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.dogtag)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 EFM_CustomItemWrapper dogtagCIW = dogtagObject.GetComponent<EFM_CustomItemWrapper>();
@@ -1264,6 +1269,7 @@ namespace EFM
             // Spawn backpack
             if (inventory.backpack != null)
             {
+                Mod.instance.LogInfo("\tSpawning backpack: " + inventory.backpack);
                 GameObject backpackObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.backpack)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -1272,6 +1278,7 @@ namespace EFM
 
                 foreach (string backpackItem in inventory.backpackContents)
                 {
+                    Mod.instance.LogInfo("\t\tSpawning backpack content " + backpackItem);
                     bool custom = false;
                     GameObject itemPrefab = null;
                     int parsedID = -1;
@@ -1427,6 +1434,7 @@ namespace EFM
             // Spawn primary weapon
             if (inventory.primaryWeapon != null)
             {
+                Mod.instance.LogInfo("\tSpawning primaryWeapon: " + inventory.primaryWeapon);
                 yield return IM.OD[inventory.primaryWeapon].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[inventory.primaryWeapon].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -1447,6 +1455,7 @@ namespace EFM
                     if (currentParent.children != null && childIndices.Peek() < currentParent.children.Count)
                     {
                         string modID = currentParent.children[childIndices.Peek()].ID;
+                        Mod.instance.LogInfo("\t\tSpawning primaryWeapon mod: " + modID);
                         // Spawn child at index
                         yield return IM.OD[modID].GetGameObjectAsync();
                         GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
@@ -1599,6 +1608,7 @@ namespace EFM
             // Spawn secondary weapon
             if (inventory.secondaryWeapon != null)
             {
+                Mod.instance.LogInfo("\tSpawning secondaryWeapon: " + inventory.secondaryWeapon);
                 yield return IM.OD[inventory.secondaryWeapon].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[inventory.secondaryWeapon].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -1619,6 +1629,7 @@ namespace EFM
                     if (currentParent.children != null && childIndices.Peek() < currentParent.children.Count)
                     {
                         string modID = currentParent.children[childIndices.Peek()].ID;
+                        Mod.instance.LogInfo("\t\tSpawning secondaryWeapon mod: " + modID);
                         // Spawn child at index
                         yield return IM.OD[modID].GetGameObjectAsync();
                         GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
@@ -1771,6 +1782,7 @@ namespace EFM
             // Spawn holster weapon
             if (inventory.holster != null)
             {
+                Mod.instance.LogInfo("\tSpawning holster: " + inventory.holster);
                 yield return IM.OD[inventory.holster].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[inventory.holster].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -1791,6 +1803,7 @@ namespace EFM
                     if (currentParent.children != null && childIndices.Peek() < currentParent.children.Count)
                     {
                         string modID = currentParent.children[childIndices.Peek()].ID;
+                        Mod.instance.LogInfo("\t\tSpawning holster mod: " + modID);
                         // Spawn child at index
                         yield return IM.OD[modID].GetGameObjectAsync();
                         GameObject attachmentPrefab = IM.OD[modID].GetGameObject();

@@ -1490,7 +1490,12 @@ namespace EFM
         {
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
-            string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
+            FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
+            if (physObj == null || physObj.ObjectWrapper == null)
+            {
+                return; // Grenade pin for example, has no wrapper
+            }
+            string itemID = physObj.ObjectWrapper.ItemID;
             if (playerInventory.ContainsKey(itemID))
             {
                 playerInventory[itemID] += customItemWrapper != null ? customItemWrapper.stack : 1;
@@ -1511,6 +1516,11 @@ namespace EFM
                         FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                         {
+                            if (loadedRound == null)
+                            {
+                                break;
+                            }
+
                             string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
 
                             if (roundsByType.ContainsKey(boxMagazine.RoundType))
@@ -1662,7 +1672,7 @@ namespace EFM
             {
                 return; // Grenade pin for example, has no wrapper
             }
-            string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
+            string itemID = physObj.ObjectWrapper.ItemID;
             if (playerInventory.ContainsKey(itemID))
             {
                 playerInventory[itemID] -= customItemWrapper != null ? customItemWrapper.stack : 1;
@@ -1688,6 +1698,11 @@ namespace EFM
                         FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                         {
+                            if (loadedRound == null)
+                            {
+                                break;
+                            }
+
                             string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
 
                             if (roundsByType.ContainsKey(boxMagazine.RoundType))
@@ -2218,13 +2233,16 @@ namespace EFM
             SteamVR_Events.Loading.Listen(OnSceneLoadedVR);
 
             // Create scene def
-            sceneDef = new MainMenuSceneDef();
+            sceneDef = ScriptableObject.CreateInstance<MainMenuSceneDef>();
             sceneDef.name = "MeatovSceneScreen";
             sceneDef.SceneName = "MeatovMenuScene";
             sceneDef.Name = "Escape from Meatov";
             sceneDef.Desciption = "Enter Meatov, loot, attempt escape. Upgrade your base, complete quests, trade, and go again. Good luck.";
             sceneDef.Image = sceneDefImage;
             sceneDef.Type = "Escape";
+
+            // Initially load main menu
+            LoadMainMenu();
         }
 
         public void OnSceneLoadedVR(bool loading)
@@ -3939,6 +3957,7 @@ namespace EFM
                 // Update lists
                 if(vanillaItemDescriptor.locationIndex == 1)
                 {
+                    Mod.instance.LogInfo("Was in hideout");
                     // Was in hideout
                     Mod.currentBaseManager.RemoveFromBaseInventory(vanillaItemDescriptor.transform, false);
 
@@ -3950,6 +3969,7 @@ namespace EFM
                 }
                 else if(vanillaItemDescriptor.locationIndex == 2)
                 {
+                    Mod.instance.LogInfo("Was in raid");
                     // Now on player
                     Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
 
@@ -3958,6 +3978,7 @@ namespace EFM
                 }
                 else if (vanillaItemDescriptor.locationIndex == 3)
                 {
+                    Mod.instance.LogInfo("Was in hideout area slot");
                     // Now on player
                     Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
 

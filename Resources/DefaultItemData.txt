@@ -833,7 +833,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 17,
       "Volumes": [
         0.005
       ],
@@ -841,6 +841,7 @@
       "idToUse": "59f32bb586f774757e1e8442",
       "ArmorAndRigProperties": null,
       "BackpackProperties": {},
+      "USEC": false,
       "DefaultPhysicalObject": {
         "DefaultObjectWrapper": {
           "DisplayName": "Dog tag",
@@ -908,7 +909,7 @@
       ]
     },
     {
-      "ItemType": 0,
+      "ItemType": 17,
       "Volumes": [
         0.005
       ],
@@ -916,6 +917,7 @@
       "idToUse": "59f32c3b86f77472a31742f0",
       "ArmorAndRigProperties": null,
       "BackpackProperties": {},
+      "USEC": true,
       "DefaultPhysicalObject": {
         "DefaultObjectWrapper": {
           "DisplayName": "Dog tag",
@@ -58838,6 +58840,836 @@
         "5448ecbe4bdc2d60728b4568",
         "54009119af1c881c07000029"
       ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        0.3
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Sealed letter",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 0,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "61904c9df62c89219a56e034",
+      "description": "A package with correspondence.",
+      "lootExperience": 20,
+      "rarity": "Not_exist",
+      "spawnChance": 1,
+      "itemSound": "item_paper",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Cardboard",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448ecbe4bdc2d60728b4568",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 6,
+      "Volumes": [
+        0.1
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Keycard holder case",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 508883,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "619cbf9e0a7c3a1a2731940a",
+      "description": "A special small case for storing plastic cards, including key cards.",
+      "lootExperience": 20,
+      "rarity": "Superrare",
+      "spawnChance": 0.6,
+      "itemSound": "keys",
+      "stackMaxSize": 1,
+      "ContainerProperties": {
+        "WhiteList": [
+          "5c164d2286f774194c5e69fa"
+        ],
+        "BlackList": [],
+        "MaxVolume": 0.1
+      },
+      "MaterialProperties": {
+        "PMaterial": "Steel",
+        "PMatSoundCategory": "Metal",
+        "PMatImpactEffectCategory": "Sparks"
+      },
+      "parents": [
+        "5795f317245977243854e041",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 6,
+      "Volumes": [
+        0.25
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Injector case",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 239844,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "619cbf7d23893217ec30b689",
+      "description": "A case for storing injectors, stimulants, and other specialized medications.",
+      "lootExperience": 20,
+      "rarity": "Superrare",
+      "spawnChance": 0.4,
+      "itemSound": "med_medkit",
+      "stackMaxSize": 1,
+      "ContainerProperties": {
+        "WhiteList": [
+          "544fb3f34bdc2d03748b456a",
+          "5448f3a64bdc2d60728b456a"
+        ],
+        "BlackList": [],
+        "MaxVolume": 0.25
+      },
+      "MaterialProperties": {
+        "PMaterial": "Cloth",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5795f317245977243854e041",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 5,
+      "Volumes": [
+        23,
+        23,
+        7
+      ],
+      "ArmorAndRigProperties": {},
+      "BackpackProperties": {
+        "MaxVolume": 22
+      },
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Santa's bag",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 54565,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": true,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 2,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "61b9e1aaef9a1b5d6a79899a",
+      "description": "Big and roomy Christmas bag, left behind by Santa himself",
+      "lootExperience": 20,
+      "rarity": "Rare",
+      "spawnChance": 2,
+      "itemSound": "gear_backpack",
+      "stackMaxSize": 1,
+      "ContainerProperties": {
+        "WhiteList": [
+          "54009119af1c881c07000029"
+        ],
+        "BlackList": [
+          "5448bf274bdc2dfc2f8b456a",
+          "5c093db286f7740a1b2617e3",
+          "5e2af55f86f7746d4159f07c",
+          "5c0a840b86f7742ffa4f2482",
+          "5b7c710788a4506dec015957",
+          "5aafbcd986f7745e590fff23",
+          "59fb016586f7746d0d4b423a",
+          "59fb042886f7746c5005a7b2",
+          "59fb023c86f7746d0d4b423c",
+          "5b6d9ce188a4501afc1b2b25"
+        ]
+      },
+      "MaterialProperties": {
+        "PMaterial": "Cloth",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448e53e4bdc2d60728b4567",
+        "566168634bdc2d144c8b456c",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 14,
+      "Volumes": [
+        0.25
+      ],
+      "ArmorAndRigProperties": {},
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Gas welder safety goggles",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 3521,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": true,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "61c18d83b00456371a66814b",
+      "description": "Gas welder safety goggles. Protects against bright flashes and sparks when welding.",
+      "lootExperience": 20,
+      "rarity": "Rare",
+      "spawnChance": 1,
+      "itemSound": "gear_goggles",
+      "stackMaxSize": 1,
+      "ContainerProperties": {},
+      "BlocksEarpiece": false,
+      "BlocksEyewear": false,
+      "BlocksFaceCover": false,
+      "BlocksHeadwear": false,
+      "MaterialProperties": {
+        "PMaterial": "Plastic",
+        "PMatSoundCategory": "Thud",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448e5724bdc2ddf718b4568",
+        "57bef4c42459772e8d35a53b",
+        "543be5f84bdc2dd4348b456a",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 15,
+      "Volumes": [
+        0.25
+      ],
+      "ArmorAndRigProperties": {},
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Leather cap",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 3605,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": true,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "61c18db6dfd64163ea78fbb4",
+      "description": "A respected gentleman's headdress. Protects the head from slander.",
+      "lootExperience": 20,
+      "rarity": "Rare",
+      "spawnChance": 2,
+      "itemSound": "gear_generic",
+      "stackMaxSize": 1,
+      "ContainerProperties": {},
+      "BlocksEarpiece": false,
+      "BlocksEyewear": false,
+      "BlocksFaceCover": false,
+      "BlocksHeadwear": false,
+      "MaterialProperties": {
+        "PMaterial": "Cloth",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5a341c4086f77401f2541505",
+        "57bef4c42459772e8d35a53b",
+        "543be5f84bdc2dd4348b456a",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 4,
+      "Volumes": [
+        1.6
+      ],
+      "ArmorAndRigProperties": {
+        "Coverage": 0.6,
+        "DamageResist": 0.75,
+        "Armor": 65
+      },
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "NFM \"HJELM\" helmet",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 74150,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": true,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 1,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "61bca7cda0eae612383adf57",
+      "description": "HJELM applies new ideas for modularity of attachments and electronics without the extra weight and bulk of previous generations.",
+      "lootExperience": 20,
+      "rarity": "Superrare",
+      "spawnChance": 0.5,
+      "itemSound": "gear_helmet",
+      "stackMaxSize": 1,
+      "ContainerProperties": {},
+      "BlocksEarpiece": false,
+      "BlocksEyewear": false,
+      "BlocksFaceCover": false,
+      "BlocksHeadwear": false,
+      "MaterialProperties": {
+        "PMaterial": "Plastic",
+        "PMatSoundCategory": "Thud",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5a341c4086f77401f2541505",
+        "57bef4c42459772e8d35a53b",
+        "543be5f84bdc2dd4348b456a",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 3,
+      "Volumes": [
+        14,
+        7.6,
+        4.8
+      ],
+      "ArmorAndRigProperties": {
+        "Coverage": 0.55,
+        "DamageResist": 0.7,
+        "Armor": 40
+      },
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Eagle Industries \"MMAC\" plate carrier (Ranger Green)",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 73026,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": true,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 2,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "61bc85697113f767765c7fe7",
+      "description": "The Eagle Industries Multi-Mission Tactical Vest (MMAC) is a traditional profile vest offering modularity and scalability. The tactical vest is constructed of MIL-SPEC 500 denier nylon and is fully MOLLE/PALS compatible. It features padded shoulders with detachable retention loops, push-to-talk (PTT) attachment points at upper left and right chest and many other features.",
+      "lootExperience": 20,
+      "rarity": "Superrare",
+      "spawnChance": 1,
+      "itemSound": "gear_generic",
+      "stackMaxSize": 1,
+      "ContainerProperties": {
+        "WhiteList": [
+          "54009119af1c881c07000029"
+        ],
+        "BlackList": [
+          "5448bf274bdc2dfc2f8b456a"
+        ]
+      },
+      "MaterialProperties": {
+        "PMaterial": "BotArmor",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448e5284bdc2dcb718b4567",
+        "566168634bdc2d144c8b456c",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 3,
+      "Volumes": [
+        14,
+        7.6,
+        4.8
+      ],
+      "ArmorAndRigProperties": {
+        "Coverage": 0.65,
+        "DamageResist": 0.7,
+        "Armor": 45
+      },
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "FirstSpear \"Strandhogg\" plate carrier rig (Ranger Green)",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 82005,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": true,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 2,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "61bcc89aef0f505f0c6cd0fc",
+      "description": "Taking its name from an Old Norse Viking term for a lightning raid, Strandhogg was one of the first formalized battle tactics to use covert infiltrators in advance of an actual raiding operation. Strandhogg was a tactical game changer in its time, just like the technological advances FirstSpear is bringing forward in this line of plate carriers.",
+      "lootExperience": 20,
+      "rarity": "Superrare",
+      "spawnChance": 1,
+      "itemSound": "gear_generic",
+      "stackMaxSize": 1,
+      "ContainerProperties": {
+        "WhiteList": [
+          "54009119af1c881c07000029"
+        ],
+        "BlackList": [
+          "5448bf274bdc2dfc2f8b456a"
+        ]
+      },
+      "MaterialProperties": {
+        "PMaterial": "BotArmor",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448e5284bdc2dcb718b4567",
+        "566168634bdc2d144c8b456c",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "ItemType": 0,
+      "Volumes": [
+        0.75
+      ],
+      "ArmorAndRigProperties": null,
+      "BackpackProperties": {},
+      "DefaultPhysicalObject": {
+        "DefaultObjectWrapper": {
+          "DisplayName": "Stolen military documents",
+          "Category": 0,
+          "Mass": 0,
+          "MagazineCapacity": 0,
+          "RequiresPicatinnySight": false,
+          "TagEra": 0,
+          "TagSet": 0,
+          "TagFirearmSize": 0,
+          "TagFirearmAction": 0,
+          "TagFirearmRoundPower": 0,
+          "TagFirearmCountryOfOrigin": 0,
+          "TagFirearmFirstYear": 0,
+          "TagFirearmFiringModes": null,
+          "TagFirearmFeedOption": null,
+          "TagFirearmMounts": null,
+          "TagAttachmentMount": 0,
+          "TagAttachmentFeature": 0,
+          "TagMeleeStyle": 0,
+          "TagMeleeHandedness": 0,
+          "TagPowerupType": 0,
+          "TagThrownType": 0,
+          "TagThrownDamageType": 0,
+          "MagazineType": 0,
+          "CreditCost": 0,
+          "OSple": true
+        },
+        "SpawnLockable": false,
+        "Harnessable": false,
+        "HandlingReleaseIntoSlotSound": 1,
+        "Size": 0,
+        "QBSlotType": 0,
+        "DoesReleaseOverrideVelocity": true,
+        "DoesReleaseAddVelocity": false,
+        "ThrowVelMultiplier": 1,
+        "ThrowAngMultiplier": 1,
+        "MoveIntensity": 1,
+        "RotIntensity": 1,
+        "UsesGravity": true,
+        "DistantGrabbable": true,
+        "IsDebug": false,
+        "IsAltHeld": false,
+        "IsKinematicLocked": false,
+        "DoesQuickbeltSlotFollowHead": false,
+        "IsPickUpLocked": false,
+        "OverridesObjectToHand": 0,
+        "CheckDestroyTick": 1
+      },
+      "idToUse": "61a00bcb177fb945751bbe6a",
+      "description": "Stolen military documents",
+      "lootExperience": 40,
+      "rarity": "Not_exist",
+      "spawnChance": 1,
+      "itemSound": "item_paper",
+      "stackMaxSize": 1,
+      "MaterialProperties": {
+        "PMaterial": "Cardboard",
+        "PMatSoundCategory": "Soft",
+        "PMatImpactEffectCategory": "Generic"
+      },
+      "parents": [
+        "5448ecbe4bdc2d60728b4568",
+        "54009119af1c881c07000029"
+      ]
     }
   ],
   "VanillaItems": [
@@ -59058,7 +59890,7 @@
       ]
     },
     {
-      "H3ID": "M4A1",
+      "H3ID": "M4A1v2Rightie",
       "TarkovID": "5447a9cd4bdc2dbd208b4567",
       "Description": "The M4A1 is one of the oldest weapons added to H3VR, and the first assault rifle added to the game. It is a modern Assault Rifle and one of the many carbine versions of the M16A1. The M4A1 is very extensively used and has largely replaced the M16, being one of the first military-issue rifles with a high degree of modularity.",
       "LootExperience": 30,
@@ -65489,6 +66321,48 @@
         "55802f4a4bdc2ddb688b4569",
         "5448fe124bdc2da5018b4567",
         "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "H3ID": "GarageTool_FlatheadScrewdriver",
+      "TarkovID": "590c2d8786f774245b1f03f3",
+      "Description": "A trusty flathead screwdriver.",
+      "LootExperience": 10,
+      "Rarity": "Rare",
+      "SpawnChance": 18,
+      "CreditCost": 1847,
+      "parents": [
+        "57864bb7245977548b3b66c2",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "H3ID": "GarageTool_WrenchTwoSided",
+      "TarkovID": "590c311186f77424d1667482",
+      "Description": "A trusty two sided wrench.",
+      "LootExperience": 10,
+      "Rarity": "Rare",
+      "SpawnChance": 18,
+      "CreditCost": 3544,
+      "parents": [
+        "57864bb7245977548b3b66c2",
+        "5448eb774bdc2d0a728b4567",
+        "54009119af1c881c07000029"
+      ]
+    },
+    {
+      "H3ID": "Drill",
+      "TarkovID": "59e35de086f7741778269d84",
+      "Description": "A cordless electric drill. Used in construction, furniture installation, and repair.",
+      "LootExperience": 60,
+      "Rarity": "Rare",
+      "SpawnChance": 4,
+      "CreditCost": 32943,
+      "parents": [
+        "57864a66245977548f04a81f",
+        "5448eb774bdc2d0a728b4567",
         "54009119af1c881c07000029"
       ]
     }

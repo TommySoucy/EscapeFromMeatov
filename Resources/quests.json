@@ -15460,6 +15460,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[],
+			"targetAttachments": [],
+			"suppressed": true,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -15658,6 +15662,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818aeb4bdc2ddc698b456a","55818acf4bdc2dde698b456b","55818add4bdc2d5b648b456f","55818ad54bdc2ddc698b4569","55818ae44bdc2dde698b456c"]],
+			"targetAttachments": [],
+			"suppressed": true,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -15900,6 +15908,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818aeb4bdc2ddc698b456a","55818acf4bdc2dde698b456b","55818add4bdc2d5b648b456f","55818ad54bdc2ddc698b4569","55818ae44bdc2dde698b456c"],["55818af64bdc2d5b648b4570"]],
+			"targetAttachments": ["MP5Fore_RIS"],
+			"suppressed": false,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -16142,6 +16154,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[],
+			"targetAttachments": [],
+			"suppressed": true,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -16335,6 +16351,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["ScopeNXS8-32x","ScopeM2231-24x"],["55818b164bdc2ddc698b456c"]],
+			"targetAttachments": [],
+			"suppressed": false,
+			"braked": true,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -16496,6 +16516,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818aeb4bdc2ddc698b456a","55818acf4bdc2dde698b456b","55818add4bdc2d5b648b456f","55818ad54bdc2ddc698b4569","55818ae44bdc2dde698b456c"]],
+			"targetAttachments": [],
+			"suppressed": true,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -18966,6 +18990,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818ad54bdc2ddc698b4569"]],
+			"targetAttachments": ["BayonetM9"],
+			"suppressed": false,
+			"braked": true,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -19178,6 +19206,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818aeb4bdc2ddc698b456a","55818acf4bdc2dde698b456b","55818add4bdc2d5b648b456f","55818ad54bdc2ddc698b4569","55818ae44bdc2dde698b456c"]],
+			"targetAttachments": ["AKForeB10","RailAdapterRussianToPicatinny"],
+			"suppressed": true,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -19342,6 +19374,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818b164bdc2ddc698b456c"],["55818af64bdc2d5b648b4570"],["55818aeb4bdc2ddc698b456a","55818acf4bdc2dde698b456b","55818add4bdc2d5b648b456f","55818ad54bdc2ddc698b4569","55818ae44bdc2dde698b456c"]],
+			"targetAttachments": ["AKForeB10"],
+			"suppressed": false,
+			"braked": true,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -19616,6 +19652,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818af64bdc2d5b648b4570"],["55818aeb4bdc2ddc698b456a","55818acf4bdc2dde698b456b","55818add4bdc2d5b648b456f","55818ad54bdc2ddc698b4569","55818ae44bdc2dde698b456c"]],
+			"targetAttachments": ["AKForeB10","MagazineAK74Drum"],
+			"suppressed": false,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -19855,6 +19895,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[],
+			"targetAttachments": ["MagnifierPSO1"],
+			"suppressed": false,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -21647,54 +21691,6 @@
           "target": "5ac3b934156ae10c4430e83c",
           "type": "TraderStanding",
           "value": "0.03"
-        },
-        {
-          "id": "60cc844965e4664318606b55",
-          "index": 2,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dacab",
-              "_tpl": "5aa7e3abe5b5b000171d064d",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dacab",
-          "type": "Item",
-          "value": "1"
-        },
-        {
-          "id": "60cc8438af2e5506c37822dc",
-          "index": 3,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dacac",
-              "_tpl": "5c0919b50db834001b7ce3b9",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dacac",
-          "type": "Item",
-          "value": "1"
-        },
-        {
-          "id": "60cc844398b49270603645f6",
-          "index": 4,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dacad",
-              "_tpl": "5aa7e373e5b5b000137b76f0",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dacad",
-          "type": "Item",
-          "value": "1"
         }
       ]
     },
@@ -22980,6 +22976,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818b164bdc2ddc698b456c"],["55818aeb4bdc2ddc698b456a","55818acf4bdc2dde698b456b","55818add4bdc2d5b648b456f","55818ad54bdc2ddc698b4569","55818ae44bdc2dde698b456c"]],
+			"targetAttachments": ["RailAdapterRussianToPicatinny"],
+			"suppressed": true,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -23235,6 +23235,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818ad54bdc2ddc698b4569"],["55818af64bdc2d5b648b4570"]],
+			"targetAttachments": [],
+			"suppressed": false,
+			"braked": true,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -23432,6 +23436,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["AKForeRomanian","AKForeShark"],["55818aeb4bdc2ddc698b456a","55818acf4bdc2dde698b456b","55818add4bdc2d5b648b456f","55818ad54bdc2ddc698b4569","55818ae44bdc2dde698b456c"]],
+			"targetAttachments": [],
+			"suppressed": false,
+			"braked": true,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -23614,6 +23622,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["55818add4bdc2d5b648b456f", "55818aeb4bdc2ddc698b456a", "55818ae44bdc2dde698b456c"]],
+			"targetAttachments": ["MagazineM1430rnd"],
+			"suppressed": true,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -23822,6 +23834,10 @@
         {
           "_parent": "WeaponAssembly",
           "_props": {
+			"targetAttachmentTypes":[["SuppressorCordedTan","SuppressorCorded"]],
+			"targetAttachments": ["ScopeAcog4x32","ReflexArco","RailAxisTiltDoubleSided","TacticalLaser4","TacticalFlashlight","ForegripShift","MagazineStanag60rnd"],
+			"suppressed": false,
+			"braked": false,
             "baseAccuracy": {
               "compareMethod": ">=",
               "value": 0
@@ -34764,7 +34780,7 @@
                           "LeftLeg",
                           "RightLeg"
                         ],
-                        "effects": ["Tremor"]
+                        "effects": ["HandsTremor"]
                       }
                     ],
                     "id": "5d25d5b086f77408251c4bf7"
@@ -34906,7 +34922,6 @@
                       ["5c110624d174af029e69734c"],
                       ["5a7c74b3e899ef0014332c29"],
                       ["5a1eaa87fcdbcb001865f75e"],
-                      ["5b3b6e495acfc4330140bd88"],
                       ["5d1b5e94d7ad1a2b865a96b0"]
                     ],
                     "id": "5d2f573986f7745e043a808d"
@@ -34980,22 +34995,6 @@
           "target": "61e1da5da7d12143174dadc4",
           "type": "Item",
           "value": "40000"
-        },
-        {
-          "id": "5d6672f486f774368e1b7866",
-          "index": 2,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dadc5",
-              "_tpl": "5b3b6e495acfc4330140bd88",
-              "upd": {
-                "StackObjectsCount": 3
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dadc5",
-          "type": "Item",
-          "value": "3"
         },
         {
           "id": "60cca22620a6283a506aeb46",
@@ -39717,22 +39716,6 @@
           "target": "61e1da5da7d12143174dae46",
           "type": "Item",
           "value": "115000"
-        },
-        {
-          "id": "60ccae5465e4664318606b79",
-          "index": 4,
-          "items": [
-            {
-              "_id": "61e1da5da7d12143174dae47",
-              "_tpl": "5a1eaa87fcdbcb001865f75e",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "61e1da5da7d12143174dae47",
-          "type": "Item",
-          "value": "1"
         },
         {
           "id": "60ccae5ea7d63f18200a2527",
@@ -47354,23 +47337,6 @@
           "value": "100"
         },
         {
-          "id": "61028c55d51ac54f163ffa06",
-          "index": 3,
-          "items": [
-            {
-              "_id": "6131fda2738f614b2f2bc8bb",
-              "_tpl": "5d1b5e94d7ad1a2b865a96b0",
-              "upd": {
-                "StackObjectsCount": 1
-              }
-            }
-          ],
-          "target": "6131fda2738f614b2f2bc8bb",
-          "type": "Item",
-          "unknown": true,
-          "value": "1"
-        },
-        {
           "id": "61029cb83401af5fe16fcb50",
           "index": 4,
           "items": [
@@ -50105,3 +50071,4 @@
     "type": "Discover"
   }
 ]
+

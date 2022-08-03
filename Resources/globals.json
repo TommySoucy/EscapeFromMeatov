@@ -1539,11 +1539,11 @@
         },
         "Contusion": {
           "preventHapticFeedback": true,
-		  "audioVolumeMultiplier": 0.3
+          "audioVolumeMultiplier": 0.3
         },
         "Disorientation": {
           "preventHapticFeedback": true,
-		  "audioVolumeMultiplier": 0,
+          "audioVolumeMultiplier": 0,
           "drunkness": 0.5
         },
         "Exhaustion": {
@@ -1634,12 +1634,12 @@
           "ThresholdMax": 60
         },
         "Pain": {
-		  "causeTremor": true,
+          "causeTremor": true,
           "TremorDelay": 30,
           "HealExperience": 20
         },
         "Tremor": {
-		  "tremors": true,
+          "tremors": true,
           "DefaultDelay": 15,
           "DefaultResidueTime": 0.2
         },
@@ -1648,8 +1648,8 @@
           "energyLoopTime": 10
         },
         "Fracture": {
-		  "causePain": true,
-		  "painDelay": 3,
+          "causePain": true,
+          "painDelay": 3,
           "DefaultDelay": 5,
           "DefaultResidueTime": 5,
           "HealExperience": 30,
@@ -1717,1597 +1717,1597 @@
           }
         }
       },
-	  "Stimulator": {
-          "BuffLoopTime": 0.2,
-          "Buffs": {
-            "BuffsSJ1TGLabs": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 180,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 180,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Strength"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 180,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 100,
-                "Duration": 200,
-                "Value": -0.25,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 1,
-                "Delay": 100,
-                "Duration": 200,
-                "Value": -0.3,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "BuffsSJ6TGLabs": [
-              {
-                "BuffType": "MaxStamina",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 240,
-                "Value": 30,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "StaminaRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 240,
-                "Value": 2,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 200,
-                "Duration": 40,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "QuantumTunnelling",
-                "Chance": 1,
-                "Delay": 200,
-                "Duration": 40,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "BuffsPropital": [
-              {
-                "BuffType": "HealthRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Metabolism"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Vitality"
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 270,
-                "Duration": 30,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "QuantumTunnelling",
-                "Chance": 1,
-                "Delay": 270,
-                "Duration": 30,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "BuffsZagustin": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 180,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Vitality"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 180,
-                "Value": -5,
-                "AbsoluteValue": true,
-                "SkillName": "Metabolism"
-              },
-              {
-                "BuffType": "RemoveAllBloodLosses",
-                "Chance": 1,
-                "Delay": 0,
-                "Duration": 180,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 170,
-                "Duration": 40,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 1,
-                "Delay": 170,
-                "Duration": 40,
-                "Value": -1.4,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "BuffseTGchange": [
-              {
-                "BuffType": "HealthRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 6.5,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 0.5,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 90,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Metabolism"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 90,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Immunity"
-              },
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 65,
-                "Duration": 20,
-                "Value": -3,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 65,
-                "Duration": 60,
-                "Value": -5,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 65,
-                "Duration": 60,
-                "Value": -5,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              }
-            ],
-            "BuffsAdrenaline": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Strength"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "RecoilControl"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": -10,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "HealthRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 15,
-                "Value": 4,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 1,
-                "Delay": 50,
-                "Duration": 30,
-                "Value": -1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 50,
-                "Duration": 30,
-                "Value": -0.8,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "BuffsGoldenStarBalm": [
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 5,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 5,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "Contusion",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 5,
-                "Value": 1,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_drink_aquamari": [
-              {
-                "BuffType": "MaxStamina",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "StaminaRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_drink_maxenergy": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": -1,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "MagDrills"
-              }
-            ],
-            "Buffs_drink_milk": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Immunity"
-              }
-            ],
-            "Buffs_drink_tarcola": [
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 0.1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_drink_hotrod": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Strength"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "MagDrills"
-              }
-            ],
-            "Buffs_drink_juice_army": [
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 0.2,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_drink_water": [
-              {
-                "BuffType": "MaxStamina",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 5,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_food_borodinskiye": [
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": -0.2,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_food_condensed_milk": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 3,
-                "AbsoluteValue": true,
-                "SkillName": "Intellect"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 3,
-                "AbsoluteValue": true,
-                "SkillName": "Attention"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 3,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              }
-            ],
-            "Buffs_food_emelya": [
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": -0.2,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_food_mayonez": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": -3,
-                "AbsoluteValue": true,
-                "SkillName": "Metabolism"
-              }
-            ],
-            "Buffs_food_mre": [
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 0.1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_food_sugar": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 300,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Intellect"
-              }
-            ],
-            "Buffs_drink_vodka": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 250,
-                "Value": 5,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 250,
-                "Value": -10,
-                "AbsoluteValue": true,
-                "SkillName": "Memory"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 250,
-                "Value": -5,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 255,
-                "Duration": 120,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_drink_jack": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 210,
-                "Value": 2,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 210,
-                "Value": -3,
-                "AbsoluteValue": true,
-                "SkillName": "Memory"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 210,
-                "Value": -2,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 220,
-                "Duration": 60,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_drink_moonshine": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 500,
-                "Value": 3,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 500,
-                "Value": -5,
-                "AbsoluteValue": true,
-                "SkillName": "Memory"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 500,
-                "Value": -1,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 510,
-                "Duration": 150,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_drink_purewater": [
-              {
-                "BuffType": "HealthRate",
-                "Chance": 1,
-                "Delay": 3,
-                "Duration": 60,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Strength"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Vitality"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Metabolism"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Immunity"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Intellect"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Memory"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Perception"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 600,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Attention"
-              }
-            ],
-            "Buffs_3bTG": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 240,
-                "Value": 30,
-                "AbsoluteValue": true,
-                "SkillName": "Attention"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 240,
-                "Value": 30,
-                "AbsoluteValue": true,
-                "SkillName": "Perception"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 240,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Strength"
-              },
-              {
-                "BuffType": "StaminaRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 240,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 220,
-                "Duration": 45,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 120,
-                "Duration": 120,
-                "Value": -0.25,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_AHF1M": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 5,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              },
-              {
-                "BuffType": "RemoveAllBloodLosses",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 120,
-                "Value": -0.3,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_L1": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 120,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 120,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Strength"
-              },
-              {
-                "BuffType": "MaxStamina",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 120,
-                "Value": 30,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": -0.45,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": -0.45,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_MULE": [
-              {
-                "BuffType": "WeightLimit",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 900,
-                "Value": 0.5,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HealthRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 900,
-                "Value": -0.1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "DamageModifier",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 900,
-                "Value": 0.09,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_Meldonin": [
-              {
-                "BuffType": "DamageModifier",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 900,
-                "Value": -0.1,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 900,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Strength"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 900,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "StaminaRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 900,
-                "Value": 0.5,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 1,
-                "Delay": 30,
-                "Duration": 900,
-                "Value": -0.1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 1,
-                "Delay": 30,
-                "Duration": 900,
-                "Value": -0.1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_Obdolbos": [
-              {
-                "BuffType": "StaminaRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": 0.5,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Strength"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": "Charisma"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": -20,
-                "AbsoluteValue": true,
-                "SkillName": "Memory"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": -20,
-                "AbsoluteValue": true,
-                "SkillName": "Intellect"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": -20,
-                "AbsoluteValue": true,
-                "SkillName": "Attention"
-              },
-              {
-                "BuffType": "Pain",
-                "Chance": 0.25,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "StomachBloodloss",
-                "Chance": 0.25,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 0.25,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": -0.05,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "EnergyRate",
-                "Chance": 0.25,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": -0.05,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "DamageModifier",
-                "Chance": 0.25,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": 0.2,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "QuantumTunnelling",
-                "Chance": 0.25,
-                "Delay": 1,
-                "Duration": 1800,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_P22": [
-              {
-                "BuffType": "DamageModifier",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": -0.1,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 30,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 30,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 30,
-                "AbsoluteValue": true,
-                "SkillName": "Vitality"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 65,
-                "Duration": 60,
-                "Value": -10,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "StaminaRate",
-                "Chance": 1,
-                "Delay": 65,
-                "Duration": 60,
-                "Value": -0.8,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_KultistsToxin": [
-              {
-                "BuffType": "UnknownToxin",
-                "Chance": 1,
-                "Delay": 6,
-                "Duration": -1,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_BodyTemperature": [
-              {
-                "BuffType": "BodyTemperature",
-                "Chance": 1,
-                "Delay": 6,
-                "Duration": 300,
-                "Value": -7,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 6,
-                "Duration": 300,
-                "Value": -20,
-                "AbsoluteValue": true,
-                "SkillName": "Metabolism"
-              },
-              {
-                "BuffType": "HealthRate",
-                "Chance": 1,
-                "Delay": 6,
-                "Duration": 420,
-                "Value": -0.1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 6,
-                "Duration": 420,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "Pain",
-                "Chance": 1,
-                "Delay": 300,
-                "Duration": 120,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_Antidote": [
-              {
-                "BuffType": "Antidote",
-                "Chance": 1,
-                "Delay": 6,
-                "Duration": 60,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 6,
-                "Duration": 60,
-                "Value": -5,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              }
-            ],
-            "Buffs_melee_bleed": [
-              {
-                "BuffType": "HeavyBleeding",
-                "Chance": 0.5,
-                "Delay": 1,
-                "Duration": 0,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": "",
-                "AppliesTo": []
-              },
-              {
-                "BuffType": "LightBleeding",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 0,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": "",
-                "AppliesTo": []
-              }
-            ],
-            "Buffs_melee_blunt": [
-              {
-                "BuffType": "Contusion",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 100,
-                "Value": 1,
-                "AbsoluteValue": false,
-                "SkillName": "",
-                "AppliesTo": [
-                  "Head"
-                ]
-              },
-              {
-                "BuffType": "Fracture",
-                "Chance": 1,
-                "Delay": 0,
-                "Duration": 0,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": "",
-                "AppliesTo": []
-              }
-            ],
-            "Buffs_hultafors": [
-              {
-                "BuffType": "Contusion",
-                "Chance": 1,
-                "Delay": 0,
-                "Duration": 20,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": "",
-                "AppliesTo": []
-              },
-              {
-                "BuffType": "Fracture",
-                "Chance": 1,
-                "Delay": 0,
-                "Duration": 0,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": "",
-                "AppliesTo": []
-              },
-              {
-                "BuffType": "Pain",
-                "Chance": 1,
-                "Delay": 0,
-                "Duration": 20,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": "",
-                "AppliesTo": []
-              }
-            ],
-            "Buffs_drink_vodka_BAD": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 250,
-                "Value": 5,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 250,
-                "Value": -10,
-                "AbsoluteValue": true,
-                "SkillName": "Memory"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 250,
-                "Value": -5,
-                "AbsoluteValue": true,
-                "SkillName": "Health"
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 255,
-                "Duration": 120,
-                "Value": 0,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Endurance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Strength"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": 10,
-                "AbsoluteValue": true,
-                "SkillName": "Charisma"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": -10,
-                "AbsoluteValue": true,
-                "SkillName": "Intellect"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": -10,
-                "AbsoluteValue": true,
-                "SkillName": "Attention"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": -10,
-                "AbsoluteValue": true,
-                "SkillName": "Metabolism"
-              },
-              {
-                "BuffType": "MaxStamina",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": 20,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "StaminaRate",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": -1,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HydrationRate",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": -0.3,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "WeightLimit",
-                "Chance": 0.2,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": -0.3,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 0.05,
-                "Delay": 5,
-                "Duration": 250,
-                "Value": 50,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "HealthRate",
-                "Chance": 0.05,
-                "Delay": 5,
-                "Duration": 15,
-                "Value": -1211,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              }
-            ],
-            "Buffs_food_alyonka": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 120,
-                "Value": 2,
-                "AbsoluteValue": true,
-                "SkillName": "Attention"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 120,
-                "Value": 2,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 120,
-                "Value": 2,
-                "AbsoluteValue": true,
-                "SkillName": "Intellect"
-              }
-            ],
-            "Buffs_food_slippers": [
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Intellect"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "Attention"
-              },
-              {
-                "BuffType": "SkillRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 1,
-                "AbsoluteValue": true,
-                "SkillName": "StressResistance"
-              }
-            ],
-            "Buffs_knife": [
-              {
-                "BuffType": "DamageModifier",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 0.5,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HealthRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": -0.5,
-                "AbsoluteValue": true,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "Pain",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "QuantumTunnelling",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              },
-              {
-                "BuffType": "HandsTremor",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 60,
-                "Value": 0,
-                "AbsoluteValue": false,
-                "SkillName": ""
-              }
-            ]
-          }
-        },
-	  "HealPrice": {
+      "Stimulator": {
+        "BuffLoopTime": 0.2,
+        "Buffs": {
+          "BuffsSJ1TGLabs": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 180,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 180,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Strength"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 180,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 100,
+              "Duration": 200,
+              "Value": -0.25,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 1,
+              "Delay": 100,
+              "Duration": 200,
+              "Value": -0.3,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "BuffsSJ6TGLabs": [
+            {
+              "BuffType": "MaxStamina",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 240,
+              "Value": 30,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "StaminaRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 240,
+              "Value": 2,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 200,
+              "Duration": 40,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "QuantumTunnelling",
+              "Chance": 1,
+              "Delay": 200,
+              "Duration": 40,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "BuffsPropital": [
+            {
+              "BuffType": "HealthRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Metabolism"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Vitality"
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 270,
+              "Duration": 30,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "QuantumTunnelling",
+              "Chance": 1,
+              "Delay": 270,
+              "Duration": 30,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "BuffsZagustin": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 180,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Vitality"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 180,
+              "Value": -5,
+              "AbsoluteValue": true,
+              "SkillName": "Metabolism"
+            },
+            {
+              "BuffType": "RemoveAllBloodLosses",
+              "Chance": 1,
+              "Delay": 0,
+              "Duration": 180,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 170,
+              "Duration": 40,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 1,
+              "Delay": 170,
+              "Duration": 40,
+              "Value": -1.4,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "BuffseTGchange": [
+            {
+              "BuffType": "HealthRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 6.5,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 0.5,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 90,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Metabolism"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 90,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Immunity"
+            },
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 65,
+              "Duration": 20,
+              "Value": -3,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 65,
+              "Duration": 60,
+              "Value": -5,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 65,
+              "Duration": 60,
+              "Value": -5,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            }
+          ],
+          "BuffsAdrenaline": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Strength"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "RecoilControl"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": -10,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "HealthRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 15,
+              "Value": 4,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 1,
+              "Delay": 50,
+              "Duration": 30,
+              "Value": -1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 50,
+              "Duration": 30,
+              "Value": -0.8,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "BuffsGoldenStarBalm": [
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 5,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 5,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "Contusion",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 5,
+              "Value": 1,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_drink_aquamari": [
+            {
+              "BuffType": "MaxStamina",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "StaminaRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_drink_maxenergy": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": -1,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "MagDrills"
+            }
+          ],
+          "Buffs_drink_milk": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Immunity"
+            }
+          ],
+          "Buffs_drink_tarcola": [
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 0.1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_drink_hotrod": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Strength"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "MagDrills"
+            }
+          ],
+          "Buffs_drink_juice_army": [
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 0.2,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_drink_water": [
+            {
+              "BuffType": "MaxStamina",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 5,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_food_borodinskiye": [
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": -0.2,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_food_condensed_milk": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 3,
+              "AbsoluteValue": true,
+              "SkillName": "Intellect"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 3,
+              "AbsoluteValue": true,
+              "SkillName": "Attention"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 3,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            }
+          ],
+          "Buffs_food_emelya": [
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": -0.2,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_food_mayonez": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": -3,
+              "AbsoluteValue": true,
+              "SkillName": "Metabolism"
+            }
+          ],
+          "Buffs_food_mre": [
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 0.1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_food_sugar": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 300,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Intellect"
+            }
+          ],
+          "Buffs_drink_vodka": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 250,
+              "Value": 5,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 250,
+              "Value": -10,
+              "AbsoluteValue": true,
+              "SkillName": "Memory"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 250,
+              "Value": -5,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 255,
+              "Duration": 120,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_drink_jack": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 210,
+              "Value": 2,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 210,
+              "Value": -3,
+              "AbsoluteValue": true,
+              "SkillName": "Memory"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 210,
+              "Value": -2,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 220,
+              "Duration": 60,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_drink_moonshine": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 500,
+              "Value": 3,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 500,
+              "Value": -5,
+              "AbsoluteValue": true,
+              "SkillName": "Memory"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 500,
+              "Value": -1,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 510,
+              "Duration": 150,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_drink_purewater": [
+            {
+              "BuffType": "HealthRate",
+              "Chance": 1,
+              "Delay": 3,
+              "Duration": 60,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Strength"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Vitality"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Metabolism"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Immunity"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Intellect"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Memory"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Perception"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 600,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Attention"
+            }
+          ],
+          "Buffs_3bTG": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 240,
+              "Value": 30,
+              "AbsoluteValue": true,
+              "SkillName": "Attention"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 240,
+              "Value": 30,
+              "AbsoluteValue": true,
+              "SkillName": "Perception"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 240,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Strength"
+            },
+            {
+              "BuffType": "StaminaRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 240,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 220,
+              "Duration": 45,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 120,
+              "Duration": 120,
+              "Value": -0.25,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_AHF1M": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 5,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            },
+            {
+              "BuffType": "RemoveAllBloodLosses",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 120,
+              "Value": -0.3,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_L1": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 120,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 120,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Strength"
+            },
+            {
+              "BuffType": "MaxStamina",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 120,
+              "Value": 30,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": -0.45,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": -0.45,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_MULE": [
+            {
+              "BuffType": "WeightLimit",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 900,
+              "Value": 0.5,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HealthRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 900,
+              "Value": -0.1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "DamageModifier",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 900,
+              "Value": 0.09,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_Meldonin": [
+            {
+              "BuffType": "DamageModifier",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 900,
+              "Value": -0.1,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 900,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Strength"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 900,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "StaminaRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 900,
+              "Value": 0.5,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 1,
+              "Delay": 30,
+              "Duration": 900,
+              "Value": -0.1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 1,
+              "Delay": 30,
+              "Duration": 900,
+              "Value": -0.1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_Obdolbos": [
+            {
+              "BuffType": "StaminaRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": 0.5,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Strength"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": "Charisma"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": -20,
+              "AbsoluteValue": true,
+              "SkillName": "Memory"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": -20,
+              "AbsoluteValue": true,
+              "SkillName": "Intellect"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": -20,
+              "AbsoluteValue": true,
+              "SkillName": "Attention"
+            },
+            {
+              "BuffType": "Pain",
+              "Chance": 0.25,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "StomachBloodloss",
+              "Chance": 0.25,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 0.25,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": -0.05,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "EnergyRate",
+              "Chance": 0.25,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": -0.05,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "DamageModifier",
+              "Chance": 0.25,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": 0.2,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "QuantumTunnelling",
+              "Chance": 0.25,
+              "Delay": 1,
+              "Duration": 1800,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_P22": [
+            {
+              "BuffType": "DamageModifier",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": -0.1,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 30,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 30,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 30,
+              "AbsoluteValue": true,
+              "SkillName": "Vitality"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 65,
+              "Duration": 60,
+              "Value": -10,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "StaminaRate",
+              "Chance": 1,
+              "Delay": 65,
+              "Duration": 60,
+              "Value": -0.8,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_KultistsToxin": [
+            {
+              "BuffType": "UnknownToxin",
+              "Chance": 1,
+              "Delay": 6,
+              "Duration": -1,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_BodyTemperature": [
+            {
+              "BuffType": "BodyTemperature",
+              "Chance": 1,
+              "Delay": 6,
+              "Duration": 300,
+              "Value": -7,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 6,
+              "Duration": 300,
+              "Value": -20,
+              "AbsoluteValue": true,
+              "SkillName": "Metabolism"
+            },
+            {
+              "BuffType": "HealthRate",
+              "Chance": 1,
+              "Delay": 6,
+              "Duration": 420,
+              "Value": -0.1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 6,
+              "Duration": 420,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "Pain",
+              "Chance": 1,
+              "Delay": 300,
+              "Duration": 120,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_Antidote": [
+            {
+              "BuffType": "Antidote",
+              "Chance": 1,
+              "Delay": 6,
+              "Duration": 60,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 6,
+              "Duration": 60,
+              "Value": -5,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            }
+          ],
+          "Buffs_melee_bleed": [
+            {
+              "BuffType": "HeavyBleeding",
+              "Chance": 0.5,
+              "Delay": 1,
+              "Duration": 0,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": "",
+              "AppliesTo": []
+            },
+            {
+              "BuffType": "LightBleeding",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 0,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": "",
+              "AppliesTo": []
+            }
+          ],
+          "Buffs_melee_blunt": [
+            {
+              "BuffType": "Contusion",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 100,
+              "Value": 1,
+              "AbsoluteValue": false,
+              "SkillName": "",
+              "AppliesTo": [
+                "Head"
+              ]
+            },
+            {
+              "BuffType": "Fracture",
+              "Chance": 1,
+              "Delay": 0,
+              "Duration": 0,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": "",
+              "AppliesTo": []
+            }
+          ],
+          "Buffs_hultafors": [
+            {
+              "BuffType": "Contusion",
+              "Chance": 1,
+              "Delay": 0,
+              "Duration": 20,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": "",
+              "AppliesTo": []
+            },
+            {
+              "BuffType": "Fracture",
+              "Chance": 1,
+              "Delay": 0,
+              "Duration": 0,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": "",
+              "AppliesTo": []
+            },
+            {
+              "BuffType": "Pain",
+              "Chance": 1,
+              "Delay": 0,
+              "Duration": 20,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": "",
+              "AppliesTo": []
+            }
+          ],
+          "Buffs_drink_vodka_BAD": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 250,
+              "Value": 5,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 250,
+              "Value": -10,
+              "AbsoluteValue": true,
+              "SkillName": "Memory"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 250,
+              "Value": -5,
+              "AbsoluteValue": true,
+              "SkillName": "Health"
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 255,
+              "Duration": 120,
+              "Value": 0,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Endurance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Strength"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": 10,
+              "AbsoluteValue": true,
+              "SkillName": "Charisma"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": -10,
+              "AbsoluteValue": true,
+              "SkillName": "Intellect"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": -10,
+              "AbsoluteValue": true,
+              "SkillName": "Attention"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": -10,
+              "AbsoluteValue": true,
+              "SkillName": "Metabolism"
+            },
+            {
+              "BuffType": "MaxStamina",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": 20,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "StaminaRate",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": -1,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HydrationRate",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": -0.3,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "WeightLimit",
+              "Chance": 0.2,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": -0.3,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 0.05,
+              "Delay": 5,
+              "Duration": 250,
+              "Value": 50,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "HealthRate",
+              "Chance": 0.05,
+              "Delay": 5,
+              "Duration": 15,
+              "Value": -1211,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            }
+          ],
+          "Buffs_food_alyonka": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 120,
+              "Value": 2,
+              "AbsoluteValue": true,
+              "SkillName": "Attention"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 120,
+              "Value": 2,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 120,
+              "Value": 2,
+              "AbsoluteValue": true,
+              "SkillName": "Intellect"
+            }
+          ],
+          "Buffs_food_slippers": [
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Intellect"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "Attention"
+            },
+            {
+              "BuffType": "SkillRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 1,
+              "AbsoluteValue": true,
+              "SkillName": "StressResistance"
+            }
+          ],
+          "Buffs_knife": [
+            {
+              "BuffType": "DamageModifier",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 0.5,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HealthRate",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": -0.5,
+              "AbsoluteValue": true,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "Pain",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "QuantumTunnelling",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            },
+            {
+              "BuffType": "HandsTremor",
+              "Chance": 1,
+              "Delay": 1,
+              "Duration": 60,
+              "Value": 0,
+              "AbsoluteValue": false,
+              "SkillName": ""
+            }
+          ]
+        }
+      },
+      "HealPrice": {
         "HealthPointPrice": 30,
         "HydrationPointPrice": 0,
         "EnergyPointPrice": 0,
@@ -17126,5 +17126,1624 @@
       "_encyclopedia": "5e870397991fd70db46995c8"
     }
   },
-  "HealthEffect": false
+  "HealthEffect": false,
+  "AIItemMap": {
+    "1": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "2": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat"
+      ]
+    },
+    "374": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "375": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "376": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "377": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "378": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "379": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "380": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "381": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "382": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "383": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_HeavyArmour_Desert",
+        "SosigAccessory_Tactical_HeavyArmour_CamoForest",
+        "SosigAccessory_Tactical_HeavyArmour_Swat"
+      ]
+    },
+    "384": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "385": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "386": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "387": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_HeavyArmour_Desert",
+        "SosigAccessory_Tactical_HeavyArmour_CamoForest",
+        "SosigAccessory_Tactical_HeavyArmour_Swat"
+      ]
+    },
+    "388": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "389": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "390": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_HeavyArmour_Desert",
+        "SosigAccessory_Tactical_HeavyArmour_CamoForest",
+        "SosigAccessory_Tactical_HeavyArmour_Swat"
+      ]
+    },
+    "391": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_HeavyArmour_Desert",
+        "SosigAccessory_Tactical_HeavyArmour_CamoForest",
+        "SosigAccessory_Tactical_HeavyArmour_Swat"
+      ]
+    },
+    "392": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "393": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "394": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "395": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "396": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "397": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "398": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_MediumArmour_Desert",
+        "SosigAccessory_Tactical_MediumArmour_CamoForest",
+        "SosigAccessory_Tactical_MediumArmour_Swat"
+      ]
+    },
+    "399": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_HeavyArmour_Desert",
+        "SosigAccessory_Tactical_HeavyArmour_CamoForest",
+        "SosigAccessory_Tactical_HeavyArmour_Swat"
+      ]
+    },
+    "400": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "401": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "402": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "403": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "404": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "405": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "406": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "407": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "408": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "409": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "411": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "412": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "413": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "414": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "415": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "416": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "417": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "418": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "419": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "420": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "421": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "422": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "423": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "424": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "425": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_Desert",
+        "SosigAccessory_Tactical_Backpack_Winter"
+      ]
+    },
+    "426": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "427": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_Desert",
+        "SosigAccessory_Tactical_Backpack_Winter"
+      ]
+    },
+    "428": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_Desert",
+        "SosigAccessory_Tactical_Backpack_Winter"
+      ]
+    },
+    "429": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_Desert",
+        "SosigAccessory_Tactical_Backpack_Winter"
+      ]
+    },
+    "430": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "431": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "432": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "433": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "434": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "435": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "436": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Swat",
+        "SosigAccessory_Tactical_Backpack_CamoForest",
+        "SosigAccessory_Tactical_Backpack_Desert"
+      ]
+    },
+    "437": {
+      "Link": 0,
+      "List": [
+        "SosigAccessoryCommonBalaklavaBrown",
+        "SosigAccessoryCommonBalaklavaGreen",
+        "SosigAccessoryCommonBalaklavaGrey"
+      ]
+    },
+    "438": {
+      "Link": 0,
+      "List": [
+        "SosigAccessoryCommonBalaklavaBrown",
+        "SosigAccessoryCommonBalaklavaGreen",
+        "SosigAccessoryCommonBalaklavaGrey"
+      ]
+    },
+    "439": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Bandana_Paisley_Black",
+        "SosigAccessory_Common_Bandana_Paisley_Brown",
+        "SosigAccessory_Common_Bandana_Paisley_Green",
+        "SosigAccessory_Common_Bandana_Paisley_Grey",
+        "SosigAccessory_Common_Bandana_Paisley_Tan",
+        "SosigAccessory_Common_Bandana_Plain_Black",
+        "SosigAccessory_Common_Bandana_Plain_Brown",
+        "SosigAccessory_Common_Bandana_Plain_Green",
+        "SosigAccessory_Common_Bandana_Plain_Grey",
+        "SosigAccessory_Common_Bandana_Plain_Tan",
+        "SosigAccessory_Common_Bandana_Tartan_Black",
+        "SosigAccessory_Common_Bandana_Tartan_Brown",
+        "SosigAccessory_Common_Bandana_Tartan_Green",
+        "SosigAccessory_Common_Bandana_Tartan_Grey",
+        "SosigAccessory_Common_Bandana_Tartan_Tan"
+      ]
+    },
+    "440": {
+      "Link": 0,
+      "List": [
+        "SosigAccessoryCommonBalaklavaBrown",
+        "SosigAccessoryCommonBalaklavaGreen",
+        "SosigAccessoryCommonBalaklavaGrey"
+      ]
+    },
+    "441": {
+      "Link": 0,
+      "List": [
+        "SosigAccessoryCommonBalaklavaBlue"
+      ]
+    },
+    "442": {
+      "Link": 0,
+      "List": [
+        "MGNinjaHelmet"
+      ]
+    },
+    "443": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_GasMask1",
+        "SosigAccessory_Tactical_GasMask2",
+        "SosigAccessory_Tactical_GasMask3"
+      ]
+    },
+    "444": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_GasMask1",
+        "SosigAccessory_Tactical_GasMask2",
+        "SosigAccessory_Tactical_GasMask3"
+      ]
+    },
+    "445": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_GasMask1",
+        "SosigAccessory_Tactical_GasMask2",
+        "SosigAccessory_Tactical_GasMask3"
+      ]
+    },
+    "446": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "447": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "448": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "449": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "450": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "451": {
+      "Link": 0,
+      "List": [
+        "SosigAccessoryCommonBalaklavaBrown",
+        "SosigAccessoryCommonBalaklavaGreen",
+        "SosigAccessoryCommonBalaklavaGrey"
+      ]
+    },
+    "452": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "453": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "454": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "455": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "456": {
+      "Link": 0,
+      "List": [
+        "SosigAccessoryCommonBalaklavaBrown",
+        "SosigAccessoryCommonBalaklavaGreen"
+      ]
+    },
+    "457": {
+      "Link": 0,
+      "List": [
+        "SosigAccessoryCommonBalaklavaBrown",
+        "SosigAccessoryCommonBalaklavaGreen"
+      ]
+    },
+    "458": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Bandana_Paisley_Black",
+        "SosigAccessory_Common_Bandana_Paisley_Brown",
+        "SosigAccessory_Common_Bandana_Paisley_Green",
+        "SosigAccessory_Common_Bandana_Paisley_Grey",
+        "SosigAccessory_Common_Bandana_Paisley_Tan",
+        "SosigAccessory_Common_Bandana_Plain_Black",
+        "SosigAccessory_Common_Bandana_Plain_Brown",
+        "SosigAccessory_Common_Bandana_Plain_Green",
+        "SosigAccessory_Common_Bandana_Plain_Grey",
+        "SosigAccessory_Common_Bandana_Plain_Tan",
+        "SosigAccessory_Common_Bandana_Tartan_Black",
+        "SosigAccessory_Common_Bandana_Tartan_Brown",
+        "SosigAccessory_Common_Bandana_Tartan_Green",
+        "SosigAccessory_Common_Bandana_Tartan_Grey",
+        "SosigAccessory_Common_Bandana_Tartan_Tan"
+      ]
+    },
+    "459": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Bandana_Paisley_Purple",
+        "SosigAccessory_Common_Bandana_Plain_Purple",
+        "SosigAccessory_Common_Bandana_Tartan_Purple"
+      ]
+    },
+    "460": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_GoalieMask"
+      ]
+    },
+    "461": {
+      "Link": 0,
+      "List": [
+        "SosigAccessoryCommonBalaklavaBrown",
+        "SosigAccessoryCommonBalaklavaGreen",
+        "SosigAccessoryCommonBalaklavaGrey"
+      ]
+    },
+    "462": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_WelderMask_Swat",
+        "SosigAccessory_Tactical_WelderMask_Desert",
+        "SosigAccessory_Tactical_WelderMask_CamoForest",
+        "SosigAccessory_Tactical_WelderMask_Winter",
+        "SosigAccessory_Tactical_WelderMask_RedYellow",
+        "SosigAccessory_Tactical_WelderMask_CamoLEMON"
+      ]
+    },
+    "463": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_WelderMask_Swat",
+        "SosigAccessory_Tactical_WelderMask_Desert",
+        "SosigAccessory_Tactical_WelderMask_CamoForest",
+        "SosigAccessory_Tactical_WelderMask_Winter",
+        "SosigAccessory_Tactical_WelderMask_RedYellow",
+        "SosigAccessory_Tactical_WelderMask_CamoLEMON"
+      ]
+    },
+    "464": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_SafteyGoggles"
+      ]
+    },
+    "465": {
+      "Link": 0,
+      "List": [
+        "SosigGlassesRectangular"
+      ]
+    },
+    "466": {
+      "Link": 0,
+      "List": [
+        "SosigGlassesHipster"
+      ]
+    },
+    "467": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Goggles_Desert",
+        "SosigAccessory_Tactical_Goggles_CamoForest",
+        "SosigAccessory_Tactical_Goggles_Winter",
+        "SosigAccessory_Tactical_Goggles_Swat"
+      ]
+    },
+    "468": {
+      "Link": 0,
+      "List": [
+        "SosigAgentShades1",
+        "SosigAgentShades2",
+        "SosigAgentShades3"
+      ]
+    },
+    "469": {
+      "Link": 0,
+      "List": [
+        "SosigAgentShades1",
+        "SosigAgentShades2",
+        "SosigAgentShades3"
+      ]
+    },
+    "470": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_SafteyGoggles"
+      ]
+    },
+    "471": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Goggles_Desert",
+        "SosigAccessory_Tactical_Goggles_CamoForest",
+        "SosigAccessory_Tactical_Goggles_Winter",
+        "SosigAccessory_Tactical_Goggles_Swat"
+      ]
+    },
+    "472": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Goggles_Desert",
+        "SosigAccessory_Tactical_Goggles_CamoForest",
+        "SosigAccessory_Tactical_Goggles_Winter",
+        "SosigAccessory_Tactical_Goggles_Swat"
+      ]
+    },
+    "473": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Goggles_Desert",
+        "SosigAccessory_Tactical_Goggles_CamoForest",
+        "SosigAccessory_Tactical_Goggles_Winter",
+        "SosigAccessory_Tactical_Goggles_Swat"
+      ]
+    },
+    "474": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Goggles_Desert",
+        "SosigAccessory_Tactical_Goggles_CamoForest",
+        "SosigAccessory_Tactical_Goggles_Winter",
+        "SosigAccessory_Tactical_Goggles_Swat"
+      ]
+    },
+    "475": {
+      "Link": 0,
+      "List": [
+        "SosigGlassesSpectacles",
+        "SosigGlassesSpectaclesSmall"
+      ]
+    },
+    "476": {
+      "Link": 0,
+      "List": [
+        "SosigAgentShades1",
+        "SosigAgentShades2",
+        "SosigAgentShades3"
+      ]
+    },
+    "477": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Forest"
+      ]
+    },
+    "478": {
+      "Link": 0,
+      "List": [
+        "SosigCasualTruckerhatCamoPink"
+      ]
+    },
+    "479": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Truckerhat_Black",
+        "SosigCasualTruckerhatCamoDesert",
+        "SosigCasualTruckerhatCamoForest",
+        "SosigCasualTruckerhatCamoNight",
+        "SosigCasualTruckerhatCamoUrban",
+        "SosigAccessory_MountainMeat_Truckerhat_Grey",
+        "SosigAccessory_MountainMeat_Truckerhat_Tan"
+      ]
+    },
+    "480": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Truckerhat_Black",
+        "SosigCasualTruckerhatCamoDesert",
+        "SosigCasualTruckerhatCamoForest",
+        "SosigCasualTruckerhatCamoNight",
+        "SosigCasualTruckerhatCamoUrban",
+        "SosigAccessory_MountainMeat_Truckerhat_Grey",
+        "SosigAccessory_MountainMeat_Truckerhat_Tan"
+      ]
+    },
+    "481": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Crimson",
+        "SosigAccessory_Common_Beanie_Forest",
+        "SosigAccessory_Common_Beanie_Jean",
+        "SosigAccessory_Common_Beanie_Tan"
+      ]
+    },
+    "482": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Crimson",
+        "SosigAccessory_Common_Beanie_Forest",
+        "SosigAccessory_Common_Beanie_Jean",
+        "SosigAccessory_Common_Beanie_Tan"
+      ]
+    },
+    "483": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Crimson",
+        "SosigAccessory_Common_Beanie_Forest",
+        "SosigAccessory_Common_Beanie_Jean",
+        "SosigAccessory_Common_Beanie_Tan"
+      ]
+    },
+    "484": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Forest"
+      ]
+    },
+    "485": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_SantaHat"
+      ]
+    },
+    "486": {
+      "Link": 0,
+      "List": [
+        "sosigaccessory_desperado_hat_pinchedfront_tan"
+      ]
+    },
+    "487": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Crimson",
+        "SosigAccessory_Common_Beanie_Forest",
+        "SosigAccessory_Common_Beanie_Jean",
+        "SosigAccessory_Common_Beanie_Tan"
+      ]
+    },
+    "488": {
+      "Link": 0,
+      "List": [
+        "sosigaccessory_desperado_hat_pinchedfront_tan"
+      ]
+    },
+    "489": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Forest"
+      ]
+    },
+    "490": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_NooseBag"
+      ]
+    },
+    "491": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Forest"
+      ]
+    },
+    "492": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Forest"
+      ]
+    },
+    "493": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Crimson",
+        "SosigAccessory_Common_Beanie_Forest",
+        "SosigAccessory_Common_Beanie_Jean",
+        "SosigAccessory_Common_Beanie_Tan"
+      ]
+    },
+    "494": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Millitarycap_Blue"
+      ]
+    },
+    "495": {
+      "Link": 0,
+      "List": [
+        "SosigCasualMillitarycapCamoUrban"
+      ]
+    },
+    "496": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Millitarycap_Black"
+      ]
+    },
+    "497": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Millitarycap_Brown"
+      ]
+    },
+    "498": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Millitarycap_Green"
+      ]
+    },
+    "499": {
+      "Link": 0,
+      "List": [
+        "SosigCasualMillitarycapCamoForest"
+      ]
+    },
+    "500": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Millitarycap_Tan"
+      ]
+    },
+    "501": {
+      "Link": 0,
+      "List": [
+        "SosigCasualMillitarycapCamoNight"
+      ]
+    },
+    "502": {
+      "Link": 0,
+      "List": [
+        "sosigaccessory_desperado_hat_pinchedfront_tan"
+      ]
+    },
+    "503": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Yukonhat_Olive"
+      ]
+    },
+    "504": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Yukonhat_Olive"
+      ]
+    },
+    "505": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Truckerhat_BlueWhite"
+      ]
+    },
+    "506": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Crimson",
+        "SosigAccessory_Common_Beanie_Forest",
+        "SosigAccessory_Common_Beanie_Jean",
+        "SosigAccessory_Common_Beanie_Tan"
+      ]
+    },
+    "507": {
+      "Link": 0,
+      "List": [
+        "SosigAccessoryCommonBalaklavaGreen"
+      ]
+    },
+    "508": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Truckerhat_Red"
+      ]
+    },
+    "509": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Common_Beanie_Black",
+        "SosigAccessory_Common_Beanie_Brown",
+        "SosigAccessory_Common_Beanie_Forest"
+      ]
+    },
+    "510": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Truckerhat_Black",
+        "SosigCasualTruckerhatCamoDesert",
+        "SosigCasualTruckerhatCamoForest",
+        "SosigCasualTruckerhatCamoNight",
+        "SosigCasualTruckerhatCamoUrban",
+        "SosigAccessory_MountainMeat_Truckerhat_Grey",
+        "SosigAccessory_MountainMeat_Truckerhat_Tan"
+      ]
+    },
+    "511": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Truckerhat_Black",
+        "SosigCasualTruckerhatCamoDesert",
+        "SosigCasualTruckerhatCamoForest",
+        "SosigCasualTruckerhatCamoNight",
+        "SosigCasualTruckerhatCamoUrban",
+        "SosigAccessory_MountainMeat_Truckerhat_Grey",
+        "SosigAccessory_MountainMeat_Truckerhat_Tan"
+      ]
+    },
+    "512": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_MountainMeat_Yukonhat_Olive"
+      ]
+    },
+    "513": {
+      "Link": 0,
+      "List": [
+        "Sosig_MF2_Blue_SC_headset"
+      ]
+    },
+    "514": {
+      "Link": 0,
+      "List": [
+        "Sosig_MF2_Blue_SC_headset"
+      ]
+    },
+    "515": {
+      "Link": 0,
+      "List": [
+        "Sosig_MF2_Blue_SC_headset"
+      ]
+    },
+    "516": {
+      "Link": 0,
+      "List": [
+        "Sosig_MF2_Blue_SC_headset"
+      ]
+    },
+    "517": {
+      "Link": 0,
+      "List": [
+        "Sosig_MF2_Blue_SC_headset"
+      ]
+    },
+    "518": {
+      "Link": 0,
+      "List": [
+        "Sosig_MF2_Blue_SC_headset"
+      ]
+    },
+    "519": {
+      "Link": 0,
+      "List": [
+        "Sosig_MF2_Blue_SC_headset"
+      ]
+    },
+    "520": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "521": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "522": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "523": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "524": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "525": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "526": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "527": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "528": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "529": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "530": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "531": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "532": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "533": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "534": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "535": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "536": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "537": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "538": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "539": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "540": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "541": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "542": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "543": {
+      "Link": 0,
+      "List": [
+        "Sosigaccesory_ww2_helmet_green"
+      ]
+    },
+    "544": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "545": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "546": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "547": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "548": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "549": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "550": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Winter"
+      ]
+    },
+    "551": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "552": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "553": {
+      "Link": 0,
+      "List": [
+        "SosigAccessory_Tactical_Helmet_Desert",
+        "SosigAccessory_Tactical_Helmet_CamoForest",
+        "SosigAccessory_Tactical_Helmet_Swat"
+      ]
+    },
+    "554": {
+      "Link": 0,
+      "List": [
+        "Sosig_MF2_Blue_DM_beard"
+      ]
+    },
+    "555": {
+      "Link": 0,
+      "List": [
+        "Sosig_MF2_Blue_DM_beard"
+      ]
+    },
+    "558": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "566": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "569": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "572": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_HeavyArmour_Desert",
+        "SosigAccessory_Tactical_HeavyArmour_CamoForest",
+        "SosigAccessory_Tactical_HeavyArmour_Swat"
+      ]
+    },
+    "573": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_HeavyArmour_Desert",
+        "SosigAccessory_Tactical_HeavyArmour_CamoForest",
+        "SosigAccessory_Tactical_HeavyArmour_Swat"
+      ]
+    },
+    "576": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "577": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "583": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "588": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_LightArmour_Desert",
+        "SosigAccessory_Tactical_LightArmour_CamoForest",
+        "SosigAccessory_Tactical_LightArmour_Swat"
+      ]
+    },
+    "726": {
+      "Link": 1,
+      "List": [
+        "SosigAccessoryCommonBalaklavaBrown",
+        "SosigAccessoryCommonBalaklavaGreen",
+        "SosigAccessoryCommonBalaklavaGrey"
+      ]
+    },
+    "744": {
+      "Link": 1,
+      "List": [
+        "SosigAccessory_Tactical_Backpack_Winter"
+      ]
+    }
+  },
+  "AIWeaponMap": {
+    "AR180": "Sosiggun_M16",
+    "AK101": "Sosiggun_AKM",
+    "AKM": "Sosiggun_AKM",
+    "AK74N": "Sosiggun_AKM",
+    "AKS74U": "Sosiggun_AKM",
+    "L85A2": "SosiggunAsh12",
+    "Bren807": "SosiggunMK47",
+    "AugA3": "SosiggunFutureNachtigal",
+    "Mk17CQC": "SosiggunMK47",
+    "H416": "Sosiggun_M16",
+    "M4A1v2Rightie": "Sosiggun_M16",
+    "AR15SBR": "SosiggunMK47",
+    "FaTactical": "Sosiggun_M16",
+    "Mk17": "SosiggunMK47",
+    "Mk16Mod0": "SosiggunMK47",
+    "Bubba15": "SosiggunMK47",
+    "PPSh41": "Sosiggun_Tommy",
+    "PP91KEDR": "SosiggunKedr",
+    "PP19Vityaz": "Sosiggun_AKM",
+    "P90": "SosiggunP90",
+    "APC9": "SosiggunMP7",
+    "Mp9": "SosiggunMP7",
+    "Mp7a1": "SosiggunMP7",
+    "MP5KA4": "Sosiggun_MP5SD",
+    "MP5A4": "Sosiggun_MP5SD",
+    "AK12": "Sosiggun_AKM",
+    "M14": "Sosiggun_Garand",
+    "SKSClassic": "Sosiggun_M1Carbine",
+    "SKSModern": "Sosiggun_M1Carbine",
+    "ASVAL": "Sosiggun_Scout",
+    "QC9": "SosiggunMK47",
+    "UMP45": "SosiggunMP7",
+    "Vector45": "SosiggunMP7",
+    "MX4": "SosiggunP90",
+    "MB590A1": "Sosiggun_870",
+    "KS23": "SosiggunToz106",
+    "M1897Trench": "Sosiggun_W1897",
+    "M2ThreeGun": "SosiggunSpas12",
+    "M1014": "SosiggunSpas12",
+    "HammerlessLong": "Sosiggun_870",
+    "MTs255": "Sosiggun_870",
+    "Saiga12k": "Sosiggun_AA12",
+    "Toz106": "SosiggunToz106",
+    "M1Shorty16": "Sosiggun_Garand",
+    "MRAD": "Sosiggun_PSG1",
+    "H51K": "Sosiggun_MP5SD",
+    "P762": "SosiggunMK47",
+    "Dragonuv": "SosiggunSVDS",
+    "VSSVintorez": "Sosiggun_Scout",
+    "PSG1": "Sosiggun_PSG1",
+    "FRF2": "Sosiggun_PSG1",
+    "Mosin91_30": "Sosiggun_Garand",
+    "MosinM1891": "Sosiggun_Garand",
+    "SV98": "Sosiggun_Scout",
+    "Scout": "Sosiggun_Scout",
+    "M40A1": "Sosiggun_Scout",
+    "RGM40_Kastet": "SosiggunM79",
+    "APS": "Sosiggun_Makarov",
+    "FiveSevenFDE": "Sosiggun_M9",
+    "G17": "Sosiggun_Glock",
+    "G18C": "Sosiggun_Glock",
+    "M1911Modern": "Sosiggun_M1911",
+    "Defender45": "SosiggunUSPMatch",
+    "M9A3": "Sosiggun_M9",
+    "CZ75Shadow": "SosiggunUSPMatch",
+    "P226": "SosiggunUSPMatch",
+    "F12": "SosiggunUSPMatch",
+    "PL14": "SosiggunUSPMatch",
+    "PMM": "Sosiggun_Makarov",
+    "Makarov": "Sosiggun_Makarov",
+    "PX4Storm": "SosiggunUSPMatch",
+    "TT33": "Sosiggun_M1911",
+    "M1911Gold": "Sosiggun_M1911",
+    "USPTactical": "SosiggunUSPMatch",
+    "BayonetAK": "SosigMelee_Tanto",
+    "Medieval_GermanicAxe1": "SosigMelee_Tomahawk",
+    "CombatKnife": "SosigMelee_Tanto",
+    "M3TrenchKnife": "SosigMelee_Tanto",
+    "FarmTool_WoodAxe": "SosigMelee_Tomahawk",
+    "Hatchet": "SosigMelee_Tomahawk",
+    "Karambit": "SosigMelee_Tanto",
+    "BayonetM9": "SosigMelee_Tanto",
+    "Crowbar": "SosigMelee_Crowbar",
+    "Tactical_Tomahawk": "SosigMelee_Tomahawk",
+    "Tanto": "SosigMelee_Tanto",
+    "GarageTool_DustPan": "SosigMelee_Rusty_Spade",
+    "Improvised_ClimbingAxe": "SosigMelee_Tomahawk",
+    "MX8": "SosigMelee_Tanto",
+    "GarageTool_SledgeHammer": "SosigMelee_Warclub",
+    "SurvivalKnife": "SosigMelee_Tanto",
+    "PinnedGrenadeF1Russia": "Sosiggrenade_Frag",
+    "PinnedGrenadeM67": "Sosiggrenade_Frag",
+    "PinnedGrenadeRG5": "Sosiggrenade_Frag",
+    "PinnedGrenadeRGN": "Sosiggrenade_Frag",
+    "PinnedGrenadeRGO": "Sosiggrenade_Frag",
+    "PinnedGrenadeM26": "Sosiggrenade_Frag",
+    "PinnedGrenadeRG42": "Sosiggrenade_Frag",
+    "PinnedGrenadeM18SmokeGrenadeWhite": "Sosiggrenade_Smoke",
+    "PinnedGrenadeXM84": "Sosiggrenade_Flash"
+  }
 }

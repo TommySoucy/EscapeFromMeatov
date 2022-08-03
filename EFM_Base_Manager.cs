@@ -155,7 +155,7 @@ namespace EFM
                 deployTimer -= Time.deltaTime;
 
                 TimeSpan timeSpan = TimeSpan.FromSeconds(deployTimer);
-                raidCountdown.text = string.Format(@"{0:ss\\.ff}", timeSpan);
+                raidCountdown.text = string.Format("{0:ss\\.ff}", timeSpan);
 
                 if (deployTimer <= 0)
                 {
@@ -1000,12 +1000,12 @@ namespace EFM
 
             // Update time texts
             TimeSpan timeSpan = TimeSpan.FromSeconds(time);
-            string formattedTime0 = string.Format(@"{0:hh\\:mm\\:ss}", timeSpan);
+            string formattedTime0 = string.Format("{0:hh\\:mm\\:ss}", timeSpan);
             timeChoice0.text = formattedTime0;
 
             float offsetTime = (time + 43200) % 86400; // Offset time by 12 hours
             TimeSpan offsetTimeSpan = TimeSpan.FromSeconds(offsetTime);
-            string formattedTime1 = string.Format(@"{0:hh\\:mm\\:ss}", offsetTimeSpan);
+            string formattedTime1 = string.Format("{0:hh\\:mm\\:ss}", offsetTimeSpan);
             timeChoice1.text = formattedTime1;
 
             chosenTime.text = chosenTimeIndex == 0 ? formattedTime0 : formattedTime1;
@@ -1815,7 +1815,12 @@ namespace EFM
         {
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
-            string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
+            FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
+            if (physObj == null || physObj.ObjectWrapper == null)
+            {
+                return; // Grenade pin for example, has no wrapper
+            }
+            string itemID = physObj.ObjectWrapper.ItemID;
             if (Mod.baseInventory.ContainsKey(itemID))
             {
                 Mod.baseInventory[itemID] += customItemWrapper != null ? (customItemWrapper.stack > 0 ? customItemWrapper.stack : 1) : 1;
@@ -1838,8 +1843,9 @@ namespace EFM
                         {
                             if (loadedRound == null)
                             {
-                                continue;
+                                break;
                             }
+
                             string roundName = AM.GetFullRoundName(boxMagazine.RoundType, loadedRound.LR_Class);
 
                             if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
@@ -1987,7 +1993,12 @@ namespace EFM
         {
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
-            string itemID = item.GetComponent<FVRPhysicalObject>().ObjectWrapper.ItemID;
+            FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
+            if (physObj == null || physObj.ObjectWrapper == null)
+            {
+                return; // Grenade pin for example, has no wrapper
+            }
+            string itemID = physObj.ObjectWrapper.ItemID;
             if (Mod.baseInventory.ContainsKey(itemID))
             {
                 Mod.baseInventory[itemID] -= customItemWrapper != null ? customItemWrapper.stack : 1;
@@ -2013,6 +2024,11 @@ namespace EFM
                         FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                         {
+                            if (loadedRound == null)
+                            {
+                                break;
+                            }
+
                             string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
 
                             if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
@@ -2174,6 +2190,8 @@ namespace EFM
 
             FVRPhysicalObject itemPhysicalObject = itemObject.GetComponentInChildren<FVRPhysicalObject>();
             FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
+            EFM_CustomItemWrapper customItemWrapper = itemObject.GetComponent<EFM_CustomItemWrapper>();
+            EFM_VanillaItemDescriptor vanillaItemDescriptor = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
 
             // Fill data
 
@@ -2244,11 +2262,6 @@ namespace EFM
 
                     if (firearmPhysicalObject.UsesClips && containerPhysicalObject is FVRFireArmClip)
                     {
-                        //Transform gunClipTransform = firearmPhysicalObject.ClipMountPos;
-
-                        //containerObject.transform.localPosition = gunClipTransform.localPosition;
-                        //containerObject.transform.localRotation = gunClipTransform.localRotation;
-
                         FVRFireArmClip clipPhysicalObject = containerPhysicalObject as FVRFireArmClip;
 
                         if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
@@ -2270,10 +2283,13 @@ namespace EFM
 
                         // Make sure the clip doesnt take the current location index once awake
                         EFM_VanillaItemDescriptor clipVID = clipPhysicalObject.GetComponent<EFM_VanillaItemDescriptor>();
-                        clipVID.takeCurrentLocation = false;
+                        if (locationIndex != -1)
+                        {
+                            clipVID.takeCurrentLocation = false;
+                            clipVID.locationIndex = locationIndex;
+                        }
 
                         clipPhysicalObject.Load(firearmPhysicalObject);
-                        clipPhysicalObject.IsInfinite = false;
 
                         // Store the clip's supposed local position so we can ensure it is correct later
                         Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(containerObject, firearmPhysicalObject.ClipMountPos));
@@ -2303,8 +2319,12 @@ namespace EFM
                         // Make sure the mag doesnt take the current location index once awake
                         EFM_VanillaItemDescriptor magVID = magPhysicalObject.GetComponent<EFM_VanillaItemDescriptor>();
                         magVID.takeCurrentLocation = false;
+                        if (locationIndex != -1)
+                        {
+                            magVID.takeCurrentLocation = false;
+                            magVID.locationIndex = locationIndex;
+                        }
 
-                        magPhysicalObject.UsesVizInterp = false;
                         magPhysicalObject.Load(firearmPhysicalObject);
 
                         // Store the mag's supposed local position so we can ensure it is correct later
@@ -2317,6 +2337,8 @@ namespace EFM
                 if (item["isRightShoulder"] != null)
                 {
                     itemPhysicalObject.SetQuickBeltSlot(Mod.rightShoulderSlot);
+
+                    BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor);
 
                     Mod.rightShoulderObject = itemObject;
                     itemObject.SetActive(false);
@@ -2402,7 +2424,6 @@ namespace EFM
             Mod.instance.LogInfo("Processed firearm");
 
             // Custom item
-            EFM_CustomItemWrapper customItemWrapper = itemObject.GetComponent<EFM_CustomItemWrapper>();
             if (customItemWrapper != null)
             {
                 if (inAll)
@@ -2663,7 +2684,6 @@ namespace EFM
                 Mod.instance.LogInfo("put in pocket if necessary");
             }
 
-            EFM_VanillaItemDescriptor vanillaItemDescriptor = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
             if (vanillaItemDescriptor != null)
             {
                 if (locationIndex != -1)
