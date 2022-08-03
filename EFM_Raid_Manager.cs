@@ -536,21 +536,28 @@ namespace EFM
                 }
             }
 
-            // Output missing items
-            if (Mod.instance.debug)
+            // Init damage volumes
+            foreach(Transform damageVolTransform in transform.GetChild(1).GetChild(1).GetChild(3).GetChild(3))
             {
-                string text = "Raid with map index = " + Mod.chosenMapIndex + " was missing FORCED loose loot:\n";
-                foreach (string id in missingForced)
-                {
-                    text += id + "\n";
-                }
-                text += "Raid with map index = " + Mod.chosenMapIndex + " was missing DYNAMIC loose loot:\n";
-                foreach (string id in missingDynamic)
-                {
-                    text += id + "\n";
-                }
-                File.WriteAllText("BepinEx/Plugins/EscapeFromMeatov/ErrorLog.txt", text);
+                EFM_DamageVolume newDamageVolume = damageVolTransform.gameObject.AddComponent<EFM_DamageVolume>();
+                newDamageVolume.Init();
             }
+
+            //// Output missing items
+            //if (Mod.instance.debug)
+            //{
+            //    string text = "Raid with map index = " + Mod.chosenMapIndex + " was missing FORCED loose loot:\n";
+            //    foreach (string id in missingForced)
+            //    {
+            //        text += id + "\n";
+            //    }
+            //    text += "Raid with map index = " + Mod.chosenMapIndex + " was missing DYNAMIC loose loot:\n";
+            //    foreach (string id in missingDynamic)
+            //    {
+            //        text += id + "\n";
+            //    }
+            //    File.WriteAllText("BepinEx/Plugins/EscapeFromMeatov/ErrorLog.txt", text);
+            //}
 
             // Init time
             InitTime();
@@ -1448,6 +1455,8 @@ namespace EFM
                     yield break;
                 }
                 AIInventoryWeaponMod currentParent = inventory.primaryWeaponMods;
+                Stack<FVRPhysicalObject> parentPhysObjs = new Stack<FVRPhysicalObject>();
+                parentPhysObjs.Push(weaponFireArm);
                 Stack<int> childIndices = new Stack<int>();
                 childIndices.Push(0);
                 while(currentParent != null)
@@ -1461,6 +1470,7 @@ namespace EFM
                         GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
                         FVRPhysicalObject attachmentPrefabPhysObj = attachmentPrefab.GetComponent<FVRPhysicalObject>();
                         GameObject attachmentObject = null;
+                        FVRPhysicalObject attachmentPhysObj = null;
 
                         // If mag or clip, must be loaded accordingly
                         // If round, fill chambers and mag/clip if applicable
@@ -1471,6 +1481,7 @@ namespace EFM
                             EFM_VanillaItemDescriptor magVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
                             magVID.takeCurrentLocation = false;
                             FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
+                            attachmentPhysObj = attachmentMagazine;
                             FireArmLoadMagPatch.ignoreLoadMag = true;
                             attachmentMagazine.UsesVizInterp = false;
                             attachmentMagazine.Load(weaponFireArm);
@@ -1481,6 +1492,7 @@ namespace EFM
                             EFM_VanillaItemDescriptor clipVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
                             clipVID.takeCurrentLocation = false;
                             FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
+                            attachmentPhysObj = attachmentClip;
                             FireArmLoadClipPatch.ignoreLoadClip = true;
                             attachmentClip.Load(weaponFireArm);
                         }
@@ -1524,6 +1536,7 @@ namespace EFM
                                     GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                    attachmentPhysObj = itemPhysObj;
 
                                     FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                     for (int j = 0; j < amount; ++j)
@@ -1548,6 +1561,7 @@ namespace EFM
 
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                    attachmentPhysObj = itemPhysObj;
 
                                     FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                     asMagazine.RoundType = asRound.RoundType;
@@ -1566,8 +1580,9 @@ namespace EFM
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
                             FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
+                            attachmentPhysObj = asAttachment;
                             bool mountFound = false;
-                            foreach(FVRFireArmAttachmentMount mount in weaponFireArm.AttachmentMounts)
+                            foreach(FVRFireArmAttachmentMount mount in parentPhysObjs.Peek().AttachmentMounts)
                             {
                                 if(mount.Type == asAttachment.Type)
                                 {
@@ -1579,8 +1594,7 @@ namespace EFM
                             if (!mountFound)
                             {
                                 Mod.instance.LogWarning("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
-                                continue from here, need to keep track of current parent object too, because right now all were doing is trying to attach all attachments to the weapn and not to their actual parent
-                                attachmentObject.transform.position = parentObject.transform.position + Vector3.up;
+                                attachmentObject.transform.position = parentPhysObjs.Peek().transform.position + Vector3.up;
                             }
                         }
                         else
@@ -1590,6 +1604,7 @@ namespace EFM
 
                         // Make this child the new parent
                         currentParent = currentParent.children[childIndices.Peek()];
+                        parentPhysObjs.Push(attachmentPhysObj);
 
                         // Increment top index
                         childIndices.Push(childIndices.Pop() + 1);
@@ -1603,6 +1618,7 @@ namespace EFM
                     {
                         childIndices.Pop();
                         currentParent = currentParent.parent;
+                        parentPhysObjs.Pop();
                     }
                 }
             }
@@ -1624,6 +1640,8 @@ namespace EFM
                     yield break;
                 }
                 AIInventoryWeaponMod currentParent = inventory.secondaryWeaponMods;
+                Stack<FVRPhysicalObject> parentPhysObjs = new Stack<FVRPhysicalObject>();
+                parentPhysObjs.Push(weaponFireArm);
                 Stack<int> childIndices = new Stack<int>();
                 childIndices.Push(0);
                 while(currentParent != null)
@@ -1637,6 +1655,7 @@ namespace EFM
                         GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
                         FVRPhysicalObject attachmentPrefabPhysObj = attachmentPrefab.GetComponent<FVRPhysicalObject>();
                         GameObject attachmentObject = null;
+                        FVRPhysicalObject attachmentPhysObj = null;
 
                         // If mag or clip, must be loaded accordingly
                         // If round, fill chambers and mag/clip if applicable
@@ -1647,6 +1666,7 @@ namespace EFM
                             EFM_VanillaItemDescriptor magVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
                             magVID.takeCurrentLocation = false;
                             FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
+                            attachmentPhysObj = attachmentMagazine;
                             attachmentMagazine.UsesVizInterp = false;
                             FireArmLoadMagPatch.ignoreLoadMag = true;
                             attachmentMagazine.Load(weaponFireArm);
@@ -1657,6 +1677,7 @@ namespace EFM
                             EFM_VanillaItemDescriptor clipVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
                             clipVID.takeCurrentLocation = false;
                             FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
+                            attachmentPhysObj = attachmentClip;
                             FireArmLoadClipPatch.ignoreLoadClip = true;
                             attachmentClip.Load(weaponFireArm);
                         }
@@ -1700,6 +1721,7 @@ namespace EFM
                                     GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                    attachmentPhysObj = itemPhysObj;
 
                                     FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                     for (int j = 0; j < amount; ++j)
@@ -1724,6 +1746,7 @@ namespace EFM
 
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                    attachmentPhysObj = itemPhysObj;
 
                                     FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                     asMagazine.RoundType = asRound.RoundType;
@@ -1742,8 +1765,9 @@ namespace EFM
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
                             FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
+                            attachmentPhysObj = asAttachment;
                             bool mountFound = false;
-                            foreach(FVRFireArmAttachmentMount mount in weaponFireArm.AttachmentMounts)
+                            foreach(FVRFireArmAttachmentMount mount in parentPhysObjs.Peek().AttachmentMounts)
                             {
                                 if(mount.Type == asAttachment.Type)
                                 {
@@ -1755,7 +1779,7 @@ namespace EFM
                             if (!mountFound)
                             {
                                 Mod.instance.LogWarning("Could not find compatible mount for mod: " + modID + " on: " + currentParent.ID);
-                                attachmentObject.transform.position = parentObject.transform.position + Vector3.up;
+                                attachmentObject.transform.position = parentPhysObjs.Peek().transform.position + Vector3.up;
                             }
                         }
                         else
@@ -1765,6 +1789,7 @@ namespace EFM
 
                         // Make this child the new parent
                         currentParent = currentParent.children[childIndices.Peek()];
+                        parentPhysObjs.Push(attachmentPhysObj);
 
                         // Increment top index
                         childIndices.Push(childIndices.Pop() + 1);
@@ -1778,6 +1803,7 @@ namespace EFM
                     {
                         childIndices.Pop();
                         currentParent = currentParent.parent;
+                        parentPhysObjs.Pop();
                     }
                 }
             }
@@ -1799,6 +1825,8 @@ namespace EFM
                     yield break;
                 }
                 AIInventoryWeaponMod currentParent = inventory.holsterMods;
+                Stack<FVRPhysicalObject> parentPhysObjs = new Stack<FVRPhysicalObject>();
+                parentPhysObjs.Push(weaponFireArm);
                 Stack<int> childIndices = new Stack<int>();
                 childIndices.Push(0);
                 while(currentParent != null)
@@ -1812,6 +1840,7 @@ namespace EFM
                         GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
                         FVRPhysicalObject attachmentPrefabPhysObj = attachmentPrefab.GetComponent<FVRPhysicalObject>();
                         GameObject attachmentObject = null;
+                        FVRPhysicalObject attachmentPhysObj = null;
 
                         // If mag or clip, must be loaded accordingly
                         // If round, fill chambers and mag/clip if applicable
@@ -1822,6 +1851,7 @@ namespace EFM
                             EFM_VanillaItemDescriptor magVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
                             magVID.takeCurrentLocation = false;
                             FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
+                            attachmentPhysObj = attachmentMagazine;
                             attachmentMagazine.UsesVizInterp = false;
                             FireArmLoadMagPatch.ignoreLoadMag = true;
                             attachmentMagazine.Load(weaponFireArm);
@@ -1832,6 +1862,7 @@ namespace EFM
                             EFM_VanillaItemDescriptor clipVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
                             clipVID.takeCurrentLocation = false;
                             FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
+                            attachmentPhysObj = attachmentClip;
                             FireArmLoadClipPatch.ignoreLoadClip = true;
                             attachmentClip.Load(weaponFireArm);
                         }
@@ -1875,6 +1906,7 @@ namespace EFM
                                     GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                    attachmentPhysObj = itemPhysObj;
 
                                     FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                     for (int j = 0; j < amount; ++j)
@@ -1899,6 +1931,7 @@ namespace EFM
 
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                    attachmentPhysObj = itemPhysObj;
 
                                     FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                     asMagazine.RoundType = asRound.RoundType;
@@ -1917,8 +1950,9 @@ namespace EFM
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
                             FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
+                            attachmentPhysObj = asAttachment; ;
                             bool mountFound = false;
-                            foreach(FVRFireArmAttachmentMount mount in weaponFireArm.AttachmentMounts)
+                            foreach(FVRFireArmAttachmentMount mount in parentPhysObjs.Peek().AttachmentMounts)
                             {
                                 if(mount.Type == asAttachment.Type)
                                 {
@@ -1930,7 +1964,7 @@ namespace EFM
                             if (!mountFound)
                             {
                                 Mod.instance.LogWarning("Could not find compatible mount for mod: " + modID + " on: " + currentParent.ID);
-                                attachmentObject.transform.position = parentObject.transform.position + Vector3.up;
+                                attachmentObject.transform.position = parentPhysObjs.Peek().transform.position + Vector3.up;
                             }
                         }
                         else
@@ -1940,6 +1974,7 @@ namespace EFM
 
                         // Make this child the new parent
                         currentParent = currentParent.children[childIndices.Peek()];
+                        parentPhysObjs.Push(attachmentPhysObj);
 
                         // Increment top index
                         childIndices.Push(childIndices.Pop() + 1);
@@ -1953,6 +1988,7 @@ namespace EFM
                     {
                         childIndices.Pop();
                         currentParent = currentParent.parent;
+                        parentPhysObjs.Pop();
                     }
                 }
             }

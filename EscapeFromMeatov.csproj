@@ -75,6 +75,7 @@
     <Compile Include="EFM_BotZone.cs" />
     <Compile Include="EFM_CategoryTreeNode.cs" />
     <Compile Include="EFM_CustomItemWrapper.cs" />
+    <Compile Include="EFM_DamageVolume.cs" />
     <Compile Include="EFM_Describable.cs" />
     <Compile Include="EFM_DescriptionManager.cs" />
     <Compile Include="EFM_DoorLockChecker.cs" />
