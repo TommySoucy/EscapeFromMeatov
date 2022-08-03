@@ -2185,7 +2185,6 @@ namespace EFM
 
             GameObject itemObject = Instantiate<GameObject>(prefabToUse);
 
-            Mod.instance.LogInfo("spawned, positioning");
             itemObject.transform.parent = parent; // Set parent after so it can awake before doing anything, in case parent is inactive
 
             FVRPhysicalObject itemPhysicalObject = itemObject.GetComponentInChildren<FVRPhysicalObject>();
@@ -2209,7 +2208,6 @@ namespace EFM
                 handStateField.SetValue(hand, FVRViveHand.HandState.GripInteracting);
                 hand.CurrentInteractable.BeginInteraction(hand);
             }
-            Mod.instance.LogInfo("Filled physical object data");
 
             // ObjectWrapper
             itemObjectWrapper.ItemID = item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString();
@@ -2218,7 +2216,6 @@ namespace EFM
             if (itemPhysicalObject is FVRFireArm)
             {
                 FVRFireArm firearmPhysicalObject = itemPhysicalObject as FVRFireArm;
-                Mod.instance.LogInfo("loading firearm " + firearmPhysicalObject.name);
 
                 // Build and load flagDict from saved lists
                 if (item["PhysicalObject"]["flagDictKeys"] != null)
@@ -2318,7 +2315,6 @@ namespace EFM
 
                         // Make sure the mag doesnt take the current location index once awake
                         EFM_VanillaItemDescriptor magVID = magPhysicalObject.GetComponent<EFM_VanillaItemDescriptor>();
-                        magVID.takeCurrentLocation = false;
                         if (locationIndex != -1)
                         {
                             magVID.takeCurrentLocation = false;
@@ -2421,8 +2417,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("Processed firearm");
-
             // Custom item
             if (customItemWrapper != null)
             {
@@ -2445,7 +2439,6 @@ namespace EFM
                     customItemWrapper.takeCurrentLocation = false;
                     customItemWrapper.locationIndex = locationIndex;
                 }
-                Mod.instance.LogInfo("Has custom item wrapper with type: "+((Mod.ItemType)(int)item["itemType"]));
 
                 // Armor
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.BodyArmor)
@@ -2648,7 +2641,6 @@ namespace EFM
                     }
                 }
 
-                Mod.instance.LogInfo("putting in equip slot if necessary");
                 // Equip the item if it has an equip slot
                 if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                 {
@@ -2669,19 +2661,18 @@ namespace EFM
 
                     itemPhysicalObject.gameObject.SetActive(Mod.playerStatusManager.displayed);
                 }
-                Mod.instance.LogInfo("put in equip slot if necessary, putting in pocket if necessary");
 
                 // Put item in pocket if it has pocket index
                 if (item["pocketSlotIndex"] != null)
                 {
                     Mod.instance.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
                     customItemWrapper.takeCurrentLocation = false;
+                    customItemWrapper.locationIndex = 0;
 
                     FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
                     itemPhysicalObject.SetQuickBeltSlot(pocketSlot);
                     itemPhysicalObject.SetParentage(null);
                 }
-                Mod.instance.LogInfo("put in pocket if necessary");
             }
 
             if (vanillaItemDescriptor != null)
@@ -2699,13 +2690,13 @@ namespace EFM
                 {
                     Mod.instance.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
                     vanillaItemDescriptor.takeCurrentLocation = false;
+                    vanillaItemDescriptor.locationIndex = 0;
 
                     FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
                     itemPhysicalObject.SetQuickBeltSlot(pocketSlot);
                 }
             }
 
-            Mod.instance.LogInfo("Checking if in trade volume");
             // Place in tradeVolume
             if (item["inTradeVolume"] != null)
             {
@@ -2720,12 +2711,20 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("positioning");
             // GameObject
             itemObject.transform.localPosition = new Vector3((float)item["PhysicalObject"]["positionX"], (float)item["PhysicalObject"]["positionY"], (float)item["PhysicalObject"]["positionZ"]);
             itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
 
-            Mod.instance.LogInfo("done");
+            // Ensure item and its contents are all in the correct location index
+            if (customItemWrapper != null)
+            {
+                BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, customItemWrapper, null);
+            }
+            else if(vanillaItemDescriptor != null)
+            {
+                BeginInteractionPatch.SetItemLocationIndex(vanillaItemDescriptor.locationIndex, null, vanillaItemDescriptor);
+            }
+
             return itemObject;
         }
 

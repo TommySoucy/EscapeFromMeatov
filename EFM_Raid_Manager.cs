@@ -1578,7 +1578,9 @@ namespace EFM
                             }
                             if (!mountFound)
                             {
-                                Mod.instance.LogError("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
+                                Mod.instance.LogWarning("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
+                                continue from here, need to keep track of current parent object too, because right now all were doing is trying to attach all attachments to the weapn and not to their actual parent
+                                attachmentObject.transform.position = parentObject.transform.position + Vector3.up;
                             }
                         }
                         else
@@ -1752,7 +1754,8 @@ namespace EFM
                             }
                             if (!mountFound)
                             {
-                                Mod.instance.LogError("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
+                                Mod.instance.LogWarning("Could not find compatible mount for mod: " + modID + " on: " + currentParent.ID);
+                                attachmentObject.transform.position = parentObject.transform.position + Vector3.up;
                             }
                         }
                         else
@@ -1926,7 +1929,8 @@ namespace EFM
                             }
                             if (!mountFound)
                             {
-                                Mod.instance.LogError("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
+                                Mod.instance.LogWarning("Could not find compatible mount for mod: " + modID + " on: " + currentParent.ID);
+                                attachmentObject.transform.position = parentObject.transform.position + Vector3.up;
                             }
                         }
                         else

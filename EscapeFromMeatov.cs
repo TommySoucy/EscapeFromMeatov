@@ -2852,7 +2852,6 @@ namespace EFM
             }
             else
             {
-                Mod.instance.LogWarning("End interaction called on "+__instance+" which has no CIW or VID");
                 return; // No need to process Item that has neither
             }
 
@@ -3957,9 +3956,16 @@ namespace EFM
                 // Update lists
                 if(vanillaItemDescriptor.locationIndex == 1)
                 {
-                    Mod.instance.LogInfo("Was in hideout");
+                    Mod.instance.LogInfo("\tWas in hideout");
                     // Was in hideout
-                    Mod.currentBaseManager.RemoveFromBaseInventory(vanillaItemDescriptor.transform, false);
+                    if (Mod.currentBaseManager != null)
+                    {
+                        Mod.currentBaseManager.RemoveFromBaseInventory(vanillaItemDescriptor.transform, false);
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Began interacting with " + __instance.name + " but VID's location index indicated that it was in hideout but current base manger is null");
+                    }
 
                     // Now on player
                     Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, false);
@@ -3969,7 +3975,7 @@ namespace EFM
                 }
                 else if(vanillaItemDescriptor.locationIndex == 2)
                 {
-                    Mod.instance.LogInfo("Was in raid");
+                    Mod.instance.LogInfo("\tWas in raid");
                     // Now on player
                     Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
 
@@ -3978,7 +3984,7 @@ namespace EFM
                 }
                 else if (vanillaItemDescriptor.locationIndex == 3)
                 {
-                    Mod.instance.LogInfo("Was in hideout area slot");
+                    Mod.instance.LogInfo("\tWas in hideout area slot");
                     // Now on player
                     Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
 
@@ -7262,7 +7268,7 @@ namespace EFM
                 VID.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
                 //TODO: Set weight of firearm this is attached to if it is
             }
-            else
+            else if(CIW != null)
             {
                 if (postNumRounds == 0)
                 {
@@ -7282,6 +7288,10 @@ namespace EFM
                     CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
                     CIW.amount -= (preNumRounds - postNumRounds);
                 }
+            }
+            else
+            {
+                Mod.instance.LogError("MagRemoveRoundPatch postfix: Mag " + __instance.name + " has no VID nor CIW");
             }
         }
     }
@@ -7318,7 +7328,7 @@ namespace EFM
                 VID.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
                 //TODO: Set weight of firearm this is attached to if it is
             }
-            else
+            else if(CIW != null)
             {
                 if (postNumRounds == 0)
                 {
@@ -7338,6 +7348,10 @@ namespace EFM
                     CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
                     CIW.amount -= (preNumRounds - postNumRounds);
                 }
+            }
+            else
+            {
+                Mod.instance.LogError("MagRemoveRoundBoolPatch postfix: Mag " + __instance.name + " has no VID nor CIW");
             }
         }
     }
@@ -7373,7 +7387,7 @@ namespace EFM
                 VID.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
                 //TODO: Set weight of firearm this is attached to if it is
             }
-            else
+            else if(CIW != null)
             {
                 if (postNumRounds == 0)
                 {
@@ -7393,6 +7407,10 @@ namespace EFM
                     CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
                     CIW.amount -= (preNumRounds - postNumRounds);
                 }
+            }
+            else
+            {
+                Mod.instance.LogError("MagRemoveRoundIntPatch postfix: Mag " + __instance.name + " has no VID nor CIW");
             }
         }
     }
