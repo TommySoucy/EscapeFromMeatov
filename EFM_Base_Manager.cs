@@ -1028,6 +1028,18 @@ namespace EFM
                 {
                     SetupPlayerRig();
                 }
+                else
+                {
+                    // Sometimes when loading stamina bar gets offset, so ensure everything we have attached to player is positionned properly
+                    Mod.staminaBarUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+                    Mod.staminaBarUI.transform.localPosition = new Vector3(0, -0.4f, 0.6f);
+                    Mod.staminaBarUI.transform.localScale = Vector3.one * 0.0015f;
+
+                    Mod.rightShoulderSlot.transform.GetChild(0).localScale = new Vector3(0.3f, 0.3f, 0.3f);
+                    Mod.rightShoulderSlot.transform.GetChild(0).localPosition = new Vector3(0.15f, 0, -0.05f);
+                    Mod.leftShoulderSlot.transform.GetChild(0).localScale = new Vector3(0.3f, 0.3f, 0.3f);
+                    Mod.leftShoulderSlot.transform.GetChild(0).localPosition = new Vector3(-0.15f, 0, -0.05f);
+                }
 
                 // Set pockets configuration as default
                 GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
@@ -2427,7 +2439,7 @@ namespace EFM
                 else
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(customItemWrapper, null);
+                    Mod.RemoveFromAll(null, customItemWrapper, null);
                 }
 
                 customItemWrapper.itemType = (Mod.ItemType)(int)item["itemType"];
@@ -2677,6 +2689,15 @@ namespace EFM
 
             if (vanillaItemDescriptor != null)
             {
+                if (inAll)
+                {
+                    vanillaItemDescriptor.inAll = true;
+                }
+                else if(itemPhysicalObject is FVRFireArm)
+                {
+                    Mod.RemoveFromAll(null, null, vanillaItemDescriptor);
+                }
+
                 if (locationIndex != -1)
                 {
                     vanillaItemDescriptor.takeCurrentLocation = false;
@@ -3271,7 +3292,7 @@ namespace EFM
                 }
                 else if (Mod.raidState == FinishRaidState.Survived)
                 {
-                    raidResultExp = 600; // TODO: Add bonus for how long we survived
+                    raidResultExp = 600 + (int)(Mod.raidTime / 60 * 10); // Survive exp + bonus of 10 exp / min
                     Mod.AddExperience(600);
                 }
 
@@ -4037,20 +4058,16 @@ namespace EFM
                 saveObject["skills"][i]["progress"] = Mod.skills[i].progress;
                 saveObject["skills"][i]["currentProgress"] = Mod.skills[i].currentProgress;
             }
-            Mod.instance.LogInfo("\tWrote skills");
 
             // Write areas
-            Mod.instance.LogInfo("\tWriting areas...");
             JArray savedAreas = new JArray();
             saveObject["areas"] = savedAreas;
             for (int i = 0; i < baseAreaManagers.Count; ++i)
             {
-                Mod.instance.LogInfo("\t\tWriting area "+i);
                 JToken currentSavedArea = new JObject();
                 currentSavedArea["level"] = baseAreaManagers[i].level;
                 currentSavedArea["constructing"] = baseAreaManagers[i].constructing;
                 currentSavedArea["constructTime"] = baseAreaManagers[i].constructTime;
-                Mod.instance.LogInfo("\t\t\tWrote basic data");
                 if (baseAreaManagers[i].slotItems != null)
                 {
                     JArray slots = new JArray();
@@ -4067,10 +4084,8 @@ namespace EFM
                         }
                     }
                 }
-                Mod.instance.LogInfo("\t\t\tWrote slot items");
                 if (baseAreaManagers[i].activeProductions != null)
                 {
-                    Mod.instance.LogInfo("\t\t\t\tWriting active productions");
                     currentSavedArea["productions"] = new JObject();
 
                     foreach(KeyValuePair<string, EFM_AreaProduction> production in baseAreaManagers[i].activeProductions)
@@ -4082,11 +4097,9 @@ namespace EFM
 
                         currentSavedArea["productions"][production.Value.ID] = currentProduction;
                     }
-                    Mod.instance.LogInfo("\t\t\t\tWrote active productions");
                 }
                 else if(baseAreaManagers[i].activeScavCaseProductions != null)
                 {
-                    Mod.instance.LogInfo("\t\t\t\tWriting active scav case productions");
                     currentSavedArea["productions"] = new JArray();
 
                     foreach(EFM_ScavCaseProduction production in baseAreaManagers[i].activeScavCaseProductions)
@@ -4115,26 +4128,21 @@ namespace EFM
 
                         (currentSavedArea["productions"] as JArray).Add(currentProduction);
                     }
-                    Mod.instance.LogInfo("\t\t\t\tWrote active scav case productions");
                 }
                 savedAreas.Add(currentSavedArea);
             }
-            Mod.instance.LogInfo("\tWrote areas");
 
             // Save trader statuses
             JArray savedTraderStatuses = new JArray();
             saveObject["traderStatuses"] = savedTraderStatuses;
-            Mod.instance.LogInfo("\tWriting trader statuses...");
             for (int i=0; i<8; ++i)
             {
-                Mod.instance.LogInfo("\t\tWriting trader " + i);
                 JToken currentSavedTraderStatus = new JObject();
                 currentSavedTraderStatus["id"] = Mod.traderStatuses[i].id;
                 currentSavedTraderStatus["salesSum"] = Mod.traderStatuses[i].salesSum;
                 currentSavedTraderStatus["standing"] = Mod.traderStatuses[i].standing;
                 currentSavedTraderStatus["unlocked"] = Mod.traderStatuses[i].unlocked;
 
-                Mod.instance.LogInfo("\t\t\tWrote basic data");
                 // Save tasks
                 // TODO: This saves literally all saveable data for tasks their conditions, and the conditions counters
                 // We could ommit tasks that dont have any data to save, like the ones that are still locked
@@ -4165,33 +4173,27 @@ namespace EFM
                         }
                     }
                 }
-                Mod.instance.LogInfo("\t\t\tWrote tasks");
 
                 savedTraderStatuses.Add(currentSavedTraderStatus);
             }
-            Mod.instance.LogInfo("\tWrote trader statuses");
 
             // Reset save data item list
             JArray saveItems = new JArray();
             saveObject["items"] = saveItems;
 
             // Save loose items
-            Mod.instance.LogInfo("\tWriting items...");
-            Mod.instance.LogInfo("\t\tWriting loose items");
             Transform itemsRoot = transform.GetChild(2);
             for (int i = 0; i < itemsRoot.childCount; ++i)
             {
                 SaveItem(saveItems, itemsRoot.GetChild(i));
             }
 
-            Mod.instance.LogInfo("\t\tWriting trade volume items");
             // Save trade volume items
             for (int i = 0; i < marketManager.tradeVolume.itemsRoot.childCount; ++i)
             {
                 SaveItem(saveItems, marketManager.tradeVolume.itemsRoot.GetChild(i));
             }
 
-            Mod.instance.LogInfo("\t\tWriting hand items");
             // Save items in hands
             FVRViveHand rightHand = GM.CurrentPlayerBody.RightHand.GetComponentInChildren<FVRViveHand>();
             FVRViveHand leftHand = GM.CurrentPlayerBody.LeftHand.GetComponentInChildren<FVRViveHand>();
@@ -4204,7 +4206,6 @@ namespace EFM
                 SaveItem(saveItems, leftHand.CurrentInteractable.transform, leftHand);
             }
 
-            Mod.instance.LogInfo("\t\tWriting equip items");
             // Save equipment
             foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
             {
@@ -4214,25 +4215,20 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\t\tWriting pocket items");
             // Save pockets
-            Mod.instance.LogInfo("Saving pockets");
             foreach (FVRQuickBeltSlot pocketSlot in Mod.pocketSlots)
             {
                 if (pocketSlot.CurObject != null)
                 {
-                    Mod.instance.LogInfo("\tPocker curObject != null");
                     SaveItem(saveItems, pocketSlot.CurObject.transform);
                 }
             }
 
-            Mod.instance.LogInfo("\t\tWriting right shoulder item");
             // Save right shoulder
             if (Mod.rightShoulderObject != null)
             {
                 SaveItem(saveItems, Mod.rightShoulderObject.transform);
             }
-            Mod.instance.LogInfo("\tWrote items");
 
 
             // Save insuredSets
@@ -4254,7 +4250,6 @@ namespace EFM
             // Replace data
             data = saveObject;
 
-            Mod.instance.LogInfo("\tWriting save data to file");
             SaveDataToFile();
             Mod.instance.LogInfo("Saved base");
             UpdateSaveButtonList();
@@ -4266,7 +4261,6 @@ namespace EFM
             {
                 return;
             }
-            Mod.instance.LogInfo("Saving item " + item.name);
 
             JToken savedItem = new JObject();
             savedItem["PhysicalObject"] = new JObject();
@@ -4276,36 +4270,29 @@ namespace EFM
             FVRPhysicalObject itemPhysicalObject = null;
             if (hand != null)
             {
-                Mod.instance.LogInfo("saving hand item: "+item.name);
                 if (hand.CurrentInteractable is FVRAlternateGrip)
                 {
-                    Mod.instance.LogInfo("\tItem is alt grip");
                     // Make sure this item isn't the same as held in right hand because we dont want an item saved twice, and will prioritize right hand
                     if (hand.IsThisTheRightHand || hand.CurrentInteractable != hand.OtherHand.CurrentInteractable)
                     {
-                        Mod.instance.LogInfo("\t\tItem in right hand or different from other hand's item");
                         itemPhysicalObject = (hand.CurrentInteractable as FVRAlternateGrip).PrimaryObject;
                         savedItem["PhysicalObject"]["heldMode"] = hand.IsThisTheRightHand ? 1 : 2;
                     }
                     else
                     {
-                        Mod.instance.LogInfo("\t\tItem not right hand or same as other hand's item");
                         itemPhysicalObject = item.GetComponentInChildren<FVRPhysicalObject>();
                         savedItem["PhysicalObject"]["heldMode"] = 0;
                     }
                 }
                 else
                 {
-                    Mod.instance.LogInfo("\tItem is not alt grip");
                     if (hand.IsThisTheRightHand || hand.CurrentInteractable != hand.OtherHand.CurrentInteractable)
                     {
-                        Mod.instance.LogInfo("\t\tItem in right hand or different from other hand's item");
                         itemPhysicalObject = hand.CurrentInteractable as FVRPhysicalObject;
                         savedItem["PhysicalObject"]["heldMode"] = hand.IsThisTheRightHand ? 1 : 2;
                     }
                     else
                     {
-                        Mod.instance.LogInfo("\t\tItem not right hand or same as other hand's item");
                         itemPhysicalObject = item.GetComponentInChildren<FVRPhysicalObject>();
                         savedItem["PhysicalObject"]["heldMode"] = 0;
                     }
@@ -4390,9 +4377,16 @@ namespace EFM
                         if (firearmPhysicalObject.Clip.HasARound())
                         {
                             JArray newLoadedRoundsInClip = new JArray();
-                            for (int roundIndex = 0; roundIndex < firearmPhysicalObject.Clip.m_numRounds; ++roundIndex)
+                            foreach (FVRFireArmClip.FVRLoadedRound round in firearmPhysicalObject.Clip.LoadedRounds)
                             {
-                                newLoadedRoundsInClip.Add((int)firearmPhysicalObject.Clip.LoadedRounds[roundIndex].LR_Class);
+                                if (round == null)
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    newLoadedRoundsInClip.Add((int)round.LR_Class);
+                                }
                             }
                             savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInClip;
                         }
@@ -4406,9 +4400,16 @@ namespace EFM
                     if (firearmPhysicalObject.Magazine.HasARound() && firearmPhysicalObject.Magazine.LoadedRounds != null)
                     {
                         JArray newLoadedRoundsInMag = new JArray();
-                        for (int roundIndex = 0; roundIndex < firearmPhysicalObject.Magazine.m_numRounds; ++roundIndex)
+                        foreach (FVRLoadedRound round in firearmPhysicalObject.Magazine.LoadedRounds)
                         {
-                            newLoadedRoundsInMag.Add((int)firearmPhysicalObject.Magazine.LoadedRounds[roundIndex].LR_Class);
+                            if (round == null)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                newLoadedRoundsInMag.Add((int)round.LR_Class);
+                            }
                         }
                         savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInMag;
                     }
@@ -4422,11 +4423,9 @@ namespace EFM
             }
             else if (itemPhysicalObject is FVRFireArmMagazine)
             {
-                Mod.instance.LogInfo("\tSaving a mag");
                 FVRFireArmMagazine magPhysicalObject = (itemPhysicalObject as FVRFireArmMagazine);
                 if (magPhysicalObject.HasARound())
                 {
-                    Mod.instance.LogInfo("\t\tHas at least 1 round");
                     JArray newLoadedRoundsInMag = new JArray();
                     foreach (FVRLoadedRound round in magPhysicalObject.LoadedRounds)
                     {
@@ -4436,7 +4435,6 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogInfo("\t\t\tSaving round: " + round.LR_Class);
                             newLoadedRoundsInMag.Add((int)round.LR_Class);
                         }
                     }
@@ -4504,8 +4502,6 @@ namespace EFM
                 // Armor
                 if (customItemWrapper.itemType == Mod.ItemType.BodyArmor)
                 {
-                    Mod.instance.LogInfo("Item is armor");
-
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.Equals(customItemWrapper))
                     {
@@ -4573,8 +4569,6 @@ namespace EFM
                 // Backpack
                 if(customItemWrapper.itemType == Mod.ItemType.Backpack)
                 {
-                    Mod.instance.LogInfo("Item is backpack");
-
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentBackpack != null && EFM_EquipmentSlot.currentBackpack.Equals(customItemWrapper))
                     {
@@ -4595,8 +4589,6 @@ namespace EFM
                 // Container
                 if (customItemWrapper.itemType == Mod.ItemType.Container)
                 {
-                    Mod.instance.LogInfo("Item is container");
-
                     if (savedItem["PhysicalObject"]["containerContents"] == null)
                     {
                         savedItem["PhysicalObject"]["containerContents"] = new JArray();
@@ -4612,8 +4604,6 @@ namespace EFM
                 // Pouch
                 if (customItemWrapper.itemType == Mod.ItemType.Pouch)
                 {
-                    Mod.instance.LogInfo("Item is pouch");
-
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentPouch != null && EFM_EquipmentSlot.currentPouch.Equals(customItemWrapper))
                     {
@@ -4634,8 +4624,6 @@ namespace EFM
                 // Helmet
                 if (customItemWrapper.itemType == Mod.ItemType.Helmet)
                 {
-                    Mod.instance.LogInfo("Item is Helmet");
-
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentHeadwear != null && EFM_EquipmentSlot.currentHeadwear.Equals(customItemWrapper))
                     {
@@ -4649,8 +4637,6 @@ namespace EFM
                 // Earpiece
                 if (customItemWrapper.itemType == Mod.ItemType.Earpiece)
                 {
-                    Mod.instance.LogInfo("Item is Earpiece");
-
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentEarpiece != null && EFM_EquipmentSlot.currentEarpiece.Equals(customItemWrapper))
                     {
@@ -4662,8 +4648,6 @@ namespace EFM
                 // FaceCover
                 if (customItemWrapper.itemType == Mod.ItemType.FaceCover)
                 {
-                    Mod.instance.LogInfo("Item is FaceCover");
-
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentFaceCover != null && EFM_EquipmentSlot.currentFaceCover.Equals(customItemWrapper))
                     {
@@ -4675,8 +4659,6 @@ namespace EFM
                 // Eyewear
                 if (customItemWrapper.itemType == Mod.ItemType.Eyewear)
                 {
-                    Mod.instance.LogInfo("Item is eyewear");
-
                     // If this is an equipment piece we are currently wearing
                     if (EFM_EquipmentSlot.currentEyewear != null && EFM_EquipmentSlot.currentEyewear.Equals(customItemWrapper))
                     {
@@ -4694,8 +4676,6 @@ namespace EFM
                 // Money
                 if (customItemWrapper.itemType == Mod.ItemType.Money)
                 {
-                    Mod.instance.LogInfo("Item is money");
-
                     savedItem["stack"] = customItemWrapper.stack;
                 }
 

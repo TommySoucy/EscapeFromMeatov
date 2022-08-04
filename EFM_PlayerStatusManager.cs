@@ -156,39 +156,13 @@ namespace EFM
 
             if (displayed && Vector3.Distance(setPosition, GM.CurrentPlayerRoot.position) > 10)
             {
-                transform.GetChild(0).gameObject.SetActive(false);
-                transform.GetChild(1).gameObject.SetActive(false);
-                transform.GetChild(2).gameObject.SetActive(false);
-                displayed = false;
+                SetDisplayed(false);
             }
 
             // Left (TODO: Non main hand) menu button
             if (Mod.leftHand.fvrHand.Input.BYButtonDown)
             {
-                if (displayed)
-                {
-                    displayed = false;
-                    transform.GetChild(0).gameObject.SetActive(false);
-                    transform.GetChild(1).gameObject.SetActive(false);
-                    transform.GetChild(2).gameObject.SetActive(false);
-                }
-                else
-                {
-                    // TODO: Play inventory opening sound
-                    transform.GetChild(0).gameObject.SetActive(true);
-                    transform.GetChild(1).gameObject.SetActive(true);
-                    transform.GetChild(2).gameObject.SetActive(true);
-
-                    displayed = true;
-                }
-
-                foreach(EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
-                {
-                    if(equipSlot.CurObject != null)
-                    {
-                        equipSlot.CurObject.gameObject.SetActive(displayed);
-                    }
-                }
+                SetDisplayed(!displayed);
             }
             if (Mod.leftHand.fvrHand.Input.BYButtonPressed && displayed)
             {
@@ -211,6 +185,32 @@ namespace EFM
             else if (mustUpdateTaskListHeight > 0)
             {
                 --mustUpdateTaskListHeight;
+            }
+        }
+
+        public void SetDisplayed(bool displayed)
+        {
+            this.displayed = displayed;
+
+            transform.GetChild(0).gameObject.SetActive(this.displayed);
+            transform.GetChild(1).gameObject.SetActive(this.displayed);
+            transform.GetChild(2).gameObject.SetActive(this.displayed);
+
+            if (this.displayed)
+            {
+                // TODO: Player inventory closing sound
+            }
+            else
+            {
+                // TODO: Play inventory opening sound
+            }
+
+            foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
+            {
+                if (equipSlot.CurObject != null)
+                {
+                    equipSlot.CurObject.gameObject.SetActive(this.displayed);
+                }
             }
         }
 
@@ -318,18 +318,8 @@ namespace EFM
         private void OnExitClick()
         {
             buttonClickAudio.Play();
-            displayed = false;
-            transform.GetChild(0).gameObject.SetActive(false);
-            transform.GetChild(1).gameObject.SetActive(false);
-            transform.GetChild(2).gameObject.SetActive(false);
 
-            foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
-            {
-                if (equipSlot.CurObject != null)
-                {
-                    equipSlot.CurObject.gameObject.SetActive(false);
-                }
-            }
+            SetDisplayed(false);
         }
 
         private void OnToggleTaskListClick()

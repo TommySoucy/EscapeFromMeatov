@@ -39,6 +39,7 @@ namespace EFM
 
         public void OnTriggerEnter(Collider other)
         {
+            Mod.instance.LogInfo("Damage volume, on trigger enter: " + other.name);
             if (headColliders == null)
             {
                 headColliders = new List<Collider>();
@@ -114,6 +115,7 @@ namespace EFM
 
         public void OnTriggerExit(Collider other)
         {
+            Mod.instance.LogInfo("Damage volume, on trigger exit: " + other.name);
             if (other.gameObject.layer == 15)
             {
                 for (int i = 0; i < headColliders.Count; ++i)

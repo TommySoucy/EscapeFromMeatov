@@ -50,7 +50,6 @@ namespace EFM
         private List<GameObject> extractionCards;
         private bool extracted;
         private bool spawning;
-        private float raidTime = 0;
 
         // AI
         private float initSpawnTimer = 5; // Will only start spawning AI once this much time has elapsed at start of raid
@@ -61,6 +60,7 @@ namespace EFM
             Mod.lootingExp = 0;
             Mod.healingExp = 0;
             Mod.explorationExp = 0;
+            Mod.raidTime = 0;
 
             // disable post processing
             GM.Options.PerformanceOptions.IsPostEnabled_AO = false;
@@ -583,7 +583,7 @@ namespace EFM
                 return;
             }
 
-            raidTime += Time.deltaTime;
+            Mod.raidTime += Time.deltaTime;
 
             if (Mod.instance.debug)
             {
@@ -594,6 +594,7 @@ namespace EFM
 
                     // Disable extraction list and timer
                     Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+                    Mod.playerStatusManager.SetDisplayed(false);
                     Mod.extractionUI.SetActive(false);
 
                     EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
@@ -637,10 +638,29 @@ namespace EFM
                     if (extractionTimer >= extractionTime)
                     {
                         Mod.justFinishedRaid = true;
-                        Mod.raidState = EFM_Base_Manager.FinishRaidState.Survived; // TODO: Will have to call with runthrough if exp is less than threshold
+                        float totalExp = 0;
+                        if (Mod.killList != null && Mod.killList.Count > 0) 
+                        {
+                            foreach (KeyValuePair<string, int> kill in Mod.killList)
+                            {
+                                totalExp += kill.Value;
+                            }
+                        }
+                        totalExp += Mod.lootingExp;
+                        totalExp += Mod.healingExp;
+                        totalExp += Mod.explorationExp;
+                        if (totalExp < 400 && Mod.raidTime < 420) // 420 seconds = 7 mins
+                        {
+                            Mod.raidState = EFM_Base_Manager.FinishRaidState.RunThrough;
+                        }
+                        else
+                        {
+                            Mod.raidState = EFM_Base_Manager.FinishRaidState.Survived;
+                        }
 
                         // Disable extraction list
                         Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+                        Mod.playerStatusManager.SetDisplayed(false);
                         Mod.extractionUI.SetActive(false);
 
                         EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
@@ -680,7 +700,7 @@ namespace EFM
             if(initSpawnTimer <= 0)
             {
                 // Check if time is >= spawnTime on next AISpawn in list, if it is, spawn it at spawnpoint depending on AIType
-                if(!spawning && nextSpawn != null && nextSpawn.spawnTime <= raidTime)
+                if(!spawning && nextSpawn != null && nextSpawn.spawnTime <= Mod.raidTime)
                 {
                     AnvilManager.Run(SpawnAI(nextSpawn));
                     AISpawns.RemoveAt(AISpawns.Count - 1);
@@ -1031,7 +1051,7 @@ namespace EFM
                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(itemCIW, null);
+                    Mod.RemoveFromAll(null, itemCIW, null);
 
                     // Get amount
                     if (itemCIW.itemType == Mod.ItemType.Money)
@@ -1085,7 +1105,7 @@ namespace EFM
                             }
 
                             // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                            Mod.RemoveFromAll(itemCIW, null);
+                            Mod.RemoveFromAll(null, itemCIW, null);
                         }
                         else // Spawn in generic box
                         {
@@ -1111,7 +1131,7 @@ namespace EFM
                             }
 
                             // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                            Mod.RemoveFromAll(itemCIW, null);
+                            Mod.RemoveFromAll(null, itemCIW, null);
                         }
                     }
                     else // Not a round, spawn as normal
@@ -1163,7 +1183,7 @@ namespace EFM
                         FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                         // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                        Mod.RemoveFromAll(itemCIW, null);
+                        Mod.RemoveFromAll(null, itemCIW, null);
 
                         // Get amount
                         if (itemCIW.itemType == Mod.ItemType.Money)
@@ -1217,7 +1237,7 @@ namespace EFM
                                 }
 
                                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                Mod.RemoveFromAll(itemCIW, null);
+                                Mod.RemoveFromAll(null, itemCIW, null);
                             }
                             else // Spawn in generic box
                             {
@@ -1242,7 +1262,7 @@ namespace EFM
                                 }
 
                                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                Mod.RemoveFromAll(itemCIW, null);
+                                Mod.RemoveFromAll(null, itemCIW, null);
                             }
                         }
                         else // Not a round, spawn as normal
@@ -1269,6 +1289,9 @@ namespace EFM
                 EFM_CustomItemWrapper dogtagCIW = dogtagObject.GetComponent<EFM_CustomItemWrapper>();
                 dogtagCIW.dogtagLevel = inventory.dogtagLevel;
                 dogtagCIW.dogtagName = inventory.dogtagName;
+
+                // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                Mod.RemoveFromAll(null, dogtagCIW, null);
 
                 yield return null;
             }
@@ -1309,7 +1332,7 @@ namespace EFM
                         itemPhysObj = itemObject.GetComponent<FVRPhysicalObject>();
 
                         // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                        Mod.RemoveFromAll(itemCIW, null);
+                        Mod.RemoveFromAll(null, itemCIW, null);
 
                         // Get amount
                         if (itemCIW.itemType == Mod.ItemType.Money)
@@ -1363,7 +1386,7 @@ namespace EFM
                                 }
 
                                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                Mod.RemoveFromAll(itemCIW, null);
+                                Mod.RemoveFromAll(null, itemCIW, null);
                             }
                             else // Spawn in generic box
                             {
@@ -1388,7 +1411,7 @@ namespace EFM
                                 }
 
                                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                Mod.RemoveFromAll(itemCIW, null);
+                                Mod.RemoveFromAll(null, itemCIW, null);
                             }
                         }
                         else // Not a round, spawn as normal
@@ -1454,6 +1477,10 @@ namespace EFM
                     Mod.instance.LogWarning("Sosig primary weapon not a firearm");
                     yield break;
                 }
+
+                // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                Mod.RemoveFromAll(weaponFireArm, null, weaponObject.GetComponent<EFM_VanillaItemDescriptor>());
+
                 AIInventoryWeaponMod currentParent = inventory.primaryWeaponMods;
                 Stack<FVRPhysicalObject> parentPhysObjs = new Stack<FVRPhysicalObject>();
                 parentPhysObjs.Push(weaponFireArm);
@@ -1545,7 +1572,7 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW, null);
                                 }
                                 else // Spawn in generic box
                                 {
@@ -1572,7 +1599,7 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW, null);
                                 }
                             }
                         }
@@ -1639,6 +1666,10 @@ namespace EFM
                     Mod.instance.LogWarning("Sosig secondary weapon not a firearm");
                     yield break;
                 }
+
+                // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                Mod.RemoveFromAll(weaponFireArm, null, weaponObject.GetComponent<EFM_VanillaItemDescriptor>());
+
                 AIInventoryWeaponMod currentParent = inventory.secondaryWeaponMods;
                 Stack<FVRPhysicalObject> parentPhysObjs = new Stack<FVRPhysicalObject>();
                 parentPhysObjs.Push(weaponFireArm);
@@ -1730,7 +1761,7 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW, null);
                                 }
                                 else // Spawn in generic box
                                 {
@@ -1757,7 +1788,7 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW, null);
                                 }
                             }
                         }
@@ -1824,6 +1855,10 @@ namespace EFM
                     Mod.instance.LogWarning("Sosig holster weapon not a firearm");
                     yield break;
                 }
+
+                // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                Mod.RemoveFromAll(weaponFireArm, null, weaponObject.GetComponent<EFM_VanillaItemDescriptor>());
+                
                 AIInventoryWeaponMod currentParent = inventory.holsterMods;
                 Stack<FVRPhysicalObject> parentPhysObjs = new Stack<FVRPhysicalObject>();
                 parentPhysObjs.Push(weaponFireArm);
@@ -1915,7 +1950,7 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW, null);
                                 }
                                 else // Spawn in generic box
                                 {
@@ -1942,7 +1977,7 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW, null);
                                 }
                             }
                         }
@@ -2894,6 +2929,7 @@ namespace EFM
             string[] itemParts = new string[] { "TacticalVest", "Pockets", "Backpack" };
             for (int i = 0; i < 3; ++i)
             {
+                Mod.instance.LogInfo("\t\tChecking items in: " + itemParts[i]);
                 foreach (string itemID in inventoryDataToUse["items"][itemParts[i]])
                 {
                     if (Mod.itemMap.ContainsKey(itemID))
@@ -2914,9 +2950,15 @@ namespace EFM
                         float itemVolume = 0;
                         float itemSpawnChance = 0;
                         FVRPhysicalObject itemPhysObj = null;
+                        Mod.instance.LogInfo("\t\t\t"+ actualItemID+" custom?: "+custom);
                         if (custom)
                         {
                             EFM_CustomItemWrapper itemCIW = itemPrefab.GetComponentInChildren<EFM_CustomItemWrapper>();
+                            if(itemCIW == null)
+                            {
+                                Mod.instance.LogError("Could spawn Item "+itemID+" in "+ newAISpawn.name + "'s "+itemParts[i]+" but is custom and has no CIW");
+                                continue;
+                            }
                             itemParents = itemCIW.parents;
                             itemVolume = itemCIW.volumes[0];
                             itemSpawnChance = itemCIW.spawnChance;
@@ -2924,6 +2966,11 @@ namespace EFM
                         else
                         {
                             EFM_VanillaItemDescriptor itemVID = itemPrefab.GetComponentInChildren<EFM_VanillaItemDescriptor>();
+                            if (itemVID == null)
+                            {
+                                Mod.instance.LogError("Could spawn Item " + itemID + " in " + newAISpawn.name + "'s " + itemParts[i] + " but is not custom and has no VID");
+                                continue;
+                            }
                             itemParents = itemVID.parents;
                             itemVolume = Mod.itemVolumes[actualItemID];
                             itemSpawnChance = itemVID.spawnChance;
@@ -4311,7 +4358,7 @@ namespace EFM
                 itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                Mod.RemoveFromAll(itemCIW, null);
+                Mod.RemoveFromAll(null, itemCIW, null);
 
                 // Get amount
                 amount = (itemData["upd"] != null && itemData["upd"]["StackObjectsCount"] != null) ? (int)itemData["upd"]["StackObjectsCount"] : 1;
@@ -4362,7 +4409,7 @@ namespace EFM
                             }
 
                             // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                            Mod.RemoveFromAll(itemCIW, null);
+                            Mod.RemoveFromAll(null, itemCIW, null);
                         }
                         else // Spawn in generic box
                         {
@@ -4388,7 +4435,7 @@ namespace EFM
                             }
 
                             // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                            Mod.RemoveFromAll(itemCIW, null);
+                            Mod.RemoveFromAll(null, itemCIW, null);
                         }
                     }
                     else // Single round, spawn as normal
@@ -4404,6 +4451,12 @@ namespace EFM
                     itemObject = GameObject.Instantiate(itemPrefab);
                     itemVID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
                     itemPhysObj = itemVID.GetComponent<FVRPhysicalObject>();
+
+                    if(itemPhysObj is FVRFireArm)
+                    {
+                        // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+                        Mod.RemoveFromAll(itemPhysObj, null, itemVID);
+                    }
                 }
             }
 

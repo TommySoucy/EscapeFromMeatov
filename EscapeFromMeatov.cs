@@ -61,6 +61,7 @@ namespace EFM
         public static int lootingExp = 0;
         public static int healingExp = 0;
         public static int explorationExp = 0;
+        public static float raidTime = 0;
         public static bool grillHouseSecure;
         public static bool isGrillhouse;
         public static bool inMeatovScene;
@@ -1414,20 +1415,27 @@ namespace EFM
             return root.gameObject;
         }
 
-        public static void AddToAll(EFM_CustomItemWrapper CIW, FVRInteractiveObject interactiveObject)
+        public static void AddToAll(FVRInteractiveObject interactiveObject, EFM_CustomItemWrapper CIW, EFM_VanillaItemDescriptor VID)
         {
-            if (!CIW.inAll)
+            if (CIW != null && !CIW.inAll)
             {
                 typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(interactiveObject, FVRInteractiveObject.All.Count);
-                FVRInteractiveObject.All.Add(interactiveObject); 
+                FVRInteractiveObject.All.Add(interactiveObject);
 
                 CIW.inAll = true;
             }
+            else if (VID != null && !VID.inAll)
+            {
+                typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(interactiveObject, FVRInteractiveObject.All.Count);
+                FVRInteractiveObject.All.Add(interactiveObject);
+
+                VID.inAll = true;
+            }
         }
 
-        public static void RemoveFromAll(EFM_CustomItemWrapper CIW, FVRInteractiveObject interactiveObject)
+        public static void RemoveFromAll(FVRInteractiveObject interactiveObject, EFM_CustomItemWrapper CIW, EFM_VanillaItemDescriptor VID)
         {
-            if (CIW.inAll || interactiveObject == null)
+            if (CIW != null && (CIW.inAll || interactiveObject == null))
             {
                 if (interactiveObject == null)
                 {
@@ -1443,6 +1451,23 @@ namespace EFM
                 indexField.SetValue(interactiveObject, -1);
 
                 CIW.inAll = false;
+            }
+            else if (VID != null && (VID.inAll || interactiveObject == null))
+            {
+                if (interactiveObject == null)
+                {
+                    interactiveObject = FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1];
+                }
+                FieldInfo indexField = typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic);
+                int currentIndex = (int)indexField.GetValue(interactiveObject);
+
+                FVRInteractiveObject.All[currentIndex] = FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1];
+                indexField.SetValue(FVRInteractiveObject.All[currentIndex], currentIndex);
+                FVRInteractiveObject.All.RemoveAt(FVRInteractiveObject.All.Count - 1);
+
+                indexField.SetValue(interactiveObject, -1);
+
+                VID.inAll = false;
             }
         }
 
@@ -2353,6 +2378,7 @@ namespace EFM
         private void LoadMeatov()
         {
             // Set LOD bias
+            // TODO: This is dependent on which headseat is being used
             QualitySettings.lodBias = 15;
 
             // Get root
@@ -3007,14 +3033,18 @@ namespace EFM
             }
 
             EFM_CustomItemWrapper heldCustomItemWrapper = primary.GetComponent<EFM_CustomItemWrapper>();
+            EFM_VanillaItemDescriptor heldVanillaItemDescriptor = primary.GetComponent<EFM_VanillaItemDescriptor>();
 
             // Remove from All if necessary
             if (heldCustomItemWrapper != null)
             {
-                Mod.RemoveFromAll(heldCustomItemWrapper, primary);
+                Mod.RemoveFromAll(primary, heldCustomItemWrapper, null);
+            }
+            else if(heldVanillaItemDescriptor != null && primary is FVRFireArm)
+            {
+                Mod.RemoveFromAll(primary, null, heldVanillaItemDescriptor);
             }
 
-            EFM_VanillaItemDescriptor heldVanillaItemDescriptor = primary.GetComponent<EFM_VanillaItemDescriptor>();
             if (collidingContainerWrapper != null && (hand.IsThisTheRightHand ? Mod.rightHand.hoverValid : Mod.leftHand.hoverValid) && (heldCustomItemWrapper == null || !heldCustomItemWrapper.Equals(collidingContainerWrapper)))
             {
                 Mod.instance.LogInfo("\tChecking if item fits in container");
@@ -3645,9 +3675,14 @@ namespace EFM
 
                 // Add to All if necessary
                 EFM_CustomItemWrapper customItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
+                EFM_VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
                 if(customItemWrapper != null)
                 {
-                    Mod.AddToAll(customItemWrapper, __instance);
+                    Mod.AddToAll(__instance, customItemWrapper, null);
+                }
+                else if(vanillaItemDescriptor != null && __instance is FVRFireArm)
+                {
+                    Mod.AddToAll(__instance, null, vanillaItemDescriptor);
                 }
             }
         }
@@ -3837,7 +3872,7 @@ namespace EFM
             if (customItemWrapper != null)
             {
                 // Add to All if necessary
-                Mod.AddToAll(customItemWrapper, __instance);
+                Mod.AddToAll(__instance, customItemWrapper, null);
 
                 if (customItemWrapper.hideoutSpawned)
                 {
@@ -3957,6 +3992,12 @@ namespace EFM
                 {
                     vanillaItemDescriptor.looted = true;
                     Mod.AddExperience(vanillaItemDescriptor.lootExperience, 1);
+                }
+
+                if(__instance is FVRFireArm)
+                {
+                    // Add to All if necessary
+                    Mod.AddToAll(__instance, null, vanillaItemDescriptor);
                 }
 
                 // Update lists

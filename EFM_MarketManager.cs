@@ -3662,7 +3662,6 @@ namespace EFM
         public IEnumerator SpawnVanillaItem(string ID, int count)
         {
             yield return IM.OD[ID].GetGameObjectAsync();
-            Mod.instance.LogInfo("spawn vanilla got GO");
             GameObject itemPrefab = IM.OD[ID].GetGameObject();
             if (itemPrefab == null)
             {
@@ -3671,15 +3670,11 @@ namespace EFM
                 IM.OD[ID].RefreshCache();
                 itemPrefab = IM.OD[ID].GetGameObject();
             }
-            Mod.instance.LogInfo("-1");
             EFM_VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<EFM_VanillaItemDescriptor>();
-            Mod.instance.LogInfo("-1");
             BoxCollider tradeVolumeCollider = tradeVolume.GetComponentInChildren<BoxCollider>();
-            Mod.instance.LogInfo("-1");
             GameObject itemObject = null;
             bool spawnedSmallBox = false;
             bool spawnedBigBox = false;
-            Mod.instance.LogInfo("-1");
             if (Mod.usedRoundIDs.Contains(prefabVID.H3ID))
             {
                 // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of round
