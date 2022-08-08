@@ -24,6 +24,7 @@ namespace EFM
         public Text energyText;
         public Text energyDeltaText;
         private Text weightText;
+        public Text extractionTimerText;
 
         private AudioSource buttonClickAudio;
         private List<TraderTask> taskList;
@@ -114,6 +115,8 @@ namespace EFM
             exitButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             buttonClickAudio = transform.GetChild(5).GetComponent<AudioSource>();
             exitButton.Button.onClick.AddListener(() => { OnExitClick(); });
+            // Set extraction timer text
+            extractionTimerText = transform.GetChild(0).GetChild(9).GetChild(0).GetChild(1).GetChild(0).GetComponent<Text>();
 
             // Init task list, fill it with trader tasks currently active and complete, set buttons and hoverscrolls
             EFM_HoverScroll downHoverScroll = transform.GetChild(1).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
@@ -186,6 +189,11 @@ namespace EFM
             {
                 --mustUpdateTaskListHeight;
             }
+        }
+
+        public void SetExtractionLimitTimer(float raidTimeLeft)
+        {
+            extractionTimerText.text = Mod.FormatTimeString(raidTimeLeft);
         }
 
         public void SetDisplayed(bool displayed)

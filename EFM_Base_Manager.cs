@@ -1111,6 +1111,11 @@ namespace EFM
             Mod.extractionUIText = Mod.extractionUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
             Mod.extractionUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
             Mod.extractionUI.SetActive(false);
+            // Extraction limit UI
+            Mod.extractionLimitUI = Instantiate(Mod.extractionLimitUIPrefab, GM.CurrentPlayerRoot);
+            Mod.extractionLimitUIText = Mod.extractionLimitUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
+            Mod.extractionLimitUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+            Mod.extractionLimitUI.SetActive(false);
             // ItemDescription UIs
             Mod.leftDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
             Mod.leftDescriptionManager = Mod.leftDescriptionUI.AddComponent<EFM_DescriptionManager>();
@@ -1612,6 +1617,20 @@ namespace EFM
                     }
                 }
 
+                // Init exploration trigger bools
+                if(Mod.triggeredExplorationTriggers == null)
+                {
+                    Mod.triggeredExplorationTriggers = new List<List<bool>>();
+                }
+                else
+                {
+                    Mod.triggeredExplorationTriggers.Clear();
+                }
+                for(int i=0; i < 12; ++i)
+                {
+                    Mod.triggeredExplorationTriggers.Add(new List<bool>());
+                }
+
                 // Init lists
                 UpdateBaseInventory();
                 if (Mod.playerInventory == null)
@@ -1791,6 +1810,23 @@ namespace EFM
                 else
                 {
                     task.Value.statusListElement = null;
+                }
+            }
+
+            // Load triggered exploration triggers
+            if(Mod.triggeredExplorationTriggers == null)
+            {
+                Mod.triggeredExplorationTriggers = new List<List<bool>>();
+            }
+            else
+            {
+                Mod.triggeredExplorationTriggers.Clear();
+            }
+            if(data["triggeredExplorationTriggers"] != null)
+            {
+                for(int i=0; i < 12; ++i)
+                {
+                    Mod.triggeredExplorationTriggers.Add(data["triggeredExplorationTriggers"][i].ToObject<List<bool>>());
                 }
             }
         }
@@ -4245,6 +4281,14 @@ namespace EFM
                     newSavedInsuredSet["items"] = JObject.FromObject(Mod.insuredItems[i].items);
                     savedInsuredSets.Add(newSavedInsuredSet);
                 }
+            }
+
+            // Save triggered exploration triggers
+            JArray savedExperiencetriggers = new JArray();
+            data["triggeredExplorationTriggers"] = savedExperiencetriggers;
+            for (int i = 0; i < 12; ++i)
+            {
+                savedExperiencetriggers.Add(JArray.FromObject(Mod.triggeredExplorationTriggers[i]));
             }
 
             // Replace data

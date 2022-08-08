@@ -100,6 +100,7 @@ namespace EFM
         public static int attachmentCheckNeeded;
         public static List<FVRInteractiveObject> physObjColResetList;
         public static int physObjColResetNeeded;
+        public static List<List<bool>> triggeredExplorationTriggers;
 
         // Player
         public static GameObject playerStatusUI;
@@ -148,6 +149,8 @@ namespace EFM
         public static Transform stackSplitUICursor;
         public static GameObject extractionUI;
         public static Text extractionUIText;
+        public static GameObject extractionLimitUI;
+        public static Text extractionLimitUIText;
         public static GameObject leftDescriptionUI;
         public static EFM_DescriptionManager leftDescriptionManager;
         public static GameObject rightDescriptionUI;
@@ -207,6 +210,7 @@ namespace EFM
         public static Dictionary<string, Sprite> itemIcons;
         public static GameObject playerStatusUIPrefab;
         public static GameObject extractionUIPrefab;
+        public static GameObject extractionLimitUIPrefab;
         public static GameObject extractionCardPrefab;
         public static GameObject consumeUIPrefab;
         public static GameObject stackSplitUIPrefab;
@@ -290,6 +294,7 @@ namespace EFM
 
         public void Update()
         {
+            continue from here add notification system
             if (Input.GetKeyDown(KeyCode.KeypadPeriod))
             {
                 debug = !debug;
@@ -456,6 +461,7 @@ namespace EFM
             consumeUIPrefab = assetsBundle.LoadAsset<GameObject>("ConsumeUI");
             stackSplitUIPrefab = assetsBundle.LoadAsset<GameObject>("StackSplitUI");
             extractionUIPrefab = assetsBundle.LoadAsset<GameObject>("ExtractionUI");
+            extractionLimitUIPrefab = assetsBundle.LoadAsset<GameObject>("ExtractionLimitUI");
             extractionCardPrefab = assetsBundle.LoadAsset<GameObject>("ExtractionCard");
             itemDescriptionUIPrefab = assetsBundle.LoadAsset<GameObject>("ItemDescriptionUI");
             neededForPrefab = assetsBundle.LoadAsset<GameObject>("NeededForText");
@@ -2616,6 +2622,14 @@ namespace EFM
                 default:
                     return "None";
             }
+        }
+
+        public static string FormatTimeString(float time)
+        {
+            int hours = (int)(time / 3600);
+            int minutes = (int)(time % 3600 / 60);
+            int seconds = (int)(time % 3600 % 60);
+            return String.Format("{0:00}:{1:00}:{2:00}", hours, minutes, seconds);
         }
     }
 

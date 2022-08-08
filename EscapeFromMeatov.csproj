@@ -82,6 +82,7 @@
     <Compile Include="EFM_DoorWrapper.cs" />
     <Compile Include="EFM_Effect.cs" />
     <Compile Include="EFM_EquipmentSlot.cs" />
+    <Compile Include="EFM_ExperienceTrigger.cs" />
     <Compile Include="EFM_GCManager.cs" />
     <Compile Include="EFM_Hand.cs" />
     <Compile Include="EFM_HoverScroll.cs" />

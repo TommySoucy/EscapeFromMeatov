@@ -29,6 +29,7 @@ namespace EFM
         public Light sun;
         public float time;
         public EFM_GCManager GCManager;
+        private float maxRaidTime;
 
         public float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
         public float[] currentHealthRates;
@@ -543,6 +544,16 @@ namespace EFM
                 newDamageVolume.Init();
             }
 
+            // Init experience triggers
+            Transform expTriggersParent = transform.GetChild(1).GetChild(1).GetChild(3).GetChild(5);
+            for (int i=0; i < expTriggersParent.childCount; ++i)
+            {
+                if (!Mod.triggeredExplorationTriggers[Mod.chosenMapIndex][i])
+                {
+                    expTriggersParent.GetChild(i).gameObject.AddComponent<EFM_ExperienceTrigger>();
+                }
+            }
+
             //// Output missing items
             //if (Mod.instance.debug)
             //{
@@ -584,6 +595,32 @@ namespace EFM
             }
 
             Mod.raidTime += Time.deltaTime;
+            float timeLeft = maxRaidTime - Mod.raidTime;
+            Mod.playerStatusManager.SetExtractionLimitTimer(timeLeft);
+            if(timeLeft <= 600)
+            {
+                if (!Mod.extractionLimitUI.activeSelf)
+                {
+                    Mod.extractionLimitUI.SetActive(true);
+                }
+                Mod.extractionLimitUIText.text = Mod.FormatTimeString(timeLeft);
+
+                // Position extraction limit UI
+                Vector3 vector = GM.CurrentPlayerBody.Head.position + Vector3.up * 0.25f;
+                Vector3 vector2 = GM.CurrentPlayerBody.Head.forward;
+                vector2.y = 0f;
+                vector2.Normalize();
+                vector2 *= 0.35f;
+                vector += vector2;
+                Mod.extractionUI.transform.position = vector;
+                Mod.extractionUI.transform.rotation = Quaternion.LookRotation(vector2, Vector3.up);
+                Mod.extractionUI.transform.Rotate(Vector3.right, -25);
+
+                if (Mod.playerStatusManager.extractionTimerText.color != Color.red)
+                {
+                    Mod.playerStatusManager.extractionTimerText.color = Color.red;
+                }
+            }
 
             if (Mod.instance.debug)
             {
@@ -594,6 +631,8 @@ namespace EFM
 
                     // Disable extraction list and timer
                     Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+                    Mod.playerStatusManager.extractionTimerText.color = Color.black;
+                    Mod.extractionLimitUI.SetActive(false);
                     Mod.playerStatusManager.SetDisplayed(false);
                     Mod.extractionUI.SetActive(false);
 
@@ -660,6 +699,8 @@ namespace EFM
 
                         // Disable extraction list
                         Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+                        Mod.playerStatusManager.extractionTimerText.color = Color.black; 
+                        Mod.extractionLimitUI.SetActive(false);
                         Mod.playerStatusManager.SetDisplayed(false);
                         Mod.extractionUI.SetActive(false);
 
@@ -683,6 +724,12 @@ namespace EFM
                 inExtractionLastFrame = false;
 
                 Mod.extractionUI.SetActive(false);
+            }
+
+            // If hit escape time limit
+            if(Mod.raidTime >= maxRaidTime)
+            {
+                KillPlayer(EFM_Base_Manager.FinishRaidState.MIA);
             }
 
             UpdateEffects();
@@ -2128,7 +2175,7 @@ namespace EFM
             // Get location's base data
             locationData = Mod.locationsBaseDB[GetLocationDataIndex(Mod.chosenMapIndex)];
             float averageLevel = (float)locationData["AveragePlayerLevel"];
-            float maxRaidTime = (float)locationData["escape_time_limit"] * 60;
+            maxRaidTime = (float)locationData["escape_time_limit"] * 60;
             maxBotPerZone = (int)locationData["MaxBotPerZone"];
 
             // Add AIManager to map
@@ -2149,6 +2196,16 @@ namespace EFM
             entities.Add(GM.CurrentPlayerBody.Hitboxes[0].MyE); // Add player as first entity
             entityRelatedAI = new List<EFM_AI>();
             entityRelatedAI.Add(null); // Place holder for player entity
+
+            // Init AI Cover points
+            Transform coverPointsParent = transform.GetChild(1).GetChild(1).GetChild(3).GetChild(0);
+            GM.CurrentAIManager.CPM = gameObject.AddComponent<AICoverPointManager>();
+            GM.CurrentAIManager.CPM.MyCoverPoints = new List<AICoverPoint>();
+            for (int i = 0; i < coverPointsParent.childCount; ++i)
+            {
+                AICoverPoint newCoverPoint = coverPointsParent.GetChild(i).gameObject.AddComponent<AICoverPoint>();
+                GM.CurrentAIManager.CPM.MyCoverPoints.Add(newCoverPoint);
+            }
 
             // Bosses
             if (spawnCultPriest)
@@ -4679,7 +4736,7 @@ namespace EFM
             }
         }
 
-        public void KillPlayer()
+        public void KillPlayer(EFM_Base_Manager.FinishRaidState raidState = EFM_Base_Manager.FinishRaidState.KIA)
         {
             if (Mod.dead)
             {
@@ -4855,10 +4912,12 @@ namespace EFM
 
             // Set raid state
             Mod.justFinishedRaid = true;
-            Mod.raidState = EFM_Base_Manager.FinishRaidState.KIA;
+            Mod.raidState = raidState;
 
             // Disable extraction list and timer
             Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+            Mod.playerStatusManager.extractionTimerText.color = Color.black;
+            Mod.extractionLimitUI.SetActive(false);
             Mod.extractionUI.SetActive(false);
 
             EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid

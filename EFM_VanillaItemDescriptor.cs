@@ -212,7 +212,6 @@ namespace EFM
                 {
                     descriptionPack.amountRequired += Mod.requiredPerArea[i][H3ID];
                     descriptionPack.amountRequiredPerArea[i] = Mod.requiredPerArea[i][H3ID];
-
                 }
                 else
                 {
