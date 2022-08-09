@@ -78,6 +78,7 @@
     <Compile Include="EFM_DamageVolume.cs" />
     <Compile Include="EFM_Describable.cs" />
     <Compile Include="EFM_DescriptionManager.cs" />
+    <Compile Include="EFM_DestroyTimer.cs" />
     <Compile Include="EFM_DoorLockChecker.cs" />
     <Compile Include="EFM_DoorWrapper.cs" />
     <Compile Include="EFM_Effect.cs" />

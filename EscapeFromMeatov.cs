@@ -294,7 +294,6 @@ namespace EFM
 
         public void Update()
         {
-            continue from here add notification system
             if (Input.GetKeyDown(KeyCode.KeypadPeriod))
             {
                 debug = !debug;

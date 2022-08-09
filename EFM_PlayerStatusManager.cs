@@ -25,6 +25,9 @@ namespace EFM
         public Text energyDeltaText;
         private Text weightText;
         public Text extractionTimerText;
+        private Transform notificationsParent;
+        private GameObject notificationPrefab;
+        private AudioSource notificationSound;
 
         private AudioSource buttonClickAudio;
         private List<TraderTask> taskList;
@@ -138,6 +141,11 @@ namespace EFM
             taskListButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             taskListButton.Button.onClick.AddListener(() => { OnToggleTaskListClick(); });
 
+            // Init notificaiton stuff
+            notificationsParent = transform.GetChild(0).GetChild(12);
+            notificationPrefab = notificationsParent.GetChild(1).gameObject;
+            notificationSound = notificationsParent.GetChild(0).GetComponent<AudioSource>();
+
             // Set background pointable
             FVRPointable backgroundPointable = transform.GetChild(0).gameObject.AddComponent<FVRPointable>();
             backgroundPointable.MaxPointingRange = 30;
@@ -194,6 +202,14 @@ namespace EFM
         public void SetExtractionLimitTimer(float raidTimeLeft)
         {
             extractionTimerText.text = Mod.FormatTimeString(raidTimeLeft);
+        }
+
+        public void AddNotification(string text)
+        {
+            notificationSound.Play();
+            GameObject notification = Instantiate(notificationPrefab, notificationsParent);
+            notification.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = text;
+            notification.AddComponent<EFM_DestroyTimer>().timer = 5;
         }
 
         public void SetDisplayed(bool displayed)
