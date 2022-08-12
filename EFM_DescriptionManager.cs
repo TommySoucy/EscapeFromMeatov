@@ -322,7 +322,7 @@ namespace EFM
                 summaryNeededIcons[2].SetActive(false);
             }
             summaryNeededIcons[3].SetActive(this.descriptionPack.onWishlist);
-            summaryWeightText.text = this.descriptionPack.weight.ToString()+"kg";
+            summaryWeightText.text = (this.descriptionPack.weight / 1000.0f).ToString()+"kg";
             summaryVolumeText.text = this.descriptionPack.volume.ToString()+"L";
 
             // Full
@@ -511,7 +511,7 @@ namespace EFM
                 compatibleAmmoTitle.SetActive(false);
                 compatibleAmmo.SetActive(false);
             }
-            propertiesText.text = "Weight: " + this.descriptionPack.weight + "kg, Volume: " + this.descriptionPack.volume;
+            propertiesText.text = "Weight: " + (this.descriptionPack.weight / 1000.0f) + "kg, Volume: " + this.descriptionPack.volume;
 
             if (this.descriptionPack.containedAmmoClasses != null)
             {

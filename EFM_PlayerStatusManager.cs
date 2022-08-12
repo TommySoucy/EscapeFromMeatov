@@ -275,7 +275,7 @@ namespace EFM
 
                 Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
             }
-            else if(Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100 * 20)
+            else if(Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100.0f * 20)
             {
                 // Reset stamina timer to prevent stamina regen even while not moving if we are 20% above max weight
                 Mod.staminaTimer = 2;
@@ -356,8 +356,8 @@ namespace EFM
 
         public void UpdateWeight()
         {
-            weightText.text = String.Format("{0:0.#}", Mod.weight) + "/ " + Mod.currentWeightLimit;
-            if(Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100 * 20) // Current weight limit + 20%
+            weightText.text = String.Format("{0:0.#}", Mod.weight / 1000.0f) + "/ " + Mod.currentWeightLimit;
+            if(Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100.0f * 20) // Current weight limit + 20%
             {
                 weightText.color = Color.red;
 

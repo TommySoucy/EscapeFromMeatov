@@ -35,7 +35,7 @@ namespace EFM
         public EFM_DescriptionManager descriptionManager; // The current description manager displaying this item's description
         public List<EFM_MarketItemView> marketItemViews;
         public bool inAll;
-        public float weight; // The original weight of the item. We need to keep it ourselves because we would usually use the RB mass but the RB gets destroyed when a mag gets put in a firearm
+        public int weight; // The original weight of the item. We need to keep it ourselves because we would usually use the RB mass but the RB gets destroyed when a mag gets put in a firearm
         private bool _insured;
         public bool insured
         {
@@ -49,8 +49,8 @@ namespace EFM
                 }
             }
         }
-        private float _currentWeight; // Includes attachments and ammo containers attached to this item
-        public float currentWeight
+        private int _currentWeight; // Includes attachments and ammo containers attached to this item
+        public int currentWeight
         {
             get { return _currentWeight; }
             set
@@ -71,11 +71,11 @@ namespace EFM
             if (physObj.RootRigidbody == null)
             {
                 // This has to be done because attachments and ammo container, when attached to a firearm, will have their rigidbodies detroyed
-                weight = ((FVRPhysicalObject.RigidbodyStoredParams)typeof(FVRPhysicalObject).GetField("StoredRBParams").GetValue(physObj)).Mass;
+                weight = (int)(((FVRPhysicalObject.RigidbodyStoredParams)typeof(FVRPhysicalObject).GetField("StoredRBParams").GetValue(physObj)).Mass * 1000);
             }
             else
             {
-                weight = physObj.RootRigidbody.mass;
+                weight = (int)(physObj.RootRigidbody.mass * 1000);
             }
 
             if (physObj is FVRFireArm)
@@ -127,7 +127,7 @@ namespace EFM
             SetCurrentWeight(this);
         }
 
-        public static float SetCurrentWeight(EFM_VanillaItemDescriptor item)
+        public static int SetCurrentWeight(EFM_VanillaItemDescriptor item)
         {
             if(item == null)
             {
@@ -141,7 +141,7 @@ namespace EFM
                 FVRFireArm asFireArm = (FVRFireArm)item.physObj;
 
                 // Considering 0.015g per round
-                item.currentWeight += 0.015f * (asFireArm.GetChamberRoundList() == null ? 0 : asFireArm.GetChamberRoundList().Count);
+                item.currentWeight += 15 * (asFireArm.GetChamberRoundList() == null ? 0 : asFireArm.GetChamberRoundList().Count);
 
                 // Ammo container
                 if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
@@ -186,18 +186,18 @@ namespace EFM
             {
                 FVRFireArmMagazine asFireArmMagazine = (FVRFireArmMagazine)item.physObj;
 
-                item.currentWeight += 0.015f * asFireArmMagazine.m_numRounds;
+                item.currentWeight += 15 * asFireArmMagazine.m_numRounds;
             }
             else if (item.physObj is FVRFireArmClip)
             {
                 FVRFireArmClip asFireArmClip = (FVRFireArmClip)item.physObj;
 
-                item.currentWeight += 0.015f * asFireArmClip.m_numRounds;
+                item.currentWeight += 15 * asFireArmClip.m_numRounds;
             }
             else if(item.GetComponentInChildren<M203>() != null)
             {
                 M203 m203 = item.GetComponentInChildren<M203>();
-                item.currentWeight += m203.Chamber.IsFull ? 0.1f : 0;
+                item.currentWeight += m203.Chamber.IsFull ? 100 : 0;
             }
 
             return item.currentWeight;

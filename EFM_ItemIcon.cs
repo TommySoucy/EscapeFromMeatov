@@ -13,8 +13,8 @@ namespace EFM
 		public string itemID;
         public string itemName;
         public string description;
-        public float weight;
-        public float volume;
+        public int weight;
+        public int volume;
 
 		public bool isPhysical;
 		public bool isCustom;

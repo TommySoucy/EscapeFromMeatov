@@ -42,8 +42,8 @@ namespace EFM
 				}
 			}
 		}
-		private float _currentWeight; // Includes attachments and ammo containers attached to this item
-		public float currentWeight
+		private int _currentWeight; // Includes attachments and ammo containers attached to this item
+		public int currentWeight
 		{
 			get { return _currentWeight; }
 			set
@@ -77,7 +77,7 @@ namespace EFM
 		}
 		public GameObject[] models;
 		public GameObject[] interactiveSets;
-		public float[] volumes;
+		public int[] volumes;
 
 		// Helmet
 		public bool blocksEarpiece;
@@ -111,9 +111,9 @@ namespace EFM
 		public bool canInsertItems = true;
 		public Text volumeIndicatorText;
 		public GameObject volumeIndicator;
-		public float maxVolume;
-		private float _containingVolume;
-		public float containingVolume 
+		public int maxVolume;
+		private int _containingVolume;
+		public int containingVolume 
 		{ 
 			get { return _containingVolume; }
 			set {
@@ -122,7 +122,7 @@ namespace EFM
 				{
 					descriptionManager.SetDescriptionPack();
 				}
-				volumeIndicatorText.text = _containingVolume.ToString() +"/"+maxVolume;
+				volumeIndicatorText.text = (_containingVolume / 1000.0f).ToString() +"/"+(maxVolume / 1000.0f);
 			}
 		}
 		public class ResetColPair
@@ -224,14 +224,14 @@ namespace EFM
 			}
 		}
 
-		public static float SetCurrentWeight(EFM_CustomItemWrapper item)
+		public static int SetCurrentWeight(EFM_CustomItemWrapper item)
 		{
 			if (item == null)
 			{
 				return 0;
 			}
 
-			item.currentWeight = item.GetComponent<Rigidbody>().mass;
+			item.currentWeight = (int)(item.GetComponent<Rigidbody>().mass * 1000);
 
 			if (item.itemType == Mod.ItemType.Rig || item.itemType == Mod.ItemType.ArmoredRig)
 			{
@@ -276,7 +276,7 @@ namespace EFM
 				FVRFireArmMagazine magazine = item.GetComponent<FVRFireArmMagazine>();
 				if (magazine != null)
 				{
-					item.currentWeight += 0.015f * magazine.m_numRounds;
+					item.currentWeight += 15 * magazine.m_numRounds;
 				}
             }
 
@@ -335,7 +335,7 @@ namespace EFM
 			}
 
 			// Get item volume
-			float volumeToUse = 0;
+			int volumeToUse = 0;
 			string IDToUse = "";
 			List<string> parentsToUse = null;
 			EFM_CustomItemWrapper wrapper = item.GetComponent<EFM_CustomItemWrapper>();

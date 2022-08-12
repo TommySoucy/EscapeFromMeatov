@@ -1331,8 +1331,8 @@ namespace EFM
                         // Setup farm cost itemIcon
                         string itemName = Mod.itemNames[currentRequirement.ID];
                         string itemDescription = Mod.itemDescriptions[currentRequirement.ID];
-                        float itemWeight = Mod.itemWeights[currentRequirement.ID];
-                        float itemVolume = Mod.itemVolumes[currentRequirement.ID];
+                        int itemWeight = Mod.itemWeights[currentRequirement.ID];
+                        int itemVolume = Mod.itemVolumes[currentRequirement.ID];
                         EFM_ItemIcon costItemIconScript = newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
                         costItemIconScript.itemID = currentRequirement.ID;
                         costItemIconScript.itemName = itemName;
@@ -1407,8 +1407,8 @@ namespace EFM
                             // Setup farm cost itemIcon
                             string itemName = Mod.itemNames[currentRequirement.ID];
                             string itemDescription = Mod.itemDescriptions[currentRequirement.ID];
-                            float itemWeight = Mod.itemWeights[currentRequirement.ID];
-                            float itemVolume = Mod.itemVolumes[currentRequirement.ID];
+                            int itemWeight = Mod.itemWeights[currentRequirement.ID];
+                            int itemVolume = Mod.itemVolumes[currentRequirement.ID];
                             EFM_ItemIcon costItemIconScript = newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
                             costItemIconScript.itemID = currentRequirement.ID;
                             costItemIconScript.itemName = itemName;

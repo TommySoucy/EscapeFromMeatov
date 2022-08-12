@@ -39,8 +39,8 @@ namespace EFM
         public int[] amountRequiredPerArea = new int[22];
         public int amountRequiredQuest;
         public bool insured;
-        public float weight;
-        public float volume;
+        public int weight;
+        public int volume;
         public Dictionary<string, int> compatibleAmmoContainers;
         public Dictionary<string, int> compatibleAmmo;
     }

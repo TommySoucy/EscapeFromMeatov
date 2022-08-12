@@ -162,8 +162,8 @@ namespace EFM
         public static int MIARaidCount;
         public static int KIARaidCount;
         public static int failedRaidCount;
-        private static float _weight = 0;
-        public static float weight
+        private static int _weight = 0;
+        public static int weight
         {
             set
             {
@@ -175,8 +175,8 @@ namespace EFM
                 return _weight;
             }
         }
-        private static float _currentWeightLimit = 55;
-        public static float currentWeightLimit
+        private static int _currentWeightLimit = 55000;
+        public static int currentWeightLimit
         {
             set
             {
@@ -201,8 +201,8 @@ namespace EFM
         public static List<GameObject> itemPrefabs;
         public static Dictionary<string, string> itemNames;
         public static Dictionary<string, string> itemDescriptions;
-        public static Dictionary<string, float> itemWeights;
-        public static Dictionary<string, float> itemVolumes;
+        public static Dictionary<string, int> itemWeights;
+        public static Dictionary<string, int> itemVolumes;
         public static GameObject doorLeftPrefab;
         public static GameObject doorRightPrefab;
         public static GameObject doorDoublePrefab;
@@ -540,8 +540,8 @@ namespace EFM
             itemPrefabs = new List<GameObject>();
             itemNames = new Dictionary<string, string>();
             itemDescriptions = new Dictionary<string, string>();
-            itemWeights = new Dictionary<string, float>();
-            itemVolumes = new Dictionary<string, float>();
+            itemWeights = new Dictionary<string, int>();
+            itemVolumes = new Dictionary<string, int>();
             itemIcons = new Dictionary<string, Sprite>();
             defaultItemsData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DefaultItemData.txt"));
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
@@ -614,7 +614,7 @@ namespace EFM
                 itemObjectWrapper.DisplayName = defaultObjectWrapper["DisplayName"].ToString();
                 itemObjectWrapper.Category = (FVRObject.ObjectCategory)((int)defaultObjectWrapper["Category"]);
                 itemObjectWrapper.Mass = itemPrefab.GetComponent<Rigidbody>().mass;
-                itemWeights.Add(i.ToString(), itemObjectWrapper.Mass);
+                itemWeights.Add(i.ToString(), (int)(itemObjectWrapper.Mass * 1000));
                 itemObjectWrapper.MagazineCapacity = (int)defaultObjectWrapper["MagazineCapacity"];
                 itemObjectWrapper.RequiresPicatinnySight = (bool)defaultObjectWrapper["RequiresPicatinnySight"];
                 itemObjectWrapper.TagEra = (FVRObject.OTagEra)(int)defaultObjectWrapper["TagEra"];
@@ -637,7 +637,13 @@ namespace EFM
                 EFM_CustomItemWrapper customItemWrapper = itemPrefab.AddComponent<EFM_CustomItemWrapper>();
                 customItemWrapper.ID = i.ToString();
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
-                customItemWrapper.volumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
+                float[] tempVolumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
+                customItemWrapper.volumes = new int[tempVolumes.Length];
+                for(int volIndex=0; volIndex < tempVolumes.Length; ++volIndex)
+                {
+                    customItemWrapper.volumes[volIndex] = (int)(tempVolumes[volIndex] * 1000);
+                }
+
                 itemVolumes.Add(i.ToString(), customItemWrapper.volumes[0]);
                 customItemWrapper.parents = defaultItemsData["ItemDefaults"][i]["parents"] != null ? defaultItemsData["ItemDefaults"][i]["parents"].ToObject<List<String>>() : new List<string>();
                 if (itemAncestors == null)
@@ -870,7 +876,7 @@ namespace EFM
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
-                    customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["BackpackProperties"]["MaxVolume"];
+                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["BackpackProperties"]["MaxVolume"] * 1000);
 
                     // Set filter lists
                     SetFilterListsFor(customItemWrapper, i);
@@ -891,7 +897,7 @@ namespace EFM
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
-                    customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
+                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"]*1000);
 
                     // Set filter lists
                     SetFilterListsFor(customItemWrapper, i);
@@ -912,7 +918,7 @@ namespace EFM
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
-                    customItemWrapper.maxVolume = (float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"];
+                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"]*1000);
 
                     // Set filter lists
                     SetFilterListsFor(customItemWrapper, i);
@@ -1270,7 +1276,7 @@ namespace EFM
                 Mod.instance.LogInfo("Setting vanilla Item: " + H3ID);
                 GameObject itemPrefab = IM.OD[H3ID].GetGameObject();
                 EFM_VanillaItemDescriptor descriptor = itemPrefab.AddComponent<EFM_VanillaItemDescriptor>();
-                itemWeights.Add(H3ID, itemPrefab.GetComponent<Rigidbody>().mass);
+                itemWeights.Add(H3ID, (int)(itemPrefab.GetComponent<Rigidbody>().mass * 1000));
                 descriptor.H3ID = vanillaItemRaw["H3ID"].ToString();
                 descriptor.tarkovID = vanillaItemRaw["TarkovID"].ToString();
                 descriptor.description = vanillaItemRaw["Description"].ToString();
@@ -3799,7 +3805,7 @@ namespace EFM
                         equipmentItemWrapper.UpdateRigMode();
 
                         // Update rig weight
-                        equipmentItemWrapper.currentWeight += __instance.RootRigidbody.mass;
+                        equipmentItemWrapper.currentWeight += (int)(__instance.RootRigidbody.mass * 1000);
 
                         foundSlot = true;
                         break;
@@ -3837,7 +3843,7 @@ namespace EFM
                                 customItemWrapper.itemsInSlots[slotIndex] = __instance.gameObject;
 
                                 // Update rig weight
-                                customItemWrapper.currentWeight += __instance.RootRigidbody.mass;
+                                customItemWrapper.currentWeight += (int)(__instance.RootRigidbody.mass * 1000);
 
                                 return;
                             }
@@ -4091,7 +4097,7 @@ namespace EFM
                 {
                     containerItemWrapper.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : vanillaItemDescriptor.currentWeight;
 
-                    containerItemWrapper.containingVolume -= customItemWrapper != null ? customItemWrapper.volumes[customItemWrapper.mode]: Mod.sizeVolumes[(int)__instance.Size];
+                    containerItemWrapper.containingVolume -= customItemWrapper != null ? customItemWrapper.volumes[customItemWrapper.mode] : Mod.sizeVolumes[(int)__instance.Size];
 
                     // Reset cols of item so that they are non trigger again and can collide with the world and the container
                     for(int i = containerItemWrapper.resetColPairs.Count - 1; i >= 0; --i)
@@ -6798,19 +6804,19 @@ namespace EFM
             if (__instance.IsFull && round == null)
             {
                 EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
-                VID.currentWeight -= 0.015f;
+                VID.currentWeight -= 15;
                 if(VID.locationIndex == 0)
                 {
-                    Mod.weight -= 0.015f;
+                    Mod.weight -= 15;
                 }
             }
             else
             {
                 EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
-                VID.currentWeight += 0.015f;
+                VID.currentWeight += 15;
                 if (VID.locationIndex == 0)
                 {
-                    Mod.weight += 0.015f;
+                    Mod.weight += 15;
                 }
             }
         }
@@ -6844,7 +6850,7 @@ namespace EFM
             EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (VID != null)
             {
-                VID.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
                 //TODO: Set weight of firearm this is attached to if it is
             }
             else if(CIW != null)
@@ -6858,13 +6864,13 @@ namespace EFM
                     }
                     else
                     {
-                        CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                        CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                         CIW.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
-                    CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                    CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                     CIW.amount -= (preNumRounds - postNumRounds);
                 }
             }
@@ -6904,7 +6910,7 @@ namespace EFM
             EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (VID != null)
             {
-                VID.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
                 //TODO: Set weight of firearm this is attached to if it is
             }
             else if(CIW != null)
@@ -6918,13 +6924,13 @@ namespace EFM
                     }
                     else
                     {
-                        CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                        CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                         CIW.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
-                    CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                    CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                     CIW.amount -= (preNumRounds - postNumRounds);
                 }
             }
@@ -6963,7 +6969,7 @@ namespace EFM
             EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (VID != null)
             {
-                VID.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
                 //TODO: Set weight of firearm this is attached to if it is
             }
             else if(CIW != null)
@@ -6977,13 +6983,13 @@ namespace EFM
                     }
                     else
                     {
-                        CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                        CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                         CIW.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
-                    CIW.currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+                    CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                     CIW.amount -= (preNumRounds - postNumRounds);
                 }
             }
@@ -7018,7 +7024,7 @@ namespace EFM
 
             int postNumRounds = ___m_numRounds;
 
-            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
             //TODO: Set weight of firearm this is attached to if it is
         }
     }
@@ -7048,7 +7054,7 @@ namespace EFM
 
             int postNumRounds = ___m_numRounds;
 
-            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
             //TODO: Set weight of firearm this is attached to if it is
         }
     }
@@ -7077,7 +7083,7 @@ namespace EFM
 
             int postNumRounds = ___m_numRounds;
 
-            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 0.015f * (preNumRounds - postNumRounds);
+            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
             //TODO: Set weight of firearm this is attached to if it is
         }
     }
@@ -7536,11 +7542,11 @@ namespace EFM
 
                 if (VID != null)
                 {
-                    VID.currentWeight += 0.015f;
+                    VID.currentWeight += 15;
                 }
                 else if(CIW != null)
                 {
-                    CIW.currentWeight += 0.015f;
+                    CIW.currentWeight += 15;
                     CIW.amount += 1;
                 }
             }
@@ -7580,11 +7586,11 @@ namespace EFM
 
                 if (VID != null)
                 {
-                    VID.currentWeight += 0.015f;
+                    VID.currentWeight += 15;
                 }
                 else if (CIW != null)
                 {
-                    CIW.currentWeight += 0.015f;
+                    CIW.currentWeight += 15;
                     CIW.amount += 1;
                 }
             }
@@ -7619,7 +7625,7 @@ namespace EFM
             if (addedRound)
             {
                 addedRound = false;
-                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
+                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 15;
             }
         }
     }
@@ -7652,7 +7658,7 @@ namespace EFM
             if (addedRound)
             {
                 addedRound = false;
-                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 0.015f;
+                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 15;
             }
         }
     }

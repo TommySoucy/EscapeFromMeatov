@@ -3004,7 +3004,7 @@ namespace EFM
                             itemPrefab = IM.OD[actualItemID].GetGameObject();
                         }
                         List<string> itemParents = null;
-                        float itemVolume = 0;
+                        int itemVolume = 0;
                         float itemSpawnChance = 0;
                         FVRPhysicalObject itemPhysObj = null;
                         Mod.instance.LogInfo("\t\t\t"+ actualItemID+" custom?: "+custom);
@@ -3291,7 +3291,7 @@ namespace EFM
                 itemPrefab = IM.OD[ID].GetGameObject();
             }
             List<string> itemParents = null;
-            float itemVolume = 0;
+            int itemVolume = 0;
             float itemSpawnChance = 0;
             FVRPhysicalObject itemPhysObj = null;
             if (custom)
@@ -3491,7 +3491,7 @@ namespace EFM
                                     }
                                     break;
                                 case EFM_Effect.EffectType.WeightLimit:
-                                    Mod.currentWeightLimit -= effect.value;
+                                    Mod.currentWeightLimit -= (int)(effect.value * 1000);
                                     break;
                                 case EFM_Effect.EffectType.DamageModifier:
                                     Mod.currentDamageModifier -= effect.value;
@@ -3754,7 +3754,7 @@ namespace EFM
                                 }
                                 break;
                             case EFM_Effect.EffectType.WeightLimit:
-                                Mod.currentWeightLimit += effect.value;
+                                Mod.currentWeightLimit += (int)(effect.value * 1000);
                                 break;
                             case EFM_Effect.EffectType.DamageModifier:
                                 Mod.currentDamageModifier += effect.value;

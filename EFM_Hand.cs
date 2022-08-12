@@ -255,7 +255,7 @@ namespace EFM
                     if (fvrHand.CurrentInteractable != null && fvrHand.CurrentInteractable is FVRPhysicalObject)
                     {
                         Mod.instance.LogInfo("\t\t\tWe are holding something");
-                        float volumeToUse = 0;
+                        int volumeToUse = 0;
                         string IDToUse = "";
                         List<string> parentsToUse = null;
                         FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;
@@ -352,7 +352,7 @@ namespace EFM
                     // Set material, if this hand is also holding something that fits in the container, set the material to hovered
                     if (fvrHand.CurrentInteractable != null && fvrHand.CurrentInteractable is FVRPhysicalObject)
                     {
-                        float volumeToUse = 0;
+                        int volumeToUse = 0;
                         string IDToUse = "";
                         List<string> parentsToUse = null;
                         FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;

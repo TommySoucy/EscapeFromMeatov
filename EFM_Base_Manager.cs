@@ -406,7 +406,7 @@ namespace EFM
                                     }
                                     break;
                                 case EFM_Effect.EffectType.WeightLimit:
-                                    Mod.currentWeightLimit -= effect.value;
+                                    Mod.currentWeightLimit -= (int)(effect.value * 1000);
                                     break;
                                 case EFM_Effect.EffectType.DamageModifier:
                                     Mod.currentDamageModifier -= effect.value;
@@ -664,7 +664,7 @@ namespace EFM
                                 }
                                 break;
                             case EFM_Effect.EffectType.WeightLimit:
-                                Mod.currentWeightLimit += effect.value;
+                                Mod.currentWeightLimit += (int)(effect.value * 1000);
                                 break;
                             case EFM_Effect.EffectType.DamageModifier:
                                 Mod.currentDamageModifier += effect.value;
@@ -1657,7 +1657,7 @@ namespace EFM
             Mod.maxEnergy = (float)data["maxEnergy"];
             Mod.stamina = (float)data["stamina"];
             Mod.maxStamina = (float)data["maxStamina"];
-            Mod.weight = (float)data["weight"];
+            Mod.weight = (int)((float)data["weight"] * 1000);
             Mod.totalRaidCount = (int)data["totalRaidCount"];
             Mod.runThroughRaidCount = (int)data["runThroughRaidCount"];
             Mod.survivedRaidCount = (int)data["survivedRaidCount"];

@@ -314,7 +314,7 @@ namespace EFM
                             break;
                         case EFM_Effect.EffectType.WeightLimit:
                             Mod.instance.LogInfo("\t\tRemoving");
-                            Mod.currentWeightLimit -= EFM_Effect.effects[j].value;
+                            Mod.currentWeightLimit -= (int)(EFM_Effect.effects[j].value * 1000);
                             Mod.instance.LogInfo("\t\tRemoved");
                             break;
                         case EFM_Effect.EffectType.DamageModifier:
