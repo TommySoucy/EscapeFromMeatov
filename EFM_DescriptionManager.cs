@@ -323,7 +323,7 @@ namespace EFM
             }
             summaryNeededIcons[3].SetActive(this.descriptionPack.onWishlist);
             summaryWeightText.text = (this.descriptionPack.weight / 1000.0f).ToString()+"kg";
-            summaryVolumeText.text = this.descriptionPack.volume.ToString()+"L";
+            summaryVolumeText.text = (this.descriptionPack.volume / Mod.volumePrecisionMultiplier).ToString()+"L";
 
             // Full
             float descriptionHeight = 640; // Top and bottom padding (25+25) + Icon (300) + Icon spacing (20) + Needed for title (55) + Spacing (20) + Desc. title (55) + Spacing (20) + Name spacing (20) + Properties (55) + Spacing (20)
@@ -511,7 +511,7 @@ namespace EFM
                 compatibleAmmoTitle.SetActive(false);
                 compatibleAmmo.SetActive(false);
             }
-            propertiesText.text = "Weight: " + (this.descriptionPack.weight / 1000.0f) + "kg, Volume: " + this.descriptionPack.volume;
+            propertiesText.text = "Weight: " + (this.descriptionPack.weight / 1000.0f) + "kg, Volume: " + (this.descriptionPack.volume / Mod.volumePrecisionMultiplier)+"L ";
 
             if (this.descriptionPack.containedAmmoClasses != null)
             {

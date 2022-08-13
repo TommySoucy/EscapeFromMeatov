@@ -29,7 +29,8 @@ namespace EFM
         // Constants
         public static readonly float headshotDamageMultiplier = 1.2f;
         public static readonly float handDamageResist = 0.5f;
-        public static readonly float[] sizeVolumes = { 1, 2, 5, 30, 0, 50}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
+        //public static readonly float[] sizeVolumes = { 1, 2, 5, 30, 0, 50}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
+        public static readonly float volumePrecisionMultiplier = 10000; // Volumes are stored as floats but are processed as ints to avoid precision errors, this is how precise we should be when converting, this goes down to 10th of a mililiter
 
         // Live data
         public static Mod instance;
@@ -641,7 +642,7 @@ namespace EFM
                 customItemWrapper.volumes = new int[tempVolumes.Length];
                 for(int volIndex=0; volIndex < tempVolumes.Length; ++volIndex)
                 {
-                    customItemWrapper.volumes[volIndex] = (int)(tempVolumes[volIndex] * 1000);
+                    customItemWrapper.volumes[volIndex] = (int)(tempVolumes[volIndex] * Mod.volumePrecisionMultiplier);
                 }
 
                 itemVolumes.Add(i.ToString(), customItemWrapper.volumes[0]);
@@ -876,7 +877,7 @@ namespace EFM
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
-                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["BackpackProperties"]["MaxVolume"] * 1000);
+                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["BackpackProperties"]["MaxVolume"] * Mod.volumePrecisionMultiplier);
 
                     // Set filter lists
                     SetFilterListsFor(customItemWrapper, i);
@@ -897,7 +898,7 @@ namespace EFM
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
-                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"]*1000);
+                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"]* Mod.volumePrecisionMultiplier);
 
                     // Set filter lists
                     SetFilterListsFor(customItemWrapper, i);
@@ -918,7 +919,7 @@ namespace EFM
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
-                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"]*1000);
+                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"]* Mod.volumePrecisionMultiplier);
 
                     // Set filter lists
                     SetFilterListsFor(customItemWrapper, i);
@@ -1312,7 +1313,8 @@ namespace EFM
                 FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
                 descriptor.itemName = physObj.ObjectWrapper.DisplayName;
                 itemNames.Add(H3ID, descriptor.itemName);
-                itemVolumes.Add(H3ID, sizeVolumes[(int)physObj.Size]);
+                descriptor.volume = (int)((float)vanillaItemRaw["Volume"] * Mod.volumePrecisionMultiplier);
+                itemVolumes.Add(H3ID, descriptor.volume);
                 if (physObj is FVRFireArm)
                 {
                     FVRFireArm asFireArm = physObj as FVRFireArm;
@@ -4097,7 +4099,7 @@ namespace EFM
                 {
                     containerItemWrapper.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : vanillaItemDescriptor.currentWeight;
 
-                    containerItemWrapper.containingVolume -= customItemWrapper != null ? customItemWrapper.volumes[customItemWrapper.mode] : Mod.sizeVolumes[(int)__instance.Size];
+                    containerItemWrapper.containingVolume -= customItemWrapper != null ? customItemWrapper.volumes[customItemWrapper.mode] : vanillaItemDescriptor.volume;
 
                     // Reset cols of item so that they are non trigger again and can collide with the world and the container
                     for(int i = containerItemWrapper.resetColPairs.Count - 1; i >= 0; --i)

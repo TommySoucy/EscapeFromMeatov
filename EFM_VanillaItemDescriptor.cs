@@ -36,6 +36,7 @@ namespace EFM
         public List<EFM_MarketItemView> marketItemViews;
         public bool inAll;
         public int weight; // The original weight of the item. We need to keep it ourselves because we would usually use the RB mass but the RB gets destroyed when a mag gets put in a firearm
+        public int volume;
         private bool _insured;
         public bool insured
         {
@@ -261,7 +262,7 @@ namespace EFM
                 }
             }
             descriptionPack.weight = weight;
-            descriptionPack.volume = Mod.sizeVolumes[(int)physObj.Size];
+            descriptionPack.volume = volume;
             descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(H3ID) ? Mod.requiredForQuest[H3ID] : 0;
             FVRFireArmMagazine asMagazine = gameObject.GetComponent<FVRFireArmMagazine>();
             FVRFireArmClip asClip = gameObject.GetComponent<FVRFireArmClip>();

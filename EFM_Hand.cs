@@ -270,7 +270,7 @@ namespace EFM
                         }
                         else
                         {
-                            volumeToUse = Mod.sizeVolumes[(int)physicalObject.Size];
+                            volumeToUse = heldVanillaItemDescriptor.volume;
 
                             if (heldVanillaItemDescriptor != null)
                             {
@@ -367,7 +367,7 @@ namespace EFM
                         }
                         else
                         {
-                            volumeToUse = Mod.sizeVolumes[(int)physicalObject.Size];
+                            volumeToUse = heldVanillaItemDescriptor.volume;
 
                             if (heldVanillaItemDescriptor != null)
                             {

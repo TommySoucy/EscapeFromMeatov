@@ -122,7 +122,7 @@ namespace EFM
 				{
 					descriptionManager.SetDescriptionPack();
 				}
-				volumeIndicatorText.text = (_containingVolume / 1000.0f).ToString() +"/"+(maxVolume / 1000.0f);
+				volumeIndicatorText.text = (_containingVolume / Mod.volumePrecisionMultiplier).ToString() +"/"+(maxVolume / Mod.volumePrecisionMultiplier);
 			}
 		}
 		public class ResetColPair
@@ -354,7 +354,7 @@ namespace EFM
 			}
 			else
 			{
-				volumeToUse = Mod.sizeVolumes[(int)item.Size];
+				volumeToUse = VID.volume;
 				IDToUse = VID.H3ID;
 				parentsToUse = VID.parents;
 			}
