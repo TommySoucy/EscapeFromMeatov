@@ -331,7 +331,12 @@ namespace EFM
 
                 if (Input.GetKeyDown(KeyCode.J))
                 {
-                    EFM_Manager.LoadBase(4);
+                    EFM_Manager.LoadBase(5);
+                }
+
+                if (Input.GetKeyDown(KeyCode.H))
+                {
+                    EFM_Manager.LoadBase(-1, true);
                 }
 
                 if (Input.GetKeyDown(KeyCode.K))
@@ -1709,6 +1714,7 @@ namespace EFM
         
         public static void RemoveFromPlayerInventory(Transform item, bool updateTypeLists)
         {
+            Mod.instance.LogInfo("Removing item " + item.name + " from player inventory");
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
@@ -1719,8 +1725,10 @@ namespace EFM
             string itemID = physObj.ObjectWrapper.ItemID;
             if (playerInventory.ContainsKey(itemID))
             {
+                Mod.instance.LogInfo("\tpre count = "+ playerInventory[itemID]);
                 playerInventory[itemID] -= customItemWrapper != null ? customItemWrapper.stack : 1;
                 playerInventoryObjects[itemID].Remove(item.gameObject);
+                Mod.instance.LogInfo("\tpost count = " + playerInventory[itemID]);
             }
             else
             {

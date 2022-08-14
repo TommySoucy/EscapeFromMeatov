@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FistVR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,39 +28,33 @@ namespace EFM
                 if (stackableWrapper.ID == otherItemWrapper.ID)
                 {
                     // Check that both are held
-                    if (Mod.leftHand.fvrHand.CurrentInteractable != null && Mod.rightHand.fvrHand.CurrentInteractable != null)
+                    if (stackableWrapper.physObj.m_hand != null && otherItemWrapper.physObj.m_hand != null)
                     {
-                        if ((Mod.leftHand.fvrHand.CurrentInteractable.gameObject.Equals(stackableWrapper.gameObject) &&
-                           Mod.rightHand.fvrHand.CurrentInteractable.gameObject.Equals(otherItemWrapper.gameObject)) ||
-                           (Mod.leftHand.fvrHand.CurrentInteractable.gameObject.Equals(otherItemWrapper.gameObject) &&
-                           Mod.rightHand.fvrHand.CurrentInteractable.gameObject.Equals(stackableWrapper.gameObject)))
+                        // Decide which direction to stack, we want to stack on greatest amount, if amount is same, stack in lowest Y, else stack in this one
+                        if (stackableWrapper.stack > otherItemWrapper.stack)
                         {
-                            // Decide which direction to stack, we want to stack on greatest amount, if amount is same, stack in lowest Y, else stack in this one
-                            if (stackableWrapper.stack > otherItemWrapper.stack)
-                            {
-                                // Stack on this one
-                                StackOnThis(otherStackTrigger);
-                            }
-                            else if (stackableWrapper.stack < otherItemWrapper.stack)
-                            {
-                                // Stack on other
-                                StackOnOther(otherStackTrigger);
-                            }
-                            else if (transform.position.y < otherStackTrigger.transform.position.y)
-                            {
-                                // Stack on this one
-                                StackOnThis(otherStackTrigger);
-                            }
-                            else if (transform.position.y > otherStackTrigger.transform.position.y)
-                            {
-                                // Stack on other
-                                StackOnOther(otherStackTrigger);
-                            }
-                            else // Same amount in both stacks and same height
-                            {
-                                // Stack on this one
-                                StackOnThis(otherStackTrigger);
-                            }
+                            // Stack on this one
+                            StackOnThis(otherStackTrigger);
+                        }
+                        else if (stackableWrapper.stack < otherItemWrapper.stack)
+                        {
+                            // Stack on other
+                            StackOnOther(otherStackTrigger);
+                        }
+                        else if (transform.position.y < otherStackTrigger.transform.position.y)
+                        {
+                            // Stack on this one
+                            StackOnThis(otherStackTrigger);
+                        }
+                        else if (transform.position.y > otherStackTrigger.transform.position.y)
+                        {
+                            // Stack on other
+                            StackOnOther(otherStackTrigger);
+                        }
+                        else // Same amount in both stacks and same height
+                        {
+                            // Stack on this one
+                            StackOnThis(otherStackTrigger);
                         }
                     }
                 }
@@ -74,6 +69,11 @@ namespace EFM
             {
                 stackableWrapper.stack = newStack;
                 otherStackTrigger.stacked = true;
+
+                Mod.weight -= otherItemWrapper.currentWeight;
+                otherItemWrapper.destroyed = true;
+                otherItemWrapper.physObj.ForceBreakInteraction();
+
                 Destroy(otherItemWrapper.gameObject);
             }
             else
@@ -92,7 +92,12 @@ namespace EFM
             {
                 otherItemWrapper.stack = newStack;
                 otherStackTrigger.stacked = true;
-                Destroy(gameObject);
+
+                Mod.weight -= stackableWrapper.currentWeight;
+                stackableWrapper.destroyed = true;
+                stackableWrapper.physObj.ForceBreakInteraction();
+
+                Destroy(stackableWrapper.gameObject);
             }
             else
             {

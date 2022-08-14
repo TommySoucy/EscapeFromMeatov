@@ -84,7 +84,7 @@ namespace EFM
             if (active)
             {
                 int consumeAmount = 0;
-                long secondsSinceSave = (long)baseManager.data["time"] - baseManager.GetTimeSeconds();
+                long secondsSinceSave = baseManager.GetTimeSeconds() - (long)baseManager.data["time"];
                 switch (areaIndex)
                 {
                     case 4: // Generator
@@ -1187,7 +1187,7 @@ namespace EFM
             }
             bool firstProduction = true;
             Mod.instance.LogInfo("0");
-            long secondsSinceSave = (long)baseManager.data["time"] - baseManager.GetTimeSeconds();
+            long secondsSinceSave = baseManager.GetTimeSeconds() - (long)baseManager.data["time"];
             foreach (JObject production in productions)
             {
                 Mod.instance.LogInfo("1");

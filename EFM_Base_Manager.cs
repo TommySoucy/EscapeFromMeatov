@@ -1646,7 +1646,7 @@ namespace EFM
             Mod.otherActiveSlots.Clear();
 
             // Load player status if not loading in from a raid
-            long secondsSinceSave = (long)data["time"] - GetTimeSeconds();
+            long secondsSinceSave = GetTimeSeconds() - (long)data["time"];
             float minutesSinceSave = secondsSinceSave / 60.0f;
             if (!Mod.justFinishedRaid)
             {
