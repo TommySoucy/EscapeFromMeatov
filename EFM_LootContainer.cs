@@ -198,7 +198,7 @@ namespace EFM
 						int actualStackSize = stackSize == -1 ? itemCIW.maxAmount : stackSize;
 						Mod.instance.LogInfo("actualStackSize: " + actualStackSize);
 						FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
-						if(itemID.Equals("715") || itemID.Equals("716"))
+						if(itemID == 715 || itemID == 716)
                         {
 							asMagazine.RoundType = roundTypes[roundTypes.Count - 1];
 							itemCIW.roundClass = roundClasses[roundClasses.Count - 1];

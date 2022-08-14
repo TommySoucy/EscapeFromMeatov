@@ -1558,7 +1558,6 @@ namespace EFM
 			}
 		}
 
-		// A rig may need to change mode while closed because it will be closed in the quipment slot while we wear it but we are still able to put items in it
 		public void UpdateRigMode()
 		{
 			// Return right away if not a rig or if open
@@ -1578,6 +1577,24 @@ namespace EFM
 
 			// If we get this far it is because no items in slots, so set to closed empty
 			SetMode(2);
+        }
+
+		public void UpdateBackpackMode()
+		{
+			// Return right away if not a backpack or if open
+			if (itemType != Mod.ItemType.Backpack || mode == 0)
+			{
+				return;
+            }
+
+			if(containerItemRoot.childCount > 0)
+			{
+				SetMode(1);
+            }
+            else
+			{
+				SetMode(2);
+			}
         }
 
 		private void CloseRig(bool processslots, bool isRightHand = false)

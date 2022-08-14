@@ -1088,6 +1088,8 @@ namespace EFM
             }
 
             // Remove entity from list
+            //TODO: continue from here, for some reason the entity's index is not updated properly and we get argument out of range when bot kill at some point in the raid, SEE ERROR SCREEENSHOT
+            //NOTE THAT THIS ERROR MIGHT BE BECAUSE OF THE OTHER ERROR IN THE OTHER SCREENSHOT
             entities[AIScript.entityIndex] = entities[entities.Count - 1];
             entityRelatedAI[AIScript.entityIndex] = entityRelatedAI[entityRelatedAI.Count - 1];
             entityRelatedAI[AIScript.entityIndex].entityIndex = AIScript.entityIndex;
@@ -1118,7 +1120,14 @@ namespace EFM
                 else
                 {
                     yield return IM.OD[genericItem].GetGameObjectAsync();
-                    itemPrefab = IM.OD[genericItem].GetGameObject();
+                    itemPrefab = IM.OD[genericItem].GetGameObject(); 
+                    if (itemPrefab == null)
+                    {
+                        Mod.instance.LogWarning("Attempted to get vanilla prefab for " + genericItem + ", but the prefab had been destroyed, refreshing cache...");
+
+                        IM.OD[genericItem].RefreshCache();
+                        itemPrefab = IM.OD[genericItem].GetGameObject();
+                    }
                 }
 
                 if (custom)
@@ -1553,6 +1562,24 @@ namespace EFM
                     yield break;
                 }
 
+                if (weaponFireArm is ClosedBoltWeapon)
+                {
+                    (weaponFireArm as ClosedBoltWeapon).CockHammer();
+                }
+                else if (weaponFireArm is BoltActionRifle)
+                {
+                    (weaponFireArm as BoltActionRifle).CockHammer();
+                }
+                else if (weaponFireArm is TubeFedShotgun)
+                {
+                    (weaponFireArm as TubeFedShotgun).CockHammer();
+                }
+                else if (weaponFireArm is BreakActionWeapon)
+                {
+                    (weaponFireArm as BreakActionWeapon).CockHammer();
+                }
+                // TODO: Might also have to set private fields in OpenBolt, LeverAction, etc
+
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                 Mod.RemoveFromAll(weaponFireArm, null, weaponObject.GetComponent<EFM_VanillaItemDescriptor>());
 
@@ -1742,6 +1769,24 @@ namespace EFM
                     yield break;
                 }
 
+                if (weaponFireArm is ClosedBoltWeapon)
+                {
+                    (weaponFireArm as ClosedBoltWeapon).CockHammer();
+                }
+                else if (weaponFireArm is BoltActionRifle)
+                {
+                    (weaponFireArm as BoltActionRifle).CockHammer();
+                }
+                else if (weaponFireArm is TubeFedShotgun)
+                {
+                    (weaponFireArm as TubeFedShotgun).CockHammer();
+                }
+                else if (weaponFireArm is BreakActionWeapon)
+                {
+                    (weaponFireArm as BreakActionWeapon).CockHammer();
+                }
+                // TODO: Might also have to set private fields in OpenBolt, LeverAction, etc
+
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                 Mod.RemoveFromAll(weaponFireArm, null, weaponObject.GetComponent<EFM_VanillaItemDescriptor>());
 
@@ -1930,6 +1975,24 @@ namespace EFM
                     Mod.instance.LogWarning("Sosig holster weapon not a firearm");
                     yield break;
                 }
+
+                if (weaponFireArm is ClosedBoltWeapon)
+                {
+                    (weaponFireArm as ClosedBoltWeapon).CockHammer();
+                }
+                else if (weaponFireArm is BoltActionRifle)
+                {
+                    (weaponFireArm as BoltActionRifle).CockHammer();
+                }
+                else if (weaponFireArm is TubeFedShotgun)
+                {
+                    (weaponFireArm as TubeFedShotgun).CockHammer();
+                }
+                else if (weaponFireArm is BreakActionWeapon)
+                {
+                    (weaponFireArm as BreakActionWeapon).CockHammer();
+                }
+                // TODO: Might also have to set private fields in OpenBolt, LeverAction, etc
 
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                 Mod.RemoveFromAll(weaponFireArm, null, weaponObject.GetComponent<EFM_VanillaItemDescriptor>());
@@ -3031,6 +3094,13 @@ namespace EFM
                         else
                         {
                             itemPrefab = IM.OD[actualItemID].GetGameObject();
+                            if (itemPrefab == null)
+                            {
+                                Mod.instance.LogWarning("Attempted to get vanilla prefab for " + actualItemID + ", but the prefab had been destroyed, refreshing cache...");
+
+                                IM.OD[actualItemID].RefreshCache();
+                                itemPrefab = IM.OD[actualItemID].GetGameObject();
+                            }
                         }
                         List<string> itemParents = null;
                         int itemVolume = 0;
@@ -3039,7 +3109,7 @@ namespace EFM
                         Mod.instance.LogInfo("\t\t\t"+ actualItemID+" custom?: "+custom);
                         if (custom)
                         {
-                            EFM_CustomItemWrapper itemCIW = itemPrefab.GetComponentInChildren<EFM_CustomItemWrapper>();
+                            EFM_CustomItemWrapper itemCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
                             if(itemCIW == null)
                             {
                                 Mod.instance.LogError("Could spawn Item "+itemID+" in "+ newAISpawn.name + "'s "+itemParts[i]+" but is custom and has no CIW");
@@ -3051,7 +3121,7 @@ namespace EFM
                         }
                         else
                         {
-                            EFM_VanillaItemDescriptor itemVID = itemPrefab.GetComponentInChildren<EFM_VanillaItemDescriptor>();
+                            EFM_VanillaItemDescriptor itemVID = itemPrefab.GetComponent<EFM_VanillaItemDescriptor>();
                             if (itemVID == null)
                             {
                                 Mod.instance.LogError("Could spawn Item " + itemID + " in " + newAISpawn.name + "'s " + itemParts[i] + " but is not custom and has no VID");
@@ -3061,7 +3131,7 @@ namespace EFM
                             itemVolume = Mod.itemVolumes[actualItemID];
                             itemSpawnChance = itemVID.spawnChance;
                         }
-                        itemPhysObj = itemPrefab.GetComponentInChildren<FVRPhysicalObject>();
+                        itemPhysObj = itemPrefab.GetComponent<FVRPhysicalObject>();
 
                         if (itemParents.Contains("5448f3ac4bdc2dce718b4569")) // Medical item
                         {

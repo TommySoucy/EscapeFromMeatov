@@ -1027,7 +1027,7 @@ namespace EFM
                 else
                 {
                     // Sometimes when loading stamina bar gets offset, so ensure everything we have attached to player is positionned properly
-                    Mod.staminaBarUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+                    Mod.staminaBarUI.transform.localRotation = Quaternion.Euler(-25, 0, 0);
                     Mod.staminaBarUI.transform.localPosition = new Vector3(0, -0.4f, 0.6f);
                     Mod.staminaBarUI.transform.localScale = Vector3.one * 0.0015f;
 
@@ -1121,7 +1121,7 @@ namespace EFM
             Mod.rightDescriptionManager.Init();
             // Stamina bar
             Mod.staminaBarUI = Instantiate(Mod.staminaBarPrefab, GM.CurrentPlayerBody.Head);
-            Mod.staminaBarUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
+            Mod.staminaBarUI.transform.localRotation = Quaternion.Euler(-25, 0, 0);
             Mod.staminaBarUI.transform.localPosition = new Vector3(0, -0.4f, 0.6f);
             Mod.staminaBarUI.transform.localScale = Vector3.one * 0.0015f;
 
@@ -2406,6 +2406,24 @@ namespace EFM
                     Mod.rightShoulderObject = itemObject;
                     itemObject.SetActive(false);
                 }
+
+                if(firearmPhysicalObject is ClosedBoltWeapon)
+                {
+                    (firearmPhysicalObject as ClosedBoltWeapon).CockHammer();
+                }
+                else if(firearmPhysicalObject is BoltActionRifle)
+                {
+                    (firearmPhysicalObject as BoltActionRifle).CockHammer();
+                }
+                else if(firearmPhysicalObject is TubeFedShotgun)
+                {
+                    (firearmPhysicalObject as TubeFedShotgun).CockHammer();
+                }
+                else if(firearmPhysicalObject is BreakActionWeapon)
+                {
+                    (firearmPhysicalObject as BreakActionWeapon).CockHammer();
+                }
+                // TODO: Might also have to set private fields in OpenBolt, LeverAction, etc
             }
             else if (itemPhysicalObject is FVRFireArmMagazine)
             {
@@ -2589,6 +2607,8 @@ namespace EFM
                             LoadSavedItem(customItemWrapper.containerItemRoot, loadedBPContents[j], customItemWrapper.locationIndex, false);
                         }
                     }
+
+                    customItemWrapper.UpdateBackpackMode();
                 }
 
                 // Container
