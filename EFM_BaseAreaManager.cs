@@ -1786,7 +1786,7 @@ namespace EFM
                                 if (Mod.playerInventory.ContainsKey(actualID))
                                 {
                                     Mod.instance.LogInfo("\t\t\t0");
-                                    itemAmountInInventory = Mod.playerInventory[actualID];
+                                    itemAmountInInventory += Mod.playerInventory[actualID];
                                 }
 
                                 if (Mod.requiredPerArea[areaIndex].ContainsKey(actualID))
@@ -2155,7 +2155,7 @@ namespace EFM
                                             ++itemAmountInInventory;
                                         }
                                     }
-                                    else if(CIW.itemType == Mod.ItemType.Backpack ||CIW.itemType == Mod.ItemType.Container ||CIW.itemType == Mod.ItemType.Pouch)
+                                    else if(CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
                                     {
                                         if (CIW.containerItemRoot.childCount == 0)
                                         {
