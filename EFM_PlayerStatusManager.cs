@@ -356,7 +356,7 @@ namespace EFM
 
         public void UpdateWeight()
         {
-            weightText.text = String.Format("{0:0.#}", Mod.weight / 1000.0f) + "/ " + Mod.currentWeightLimit;
+            weightText.text = String.Format("{0:0.#}", Mod.weight / 1000.0f) + "/ " + String.Format("{0:0.#}", Mod.currentWeightLimit / 1000.0f);
             if(Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100.0f * 20) // Current weight limit + 20%
             {
                 weightText.color = Color.red;

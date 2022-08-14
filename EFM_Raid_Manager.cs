@@ -45,6 +45,7 @@ namespace EFM
         private Dictionary<string, int> AISquadIFFs;
         private Dictionary<string, List<Sosig>> AISquads;
         private Dictionary<string, int> AISquadSizes;
+        private List<Sosig> friendlyAI;
         public static List<AIEntity> entities;
         public static List<EFM_AI> entityRelatedAI;
 
@@ -67,6 +68,9 @@ namespace EFM
             GM.Options.PerformanceOptions.IsPostEnabled_AO = false;
             GM.Options.PerformanceOptions.IsPostEnabled_Bloom = false;
             GM.Options.PerformanceOptions.IsPostEnabled_CC = false;
+
+            // Clear other active slots since we shouldn't have any on load
+            Mod.otherActiveSlots.Clear();
 
             // Init player state
             currentHealthRates = new float[7];
@@ -546,10 +550,21 @@ namespace EFM
 
             // Init experience triggers
             Transform expTriggersParent = transform.GetChild(1).GetChild(1).GetChild(3).GetChild(5);
-            for (int i=0; i < expTriggersParent.childCount; ++i)
+            if (Mod.triggeredExplorationTriggers[Mod.chosenMapIndex].Count > 0)
             {
-                if (!Mod.triggeredExplorationTriggers[Mod.chosenMapIndex][i])
+                for (int i = 0; i < expTriggersParent.childCount; ++i)
                 {
+                    if (!Mod.triggeredExplorationTriggers[Mod.chosenMapIndex][i])
+                    {
+                        expTriggersParent.GetChild(i).gameObject.AddComponent<EFM_ExperienceTrigger>();
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < expTriggersParent.childCount; ++i)
+                {
+                    Mod.triggeredExplorationTriggers[Mod.chosenMapIndex].Add(false);
                     expTriggersParent.GetChild(i).gameObject.AddComponent<EFM_ExperienceTrigger>();
                 }
             }
@@ -612,9 +627,9 @@ namespace EFM
                 vector2.Normalize();
                 vector2 *= 0.35f;
                 vector += vector2;
-                Mod.extractionUI.transform.position = vector;
-                Mod.extractionUI.transform.rotation = Quaternion.LookRotation(vector2, Vector3.up);
-                Mod.extractionUI.transform.Rotate(Vector3.right, -25);
+                Mod.extractionLimitUI.transform.position = vector;
+                Mod.extractionLimitUI.transform.rotation = Quaternion.LookRotation(vector2, Vector3.up);
+                Mod.extractionLimitUI.transform.Rotate(Vector3.right, -25);
 
                 if (Mod.playerStatusManager.extractionTimerText.color != Color.red)
                 {
@@ -878,7 +893,6 @@ namespace EFM
                 yield return IM.OD[spawnData.sosigWeapon].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[spawnData.sosigWeapon].GetGameObject());
                 SosigWeapon sosigWeapon = weaponObject.GetComponent<SosigWeapon>();
-                Destroy(sosigWeapon.GetComponent<SosigWeaponPlayerInterface>());
                 sosigWeapon.SetAutoDestroy(true);
                 sosigScript.ForceEquip(sosigWeapon);
                 if (sosigWeapon.Type == SosigWeapon.SosigWeaponType.Gun)
@@ -896,7 +910,6 @@ namespace EFM
                 yield return IM.OD[spawnData.sosigGrenade].GetGameObjectAsync();
                 GameObject grenadeObject = Instantiate(IM.OD[spawnData.sosigGrenade].GetGameObject());
                 SosigWeapon sosigGrenade = grenadeObject.GetComponent<SosigWeapon>();
-                Destroy(sosigGrenade.GetComponent<SosigWeaponPlayerInterface>());
                 sosigGrenade.SetAutoDestroy(true);
                 sosigScript.ForceEquip(sosigGrenade);
             }
@@ -911,9 +924,16 @@ namespace EFM
                     {
                         iff = 1;
                     }
-                    else // Player is scav
+                    else // Player is scav, leave IFF as 0
                     {
-                        iff = 0;
+                        if(friendlyAI != null)
+                        {
+                            friendlyAI.Add(sosigScript);
+                        }
+                        else // friendlyAI is only nulled when the player kills a friendly scavs, then all scavs should be enemies instead even if player is scav
+                        {
+                            iff = 1;
+                        }
                     }
 
                     sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
@@ -1055,6 +1075,16 @@ namespace EFM
                 Mod.AddExperience(AIScript.experienceReward);
 
                 Mod.killList.Add(sosig.name, AIScript.experienceReward);
+
+                // Have to make all scavs enemies if this was a friendly scav that was killed
+                if(sosig.GetOriginalIFFTeam() == 0)
+                {
+                    foreach(Sosig friendly in friendlyAI)
+                    {
+                        friendly.SetOriginalIFFTeam(1);
+                        friendly.SetIFF(1);
+                    }
+                }
             }
 
             // Remove entity from list
@@ -1474,8 +1504,6 @@ namespace EFM
                     bool boxMainContainer = backpackCIW.mainContainer.GetComponent<BoxCollider>() != null;
                     if (backpackCIW.AddItemToContainer(itemPhysObj))
                     {
-                        itemObject.transform.parent = backpackCIW.containerItemRoot;
-
                         if (boxMainContainer)
                         {
                             BoxCollider boxCollider = backpackCIW.mainContainer.GetComponent<BoxCollider>();
@@ -2192,6 +2220,7 @@ namespace EFM
             AISquads = new Dictionary<string, List<Sosig>>();
             AISquadSizes = new Dictionary<string, int>();
             Mod.killList = new Dictionary<string, int>();
+            friendlyAI = new List<Sosig>();
             entities = new List<AIEntity>();
             entities.Add(GM.CurrentPlayerBody.Hitboxes[0].MyE); // Add player as first entity
             entityRelatedAI = new List<EFM_AI>();
@@ -4567,8 +4596,6 @@ namespace EFM
                         bool boxMainContainer = parent.mainContainer.GetComponent<BoxCollider>() != null;
                         if (parent.AddItemToContainer(itemObject.GetComponent<EFM_CustomItemWrapper>().physObj))
                         {
-                            itemObject.transform.parent = parent.containerItemRoot;
-
                             if (boxMainContainer)
                             {
                                 BoxCollider boxCollider = parent.mainContainer.GetComponent<BoxCollider>();

@@ -22,7 +22,7 @@ namespace EFM
         public int level;
         public bool active; // whether the area is active (could be inactive if needs generator but generator not running, or needs slot filled but none are)
         public bool constructing;
-        public float constructTime; // What time the construction has started so we can check how long it has been since then and decide if it is done
+        //public float constructTime; // What time the construction has started so we can check how long it has been since then and decide if it is done
         private bool slotsInit;
         public bool needsFuel;
         public float consumptionTimer;
@@ -78,6 +78,72 @@ namespace EFM
             {
                 transform.GetChild(0).gameObject.SetActive(false);
                 transform.GetChild(level).gameObject.SetActive(true);
+            }
+
+            // Init consumption based on save time, production timeleft and construction timer are set depending on it when loaded
+            if (active)
+            {
+                int consumeAmount = 0;
+                long secondsSinceSave = (long)baseManager.data["time"] - baseManager.GetTimeSeconds();
+                switch (areaIndex)
+                {
+                    case 4: // Generator
+                        consumptionTimer = 757.89f;
+                        break;
+                    case 6: // Water collector
+                        consumptionTimer = 295.45f;
+                        break;
+                    case 17: // AFU
+                        consumptionTimer = 211.76f;
+                        break;
+                    default:
+                        break;
+                }
+                consumeAmount = (int)(secondsSinceSave / consumptionTimer);
+
+                // Consume units from the first items in slots that have an amount for as long as we have an amount to consume
+                for (int i = 0; i < slots[level].Count && consumeAmount > 0; ++i)
+                {
+                    if (slots[level][i].CurObject != null)
+                    {
+                        EFM_CustomItemWrapper CIW = slots[level][i].CurObject.GetComponent<EFM_CustomItemWrapper>();
+                        if (CIW.amount > consumeAmount)
+                        {
+                            CIW.amount -= consumeAmount;
+                            consumeAmount = 0;
+                        }
+                        else if (CIW.amount == consumeAmount)
+                        {
+                            CIW.amount = 0;
+                            consumeAmount = 0;
+                        }
+                        else // CIW.amount < consumeAmount
+                        {
+                            CIW.amount = 0;
+                            consumeAmount -= consumeAmount;
+                        }
+
+                        if(consumeAmount == 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if(consumeAmount > 0)
+                {
+                    active = false;
+                    if (areaIndex == 4) // Generator
+                    {
+                        generatorRunning = false;
+
+                        // Update based on fuel the areas taht come before this one. The other ones were not intialized yet so no need to update
+                        for (int j = 0; j < areaIndex; ++j) 
+                        {
+                            baseManager.baseAreaManagers[j].UpdateBasedOnFuel();
+                        }
+                    }
+                }
             }
 
             init = true;
@@ -522,7 +588,6 @@ namespace EFM
                 {
                     constructing = false;
                     constructionTimer = 0;
-                    constructTime = 0;
 
                     Upgrade();
                 }
@@ -1122,6 +1187,7 @@ namespace EFM
             }
             bool firstProduction = true;
             Mod.instance.LogInfo("0");
+            long secondsSinceSave = (long)baseManager.data["time"] - baseManager.GetTimeSeconds();
             foreach (JObject production in productions)
             {
                 Mod.instance.LogInfo("1");
@@ -1179,7 +1245,7 @@ namespace EFM
                         activeProductions.Add(productionScript.ID, productionScript);
 
                         productionScript.active = true;
-                        productionScript.timeLeft = (float)productionsDict[productionScript.ID]["timeLeft"];
+                        productionScript.timeLeft = (float)productionsDict[productionScript.ID]["timeLeft"] - secondsSinceSave;
                         productionScript.productionCount = (int)productionsDict[productionScript.ID]["productionCount"];
 
                         Mod.instance.LogInfo("3");
@@ -2710,7 +2776,6 @@ namespace EFM
             else
             {
                 constructing = true;
-                constructTime = baseManager.GetTimeSeconds();
                 constructionTimer = (int)Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["constructionTime"];
             }
             

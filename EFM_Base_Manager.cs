@@ -154,8 +154,7 @@ namespace EFM
             {
                 deployTimer -= Time.deltaTime;
 
-                TimeSpan timeSpan = TimeSpan.FromSeconds(deployTimer);
-                raidCountdown.text = string.Format("{0:ss\\.ff}", timeSpan);
+                raidCountdown.text = Mod.FormatTimeString(deployTimer);
 
                 if (deployTimer <= 0)
                 {
@@ -163,7 +162,6 @@ namespace EFM
                     Mod.saveSlotIndex = 5;
                     SaveBase();
 
-                    Mod.currentLocationIndex = 2;
                     SteamVR_LoadLevel.Begin("Meatov"+ chosenMap.text+ "Scene", false, 0.5f, 0f, 0f, 0f, 1f);
                     countdownDeploy = false;
                 }
@@ -999,13 +997,11 @@ namespace EFM
             time %= 86400;
 
             // Update time texts
-            TimeSpan timeSpan = TimeSpan.FromSeconds(time);
-            string formattedTime0 = string.Format("{0:hh\\:mm\\:ss}", timeSpan);
+            string formattedTime0 = Mod.FormatTimeString(time);
             timeChoice0.text = formattedTime0;
 
             float offsetTime = (time + 43200) % 86400; // Offset time by 12 hours
-            TimeSpan offsetTimeSpan = TimeSpan.FromSeconds(offsetTime);
-            string formattedTime1 = string.Format("{0:hh\\:mm\\:ss}", offsetTimeSpan);
+            string formattedTime1 = Mod.FormatTimeString(offsetTime);
             timeChoice1.text = formattedTime1;
 
             chosenTime.text = chosenTimeIndex == 0 ? formattedTime0 : formattedTime1;
@@ -1113,7 +1109,7 @@ namespace EFM
             Mod.extractionUI.SetActive(false);
             // Extraction limit UI
             Mod.extractionLimitUI = Instantiate(Mod.extractionLimitUIPrefab, GM.CurrentPlayerRoot);
-            Mod.extractionLimitUIText = Mod.extractionLimitUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
+            Mod.extractionLimitUIText = Mod.extractionLimitUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
             Mod.extractionLimitUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
             Mod.extractionLimitUI.SetActive(false);
             // ItemDescription UIs
@@ -1574,7 +1570,6 @@ namespace EFM
                     currentBaseAreaManager.areaIndex = i;
                     currentBaseAreaManager.level = i == 3 ? 1 : 0; // Stash starts at level 1
                     currentBaseAreaManager.constructing = false;
-                    currentBaseAreaManager.constructTime = 0;
 
                     baseAreaManagers.Add(currentBaseAreaManager);
                 }
@@ -1647,43 +1642,55 @@ namespace EFM
                 return;
             }
 
-            // Load player status
-            Mod.level = (int)data["level"];
-            Mod.experience = (int)data["experience"];
-            Mod.health = data["health"].ToObject<float[]>();
-            Mod.hydration = (float)data["hydration"];
-            Mod.maxHydration = (float)data["maxHydration"];
-            Mod.energy = (float)data["energy"];
-            Mod.maxEnergy = (float)data["maxEnergy"];
-            Mod.stamina = (float)data["stamina"];
-            Mod.maxStamina = (float)data["maxStamina"];
-            Mod.weight = (int)((float)data["weight"] * 1000);
-            Mod.totalRaidCount = (int)data["totalRaidCount"];
-            Mod.runThroughRaidCount = (int)data["runThroughRaidCount"];
-            Mod.survivedRaidCount = (int)data["survivedRaidCount"];
-            Mod.MIARaidCount = (int)data["MIARaidCount"];
-            Mod.KIARaidCount = (int)data["KIARaidCount"];
-            Mod.failedRaidCount = (int)data["failedRaidCount"];
-            Mod.skills = new EFM_Skill[64];
-            for(int i=0; i<64; ++i)
+            // Clear other active slots since we shouldn't have any on load
+            Mod.otherActiveSlots.Clear();
+
+            // Load player status if not loading in from a raid
+            long secondsSinceSave = (long)data["time"] - GetTimeSeconds();
+            float minutesSinceSave = secondsSinceSave / 60.0f;
+            if (!Mod.justFinishedRaid)
             {
-                Mod.skills[i] = new EFM_Skill();
-                Mod.skills[i].progress = (float)data["skills"][i]["progress"];
-                Mod.skills[i].currentProgress = (float)data["skills"][i]["currentProgress"];
-                // 0-6 unless 4 physical
-                // 28-53 unless 52 practical
-                // 54-63 special
-                if (i >= 0 && i <= 6 && i != 4)
+                Mod.level = (int)data["level"];
+                Mod.experience = (int)data["experience"];
+                Mod.health = data["health"].ToObject<float[]>();
+                for(int i=0; i < Mod.health.Length; ++i)
                 {
-                    Mod.skills[i].skillType = EFM_Skill.SkillType.Physical;
+                    Mod.health[i] += Mathf.Min(healthRates[i] * minutesSinceSave, maxHealth[i]);
                 }
-                else if (i >= 28 && i <= 53 && i != 52)
+                Mod.maxHydration = (float)data["maxHydration"];
+                Mod.hydration = Mathf.Min((float)data["hydration"] + hydrationRate * minutesSinceSave, Mod.maxHydration);
+                Mod.maxEnergy = (float)data["maxEnergy"];
+                Mod.energy = Mathf.Min((float)data["energy"] + energyRate * minutesSinceSave, Mod.maxEnergy);
+                Mod.stamina = (float)data["stamina"];
+                Mod.maxStamina = (float)data["maxStamina"];
+                Mod.weight = (int)data["weight"];
+                Mod.totalRaidCount = (int)data["totalRaidCount"];
+                Mod.runThroughRaidCount = (int)data["runThroughRaidCount"];
+                Mod.survivedRaidCount = (int)data["survivedRaidCount"];
+                Mod.MIARaidCount = (int)data["MIARaidCount"];
+                Mod.KIARaidCount = (int)data["KIARaidCount"];
+                Mod.failedRaidCount = (int)data["failedRaidCount"];
+                Mod.skills = new EFM_Skill[64];
+                for (int i = 0; i < 64; ++i)
                 {
-                    Mod.skills[i].skillType = EFM_Skill.SkillType.Practical;
-                }
-                else if (i >= 54 && i <= 63)
-                {
-                    Mod.skills[i].skillType = EFM_Skill.SkillType.Special;
+                    Mod.skills[i] = new EFM_Skill();
+                    Mod.skills[i].progress = (float)data["skills"][i]["progress"];
+                    Mod.skills[i].currentProgress = (float)data["skills"][i]["currentProgress"];
+                    // 0-6 unless 4 physical
+                    // 28-53 unless 52 practical
+                    // 54-63 special
+                    if (i >= 0 && i <= 6 && i != 4)
+                    {
+                        Mod.skills[i].skillType = EFM_Skill.SkillType.Physical;
+                    }
+                    else if (i >= 28 && i <= 53 && i != 52)
+                    {
+                        Mod.skills[i].skillType = EFM_Skill.SkillType.Practical;
+                    }
+                    else if (i >= 54 && i <= 63)
+                    {
+                        Mod.skills[i].skillType = EFM_Skill.SkillType.Special;
+                    }
                 }
             }
 
@@ -1736,7 +1743,7 @@ namespace EFM
                     JArray loadedAreas = (JArray)data["areas"];
                     currentBaseAreaManager.level = (int)loadedAreas[i]["level"];
                     currentBaseAreaManager.constructing = (bool)loadedAreas[i]["constructing"];
-                    currentBaseAreaManager.constructTime = (float)loadedAreas[i]["constructTime"];
+                    currentBaseAreaManager.constructionTimer = (float)loadedAreas[i]["constructTimer"] - secondsSinceSave;
                     if (loadedAreas[i]["slots"] != null)
                     {
                         currentBaseAreaManager.slotItems = new List<GameObject>();
@@ -1758,75 +1765,87 @@ namespace EFM
                 {
                     currentBaseAreaManager.level = 0;
                     currentBaseAreaManager.constructing = false;
-                    currentBaseAreaManager.constructTime = 0;
                 }
 
                 baseAreaManagers.Add(currentBaseAreaManager);
             }
 
-            // Load trader statuses
-            if (EFM_TraderStatus.waitingQuestConditions == null)
+            // Load trader statuses if not loading in from a raid
+            if (!Mod.justFinishedRaid)
             {
-                EFM_TraderStatus.foundTasks = new Dictionary<string, TraderTask>();
-                EFM_TraderStatus.foundTaskConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                EFM_TraderStatus.waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                EFM_TraderStatus.waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
-            }
-            else
-            {
-                EFM_TraderStatus.foundTasks.Clear();
-                EFM_TraderStatus.foundTaskConditions.Clear();
-                EFM_TraderStatus.waitingQuestConditions.Clear();
-                EFM_TraderStatus.waitingVisibilityConditions.Clear();
-            }
-            Mod.traderStatuses = new EFM_TraderStatus[8];
-            if (data["traderStatuses"] == null)
-            {
-                for (int i = 0; i < 8; i++)
+                if (EFM_TraderStatus.waitingQuestConditions == null)
                 {
-                    Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
-                }
-            }
-            else
-            {
-                JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
-                for (int i = 0; i < 8; i++)
-                {
-                    Mod.traderStatuses[i] = new EFM_TraderStatus(data["traderStatuses"][i], i, Mod.traderBaseDB[i]["nickname"].ToString(), (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
-                }
-            }
-            for (int i = 0; i < 8; i++)
-            {
-                Mod.traderStatuses[i].Init();
-            }
-
-            // Add tasks to player status
-            foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
-            {
-                if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
-                {
-                    Mod.playerStatusManager.AddTask(task.Value);
+                    EFM_TraderStatus.foundTasks = new Dictionary<string, TraderTask>();
+                    EFM_TraderStatus.foundTaskConditions = new Dictionary<string, List<TraderTaskCondition>>();
+                    EFM_TraderStatus.waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
+                    EFM_TraderStatus.waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
                 }
                 else
                 {
-                    task.Value.statusListElement = null;
+                    EFM_TraderStatus.foundTasks.Clear();
+                    EFM_TraderStatus.foundTaskConditions.Clear();
+                    EFM_TraderStatus.waitingQuestConditions.Clear();
+                    EFM_TraderStatus.waitingVisibilityConditions.Clear();
+                }
+                Mod.traderStatuses = new EFM_TraderStatus[8];
+                if (data["traderStatuses"] == null)
+                {
+                    for (int i = 0; i < 8; i++)
+                    {
+                        Mod.traderStatuses[i] = new EFM_TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
+                    }
+                }
+                else
+                {
+                    JArray loadedTraderStatuses = (JArray)data["traderStatuses"];
+                    for (int i = 0; i < 8; i++)
+                    {
+                        Mod.traderStatuses[i] = new EFM_TraderStatus(data["traderStatuses"][i], i, Mod.traderBaseDB[i]["nickname"].ToString(), (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
+                    }
+                }
+                for (int i = 0; i < 8; i++)
+                {
+                    Mod.traderStatuses[i].Init();
+                }
+
+                // Add tasks to player status
+                foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
+                {
+                    if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
+                    {
+                        Mod.playerStatusManager.AddTask(task.Value);
+                    }
+                    else
+                    {
+                        task.Value.statusListElement = null;
+                    }
                 }
             }
 
-            // Load triggered exploration triggers
-            if(Mod.triggeredExplorationTriggers == null)
+            // Load triggered exploration triggers if not loading in from raid
+            if (!Mod.justFinishedRaid)
             {
-                Mod.triggeredExplorationTriggers = new List<List<bool>>();
-            }
-            else
-            {
-                Mod.triggeredExplorationTriggers.Clear();
-            }
-            if(data["triggeredExplorationTriggers"] != null)
-            {
-                for(int i=0; i < 12; ++i)
+                if (Mod.triggeredExplorationTriggers == null)
                 {
-                    Mod.triggeredExplorationTriggers.Add(data["triggeredExplorationTriggers"][i].ToObject<List<bool>>());
+                    Mod.triggeredExplorationTriggers = new List<List<bool>>();
+                }
+                else
+                {
+                    Mod.triggeredExplorationTriggers.Clear();
+                }
+                if (data["triggeredExplorationTriggers"] != null)
+                {
+                    for (int i = 0; i < 12; ++i)
+                    {
+                        Mod.triggeredExplorationTriggers.Add(data["triggeredExplorationTriggers"][i].ToObject<List<bool>>());
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < 12; ++i)
+                    {
+                        Mod.triggeredExplorationTriggers.Add(new List<bool>());
+                    }
                 }
             }
         }
@@ -2705,7 +2724,7 @@ namespace EFM
                         Mod.leftShoulderObject = itemPhysicalObject.gameObject;
                     }
 
-                    EFM_EquipmentSlot.WearEquipment(customItemWrapper);
+                    //EFM_EquipmentSlot.WearEquipment(customItemWrapper);
 
                     itemPhysicalObject.gameObject.SetActive(Mod.playerStatusManager.displayed);
                 }
@@ -4075,16 +4094,15 @@ namespace EFM
             saveObject["maxEnergy"] = Mod.maxEnergy;
             saveObject["stamina"] = Mod.stamina;
             saveObject["maxStamina"] = Mod.maxStamina;
+            saveObject["weight"] = Mod.weight;
             saveObject["level"] = Mod.level;
             saveObject["experience"] = Mod.experience;
-            saveObject["weight"] = Mod.weight;
             saveObject["totalRaidCount"] = Mod.totalRaidCount;
             saveObject["runThroughRaidCount"] = Mod.runThroughRaidCount;
             saveObject["survivedRaidCount"] = Mod.survivedRaidCount;
             saveObject["MIARaidCount"] = Mod.MIARaidCount;
             saveObject["KIARaidCount"] = Mod.KIARaidCount;
             saveObject["failedRaidCount"] = Mod.failedRaidCount;
-            Mod.instance.LogInfo("\tWrote basic data");
 
             // Write skills
             saveObject["skills"] = new JArray();
@@ -4103,7 +4121,7 @@ namespace EFM
                 JToken currentSavedArea = new JObject();
                 currentSavedArea["level"] = baseAreaManagers[i].level;
                 currentSavedArea["constructing"] = baseAreaManagers[i].constructing;
-                currentSavedArea["constructTime"] = baseAreaManagers[i].constructTime;
+                currentSavedArea["constructTimer"] = baseAreaManagers[i].constructionTimer;
                 if (baseAreaManagers[i].slotItems != null)
                 {
                     JArray slots = new JArray();

@@ -336,6 +336,7 @@ namespace EFM
 
 			// Get item volume
 			int volumeToUse = 0;
+			int weightToUse = 0;
 			string IDToUse = "";
 			List<string> parentsToUse = null;
 			EFM_CustomItemWrapper wrapper = item.GetComponent<EFM_CustomItemWrapper>();
@@ -349,12 +350,14 @@ namespace EFM
 
 				}
 				volumeToUse = wrapper.volumes[wrapper.mode];
+				weightToUse = wrapper.currentWeight;
 				IDToUse = wrapper.ID;
 				parentsToUse = wrapper.parents;
 			}
 			else
 			{
 				volumeToUse = VID.volume;
+				weightToUse = VID.weight;
 				IDToUse = VID.H3ID;
 				parentsToUse = VID.parents;
 			}
@@ -394,6 +397,9 @@ namespace EFM
 
 				// Add volume to backpack
 				containingVolume += volumeToUse;
+
+				// Add item's weight to container
+				currentWeight += weightToUse;
 
 				return true;
 			}
@@ -1424,13 +1430,13 @@ namespace EFM
 					SetMode(0);
 					SetContainerOpen(true, isRightHand);
 					volumeIndicator.SetActive(true);
-					volumeIndicatorText.text = containingVolume.ToString()+"/"+maxVolume;
+					volumeIndicatorText.text = (containingVolume / Mod.volumePrecisionMultiplier).ToString() + "/" + (maxVolume / Mod.volumePrecisionMultiplier);
 				}
 				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
 				{
 					SetContainerOpen(true, isRightHand);
 					volumeIndicator.SetActive(true);
-					volumeIndicatorText.text = containingVolume.ToString() + "/" + maxVolume;
+					volumeIndicatorText.text = (containingVolume / Mod.volumePrecisionMultiplier).ToString() + "/" + (maxVolume / Mod.volumePrecisionMultiplier);
 				}
 				else if(itemType == Mod.ItemType.LootContainer)
 				{

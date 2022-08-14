@@ -135,7 +135,7 @@ namespace EFM
         public static float staminaRestoration = 4.4f;
         public static float jumpStaminaDrain = 16;
         public static float currentStaminaEffect = 0;
-        public static float weightLimit = 55;
+        public static float weightLimit = 55000;
         public static float currentDamageModifier = 1;
         public static int stomachBloodLossCount = 0; // If this is 0, in hideout we will regen health otherwise not, in raid we will multiply energy and hydration rate by 5
         public static float temperatureOffset = 0;
@@ -2347,6 +2347,7 @@ namespace EFM
             }
             else if (loadedScene.name.Equals("MeatovFactoryScene") /*|| other raid scenes*/)
             {
+                Mod.currentLocationIndex = 2;
                 inMeatovScene = true;
                 Mod.currentBaseManager = null;
                 UnsecureObjects();
@@ -3034,7 +3035,7 @@ namespace EFM
 
         private static void DropItem(FVRViveHand hand, FVRPhysicalObject primary)
         {
-            Mod.instance.LogInfo("Dropped Item " + primary.name);
+            Mod.instance.LogInfo("Dropped Item " + primary.name+":\n"+Environment.StackTrace);
             EFM_CustomItemWrapper collidingContainerWrapper = null;
             EFM_TradeVolume collidingTradeVolume = null;
             if (Mod.rightHand != null)
@@ -3078,8 +3079,6 @@ namespace EFM
 
                         if(heldCustomItemWrapper != null)
                         {
-                            collidingContainerWrapper.currentWeight += heldCustomItemWrapper.currentWeight;
-
                             // Was on player
                             Mod.RemoveFromPlayerInventory(heldCustomItemWrapper.transform, false);
 
@@ -3088,8 +3087,6 @@ namespace EFM
                         }
                         else
                         {
-                            collidingContainerWrapper.currentWeight += heldVanillaItemDescriptor.currentWeight;
-
                             // Was on player
                             Mod.RemoveFromPlayerInventory(heldVanillaItemDescriptor.transform, false);
 
@@ -3103,15 +3100,11 @@ namespace EFM
 
                         if (heldCustomItemWrapper != null)
                         {
-                            collidingContainerWrapper.currentWeight += heldCustomItemWrapper.currentWeight;
-
                             // Was on player
                             Mod.RemoveFromPlayerInventory(heldCustomItemWrapper.transform, true);
                         }
                         else
                         {
-                            collidingContainerWrapper.currentWeight += heldVanillaItemDescriptor.currentWeight;
-
                             // Was on player
                             Mod.RemoveFromPlayerInventory(heldVanillaItemDescriptor.transform, true);
                         }
@@ -3563,10 +3556,21 @@ namespace EFM
     // Patches FVRPhysicalObject.SetQuickBeltSlot so we can keep track of what goes in and out of rigs
     class SetQuickBeltSlotPatch
     {
+        private static bool skipPatch;
+
         static void Prefix(ref FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
         {
             if (!Mod.inMeatovScene)
             {
+                return;
+            }
+            Mod.instance.LogInfo("SetQuickBeltSlotPatch called");
+
+            // This may be the case, and in this case we don't want to redo everything we do in the patch, so just skip
+            if(slot == __instance.QuickbeltSlot)
+            {
+                Mod.instance.LogInfo("Item " + __instance.name + " is already in slot: " + (slot == null ? "null":slot.name)+ ", skipipng SetQuickBeltSlotPatch patch");
+                skipPatch = true;
                 return;
             }
 
@@ -3715,6 +3719,19 @@ namespace EFM
                 return;
             }
 
+            if (skipPatch)
+            {
+                skipPatch = false;
+
+                // Event if skipping, we still want to make sure that if the slot is not null, we set the item's parent to null
+                if (slot != null)
+                {
+                    __instance.SetParentage(null);
+                }
+
+                return;
+            }
+
             if (slot == null)
             {
                 return;
@@ -3742,7 +3759,7 @@ namespace EFM
                 if (asShoulderSlot.right)
                 {
                     Mod.rightShoulderObject = __instance.gameObject;
-                    __instance.gameObject.SetActive(__instance.IsAltHeld || __instance.IsHeld); // Dont want to set inactive if heald, and could be held if harnessed
+                    __instance.gameObject.SetActive(__instance.IsAltHeld || __instance.IsHeld); // Dont want to set inactive if held, and could be held if harnessed
                 }
                 //else
                 //{
@@ -6113,6 +6130,7 @@ namespace EFM
                         {
                             if (__instance.CurrentInteractable is FVRPhysicalObject && ((FVRPhysicalObject)__instance.CurrentInteractable).QuickbeltSlot == null && !((FVRPhysicalObject)__instance.CurrentInteractable).IsPivotLocked && __instance.CurrentHoveredQuickbeltSlot != null && __instance.CurrentHoveredQuickbeltSlot.HeldObject == null && ((FVRPhysicalObject)__instance.CurrentInteractable).QBSlotType == __instance.CurrentHoveredQuickbeltSlot.Type && __instance.CurrentHoveredQuickbeltSlot.SizeLimit >= ((FVRPhysicalObject)__instance.CurrentInteractable).Size)
                             {
+                                // Note: This will call set quick belt slot twice, this is by vanilla design and is not a bug
                                 ((FVRPhysicalObject)__instance.CurrentInteractable).EndInteractionIntoInventorySlot(__instance, __instance.CurrentHoveredQuickbeltSlot);
                             }
                             else
