@@ -1054,8 +1054,8 @@ namespace EFM
                                     break;
                                 case "DestroyedPart":
                                     consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.DestroyedPart;
-                                    consumableEffect.healthPenaltyMax = (float)damageEntry.Value["healthPenaltyMax"];
-                                    consumableEffect.healthPenaltyMin = (float)damageEntry.Value["healthPenaltyMin"];
+                                    consumableEffect.healthPenaltyMax = (float)damageEntry.Value["healthPenaltyMax"] / 100;
+                                    consumableEffect.healthPenaltyMin = (float)damageEntry.Value["healthPenaltyMin"] / 100;
                                     break;
                                 case "HeavyBleeding":
                                     consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.HeavyBleeding;
@@ -1230,6 +1230,8 @@ namespace EFM
                 traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/categories.json"));
             }
             globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/globals.json"));
+            MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
+            MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
             questDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/quests.json"));
             XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
             mapData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/EscapeFromMeatovMapData.txt"));
@@ -2392,6 +2394,8 @@ namespace EFM
             pointableInstance.MaxPointingRange = 30;
             currentPointable.transform.position = new Vector3(-12.14f, 9.5f, 4.88f);
             currentPointable.transform.rotation = Quaternion.Euler(0, 300, 0);
+
+            GM.CurrentSceneSettings.MaxPointingDistance = 30;
 
             // Set LOD bias to default
             QualitySettings.lodBias = 2;
@@ -4805,6 +4809,7 @@ namespace EFM
                             fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                             fractureEffect.partIndex = actualPartIndex;
                             EFM_Effect.effects.Add(fractureEffect);
+                            // TODO: Player fracture sound
                         }
                         break;
                     case 5:
@@ -4836,6 +4841,7 @@ namespace EFM
                             fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                             fractureEffect.partIndex = actualPartIndex;
                             EFM_Effect.effects.Add(fractureEffect);
+                            // TODO: Player fracture sound
                         }
                         break;
                 }
@@ -4846,7 +4852,6 @@ namespace EFM
 
         public static bool RegisterPlayerHit(int partIndex, float totalDamage, bool FromSelf)
         {
-            GM.CurrentSceneSettings.OnPlayerTookDamage(totalDamage / 440f);
             if (GM.CurrentSceneSettings.DoesDamageGetRegistered && GM.CurrentSceneSettings.DeathResetPoint != null && !GM.IsDead())
             {
                 GM.CurrentPlayerBody.Health -= totalDamage;
@@ -4860,6 +4865,7 @@ namespace EFM
 
                 // Parts other than head and thorax at zero distribute damage over all other parts
                 float[] destroyedMultiplier = new float[] { 0, 0, 1.5f, 0.7f, 0.7f, 1, 1};
+                float actualTotalDamage = 0;
                 if (partIndex >= 2)
                 {
                     if (Mod.health[partIndex] <= 0)
@@ -4868,7 +4874,9 @@ namespace EFM
                         {
                             if (i != partIndex)
                             {
-                                Mod.health[i] -= totalDamage / 6 * destroyedMultiplier[partIndex];
+                                float actualDamage = Mathf.Min(totalDamage / 6 * destroyedMultiplier[partIndex], Mod.health[i]);
+                                Mod.health[i] -= actualDamage;
+                                actualTotalDamage += actualDamage;
 
                                 if (i == 0 || i == 1)
                                 {
@@ -4883,6 +4891,7 @@ namespace EFM
                     }
                     else
                     {
+                        actualTotalDamage = totalDamage;
                         Mod.health[partIndex] = Mathf.Clamp(Mod.health[partIndex] - totalDamage, 0, Mod.currentRaidManager.maxHealth[partIndex]);
                     }
                 }
@@ -4893,8 +4902,10 @@ namespace EFM
                 }
                 else // Part is head or thorax, not yet destroyed
                 {
+                    actualTotalDamage = totalDamage;
                     Mod.health[partIndex] = Mathf.Clamp(Mod.health[partIndex] - totalDamage, 0, Mod.currentRaidManager.maxHealth[partIndex]);
                 }
+                GM.CurrentSceneSettings.OnPlayerTookDamage(actualTotalDamage / 440f);
             }
             return false;
         }
@@ -6434,6 +6445,11 @@ namespace EFM
     // Patches FVRMovementManager.HandUpdateTwinstick to prevent sprinting in case of lack of stamina
     class MovementManagerUpdatePatch
     {
+        private static bool wasGrounded = true;
+        private static Vector3 previousVelocity;
+        public static float damagePerMeter = 9;
+        public static float safeHeight = 3;
+
         static bool Prefix(FVRViveHand hand, ref bool ___m_isRightHandActive, ref bool ___m_isLeftHandActive, ref GameObject ___m_twinStickArrowsRight,
                            ref bool ___m_isTwinStickSmoothTurningCounterClockwise, ref bool ___m_isTwinStickSmoothTurningClockwise, ref GameObject ___m_twinStickArrowsLeft,
                            ref float ___m_timeSinceSprintDownClick, ref float ___m_timeSinceSnapTurn, ref bool ___m_sprintingEngaged, ref bool ___m_twoAxisGrounded,
@@ -6815,7 +6831,47 @@ namespace EFM
                 }
             }
 
+            // Update fall damage depending on grounded and previous velocity
+            UpdateFallDamage(___m_twoAxisGrounded);
+
+            wasGrounded = ___m_twoAxisGrounded;
+            previousVelocity = ___m_twoAxisVelocity;
+
             return false;
+        }
+
+        private static void UpdateFallDamage(bool grounded)
+        {
+            if (grounded && !wasGrounded)
+            {
+                // Considering realistic 1g of acceleration, t = (Vf-Vi)/a, and s = Vi * t + 0.5 * a * t ^ 2, s being distance fallen
+                float t = previousVelocity.y / -9.806f; // Note that here, velocity and a are negative, giving a positive time
+                float s = 4.903f /* 0.5f * 9.806f */ * t * t; // Here a is positive to have a positive distance fallen
+                if (s > safeHeight)
+                {
+                    float damage = s * damagePerMeter;
+                    float distribution = UnityEngine.Random.value;
+                    if (UnityEngine.Random.value < 0.125 * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
+                    {
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = 5;
+                        EFM_Effect.effects.Add(fractureEffect);
+                        // TODO: Player fracture sound
+                    }
+                    if (UnityEngine.Random.value < 0.125 * (s - safeHeight)) // 100% chance of fracture 8+ meters unsafe fall
+                    {
+                        EFM_Effect fractureEffect = new EFM_Effect();
+                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        fractureEffect.partIndex = 6;
+                        EFM_Effect.effects.Add(fractureEffect);
+                        // TODO: Player fracture sound
+                    }
+
+                    DamagePatch.RegisterPlayerHit(5, distribution * damage, true);
+                    DamagePatch.RegisterPlayerHit(6, (1 - distribution) * damage, true);
+                }
+            }
         }
     }
 

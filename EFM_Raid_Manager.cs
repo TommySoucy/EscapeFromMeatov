@@ -4066,10 +4066,12 @@ namespace EFM
             float healthDelta = 0;
             float health = 0;
             bool lethal = false;
+            float maxHealthTotal = 0;
 
             // Apply lethal health rates
             for (int i = 0; i < 7; ++i)
             {
+                maxHealthTotal += maxHealth[i];
                 if (Mod.health[i] == 0 && !(i == 0 || i == 1)) 
                 {
                     // Apply currentHealthRates[i] to other parts
@@ -4147,7 +4149,9 @@ namespace EFM
             {
                 Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(false);
             }
-            Mod.playerStatusManager.healthText.text = String.Format("{0:0}/440", health);
+            Mod.playerStatusManager.healthText.text = String.Format("{0:0}/{1:0}", health, maxHealthTotal);
+            GM.CurrentPlayerBody.Health = health;
+            // TODO: Update max health on vanilla display
 
             Mod.hydration = Mathf.Clamp(Mod.hydration + currentHydrationRate * (Time.deltaTime / 60), 0, Mod.maxHydration);
             if (currentHydrationRate != 0)

@@ -182,7 +182,7 @@ namespace EFM
 		public List<EFM_Effect_Consumable> consumeEffects; // Immediate effects or effects that modify/override/give new effects 
 		private float consumableTimer;
 		private bool validConsumePress;
-        public int targettedPart = -1;
+        public int targettedPart = -1; // TODO: Implement
 
 		// DogTag
 		public bool USEC;
@@ -568,15 +568,17 @@ namespace EFM
 						validConsumePress = false;
 						hand.GetComponent<EFM_Hand>().consuming = false;
 						Mod.consumeUI.SetActive(false);
+						Mod.instance.LogInfo("Valid consume released");
 
 						if (amountRate == -1)
 						{
+							Mod.instance.LogInfo("\tAmount rate -1");
 							if (maxAmount > 0)
 							{
-								Mod.instance.LogInfo("Consuming, amountRate == -1, maxAmount > 0, consumableTimer: " + consumableTimer + ", useTime: " + useTime);
+								Mod.instance.LogInfo("\t\tConsuming, amountRate == -1, maxAmount > 0, consumableTimer: " + consumableTimer + ", useTime: " + useTime);
 								// Consume for the fraction timer/useTime of remaining amount. If timer >= useTime, we consume the whole thing
 								int amountToConsume = consumableTimer >= useTime ? amount : (int)(amount * (consumableTimer / useTime));
-								Mod.instance.LogInfo("Amount to consume: " + amountToConsume);
+								Mod.instance.LogInfo("\t\tAmount to consume: " + amountToConsume);
 								if (amount - amountToConsume <= 0)
 								{
 									// Attempt to apply effects at full effectiveness
@@ -612,6 +614,7 @@ namespace EFM
 						}
 						else if (amountRate == 0)
 						{
+							Mod.instance.LogInfo("\tAmount rate 0");
 							// This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
 							if (consumableTimer >= useTime)
 							{
@@ -624,8 +627,10 @@ namespace EFM
 						}
 						else
 						{
+							Mod.instance.LogInfo("\tAmount rate else");
 							// Consume timer/useTime of to amountRate
 							int amountToConsume = consumableTimer >= useTime ? (int)amountRate : (int)(amountRate * (consumableTimer / useTime));
+							Mod.instance.LogInfo("\tAmount to consume: "+ amountToConsume);
 							if (consumableTimer >= useTime)
 							{
 								// Apply effects at full effectiveness
@@ -867,7 +872,47 @@ namespace EFM
 								// Apply effects at full effectiveness
 								if (ApplyEffects(1, amountToConsume))
 								{
-									amount -= amountToConsume;
+									// Here we also have to apply amount consumed as health to relevant parts
+									// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
+									// If this ever changes, we will need to have an additional flag for healing items
+									int actualAmountConsumed = 0;
+									int partIndex = -1;
+									if (targettedPart == -1)
+									{
+										partIndex = targettedPart;
+									}
+									else // No part targetted, prioritize least health, and as we go through more important parts first, those will be prioritized if health is equal
+									{
+										int leastIndex = -1;
+										float leastAmount = 1000;
+										for (int i = 0; i < Mod.health.Length; ++i)
+										{
+											if (Mod.health[i] < leastAmount)
+											{
+												leastIndex = i;
+											}
+										}
+										if (leastIndex > 0)
+										{
+											partIndex = leastIndex;
+										}
+									}
+
+									if (partIndex != -1)
+									{
+										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
+										{
+											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentBaseManager.maxHealth[partIndex] - Mod.health[partIndex]));
+										}
+										else // In raid, take raid max health
+										{
+											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentRaidManager.maxHealth[partIndex] - Mod.health[partIndex]));
+										}
+										Mod.health[partIndex] += actualAmountConsumed;
+									}
+									// else, no target part and all parts are at max health
+
+									amount -= actualAmountConsumed;
 								}
 							}
 							else
@@ -875,7 +920,47 @@ namespace EFM
 								// Apply effects at effectiveness * amountToConsume / amountRate
 								if (ApplyEffects(amountToConsume / amountRate, amountToConsume))
 								{
-									amount -= amountToConsume;
+									// Here we also have to apply amount consumed as health to relevant parts
+									// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
+									// If this ever changes, we will need to have an additional flag for healing items
+									int actualAmountConsumed = 0;
+									int partIndex = -1;
+									if (targettedPart == -1)
+									{
+										partIndex = targettedPart;
+									}
+									else // No part targetted, prioritize least health, and as we go through more important parts first, those will be prioritized if health is equal
+									{
+										int leastIndex = -1;
+										float leastAmount = 1000;
+										for (int i = 0; i < Mod.health.Length; ++i)
+										{
+											if (Mod.health[i] < leastAmount)
+											{
+												leastIndex = i;
+											}
+										}
+										if (leastIndex > 0)
+										{
+											partIndex = leastIndex;
+										}
+									}
+
+                                    if(partIndex != -1)
+									{
+										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
+										{
+											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentBaseManager.maxHealth[partIndex] - Mod.health[partIndex]));
+										}
+										else // In raid, take raid max health
+										{
+											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentRaidManager.maxHealth[partIndex] - Mod.health[partIndex]));
+										}
+										Mod.health[partIndex] += actualAmountConsumed;
+									}
+									// else, no target part and all parts are at max health
+
+									amount -= actualAmountConsumed;
 								}
 							}
 						}
@@ -1248,6 +1333,11 @@ namespace EFM
 							{
 								EFM_Effect.effects.RemoveAt(highest);
 								amount -= consumeEffect.cost;
+								Mod.health[lowestPartIndex] = 1;
+								if(Mod.currentLocationIndex == 2)
+                                {
+									Mod.currentRaidManager.maxHealth[lowestPartIndex] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
+                                }
 								if (amount - amountToConsume == 0)
 								{
 									return true;
@@ -1284,6 +1374,11 @@ namespace EFM
 							{
 								EFM_Effect.effects.RemoveAt(index);
 								amount -= consumeEffect.cost;
+								Mod.health[targettedPart] = 1;
+								if (Mod.currentLocationIndex == 2)
+								{
+									Mod.currentRaidManager.maxHealth[targettedPart] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
+								}
 								if (amount - amountToConsume == 0)
 								{
 									return true;

@@ -912,6 +912,8 @@ namespace EFM
             {
                 medicalScreenTotalHealthText.text = String.Format("{0:0}/{1}", health, maxHealthTotal); ;
             }
+            GM.CurrentPlayerBody.Health = health;
+            // TODO: Update max health on vanilla display
 
             if (currentHydrationRate > 0)
             {
