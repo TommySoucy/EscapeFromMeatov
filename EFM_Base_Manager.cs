@@ -2285,6 +2285,19 @@ namespace EFM
                 hand.CurrentInteractable = itemPhysicalObject;
                 FieldInfo handStateField = typeof(FVRViveHand).GetField("m_state", BindingFlags.NonPublic | BindingFlags.Instance);
                 handStateField.SetValue(hand, FVRViveHand.HandState.GripInteracting);
+                // Must set location index before beginning interaction because begin interactionpatch will consider this to be in hideout and will try to remove it from it
+                // but it isnt in there yet
+                if(customItemWrapper != null)
+                {
+                    customItemWrapper.takeCurrentLocation = false;
+                    customItemWrapper.locationIndex = 0;
+                }
+                else
+                {
+                    vanillaItemDescriptor.takeCurrentLocation = false;
+                    vanillaItemDescriptor.locationIndex = 0;
+                }
+                locationIndex = 0;
                 hand.CurrentInteractable.BeginInteraction(hand);
             }
 

@@ -683,7 +683,7 @@ namespace EFM
                     Vector3 vector2 = GM.CurrentPlayerBody.Head.forward;
                     vector2.y = 0f;
                     vector2.Normalize();
-                    vector2 *= 0.25f;
+                    vector2 *= 0.33f;
                     vector += vector2;
                     Mod.extractionUI.transform.position = vector;
                     Mod.extractionUI.transform.rotation = Quaternion.LookRotation(vector2, Vector3.up);

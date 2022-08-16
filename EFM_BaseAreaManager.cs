@@ -1187,7 +1187,7 @@ namespace EFM
             }
             bool firstProduction = true;
             Mod.instance.LogInfo("0");
-            long secondsSinceSave = baseManager.GetTimeSeconds() - (long)baseManager.data["time"];
+            long secondsSinceSave = baseManager.data["time"] != null ? baseManager.GetTimeSeconds() - (long)baseManager.data["time"] : 0;
             foreach (JObject production in productions)
             {
                 Mod.instance.LogInfo("1");
