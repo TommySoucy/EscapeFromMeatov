@@ -3685,7 +3685,17 @@ namespace EFM
                                     {
                                         if (causedEffect.effectType == EFM_Effect.EffectType.HealthRate)
                                         {
-                                            currentNonLethalHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                            if (causedEffect.partIndex == -1)
+                                            {
+                                                for (int j = 0; j < 7; ++j)
+                                                {
+                                                    currentNonLethalHealthRates[j] -= causedEffect.value;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                currentNonLethalHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                            }
                                         }
                                         else // Energy rate
                                         {
@@ -3808,7 +3818,7 @@ namespace EFM
                                 {
                                     for (int j = 0; j < 7; ++j)
                                     {
-                                        arrayToUse[j] += effect.value / 7;
+                                        arrayToUse[j] += effect.value; // Note: Need to keep in mind this will apply the ENTIRE value to EACH part
                                     }
                                 }
                                 else
@@ -3927,7 +3937,6 @@ namespace EFM
                                 newLightBleedingHealthRate.value = -8;
                                 newLightBleedingHealthRate.hasTimer = effect.hasTimer;
                                 newLightBleedingHealthRate.timer = effect.timer;
-                                newLightBleedingHealthRate.partIndex = effect.partIndex;
                                 newLightBleedingHealthRate.nonLethal = true;
                                 EFM_Effect.effects.Add(newLightBleedingHealthRate);
                                 effect.caused.Add(newLightBleedingHealthRate);
@@ -3938,7 +3947,6 @@ namespace EFM
                                 newLightBleedingEnergyRate.value = -5;
                                 newLightBleedingEnergyRate.hasTimer = effect.hasTimer;
                                 newLightBleedingEnergyRate.timer = effect.timer;
-                                newLightBleedingEnergyRate.partIndex = effect.partIndex;
                                 EFM_Effect.effects.Add(newLightBleedingEnergyRate);
                                 effect.caused.Add(newLightBleedingEnergyRate);
 
@@ -3952,7 +3960,7 @@ namespace EFM
                                 EFM_Effect newHeavyBleedingHealthRate = new EFM_Effect();
                                 newHeavyBleedingHealthRate.effectType = EFM_Effect.EffectType.HealthRate;
                                 newHeavyBleedingHealthRate.delay = 5;
-                                newHeavyBleedingHealthRate.value = -13.5f;
+                                newHeavyBleedingHealthRate.value = -13.5f; // Note: This damage will be applied to each part every 60 seconds since no part index is specified
                                 newHeavyBleedingHealthRate.hasTimer = effect.hasTimer;
                                 newHeavyBleedingHealthRate.timer = effect.timer;
                                 newHeavyBleedingHealthRate.nonLethal = true;
@@ -3965,7 +3973,6 @@ namespace EFM
                                 newHeavyBleedingEnergyRate.value = -6;
                                 newHeavyBleedingEnergyRate.hasTimer = effect.hasTimer;
                                 newHeavyBleedingEnergyRate.timer = effect.timer;
-                                newHeavyBleedingEnergyRate.partIndex = effect.partIndex;
                                 EFM_Effect.effects.Add(newHeavyBleedingEnergyRate);
                                 effect.caused.Add(newHeavyBleedingEnergyRate);
 

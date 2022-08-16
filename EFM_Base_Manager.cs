@@ -499,7 +499,17 @@ namespace EFM
                                     {
                                         if (causedEffect.effectType == EFM_Effect.EffectType.HealthRate)
                                         {
-                                            currentHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                            if (causedEffect.partIndex == -1)
+                                            {
+                                                for (int j = 0; j < 7; ++j)
+                                                {
+                                                    currentHealthRates[j] -= causedEffect.value;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                currentHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                            }
                                         }
                                         else // Energy rate
                                         {
@@ -2098,7 +2108,7 @@ namespace EFM
                                 break;
                             }
 
-                            string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
+                            string roundName = loadedRound.LR_ObjectWrapper.DisplayName;
 
                             if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
                             {

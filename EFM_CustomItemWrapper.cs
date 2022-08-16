@@ -160,7 +160,7 @@ namespace EFM
 		private Vector3 stackSplitRightVector;
 
 		// Amount
-		private int _amount;
+		public int _amount;
 		public int amount 
 		{ 
 			get { return _amount; } 
@@ -618,6 +618,7 @@ namespace EFM
 							// This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
 							if (consumableTimer >= useTime)
 							{
+								Mod.instance.LogInfo("\t\tConsumable timer >= useTime");
 								if (ApplyEffects(1, 1))
 								{
 									amount -= 1;
@@ -633,18 +634,103 @@ namespace EFM
 							Mod.instance.LogInfo("\tAmount to consume: "+ amountToConsume);
 							if (consumableTimer >= useTime)
 							{
+								Mod.instance.LogInfo("\t\tConsumable timer >= useTime");
 								// Apply effects at full effectiveness
-								if (ApplyEffects(1, amountToConsume))
+								// NOTE: In the case we have an amount rate, here, we only remove the used amount if no other effects  have been applied
+								// so only if ApplyEffects returns false.
+								if (!ApplyEffects(1, amountToConsume))
 								{
-									amount -= amountToConsume;
+									// Here we also have to apply amount consumed as health to relevant parts
+									// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
+									// If this ever changes, we will need to have an additional flag for healing items
+									int actualAmountConsumed = 0;
+									int partIndex = -1;
+									if (targettedPart == -1)
+									{
+										partIndex = targettedPart;
+									}
+									else // No part targetted, prioritize least health, and as we go through more important parts first, those will be prioritized if health is equal
+									{
+										int leastIndex = -1;
+										float leastAmount = 1000;
+										for (int i = 0; i < Mod.health.Length; ++i)
+										{
+											if (Mod.health[i] < leastAmount)
+											{
+												leastIndex = i;
+											}
+										}
+										if (leastIndex > 0)
+										{
+											partIndex = leastIndex;
+										}
+									}
+
+									if (partIndex != -1)
+									{
+										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
+										{
+											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentBaseManager.maxHealth[partIndex] - Mod.health[partIndex]));
+										}
+										else // In raid, take raid max health
+										{
+											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentRaidManager.maxHealth[partIndex] - Mod.health[partIndex]));
+										}
+										Mod.health[partIndex] += actualAmountConsumed;
+									}
+									// else, no target part and all parts are at max health
+
+									amount -= actualAmountConsumed;
 								}
 							}
 							else
 							{
+								Mod.instance.LogInfo("\t\tConsumable timer < useTime");
+
 								// Apply effects at effectiveness * amountToConsume / amountRate
-								if (ApplyEffects(amountToConsume / amountRate, amountToConsume))
+								if (!ApplyEffects(amountToConsume / amountRate, amountToConsume))
 								{
-									amount -= amountToConsume;
+									// Here we also have to apply amount consumed as health to relevant parts
+									// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
+									// If this ever changes, we will need to have an additional flag for healing items
+									int actualAmountConsumed = 0;
+									int partIndex = -1;
+									if (targettedPart == -1)
+									{
+										partIndex = targettedPart;
+									}
+									else // No part targetted, prioritize least health, and as we go through more important parts first, those will be prioritized if health is equal
+									{
+										int leastIndex = -1;
+										float leastAmount = 1000;
+										for (int i = 0; i < Mod.health.Length; ++i)
+										{
+											if (Mod.health[i] < leastAmount)
+											{
+												leastIndex = i;
+											}
+										}
+										if (leastIndex > 0)
+										{
+											partIndex = leastIndex;
+										}
+									}
+
+									if (partIndex != -1)
+									{
+										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
+										{
+											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentBaseManager.maxHealth[partIndex] - Mod.health[partIndex]));
+										}
+										else // In raid, take raid max health
+										{
+											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentRaidManager.maxHealth[partIndex] - Mod.health[partIndex]));
+										}
+										Mod.health[partIndex] += actualAmountConsumed;
+									}
+									// else, no target part and all parts are at max health
+
+									amount -= actualAmountConsumed;
 								}
 							}
 						}
@@ -660,9 +746,12 @@ namespace EFM
 							physObj.ForceBreakInteraction();
 							Destroy(gameObject);
 
-							foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+							if (Mod.currentLocationIndex == 1)
 							{
-								areaManager.UpdateBasedOnItem(ID);
+								foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+								{
+									areaManager.UpdateBasedOnItem(ID);
+								}
 							}
 						}
 					}
@@ -975,9 +1064,12 @@ namespace EFM
 							destroyed = true;
 							Destroy(gameObject);
 
-							foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+							if (Mod.currentLocationIndex == 1)
 							{
-								areaManager.UpdateBasedOnItem(ID);
+								foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+								{
+									areaManager.UpdateBasedOnItem(ID);
+								}
 							}
 						}
 					}
@@ -995,6 +1087,7 @@ namespace EFM
 
 		private bool ApplyEffects(float effectiveness, int amountToConsume)
         {
+			Mod.instance.LogInfo("Apply effects called, effectiveness: " + effectiveness + ", amount to consume: " + amountToConsume);
 			if(consumeEffects == null)
             {
 				consumeEffects = prefabCIW.consumeEffects;
@@ -1028,7 +1121,7 @@ namespace EFM
 							bool radExposureApplied = false;
 							for(int i = EFM_Effect.effects.Count - 1; i >= 0; --i)
                             {
-								if (consumeEffect.cost <= amount - amountToConsume)
+								if (consumeEffect.cost==0 || consumeEffect.cost <= amount - amountToConsume)
 								{
 									if (EFM_Effect.effects[i].effectType == EFM_Effect.EffectType.RadExposure)
 									{
@@ -1152,9 +1245,11 @@ namespace EFM
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.LightBleeding:
+						Mod.instance.LogInfo("\tHas damage light bleeding effect");
 						// Remove priority LightBleeding effect, or one found on targetted part
 						if (targettedPart == -1)
 						{
+							Mod.instance.LogInfo("\t\tNo targetted part, cost: "+consumeEffect.cost+", amount: "+amount+", to consume: "+amountToConsume);
 							// Prioritize lowest partIndex
 							int highest = -1;
 							int lowestPartIndex = 7;
@@ -1164,12 +1259,14 @@ namespace EFM
 								{
 									if (EFM_Effect.effects[i].effectType == EFM_Effect.EffectType.LightBleeding && EFM_Effect.effects[i].partIndex < lowestPartIndex)
 									{
+										Mod.instance.LogInfo("\t\t\tFound valid light bleeding");
 										highest = i;
 									}
 								}
 							}
 							if(highest == -1) // We did not find light bleeding
-                            {
+							{
+								Mod.instance.LogInfo("\t\tNo valid light bleeding");
 								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
 								{
 									return false;
@@ -1180,8 +1277,9 @@ namespace EFM
 								}
                             }
                             else
-                            {
-								EFM_Effect.effects.RemoveAt(highest);
+							{
+								Mod.instance.LogInfo("\t\tRemoving valid light bleed");
+								EFM_Effect.RemoveEffectAt(highest);
 								amount -= consumeEffect.cost;
 								if (amount - amountToConsume == 0)
 								{
@@ -1217,7 +1315,7 @@ namespace EFM
 							}
 							else
 							{
-								EFM_Effect.effects.RemoveAt(index);
+								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
 								if (amount - amountToConsume == 0)
 								{
@@ -1256,7 +1354,7 @@ namespace EFM
 							}
 							else
                             {
-								EFM_Effect.effects.RemoveAt(index);
+								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
 								if (amount - amountToConsume == 0)
 								{
@@ -1292,7 +1390,7 @@ namespace EFM
 							}
 							else
 							{
-								EFM_Effect.effects.RemoveAt(index);
+								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
 								if (amount - amountToConsume == 0)
 								{
@@ -1331,7 +1429,7 @@ namespace EFM
 							}
 							else
 							{
-								EFM_Effect.effects.RemoveAt(highest);
+								EFM_Effect.RemoveEffectAt(highest);
 								amount -= consumeEffect.cost;
 								Mod.health[lowestPartIndex] = 1;
 								if(Mod.currentLocationIndex == 2)
@@ -1372,7 +1470,7 @@ namespace EFM
 							}
 							else
 							{
-								EFM_Effect.effects.RemoveAt(index);
+								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
 								Mod.health[targettedPart] = 1;
 								if (Mod.currentLocationIndex == 2)
@@ -1417,7 +1515,7 @@ namespace EFM
 							}
 							else
 							{
-								EFM_Effect.effects.RemoveAt(highest);
+								EFM_Effect.RemoveEffectAt(highest);
 								amount -= consumeEffect.cost;
 								if (amount - amountToConsume == 0)
 								{
@@ -1454,7 +1552,7 @@ namespace EFM
 							}
 							else
 							{
-								EFM_Effect.effects.RemoveAt(index);
+								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
 								if (amount - amountToConsume == 0)
 								{
@@ -1476,7 +1574,7 @@ namespace EFM
 
 				// Set effect
 				EFM_Effect effect = new EFM_Effect();
-				effect.effectType = EFM_Effect.EffectType.SkillRate;
+				effect.effectType = buff.effectType;
 
 				effect.value = buff.value;
 				effect.timer = buff.duration;

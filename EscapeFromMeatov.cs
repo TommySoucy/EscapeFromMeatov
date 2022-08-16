@@ -674,6 +674,7 @@ namespace EFM
                 if (defaultItemsData["ItemDefaults"][i]["MaxAmount"] != null)
                 {
                     customItemWrapper.maxAmount = (int)defaultItemsData["ItemDefaults"][i]["MaxAmount"];
+                    customItemWrapper._amount = customItemWrapper.maxAmount;
                 }
                 if(defaultItemsData["ItemDefaults"][i]["BlocksEarpiece"] != null)
                 {
@@ -1571,8 +1572,7 @@ namespace EFM
                             {
                                 break;
                             }
-
-                            string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
+                            string roundName = loadedRound.LR_ObjectWrapper.DisplayName;
 
                             if (roundsByType.ContainsKey(boxMagazine.RoundType))
                             {
@@ -1757,7 +1757,7 @@ namespace EFM
                                 break;
                             }
 
-                            string roundName = AM.STypeDic[boxMagazine.RoundType][loadedRound.LR_Class].Name;
+                            string roundName = loadedRound.LR_ObjectWrapper.DisplayName;
 
                             if (roundsByType.ContainsKey(boxMagazine.RoundType))
                             {
