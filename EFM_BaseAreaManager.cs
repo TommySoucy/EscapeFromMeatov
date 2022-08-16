@@ -719,6 +719,7 @@ namespace EFM
                     bottomButton.GetComponent<Collider>().enabled = false; // Disable button
                     bottomButton.transform.GetChild(1).GetComponent<Text>().color = Color.black;
                     bottomButton.GetComponent<EFM_PointableButton>().hoverSound = areaCanvas.transform.GetChild(2).GetComponent<AudioSource>();
+                    bottomButton.GetComponent<Button>().onClick.AddListener(OnConstructClicked);
 
                     // Full bottom 2
                     // No access to bottom 2 when constructing
@@ -765,7 +766,8 @@ namespace EFM
                     GameObject bottom2UpgradeButton = Instantiate(EFM_Base_Manager.areaCanvasBottomButtonPrefab, bottom2);
                     bottom2UpgradeButton.transform.GetChild(1).GetComponent<Text>().text = "Upgrading..."; // Upgrade bottom button
                     bottom2UpgradeButton.GetComponent<Collider>().enabled = false; // Disable upgrade button because curently upgrading
-                    bottom2UpgradeButton.transform.GetChild(1).GetComponent<Text>().color = Color.black; 
+                    bottom2UpgradeButton.transform.GetChild(1).GetComponent<Text>().color = Color.black;
+                    bottom2UpgradeButton.GetComponent<Button>().onClick.AddListener(OnConstructClicked);
                     bottom2UpgradeButton.GetComponent<EFM_PointableButton>().hoverSound = areaCanvas.transform.GetChild(2).GetComponent<AudioSource>();
                 }
             }
@@ -901,12 +903,9 @@ namespace EFM
                     Transform bottom = areaCanvas.transform.GetChild(1).GetChild(3);
                     GameObject bottomConstructButton = Instantiate(EFM_Base_Manager.areaCanvasBottomButtonPrefab, bottom);
                     bottomConstructButton.transform.GetChild(1).GetComponent<Text>().text = "Construct"; // Construct bottom button
-                    if (requirementsFullfilled)
-                    {
-                        bottomConstructButton.GetComponent<Button>().onClick.AddListener(OnConstructClicked);
-                        bottomConstructButton.GetComponent<EFM_PointableButton>().hoverSound = areaCanvas.transform.GetChild(2).GetComponent<AudioSource>();
-                    }
-                    else
+                    bottomConstructButton.GetComponent<EFM_PointableButton>().hoverSound = areaCanvas.transform.GetChild(2).GetComponent<AudioSource>();
+                    bottomConstructButton.GetComponent<Button>().onClick.AddListener(OnConstructClicked);
+                    if(!requirementsFullfilled)
                     {
                         bottomConstructButton.GetComponent<Collider>().enabled = false;
                         bottomConstructButton.transform.GetChild(1).GetComponent<Text>().color = Color.black;
@@ -1003,11 +1002,8 @@ namespace EFM
                         GameObject bottom2UpgradeButton = Instantiate(EFM_Base_Manager.areaCanvasBottomButtonPrefab, bottom2);
                         bottom2UpgradeButton.transform.GetChild(1).GetComponent<Text>().text = "Upgrade"; // Upgrade bottom button
                         bottom2UpgradeButton.GetComponent<EFM_PointableButton>().hoverSound = areaCanvas.transform.GetChild(2).GetComponent<AudioSource>();
-                        if (GetRequirementsFullfilled(true, true))
-                        {
-                            bottom2UpgradeButton.GetComponent<Button>().onClick.AddListener(OnPreviousLevelClicked);
-                        }
-                        else
+                        bottom2UpgradeButton.GetComponent<Button>().onClick.AddListener(OnConstructClicked);
+                        if(!GetRequirementsFullfilled(true, true))
                         {
                             bottom2UpgradeButton.GetComponent<Collider>().enabled = false;
                             bottom2UpgradeButton.transform.GetChild(1).GetComponent<Text>().color = Color.black;
