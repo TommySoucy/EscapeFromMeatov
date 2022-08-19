@@ -2210,6 +2210,12 @@ namespace EFM
 
             harmony.Patch(isPointInsideSphereGeoPatchOriginal, new HarmonyMethod(isPointInsideSphereGeoPatchPrefix));
 
+            //// UpdateModeTwoAxisPatch
+            //MethodInfo updateModeTwoAxisPatchOriginal = typeof(FVRMovementManager).GetMethod("UpdateModeTwoAxis", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo updateModeTwoAxisPatchPrefix = typeof(UpdateModeTwoAxisPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            //harmony.Patch(updateModeTwoAxisPatchOriginal, new HarmonyMethod(updateModeTwoAxisPatchPrefix));
+
             //// SetActivePatch
             //MethodInfo setActivePatchOriginal = typeof(UnityEngine.GameObject).GetMethod("SetActive", BindingFlags.Public | BindingFlags.Instance);
             //MethodInfo setActivePatchPrefix = typeof(SetActivePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -7986,6 +7992,310 @@ namespace EFM
             {
                 Mod.instance.LogError("DequeueAndPlayDebugPatch called but threw null exception, __instance.SourceQueue_Disabled null?: " + (__instance.SourceQueue_Disabled == null)+ ", __instance.ActiveSources null?: " + (__instance.ActiveSources == null)+":\n"+e.StackTrace);
             }
+            return false;
+        }
+    }
+
+    class UpdateModeTwoAxisPatch
+    {
+        static bool Prefix(ref FVRMovementManager __instance, bool IsTwinstick, ref Vector3 ___CurNeckPos, ref Vector3 ___LastNeckPos, ref Vector3 ___correctionDir,
+                           ref bool ___m_isLeftHandActive, ref bool ___m_twoAxisGrounded, ref Vector3 ___m_twoAxisVelocity, ref FVRViveHand ___m_authoratativeHand,
+                           ref float ___m_armSwingerStepHeight, ref float ___m_delayGroundCheck, ref RaycastHit ___m_hit_ray, ref Vector3 ___m_groundPoint,
+                           ref bool ___m_isTwinStickSmoothTurningClockwise, ref bool ___m_isTwinStickSmoothTurningCounterClockwise, ref bool ___IsGrabHolding)
+        {
+            Mod.instance.LogInfo("Update mode two axis patch prefix called");
+            ___CurNeckPos = GM.CurrentPlayerBody.NeckJointTransform.position;
+            Vector3 vector = ___LastNeckPos - ___CurNeckPos;
+            Vector3 lastNeckPos = ___LastNeckPos;
+            Vector3 a = ___CurNeckPos - ___LastNeckPos;
+            RaycastHit raycastHit;
+            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            Mod.instance.LogInfo("\t"+ Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (Physics.SphereCast(___LastNeckPos, 0.15f, a.normalized, out raycastHit, a.magnitude, __instance.LM_TeleCast))
+            {
+                ___correctionDir = -a * 1f;
+            }
+            if (IsTwinstick)
+            {
+                if (!___m_isLeftHandActive && ___m_twoAxisGrounded)
+                {
+                    ___m_twoAxisVelocity.x = 0f;
+                    ___m_twoAxisVelocity.z = 0f;
+                }
+            }
+            else if (___m_authoratativeHand == null && ___m_twoAxisGrounded)
+            {
+                ___m_twoAxisVelocity.x = 0f;
+                ___m_twoAxisVelocity.z = 0f;
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            Vector3 vector2 = lastNeckPos;
+            Vector3 b = vector2;
+            vector2.y = Mathf.Max(vector2.y, __instance.transform.position.y + ___m_armSwingerStepHeight);
+            b.y = __instance.transform.position.y;
+            float num = Vector3.Distance(vector2, b);
+            if (___m_delayGroundCheck > 0f)
+            {
+                num *= 0.5f;
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            bool flag = false;
+            Vector3 planeNormal = Vector3.up;
+            bool flag2 = false;
+            Vector3 vector3 = Vector3.up;
+            Vector3 groundPoint = vector2 + -Vector3.up * num;
+            Vector3 groundPoint2 = vector2 + -Vector3.up * num;
+            float num2 = 90f;
+            float a2 = -1000f;
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (Physics.SphereCast(vector2, 0.2f, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
+            {
+                vector3 = ___m_hit_ray.normal;
+                groundPoint = ___m_hit_ray.point;
+                groundPoint2 = ___m_hit_ray.point;
+                num2 = Vector3.Angle(Vector3.up, ___m_hit_ray.normal);
+                a2 = groundPoint.y;
+                flag2 = true;
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (Physics.Raycast(vector2, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
+            {
+                num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
+                vector3 = ___m_hit_ray.normal;
+                groundPoint.y = Mathf.Max(groundPoint.y, ___m_hit_ray.point.y);
+                groundPoint2.y = Mathf.Min(groundPoint.y, ___m_hit_ray.point.y);
+                a2 = Mathf.Max(a2, ___m_hit_ray.point.y);
+                flag2 = true;
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            Vector3 vector4 = __instance.Head.forward;
+            vector4.y = 0f;
+            vector4.Normalize();
+            vector4 = Vector3.ClampMagnitude(vector4, 0.1f);
+            Vector3 vector5 = __instance.Head.right;
+            vector5.y = 0f;
+            vector5.Normalize();
+            vector5 = Vector3.ClampMagnitude(vector5, 0.1f);
+            Vector3 b2 = -vector4;
+            Vector3 b3 = -vector5;
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (Physics.Raycast(vector2 + vector4, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
+            {
+                num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
+                groundPoint.y = Mathf.Max(groundPoint.y, ___m_hit_ray.point.y);
+                groundPoint2.y = Mathf.Min(groundPoint.y, ___m_hit_ray.point.y);
+                a2 = Mathf.Max(a2, ___m_hit_ray.point.y);
+                if (!flag2)
+                {
+                    vector3 = ___m_hit_ray.normal;
+                    flag2 = true;
+                }
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (Physics.Raycast(vector2 + vector5, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
+            {
+                num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
+                groundPoint.y = Mathf.Max(groundPoint.y, ___m_hit_ray.point.y);
+                groundPoint2.y = Mathf.Min(groundPoint.y, ___m_hit_ray.point.y);
+                a2 = Mathf.Max(a2, ___m_hit_ray.point.y);
+                if (!flag2)
+                {
+                    vector3 = ___m_hit_ray.normal;
+                    flag2 = true;
+                }
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (Physics.Raycast(vector2 + b2, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
+            {
+                num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
+                groundPoint.y = Mathf.Max(groundPoint.y, ___m_hit_ray.point.y);
+                groundPoint2.y = Mathf.Min(groundPoint.y, ___m_hit_ray.point.y);
+                a2 = Mathf.Max(a2, ___m_hit_ray.point.y);
+                if (!flag2)
+                {
+                    vector3 = ___m_hit_ray.normal;
+                    flag2 = true;
+                }
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (Physics.Raycast(vector2 + b3, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
+            {
+                num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
+                groundPoint.y = Mathf.Max(groundPoint.y, ___m_hit_ray.point.y);
+                groundPoint2.y = Mathf.Min(groundPoint.y, ___m_hit_ray.point.y);
+                a2 = Mathf.Max(a2, ___m_hit_ray.point.y);
+                if (!flag2)
+                {
+                    vector3 = ___m_hit_ray.normal;
+                    flag2 = true;
+                }
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (flag2)
+            {
+                if (num2 > 70f)
+                {
+                    flag = true;
+                    ___m_twoAxisGrounded = false;
+                    planeNormal = vector3;
+                    ___m_groundPoint = groundPoint2;
+                }
+                else
+                {
+                    ___m_twoAxisGrounded = true;
+                    ___m_groundPoint = groundPoint;
+                }
+            }
+            else
+            {
+                ___m_twoAxisGrounded = false;
+                ___m_groundPoint = vector2 - Vector3.up * num;
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            Vector3 vector6 = lastNeckPos;
+            Vector3 b4 = vector6;
+            b4.y = __instance.transform.position.y + 2.15f * GM.CurrentPlayerBody.transform.localScale.y;
+            float maxDistance = Vector3.Distance(vector6, b4);
+            float num3 = vector6.y + 0.15f;
+            if (Physics.SphereCast(vector6, 0.15f, Vector3.up, out ___m_hit_ray, maxDistance, __instance.LM_TeleCast))
+            {
+                Vector3 point = ___m_hit_ray.point;
+                float num4 = Vector3.Distance(vector6, new Vector3(vector6.x, point.y, vector6.z));
+                num3 = ___m_hit_ray.point.y - 0.15f;
+                float num5 = Mathf.Clamp(GM.CurrentPlayerBody.Head.localPosition.y, 0.3f, 2.5f);
+                float y = ___m_groundPoint.y;
+                float min = y - (num5 - 0.2f);
+                float y2 = Mathf.Clamp(num3 - num5 - 0.15f, min, y);
+                ___m_groundPoint.y = y2;
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (___m_twoAxisGrounded)
+            {
+                ___m_twoAxisVelocity.y = 0f;
+            }
+            else
+            {
+                float num6 = 5f;
+                switch (GM.Options.SimulationOptions.PlayerGravityMode)
+                {
+                    case SimulationOptions.GravityMode.Realistic:
+                        num6 = 9.81f;
+                        break;
+                    case SimulationOptions.GravityMode.Playful:
+                        num6 = 5f;
+                        break;
+                    case SimulationOptions.GravityMode.OnTheMoon:
+                        num6 = 1.62f;
+                        break;
+                    case SimulationOptions.GravityMode.None:
+                        num6 = 0.001f;
+                        break;
+                }
+                if (!flag)
+                {
+                    ___m_twoAxisVelocity.y = ___m_twoAxisVelocity.y - num6 * Time.deltaTime;
+                }
+                else
+                {
+                    Vector3 a3 = Vector3.ProjectOnPlane(-Vector3.up * num6, planeNormal);
+                    ___m_twoAxisVelocity += a3 * Time.deltaTime;
+                    ___m_twoAxisVelocity = Vector3.ProjectOnPlane(___m_twoAxisVelocity, planeNormal);
+                }
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            float num7 = Mathf.Abs(lastNeckPos.y - GM.CurrentPlayerBody.transform.position.y);
+            Vector3 point2 = lastNeckPos;
+            Vector3 point3 = lastNeckPos;
+            point2.y = Mathf.Min(point2.y, num3 - 0.01f);
+            point3.y = Mathf.Max(__instance.transform.position.y, ___m_groundPoint.y) + (___m_armSwingerStepHeight + 0.2f);
+            point2.y = Mathf.Max(point2.y, point3.y);
+            Vector3 vector7 = ___m_twoAxisVelocity;
+            float maxLength = ___m_twoAxisVelocity.magnitude * Time.deltaTime;
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (Physics.CapsuleCast(point2, point3, 0.15f, ___m_twoAxisVelocity, out ___m_hit_ray, ___m_twoAxisVelocity.magnitude * Time.deltaTime + 0.1f, __instance.LM_TeleCast))
+            {
+                vector7 = Vector3.ProjectOnPlane(___m_twoAxisVelocity, ___m_hit_ray.normal);
+                maxLength = ___m_hit_ray.distance * 0.5f;
+                if (___m_twoAxisGrounded)
+                {
+                    vector7.y = 0f;
+                }
+                RaycastHit raycastHit2;
+                if (Physics.CapsuleCast(point2, point3, 0.15f, vector7, out raycastHit2, vector7.magnitude * Time.deltaTime + 0.1f, __instance.LM_TeleCast))
+                {
+                    maxLength = raycastHit2.distance * 0.5f;
+                }
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            ___m_twoAxisVelocity = vector7;
+            if (___m_twoAxisGrounded)
+            {
+                ___m_twoAxisVelocity.y = 0f;
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            Vector3 a4 = __instance.transform.position;
+            Vector3 vector8 = ___m_twoAxisVelocity * Time.deltaTime;
+            vector8 = Vector3.ClampMagnitude(vector8, maxLength);
+            a4 = __instance.transform.position + vector8;
+            if (___m_twoAxisGrounded)
+            {
+                a4.y = Mathf.MoveTowards(a4.y, ___m_groundPoint.y, 8f * Time.deltaTime * Mathf.Abs(__instance.transform.position.y - ___m_groundPoint.y));
+            }
+            Vector3 a5 = ___CurNeckPos + vector8;
+            a = a5 - ___LastNeckPos;
+            if (Physics.SphereCast(___LastNeckPos, 0.15f, a.normalized, out raycastHit, a.magnitude, __instance.LM_TeleCast))
+            {
+                ___correctionDir = -a * 1f;
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (GM.Options.MovementOptions.AXButtonSnapTurnState == MovementOptions.AXButtonSnapTurnMode.Smoothturn)
+            {
+                for (int i = 0; i < __instance.Hands.Length; i++)
+                {
+                    if (!__instance.Hands[i].IsInStreamlinedMode)
+                    {
+                        if (__instance.Hands[i].IsThisTheRightHand)
+                        {
+                            if (__instance.Hands[i].Input.AXButtonPressed)
+                            {
+                                ___m_isTwinStickSmoothTurningClockwise = true;
+                            }
+                        }
+                        else if (__instance.Hands[i].Input.AXButtonPressed)
+                        {
+                            ___m_isTwinStickSmoothTurningCounterClockwise = true;
+                        }
+                    }
+                }
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            if (!___m_isTwinStickSmoothTurningClockwise && !___m_isTwinStickSmoothTurningCounterClockwise)
+            {
+                __instance.transform.position = a4 + ___correctionDir;
+            }
+            else
+            {
+                Vector3 vector9 = a4 + ___correctionDir;
+                Vector3 vector10 = GM.CurrentPlayerBody.transform.forward;
+                float num8 = GM.Options.MovementOptions.SmoothTurnMagnitudes[GM.Options.MovementOptions.SmoothTurnMagnitudeIndex] * Time.deltaTime;
+                if (___m_isTwinStickSmoothTurningCounterClockwise)
+                {
+                    num8 = -num8;
+                }
+                vector9 = __instance.RotatePointAroundPivotWithEuler(vector9, ___CurNeckPos, new Vector3(0f, num8, 0f));
+                vector10 = Quaternion.AngleAxis(num8, Vector3.up) * vector10;
+                __instance.transform.SetPositionAndRotation(vector9, Quaternion.LookRotation(vector10, Vector3.up));
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            typeof(FVRMovementManager).GetMethod("SetTopSpeedLastSecond", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { ___m_twoAxisVelocity });
+            //__instance.SetTopSpeedLastSecond(___m_twoAxisVelocity);
+            if (!___IsGrabHolding)
+            {
+                typeof(FVRMovementManager).GetMethod("SetFrameSpeed", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { ___m_twoAxisVelocity });
+                //__instance.SetFrameSpeed(___m_twoAxisVelocity);
+            }
+            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
+            ___LastNeckPos = GM.CurrentPlayerBody.NeckJointTransform.position;
             return false;
         }
     }
