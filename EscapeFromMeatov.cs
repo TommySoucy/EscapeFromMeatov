@@ -4149,6 +4149,8 @@ namespace EFM
                             break;
                         }
                     }
+
+                    __instance.RecoverRigidbody();
                 }
             }
         }
@@ -4269,7 +4271,7 @@ namespace EFM
             }
         }
 
-        static void Postfix()
+        static void Postfix(ref FVRPhysicalObject __instance)
         {
             if (!Mod.inMeatovScene)
             {
@@ -4280,6 +4282,13 @@ namespace EFM
             {
                 Mod.beginInteractingEquipRig = false;
             }
+
+            // Ensure the item is parented to null
+            // This is because typically the items are parented to player body, when we move with two axis mode the position of held item is then moved along with the body
+            // This move is done using body.transform.position = x, moving items this way with many children which each have many colliders is very demanding to the physics engine
+            // This causes extreme lag and is not necessary since the item's position will be set to the hand's through the item's rigidbody instead which is much less performance heavy
+            // This was mainly a problem with backpacks with many items in them begin held while moving
+            __instance.transform.parent = null;
         }
     }
 
@@ -8003,14 +8012,12 @@ namespace EFM
                            ref float ___m_armSwingerStepHeight, ref float ___m_delayGroundCheck, ref RaycastHit ___m_hit_ray, ref Vector3 ___m_groundPoint,
                            ref bool ___m_isTwinStickSmoothTurningClockwise, ref bool ___m_isTwinStickSmoothTurningCounterClockwise, ref bool ___IsGrabHolding)
         {
-            Mod.instance.LogInfo("Update mode two axis patch prefix called");
             ___CurNeckPos = GM.CurrentPlayerBody.NeckJointTransform.position;
             Vector3 vector = ___LastNeckPos - ___CurNeckPos;
             Vector3 lastNeckPos = ___LastNeckPos;
             Vector3 a = ___CurNeckPos - ___LastNeckPos;
             RaycastHit raycastHit;
             DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            Mod.instance.LogInfo("\t"+ Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (Physics.SphereCast(___LastNeckPos, 0.15f, a.normalized, out raycastHit, a.magnitude, __instance.LM_TeleCast))
             {
                 ___correctionDir = -a * 1f;
@@ -8028,7 +8035,6 @@ namespace EFM
                 ___m_twoAxisVelocity.x = 0f;
                 ___m_twoAxisVelocity.z = 0f;
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             Vector3 vector2 = lastNeckPos;
             Vector3 b = vector2;
             vector2.y = Mathf.Max(vector2.y, __instance.transform.position.y + ___m_armSwingerStepHeight);
@@ -8038,7 +8044,6 @@ namespace EFM
             {
                 num *= 0.5f;
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             bool flag = false;
             Vector3 planeNormal = Vector3.up;
             bool flag2 = false;
@@ -8047,7 +8052,6 @@ namespace EFM
             Vector3 groundPoint2 = vector2 + -Vector3.up * num;
             float num2 = 90f;
             float a2 = -1000f;
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (Physics.SphereCast(vector2, 0.2f, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
             {
                 vector3 = ___m_hit_ray.normal;
@@ -8057,7 +8061,6 @@ namespace EFM
                 a2 = groundPoint.y;
                 flag2 = true;
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (Physics.Raycast(vector2, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
             {
                 num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
@@ -8067,7 +8070,6 @@ namespace EFM
                 a2 = Mathf.Max(a2, ___m_hit_ray.point.y);
                 flag2 = true;
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             Vector3 vector4 = __instance.Head.forward;
             vector4.y = 0f;
             vector4.Normalize();
@@ -8078,7 +8080,6 @@ namespace EFM
             vector5 = Vector3.ClampMagnitude(vector5, 0.1f);
             Vector3 b2 = -vector4;
             Vector3 b3 = -vector5;
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (Physics.Raycast(vector2 + vector4, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
             {
                 num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
@@ -8091,7 +8092,6 @@ namespace EFM
                     flag2 = true;
                 }
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (Physics.Raycast(vector2 + vector5, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
             {
                 num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
@@ -8104,7 +8104,6 @@ namespace EFM
                     flag2 = true;
                 }
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (Physics.Raycast(vector2 + b2, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
             {
                 num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
@@ -8117,7 +8116,6 @@ namespace EFM
                     flag2 = true;
                 }
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (Physics.Raycast(vector2 + b3, -Vector3.up, out ___m_hit_ray, num, __instance.LM_TeleCast))
             {
                 num2 = Mathf.Min(num2, Vector3.Angle(Vector3.up, ___m_hit_ray.normal));
@@ -8130,7 +8128,6 @@ namespace EFM
                     flag2 = true;
                 }
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (flag2)
             {
                 if (num2 > 70f)
@@ -8151,7 +8148,6 @@ namespace EFM
                 ___m_twoAxisGrounded = false;
                 ___m_groundPoint = vector2 - Vector3.up * num;
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             Vector3 vector6 = lastNeckPos;
             Vector3 b4 = vector6;
             b4.y = __instance.transform.position.y + 2.15f * GM.CurrentPlayerBody.transform.localScale.y;
@@ -8168,7 +8164,6 @@ namespace EFM
                 float y2 = Mathf.Clamp(num3 - num5 - 0.15f, min, y);
                 ___m_groundPoint.y = y2;
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (___m_twoAxisGrounded)
             {
                 ___m_twoAxisVelocity.y = 0f;
@@ -8202,7 +8197,6 @@ namespace EFM
                     ___m_twoAxisVelocity = Vector3.ProjectOnPlane(___m_twoAxisVelocity, planeNormal);
                 }
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             float num7 = Mathf.Abs(lastNeckPos.y - GM.CurrentPlayerBody.transform.position.y);
             Vector3 point2 = lastNeckPos;
             Vector3 point3 = lastNeckPos;
@@ -8211,7 +8205,6 @@ namespace EFM
             point2.y = Mathf.Max(point2.y, point3.y);
             Vector3 vector7 = ___m_twoAxisVelocity;
             float maxLength = ___m_twoAxisVelocity.magnitude * Time.deltaTime;
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (Physics.CapsuleCast(point2, point3, 0.15f, ___m_twoAxisVelocity, out ___m_hit_ray, ___m_twoAxisVelocity.magnitude * Time.deltaTime + 0.1f, __instance.LM_TeleCast))
             {
                 vector7 = Vector3.ProjectOnPlane(___m_twoAxisVelocity, ___m_hit_ray.normal);
@@ -8226,13 +8219,11 @@ namespace EFM
                     maxLength = raycastHit2.distance * 0.5f;
                 }
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             ___m_twoAxisVelocity = vector7;
             if (___m_twoAxisGrounded)
             {
                 ___m_twoAxisVelocity.y = 0f;
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             Vector3 a4 = __instance.transform.position;
             Vector3 vector8 = ___m_twoAxisVelocity * Time.deltaTime;
             vector8 = Vector3.ClampMagnitude(vector8, maxLength);
@@ -8247,7 +8238,6 @@ namespace EFM
             {
                 ___correctionDir = -a * 1f;
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (GM.Options.MovementOptions.AXButtonSnapTurnState == MovementOptions.AXButtonSnapTurnMode.Smoothturn)
             {
                 for (int i = 0; i < __instance.Hands.Length; i++)
@@ -8268,7 +8258,6 @@ namespace EFM
                     }
                 }
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             if (!___m_isTwinStickSmoothTurningClockwise && !___m_isTwinStickSmoothTurningCounterClockwise)
             {
                 __instance.transform.position = a4 + ___correctionDir;
@@ -8286,7 +8275,6 @@ namespace EFM
                 vector10 = Quaternion.AngleAxis(num8, Vector3.up) * vector10;
                 __instance.transform.SetPositionAndRotation(vector9, Quaternion.LookRotation(vector10, Vector3.up));
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             typeof(FVRMovementManager).GetMethod("SetTopSpeedLastSecond", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { ___m_twoAxisVelocity });
             //__instance.SetTopSpeedLastSecond(___m_twoAxisVelocity);
             if (!___IsGrabHolding)
@@ -8294,7 +8282,6 @@ namespace EFM
                 typeof(FVRMovementManager).GetMethod("SetFrameSpeed", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { ___m_twoAxisVelocity });
                 //__instance.SetFrameSpeed(___m_twoAxisVelocity);
             }
-            Mod.instance.LogInfo("\t" + Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds));
             ___LastNeckPos = GM.CurrentPlayerBody.NeckJointTransform.position;
             return false;
         }

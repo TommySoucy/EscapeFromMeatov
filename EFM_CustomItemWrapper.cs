@@ -393,7 +393,7 @@ namespace EFM
 					resetColPairs.Add(resetColPair);
 				}
 				item.transform.parent = containerItemRoot;
-				item.GetComponent<Rigidbody>().isKinematic = true;
+				item.StoreAndDestroyRigidbody();
 
 				// Add volume to backpack
 				containingVolume += volumeToUse;
