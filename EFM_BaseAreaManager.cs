@@ -2686,6 +2686,7 @@ namespace EFM
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.physObj.ForceBreakInteraction();
                                         CIW.destroyed = true;
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                         Destroy(toCheck);
                                         Mod.weight -= CIW.currentWeight;
                                     }
@@ -2709,6 +2710,7 @@ namespace EFM
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.physObj.ForceBreakInteraction();
                                         CIW.destroyed = true;
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                         Destroy(toCheck);
                                         Mod.weight -= CIW.currentWeight;
                                     }
@@ -2722,6 +2724,7 @@ namespace EFM
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.physObj.ForceBreakInteraction();
                                         CIW.destroyed = true;
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                         Destroy(toCheck);
                                         Mod.weight -= CIW.currentWeight;
                                     }
@@ -2733,6 +2736,7 @@ namespace EFM
                                     CIW.physObj.SetQuickBeltSlot(null);
                                     CIW.physObj.ForceBreakInteraction();
                                     CIW.destroyed = true;
+                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                     Destroy(toCheck);
                                     Mod.weight -= CIW.currentWeight;
                                 }
@@ -2744,6 +2748,7 @@ namespace EFM
                                 VID.physObj.SetQuickBeltSlot(null);
                                 VID.physObj.ForceBreakInteraction();
                                 VID.destroyed = true;
+                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                 Destroy(toCheck);
                                 Mod.weight -= VID.currentWeight;
                             }

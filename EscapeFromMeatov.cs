@@ -895,6 +895,8 @@ namespace EFM
                     // Set MainContainer renderers and their material
                     GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
                     customItemWrapper.mainContainer = mainContainer;
+                    EFM_MainContainer mainContainerScript = customItemWrapper.mainContainer.AddComponent<EFM_MainContainer>();
+                    mainContainerScript.parentCIW = customItemWrapper;
                     Renderer[] mainContainerRenderer = new Renderer[1];
                     mainContainerRenderer[0] = mainContainer.GetComponent<Renderer>();
                     mainContainerRenderer[0].material = quickSlotConstantMaterial;
@@ -916,6 +918,8 @@ namespace EFM
                     // Set MainContainer renderers and their material
                     GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
                     customItemWrapper.mainContainer = mainContainer;
+                    EFM_MainContainer mainContainerScript = customItemWrapper.mainContainer.AddComponent<EFM_MainContainer>();
+                    mainContainerScript.parentCIW = customItemWrapper;
                     Renderer[] mainContainerRenderer = new Renderer[1];
                     mainContainerRenderer[0] = mainContainer.GetComponent<Renderer>();
                     mainContainerRenderer[0].material = quickSlotConstantMaterial;
@@ -3678,6 +3682,7 @@ namespace EFM
                                     if (rigItemWrapper.rigSlots[slotIndex].Equals(__instance.QuickbeltSlot))
                                     {
                                         rigItemWrapper.itemsInSlots[slotIndex] = null;
+                                        rigItemWrapper.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight;
                                         return;
                                     }
                                 }
@@ -3697,6 +3702,7 @@ namespace EFM
                                 if (EFM_EquipmentSlot.currentRig.itemsInSlots[i] == __instance.gameObject)
                                 {
                                     EFM_EquipmentSlot.currentRig.itemsInSlots[i] = null;
+                                    EFM_EquipmentSlot.currentRig.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight;
                                     EFM_EquipmentSlot.currentRig.UpdateRigMode();
                                     return;
                                 }
@@ -3839,6 +3845,7 @@ namespace EFM
                     {
                         EFM_CustomItemWrapper equipmentItemWrapper = EFM_EquipmentSlot.currentRig;
                         equipmentItemWrapper.itemsInSlots[slotIndex - 4] = __instance.gameObject;
+                        equipmentItemWrapper.currentWeight += __instance.GetComponent<EFM_CustomItemWrapper>() != null ? __instance.GetComponent<EFM_CustomItemWrapper>().currentWeight : __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight;
                         equipmentItemWrapper.UpdateRigMode();
 
                         // Update rig weight
@@ -4134,10 +4141,12 @@ namespace EFM
                 {
                     containerItemWrapper.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : vanillaItemDescriptor.currentWeight;
 
+                    Mod.instance.LogInfo("Grabbed item from container: " + containerItemWrapper.name + ", prevol: " + containerItemWrapper.containingVolume);
                     containerItemWrapper.containingVolume -= customItemWrapper != null ? customItemWrapper.volumes[customItemWrapper.mode] : vanillaItemDescriptor.volume;
+                    Mod.instance.LogInfo("Postvol: " + containerItemWrapper.containingVolume);
 
                     // Reset cols of item so that they are non trigger again and can collide with the world and the container
-                    for(int i = containerItemWrapper.resetColPairs.Count - 1; i >= 0; --i)
+                    for (int i = containerItemWrapper.resetColPairs.Count - 1; i >= 0; --i)
                     {
                         if (containerItemWrapper.resetColPairs[i].physObj.Equals(__instance))
                         {

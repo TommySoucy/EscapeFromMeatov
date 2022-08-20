@@ -270,7 +270,7 @@ namespace EFM
                 else if (this.descriptionPack.customItem.itemType == Mod.ItemType.Backpack || this.descriptionPack.customItem.itemType == Mod.ItemType.Container || this.descriptionPack.customItem.itemType == Mod.ItemType.Pouch)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
-                    summaryAmountStackText.text = this.descriptionPack.containingVolume.ToString() + "/" + this.descriptionPack.maxVolume;
+                    summaryAmountStackText.text = (this.descriptionPack.containingVolume / Mod.volumePrecisionMultiplier).ToString() + "/" + (this.descriptionPack.maxVolume / Mod.volumePrecisionMultiplier);
                 }
                 else if (this.descriptionPack.customItem.itemType == Mod.ItemType.AmmoBox)
                 {

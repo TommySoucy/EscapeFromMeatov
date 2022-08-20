@@ -2068,6 +2068,43 @@ namespace EFM
             }
         }
 
+        public static bool RemoveFromContainer(Transform item, EFM_CustomItemWrapper CIW, EFM_VanillaItemDescriptor VID)
+        {
+            if (item.transform.parent != null && item.transform.parent.parent != null)
+            {
+                EFM_CustomItemWrapper containerItemWrapper = item.transform.parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                if (containerItemWrapper != null && (containerItemWrapper.itemType == Mod.ItemType.Backpack ||
+                                                    containerItemWrapper.itemType == Mod.ItemType.Container ||
+                                                    containerItemWrapper.itemType == Mod.ItemType.Pouch))
+                {
+                    containerItemWrapper.currentWeight -= CIW != null ? CIW.currentWeight : VID.currentWeight;
+
+                    containerItemWrapper.containingVolume -= CIW != null ? CIW.volumes[CIW.mode] : VID.volume;
+
+                    // Reset cols of item so that they are non trigger again and can collide with the world and the container
+                    FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
+                    for (int i = containerItemWrapper.resetColPairs.Count - 1; i >= 0; --i)
+                    {
+                        if (containerItemWrapper.resetColPairs[i].physObj.Equals(physObj))
+                        {
+                            foreach (Collider col in containerItemWrapper.resetColPairs[i].colliders)
+                            {
+                                col.isTrigger = false;
+                            }
+                            containerItemWrapper.resetColPairs.RemoveAt(i);
+                            break;
+                        }
+                    }
+
+                    physObj.RecoverRigidbody();
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public void RemoveFromBaseInventory(Transform item, bool updateTypeLists)
         {
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();

@@ -895,7 +895,17 @@ namespace EFM
                 {
                     Transform currentItemIcon = sellItemShowcaseElements[itemID].transform;
                     EFM_MarketItemView marketItemView = currentItemIcon.GetComponent<EFM_MarketItemView>();
-                    int actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemValue : (int)Mathf.Max(itemValue * 0.008f, 1);
+                    int actualValue;
+                    if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
+                    {
+                        actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
+                    }
+                    else
+                    {
+                        // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
+                        actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
+                    }
+                    actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemValue : (int)Mathf.Max(itemValue * 0.008f, 1);
                     marketItemView.value = marketItemView.value + actualValue;
                     if (marketItemView.custom)
                     {
