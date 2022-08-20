@@ -819,6 +819,62 @@ namespace EFM
                     upHoverScroll.gameObject.SetActive(false);
                 }
             }
+            // De/Activate buy deal button as necessary
+            bool canDeal = true;
+            for (int i = 0; i < prices.Count; ++i)
+            {
+                AssortmentPriceData priceData = prices[i];
+                if (tradeVolumeInventory.ContainsKey(priceData.ID))
+                {
+                    // Find how many we have in trade inventory
+                    // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
+                    int matchingCountInInventory = 0;
+                    if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                    {
+                        foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
+                        {
+                            EFM_CustomItemWrapper priceCIW = priceObject.GetComponent<EFM_CustomItemWrapper>();
+                            if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
+                            {
+                                ++matchingCountInInventory;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        matchingCountInInventory = priceData.count;
+                    }
+
+                    // If this is the item we are adding, make sure the requirement fulfilled icon is active
+                    if (matchingCountInInventory >= (priceData.count * cartItemCount))
+                    {
+                        Transform priceElement = buyPriceElements[i].transform;
+                        priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
+                        priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        canDeal = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    canDeal = false;
+                    break;
+                }
+            }
+            Transform dealButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
+            if (canDeal)
+            {
+                dealButton.GetComponent<Collider>().enabled = true;
+                dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
+            }
+            else
+            {
+                dealButton.GetComponent<Collider>().enabled = false;
+                dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+            }
 
             Mod.instance.LogInfo("0");
             // Sell
@@ -844,6 +900,9 @@ namespace EFM
             {
                 sellItemShowcaseElements.Clear();
             }
+            // Deactivate deal button by default
+            traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
+            traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
             foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
             {
                 Mod.instance.LogInfo("\tAdding item from volume: "+itemTransform.name);
@@ -905,7 +964,7 @@ namespace EFM
                         // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
                         actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
                     }
-                    actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemValue : (int)Mathf.Max(itemValue * 0.008f, 1);
+                    actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? actualValue : (int)Mathf.Max(actualValue * 0.008f, 1);
                     marketItemView.value = marketItemView.value + actualValue;
                     if (marketItemView.custom)
                     {
@@ -969,6 +1028,17 @@ namespace EFM
                     marketItemView.CIW = new List<EFM_CustomItemWrapper>() { CIW };
                     marketItemView.VID = new List<EFM_VanillaItemDescriptor>() { VID };
 
+                    int actualValue;
+                    if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
+                    {
+                        actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
+                    }
+                    else
+                    {
+                        // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
+                        actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
+                    }
+
                     // Write price to item icon and set correct currency icon
                     Sprite currencySprite = null;
                     //string currencyItemID = "";
@@ -980,13 +1050,13 @@ namespace EFM
                     else if (trader.currency == 1)
                     {
                         currencySprite = EFM_Base_Manager.dollarCurrencySprite;
-                        itemValue = (int)Mathf.Max(itemValue * 0.008f, 1); // Adjust item value
+                        actualValue = (int)Mathf.Max(actualValue * 0.008f, 1); // Adjust item value
                         //currencyItemID = "201";
                     }
-                    marketItemView.value = itemValue;
-                    totalSellingPrice += itemValue;
+                    marketItemView.value = actualValue;
+                    totalSellingPrice += actualValue;
                     currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
-                    currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemValue.ToString();
+                    currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = actualValue.ToString();
 
                     currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "1";
 
@@ -1007,6 +1077,10 @@ namespace EFM
                         VID.marketItemViews.Add(marketItemView);
                     }
                 }
+
+                // Activate deal button
+                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
+                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
             }
             Mod.instance.LogInfo("0");
             // Setup selling price display
@@ -1929,6 +2003,9 @@ namespace EFM
                 Destroy(currentFirstChild.gameObject);
             }
             Mod.instance.LogInfo("0");
+            // Deactivate deal button by default
+            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
+            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
             if ((bool)Mod.traderBaseDB[trader.index]["insurance"]["availability"])
             {
                 Mod.instance.LogInfo("insurance available");
@@ -2103,6 +2180,26 @@ namespace EFM
                         Mod.instance.LogInfo("5");
                     }
                 }
+                string currencyItemID = "";
+                if (Mod.traderStatuses[currentTraderIndex].currency == 0)
+                {
+                    currencyItemID = "203";
+                }
+                else if (Mod.traderStatuses[currentTraderIndex].currency == 1)
+                {
+                    currencyItemID = "201";
+                }
+                // Activate deal button
+                if (tradeVolumeInventory.ContainsKey(currencyItemID) && tradeVolumeInventory[currencyItemID] >= currentTotalInsurePrice)
+                {
+                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
+                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
+                }
+                else
+                {
+                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
+                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
+                }
                 // Setup insure price display
                 Mod.instance.LogInfo("1");
                 string insurePriceItemID = "203";
@@ -2173,6 +2270,10 @@ namespace EFM
                 }
                 Mod.instance.LogInfo("1");
             }
+            else
+            {
+                insureItemShowcaseElements = null;
+            }
 
             Mod.instance.LogInfo("0");
             initButtonsSet = true;
@@ -2237,7 +2338,7 @@ namespace EFM
             bool custom = CIW != null;
             string itemID = custom ? CIW.ID : VID.H3ID;
             int itemValue = custom ? CIW.GetValue() : VID.GetValue();
-            int itemInsureValue = custom ? CIW.GetInsuranceValue() : VID.GetInsuranceValue();
+            int itemInsureValue = custom ? (int)Mathf.Max(CIW.GetInsuranceValue() * Mod.traderStatuses[currentTraderIndex].insuranceRate, 1) : (int)Mathf.Max(VID.GetInsuranceValue() * Mod.traderStatuses[currentTraderIndex].insuranceRate, 1);
 
             Mod.instance.LogInfo("UpdateBasedOnItem called");
             if (added)
@@ -2732,7 +2833,17 @@ namespace EFM
                     {
                         Transform currentItemIcon = insureItemShowcaseElements[itemID].transform;
                         EFM_MarketItemView marketItemView = currentItemIcon.GetComponent<EFM_MarketItemView>();
-                        int actualInsureValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemInsureValue : (int)Mathf.Max(itemInsureValue * 0.008f, 1);
+                        int actualInsureValue = itemInsureValue;
+                        string currencyItemID = "";
+                        if (Mod.traderStatuses[currentTraderIndex].currency == 0)
+                        {
+                            currencyItemID = "203";
+                        }
+                        else if (Mod.traderStatuses[currentTraderIndex].currency == 1)
+                        {
+                            itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
+                            currencyItemID = "201";
+                        }
                         marketItemView.insureValue = marketItemView.insureValue + actualInsureValue;
                         if (marketItemView.custom)
                         {
@@ -2746,6 +2857,18 @@ namespace EFM
                         }
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
                         currentTotalInsurePrice += actualInsureValue;
+
+                        // Activate deal button
+                        if (tradeVolumeInventory.ContainsKey(currencyItemID) && tradeVolumeInventory[currencyItemID] >= currentTotalInsurePrice)
+                        {
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
+                        }
+                        else
+                        {
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
+                        }
 
                         // Setup itemIcon
                         EFM_ItemIcon currentItemIconScript = currentItemIcon.GetComponent<EFM_ItemIcon>();
@@ -2853,8 +2976,16 @@ namespace EFM
                         traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currencyItemID];
 
                         // Activate deal button
-                        traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
-                        traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
+                        if (tradeVolumeInventory.ContainsKey(currencyItemID) && tradeVolumeInventory[currencyItemID] >= currentTotalInsurePrice)
+                        {
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
+                        }
+                        else
+                        {
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
+                        }
 
                         Mod.instance.LogInfo("0");
                         // Update hoverscrolls
@@ -3127,7 +3258,17 @@ namespace EFM
                     float sellShowCaseHeight = 3 + 24 * sellHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
                     Transform currentItemIcon = sellItemShowcaseElements[itemID].transform;
                     EFM_MarketItemView marketItemView = currentItemIcon.GetComponent<EFM_MarketItemView>();
-                    int actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemValue : (int)Mathf.Max(itemValue * 0.008f, 1);
+                    int actualValue;
+                    if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
+                    {
+                        actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
+                    }
+                    else
+                    {
+                        // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
+                        actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
+                    }
+                    actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? actualValue : (int)Mathf.Max(actualValue * 0.008f, 1);
                     marketItemView.value = marketItemView.value -= actualValue;
                     bool shouldRemove = false;
                     bool lastOne = false;
@@ -3301,6 +3442,29 @@ namespace EFM
                     {
                         traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
                         traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                    }
+                    else
+                    {
+                        string currencyItemID = "";
+                        if (Mod.traderStatuses[currentTraderIndex].currency == 0)
+                        {
+                            currencyItemID = "203";
+                        }
+                        else if (Mod.traderStatuses[currentTraderIndex].currency == 1)
+                        {
+                            currencyItemID = "201";
+                        }
+                        // Activate deal button
+                        if (tradeVolumeInventory.ContainsKey(currencyItemID) && tradeVolumeInventory[currencyItemID] >= currentTotalInsurePrice)
+                        {
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
+                        }
+                        else
+                        {
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
+                            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
+                        }
                     }
 
                     // Update hoverscrolls
@@ -3955,21 +4119,22 @@ namespace EFM
 
                 BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
             }
-            if (tradeVolumeInventory.ContainsKey(cartItem))
+            string stringCurrencyID = currencyID.ToString();
+            if (tradeVolumeInventory.ContainsKey(stringCurrencyID))
             {
-                tradeVolumeInventory[cartItem] += cartItemCount;
-                tradeVolumeInventoryObjects[cartItem].AddRange(objectsList);
+                tradeVolumeInventory[stringCurrencyID] += currentTotalSellingPrice;
+                tradeVolumeInventoryObjects[stringCurrencyID].AddRange(objectsList);
             }
             else
             {
-                tradeVolumeInventory.Add(cartItem, cartItemCount);
-                tradeVolumeInventoryObjects.Add(cartItem, objectsList);
+                tradeVolumeInventory.Add(stringCurrencyID, currentTotalSellingPrice);
+                tradeVolumeInventoryObjects.Add(stringCurrencyID, objectsList);
             }
 
             // Update area managers based on item we just added
             foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
             {
-                areaManager.UpdateBasedOnItem(cartItem);
+                areaManager.UpdateBasedOnItem(stringCurrencyID);
             }
 
             // Update the whole thing

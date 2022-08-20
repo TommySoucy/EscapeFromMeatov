@@ -2607,6 +2607,7 @@ namespace EFM
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.destroyed = true;
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                         Destroy(toCheck);
                                     }
                                 }
@@ -2628,6 +2629,7 @@ namespace EFM
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.destroyed = true;
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                         Destroy(toCheck);
                                     }
                                 }
@@ -2639,6 +2641,7 @@ namespace EFM
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.destroyed = true;
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                         Destroy(toCheck);
                                     }
                                 }
@@ -2648,6 +2651,7 @@ namespace EFM
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
                                     CIW.destroyed = true;
+                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                     Destroy(toCheck);
                                 }
                             }
@@ -2657,6 +2661,7 @@ namespace EFM
                                 objectList.RemoveAt(objectList.Count - 1);
                                 VID.physObj.SetQuickBeltSlot(null);
                                 VID.destroyed = true;
+                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, null, VID);
                                 Destroy(toCheck);
                             }
                         }
@@ -2748,7 +2753,7 @@ namespace EFM
                                 VID.physObj.SetQuickBeltSlot(null);
                                 VID.physObj.ForceBreakInteraction();
                                 VID.destroyed = true;
-                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
+                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, null, VID);
                                 Destroy(toCheck);
                                 Mod.weight -= VID.currentWeight;
                             }
@@ -2941,6 +2946,7 @@ namespace EFM
                             ++filledSlotCount;
 
                             EFM_CustomItemWrapper instanceCIW = slotItemPhysObj.GetComponent<EFM_CustomItemWrapper>();
+                            EFM_Base_Manager.RemoveFromContainer(leastInstanceObject.transform, instanceCIW, null);
                             int preLocationIndex = instanceCIW.locationIndex;
                             BeginInteractionPatch.SetItemLocationIndex(3, instanceCIW, null);
                             if (preLocationIndex == 0) // If was on player
@@ -2991,6 +2997,7 @@ namespace EFM
 
                             EFM_CustomItemWrapper instanceCIW = slotItemPhysObj.GetComponent<EFM_CustomItemWrapper>();
                             EFM_VanillaItemDescriptor instanceVID = slotItemPhysObj.GetComponent<EFM_VanillaItemDescriptor>();
+                            EFM_Base_Manager.RemoveFromContainer(instanceObject.transform, null, instanceVID);
                             int preLocationIndex = -1;
                             if (custom)
                             {
@@ -3209,6 +3216,7 @@ namespace EFM
                         ++filledSlotCount;
 
                         EFM_CustomItemWrapper instanceCIW = slotItemPhysObj.GetComponent<EFM_CustomItemWrapper>();
+                        EFM_Base_Manager.RemoveFromContainer(leastInstanceObject.transform, instanceCIW, null);
                         int preLocationIndex = instanceCIW.locationIndex;
                         BeginInteractionPatch.SetItemLocationIndex(3, instanceCIW, null);
                         if (preLocationIndex == 0) // If was on player
@@ -3256,6 +3264,7 @@ namespace EFM
 
                         EFM_CustomItemWrapper instanceCIW = slotItemPhysObj.GetComponent<EFM_CustomItemWrapper>();
                         EFM_VanillaItemDescriptor instanceVID = slotItemPhysObj.GetComponent<EFM_VanillaItemDescriptor>();
+                        EFM_Base_Manager.RemoveFromContainer(instanceObject.transform, null, instanceVID);
                         int preLocationIndex = -1;
                         if (custom)
                         {
@@ -3649,6 +3658,7 @@ namespace EFM
                                     j -= CIW.stack;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
+                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                     Destroy(toCheck);
                                 }
                             }
@@ -3669,6 +3679,7 @@ namespace EFM
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
+                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                     Destroy(toCheck);
                                 }
                             }
@@ -3679,6 +3690,7 @@ namespace EFM
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
+                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                     Destroy(toCheck);
                                 }
                             }
@@ -3687,6 +3699,7 @@ namespace EFM
                                 --j;
                                 objectList.RemoveAt(objectList.Count - 1);
                                 CIW.physObj.SetQuickBeltSlot(null);
+                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                 Destroy(toCheck);
                             }
                         }
@@ -3694,7 +3707,9 @@ namespace EFM
                         {
                             --j;
                             objectList.RemoveAt(objectList.Count - 1);
-                            CIW.physObj.SetQuickBeltSlot(null);
+                            EFM_VanillaItemDescriptor VID = toCheck.GetComponent<EFM_VanillaItemDescriptor>();
+                            VID.physObj.SetQuickBeltSlot(null);
+                            EFM_Base_Manager.RemoveFromContainer(toCheck.transform, null, VID);
                             Destroy(toCheck);
                         }
                     }
@@ -3722,6 +3737,7 @@ namespace EFM
                                     j -= CIW.stack;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
+                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                     Destroy(toCheck);
                                     Mod.weight -= CIW.currentWeight;
                                 }
@@ -3743,6 +3759,7 @@ namespace EFM
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
+                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                     Destroy(toCheck);
                                     Mod.weight -= VID.currentWeight;
                                 }
@@ -3754,6 +3771,7 @@ namespace EFM
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
+                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                     Destroy(toCheck);
                                     Mod.weight -= VID.currentWeight;
                                 }
@@ -3763,6 +3781,7 @@ namespace EFM
                                 --j;
                                 objectList.RemoveAt(objectList.Count - 1);
                                 CIW.physObj.SetQuickBeltSlot(null);
+                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
                                 Destroy(toCheck);
                                 Mod.weight -= CIW.currentWeight;
                             }
@@ -3771,7 +3790,8 @@ namespace EFM
                         {
                             --j;
                             objectList.RemoveAt(objectList.Count - 1);
-                            CIW.physObj.SetQuickBeltSlot(null);
+                            VID.physObj.SetQuickBeltSlot(null);
+                            EFM_Base_Manager.RemoveFromContainer(toCheck.transform, null, VID);
                             Destroy(toCheck);
                             Mod.weight -= VID.currentWeight;
                         }

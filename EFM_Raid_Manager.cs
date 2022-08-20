@@ -2174,6 +2174,8 @@ namespace EFM
             // Compile list of least filled spawn points, take a random one from the list
             Transform raiderZoneRoot = transform.GetChild(transform.childCount - 1).GetChild(1);
             List<Transform> availableBotZones = new List<Transform>();
+            List<Transform> notIdealBotZones = new List<Transform>();
+            List<Transform> idealBotZones = new List<Transform>();
             int least = int.MaxValue;
             for (int i = 0; i < raiderZoneRoot.childCount; ++i)
             {
@@ -2183,11 +2185,45 @@ namespace EFM
                     least = botZoneScript.botCount;
                     availableBotZones.Clear();
                     availableBotZones.Add(botZoneScript.transform);
+                    Vector3 zonePosition = botZoneScript.transform.GetChild(0).position;
+                    float distanceToPlayerHead = Vector3.Distance(zonePosition, GM.CurrentPlayerBody.headPositionFiltered);
+                    Vector3 vectorToPlayerHead = (GM.CurrentPlayerBody.headPositionFiltered - zonePosition).normalized;
+                    bool outOfRange = distanceToPlayerHead >= 20;
+                    bool noLineOfSight = !Physics.Raycast(zonePosition + Vector3.up * 0.15f, vectorToPlayerHead, distanceToPlayerHead, 524288); // Check only if collide with environment
+                    if(outOfRange && noLineOfSight)
+                    {
+                        idealBotZones.Add(botZoneScript.transform);
+                    }
+                    else if(outOfRange || noLineOfSight)
+                    {
+                        notIdealBotZones.Add(botZoneScript.transform);
+                    }
                 }
                 else if(botZoneScript.botCount == least)
                 {
                     availableBotZones.Add(botZoneScript.transform);
+                    Vector3 zonePosition = botZoneScript.transform.GetChild(0).position;
+                    float distanceToPlayerHead = Vector3.Distance(zonePosition, GM.CurrentPlayerBody.headPositionFiltered);
+                    Vector3 vectorToPlayerHead = (GM.CurrentPlayerBody.headPositionFiltered - zonePosition).normalized;
+                    bool outOfRange = distanceToPlayerHead >= 20;
+                    bool noLineOfSight = !Physics.Raycast(zonePosition + Vector3.up * 0.15f, vectorToPlayerHead, distanceToPlayerHead, 524288);
+                    if (outOfRange && noLineOfSight)
+                    {
+                        idealBotZones.Add(botZoneScript.transform);
+                    }
+                    else if (outOfRange || noLineOfSight)
+                    {
+                        notIdealBotZones.Add(botZoneScript.transform);
+                    }
                 }
+            }
+            if(idealBotZones.Count > 0)
+            {
+                return idealBotZones;
+            }
+            else if(notIdealBotZones.Count > 0)
+            {
+                return notIdealBotZones;
             }
             return availableBotZones;
         }
