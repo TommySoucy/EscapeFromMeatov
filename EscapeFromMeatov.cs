@@ -1572,7 +1572,7 @@ namespace EFM
                         FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                         {
-                            if (loadedRound == null)
+                            if (loadedRound == null || loadedRound.LR_ObjectWrapper == null)
                             {
                                 break;
                             }

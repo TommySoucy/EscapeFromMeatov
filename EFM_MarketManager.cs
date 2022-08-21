@@ -1990,7 +1990,6 @@ namespace EFM
             Mod.instance.LogInfo("0");
 
             // Insure
-            List<Transform> currentInsureHorizontals = new List<Transform>();
             Transform insureHorizontalsParent = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject insureHorizontalCopy = insureHorizontalsParent.GetChild(0).gameObject;
             float insureShowCaseHeight = 3; // Top padding
@@ -2109,7 +2108,7 @@ namespace EFM
                             currentHorizontal = GameObject.Instantiate(insureHorizontalCopy, insureHorizontalsParent).transform;
                             currentHorizontal.gameObject.SetActive(true);
                         }
-                        else if (currentInsureHorizontals[currentInsureHorizontals.Count - 1].childCount == 7)
+                        else if (currentHorizontal.childCount == 7)
                         {
                             currentHorizontal = GameObject.Instantiate(insureHorizontalCopy, insureHorizontalsParent).transform;
                             currentHorizontal.gameObject.SetActive(true);

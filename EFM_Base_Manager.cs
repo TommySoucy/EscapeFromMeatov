@@ -2911,28 +2911,29 @@ namespace EFM
                     prefabToUse = IM.OD[currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString()].GetGameObject();
                 }
 
-                GameObject itemObject = Instantiate<GameObject>(prefabToUse);
+                GameObject itemObject = Instantiate<GameObject>(prefabToUse, root);
 
                 FVRPhysicalObject itemPhysicalObject = itemObject.GetComponentInChildren<FVRPhysicalObject>();
                 FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
 
                 // Fill data
                 // GameObject
-                //itemObject.transform.localPosition = new Vector3((float)currentPhysicalObject["positionX"], (float)currentPhysicalObject["positionY"], (float)currentPhysicalObject["positionZ"]);
-                //itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)currentPhysicalObject["rotationX"], (float)currentPhysicalObject["rotationY"], (float)currentPhysicalObject["rotationZ"]));
+                itemObject.transform.localPosition = new Vector3((float)currentPhysicalObject["positionX"], (float)currentPhysicalObject["positionY"], (float)currentPhysicalObject["positionZ"]);
+                itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)currentPhysicalObject["rotationX"], (float)currentPhysicalObject["rotationY"], (float)currentPhysicalObject["rotationZ"]));
+                itemObject.transform.parent = null;
 
                 // PhysicalObject
                 itemPhysicalObject.m_isSpawnLock = (bool)currentPhysicalObject["m_isSpawnLock"];
                 itemPhysicalObject.m_isHardnessed = (bool)currentPhysicalObject["m_isHarnessed"];
                 itemPhysicalObject.IsKinematicLocked = (bool)currentPhysicalObject["IsKinematicLocked"];
                 itemPhysicalObject.IsInWater = (bool)currentPhysicalObject["IsInWater"];
-                AddAttachments(itemPhysicalObject, currentPhysicalObject);
                 FVRFireArmAttachment itemAttachment = itemPhysicalObject as FVRFireArmAttachment;
                 itemAttachment.AttachToMount(physicalObject.AttachmentMounts[(int)currentPhysicalObject["mountIndex"]], false);
-                if(itemAttachment is Suppressor)
+                if (itemAttachment is Suppressor)
                 {
                     (itemAttachment as Suppressor).AutoMountWell();
                 }
+                AddAttachments(itemPhysicalObject, currentPhysicalObject);
                 
                 // ObjectWrapper
                 itemObjectWrapper.ItemID = currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString();
@@ -4485,6 +4486,7 @@ namespace EFM
             // Firearm
             if (itemPhysicalObject is FVRFireArm)
             {
+                Mod.instance.LogInfo("Saving firearm: " + itemPhysicalObject.name);
                 FVRFireArm firearmPhysicalObject = itemPhysicalObject as FVRFireArm;
 
                 // Save flagDict by converting it into two lists of string, one for keys and one for values
@@ -4511,32 +4513,29 @@ namespace EFM
                 }
 
                 // Magazine/Clip
-                if (firearmPhysicalObject.UsesClips)
+                if (firearmPhysicalObject.UsesClips && firearmPhysicalObject.Clip != null)
                 {
-                    if (firearmPhysicalObject.Clip != null)
-                    {
-                        savedItem["PhysicalObject"]["ammoContainer"] = new JObject();
-                        savedItem["PhysicalObject"]["ammoContainer"]["itemID"] = firearmPhysicalObject.Clip.ObjectWrapper.ItemID;
+                    savedItem["PhysicalObject"]["ammoContainer"] = new JObject();
+                    savedItem["PhysicalObject"]["ammoContainer"]["itemID"] = firearmPhysicalObject.Clip.ObjectWrapper.ItemID;
 
-                        if (firearmPhysicalObject.Clip.HasARound())
+                    if (firearmPhysicalObject.Clip.HasARound())
+                    {
+                        JArray newLoadedRoundsInClip = new JArray();
+                        foreach (FVRFireArmClip.FVRLoadedRound round in firearmPhysicalObject.Clip.LoadedRounds)
                         {
-                            JArray newLoadedRoundsInClip = new JArray();
-                            foreach (FVRFireArmClip.FVRLoadedRound round in firearmPhysicalObject.Clip.LoadedRounds)
+                            if (round == null || round.LR_ObjectWrapper == null)
                             {
-                                if (round == null)
-                                {
-                                    break;
-                                }
-                                else
-                                {
-                                    newLoadedRoundsInClip.Add((int)round.LR_Class);
-                                }
+                                break;
                             }
-                            savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInClip;
+                            else
+                            {
+                                newLoadedRoundsInClip.Add((int)round.LR_Class);
+                            }
                         }
+                        savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInClip;
                     }
                 }
-                else if (firearmPhysicalObject.Magazine != null)
+                else if (firearmPhysicalObject.UsesMagazines && firearmPhysicalObject.Magazine != null)
                 {
                     savedItem["PhysicalObject"]["ammoContainer"] = new JObject();
                     savedItem["PhysicalObject"]["ammoContainer"]["itemID"] = firearmPhysicalObject.Magazine.ObjectWrapper.ItemID;
@@ -4573,7 +4572,7 @@ namespace EFM
                     JArray newLoadedRoundsInMag = new JArray();
                     foreach (FVRLoadedRound round in magPhysicalObject.LoadedRounds)
                     {
-                        if (round == null)
+                        if (round == null || round.LR_ObjectWrapper == null)
                         {
                             break;
                         }
@@ -4593,7 +4592,7 @@ namespace EFM
                     JArray newLoadedRoundsInClip = new JArray();
                     foreach (FVRFireArmClip.FVRLoadedRound round in clipPhysicalObject.LoadedRounds)
                     {
-                        if (round == null)
+                        if (round == null || round.LR_ObjectWrapper == null)
                         {
                             break;
                         }
@@ -4850,36 +4849,39 @@ namespace EFM
         private void SaveAttachments(FVRPhysicalObject physicalObject, JToken itemPhysicalObject)
         {
             // We want to save attachments curently physically present on physicalObject into the save data itemPhysicalObject
-            for (int i = 0; i < physicalObject.Attachments.Count; ++i)
+            for (int i = 0; i < physicalObject.AttachmentMounts.Count; ++i)
             {
-                JToken newPhysicalObject = new JObject();
-                if(itemPhysicalObject["AttachmentsList"] == null)
+                for (int j = 0; j < physicalObject.AttachmentMounts[i].AttachmentsList.Count; ++j) 
                 {
-                    itemPhysicalObject["AttachmentsList"] = new JArray();
+                    JToken newPhysicalObject = new JObject();
+                    if (itemPhysicalObject["AttachmentsList"] == null)
+                    {
+                        itemPhysicalObject["AttachmentsList"] = new JArray();
+                    }
+                    ((JArray)itemPhysicalObject["AttachmentsList"]).Add(newPhysicalObject);
+
+                    FVRPhysicalObject currentPhysicalObject = physicalObject.AttachmentMounts[i].AttachmentsList[j];
+                    Transform currentTransform = currentPhysicalObject.transform;
+
+                    newPhysicalObject["ObjectWrapper"] = new JObject();
+
+                    // Fill PhysicalObject
+                    newPhysicalObject["positionX"] = currentTransform.localPosition.x;
+                    newPhysicalObject["positionY"] = currentTransform.localPosition.y;
+                    newPhysicalObject["positionZ"] = currentTransform.localPosition.z;
+                    newPhysicalObject["rotationX"] = currentTransform.localRotation.eulerAngles.x;
+                    newPhysicalObject["rotationY"] = currentTransform.localRotation.eulerAngles.y;
+                    newPhysicalObject["rotationZ"] = currentTransform.localRotation.eulerAngles.z;
+                    newPhysicalObject["m_isSpawnLock"] = currentPhysicalObject.m_isSpawnLock;
+                    newPhysicalObject["m_isHarnessed"] = currentPhysicalObject.m_isHardnessed;
+                    newPhysicalObject["IsKinematicLocked"] = currentPhysicalObject.IsKinematicLocked;
+                    newPhysicalObject["IsInWater"] = currentPhysicalObject.IsInWater;
+                    SaveAttachments(currentPhysicalObject, newPhysicalObject);
+                    newPhysicalObject["mountIndex"] = i;
+
+                    // Fill ObjectWrapper
+                    newPhysicalObject["ObjectWrapper"]["ItemID"] = currentPhysicalObject.ObjectWrapper.ItemID;
                 }
-                ((JArray)itemPhysicalObject["AttachmentsList"]).Add(newPhysicalObject);
-
-                FVRPhysicalObject currentPhysicalObject = physicalObject.Attachments[i];
-                Transform currentTransform = currentPhysicalObject.transform;
-
-                newPhysicalObject["ObjectWrapper"] = new JObject();
-
-                // Fill PhysicalObject
-                newPhysicalObject["positionX"] = currentTransform.localPosition.x;
-                newPhysicalObject["positionY"] = currentTransform.localPosition.y;
-                newPhysicalObject["positionZ"] = currentTransform.localPosition.z;
-                newPhysicalObject["rotationX"] = currentTransform.localRotation.eulerAngles.x;
-                newPhysicalObject["rotationY"] = currentTransform.localRotation.eulerAngles.y;
-                newPhysicalObject["rotationZ"] = currentTransform.localRotation.eulerAngles.z;
-                newPhysicalObject["m_isSpawnLock"] = currentPhysicalObject.m_isSpawnLock;
-                newPhysicalObject["m_isHarnessed"] = currentPhysicalObject.m_isHardnessed;
-                newPhysicalObject["IsKinematicLocked"] = currentPhysicalObject.IsKinematicLocked;
-                newPhysicalObject["IsInWater"] = currentPhysicalObject.IsInWater;
-                SaveAttachments(currentPhysicalObject, newPhysicalObject);
-                newPhysicalObject["mountIndex"] = physicalObject.AttachmentMounts.IndexOf((currentPhysicalObject as FVRFireArmAttachment).curMount);
-
-                // Fill ObjectWrapper
-                newPhysicalObject["ObjectWrapper"]["ItemID"] = currentPhysicalObject.ObjectWrapper.ItemID;
             }
         }
 

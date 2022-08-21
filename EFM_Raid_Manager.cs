@@ -3135,7 +3135,11 @@ namespace EFM
                                 Mod.instance.LogWarning("Attempted to get vanilla prefab for " + actualItemID + ", but the prefab had been destroyed, refreshing cache...");
 
                                 IM.OD[actualItemID].RefreshCache();
-                                itemPrefab = IM.OD[actualItemID].GetGameObject();
+                                do
+                                {
+                                    Mod.instance.LogInfo("Waiting for cache refresh...");
+                                    itemPrefab = IM.OD[actualItemID].GetGameObject();
+                                } while (itemPrefab == null);
                             }
                         }
                         List<string> itemParents = null;
