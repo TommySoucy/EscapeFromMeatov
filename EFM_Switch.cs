@@ -8,13 +8,18 @@ namespace EFM
 {
     public class EFM_Switch : MonoBehaviour
     {
-        public int mode; // 0: Toggle gameObjects, 1: Power, 2: UI, 3: Market toggle
+        public int mode; // 0: Toggle gameObjects, 1: Power, 2: UI, 3: Market toggle, 4: Lights
+        public AudioSource audioSource;
 
         // 0
         public List<GameObject> gameObjects;
 
         // 2
         private bool active = true;
+
+        // 4
+        public AudioSource level2AudioSource;
+        public AudioSource level3AudioSource;
 
         public void Activate()
         {
@@ -58,8 +63,27 @@ namespace EFM
                         }
                     }
                     break;
+                case 4:
+                    foreach (GameObject go in gameObjects)
+                    {
+                        go.SetActive(!go.activeSelf);
+                    }
+                    if(Mod.currentBaseManager.baseAreaManagers[15].level == 2)
+                    {
+                        level2AudioSource.Play();
+                    }
+                    else if(Mod.currentBaseManager.baseAreaManagers[15].level == 3)
+                    {
+                        level3AudioSource.Play();
+                    }
+                    break;
                 default:
                     break;
+            }
+
+            if(audioSource != null)
+            {
+                audioSource.Play();
             }
         }
     }

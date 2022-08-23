@@ -106,6 +106,7 @@ namespace EFM
         public EFM_MarketManager marketManager;
         public static bool marketUI; // whether we are currently in market mode or in area UI mode
         public EFM_GCManager GCManager;
+        public EFM_AreaUpgradeCheckProcessor[] activeCheckProcessors = new EFM_AreaUpgradeCheckProcessor[2];
 
         // TODO make sure the following are used where they should
         public static float currentExperienceRate = 1;
@@ -3094,6 +3095,7 @@ namespace EFM
                 Mod.instance.LogInfo("Area canvas not initialized, initializing all area UI and prepping...");
 
                 // Load prefabs and assets
+                continue from here, load necessary hideout audio clips, and make sure we use them properly when turning on/off the generator, crafting starting/finishing, etc
                 areaCanvasPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaCanvas");
                 areaCanvasBottomButtonPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaCanvasBottomButton");
                 areaRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaRequirement");
@@ -3373,14 +3375,16 @@ namespace EFM
             // Add switches
             // LightSwitch
             EFM_Switch lightSwitch = transform.GetChild(1).GetChild(23).GetChild(0).gameObject.AddComponent<EFM_Switch>();
+            lightSwitch.level2AudioSource = transform.GetChild(1).GetChild(23).GetChild(0).GetChild(0).GetComponent<AudioSource>();
+            lightSwitch.level3AudioSource = transform.GetChild(1).GetChild(23).GetChild(0).GetChild(1).GetComponent<AudioSource>();
             lightSwitch.gameObjects = new List<GameObject>
             {
-                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(0).GetChild(1).gameObject,
-                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(1).GetChild(1).gameObject,
-                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(2).GetChild(1).gameObject,
-                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(3).GetChild(1).gameObject,
-                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(4).GetChild(1).gameObject,
-                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(0).GetChild(5).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(1).GetChild(0).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(1).GetChild(1).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(1).GetChild(2).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(1).GetChild(3).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(1).GetChild(4).GetChild(1).gameObject,
+                transform.GetChild(1).GetChild(15).GetChild(2).GetChild(1).GetChild(5).GetChild(1).gameObject,
 
                 transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(0).GetChild(5).gameObject,
                 transform.GetChild(1).GetChild(15).GetChild(3).GetChild(0).GetChild(1).GetChild(5).gameObject,
@@ -3393,6 +3397,7 @@ namespace EFM
             // UISwitch
             EFM_Switch UISwitch = transform.GetChild(1).GetChild(23).GetChild(1).gameObject.AddComponent<EFM_Switch>();
             UISwitch.mode = 2;
+            UISwitch.audioSource = transform.GetChild(1).GetChild(23).GetChild(0).GetChild(0).GetComponent<AudioSource>();
             UISwitch.gameObjects = new List<GameObject>();
             for(int i=0; i < 22; ++i)
             {
@@ -3403,6 +3408,7 @@ namespace EFM
             // MarketSwitch
             EFM_Switch MarketSwitch = transform.GetChild(1).GetChild(23).GetChild(2).gameObject.AddComponent<EFM_Switch>();
             MarketSwitch.mode = 3;
+            MarketSwitch.audioSource = transform.GetChild(1).GetChild(23).GetChild(0).GetChild(0).GetComponent<AudioSource>();
             MarketSwitch.gameObjects = new List<GameObject>();
             for(int i=0; i < 22; ++i)
             {

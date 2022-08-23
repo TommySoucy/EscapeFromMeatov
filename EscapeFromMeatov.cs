@@ -239,7 +239,8 @@ namespace EFM
         public static JArray lootContainerDB;
         public static JObject defaultItemsData;
         public static Dictionary<string, EFM_VanillaItemDescriptor> vanillaItems;
-        public static Dictionary<string, JObject> lootContainersByName; 
+        public static Dictionary<string, JObject> lootContainersByName;
+        public static Dictionary<string, AudioClip[]> itemSounds;
 
         // Config settings
 
@@ -552,6 +553,8 @@ namespace EFM
             defaultItemsData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DefaultItemData.txt"));
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
             quickSlotConstantMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Renderer>().material;
+            itemSounds = new Dictionary<string, AudioClip[]>();
+            string[] soundCategories = new string[] { "drop", "pickup", "offline_use", "open", "use", "use_loop" };
             for (int i = 0; i < ((JArray)defaultItemsData["ItemDefaults"]).Count; ++i)
             {
                 LogInfo("\tLoading Item"+i);
@@ -682,6 +685,39 @@ namespace EFM
                     customItemWrapper.blocksEyewear = (bool)defaultItemsData["ItemDefaults"][i]["BlocksEyewear"];
                     customItemWrapper.blocksFaceCover = (bool)defaultItemsData["ItemDefaults"][i]["BlocksFaceCover"];
                     customItemWrapper.blocksHeadwear = (bool)defaultItemsData["ItemDefaults"][i]["BlocksHeadwear"];
+                }
+                string itemSound = defaultItemsData["ItemDefaults"][i]["itemSound"].ToString();
+                if (!itemSound.Equals("None"))
+                {
+                    AudioClip[] sounds;
+                    if (!itemSounds.ContainsKey(itemSound))
+                    {
+                        sounds = new AudioClip[soundCategories.Length];
+                        int count = 0;
+                        for(int j=0; j < sounds.Length; ++j)
+                        {
+                            sounds[j] = assetsBundle.LoadAsset<AudioClip>(itemSound + "_" + soundCategories[j]);
+                            count += sounds[j] == null ? 0 : 1;
+                        }
+                        if(count == 0)
+                        {
+                            LogError("No item sound found for category: " + itemSound);
+                            itemPhysicalObject.HandlingGrabSound = HandlingGrabType.Generic;
+                            itemPhysicalObject.HandlingReleaseSound = HandlingReleaseType.HardSmooth;
+                        }
+                        itemSounds.Add(itemSound, sounds);
+                        customItemWrapper.itemSounds = sounds;
+                    }
+                    else
+                    {
+                        sounds = itemSounds[itemSound];
+                    }
+                    customItemWrapper.itemSounds = sounds;
+                }
+                else
+                {
+                    itemPhysicalObject.HandlingGrabSound = HandlingGrabType.Generic;
+                    itemPhysicalObject.HandlingReleaseSound = HandlingReleaseType.HardSmooth;
                 }
 
                 AddCategories(customItemWrapper.parents);
@@ -2214,6 +2250,18 @@ namespace EFM
 
             harmony.Patch(isPointInsideSphereGeoPatchOriginal, new HarmonyMethod(isPointInsideSphereGeoPatchPrefix));
 
+            // PlayGrabSoundPatch
+            MethodInfo playGrabSoundPatchOriginal = typeof(FVRInteractiveObject).GetMethod("PlayGrabSound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo playGrabSoundPatchPrefix = typeof(PlayGrabSoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(playGrabSoundPatchOriginal, new HarmonyMethod(playGrabSoundPatchPrefix));
+
+            // PlayReleaseSoundPatch
+            MethodInfo playReleaseSoundPatchOriginal = typeof(FVRInteractiveObject).GetMethod("PlayReleaseSound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo playReleaseSoundPatchPrefix = typeof(PlayReleaseSoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(playReleaseSoundPatchOriginal, new HarmonyMethod(playReleaseSoundPatchPrefix));
+
             //// UpdateModeTwoAxisPatch
             //MethodInfo updateModeTwoAxisPatchOriginal = typeof(FVRMovementManager).GetMethod("UpdateModeTwoAxis", BindingFlags.NonPublic | BindingFlags.Instance);
             //MethodInfo updateModeTwoAxisPatchPrefix = typeof(UpdateModeTwoAxisPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -3011,6 +3059,15 @@ namespace EFM
                         }
                         return;
                     }
+                }
+
+                // Play drop sound if custom
+                if (hand.CanMakeGrabReleaseSound && CIW.itemSounds != null && CIW.itemSounds[0] != null)
+                {
+                    AudioEvent audioEvent = new AudioEvent();
+                    audioEvent.Clips.Add(CIW.itemSounds[0]);
+                    SM.PlayCoreSound(FVRPooledAudioType.GenericClose, audioEvent, hand.Input.Pos);
+                    hand.HandMadeGrabReleaseSound();
                 }
                 return;
             }
@@ -7979,6 +8036,78 @@ namespace EFM
                     }
                 }
             }
+        }
+    }
+
+    // Patches FVRInteractiveObject.PlayGrabSound to use custom item sounds 
+    // This completely replaces the original
+    class PlayGrabSoundPatch
+    {
+        static bool Prefix(ref FVRInteractiveObject __instance, bool isHard, FVRViveHand hand)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            if (hand.CanMakeGrabReleaseSound)
+            {
+                if (__instance.HandlingGrabSound != HandlingGrabType.None)
+                {
+                    SM.PlayHandlingGrabSound(__instance.HandlingGrabSound, hand.Input.Pos, isHard);
+                    hand.HandMadeGrabReleaseSound();
+                }
+                else
+                {
+                    EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+                    //string[] soundCategories = new string[] { "drop", "pickup", "offline_use", "open", "use", "use_loop" };
+                    if (CIW != null && CIW.itemSounds != null && CIW.itemSounds[1] != null) 
+                    {
+                        AudioEvent audioEvent = new AudioEvent();
+                        audioEvent.Clips.Add(CIW.itemSounds[1]);
+                        SM.PlayCoreSound(FVRPooledAudioType.GenericClose, audioEvent, hand.Input.Pos);
+                        hand.HandMadeGrabReleaseSound();
+                    }
+                }
+            }
+
+            return false;
+        }
+    }
+
+    // Patches FVRInteractiveObject.PlayReleaseSound to use custom item sounds 
+    // This completely replaces the original
+    class PlayReleaseSoundPatch
+    {
+        static bool Prefix(ref FVRInteractiveObject __instance, FVRViveHand hand)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            if (hand.CanMakeGrabReleaseSound)
+            {
+                if (__instance.HandlingReleaseSound != HandlingReleaseType.None)
+                {
+                    SM.PlayHandlingReleaseSound(__instance.HandlingReleaseSound, hand.Input.Pos);
+                    hand.HandMadeGrabReleaseSound();
+                }
+                else
+                {
+                    EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+                    //string[] soundCategories = new string[] { "drop", "pickup", "offline_use", "open", "use", "use_loop" };
+                    if (CIW != null && CIW.itemSounds != null && CIW.itemSounds[0] != null) 
+                    {
+                        AudioEvent audioEvent = new AudioEvent();
+                        audioEvent.Clips.Add(CIW.itemSounds[0]);
+                        SM.PlayCoreSound(FVRPooledAudioType.GenericClose, audioEvent, hand.Input.Pos);
+                        hand.HandMadeGrabReleaseSound();
+                    }
+                }
+            }
+
+            return false;
         }
     }
     #endregion

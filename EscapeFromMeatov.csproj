@@ -70,6 +70,7 @@
     <Compile Include="EFM_AreaRequirement.cs" />
     <Compile Include="EFM_AreasDB.cs" />
     <Compile Include="EFM_AreaSlot.cs" />
+    <Compile Include="EFM_AreaUpgradeCheckProcessor.cs" />
     <Compile Include="EFM_BaseAreaManager.cs" />
     <Compile Include="EFM_Base_Manager.cs" />
     <Compile Include="EFM_BotZone.cs" />

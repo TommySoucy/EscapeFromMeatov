@@ -43,6 +43,8 @@ namespace EFM
         public List<EFM_AreaRequirement> skillRequirements;
         public List<EFM_AreaRequirement> traderRequirements;
         public List<EFM_AreaBonus> bonuses;
+        public EFM_AreaUpgradeCheckProcessor[,] upgradeCheckProcessors;
+        public GameObject[] upgradeDialogs = new GameObject[3]; // Block, warning, confirm
 
         // UI
         public GameObject areaCanvas;
@@ -55,28 +57,49 @@ namespace EFM
 
         public void Init()
         {
-            InitUI();
-
             needsFuel = (bool)Mod.areasDB["areaDefaults"][areaIndex]["needsFuel"];
 
-            if(areaIndex == 4)
+            // Init each level's upgrade check processors
+            bool lastLevelFound = false;
+            for(int i = transform.childCount - 1; i >= 0; --i)
             {
-                EFM_Switch generatorSwitch = transform.GetChild(1).GetChild(0).gameObject.AddComponent<EFM_Switch>();
+                if (lastLevelFound)
+                {
+                    upgradeCheckProcessors[i, 0] = transform.GetChild(i).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_AreaUpgradeCheckProcessor>();
+                    upgradeCheckProcessors[i, 0].manager = this;
+                    upgradeCheckProcessors[i, 0].block = true;
+                    upgradeCheckProcessors[i, 1] = transform.GetChild(i).GetChild(0).GetChild(1).gameObject.AddComponent<EFM_AreaUpgradeCheckProcessor>();
+                    upgradeCheckProcessors[i, 1].manager = this;
+                }
+                if (transform.GetChild(i).name.StartsWith("level"))
+                {
+                    lastLevelFound = true;
+                    upgradeCheckProcessors = new EFM_AreaUpgradeCheckProcessor[i,2];
+                }
+            }
+
+            InitUI();
+
+            if (areaIndex == 4)
+            {
+                EFM_Switch generatorSwitch = transform.GetChild(1).GetChild(1).gameObject.AddComponent<EFM_Switch>();
                 generatorSwitch.mode = 1;
-                generatorSwitch = transform.GetChild(2).GetChild(0).gameObject.AddComponent<EFM_Switch>();
+                generatorSwitch = transform.GetChild(2).GetChild(1).gameObject.AddComponent<EFM_Switch>();
                 generatorSwitch.mode = 1;
-                generatorSwitch = transform.GetChild(3).GetChild(0).gameObject.AddComponent<EFM_Switch>();
+                generatorSwitch = transform.GetChild(3).GetChild(1).gameObject.AddComponent<EFM_Switch>();
                 generatorSwitch.mode = 1;
             }
 
             if(areaIndex == 3 && level != 1)
             {
                 transform.GetChild(1).gameObject.SetActive(false);
+                transform.GetChild(level).GetComponent<AudioSource>().enabled = false;
                 transform.GetChild(level).gameObject.SetActive(true);
             }
             else if(level != 0)
             {
                 transform.GetChild(0).gameObject.SetActive(false);
+                transform.GetChild(level).GetComponent<AudioSource>().enabled = false;
                 transform.GetChild(level).gameObject.SetActive(true);
             }
 
@@ -137,7 +160,7 @@ namespace EFM
                     {
                         generatorRunning = false;
 
-                        // Update based on fuel the areas taht come before this one. The other ones were not intialized yet so no need to update
+                        // Update based on fuel the areas that come before this one. The other ones were not intialized yet so no need to update
                         for (int j = 0; j < areaIndex; ++j) 
                         {
                             baseManager.baseAreaManagers[j].UpdateBasedOnFuel();
@@ -673,6 +696,7 @@ namespace EFM
                 areaRequirementMiddle2Parents[i].Add(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(i + 2).gameObject);
             }
 
+            // Setup
             if (constructing)
             {
                 Mod.instance.LogInfo("\tConstructing");
@@ -1011,6 +1035,39 @@ namespace EFM
                     }
                 }
             }
+
+            // Dialogs
+            AudioSource hoverButtonSound = areaCanvas.transform.GetChild(2).GetComponent<AudioSource>();
+            // Upgrade confirm
+            upgradeDialogs[2] = areaCanvas.transform.GetChild(1).GetChild(7).gameObject;
+            EFM_PointableButton upgradeConfirmCancelButton = upgradeDialogs[2].transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            upgradeConfirmCancelButton.SetButton();
+            upgradeConfirmCancelButton.hoverSound = hoverButtonSound;
+            upgradeConfirmCancelButton.Button.onClick.AddListener(OnUpgradeCancelClicked);
+            //upgradeConfirmCancelButton.GetComponent<Collider>().enabled = false;
+            EFM_PointableButton upgradeConfirmConfirmButton = upgradeDialogs[2].transform.GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
+            upgradeConfirmConfirmButton.SetButton();
+            upgradeConfirmConfirmButton.hoverSound = hoverButtonSound;
+            upgradeConfirmConfirmButton.Button.onClick.AddListener(OnUpgradeConfirmConfirmClicked);
+            //upgradeConfirmConfirmButton.GetComponent<Collider>().enabled = false;
+            // Upgrade warning
+            upgradeDialogs[1] = areaCanvas.transform.GetChild(1).GetChild(8).gameObject;
+            EFM_PointableButton upgradeWarningCancelButton = upgradeDialogs[1].transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            upgradeWarningCancelButton.SetButton();
+            upgradeWarningCancelButton.hoverSound = hoverButtonSound;
+            upgradeWarningCancelButton.Button.onClick.AddListener(OnUpgradeCancelClicked);
+            //upgradeWarningCancelButton.GetComponent<Collider>().enabled = false;
+            EFM_PointableButton upgradeWarningContinueButton = upgradeDialogs[1].transform.GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
+            upgradeWarningContinueButton.SetButton();
+            upgradeWarningContinueButton.hoverSound = hoverButtonSound;
+            upgradeWarningContinueButton.Button.onClick.AddListener(OnUpgradeWarningContinueClicked);
+            //upgradeWarningContinueButton.GetComponent<Collider>().enabled = false;
+            // Upgrade blocked
+            upgradeDialogs[0] = areaCanvas.transform.GetChild(1).GetChild(9).gameObject;
+            EFM_PointableButton upgradeBlockedCancelButton = upgradeDialogs[0].transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            upgradeBlockedCancelButton.SetButton();
+            upgradeBlockedCancelButton.hoverSound = hoverButtonSound;
+            upgradeBlockedCancelButton.Button.onClick.AddListener(OnUpgradeCancelClicked);
         }
 
         public void SetProductions()
@@ -2534,6 +2591,10 @@ namespace EFM
             areaCanvas.transform.GetChild(0).gameObject.SetActive(true);
             inSummary = true;
             buttonClickSound.Play();
+
+            // Disable upgrade check processors if active
+            upgradeCheckProcessors[level, 0].gameObject.SetActive(false);
+            upgradeCheckProcessors[level, 1].gameObject.SetActive(false);
         }
 
         public void OnNextLevelClicked()
@@ -2555,6 +2616,18 @@ namespace EFM
         }
 
         public void OnConstructClicked()
+        {
+            buttonClickSound.Play();
+
+            // Activate upgrade confirm dialog
+            upgradeDialogs[2].SetActive(true);
+
+            // Activate upgrade check processors
+            upgradeCheckProcessors[level, 0].gameObject.SetActive(true);
+            upgradeCheckProcessors[level, 1].gameObject.SetActive(true);
+        }
+        
+        public void OnUpgradeConfirmConfirmClicked()
         {
             buttonClickSound.Play();
 
@@ -2785,6 +2858,30 @@ namespace EFM
                 constructionTimer = (int)Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["constructionTime"];
             }
             
+        }
+
+        public void OnUpgradeCancelClicked()
+        {
+            buttonClickSound.Play();
+
+            // Disable all upgrade dialogs THIS WILL BE DONE DIRECTLY BY DISABLING THE PROCESSORS
+            //foreach(GameObject upgradeDialog in upgradeDialogs)
+            //{
+            //    upgradeDialog.SetActive(false);
+            //}
+
+            // Disable upgrade check processors
+            baseManager.activeCheckProcessors[0].gameObject.SetActive(false);
+            baseManager.activeCheckProcessors[1].gameObject.SetActive(false);
+        }
+
+        public void OnUpgradeWarningContinueClicked()
+        {
+            buttonClickSound.Play();
+
+            // Disable warning, enable upgrade confirm
+            upgradeDialogs[1].SetActive(false);
+            upgradeDialogs[2].SetActive(true);
         }
 
         public void Upgrade()

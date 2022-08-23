@@ -34,6 +34,8 @@ namespace EFM
         public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid. This is to keep track of where an item is in general
         public EFM_DescriptionManager descriptionManager; // The current description manager displaying this item's description
         public List<EFM_MarketItemView> marketItemViews;
+        public int upgradeCheckBlockedIndex = -1;
+        public int upgradeCheckWarnedIndex = -1;
         public bool inAll;
         public int weight; // The original weight of the item. We need to keep it ourselves because we would usually use the RB mass but the RB gets destroyed when a mag gets put in a firearm
         public int volume;
