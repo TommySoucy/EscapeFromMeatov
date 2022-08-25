@@ -45,6 +45,19 @@ namespace EFM
         public List<EFM_AreaBonus> bonuses;
         public EFM_AreaUpgradeCheckProcessor[,] upgradeCheckProcessors;
         public GameObject[] upgradeDialogs = new GameObject[3]; // Block, warning, confirm
+        public AudioSource[] productionAudioSourceByLevel = new AudioSource[22];
+        public AudioSource[] slotAudioSourceByLevel = new AudioSource[22];
+        public AudioSource[] generatorAudioSourceByLevel = new AudioSource[4];
+        public AudioSource medStationFridgeAudioSource;
+        public AudioSource[] kitchenFridgeAudioSourceByLevel = new AudioSource[4];
+        public AudioSource[] kitchenPotAudioSourceByLevel = new AudioSource[4];
+        public AudioSource[] restSpaceTVAudioSourceByLevel = new AudioSource[4];
+        public AudioSource restSpacePSAudioSource;
+        public AudioSource intelCenterPCAudioSource;
+        public AudioSource intelCenterHDDAudioSource;
+        public AudioSource AFUAudioSource;
+        public AudioSource boozeGenAudioSource;
+        public AudioSource[] bitcoinFarmAudioSourceByLevel = new AudioSource[4];
 
         // UI
         public GameObject areaCanvas;
@@ -76,6 +89,204 @@ namespace EFM
                     lastLevelFound = true;
                     upgradeCheckProcessors = new EFM_AreaUpgradeCheckProcessor[i,2];
                 }
+            }
+
+            // Init area specific hierarchy stuff
+            AreaSoundManager areaSoundManager;
+            switch (areaIndex)
+            {
+                case 2:
+                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
+                    break;
+                case 4:
+                    slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(3).GetChild(3).GetComponent<AudioSource>();
+                    slotAudioSourceByLevel[2] = transform.GetChild(2).GetChild(3).GetChild(3).GetComponent<AudioSource>();
+                    slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(2).GetChild(4).GetComponent<AudioSource>();
+                    generatorAudioSourceByLevel[1] = transform.GetChild(1).GetChild(3).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = generatorAudioSourceByLevel[1].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.generatorLevel1And2Audio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 1);
+                    areaSoundManager.workingRange = new Vector2(1, 5.5f);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(5.5f, 6.5f);
+                    generatorAudioSourceByLevel[2] = transform.GetChild(2).GetChild(3).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = generatorAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.generatorLevel1And2Audio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 1);
+                    areaSoundManager.workingRange = new Vector2(1, 5.5f);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(5.5f, 6.5f);
+                    generatorAudioSourceByLevel[3] = transform.GetChild(3).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = generatorAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.generatorLevel3Audio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 5.5f);
+                    areaSoundManager.workingRange = new Vector2(5.5f, 19);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(19, 23.5f);
+                    break;
+                case 6:
+                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
+                    slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
+                    break;
+                case 7:
+                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
+                    medStationFridgeAudioSource = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
+                    areaSoundManager = medStationFridgeAudioSource.gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.medStationLevel3Audio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 2.5f);
+                    areaSoundManager.workingRange = new Vector2(2.5f, 8.5f);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(8.5f, 10.8f);
+                    break;
+                case 8:
+                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(2).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
+                    kitchenFridgeAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = kitchenFridgeAudioSourceByLevel[1].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.kitchenFridgeAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 1);
+                    areaSoundManager.workingRange = new Vector2(1, 12);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(12, 13.5f);
+                    kitchenFridgeAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = kitchenFridgeAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.kitchenFridgeAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 1);
+                    areaSoundManager.workingRange = new Vector2(1, 12);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(12, 13.5f);
+                    kitchenFridgeAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = kitchenFridgeAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.kitchenFridgeAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 1);
+                    areaSoundManager.workingRange = new Vector2(1, 12);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(12, 13.5f);
+                    kitchenPotAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    areaSoundManager = kitchenPotAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.kitchenPotAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 1);
+                    areaSoundManager.workingRange = new Vector2(1, 18.1f);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(18.1f, 22.5f);
+                    kitchenPotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
+                    areaSoundManager = kitchenPotAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.kitchenPotAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 1);
+                    areaSoundManager.workingRange = new Vector2(1, 18.1f);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(18.1f, 22.5f);
+                    break;
+                case 9:
+                    restSpaceTVAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = restSpaceTVAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.restSpaceTracks[1];
+                    areaSoundManager.workingRange = new Vector2(0, 330);
+                    restSpaceTVAudioSourceByLevel[3] = transform.GetChild(3).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = restSpaceTVAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.restSpaceTracks[1];
+                    areaSoundManager.workingRange = new Vector2(0, 330);
+                    restSpacePSAudioSource = transform.GetChild(3).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    areaSoundManager = restSpacePSAudioSource.gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.restSpacePSAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 13);
+                    areaSoundManager.workingRange = new Vector2(13, 29);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(29, 32);
+                    break;
+                case 10:
+                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
+                    break;
+                case 11:
+                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(3).GetComponent<AudioSource>();
+                    intelCenterPCAudioSource = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = intelCenterPCAudioSource.gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.intelCenterPCAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 23);
+                    areaSoundManager.workingRange = new Vector2(23, 32);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(32, 48);
+                    intelCenterHDDAudioSource = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
+                    areaSoundManager = intelCenterHDDAudioSource.gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.intelCenterHDDAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 9.5f);
+                    areaSoundManager.workingRange = new Vector2(9.5f, 17.5f);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(17.5f, 24);
+                    break;
+                case 17:
+                    slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<AudioSource>();
+                    AFUAudioSource = transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = AFUAudioSource.gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.AFUAudio;
+                    areaSoundManager.workingRange = new Vector2(0, 14.3f);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(14.3f, 18.5f);
+                    break;
+                case 19:
+                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<AudioSource>();
+                    boozeGenAudioSource = transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = boozeGenAudioSource.gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.boozeGenAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 3.2f);
+                    areaSoundManager.workingRange = new Vector2(3.2f, 12);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(12, 30);
+                    break;
+                case 20:
+                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
+                    slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(2).GetComponent<AudioSource>();
+                    slotAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(2).GetComponent<AudioSource>();
+                    slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
+                    bitcoinFarmAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = bitcoinFarmAudioSourceByLevel[1].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.bitcoinFarmAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 6.5f);
+                    areaSoundManager.workingRange = new Vector2(6.5f, 23);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(23, 28);
+                    bitcoinFarmAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = bitcoinFarmAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.bitcoinFarmAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 6.5f);
+                    areaSoundManager.workingRange = new Vector2(6.5f, 23);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(23, 28);
+                    bitcoinFarmAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
+                    areaSoundManager = bitcoinFarmAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
+                    areaSoundManager.clip = EFM_Base_Manager.bitcoinFarmAudio;
+                    areaSoundManager.hasStart = true;
+                    areaSoundManager.startRange = new Vector2(0, 6.5f);
+                    areaSoundManager.workingRange = new Vector2(6.5f, 23);
+                    areaSoundManager.hasEnd = true;
+                    areaSoundManager.endRange = new Vector2(23, 28);
+                    break;
             }
 
             InitUI();
@@ -250,6 +461,8 @@ namespace EFM
                             {
                                 UpdateStateElements();
                             }
+
+                            PlayProductionReadySound();
                         }
                         else
                         {
@@ -328,10 +541,28 @@ namespace EFM
                                 }
                             }
 
+                            PlayProductionReadySound();
+
                             activeScavCaseProductions.RemoveAt(i);
                         }
                     }
                 }
+            }
+        }
+
+        public void PlayProductionReadySound()
+        {
+            if(EFM_Base_Manager.areaProductionSounds[areaIndex, 1] != null && productionAudioSourceByLevel[level] != null)
+            {
+                productionAudioSourceByLevel[level].PlayOneShot(EFM_Base_Manager.areaProductionSounds[areaIndex, 1]);
+            }
+        }
+
+        public void PlayProductionStartSound()
+        {
+            if(EFM_Base_Manager.areaProductionSounds[areaIndex, 0] != null && productionAudioSourceByLevel[level] != null)
+            {
+                productionAudioSourceByLevel[level].PlayOneShot(EFM_Base_Manager.areaProductionSounds[areaIndex, 0]);
             }
         }
 
@@ -794,6 +1025,11 @@ namespace EFM
                     bottom2UpgradeButton.GetComponent<Button>().onClick.AddListener(OnConstructClicked);
                     bottom2UpgradeButton.GetComponent<EFM_PointableButton>().hoverSound = areaCanvas.transform.GetChild(2).GetComponent<AudioSource>();
                 }
+
+                if (generatorRunning)
+                {
+                    BeginGeneratorDependentAudio();
+                }
             }
             else // Not in construction or in upgrade process
             {
@@ -837,6 +1073,8 @@ namespace EFM
                         areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(12).GetChild(0).gameObject.SetActive(false); // Producing icon
                         areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(12).GetChild(0).gameObject.SetActive(false); // Producing icon
                     }
+
+                    BeginGeneratorDependentAudio();
                 }
                 else
                 {
@@ -1068,6 +1306,134 @@ namespace EFM
             upgradeBlockedCancelButton.SetButton();
             upgradeBlockedCancelButton.hoverSound = hoverButtonSound;
             upgradeBlockedCancelButton.Button.onClick.AddListener(OnUpgradeCancelClicked);
+        }
+
+        public void BeginGeneratorDependentAudio()
+        {
+            switch (areaIndex)
+            {
+                case 4:
+                    if (generatorAudioSourceByLevel[level] != null)
+                    {
+                        generatorAudioSourceByLevel[level].GetComponent<AreaSoundManager>().Begin();
+                    }
+                    break;
+                case 7:
+                    if (level == 3)
+                    {
+                        medStationFridgeAudioSource.GetComponent<AreaSoundManager>().Begin();
+                    }
+                    break;
+                case 8:
+                    if (kitchenFridgeAudioSourceByLevel[level] != null)
+                    {
+                        kitchenFridgeAudioSourceByLevel[level].GetComponent<AreaSoundManager>().Begin();
+                    }
+                    if (kitchenPotAudioSourceByLevel[level] != null)
+                    {
+                        kitchenPotAudioSourceByLevel[level].GetComponent<AreaSoundManager>().Begin();
+                    }
+                    break;
+                case 9:
+                    if(restSpaceTVAudioSourceByLevel[level] != null)
+                    {
+                        restSpaceTVAudioSourceByLevel[level].GetComponent<AreaSoundManager>().Begin();
+                    }
+                    if(level == 3)
+                    {
+                        restSpacePSAudioSource.GetComponent<AreaSoundManager>().Begin();
+                    }
+                    break;
+                case 11:
+                    if(level == 3)
+                    {
+                        intelCenterPCAudioSource.GetComponent<AreaSoundManager>().Begin();
+                        intelCenterHDDAudioSource.GetComponent<AreaSoundManager>().Begin();
+                    }
+                    break;
+                case 17:
+                    if (level == 1)
+                    {
+                        AFUAudioSource.GetComponent<AreaSoundManager>().Begin();
+                    }
+                    break;
+                case 19:
+                    if (level == 1)
+                    {
+                        boozeGenAudioSource.GetComponent<AreaSoundManager>().Begin();
+                    }
+                    break;
+                case 20:
+                    if (bitcoinFarmAudioSourceByLevel[level] != null)
+                    {
+                        bitcoinFarmAudioSourceByLevel[level].GetComponent<AreaSoundManager>().Begin();
+                    }
+                    break;
+            }
+        }
+
+        public void StopGeneratorDependentAudio()
+        {
+            switch (areaIndex)
+            {
+                case 4:
+                    if (generatorAudioSourceByLevel[level] != null)
+                    {
+                        generatorAudioSourceByLevel[level].GetComponent<AreaSoundManager>().End();
+                    }
+                    break;
+                case 7:
+                    if (level == 3)
+                    {
+                        medStationFridgeAudioSource.GetComponent<AreaSoundManager>().End();
+                    }
+                    break;
+                case 8:
+                    if (kitchenFridgeAudioSourceByLevel[level] != null)
+                    {
+                        kitchenFridgeAudioSourceByLevel[level].GetComponent<AreaSoundManager>().End();
+                    }
+                    if (kitchenPotAudioSourceByLevel[level] != null)
+                    {
+                        kitchenPotAudioSourceByLevel[level].GetComponent<AreaSoundManager>().End();
+                    }
+                    break;
+                case 9:
+                    if(restSpaceTVAudioSourceByLevel[level] != null)
+                    {
+                        restSpaceTVAudioSourceByLevel[level].GetComponent<AreaSoundManager>().End();
+                    }
+                    if(level == 3)
+                    {
+                        restSpacePSAudioSource.GetComponent<AreaSoundManager>().End();
+                    }
+                    break;
+                case 11:
+                    if(level == 3)
+                    {
+                        intelCenterPCAudioSource.GetComponent<AreaSoundManager>().End();
+                        intelCenterHDDAudioSource.GetComponent<AreaSoundManager>().End();
+                    }
+                    break;
+                case 17:
+                    if (level == 1)
+                    {
+                        AFUAudioSource.GetComponent<AreaSoundManager>().End();
+                    }
+                    break;
+                case 19:
+                    if (level == 1)
+                    {
+                        boozeGenAudioSource.GetComponent<AreaSoundManager>().End();
+                    }
+                    break;
+                case 20:
+                    if (bitcoinFarmAudioSourceByLevel[level] != null)
+                    {
+                        bitcoinFarmAudioSourceByLevel[level].GetComponent<AreaSoundManager>().End();
+                    }
+                    break;
+            }
         }
 
         public void SetProductions()
@@ -2912,7 +3278,6 @@ namespace EFM
 
         public void OnFarmingViewSetAllClick(string productionID)
         {
-            // Just return if we have none of necessary item in inventory
             string requiredItemID = productions[productionID].requirements[0].ID;
             bool custom = false;
 
@@ -3133,6 +3498,11 @@ namespace EFM
             int installedAmount = Mathf.Min(amountInInventory, slotsToFillCount);
             productions[productionID].installedCount += installedAmount;
 
+            if(installedAmount > 0)
+            {
+                PlaySlotInputSound();
+            }
+
             farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productions[productionID].installedCount.ToString();
             if(productions[productionID].installedCount > 0)
             {
@@ -3156,6 +3526,8 @@ namespace EFM
                     }
 
                     activeProductions.Add(productionID, productions[productionID]);
+
+                    PlayProductionStartSound();
                 }
 
                 // Set production status
@@ -3398,6 +3770,8 @@ namespace EFM
             GameObject farmingView = productions[productionID].gameObject;
             productions[productionID].installedCount += 1;
 
+            PlaySlotInputSound();
+
             farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productions[productionID].installedCount.ToString();
             if (Mod.itemIcons.ContainsKey(requiredItemID))
             {
@@ -3419,6 +3793,8 @@ namespace EFM
                 }
 
                 activeProductions.Add(productionID, productions[productionID]);
+
+                PlayProductionStartSound();
             }
 
             // Set production status
@@ -3431,6 +3807,14 @@ namespace EFM
             else
             {
                 farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Paused\n({0:00}:{1:00}:{2:00})", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+            }
+        }
+
+        public void PlaySlotInputSound()
+        {
+            if (EFM_Base_Manager.areaSlotSounds[areaIndex] != null && slotAudioSourceByLevel[level] != null)
+            {
+                slotAudioSourceByLevel[level].PlayOneShot(EFM_Base_Manager.areaSlotSounds[areaIndex]);
             }
         }
 
@@ -3900,18 +4284,20 @@ namespace EFM
                 {
                     baseAreaManager.UpdateBasedOnItem(requiredItemID, true, amountInBase + amountOnPlayer);
                 }
-
-                // Update current produce view UI
-                production.transform.GetChild(4).GetChild(0).gameObject.SetActive(false); // Disable start button
-                production.transform.GetChild(4).GetChild(2).gameObject.SetActive(true); // Enable production status
-                int[] formattedTimeLeft = FormatTime(production.productionTime); // Set production string
-                production.transform.GetChild(4).GetChild(2).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
-
-                // Set production active
-                production.active = true;
-                production.timeLeft = production.productionTime;
-                activeProductions.Add(productionID, production);
             }
+
+            // Update current produce view UI
+            production.transform.GetChild(4).GetChild(0).gameObject.SetActive(false); // Disable start button
+            production.transform.GetChild(4).GetChild(2).gameObject.SetActive(true); // Enable production status
+            int[] formattedTimeLeft = FormatTime(production.productionTime); // Set production string
+            production.transform.GetChild(4).GetChild(2).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+
+            // Set production active
+            production.active = true;
+            production.timeLeft = production.productionTime;
+            activeProductions.Add(productionID, production);
+
+            PlayProductionStartSound();
         }
 
         public void OnScavCaseViewStartClick()
@@ -3973,6 +4359,8 @@ namespace EFM
             Transform scavCaseView = areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(2);
             scavCaseView.transform.GetChild(4).GetChild(0).GetComponent<Collider>().enabled = false;
             scavCaseView.transform.GetChild(4).GetChild(0).GetChild(0).GetComponent<Text>().color = Color.gray;
+
+            PlayProductionStartSound();
         }
 
         private IEnumerator SpawnVanillaItem(string ID, int count, BoxCollider outputVolume, string fromProductionID)
@@ -4751,6 +5139,8 @@ namespace EFM
                         SetEffectsActive(true);
                         ResumeProductions();
                         SetOutOfFuelUI(false);
+
+                        BeginGeneratorDependentAudio();
                     }
                 }
                 else
@@ -4759,6 +5149,8 @@ namespace EFM
                     SetEffectsActive(false);
                     PauseProductions();
                     SetOutOfFuelUI(true);
+
+                    StopGeneratorDependentAudio();
                 }
             }
         }
@@ -4949,6 +5341,104 @@ namespace EFM
             int seconds = (int)((totalSeconds % 3600) % 60);
 
             return new int[] { hours, minutes, seconds };
+        }
+    }
+
+    public class AreaSoundManager : MonoBehaviour
+    {
+        public AudioClip clip;
+        private AudioClip startClip;
+        private AudioClip workingClip;
+        private AudioClip endClip;
+        private AudioSource source;
+
+        public bool hasStart;
+        public bool hasEnd;
+
+        public Vector2 startRange;
+        public Vector2 workingRange;
+        public Vector2 endRange;
+
+        private bool playing;
+        private double nextWorkingStartTime;
+
+        public void Begin()
+        {
+            if(source == null)
+            {
+                source = GetComponent<AudioSource>();
+            }
+
+            if (workingClip == null)
+            {
+                if (hasStart)
+                {
+                    startClip = AudioClip.Create("StartClip", (int)(clip.frequency * (startRange.y - startRange.x) * clip.channels), clip.channels, clip.frequency, false);
+                    float[] startData = new float[clip.channels];
+                    clip.GetData(startData, (int)(clip.frequency * startRange.x));
+                    startClip.SetData(startData, 0);
+                }
+
+                workingClip = AudioClip.Create("WorkingClip", (int)(clip.frequency * (workingRange.y - workingRange.x) * clip.channels), clip.channels, clip.frequency, false);
+                float[] workingData = new float[clip.channels];
+                clip.GetData(workingData, (int)(clip.frequency * workingRange.x));
+                workingClip.SetData(workingData, 0);
+
+                if (hasEnd)
+                {
+                    endClip = AudioClip.Create("EndClip", (int)(clip.frequency * (endRange.y - endRange.x) * clip.channels), clip.channels, clip.frequency, false);
+                    float[] endData = new float[clip.channels];
+                    clip.GetData(endData, (int)(clip.frequency * endRange.x));
+                    endClip.SetData(endData, 0);
+                }
+            }
+
+            if (hasStart)
+            {
+                source.clip = startClip;
+                nextWorkingStartTime = AudioSettings.dspTime + startClip.length;
+            }
+            else
+            {
+                source.clip = workingClip;
+                nextWorkingStartTime = AudioSettings.dspTime + workingClip.length;
+            }
+            source.Play();
+            playing = true;
+        }
+
+        public void Update()
+        {
+            if (playing)
+            {
+                if(AudioSettings.dspTime+0.5f >= nextWorkingStartTime)
+                {
+                    source.clip = workingClip;
+                    source.PlayScheduled(nextWorkingStartTime);
+                    nextWorkingStartTime = AudioSettings.dspTime + workingClip.length;
+                }
+            }
+        }
+
+        public void End()
+        {
+            if (hasEnd)
+            {
+                source.clip = endClip;
+                source.Play();
+            }
+            else
+            {
+                source.Stop();
+            }
+            playing = false;
+        }
+
+        public void Reset()
+        {
+            startClip = null;
+            workingClip = null;
+            endClip = null;
         }
     }
 }

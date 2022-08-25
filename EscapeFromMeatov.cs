@@ -3863,6 +3863,8 @@ namespace EFM
                     areaManager.slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
 
                     areaManager.UpdateBasedOnSlots();
+
+                    areaManager.PlaySlotInputSound();
                 }
                 else
                 {

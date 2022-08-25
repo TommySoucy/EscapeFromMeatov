@@ -77,6 +77,20 @@ namespace EFM
         public static Sprite barterSprite;
         public static Sprite experienceSprite;
         public static Sprite standingSprite;
+        public static AudioClip[,] areaProductionSounds;
+        public static AudioClip[] areaSlotSounds;
+        public static AudioClip generatorLevel1And2Audio;
+        public static AudioClip generatorLevel3Audio;
+        public static AudioClip medStationLevel3Audio;
+        public static AudioClip kitchenPotAudio;
+        public static AudioClip kitchenFridgeAudio;
+        public static AudioClip[] restSpaceTracks;
+        public static AudioClip restSpacePSAudio;
+        public static AudioClip intelCenterPCAudio;
+        public static AudioClip intelCenterHDDAudio;
+        public static AudioClip AFUAudio;
+        public static AudioClip boozeGenAudio;
+        public static AudioClip bitcoinFarmAudio;
 
         public JToken data;
 
@@ -3095,7 +3109,6 @@ namespace EFM
                 Mod.instance.LogInfo("Area canvas not initialized, initializing all area UI and prepping...");
 
                 // Load prefabs and assets
-                continue from here, load necessary hideout audio clips, and make sure we use them properly when turning on/off the generator, crafting starting/finishing, etc
                 areaCanvasPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaCanvas");
                 areaCanvasBottomButtonPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaCanvasBottomButton");
                 areaRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaRequirement");
@@ -3249,6 +3262,44 @@ namespace EFM
                 skillIcons[62] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_negotiations");
                 skillIcons[63] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_tactics");
 
+                // Area specific sounds
+                areaProductionSounds = new AudioClip[22,2];
+                areaSlotSounds = new AudioClip[22];
+                areaProductionSounds[2,0] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("waterprocessing_item_started");
+                areaProductionSounds[2,1] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("waterprocessing_item_ready");
+                areaSlotSounds[4] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("generator_item_plugin_fuel");
+                generatorLevel1And2Audio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("generator_level1_on + generator_level1_working + generator_level1_off + generator_level1_notworking");
+                generatorLevel3Audio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("generator_level3_on + generator_level3_working + generator_level3_off + generator_level3_notworking");
+                areaProductionSounds[6,0] = areaProductionSounds[2, 0];
+                areaProductionSounds[6,1] = areaProductionSounds[2, 1];
+                areaSlotSounds[6] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("waterprocessing_item_install");
+                areaProductionSounds[7, 0] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("medstation_item_started");
+                areaProductionSounds[7, 1] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("medstation_item_ready");
+                medStationLevel3Audio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("medstation_level3_fridge_on + medstation_level3_fridge_working + medstation_level3_fridge_off");
+                areaProductionSounds[8, 0] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("boozegen_item_started");
+                areaProductionSounds[8, 1] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("boozegen_item_ready");
+                kitchenPotAudio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("kitchen_level1_pot_on + kitchen_level1_pot_working + kitchen_level1_pot_off");
+                kitchenFridgeAudio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("kitchen_level2_fridge_on + kitchen_level2_fridge_working + kitchen_level2_fridge_off");
+                restSpaceTracks = new AudioClip[3];
+                restSpaceTracks[0] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("restplace_level3_track1");
+                restSpaceTracks[1] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("restplace_level3_track2");
+                restSpaceTracks[2] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("restplace_level3_track3");
+                restSpacePSAudio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("restplace_level3_ps_on + restplace_level3_ps_working + restplace_level3_ps_off");
+                areaProductionSounds[10, 0] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("workbench_item_started");
+                areaProductionSounds[10, 1] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("workbench_item_ready");
+                areaProductionSounds[11, 0] = areaProductionSounds[10, 0];
+                areaProductionSounds[11, 1] = areaProductionSounds[10, 1];
+                intelCenterPCAudio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("icenter_level2_pc_on + icenter_level2_pc_working + icenter_level2_pc_off + icenter_level2_pc_notworking");
+                intelCenterHDDAudio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("icenter_level3_hdd_on + icenter_level3_hdd_working + icenter_level3_hdd_off");
+                AFUAudio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("afu_generic_working + afu_generic_notworking");
+                areaSlotSounds[17] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("afu_item_plugin_filter");
+                boozeGenAudio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("boozegen_generic_on + boozegen_generic_working + boozegen_generic_off + boozegen_generic_notworking");
+                areaProductionSounds[19, 0] = areaProductionSounds[8, 0];
+                areaProductionSounds[19, 1] = areaProductionSounds[8, 1];
+                areaProductionSounds[20, 1] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("bitcoinfarm_item_ready"); ;
+                areaSlotSounds[20] = Mod.baseAssetsBundle.LoadAsset<AudioClip>("bitcoinfarm_item_install_videocard");
+                bitcoinFarmAudio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("bitcoinfarm_generic_on + bitcoinfarm_generic_working + bitcoinfarm_generic_off");
+
                 // Prep prefabs
                 Mod.instance.LogInfo("All area UI loaded, prepping...");
 
@@ -3354,19 +3405,19 @@ namespace EFM
                 Mod.instance.LogInfo("Area UI prepped");
             }
 
-            // Unload base assets bundle without unloading loaded assets, if necessary
-            // TODO: will have to review the asset loading process, because if already in hideout, if we load a save, this unload causes assets to be missing because the hideout assets only get loaded once, on the first hideout load
-            //if (Mod.baseAssetsBundle != null)
-            //{
-            //    Mod.baseAssetsBundle.Unload(false);
-            //}
-
             Mod.instance.LogInfo("Initializing area managers");
             // Init all area managers after UI is prepped
             for (int i = 0; i < 22; ++i)
             {
                 baseAreaManagers[i].Init();
             }
+
+            // Unload base assets bundle without unloading loaded assets, if necessary
+            // TODO: will have to review the asset loading process, because if already in hideout, if we load a save, this unload causes assets to be missing because the hideout assets only get loaded once, on the first hideout load
+            //if (Mod.baseAssetsBundle != null)
+            //{
+            //    Mod.baseAssetsBundle.Unload(false);
+            //}
 
             // Init Market
             marketManager = transform.GetChild(1).GetChild(24).gameObject.AddComponent<EFM_MarketManager>();
