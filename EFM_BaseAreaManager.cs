@@ -70,7 +70,6 @@ namespace EFM
 
         public void Init()
         {
-            Mod.instance.LogInfo("Base area manager init called");
             needsFuel = (bool)Mod.areasDB["areaDefaults"][areaIndex]["needsFuel"];
 
             // Init each level's upgrade check processors
@@ -85,7 +84,7 @@ namespace EFM
                     upgradeCheckProcessors[i, 1] = transform.GetChild(i).GetChild(0).GetChild(1).gameObject.AddComponent<EFM_AreaUpgradeCheckProcessor>();
                     upgradeCheckProcessors[i, 1].manager = this;
                 }
-                if (transform.GetChild(i).name.StartsWith("level"))
+                else if (transform.GetChild(i).name.StartsWith("level"))
                 {
                     lastLevelFound = true;
                     upgradeCheckProcessors = new EFM_AreaUpgradeCheckProcessor[i,2];
@@ -94,7 +93,6 @@ namespace EFM
 
             // Init area specific hierarchy stuff
             AreaSoundManager areaSoundManager;
-            Mod.instance.LogInfo("Init specific area hierarchy stuff");
             switch (areaIndex)
             {
                 case 2:
@@ -2981,6 +2979,7 @@ namespace EFM
             buttonClickSound.Play();
 
             // Disable upgrade check processors if active
+            Mod.instance.LogInfo("Closed area UI, disabling check processors for level: "+level);
             upgradeCheckProcessors[level, 0].gameObject.SetActive(false);
             upgradeCheckProcessors[level, 1].gameObject.SetActive(false);
         }
@@ -5467,7 +5466,6 @@ namespace EFM
                 source.clip = startClip;
                 workingStartTime = AudioSettings.dspTime + startClip.length;
                 starting = true;
-                Mod.instance.LogInfo("Starting at audio time: " + AudioSettings.dspTime + ", working set to play at " + workingStartTime);
             }
             else
             {
@@ -5483,7 +5481,6 @@ namespace EFM
             {
                 if(AudioSettings.dspTime+0.01f >= workingStartTime)
                 {
-                    Mod.instance.LogInfo("Current audio time: " + AudioSettings.dspTime + ", working...");
                     source.clip = workingClip;
                     source.loop = true;
                     source.Play();

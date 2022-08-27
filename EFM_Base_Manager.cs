@@ -2480,6 +2480,7 @@ namespace EFM
                         magPhysicalObject.Load(firearmPhysicalObject);
 
                         // Store the mag's supposed local position so we can ensure it is correct later
+                        Mod.instance.LogInfo("Adding mag: "+containerObject.name+" to attachment local transform list for position "+ firearmPhysicalObject.MagazineMountPos.localPosition);
                         Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(containerObject, firearmPhysicalObject.MagazineMountPos));
                         Mod.attachmentCheckNeeded = 5;
                     }

@@ -3062,7 +3062,7 @@ namespace EFM
                 }
 
                 // Play drop sound if custom
-                if (hand.CanMakeGrabReleaseSound && CIW.itemSounds != null && CIW.itemSounds[0] != null)
+                if (CIW != null && hand.CanMakeGrabReleaseSound && CIW.itemSounds != null && CIW.itemSounds[0] != null)
                 {
                     AudioEvent audioEvent = new AudioEvent();
                     audioEvent.Clips.Add(CIW.itemSounds[0]);
@@ -8014,11 +8014,13 @@ namespace EFM
                     {
                         if(attachCheck.Value is Transform)
                         {
+                            Mod.instance.LogInfo("Fixing position of: " + attachCheck.Key.name + " from " + attachCheck.Key.transform.localPosition + " to " + (attachCheck.Value as Transform).localPosition);
                             attachCheck.Key.transform.localPosition = (attachCheck.Value as Transform).localPosition;
                             attachCheck.Key.transform.localRotation = (attachCheck.Value as Transform).localRotation;
                         }
                         else
                         {
+                            Mod.instance.LogInfo("Fixing position of: " + attachCheck.Key.name + " from " + attachCheck.Key.transform.localPosition + " to " + (attachCheck.Value as Vector3[])[0]);
                             attachCheck.Key.transform.localPosition = (attachCheck.Value as Vector3[])[0];
                             attachCheck.Key.transform.localEulerAngles = (attachCheck.Value as Vector3[])[1];
                         }
