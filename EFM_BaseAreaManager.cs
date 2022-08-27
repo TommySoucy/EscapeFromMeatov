@@ -26,10 +26,10 @@ namespace EFM
         private bool slotsInit;
         public bool needsFuel;
         public float consumptionTimer;
-        public List<GameObject> slotItems; // Slots that could contain items, like generator that could have gas cans
+        public GameObject[] slotItems; // Slots that could contain items, like generator that could have gas cans
         public List<List<EFM_AreaSlot>> slots;
         public Dictionary<string, EFM_AreaProduction> productions; // Productions that can be activated on this area
-        public Dictionary<string, EFM_AreaProduction> activeProductions; // Currently active productions
+        public Dictionary<string, EFM_AreaProduction> activeProductions = new Dictionary<string, EFM_AreaProduction>(); // Currently active productions
         public List<EFM_ScavCaseProduction> activeScavCaseProductions;
         public float constructionTimer; // How much time is actually left on the construction
         // TODO: Keep list of necessary elements that will need to be updated when items are sold/bought/thrown away/crafted/crafted with/used, when skills level up, when trader rep changes, when areas constructed or leveled up, when production timeleft updated
@@ -70,6 +70,7 @@ namespace EFM
 
         public void Init()
         {
+            Mod.instance.LogInfo("Base area manager init called");
             needsFuel = (bool)Mod.areasDB["areaDefaults"][areaIndex]["needsFuel"];
 
             // Init each level's upgrade check processors
@@ -93,14 +94,17 @@ namespace EFM
 
             // Init area specific hierarchy stuff
             AreaSoundManager areaSoundManager;
+            Mod.instance.LogInfo("Init specific area hierarchy stuff");
             switch (areaIndex)
             {
                 case 2:
+                    Mod.instance.LogInfo("\t2");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     break;
                 case 4:
+                    Mod.instance.LogInfo("\t4");
                     slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(3).GetChild(3).GetComponent<AudioSource>();
                     slotAudioSourceByLevel[2] = transform.GetChild(2).GetChild(3).GetChild(3).GetComponent<AudioSource>();
                     slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(2).GetChild(4).GetComponent<AudioSource>();
@@ -130,10 +134,12 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(19, 23.5f);
                     break;
                 case 6:
+                    Mod.instance.LogInfo("\t6");
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
                     slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     break;
                 case 7:
+                    Mod.instance.LogInfo("\t7");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(0).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
@@ -147,6 +153,7 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(8.5f, 10.8f);
                     break;
                 case 8:
+                    Mod.instance.LogInfo("\t8");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(2).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
@@ -192,15 +199,16 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(18.1f, 22.5f);
                     break;
                 case 9:
+                    Mod.instance.LogInfo("\t9");
                     restSpaceTVAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
                     areaSoundManager = restSpaceTVAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
                     areaSoundManager.clip = EFM_Base_Manager.restSpaceTracks[1];
                     areaSoundManager.workingRange = new Vector2(0, 330);
-                    restSpaceTVAudioSourceByLevel[3] = transform.GetChild(3).GetChild(2).GetChild(0).GetComponent<AudioSource>();
+                    restSpaceTVAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
                     areaSoundManager = restSpaceTVAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
                     areaSoundManager.clip = EFM_Base_Manager.restSpaceTracks[1];
                     areaSoundManager.workingRange = new Vector2(0, 330);
-                    restSpacePSAudioSource = transform.GetChild(3).GetChild(2).GetChild(1).GetComponent<AudioSource>();
+                    restSpacePSAudioSource = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     areaSoundManager = restSpacePSAudioSource.gameObject.AddComponent<AreaSoundManager>();
                     areaSoundManager.clip = EFM_Base_Manager.restSpacePSAudio;
                     areaSoundManager.hasStart = true;
@@ -210,11 +218,13 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(29, 32);
                     break;
                 case 10:
+                    Mod.instance.LogInfo("\t10");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     break;
                 case 11:
+                    Mod.instance.LogInfo("\t11");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(3).GetComponent<AudioSource>();
@@ -236,6 +246,7 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(17.5f, 24);
                     break;
                 case 17:
+                    Mod.instance.LogInfo("\t17");
                     slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     AFUAudioSource = transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<AudioSource>();
                     areaSoundManager = AFUAudioSource.gameObject.AddComponent<AreaSoundManager>();
@@ -245,6 +256,7 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(14.3f, 18.5f);
                     break;
                 case 19:
+                    Mod.instance.LogInfo("\t19");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     boozeGenAudioSource = transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<AudioSource>();
                     areaSoundManager = boozeGenAudioSource.gameObject.AddComponent<AreaSoundManager>();
@@ -256,6 +268,7 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(12, 30);
                     break;
                 case 20:
+                    Mod.instance.LogInfo("\t20");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
@@ -301,17 +314,25 @@ namespace EFM
                 generatorSwitch.mode = 1;
             }
 
-            if(areaIndex == 3 && level != 1)
+            if(areaIndex == 3)
             {
-                transform.GetChild(1).gameObject.SetActive(false);
-                transform.GetChild(level).GetComponent<AudioSource>().enabled = false;
-                transform.GetChild(level).gameObject.SetActive(true);
+                if (level != 1)
+                {
+                    transform.GetChild(1).gameObject.SetActive(false);
+                    transform.GetChild(level).GetComponent<AudioSource>().enabled = false;
+                    transform.GetChild(level).gameObject.SetActive(true);
+                }
             }
             else if(level != 0)
             {
                 transform.GetChild(0).gameObject.SetActive(false);
                 transform.GetChild(level).GetComponent<AudioSource>().enabled = false;
                 transform.GetChild(level).gameObject.SetActive(true);
+                if (transform.GetChild(transform.childCount - 1).childCount > 0)
+                {
+                    transform.GetChild(transform.childCount - 1).GetChild(0).gameObject.SetActive(false);
+                    transform.GetChild(transform.childCount - 1).GetChild(level).gameObject.SetActive(true);
+                }
             }
 
             // Init consumption based on save time, production timeleft and construction timer are set depending on it when loaded
@@ -403,7 +424,7 @@ namespace EFM
 
         private void UpdateProductions()
         {
-            if (((needsFuel && generatorRunning) || !needsFuel))
+            if (!needsFuel || generatorRunning)
             {
                 if (activeProductions != null && activeProductions.Count != 0)
                 {
@@ -1550,7 +1571,7 @@ namespace EFM
             Mod.instance.LogInfo("0");
             if (slotItems != null)
             {
-                for (int slotItemIndex = 0; slotItemIndex < slotItems.Count; ++slotItemIndex)
+                for (int slotItemIndex = 0; slotItemIndex < slotItems.Length; ++slotItemIndex)
                 {
                     if (slotItems[slotItemIndex] != null)
                     {
@@ -1673,7 +1694,8 @@ namespace EFM
 
                         Mod.instance.LogInfo("3");
                         // Set installed item count
-                        newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = slotItems.Count.ToString();
+                        int installedCount = GetFilledSlotCount();
+                        newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = installedCount.ToString();
 
                         Mod.instance.LogInfo("3");
                         // It is possible we have an unclaimed amount of item
@@ -1685,7 +1707,7 @@ namespace EFM
 
                         Mod.instance.LogInfo("3");
                         // If have necessary items to produce and not at production limit yet
-                        if (slotItems.Count > 0 && productionScript.productionCount < productionScript.productionLimitCount)
+                        if (installedCount > 0 && productionScript.productionCount < productionScript.productionLimitCount)
                         {
                             // Activate production status
                             newFarmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
@@ -3254,16 +3276,31 @@ namespace EFM
         {
             transform.GetChild(level).gameObject.SetActive(false);
             transform.GetChild(level + 1).gameObject.SetActive(true);
-            if(level < slots.Count && slots[level] != null && slots[level].Count > 0)
+
+            // Transfer items to new slots and make slotItems bigger depending on new slot count
+            if(level < slots.Count)
             {
-                for(int i=0; i < slots[level].Count; ++i)
+                if (slots[level] != null && slots[level].Count > 0)
                 {
-                    Mod.areaSlotShouldUpdate = false;
-                    slots[level][i].CurObject.SetQuickBeltSlot(slots[level + 1][i]);
+                    for (int i = 0; i < slots[level].Count; ++i)
+                    {
+                        Mod.areaSlotShouldUpdate = false;
+                        slots[level][i].CurObject.SetQuickBeltSlot(slots[level + 1][i]);
+                    }
                 }
-                transform.GetChild(transform.childCount - 1).GetChild(level).gameObject.SetActive(false);
-                transform.GetChild(transform.childCount - 1).GetChild(level + 1).gameObject.SetActive(true);
+                if (slots[level + 1] != null && slots[level + 1].Count > 0)
+                {
+                    transform.GetChild(transform.childCount - 1).GetChild(level).gameObject.SetActive(false);
+                    transform.GetChild(transform.childCount - 1).GetChild(level + 1).gameObject.SetActive(true);
+                    GameObject[] newSlotItems = new GameObject[slots[level + 1].Count];
+                    for(int i =0; i < slotItems.Length; ++i)
+                    {
+                        newSlotItems[i] = slotItems[i];
+                    }
+                    slotItems = newSlotItems;
+                }
             }
+
             SetEffectsActive(false);
 
             ++level;
@@ -4599,15 +4636,15 @@ namespace EFM
 
         public int GetFilledSlotCount()
         {
-            int count = 0;
-            for(int i=0; i < slots[level].Count; ++i)
+            int filledCount = 0;
+            foreach (GameObject slotItem in slotItems)
             {
-                if(slots[level][i].CurObject != null)
+                if (slotItem != null)
                 {
-                    ++count;
+                    ++filledCount;
                 }
             }
-            return count;
+            return filledCount;
         }
 
         public void UpdateBasedOnItem(string itemID, bool amountSpecified = false, int amount = 0)
@@ -5108,16 +5145,27 @@ namespace EFM
                 if (generatorRunning)
                 {
                     int filledSlotCount = 0;
-                    foreach (EFM_AreaSlot areaSlot in slots[level])
+                    // TODO: Review, here we make the assumption that an area that requires fuel AND has slots, requires slots to be filled in order to function
+                    // This means that something like the water collector's bonuses will be active when generator is on up to level 3, at which it gains a slot
+                    // that must be filled with a water filter in order to function. Is that how we want it to function? Or should the slot being filled
+                    // only affect if production of purified water if functionning?
+                    if (slots != null && slots.Count > 0)
                     {
-                        if (areaSlot.CurObject != null)
+                        foreach (EFM_AreaSlot areaSlot in slots[level])
                         {
-                            EFM_CustomItemWrapper CIW = areaSlot.CurObject.GetComponent<EFM_CustomItemWrapper>();
-                            if (CIW != null)
+                            if (areaSlot.CurObject != null)
                             {
-                                if (CIW.maxAmount > 0)
+                                EFM_CustomItemWrapper CIW = areaSlot.CurObject.GetComponent<EFM_CustomItemWrapper>();
+                                if (CIW != null)
                                 {
-                                    if (CIW.amount > 0)
+                                    if (CIW.maxAmount > 0)
+                                    {
+                                        if (CIW.amount > 0)
+                                        {
+                                            ++filledSlotCount;
+                                        }
+                                    }
+                                    else
                                     {
                                         ++filledSlotCount;
                                     }
@@ -5127,13 +5175,18 @@ namespace EFM
                                     ++filledSlotCount;
                                 }
                             }
-                            else
-                            {
-                                ++filledSlotCount;
-                            }
+                        }
+                        if (filledSlotCount > 0)
+                        {
+                            // Make sure out of fuel icons are disabled, effects are enabled, and paused productions are resumed
+                            SetEffectsActive(true);
+                            ResumeProductions();
+                            SetOutOfFuelUI(false);
+
+                            BeginGeneratorDependentAudio();
                         }
                     }
-                    if (filledSlotCount > 0)
+                    else // Needs fuel but does not have slots, therefore its funcitoning does not depend on slots being filled
                     {
                         // Make sure out of fuel icons are disabled, effects are enabled, and paused productions are resumed
                         SetEffectsActive(true);
@@ -5200,12 +5253,22 @@ namespace EFM
 
         public void ResumeProductions()
         {
-            foreach(KeyValuePair<string, EFM_AreaProduction> production in productions)
+            Mod.instance.LogInfo("Resume productions called on area: " + areaIndex);
+            if(productions == null)
             {
-                if (!activeProductions.ContainsKey(production.Key))
+                return;
+            }
+            Mod.instance.LogInfo("\tHas productions");
+
+            foreach (KeyValuePair<string, EFM_AreaProduction> production in productions)
+            {
+                Mod.instance.LogInfo("\t\tProduction: "+production.Key);
+                if (production.Value.timeLeft > 0 && !activeProductions.ContainsKey(production.Key))
                 {
+                    Mod.instance.LogInfo("\t\t\tNot active but should be");
                     if (production.Value.continuous)
                     {
+                        Mod.instance.LogInfo("\t\t\t\tContinuous");
                         GameObject farmingView = production.Value.gameObject;
 
                         production.Value.active = true;
@@ -5226,6 +5289,7 @@ namespace EFM
                     }
                     else if(production.Value.timeLeft > 0)
                     {
+                        Mod.instance.LogInfo("\t\t\t\tNon Continuous");
                         production.Value.active = true;
                         activeProductions.Add(production.Key, production.Value);
 
@@ -5237,6 +5301,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("\tSetting production UI");
             // Set Production UI
             int doneCount = 0;
             int totalCount = 0;
@@ -5254,6 +5319,7 @@ namespace EFM
                 }
                 ++totalCount;
             }
+            Mod.instance.LogInfo("\tDoneCount: "+doneCount+", continuousCount: "+continuousCount);
             if (doneCount > 0)
             {
                 // Summary
@@ -5359,8 +5425,8 @@ namespace EFM
         public Vector2 workingRange;
         public Vector2 endRange;
 
-        private bool playing;
-        private double nextWorkingStartTime;
+        private bool starting;
+        private double workingStartTime;
 
         public void Begin()
         {
@@ -5373,21 +5439,24 @@ namespace EFM
             {
                 if (hasStart)
                 {
-                    startClip = AudioClip.Create("StartClip", (int)(clip.frequency * (startRange.y - startRange.x) * clip.channels), clip.channels, clip.frequency, false);
-                    float[] startData = new float[clip.channels];
+                    int startSamplesLength = (int)(clip.frequency * (startRange.y - startRange.x));
+                    startClip = AudioClip.Create("StartClip", startSamplesLength, clip.channels, clip.frequency, false);
+                    float[] startData = new float[startSamplesLength * clip.channels];
                     clip.GetData(startData, (int)(clip.frequency * startRange.x));
                     startClip.SetData(startData, 0);
                 }
 
-                workingClip = AudioClip.Create("WorkingClip", (int)(clip.frequency * (workingRange.y - workingRange.x) * clip.channels), clip.channels, clip.frequency, false);
-                float[] workingData = new float[clip.channels];
+                int workingSamplesLength = (int)(clip.frequency * (workingRange.y - workingRange.x));
+                workingClip = AudioClip.Create("WorkingClip", workingSamplesLength, clip.channels, clip.frequency, false);
+                float[] workingData = new float[workingSamplesLength * clip.channels];
                 clip.GetData(workingData, (int)(clip.frequency * workingRange.x));
                 workingClip.SetData(workingData, 0);
 
                 if (hasEnd)
                 {
-                    endClip = AudioClip.Create("EndClip", (int)(clip.frequency * (endRange.y - endRange.x) * clip.channels), clip.channels, clip.frequency, false);
-                    float[] endData = new float[clip.channels];
+                    int endSamplesLength = (int)(clip.frequency * (endRange.y - endRange.x));
+                    endClip = AudioClip.Create("EndClip", endSamplesLength, clip.channels, clip.frequency, false);
+                    float[] endData = new float[endSamplesLength * clip.channels];
                     clip.GetData(endData, (int)(clip.frequency * endRange.x));
                     endClip.SetData(endData, 0);
                 }
@@ -5396,26 +5465,29 @@ namespace EFM
             if (hasStart)
             {
                 source.clip = startClip;
-                nextWorkingStartTime = AudioSettings.dspTime + startClip.length;
+                workingStartTime = AudioSettings.dspTime + startClip.length;
+                starting = true;
+                Mod.instance.LogInfo("Starting at audio time: " + AudioSettings.dspTime + ", working set to play at " + workingStartTime);
             }
             else
             {
                 source.clip = workingClip;
-                nextWorkingStartTime = AudioSettings.dspTime + workingClip.length;
+                source.loop = true;
             }
             source.Play();
-            playing = true;
         }
 
         public void Update()
         {
-            if (playing)
+            if (starting)
             {
-                if(AudioSettings.dspTime+0.5f >= nextWorkingStartTime)
+                if(AudioSettings.dspTime+0.01f >= workingStartTime)
                 {
+                    Mod.instance.LogInfo("Current audio time: " + AudioSettings.dspTime + ", working...");
                     source.clip = workingClip;
-                    source.PlayScheduled(nextWorkingStartTime);
-                    nextWorkingStartTime = AudioSettings.dspTime + workingClip.length;
+                    source.loop = true;
+                    source.Play();
+                    starting = false;
                 }
             }
         }
@@ -5425,13 +5497,14 @@ namespace EFM
             if (hasEnd)
             {
                 source.clip = endClip;
+                source.loop = false;
                 source.Play();
             }
             else
             {
                 source.Stop();
             }
-            playing = false;
+            starting = false;
         }
 
         public void Reset()

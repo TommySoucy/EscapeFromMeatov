@@ -3002,7 +3002,7 @@ namespace EFM
                 {
                     EFM_CustomItemWrapper heldCustomItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
                     EFM_VanillaItemDescriptor heldVanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                    BeginInteractionPatch.SetItemLocationIndex(3, null, heldVanillaItemDescriptor, true);
+                    BeginInteractionPatch.SetItemLocationIndex(3, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
 
                     // Was on player
                     Mod.RemoveFromPlayerInventory(__instance.transform, true);

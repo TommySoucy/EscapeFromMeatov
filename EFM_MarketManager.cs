@@ -276,6 +276,7 @@ namespace EFM
 
             // Setup rag fair
             // Buy
+            Mod.instance.LogInfo("0");
             Transform categoriesParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject categoryTemplate = categoriesParent.GetChild(0).gameObject;
             EFM_PointableButton categoryTemplateMainButton = categoryTemplate.transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
@@ -301,6 +302,7 @@ namespace EFM
             ragFairItemBuyViewsByID = new Dictionary<string, List<GameObject>>();
 
             // Setup buy categories hoverscrolls
+            Mod.instance.LogInfo("0");
             EFM_HoverScroll newBuyCategoriesDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
             EFM_HoverScroll newBuyCategoriesUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
             newBuyCategoriesDownHoverScroll.MaxPointingRange = 30;
@@ -322,6 +324,7 @@ namespace EFM
             }
 
             // Setup buy items hoverscrolls
+            Mod.instance.LogInfo("0");
             EFM_HoverScroll newBuyItemsDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
             EFM_HoverScroll newBuyItemsUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
             newBuyItemsDownHoverScroll.MaxPointingRange = 30;
@@ -336,6 +339,7 @@ namespace EFM
             newBuyItemsUpHoverScroll.up = true;
 
             // Cart
+            Mod.instance.LogInfo("0");
             Transform ragfairCartTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2);
             EFM_PointableButton ragfairCartAmountButton = ragfairCartTransform.transform.GetChild(1).GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
             ragfairCartAmountButton.SetButton();
@@ -352,6 +356,7 @@ namespace EFM
             ragfairCartCancelAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
             ragfairCartCancelAmountButton.Button.onClick.AddListener(() => { OnRagfairBuyCancelClick(); });
 
+            Mod.instance.LogInfo("0");
             EFM_HoverScroll newWishlistCartDownHoverScroll = ragfairCartTransform.GetChild(1).GetChild(3).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
             EFM_HoverScroll newWishlistCartUpHoverScroll = ragfairCartTransform.GetChild(1).GetChild(3).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
             newWishlistCartDownHoverScroll.MaxPointingRange = 30;
@@ -366,6 +371,7 @@ namespace EFM
             newWishlistCartUpHoverScroll.up = true;
 
             // Wishlist
+            Mod.instance.LogInfo("0");
             Transform wishlistParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject wishlistItemViewTemplate = wishlistParent.GetChild(0).gameObject;
             EFM_PointableButton wishlistItemViewTemplateWishButton = wishlistItemViewTemplate.transform.GetChild(2).gameObject.AddComponent<EFM_PointableButton>();
@@ -402,6 +408,7 @@ namespace EFM
             }
 
             // Setup wishlist hoverscrolls
+            Mod.instance.LogInfo("0");
             EFM_HoverScroll newWishlistDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
             EFM_HoverScroll newWishlistUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
             newWishlistDownHoverScroll.MaxPointingRange = 30;
@@ -423,6 +430,7 @@ namespace EFM
             }
 
             // Setup rag fair tabs
+            Mod.instance.LogInfo("0");
             Transform ragFaireTabsParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(2);
             for (int i = 0; i < 3; ++i)
             {
@@ -451,6 +459,7 @@ namespace EFM
                 }
             }
 
+            Mod.instance.LogInfo("0");
             // Add background pointable
             FVRPointable ragfairBackgroundPointable = transform.GetChild(0).GetChild(2).gameObject.AddComponent<FVRPointable>();
             ragfairBackgroundPointable.MaxPointingRange = 30;

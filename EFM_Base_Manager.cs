@@ -1597,6 +1597,7 @@ namespace EFM
                     currentBaseAreaManager.areaIndex = i;
                     currentBaseAreaManager.level = i == 3 ? 1 : 0; // Stash starts at level 1
                     currentBaseAreaManager.constructing = false;
+                    currentBaseAreaManager.slotItems = new GameObject[0];
 
                     baseAreaManagers.Add(currentBaseAreaManager);
                 }
@@ -1763,6 +1764,7 @@ namespace EFM
             for (int i = 0; i < 22; ++i)
             {
                 EFM_BaseAreaManager currentBaseAreaManager = transform.GetChild(1).GetChild(i).gameObject.AddComponent<EFM_BaseAreaManager>();
+                Transform slotsParent = currentBaseAreaManager.transform.GetChild(currentBaseAreaManager.transform.childCount - 1);
                 currentBaseAreaManager.baseManager = this;
                 currentBaseAreaManager.areaIndex = i;
                 if (data["areas"] != null)
@@ -1771,20 +1773,29 @@ namespace EFM
                     currentBaseAreaManager.level = (int)loadedAreas[i]["level"];
                     currentBaseAreaManager.constructing = (bool)loadedAreas[i]["constructing"];
                     currentBaseAreaManager.constructionTimer = (float)loadedAreas[i]["constructTimer"] - secondsSinceSave;
+                    if (slotsParent.childCount > 0)
+                    {
+                        currentBaseAreaManager.slotItems = new GameObject[slotsParent.GetChild(currentBaseAreaManager.level).childCount];
+                    }
+                    else
+                    {
+                        currentBaseAreaManager.slotItems = new GameObject[0];
+                    }
                     if (loadedAreas[i]["slots"] != null)
                     {
-                        currentBaseAreaManager.slotItems = new List<GameObject>();
                         JArray loadedAreaSlot = (JArray)loadedAreas[i]["slots"];
+                        int slotIndex = 0;
                         foreach (JToken item in loadedAreaSlot)
                         {
                             if (item == null)
                             {
-                                currentBaseAreaManager.slotItems.Add(null);
+                                currentBaseAreaManager.slotItems[slotIndex] = null;
                             }
                             else
                             {
-                                currentBaseAreaManager.slotItems.Add(LoadSavedItem(currentBaseAreaManager.transform.GetChild(currentBaseAreaManager.transform.childCount - 1), item));
+                                currentBaseAreaManager.slotItems[slotIndex] = LoadSavedItem(currentBaseAreaManager.transform.GetChild(currentBaseAreaManager.transform.childCount - 1), item);
                             }
+                            ++slotIndex;
                         }
                     }
                 }
@@ -1792,6 +1803,7 @@ namespace EFM
                 {
                     currentBaseAreaManager.level = 0;
                     currentBaseAreaManager.constructing = false;
+                    currentBaseAreaManager.slotItems = new GameObject[0];
                 }
 
                 baseAreaManagers.Add(currentBaseAreaManager);

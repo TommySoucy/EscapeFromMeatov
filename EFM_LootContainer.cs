@@ -47,9 +47,11 @@ namespace EFM
 
 			// Set vanillaIDs and customIDs lists with ID of items to spawn when opened
 			int successfulAttempts = 0;
-			for(int i=0; i < 20; ++i) // 20 spawn attempts
+			Mod.instance.LogInfo("\tSpawning attempts...");
+			for (int i=0; i < 20; ++i) // 20 spawn attempts
             {
 				string randomFilterID = spawnFilter[UnityEngine.Random.Range(0, spawnFilter.Count - 1)];
+				Mod.instance.LogInfo("\t\trandomFilterID: "+ randomFilterID);
 				string itemID;
                 if (Mod.itemsByParents.TryGetValue(randomFilterID, out List<string> possibleItems))
                 {
@@ -65,9 +67,10 @@ namespace EFM
 					// Maybe in this case we want to spawn a single random round instead
 					Mod.instance.LogError("\t\tLoot container has spawn filter ID: " + randomFilterID + " not present in both itemMap and parents dict.");
 					continue;
-                }
+				}
+				Mod.instance.LogInfo("\t\titemID: " + itemID);
 
-				if(int.TryParse(itemID, out int result))
+				if (int.TryParse(itemID, out int result))
                 {
 					EFM_CustomItemWrapper prefabCIW = Mod.itemPrefabs[result].GetComponent<EFM_CustomItemWrapper>();
 
