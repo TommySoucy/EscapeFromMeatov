@@ -4284,13 +4284,11 @@ namespace EFM
                 {
                     if (physObj is FVRFireArm)
                     {
-                        Mod.instance.LogInfo("\t\t\tis firearm");
                         FVRFireArm asFireArm = (FVRFireArm)physObj;
 
                         // Ammo container
                         if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                         {
-                            Mod.instance.LogInfo("\t\t\t\tHas mag");
                             EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
                             if(ammoContainerVID != null)
                             {
@@ -4300,7 +4298,6 @@ namespace EFM
                         }
                         else if(asFireArm.UsesClips && asFireArm.Clip != null)
                         {
-                            Mod.instance.LogInfo("\t\t\t\tHas clip");
                             EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>();
                             if (ammoContainerVID != null)
                             {
@@ -4312,7 +4309,6 @@ namespace EFM
                         // Attachments
                         if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
                         {
-                            Mod.instance.LogInfo("\t\t\t\tHas attachmnets");
                             foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
                             {
                                 SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
@@ -8014,13 +8010,11 @@ namespace EFM
                     {
                         if(attachCheck.Value is Transform)
                         {
-                            Mod.instance.LogInfo("Fixing position of: " + attachCheck.Key.name + " from " + attachCheck.Key.transform.localPosition + " to " + (attachCheck.Value as Transform).localPosition);
                             attachCheck.Key.transform.localPosition = (attachCheck.Value as Transform).localPosition;
                             attachCheck.Key.transform.localRotation = (attachCheck.Value as Transform).localRotation;
                         }
                         else
                         {
-                            Mod.instance.LogInfo("Fixing position of: " + attachCheck.Key.name + " from " + attachCheck.Key.transform.localPosition + " to " + (attachCheck.Value as Vector3[])[0]);
                             attachCheck.Key.transform.localPosition = (attachCheck.Value as Vector3[])[0];
                             attachCheck.Key.transform.localEulerAngles = (attachCheck.Value as Vector3[])[1];
                         }

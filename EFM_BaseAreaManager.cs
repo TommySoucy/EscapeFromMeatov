@@ -2979,7 +2979,6 @@ namespace EFM
             buttonClickSound.Play();
 
             // Disable upgrade check processors if active
-            Mod.instance.LogInfo("Closed area UI, disabling check processors for level: "+level);
             upgradeCheckProcessors[level, 0].gameObject.SetActive(false);
             upgradeCheckProcessors[level, 1].gameObject.SetActive(false);
         }

@@ -1787,13 +1787,13 @@ namespace EFM
                         int slotIndex = 0;
                         foreach (JToken item in loadedAreaSlot)
                         {
-                            if (item == null)
+                            if (item == null || item.Type == JTokenType.Null)
                             {
                                 currentBaseAreaManager.slotItems[slotIndex] = null;
                             }
                             else
                             {
-                                currentBaseAreaManager.slotItems[slotIndex] = LoadSavedItem(currentBaseAreaManager.transform.GetChild(currentBaseAreaManager.transform.childCount - 1), item);
+                                currentBaseAreaManager.slotItems[slotIndex] = LoadSavedItem(null, item);
                             }
                             ++slotIndex;
                         }
@@ -2374,9 +2374,9 @@ namespace EFM
                 FVRFireArm firearmPhysicalObject = itemPhysicalObject as FVRFireArm;
 
                 // Build and load flagDict from saved lists
-                if (item["PhysicalObject"]["flagDictKeys"] != null)
+                if (item["PhysicalObject"]["flagDict"] != null)
                 {
-                    JObject loadedFlagDict = (JObject)item["PhysicalObject"]["flagDictKeys"];
+                    JObject loadedFlagDict = (JObject)item["PhysicalObject"]["flagDict"];
                     Dictionary<string, string> flagDict = new Dictionary<string, string>();
                     flagDict = loadedFlagDict.ToObject<Dictionary<string, string>>();
                     firearmPhysicalObject.ConfigureFromFlagDic(flagDict);
@@ -2451,6 +2451,7 @@ namespace EFM
                     else if (firearmPhysicalObject.UsesMagazines && containerPhysicalObject is FVRFireArmMagazine)
                     {
                         FVRFireArmMagazine magPhysicalObject = containerPhysicalObject as FVRFireArmMagazine;
+                        magPhysicalObject.UsesVizInterp = false;
 
                         if (item["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] != null)
                         {
@@ -2480,7 +2481,6 @@ namespace EFM
                         magPhysicalObject.Load(firearmPhysicalObject);
 
                         // Store the mag's supposed local position so we can ensure it is correct later
-                        Mod.instance.LogInfo("Adding mag: "+containerObject.name+" to attachment local transform list for position "+ firearmPhysicalObject.MagazineMountPos.localPosition);
                         Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(containerObject, firearmPhysicalObject.MagazineMountPos));
                         Mod.attachmentCheckNeeded = 5;
                     }
