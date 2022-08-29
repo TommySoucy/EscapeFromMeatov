@@ -206,6 +206,7 @@ namespace EFM
 
         public void AddNotification(string text)
         {
+            Mod.instance.LogInfo("Add notification called");
             notificationSound.Play();
             GameObject notification = Instantiate(notificationPrefab, notificationsParent);
             notification.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = text;

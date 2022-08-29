@@ -331,5 +331,24 @@ namespace EFM
         {
             this.descriptionManager = descriptionManager;
         }
+
+        public void Highlight(Color color)
+        {
+            MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>();
+            foreach (MeshRenderer mr in mrs)
+            {
+                mr.material.EnableKeyword("_RIM_ON");
+                mr.material.SetColor("_RimColor", color);
+            }
+        }
+
+        public void RemoveHighlight()
+        {
+            MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>();
+            foreach (MeshRenderer mr in mrs)
+            {
+                mr.material.DisableKeyword("_RIM_ON");
+            }
+        }
     }
 }

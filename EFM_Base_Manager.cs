@@ -2397,20 +2397,26 @@ namespace EFM
                 // Magazine/Clip
                 if (item["PhysicalObject"]["ammoContainer"] != null)
                 {
+                    string rawContainerID = item["PhysicalObject"]["ammoContainer"]["itemID"].ToString();
+                    bool internalMag = false;
                     int parsedContainerID = -1;
                     GameObject containerPrefabToUse = null;
-                    if (int.TryParse(item["PhysicalObject"]["ammoContainer"]["itemID"].ToString(), out parsedContainerID))
+                    if (int.TryParse(rawContainerID, out parsedContainerID))
                     {
                         // Custom mag, fetch from our own assets
                         containerPrefabToUse = Mod.itemPrefabs[parsedContainerID];
                     }
+                    else if (rawContainerID.Equals("InternalMag"))
+                    {
+                        internalMag = true;
+                    }
                     else
                     {
                         // Vanilla mag, fetch from game assets
-                        containerPrefabToUse = IM.OD[item["PhysicalObject"]["ammoContainer"]["itemID"].ToString()].GetGameObject();
+                        containerPrefabToUse = IM.OD[rawContainerID].GetGameObject();
                     }
 
-                    GameObject containerObject = Instantiate<GameObject>(containerPrefabToUse);
+                    GameObject containerObject = internalMag ? firearmPhysicalObject.Magazine.gameObject : Instantiate<GameObject>(containerPrefabToUse);
                     FVRPhysicalObject containerPhysicalObject = containerObject.GetComponentInChildren<FVRPhysicalObject>();
 
                     if (firearmPhysicalObject.UsesClips && containerPhysicalObject is FVRFireArmClip)
@@ -2470,19 +2476,22 @@ namespace EFM
                             }
                         }
 
-                        // Make sure the mag doesnt take the current location index once awake
-                        EFM_VanillaItemDescriptor magVID = magPhysicalObject.GetComponent<EFM_VanillaItemDescriptor>();
-                        if (locationIndex != -1)
+                        if (!internalMag)
                         {
-                            magVID.takeCurrentLocation = false;
-                            magVID.locationIndex = locationIndex;
+                            // Make sure the mag doesnt take the current location index once awake
+                            EFM_VanillaItemDescriptor magVID = magPhysicalObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            if (locationIndex != -1)
+                            {
+                                magVID.takeCurrentLocation = false;
+                                magVID.locationIndex = locationIndex;
+                            }
+
+                            magPhysicalObject.Load(firearmPhysicalObject);
+
+                            // Store the mag's supposed local position so we can ensure it is correct later
+                            Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(containerObject, firearmPhysicalObject.MagazineMountPos));
+                            Mod.attachmentCheckNeeded = 5;
                         }
-
-                        magPhysicalObject.Load(firearmPhysicalObject);
-
-                        // Store the mag's supposed local position so we can ensure it is correct later
-                        Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(containerObject, firearmPhysicalObject.MagazineMountPos));
-                        Mod.attachmentCheckNeeded = 5;
                     }
                 }
 
@@ -2652,6 +2661,7 @@ namespace EFM
                             else
                             {
                                 customItemWrapper.itemsInSlots[j] = LoadSavedItem(null, loadedQBContents[j], customItemWrapper.locationIndex, equipped);
+                                customItemWrapper.itemsInSlots[j].SetActive(false); // Inactive by default // TODO: If we ever save the mode of the rig, and therefore could load an open rig, then we should check this mode before setting active or inactive
                             }
                         }
 
@@ -2673,6 +2683,9 @@ namespace EFM
                         //        }
                         //    }
                         //}
+
+                        // Update the current weight of the rig
+                        EFM_CustomItemWrapper.SetCurrentWeight(customItemWrapper);
 
                         customItemWrapper.UpdateRigMode();
                     }
@@ -3576,10 +3589,11 @@ namespace EFM
                 // Set total
                 listContent.GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = expTotal.ToString()+" exp";
 
-                Mod.instance.LogInfo("\tSetting hoverscrolls");
+                Mod.instance.LogInfo("\tSetting hoverscrolls, killcount: "+killCount);
                 // Set hover scrolls
                 if (killCount >= 8)
                 {
+                    Mod.instance.LogInfo("\t\tkillcount >= 8, activating kill list hover scrolls");
                     EFM_HoverScroll raidReportListDownHoverScroll = raidReportScreen.GetChild(3).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
                     EFM_HoverScroll raidReportListUpHoverScroll = raidReportScreen.GetChild(3).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
                     raidReportListDownHoverScroll.MaxPointingRange = 30;
@@ -4608,14 +4622,14 @@ namespace EFM
                 else if (firearmPhysicalObject.UsesMagazines && firearmPhysicalObject.Magazine != null)
                 {
                     savedItem["PhysicalObject"]["ammoContainer"] = new JObject();
-                    savedItem["PhysicalObject"]["ammoContainer"]["itemID"] = firearmPhysicalObject.Magazine.ObjectWrapper.ItemID;
+                    savedItem["PhysicalObject"]["ammoContainer"]["itemID"] = firearmPhysicalObject.Magazine.ObjectWrapper == null ? "InternalMag" : firearmPhysicalObject.Magazine.ObjectWrapper.ItemID;
 
                     if (firearmPhysicalObject.Magazine.HasARound() && firearmPhysicalObject.Magazine.LoadedRounds != null)
                     {
                         JArray newLoadedRoundsInMag = new JArray();
                         foreach (FVRLoadedRound round in firearmPhysicalObject.Magazine.LoadedRounds)
                         {
-                            if (round == null)
+                            if (round == null || round.LR_ObjectWrapper == null)
                             {
                                 break;
                             }

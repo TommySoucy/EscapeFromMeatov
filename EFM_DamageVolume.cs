@@ -35,22 +35,19 @@ namespace EFM
             {
                 Mod.instance.LogWarning("Unknown damage volume type, will have no audio");
             }
+
+            headColliders = new List<Collider>();
+            headColliderDistances = new List<float>();
+            headColliderPreviousPos = new List<Vector3>();
+
+            handColliders = new List<Collider>();
+            handColliderDistances = new List<float>();
+            handColliderPreviousPos = new List<Vector3>();
         }
 
         public void OnTriggerEnter(Collider other)
         {
             Mod.instance.LogInfo("Damage volume, on trigger enter: " + other.name);
-            if (headColliders == null)
-            {
-                headColliders = new List<Collider>();
-                headColliderDistances = new List<float>();
-                headColliderPreviousPos = new List<Vector3>();
-
-                handColliders = new List<Collider>();
-                handColliderDistances = new List<float>();
-                handColliderPreviousPos = new List<Vector3>();
-            }
-
             if (other.gameObject.layer == 15) // PlayerHead (includes torso, head, and neck)
             {
                 headColliders.Add(other);
@@ -81,7 +78,7 @@ namespace EFM
                             DamagePatch.RegisterPlayerHit((int)damageData[0], (float)damageData[1], false);
                             if(audioClips != null)
                             {
-                                audioSource.PlayOneShot(audioClips[UnityEngine.Random.Range(0, audioClips.Length + 1)], 0.4f);
+                                audioSource.PlayOneShot(audioClips[UnityEngine.Random.Range(0, audioClips.Length - 1)], 0.4f);
                             }
                         }
                         headColliderPreviousPos[i] = other.transform.position;
@@ -103,7 +100,7 @@ namespace EFM
                             DamagePatch.RegisterPlayerHit((int)damageData[0], (float)damageData[1], false);
                             if (audioClips != null)
                             {
-                                audioSource.PlayOneShot(audioClips[UnityEngine.Random.Range(0, audioClips.Length + 1)], 0.4f);
+                                audioSource.PlayOneShot(audioClips[UnityEngine.Random.Range(0, audioClips.Length - 1)], 0.4f);
                             }
                         }
                         handColliderPreviousPos[i] = other.transform.position;

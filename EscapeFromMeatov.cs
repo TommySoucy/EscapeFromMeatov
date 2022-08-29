@@ -1055,10 +1055,10 @@ namespace EFM
 
                     // Set effects
                     customItemWrapper.consumeEffects = new List<EFM_Effect_Consumable>();
-                    if (defaultItemsData["ItemDefaults"][i]["effects_damage"] != null)
+                    if (defaultItemsData["ItemDefaults"][i]["effectsDamage"] != null)
                     {
                         // Damage effects
-                        Dictionary<string, JToken> damageEffects = defaultItemsData["ItemDefaults"][i]["effects_damage"].ToObject<Dictionary<string, JToken>>();
+                        Dictionary<string, JToken> damageEffects = defaultItemsData["ItemDefaults"][i]["effectsDamage"].ToObject<Dictionary<string, JToken>>();
                         foreach (KeyValuePair<string, JToken> damageEntry in damageEffects)
                         {
                             EFM_Effect_Consumable consumableEffect = new EFM_Effect_Consumable();
@@ -1215,7 +1215,11 @@ namespace EFM
                 Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
 
                 IM.OD[ID].RefreshCache();
-                itemPrefab = IM.OD[ID].GetGameObject();
+                do
+                {
+                    Mod.instance.LogInfo("Waiting for cache refresh...");
+                    itemPrefab = IM.OD[ID].GetGameObject();
+                } while (itemPrefab == null);
             }
             FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
             image.sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
@@ -1935,7 +1939,7 @@ namespace EFM
             }
         }
 
-        public static void AddExperience(int xp, int type = 0 /*0: General (kill, raid result, etc.), 1: Looting, 2: Healing, 3: Exploration*/)
+        public static void AddExperience(int xp, int type = 0 /*0: General (kill, raid result, etc.), 1: Looting, 2: Healing, 3: Exploration*/, string notifMsg = null)
         {
             int preLevel = level;
             experience += xp;
@@ -1960,14 +1964,42 @@ namespace EFM
             if(type == 1)
             {
                 Mod.lootingExp += xp;
+                if(notifMsg == null)
+                {
+                    playerStatusManager.AddNotification(string.Format("Gained {0} looting experience.", xp));
+                }
+                else
+                {
+                    playerStatusManager.AddNotification(string.Format(notifMsg, xp));
+                }
             }
             else if(type == 2)
             {
                 Mod.healingExp += xp;
+                if (notifMsg == null)
+                {
+                    playerStatusManager.AddNotification(string.Format("Gained {0} healing experience.", xp));
+                }
+                else
+                {
+                    playerStatusManager.AddNotification(string.Format(notifMsg, xp));
+                }
             }
             else if(type == 3)
             {
                 Mod.explorationExp += xp;
+                if (notifMsg == null)
+                {
+                    playerStatusManager.AddNotification(string.Format("Gained {0} exploration experience.", xp));
+                }
+                else
+                {
+                    playerStatusManager.AddNotification(string.Format(notifMsg, xp));
+                }
+            }
+            else
+            {
+                playerStatusManager.AddNotification(string.Format("Gained {0} experience.", xp));
             }
         }
 
@@ -2757,6 +2789,7 @@ namespace EFM
             Mod.securedObjects.Add(objectToSecure);
             GameObject.DontDestroyOnLoad(objectToSecure);
             EFM_CustomItemWrapper CIW  = objectToSecure.GetComponent<EFM_CustomItemWrapper>();
+            EFM_VanillaItemDescriptor VID  = objectToSecure.GetComponent<EFM_VanillaItemDescriptor>();
             if (CIW != null)
             {
                 // Items inside a rig will not be attached to the rig, so much secure them separately
@@ -2768,6 +2801,18 @@ namespace EFM
                         {
                             SecureObject(innerItem);
                         }
+                    }
+                }
+            }
+            else if(VID != null)
+            {
+                // Secure any laser pointer hit objects
+                LaserPointer[] laserPointers = objectToSecure.GetComponentsInChildren<LaserPointer>();
+                foreach(LaserPointer laserPointer in laserPointers)
+                {
+                    if(laserPointer.BeamHitPoint != null && laserPointer.BeamHitPoint.transform.parent == null)
+                    {
+                        SecureObject(laserPointer.BeamHitPoint);
                     }
                 }
             }
@@ -3636,6 +3681,7 @@ namespace EFM
     class SetQuickBeltSlotPatch
     {
         private static bool skipPatch;
+        public static bool dontProcessRigWeight;
 
         static void Prefix(ref FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
         {
@@ -3907,9 +3953,6 @@ namespace EFM
                         equipmentItemWrapper.currentWeight += __instance.GetComponent<EFM_CustomItemWrapper>() != null ? __instance.GetComponent<EFM_CustomItemWrapper>().currentWeight : __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight;
                         equipmentItemWrapper.UpdateRigMode();
 
-                        // Update rig weight
-                        equipmentItemWrapper.currentWeight += (int)(__instance.RootRigidbody.mass * 1000);
-
                         foundSlot = true;
                         break;
                     }
@@ -3945,9 +3988,16 @@ namespace EFM
                             {
                                 customItemWrapper.itemsInSlots[slotIndex] = __instance.gameObject;
 
+                                Mod.instance.LogInfo("Added item to rig: " + customItemWrapper.name + ", dont precess weight: "+dontProcessRigWeight);
                                 // Update rig weight
-                                customItemWrapper.currentWeight += (int)(__instance.RootRigidbody.mass * 1000);
-
+                                if (dontProcessRigWeight)
+                                {
+                                    dontProcessRigWeight = false;
+                                }
+                                else
+                                {
+                                    customItemWrapper.currentWeight += __instance.GetComponent<EFM_CustomItemWrapper>() != null ? __instance.GetComponent<EFM_CustomItemWrapper>().currentWeight : __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight;
+                                }
                                 return;
                             }
                         }
@@ -4249,7 +4299,7 @@ namespace EFM
                     {
                         if (innerItem != null)
                         {
-                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
+                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>(), false);
                         }
                     }
                 }
@@ -4257,7 +4307,7 @@ namespace EFM
                 {
                     foreach (Transform innerItem in customItemWrapper.containerItemRoot)
                     {
-                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
+                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>(), false);
                     }
                 }
             }
@@ -4311,6 +4361,8 @@ namespace EFM
                         {
                             foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
                             {
+                                // TODO: Review if we ever update the weight of the firearm dynamically as we attach attachments to it, we will need to pass
+                                // false here instead of updateWeight because the attachment's weight was already included in the firearm's weight
                                 SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
                             }
                         }
@@ -4323,6 +4375,8 @@ namespace EFM
                         {
                             foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
                             {
+                                // TODO: Review if we ever update the weight of the attachment dynamically as we attach attachments to it, we will need to pass
+                                // false here instead of updateWeight because the attachment's weight was already included in the attachment's weight
                                 SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
                             }
                         }

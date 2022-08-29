@@ -1114,11 +1114,13 @@ namespace EFM
                 Mod.instance.LogInfo("\t\t"+genericItem);
                 if (int.TryParse(genericItem, out parsedID))
                 {
+                    Mod.instance.LogInfo("\t\tparsed, is custom");
                     itemPrefab = Mod.itemPrefabs[parsedID];
                     custom = true;
                 }
                 else
                 {
+                    Mod.instance.LogInfo("\t\tnot parsed, is vanilla");
                     yield return IM.OD[genericItem].GetGameObjectAsync();
                     itemPrefab = IM.OD[genericItem].GetGameObject(); 
                     if (itemPrefab == null)
@@ -1126,15 +1128,23 @@ namespace EFM
                         Mod.instance.LogWarning("Attempted to get vanilla prefab for " + genericItem + ", but the prefab had been destroyed, refreshing cache...");
 
                         IM.OD[genericItem].RefreshCache();
-                        itemPrefab = IM.OD[genericItem].GetGameObject();
+                        do
+                        {
+                            Mod.instance.LogInfo("Waiting for cache refresh...");
+                            itemPrefab = IM.OD[genericItem].GetGameObject();
+                        } while (itemPrefab == null);
                     }
                 }
 
                 if (custom)
                 {
+                    Mod.instance.LogInfo("\t\tis custom");
                     GameObject itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                    Mod.instance.LogInfo("\t\tinstantiated"); 
                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                    Mod.instance.LogInfo("\t\tgot CIW");
                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                    Mod.instance.LogInfo("\t\tgot physobj");
 
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                     Mod.RemoveFromAll(null, itemCIW, null);
@@ -1142,7 +1152,8 @@ namespace EFM
                     // Get amount
                     if (itemCIW.itemType == Mod.ItemType.Money)
                     {
-                        if(parsedID == 201) // USD
+                        Mod.instance.LogInfo("\t\t\tis money");
+                        if (parsedID == 201) // USD
                         {
                             itemCIW.stack = UnityEngine.Random.Range(20, 200);
                         }
@@ -1157,6 +1168,7 @@ namespace EFM
                     }
                     else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
                     {
+                        Mod.instance.LogInfo("\t\t\tis ammobox");
                         FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                         for (int j = 0; j < itemCIW.maxAmount; ++j)
                         {
@@ -1165,6 +1177,7 @@ namespace EFM
                     }
                     else if (itemCIW.maxAmount > 0)
                     {
+                        Mod.instance.LogInfo("\t\t\thas amount");
                         itemCIW.amount = itemCIW.maxAmount;
                     }
                 }
@@ -4890,10 +4903,12 @@ namespace EFM
             {
                 return;
             }
+            Mod.instance.LogInfo("Kill player called");
             Mod.dead = true;
 
             // Register insured items that are currently on player
-            if(Mod.insuredItems == null)
+            Mod.instance.LogInfo("\tRegistering insured items");
+            if (Mod.insuredItems == null)
             {
                 Mod.insuredItems = new List<InsuredSet>();
             }
@@ -4941,20 +4956,26 @@ namespace EFM
                 Mod.insuredItems.Add(insuredSet);
             }
 
+            Mod.instance.LogInfo("\tDropping held items, preweight: "+Mod.weight);
             // Drop items in hand
             if (GM.CurrentMovementManager.Hands[0].CurrentInteractable != null && !(GM.CurrentMovementManager.Hands[0].CurrentInteractable is FVRPhysicalObject))
             {
+                Mod.instance.LogInfo("\t\tDropping left held item");
                 GM.CurrentMovementManager.Hands[0].CurrentInteractable.ForceBreakInteraction();
             }
             if (GM.CurrentMovementManager.Hands[1].CurrentInteractable != null && !(GM.CurrentMovementManager.Hands[1].CurrentInteractable is FVRPhysicalObject))
             {
+                Mod.instance.LogInfo("\t\tDropping right held item");
                 GM.CurrentMovementManager.Hands[1].CurrentInteractable.ForceBreakInteraction();
             }
+            Mod.instance.LogInfo("\tDropping held items, postweight: " + Mod.weight);
 
+            Mod.instance.LogInfo("\tDropping equipment, preweight: " + Mod.weight);
             // Unequip and destroy all equipment apart from pouch
             if (EFM_EquipmentSlot.wearingBackpack)
             {
                 EFM_CustomItemWrapper backpackCIW = EFM_EquipmentSlot.currentBackpack;
+                Mod.instance.LogInfo("\t\tDropping backpack, weight: "+ backpackCIW.currentWeight);
                 FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
                 backpackPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= backpackCIW.currentWeight;
@@ -4965,6 +4986,7 @@ namespace EFM
             if (EFM_EquipmentSlot.wearingBodyArmor)
             {
                 EFM_CustomItemWrapper bodyArmorCIW = EFM_EquipmentSlot.currentArmor;
+                Mod.instance.LogInfo("\t\tDropping body armor, weight: " + bodyArmorCIW.currentWeight);
                 FVRPhysicalObject bodyArmorPhysObj = bodyArmorCIW.GetComponent<FVRPhysicalObject>();
                 bodyArmorPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= bodyArmorCIW.currentWeight;
@@ -4975,6 +4997,7 @@ namespace EFM
             if (EFM_EquipmentSlot.wearingEarpiece)
             {
                 EFM_CustomItemWrapper earPieceCIW = EFM_EquipmentSlot.currentEarpiece;
+                Mod.instance.LogInfo("\t\tDropping earpiece, weight: " + earPieceCIW.currentWeight);
                 FVRPhysicalObject earPiecePhysObj = earPieceCIW.GetComponent<FVRPhysicalObject>();
                 earPiecePhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= earPieceCIW.currentWeight;
@@ -4985,6 +5008,7 @@ namespace EFM
             if (EFM_EquipmentSlot.wearingHeadwear)
             {
                 EFM_CustomItemWrapper headWearCIW = EFM_EquipmentSlot.currentHeadwear;
+                Mod.instance.LogInfo("\t\tDropping headwear, weight: " + headWearCIW.currentWeight);
                 FVRPhysicalObject headWearPhysObj = headWearCIW.GetComponent<FVRPhysicalObject>();
                 headWearPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= headWearCIW.currentWeight;
@@ -4995,6 +5019,7 @@ namespace EFM
             if (EFM_EquipmentSlot.wearingFaceCover)
             {
                 EFM_CustomItemWrapper faceCoverCIW = EFM_EquipmentSlot.currentFaceCover;
+                Mod.instance.LogInfo("\t\tDropping face cover, weight: " + faceCoverCIW.currentWeight);
                 FVRPhysicalObject faceCoverPhysObj = faceCoverCIW.GetComponent<FVRPhysicalObject>();
                 faceCoverPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= faceCoverCIW.currentWeight;
@@ -5005,6 +5030,7 @@ namespace EFM
             if (EFM_EquipmentSlot.wearingEyewear)
             {
                 EFM_CustomItemWrapper eyeWearCIW = EFM_EquipmentSlot.currentEyewear;
+                Mod.instance.LogInfo("\t\tDropping eyewear, weight: " + eyeWearCIW.currentWeight);
                 FVRPhysicalObject eyeWearPhysObj = eyeWearCIW.GetComponent<FVRPhysicalObject>();
                 eyeWearPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= eyeWearCIW.currentWeight;
@@ -5015,6 +5041,7 @@ namespace EFM
             if (EFM_EquipmentSlot.wearingRig)
             {
                 EFM_CustomItemWrapper rigCIW = EFM_EquipmentSlot.currentRig;
+                Mod.instance.LogInfo("\t\tDropping rig, weight: " + rigCIW.currentWeight);
                 FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
                 rigPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= rigCIW.currentWeight;
@@ -5022,21 +5049,26 @@ namespace EFM
                 rigCIW.destroyed = true;
                 Destroy(rigCIW.gameObject);
             }
+            Mod.instance.LogInfo("\tDropping equipment, postweight: " + Mod.weight);
 
+            Mod.instance.LogInfo("\tDestroying right shoulder item, preweight: " + Mod.weight);
             // Destroy right shoulder object
-            if(Mod.rightShoulderObject != null)
+            if (Mod.rightShoulderObject != null)
             {
                 EFM_VanillaItemDescriptor rightShoulderVID = Mod.rightShoulderObject.GetComponent<EFM_VanillaItemDescriptor>();
                 FVRPhysicalObject rightShoulderPhysObj = rightShoulderVID.GetComponent<FVRPhysicalObject>();
                 rightShoulderPhysObj.SetQuickBeltSlot(null);
+                Mod.instance.LogInfo("\t\tDestroying right shoulder item, weight: " + rightShoulderVID.currentWeight);
                 Mod.weight -= rightShoulderVID.currentWeight;
                 rightShoulderVID.destroyed = true;
                 Mod.rightShoulderObject = null;
                 Destroy(Mod.rightShoulderObject);
             }
+            Mod.instance.LogInfo("\tDestroying right shoulder item, postweight: " + Mod.weight);
 
+            Mod.instance.LogInfo("\tDestroying pocket contents, preweight: " + Mod.weight);
             // Destroy pockets' contents, note that the quick belt config went back to pockets only when we unequipped rig
-            for(int i=0; i < 4; ++i)
+            for (int i=0; i < 4; ++i)
             {
                 if(GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject != null)
                 {
@@ -5044,11 +5076,13 @@ namespace EFM
                     EFM_CustomItemWrapper pocketItemCIW = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<EFM_CustomItemWrapper>();
                     if(pocketItemCIW != null)
                     {
+                        Mod.instance.LogInfo("\t\tpocket item, weight: " + pocketItemCIW.currentWeight);
                         Mod.weight -= pocketItemCIW.currentWeight;
                         pocketItemCIW.destroyed = true;
                     }
                     else if(pocketItemVID != null)
                     {
+                        Mod.instance.LogInfo("\t\tpocket item, weight: " + pocketItemVID.currentWeight);
                         Mod.weight -= pocketItemVID.currentWeight;
                         pocketItemVID.destroyed = true;
                     }
@@ -5057,6 +5091,7 @@ namespace EFM
                     Destroy(pocketItemPhysObj.gameObject);
                 }
             }
+            Mod.instance.LogInfo("\tKilled player final weight: " + Mod.weight);
 
             // Set raid state
             Mod.justFinishedRaid = true;

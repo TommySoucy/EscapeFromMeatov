@@ -186,6 +186,12 @@ namespace EFM
 		private float consumableTimer;
 		private bool validConsumePress;
         public int targettedPart = -1; // TODO: Implement
+		private static int breakPartExperience = -1;
+		private static int painExperience = -1;
+		private static int intoxicationExperience = -1;
+		private static int lightBleedExperience = -1;
+		private static int fractureExperience = -1;
+		private static int heavyBleedExperience = -1;
 
 		// DogTag
 		public bool USEC;
@@ -643,12 +649,13 @@ namespace EFM
 								// so only if ApplyEffects returns false.
 								if (!ApplyEffects(1, amountToConsume))
 								{
+									Mod.instance.LogInfo("\t\t\tNo effects applied, using consumed amount to heal");
 									// Here we also have to apply amount consumed as health to relevant parts
 									// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
 									// If this ever changes, we will need to have an additional flag for healing items
 									int actualAmountConsumed = 0;
 									int partIndex = -1;
-									if (targettedPart == -1)
+									if (targettedPart != -1)
 									{
 										partIndex = targettedPart;
 									}
@@ -684,6 +691,7 @@ namespace EFM
 									// else, no target part and all parts are at max health
 
 									amount -= actualAmountConsumed;
+									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
 								}
 							}
 							else
@@ -698,7 +706,7 @@ namespace EFM
 									// If this ever changes, we will need to have an additional flag for healing items
 									int actualAmountConsumed = 0;
 									int partIndex = -1;
-									if (targettedPart == -1)
+									if (targettedPart != -1)
 									{
 										partIndex = targettedPart;
 									}
@@ -734,6 +742,7 @@ namespace EFM
 									// else, no target part and all parts are at max health
 
 									amount -= actualAmountConsumed;
+									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
 								}
 							}
 						}
@@ -1099,7 +1108,7 @@ namespace EFM
 
 			// TODO: Set targetted part if hovering over a part
 
-
+			int appliedEffectCount = 0;
 			bool singleEffect = consumeEffects.Count + effects.Count == 1;
 			int unusedEffectCount = 0;
 
@@ -1111,17 +1120,19 @@ namespace EFM
 					// Health
 					case EFM_Effect_Consumable.EffectConsumable.Hydration:
 						Mod.hydration += consumeEffect.value * effectiveness;
+						++appliedEffectCount;
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Energy:
 						Mod.energy += consumeEffect.value * effectiveness;
+						++appliedEffectCount;
 						break;
 
 					// Damage
 					case EFM_Effect_Consumable.EffectConsumable.RadExposure:
-						if(consumeEffect.duration == 0)
+						bool radExposureApplied = false;
+						if (consumeEffect.duration == 0)
                         {
 							// Remove all rad exposure effects
-							bool radExposureApplied = false;
 							for(int i = EFM_Effect.effects.Count - 1; i >= 0; --i)
                             {
 								if (consumeEffect.cost==0 || consumeEffect.cost <= amount - amountToConsume)
@@ -1131,10 +1142,11 @@ namespace EFM
 										EFM_Effect.effects.RemoveAt(i);
 										radExposureApplied = true;
 										amount -= consumeEffect.cost;
-										if(amount - amountToConsume == 0)
-                                        {
-											return true;
-                                        }
+										//if(amount - amountToConsume == 0)
+										//{
+										//	return true;
+										//}
+										return true;
 									}
                                 }
                                 else
@@ -1159,23 +1171,47 @@ namespace EFM
 							// Make all rad exposure effects inactive for the duration
 							for (int i = EFM_Effect.effects.Count - 1; i >= 0; --i)
 							{
-								if (EFM_Effect.effects[i].effectType == EFM_Effect.EffectType.RadExposure)
+								if (EFM_Effect.effects[i].effectType == EFM_Effect.EffectType.RadExposure && EFM_Effect.effects[i].active)
 								{
 									EFM_Effect.effects[i].active = false;
 									EFM_Effect.effects[i].inactiveTimer = consumeEffect.duration * effectiveness;
+									radExposureApplied = true;
 								}
 							}
+                            if (radExposureApplied)
+							{
+								return true;
+                            }
+                            else
+                            {
+								++unusedEffectCount;
+                            }
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Pain:
+						if(painExperience == -1)
+						{
+							painExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["Pain"]["HealExperience"];
+						}
 						// Make all pain effects inactive for the duration
+						bool painApplied = false;
 						for (int i = EFM_Effect.effects.Count - 1; i >= 0; --i)
 						{
-							if (EFM_Effect.effects[i].effectType == EFM_Effect.EffectType.Pain)
+							if (EFM_Effect.effects[i].effectType == EFM_Effect.EffectType.Pain && EFM_Effect.effects[i].active)
 							{
 								EFM_Effect.effects[i].active = false;
 								EFM_Effect.effects[i].inactiveTimer = consumeEffect.duration * effectiveness;
+								Mod.AddExperience((int)(painExperience * effectiveness), 2, "Treatment experience - Pain ({0})");
+								painApplied = true;
 							}
+							if (painApplied)
+							{
+								return true;
+                            }
+                            else
+                            {
+								++unusedEffectCount;
+                            }
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Contusion:
@@ -1189,11 +1225,13 @@ namespace EFM
 								{
 									EFM_Effect.effects.RemoveAt(i);
 									contusionApplied = true;
+									++appliedEffectCount;
 									amount -= consumeEffect.cost;
-									if (amount - amountToConsume == 0)
-									{
-										return true;
-									}
+									//if (amount - amountToConsume == 0)
+									//{
+									//	return true;
+									//}
+									return true;
 								}
                             }
                             else
@@ -1214,6 +1252,10 @@ namespace EFM
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Intoxication:
+						if (intoxicationExperience == -1)
+						{
+							intoxicationExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["Intoxication"]["HealExperience"];
+						}
 						// Remove all Intoxication effects
 						bool intoxicationApplied = false;
 						for (int i = EFM_Effect.effects.Count - 1; i >= 0; --i)
@@ -1224,10 +1266,14 @@ namespace EFM
 								{
 									EFM_Effect.effects.RemoveAt(i);
 									amount -= consumeEffect.cost;
-									if (amount - amountToConsume == 0)
-									{
-										return true;
-									}
+									intoxicationApplied = true;
+									 ++appliedEffectCount;
+									//if (amount - amountToConsume == 0)
+									//{
+									//	return true;
+									//}
+									Mod.AddExperience(intoxicationExperience, 2, "Treatment experience - Intoxication ({0})");
+									return true;
 								}
                             }
                             else
@@ -1248,6 +1294,10 @@ namespace EFM
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.LightBleeding:
+						if (lightBleedExperience == -1)
+						{
+							lightBleedExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["HealExperience"];
+						}
 						Mod.instance.LogInfo("\tHas damage light bleeding effect");
 						// Remove priority LightBleeding effect, or one found on targetted part
 						if (targettedPart == -1)
@@ -1284,10 +1334,13 @@ namespace EFM
 								Mod.instance.LogInfo("\t\tRemoving valid light bleed");
 								EFM_Effect.RemoveEffectAt(highest);
 								amount -= consumeEffect.cost;
-								if (amount - amountToConsume == 0)
-								{
-									return true;
-								}
+								++appliedEffectCount;
+								//if (amount - amountToConsume == 0)
+								//{
+								//	return true;
+								//}
+								Mod.AddExperience(lightBleedExperience, 2, "Treatment experience - Light Bleeding ({0})");
+								return true;
 							}
                         }
                         else
@@ -1320,14 +1373,21 @@ namespace EFM
 							{
 								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
-								if (amount - amountToConsume == 0)
-								{
-									return true;
-								}
+								++appliedEffectCount;
+								//if (amount - amountToConsume == 0)
+								//{
+								//	return true;
+								//}
+								Mod.AddExperience(lightBleedExperience, 2, "Treatment experience - Light Bleeding ({0})");
+								return true;
 							}
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Fracture:
+						if (fractureExperience == -1)
+						{
+							fractureExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["Fracture"]["HealExperience"];
+						}
 						// Remove first Fracture effect, or one found on targetted part
 						if (targettedPart == -1)
 						{
@@ -1359,10 +1419,13 @@ namespace EFM
                             {
 								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
-								if (amount - amountToConsume == 0)
-								{
-									return true;
-								}
+								++appliedEffectCount;
+								//if (amount - amountToConsume == 0)
+								//{
+								//	return true;
+								//}
+								Mod.AddExperience(fractureExperience, 2, "Treatment experience - Fracture ({0})");
+								return true;
 							}
                         }
                         else
@@ -1395,14 +1458,21 @@ namespace EFM
 							{
 								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
-								if (amount - amountToConsume == 0)
-								{
-									return true;
-								}
+								++appliedEffectCount;
+								//if (amount - amountToConsume == 0)
+								//{
+								//	return true;
+								//}
+								Mod.AddExperience(fractureExperience, 2, "Treatment experience - Fracture ({0})");
+								return true;
 							}
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.DestroyedPart:
+						if(breakPartExperience == -1)
+                        {
+							breakPartExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["BreakPart"]["HealExperience"];
+						}
 						// Remove priority DestroyedPart effect, or one found on targetted part
 						if (targettedPart == -1)
 						{
@@ -1434,15 +1504,18 @@ namespace EFM
 							{
 								EFM_Effect.RemoveEffectAt(highest);
 								amount -= consumeEffect.cost;
+								++appliedEffectCount;
 								Mod.health[lowestPartIndex] = 1;
 								if(Mod.currentLocationIndex == 2)
                                 {
 									Mod.currentRaidManager.maxHealth[lowestPartIndex] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
                                 }
-								if (amount - amountToConsume == 0)
-								{
-									return true;
-								}
+								//if (amount - amountToConsume == 0)
+								//{
+								//	return true;
+								//}
+								Mod.AddExperience(breakPartExperience, 2, "Treatment experience - Destroyed Part ({0})");
+								return true;
 							}
 						}
 						else
@@ -1475,19 +1548,26 @@ namespace EFM
 							{
 								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
+								++appliedEffectCount;
 								Mod.health[targettedPart] = 1;
 								if (Mod.currentLocationIndex == 2)
 								{
 									Mod.currentRaidManager.maxHealth[targettedPart] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
 								}
-								if (amount - amountToConsume == 0)
-								{
-									return true;
-								}
+								//if (amount - amountToConsume == 0)
+								//{
+								//	return true;
+								//}
+								Mod.AddExperience(breakPartExperience, 2, "Treatment experience - Destroyed Part ({0})");
+								return true;
 							}
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.HeavyBleeding:
+						if (heavyBleedExperience == -1)
+						{
+							heavyBleedExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["HeavyBleeding"]["HealExperience"];
+						}
 						// Remove priority DestroyedPart effect, or one found on targetted part
 						if (targettedPart == -1)
 						{
@@ -1520,10 +1600,13 @@ namespace EFM
 							{
 								EFM_Effect.RemoveEffectAt(highest);
 								amount -= consumeEffect.cost;
-								if (amount - amountToConsume == 0)
-								{
-									return true;
-								}
+								++appliedEffectCount;
+								//if (amount - amountToConsume == 0)
+								//{
+								//	return true;
+								//}
+								Mod.AddExperience(heavyBleedExperience, 2, "Treatment experience - Heavy Bleeding ({0})");
+								return true;
 							}
 						}
 						else
@@ -1557,10 +1640,13 @@ namespace EFM
 							{
 								EFM_Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
-								if (amount - amountToConsume == 0)
-								{
-									return true;
-								}
+								++appliedEffectCount;
+								//if (amount - amountToConsume == 0)
+								//{
+								//	return true;
+								//}
+								Mod.AddExperience(heavyBleedExperience, 2, "Treatment experience - Heavy Bleeding ({0})");
+								return true;
 							}
 						}
 						break;
@@ -1607,7 +1693,7 @@ namespace EFM
             }
 
 			// Return true if at least one effect was used
-			return unusedEffectCount != consumeEffects.Count + effects.Count; 
+			return appliedEffectCount > 0; 
         }
 
 		public void ToggleMode(bool inHand, bool isRightHand = false)
@@ -1729,6 +1815,7 @@ namespace EFM
 
 						CIW.inAll = true;
 					}
+					SetQuickBeltSlotPatch.dontProcessRigWeight = true; // Dont want to add the weight of this item to the rig as we set its slot, the item is already in the rig
 					physicalObject.SetQuickBeltSlot(rigSlots[i]);
 					physicalObject.SetParentage(null);
 					physicalObject.transform.localScale = Vector3.one;
@@ -1928,8 +2015,27 @@ namespace EFM
         public void SetDescriptionManager(EFM_DescriptionManager descriptionManager)
         {
 			this.descriptionManager = descriptionManager;
-        }
-    }
+		}
+
+		public void Highlight(Color color)
+		{
+			MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>();
+			foreach (MeshRenderer mr in mrs)
+			{
+				mr.material.EnableKeyword("_RIM_ON");
+				mr.material.SetColor("_RimColor", color);
+			}
+		}
+
+		public void RemoveHighlight()
+		{
+			MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>();
+			foreach (MeshRenderer mr in mrs)
+			{
+				mr.material.DisableKeyword("_RIM_ON");
+			}
+		}
+	}
 
 	public class EFM_MainContainer : MonoBehaviour
     {

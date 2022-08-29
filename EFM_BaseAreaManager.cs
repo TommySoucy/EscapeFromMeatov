@@ -1299,11 +1299,13 @@ namespace EFM
             upgradeDialogs[2] = areaCanvas.transform.GetChild(1).GetChild(7).gameObject;
             EFM_PointableButton upgradeConfirmCancelButton = upgradeDialogs[2].transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
             upgradeConfirmCancelButton.SetButton();
+            upgradeConfirmCancelButton.MaxPointingRange = 30;
             upgradeConfirmCancelButton.hoverSound = hoverButtonSound;
             upgradeConfirmCancelButton.Button.onClick.AddListener(OnUpgradeCancelClicked);
             //upgradeConfirmCancelButton.GetComponent<Collider>().enabled = false;
             EFM_PointableButton upgradeConfirmConfirmButton = upgradeDialogs[2].transform.GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
             upgradeConfirmConfirmButton.SetButton();
+            upgradeConfirmConfirmButton.MaxPointingRange = 30;
             upgradeConfirmConfirmButton.hoverSound = hoverButtonSound;
             upgradeConfirmConfirmButton.Button.onClick.AddListener(OnUpgradeConfirmConfirmClicked);
             //upgradeConfirmConfirmButton.GetComponent<Collider>().enabled = false;
@@ -1311,11 +1313,13 @@ namespace EFM
             upgradeDialogs[1] = areaCanvas.transform.GetChild(1).GetChild(8).gameObject;
             EFM_PointableButton upgradeWarningCancelButton = upgradeDialogs[1].transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
             upgradeWarningCancelButton.SetButton();
+            upgradeWarningCancelButton.MaxPointingRange = 30;
             upgradeWarningCancelButton.hoverSound = hoverButtonSound;
             upgradeWarningCancelButton.Button.onClick.AddListener(OnUpgradeCancelClicked);
             //upgradeWarningCancelButton.GetComponent<Collider>().enabled = false;
             EFM_PointableButton upgradeWarningContinueButton = upgradeDialogs[1].transform.GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
             upgradeWarningContinueButton.SetButton();
+            upgradeWarningContinueButton.MaxPointingRange = 30;
             upgradeWarningContinueButton.hoverSound = hoverButtonSound;
             upgradeWarningContinueButton.Button.onClick.AddListener(OnUpgradeWarningContinueClicked);
             //upgradeWarningContinueButton.GetComponent<Collider>().enabled = false;
@@ -1323,6 +1327,7 @@ namespace EFM
             upgradeDialogs[0] = areaCanvas.transform.GetChild(1).GetChild(9).gameObject;
             EFM_PointableButton upgradeBlockedCancelButton = upgradeDialogs[0].transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
             upgradeBlockedCancelButton.SetButton();
+            upgradeBlockedCancelButton.MaxPointingRange = 30;
             upgradeBlockedCancelButton.hoverSound = hoverButtonSound;
             upgradeBlockedCancelButton.Button.onClick.AddListener(OnUpgradeCancelClicked);
         }
@@ -4407,7 +4412,11 @@ namespace EFM
                 Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
 
                 IM.OD[ID].RefreshCache();
-                itemPrefab = IM.OD[ID].GetGameObject();
+                do
+                {
+                    Mod.instance.LogInfo("Waiting for cache refresh...");
+                    itemPrefab = IM.OD[ID].GetGameObject();
+                } while (itemPrefab == null);
             }
             EFM_VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<EFM_VanillaItemDescriptor>();
             GameObject itemObject = null;

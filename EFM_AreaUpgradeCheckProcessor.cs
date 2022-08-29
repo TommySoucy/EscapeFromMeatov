@@ -40,7 +40,7 @@ namespace EFM
                 {
                     customItems[i].upgradeCheckBlockedIndex = -1;
                     customItems[i].upgradeCheckWarnedIndex = -1;
-                    // TODO: Remove highlight on item
+                    customItems[i].RemoveHighlight();
                 }
             }
             for(int i=vanillaItems.Count-1; i>=0; i--)
@@ -49,7 +49,7 @@ namespace EFM
                 {
                     vanillaItems[i].upgradeCheckBlockedIndex = -1;
                     vanillaItems[i].upgradeCheckWarnedIndex = -1;
-                    // TODO: Remove highlight on item
+                    vanillaItems[i].RemoveHighlight();
                 }
             }
             customItems.Clear();
@@ -81,7 +81,7 @@ namespace EFM
                                 {
                                     CIW.upgradeCheckBlockedIndex = CIW.upgradeCheckWarnedIndex;
                                 }
-                                // TODO: Set red highlight on item
+                                CIW.Highlight(Color.red);
 
                                 manager.upgradeDialogs[0].SetActive(true);
                                 manager.upgradeDialogs[1].SetActive(false);
@@ -96,7 +96,7 @@ namespace EFM
                                 {
                                     CIW.upgradeCheckWarnedIndex = customItems.Count;
                                     customItems.Add(CIW);
-                                    // TODO: Set yellow highlight
+                                    CIW.Highlight(Color.yellow);
                                 }
                                 else
                                 {
@@ -124,7 +124,7 @@ namespace EFM
                                 {
                                     VID.upgradeCheckBlockedIndex = VID.upgradeCheckWarnedIndex;
                                 }
-                                // TODO: Set red highlight on item
+                                VID.Highlight(Color.red);
 
                                 manager.upgradeDialogs[0].SetActive(true);
                                 manager.upgradeDialogs[1].SetActive(false);
@@ -139,7 +139,7 @@ namespace EFM
                                 {
                                     VID.upgradeCheckWarnedIndex = vanillaItems.Count;
                                     vanillaItems.Add(VID);
-                                    // TODO: Set yellow highlight
+                                    VID.Highlight(Color.yellow);
                                 }
                                 else
                                 {
@@ -181,11 +181,11 @@ namespace EFM
                                     customItems[customItems.Count - 1].upgradeCheckWarnedIndex = customItems[customItems.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : CIW.upgradeCheckBlockedIndex;
                                     customItems[CIW.upgradeCheckBlockedIndex] = customItems[customItems.Count - 1];
                                     customItems.RemoveAt(customItems.Count - 1);
-                                    // TODO: Remove red highlight on item
+                                    CIW.RemoveHighlight();
                                 }
                                 else
                                 {
-                                    // TODO: Set yellow highlight on item
+                                    CIW.Highlight(Color.yellow);
                                 }
                                 CIW.upgradeCheckBlockedIndex = -1;
 
@@ -202,7 +202,7 @@ namespace EFM
                                     customItems[customItems.Count - 1].upgradeCheckWarnedIndex = customItems[customItems.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : CIW.upgradeCheckWarnedIndex;
                                     customItems[CIW.upgradeCheckBlockedIndex] = customItems[customItems.Count - 1];
                                     customItems.RemoveAt(customItems.Count - 1);
-                                    // TODO: Remove yellow highlight on item
+                                    CIW.RemoveHighlight();
                                 }
                                 CIW.upgradeCheckWarnedIndex = -1;
 
@@ -223,11 +223,11 @@ namespace EFM
                                     vanillaItems[vanillaItems.Count - 1].upgradeCheckWarnedIndex = vanillaItems[vanillaItems.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : VID.upgradeCheckBlockedIndex;
                                     vanillaItems[VID.upgradeCheckBlockedIndex] = vanillaItems[vanillaItems.Count - 1];
                                     vanillaItems.RemoveAt(vanillaItems.Count - 1);
-                                    // TODO: Remove red highlight on item
+                                    VID.RemoveHighlight();
                                 }
                                 else
                                 {
-                                    // TODO: Set yellow highlight on item
+                                    VID.Highlight(Color.yellow);
                                 }
                                 VID.upgradeCheckBlockedIndex = -1;
 
@@ -244,7 +244,7 @@ namespace EFM
                                     vanillaItems[vanillaItems.Count - 1].upgradeCheckWarnedIndex = vanillaItems[vanillaItems.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : VID.upgradeCheckWarnedIndex;
                                     vanillaItems[VID.upgradeCheckBlockedIndex] = vanillaItems[vanillaItems.Count - 1];
                                     vanillaItems.RemoveAt(vanillaItems.Count - 1);
-                                    // TODO: Remove yellow highlight on item
+                                    VID.RemoveHighlight();
                                 }
                                 VID.upgradeCheckWarnedIndex = -1;
 
