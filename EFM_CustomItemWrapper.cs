@@ -404,7 +404,13 @@ namespace EFM
 				item.transform.parent = containerItemRoot;
 				item.StoreAndDestroyRigidbody();
 
-				// Add volume to backpack
+				// If put a melee weapon in a container, we must remove it from All, otherwise it will be FixedUpdated like a loose melee weapon
+				if(item is FVRMeleeWeapon)
+                {
+					Mod.RemoveFromAll(item, null, VID);
+                }
+
+				// Add volume to container
 				containingVolume += volumeToUse;
 
 				// Add item's weight to container
@@ -659,7 +665,7 @@ namespace EFM
 									{
 										partIndex = targettedPart;
 									}
-									else // No part targetted, prioritize least health, and as we go through more important parts first, those will be prioritized if health is equal
+									else // No part targetted, prioritize least health TODO: Make a setting to prioritize by part first instead, and as we go through more important parts first, those will be prioritized if health is equal
 									{
 										int leastIndex = -1;
 										float leastAmount = 1000;
@@ -680,13 +686,14 @@ namespace EFM
 									{
 										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
 										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentBaseManager.maxHealth[partIndex] - Mod.health[partIndex]));
+											actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
+											Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
 										}
 										else // In raid, take raid max health
 										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentRaidManager.maxHealth[partIndex] - Mod.health[partIndex]));
+											actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
+											Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
 										}
-										Mod.health[partIndex] += actualAmountConsumed;
 									}
 									// else, no target part and all parts are at max health
 
@@ -731,13 +738,14 @@ namespace EFM
 									{
 										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
 										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentBaseManager.maxHealth[partIndex] - Mod.health[partIndex]));
+											actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
+											Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
 										}
 										else // In raid, take raid max health
 										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentRaidManager.maxHealth[partIndex] - Mod.health[partIndex]));
+											actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
+											Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
 										}
-										Mod.health[partIndex] += actualAmountConsumed;
 									}
 									// else, no target part and all parts are at max health
 
@@ -1001,15 +1009,8 @@ namespace EFM
 
 									if (partIndex != -1)
 									{
-										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
-										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentBaseManager.maxHealth[partIndex] - Mod.health[partIndex]));
-										}
-										else // In raid, take raid max health
-										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentRaidManager.maxHealth[partIndex] - Mod.health[partIndex]));
-										}
-										Mod.health[partIndex] += actualAmountConsumed;
+										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
+										Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
 									}
 									// else, no target part and all parts are at max health
 
@@ -1047,17 +1048,10 @@ namespace EFM
 										}
 									}
 
-                                    if(partIndex != -1)
+									if (partIndex != -1)
 									{
-										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
-										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentBaseManager.maxHealth[partIndex] - Mod.health[partIndex]));
-										}
-										else // In raid, take raid max health
-										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, (int)(Mod.currentRaidManager.maxHealth[partIndex] - Mod.health[partIndex]));
-										}
-										Mod.health[partIndex] += actualAmountConsumed;
+										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
+										Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
 									}
 									// else, no target part and all parts are at max health
 
@@ -1508,7 +1502,7 @@ namespace EFM
 								Mod.health[lowestPartIndex] = 1;
 								if(Mod.currentLocationIndex == 2)
                                 {
-									Mod.currentRaidManager.maxHealth[lowestPartIndex] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
+									Mod.currentMaxHealth[lowestPartIndex] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
                                 }
 								//if (amount - amountToConsume == 0)
 								//{
@@ -1552,7 +1546,7 @@ namespace EFM
 								Mod.health[targettedPart] = 1;
 								if (Mod.currentLocationIndex == 2)
 								{
-									Mod.currentRaidManager.maxHealth[targettedPart] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
+									Mod.currentMaxHealth[targettedPart] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
 								}
 								//if (amount - amountToConsume == 0)
 								//{
@@ -1819,6 +1813,7 @@ namespace EFM
 					physicalObject.SetQuickBeltSlot(rigSlots[i]);
 					physicalObject.SetParentage(null);
 					physicalObject.transform.localScale = Vector3.one;
+					physicalObject.transform.position = rigSlots[i].transform.position;
 					rigSlots[i].transform.localPosition = Vector3.zero;
 					rigSlots[i].transform.localRotation = Quaternion.identity;
 					FieldInfo grabPointTransformField = typeof(FVRPhysicalObject).GetField("m_grabPointTransform", BindingFlags.NonPublic | BindingFlags.Instance);

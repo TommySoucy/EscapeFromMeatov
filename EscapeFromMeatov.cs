@@ -110,7 +110,18 @@ namespace EFM
         public static Dictionary<string, List<GameObject>> playerInventoryObjects;
         public static List<InsuredSet> insuredItems;
         public static bool dead;
+        public static readonly float[] defaultMaxHealth = { 35, 85, 70, 60, 60, 65, 65 };
+        public static float[] currentMaxHealth = { 35, 85, 70, 60, 60, 65, 65 };
         public static float[] health; // 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
+        public static float[] hideoutHealthRates = { 0.6125f, 1.4f, 1.225f, 1.05f, 1.05f, 1.1375f, 1.1375f }; // Hideout default healthrates
+        public static float[] currentHealthRates = new float[7]; // Should change depending on whether we are in raid or hideout
+        public static float[] currentNonLethalHealthRates = new float[7]; // Should change depending on whether we are in raid or hideout
+        public static readonly float raidEnergyRate = -3.2f;
+        public static readonly float raidHydrationRate = -2.6f;
+        public static readonly float hideoutEnergyRate = 1;
+        public static readonly float hideoutHydrationRate = 1;
+        public static float currentEnergyRate = 1;
+        public static float currentHydrationRate = 1;
         public static Text[] partHealthTexts;
         public static Image[] partHealthImages;
         public static Text healthText;
@@ -1760,7 +1771,6 @@ namespace EFM
         
         public static void RemoveFromPlayerInventory(Transform item, bool updateTypeLists)
         {
-            Mod.instance.LogInfo("Removing item " + item.name + " from player inventory");
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
@@ -1771,10 +1781,8 @@ namespace EFM
             string itemID = physObj.ObjectWrapper.ItemID;
             if (playerInventory.ContainsKey(itemID))
             {
-                Mod.instance.LogInfo("\tpre count = "+ playerInventory[itemID]);
                 playerInventory[itemID] -= customItemWrapper != null ? customItemWrapper.stack : 1;
                 playerInventoryObjects[itemID].Remove(item.gameObject);
-                Mod.instance.LogInfo("\tpost count = " + playerInventory[itemID]);
             }
             else
             {
@@ -3696,6 +3704,21 @@ namespace EFM
             {
                 Mod.instance.LogInfo("Item " + __instance.name + " is already in slot: " + (slot == null ? "null":slot.name)+ ", skipipng SetQuickBeltSlotPatch patch");
                 skipPatch = true;
+
+                // Even if skipping patch, need to make sure taht in the case of the backpack shoulder slot, we still set it as equip slot
+                // This is in case the backpack is harnessed to the slot, it will already have this slot assigned but we can't skip this
+                if(slot != null)
+                {
+                    // Need to make sure that a backpack being put into left shoulder slot gets put into backpack equipment slot instead
+                    if (slot is EFM_ShoulderStorage)
+                    {
+                        if (!(slot as EFM_ShoulderStorage).right)
+                        {
+                            slot = Mod.equipmentSlots[0]; // Set the slot as the backpack equip slot
+                        }
+                    }
+                }
+
                 return;
             }
 
@@ -3832,7 +3855,7 @@ namespace EFM
                 {
                     Mod.AddToAll(__instance, customItemWrapper, null);
                 }
-                else if(vanillaItemDescriptor != null && __instance is FVRFireArm)
+                else if(vanillaItemDescriptor != null && (__instance is FVRFireArm || (__instance is FVRMeleeWeapon && !vanillaItemDescriptor.inAll)))
                 {
                     Mod.AddToAll(__instance, null, vanillaItemDescriptor);
                 }
@@ -3851,9 +3874,34 @@ namespace EFM
                 skipPatch = false;
 
                 // Event if skipping, we still want to make sure that if the slot is not null, we set the item's parent to null
+                // Also make sure that if it is an equip slot, wear the equipment and set active depending on player status display
                 if (slot != null)
                 {
                     __instance.SetParentage(null);
+
+                    // This is for in case we harnessed backpack to the shoulder slot
+                    if (slot is EFM_EquipmentSlot)
+                    {
+                        // Make equipment the size of its QBPoseOverride because by default the game only sets rotation
+                        if (__instance.QBPoseOverride != null)
+                        {
+                            __instance.transform.localScale = __instance.QBPoseOverride.localScale;
+
+                            // Also set the slot's poseoverride to the QBPoseOverride of the item so it get positionned properly
+                            // Multiply poseoverride position by 10 because our pose override is set in cm not relativ to scale of QBTransform but H3 sets position relative to it
+                            slot.PoseOverride.localPosition = __instance.QBPoseOverride.localPosition * 10;
+                        }
+
+                        // If this is backpack slot, also set left shoulder to the object
+                        if (slot.Equals(Mod.equipmentSlots[0]))
+                        {
+                            Mod.leftShoulderObject = __instance.gameObject;
+                        }
+
+                        EFM_EquipmentSlot.WearEquipment(__instance.GetComponent<EFM_CustomItemWrapper>());
+
+                        __instance.gameObject.SetActive(Mod.playerStatusManager.displayed);
+                    }
                 }
 
                 return;
@@ -4021,9 +4069,8 @@ namespace EFM
             // Ensure the object is active
             // This is more specifically for the case of using the left shoulder slot to access the backpack slot
             // while the equipment slots arent displayed, so the backpack is inactive, we must activate it
-            Mod.instance.LogInfo("Began interacting with " + __instance.name);
+            Mod.instance.LogInfo("Began interacting with " + __instance.name +", qbs null?: "+(__instance.QuickbeltSlot == null)+", harnessed?: "+ __instance.m_isHardnessed);
             __instance.gameObject.SetActive(true);
-            Mod.instance.LogInfo("\tActive?: "+__instance.gameObject.activeSelf);
            
             hand.GetComponent<EFM_Hand>().currentHeldItem = __instance.gameObject;
 
@@ -4166,7 +4213,7 @@ namespace EFM
                     Mod.AddExperience(vanillaItemDescriptor.lootExperience, 1);
                 }
 
-                if(__instance is FVRFireArm)
+                if(__instance is FVRFireArm || (__instance is FVRMeleeWeapon && !vanillaItemDescriptor.inAll))
                 {
                     // Add to All if necessary
                     Mod.AddToAll(__instance, null, vanillaItemDescriptor);
@@ -5025,7 +5072,7 @@ namespace EFM
                     else
                     {
                         actualTotalDamage = totalDamage;
-                        Mod.health[partIndex] = Mathf.Clamp(Mod.health[partIndex] - totalDamage, 0, Mod.currentRaidManager.maxHealth[partIndex]);
+                        Mod.health[partIndex] = Mathf.Clamp(Mod.health[partIndex] - totalDamage, 0, Mod.currentMaxHealth[partIndex]);
                     }
                 }
                 else if (Mod.health[partIndex] <= 0) // Part is head or thorax, destroyed
@@ -5036,7 +5083,7 @@ namespace EFM
                 else // Part is head or thorax, not yet destroyed
                 {
                     actualTotalDamage = totalDamage;
-                    Mod.health[partIndex] = Mathf.Clamp(Mod.health[partIndex] - totalDamage, 0, Mod.currentRaidManager.maxHealth[partIndex]);
+                    Mod.health[partIndex] = Mathf.Clamp(Mod.health[partIndex] - totalDamage, 0, Mod.currentMaxHealth[partIndex]);
                 }
                 GM.CurrentSceneSettings.OnPlayerTookDamage(actualTotalDamage / 440f);
             }

@@ -221,6 +221,7 @@ namespace EFM
             }
 
             EFM_MainContainer mainContainer = collider.GetComponent<EFM_MainContainer>();
+            bool newMainContainer = false;
             if (mainContainer != null && collidingContainerWrapper != mainContainer.parentCIW)
             {
                 EFM_CustomItemWrapper customItemWrapper = mainContainer.parentCIW;
@@ -238,13 +239,14 @@ namespace EFM
                         collidingContainerWrapper.SetContainerHovered(false);
                     }
 
+                    newMainContainer = true;
                     collidingContainerWrapper = customItemWrapper;
                     Mod.instance.LogInfo("\tcollidingContainerWrapper now has ID: "+ collidingContainerWrapper.ID);
                 }
             }
 
             // Set container hovered if necessary
-            if (collidingContainerWrapper != null && collidingContainerWrapper.canInsertItems)
+            if (newMainContainer && collidingContainerWrapper.canInsertItems)
             {
                 Mod.instance.LogInfo("\tCan insert items into it");
                 // Verify container mode

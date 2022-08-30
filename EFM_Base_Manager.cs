@@ -110,13 +110,6 @@ namespace EFM
         private Dictionary<int, int[]> fullPartConditions;
         private Dictionary<int, GameObject> medicalPartElements;
         private int totalMedicalTreatmentPrice;
-        public float[] maxHealth = { 35, 85, 70, 60, 60, 65, 65 };
-        public static float[] healthRates = { 0.6125f, 1.4f, 1.225f, 1.05f, 1.05f, 1.1375f, 1.1375f };
-        public static float[] currentHealthRates = { 0.6125f, 1.4f, 1.225f, 1.05f, 1.05f, 1.1375f, 1.1375f };
-        public float energyRate = 1;
-        public float currentEnergyRate = 1;
-        public float hydrationRate = 1;
-        public float currentHydrationRate = 1;
         public EFM_MarketManager marketManager;
         public static bool marketUI; // whether we are currently in market mode or in area UI mode
         public EFM_GCManager GCManager;
@@ -355,10 +348,10 @@ namespace EFM
                                     Mod.skills[effect.skillIndex].currentProgress -= effect.value;
                                     break;
                                 case EFM_Effect.EffectType.EnergyRate:
-                                    currentEnergyRate -= effect.value;
+                                    Mod.currentEnergyRate -= effect.value;
                                     break;
                                 case EFM_Effect.EffectType.HydrationRate:
-                                    currentHydrationRate -= effect.value;
+                                    Mod.currentHydrationRate -= effect.value;
                                     break;
                                 case EFM_Effect.EffectType.MaxStamina:
                                     Mod.currentMaxStamina -= effect.value;
@@ -381,16 +374,17 @@ namespace EFM
                                     }
                                     break;
                                 case EFM_Effect.EffectType.HealthRate:
+                                    float[] arrayToUse = effect.nonLethal ? Mod.currentNonLethalHealthRates : Mod.currentHealthRates;
                                     if (effect.partIndex == -1)
                                     {
                                         for (int j = 0; j < 7; ++j)
                                         {
-                                            currentHealthRates[j] -= effect.value / 7;
+                                            arrayToUse[j] -= effect.value / 7;
                                         }
                                     }
                                     else
                                     {
-                                        currentHealthRates[effect.partIndex] -= effect.value;
+                                        arrayToUse[effect.partIndex] -= effect.value;
                                     }
                                     break;
                                 case EFM_Effect.EffectType.RemoveAllBloodLosses:
@@ -468,7 +462,7 @@ namespace EFM
                                         {
                                             for (int j = 0; j < 7; ++j)
                                             {
-                                                currentHealthRates[j] -= causedEffect.value / 7;
+                                                Mod.currentHealthRates[j] -= causedEffect.value / 7;
                                             }
                                         }
                                         // Could go two layers deep
@@ -518,17 +512,17 @@ namespace EFM
                                             {
                                                 for (int j = 0; j < 7; ++j)
                                                 {
-                                                    currentHealthRates[j] -= causedEffect.value;
+                                                    Mod.currentNonLethalHealthRates[j] -= causedEffect.value;
                                                 }
                                             }
                                             else
                                             {
-                                                currentHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                                Mod.currentNonLethalHealthRates[causedEffect.partIndex] -= causedEffect.value;
                                             }
                                         }
                                         else // Energy rate
                                         {
-                                            currentEnergyRate -= causedEffect.value;
+                                            Mod.currentEnergyRate -= causedEffect.value;
                                         }
                                         EFM_Effect.effects.Remove(causedEffect);
                                     }
@@ -628,10 +622,10 @@ namespace EFM
                                 Mod.skills[effect.skillIndex].currentProgress += effect.value;
                                 break;
                             case EFM_Effect.EffectType.EnergyRate:
-                                currentEnergyRate += effect.value;
+                                Mod.currentEnergyRate += effect.value;
                                 break;
                             case EFM_Effect.EffectType.HydrationRate:
-                                currentHydrationRate += effect.value;
+                                Mod.currentHydrationRate += effect.value;
                                 break;
                             case EFM_Effect.EffectType.MaxStamina:
                                 Mod.currentMaxStamina += effect.value;
@@ -654,16 +648,17 @@ namespace EFM
                                 }
                                 break;
                             case EFM_Effect.EffectType.HealthRate:
+                                float[] arrayToUse = effect.nonLethal ? Mod.currentNonLethalHealthRates : Mod.currentHealthRates;
                                 if (effect.partIndex == -1)
                                 {
                                     for (int j = 0; j < 7; ++j)
                                     {
-                                        currentHealthRates[j] += effect.value / 7;
+                                        arrayToUse[j] += effect.value / 7;
                                     }
                                 }
                                 else
                                 {
-                                    currentHealthRates[effect.partIndex] += effect.value;
+                                    arrayToUse[effect.partIndex] += effect.value;
                                 }
                                 break;
                             case EFM_Effect.EffectType.RemoveAllBloodLosses:
@@ -674,6 +669,22 @@ namespace EFM
                                     {
                                         bleedEffect.active = false;
                                         bleedEffect.inactiveTimer = effect.timer;
+
+                                        // Unapply the healthrate caused by this bleed
+                                        EFM_Effect causedHealthRate = bleedEffect.caused[0];
+                                        if (causedHealthRate.nonLethal)
+                                        {
+                                            Mod.currentNonLethalHealthRates[causedHealthRate.partIndex] -= causedHealthRate.value;
+                                        }
+                                        else
+                                        {
+                                            Mod.currentHealthRates[causedHealthRate.partIndex] -= causedHealthRate.value;
+                                        }
+                                        EFM_Effect causedEnergyRate = bleedEffect.caused[1];
+                                        Mod.currentEnergyRate -= causedEnergyRate.value;
+                                        bleedEffect.caused.Clear();
+                                        EFM_Effect.effects.Remove(causedHealthRate);
+                                        EFM_Effect.effects.Remove(causedEnergyRate);
                                     }
                                 }
                                 break;
@@ -902,22 +913,22 @@ namespace EFM
             float maxHealthTotal = 0;
             for (int i = 0; i < 7; ++i)
             {
-                maxHealthTotal += maxHealth[i];
-                if (heal[i] && currentHealthRates[i] > 0)
+                maxHealthTotal += Mod.currentMaxHealth[i];
+                if (heal[i] && Mod.currentHealthRates[i] > 0)
                 {
-                    float currentHealthDelta = currentHealthRates[i];
-                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + currentHealthRates[i] * (Time.deltaTime / 60), 1, maxHealth[i]);
+                    float currentHealthDelta = Mod.currentHealthRates[i] + Mod.currentNonLethalHealthRates[i];
+                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + currentHealthDelta * (Time.deltaTime / 60), 1, Mod.currentMaxHealth[i]);
 
                     healthDelta += currentHealthDelta;
                     health += Mod.health[i];
                 }
-                Mod.playerStatusManager.partHealthTexts[i].text = String.Format("{0:0}", Mod.health[i]) + "/" + String.Format("{0:0}", maxHealth[i]);
-                Mod.playerStatusManager.partHealthImages[i].color = Color.Lerp(Color.red, Color.white, Mod.health[i] / maxHealth[i]);
+                Mod.playerStatusManager.partHealthTexts[i].text = String.Format("{0:0}", Mod.health[i]) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[i]);
+                Mod.playerStatusManager.partHealthImages[i].color = Color.Lerp(Color.red, Color.white, Mod.health[i] / Mod.currentMaxHealth[i]);
 
                 if (medicalScreen != null && medicalScreen.gameObject.activeSelf)
                 {
-                    medicalScreenPartHealthTexts[i].text = String.Format("{0:0}", Mod.health[i]) + "/" + String.Format("{0:0}", maxHealth[i]);
-                    medicalScreenPartImages[i].GetComponent<Image>().color = Color.Lerp(Color.red, Color.white, Mod.health[i] / maxHealth[i]);
+                    medicalScreenPartHealthTexts[i].text = String.Format("{0:0}", Mod.health[i]) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[i]);
+                    medicalScreenPartImages[i].GetComponent<Image>().color = Color.Lerp(Color.red, Color.white, Mod.health[i] / Mod.currentMaxHealth[i]);
                 }
             }
             if (healthDelta != 0)
@@ -940,15 +951,15 @@ namespace EFM
             GM.CurrentPlayerBody.Health = health;
             // TODO: Update max health on vanilla display
 
-            if (currentHydrationRate > 0)
+            if (Mod.currentHydrationRate > 0)
             {
-                Mod.hydration = Mathf.Clamp(Mod.hydration + currentHydrationRate * (Time.deltaTime / 60), 0, Mod.maxHydration);
+                Mod.hydration = Mathf.Clamp(Mod.hydration + Mod.currentHydrationRate * (Time.deltaTime / 60), 0, Mod.maxHydration);
 
                 if (!Mod.playerStatusManager.hydrationDeltaText.gameObject.activeSelf)
                 {
                     Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.hydrationDeltaText.text = (currentHydrationRate > 0 ? "+" : "") + String.Format("{0:0}/min", currentHydrationRate);
+                Mod.playerStatusManager.hydrationDeltaText.text = (Mod.currentHydrationRate > 0 ? "+" : "") + String.Format("{0:0}/min", Mod.currentHydrationRate);
             }
             else if (Mod.playerStatusManager.hydrationDeltaText.gameObject.activeSelf)
             {
@@ -965,7 +976,7 @@ namespace EFM
                     {
                         for (int j = 0; j < 7; ++j)
                         {
-                            currentHealthRates[j] -= Mod.dehydrationEffect.caused[0].value / 7;
+                            Mod.currentHealthRates[j] -= Mod.dehydrationEffect.caused[0].value / 7;
                         }
                         EFM_Effect.effects.Remove(Mod.dehydrationEffect.caused[0]);
                     }
@@ -978,15 +989,15 @@ namespace EFM
                 }
             }
 
-            if (currentEnergyRate > 0)
+            if (Mod.currentEnergyRate > 0)
             {
-                Mod.energy = Mathf.Clamp(Mod.energy + currentEnergyRate * (Time.deltaTime / 60), 0, Mod.maxEnergy);
+                Mod.energy = Mathf.Clamp(Mod.energy + Mod.currentEnergyRate * (Time.deltaTime / 60), 0, Mod.maxEnergy);
 
                 if (!Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
                 {
                     Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.energyDeltaText.text = (currentEnergyRate > 0 ? "+" : "") + String.Format("{0:0}/min", currentEnergyRate);
+                Mod.playerStatusManager.energyDeltaText.text = (Mod.currentEnergyRate > 0 ? "+" : "") + String.Format("{0:0}/min", Mod.currentEnergyRate);
             }
             else if (Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
             {
@@ -1003,7 +1014,7 @@ namespace EFM
                     {
                         for (int j = 0; j < 7; ++j)
                         {
-                            currentHealthRates[j] -= Mod.fatigueEffect.caused[0].value / 7;
+                            Mod.currentHealthRates[j] -= Mod.fatigueEffect.caused[0].value / 7;
                         }
                         EFM_Effect.effects.Remove(Mod.fatigueEffect.caused[0]);
                     }
@@ -1068,6 +1079,20 @@ namespace EFM
                 GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
             }
 
+            // Set live data
+            for (int i = 0; i < 7; ++i)
+            {
+                Mod.currentMaxHealth[i] = Mod.defaultMaxHealth[i];
+                Mod.currentHealthRates[i] += Mod.hideoutHealthRates[i];
+            }
+            Mod.currentEnergyRate += Mod.hideoutEnergyRate;
+            Mod.currentHydrationRate += Mod.hideoutHydrationRate;
+            if (Mod.justFinishedRaid)
+            {
+                Mod.currentEnergyRate -= Mod.raidEnergyRate;
+                Mod.currentHydrationRate -= Mod.raidHydrationRate;
+            }
+
             ProcessData();
 
             InitUI();
@@ -1110,7 +1135,7 @@ namespace EFM
 
             // Set player's max health
             float totalMaxHealth = 0;
-            foreach(float bodyPartMaxHealth in maxHealth)
+            foreach(float bodyPartMaxHealth in Mod.currentMaxHealth)
             {
                 totalMaxHealth += bodyPartMaxHealth;
             }
@@ -1270,7 +1295,7 @@ namespace EFM
                 Mod.health = new float[7];
                 for (int i = 0; i < 7; ++i)
                 {
-                    Mod.health[i] = maxHealth[i];
+                    Mod.health[i] = Mod.currentMaxHealth[i];
                 }
                 Mod.hydration = 100;
                 Mod.energy = 100;
@@ -1683,12 +1708,12 @@ namespace EFM
                 Mod.health = data["health"].ToObject<float[]>();
                 for(int i=0; i < Mod.health.Length; ++i)
                 {
-                    Mod.health[i] += Mathf.Min(healthRates[i] * minutesSinceSave, maxHealth[i]);
+                    Mod.health[i] += Mathf.Min(Mod.currentHealthRates[i] * minutesSinceSave, Mod.currentMaxHealth[i]);
                 }
                 Mod.maxHydration = (float)data["maxHydration"];
-                Mod.hydration = Mathf.Min((float)data["hydration"] + hydrationRate * minutesSinceSave, Mod.maxHydration);
+                Mod.hydration = Mathf.Min((float)data["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.maxHydration);
                 Mod.maxEnergy = (float)data["maxEnergy"];
-                Mod.energy = Mathf.Min((float)data["energy"] + energyRate * minutesSinceSave, Mod.maxEnergy);
+                Mod.energy = Mathf.Min((float)data["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.maxEnergy);
                 Mod.stamina = (float)data["stamina"];
                 Mod.maxStamina = (float)data["maxStamina"];
                 Mod.weight = (int)data["weight"];
@@ -2611,7 +2636,7 @@ namespace EFM
                 else
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(null, customItemWrapper, null);
+                    Mod.RemoveFromAll(itemPhysicalObject, customItemWrapper, null);
                 }
 
                 customItemWrapper.itemType = (Mod.ItemType)(int)item["itemType"];
@@ -2873,7 +2898,7 @@ namespace EFM
                 }
                 else if(itemPhysicalObject is FVRFireArm)
                 {
-                    Mod.RemoveFromAll(null, null, vanillaItemDescriptor);
+                    Mod.RemoveFromAll(itemPhysicalObject, null, vanillaItemDescriptor);
                 }
 
                 if (locationIndex != -1)
@@ -3502,7 +3527,7 @@ namespace EFM
                 {
                     for (int i = 0; i < Mod.health.Length; ++i)
                     {
-                        Mod.health[i] = 0.3f * maxHealth[i];
+                        Mod.health[i] = 0.3f * Mod.currentMaxHealth[i];
                     }
 
                     Mod.hydration = 0.3f * Mod.maxHydration;
@@ -3685,12 +3710,12 @@ namespace EFM
                     }
                     else
                     {
-                        medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.Lerp(Color.red, Color.white, Mod.health[partIndex] / maxHealth[partIndex]);
+                        medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.Lerp(Color.red, Color.white, Mod.health[partIndex] / Mod.currentMaxHealth[partIndex]);
                     }
 
                     // Set part info
                     medicalScreenPartHealthTexts[partIndex] = partInfoParent.GetChild(partIndex).GetChild(1).GetComponent<Text>();
-                    medicalScreenPartHealthTexts[partIndex].text = String.Format("{0:0}", Mod.health[partIndex]) + "/" + String.Format("{0:0}", maxHealth[partIndex]);
+                    medicalScreenPartHealthTexts[partIndex].text = String.Format("{0:0}", Mod.health[partIndex]) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[partIndex]);
                     if (partConditions.ContainsKey(partIndex))
                     {
                         for (int i = 0; i < partConditions[partIndex].Length; ++i)
@@ -3699,7 +3724,7 @@ namespace EFM
                         }
                     }
 
-                    if (partConditions.ContainsKey(partIndex) || Mod.health[partIndex] < maxHealth[partIndex])
+                    if (partConditions.ContainsKey(partIndex) || Mod.health[partIndex] < Mod.currentMaxHealth[partIndex])
                     {
                         fullPartConditions.Add(partIndex, new int[5]);
 
@@ -3722,11 +3747,11 @@ namespace EFM
 
                         // Process health and destroyed
                         int partTotalCost = 0;
-                        if (Mod.health[partIndex] < maxHealth[partIndex])
+                        if (Mod.health[partIndex] < Mod.currentMaxHealth[partIndex])
                         {
                             if(Mod.health[partIndex] <= 0)
                             {
-                                int cost = (int)(breakPartPrice + healthPrice * maxHealth[partIndex]);
+                                int cost = (int)(breakPartPrice + healthPrice * Mod.currentMaxHealth[partIndex]);
                                 fullPartConditions[partIndex][4] = cost;
                                 totalMedicalTreatmentPrice += cost;
                                 partTotalCost += cost;
@@ -3742,7 +3767,7 @@ namespace EFM
                             }
                             else // Not destroyed but damaged
                             {
-                                int hpToHeal = (int)(maxHealth[partIndex] - Mod.health[partIndex]);
+                                int hpToHeal = (int)(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]);
                                 int cost = healthPrice * hpToHeal;
                                 fullPartConditions[partIndex][0] = cost;
                                 totalMedicalTreatmentPrice += cost;
@@ -4113,11 +4138,11 @@ namespace EFM
                         {
                             if(i == 0) // Health
                             {
-                                Mod.health[partElement.Key] = maxHealth[partElement.Key];
+                                Mod.health[partElement.Key] = Mod.currentMaxHealth[partElement.Key];
 
                                 // Update display
                                 transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(0).GetChild(partElement.Key).GetComponent<Image>().color = Color.white;
-                                transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(1).GetChild(partElement.Key).GetChild(1).GetComponent<Text>().text = maxHealth[partElement.Key].ToString()+"/"+ maxHealth[partElement.Key];
+                                transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(1).GetChild(partElement.Key).GetChild(1).GetComponent<Text>().text = Mod.currentMaxHealth[partElement.Key].ToString()+"/"+ Mod.currentMaxHealth[partElement.Key];
                             }
                             else if(i == 1) // LightBleeding
                             {
@@ -4144,14 +4169,16 @@ namespace EFM
                             {
                                 EFM_Effect.RemoveEffects(false, EFM_Effect.EffectType.DestroyedPart, partElement.Key);
 
-                                Mod.health[partElement.Key] = maxHealth[partElement.Key];
+                                Mod.health[partElement.Key] = Mod.currentMaxHealth[partElement.Key];
 
                                 // Update display
                                 transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(0).GetChild(partElement.Key).GetComponent<Image>().color = Color.white;
-                                transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(1).GetChild(partElement.Key).GetChild(1).GetComponent<Text>().text = maxHealth[partElement.Key].ToString() + "/" + maxHealth[partElement.Key];
+                                transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(1).GetChild(partElement.Key).GetChild(1).GetComponent<Text>().text = Mod.currentMaxHealth[partElement.Key].ToString() + "/" + Mod.currentMaxHealth[partElement.Key];
                             }
                         }
                     }
+
+                    Destroy(partElement.Value);
                 }
             }
 

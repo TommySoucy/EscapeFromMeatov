@@ -36,7 +36,7 @@ namespace EFM
         public List<EFM_MarketItemView> marketItemViews;
         public int upgradeCheckBlockedIndex = -1;
         public int upgradeCheckWarnedIndex = -1;
-        public bool inAll;
+        public bool inAll = true;
         public int weight; // The original weight of the item. We need to keep it ourselves because we would usually use the RB mass but the RB gets destroyed when a mag gets put in a firearm
         public int volume;
         private bool _insured;
