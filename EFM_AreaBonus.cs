@@ -169,7 +169,7 @@ namespace EFM
                             // If in hideout
                             if (Mod.currentLocationIndex == 1)
                             {
-                                Mod.currentBaseManager.currentEnergyRate -= effectCaused.value / 60;
+                                Mod.currentEnergyRate -= effectCaused.value / 60;
                             }
                             //else In raid map, no need to do anything, raid manager will disable effects itself
                             EFM_Effect.effects.Remove(effectCaused);
@@ -183,7 +183,7 @@ namespace EFM
                             {
                                 for (int i = 0; i < 7; ++i)
                                 {
-                                    EFM_Base_Manager.currentHealthRates[i] -= (4.4f * effectCaused.value) / 60 / 7;
+                                    Mod.currentHealthRates[i] -= (4.4f * effectCaused.value) / 60 / 7;
                                 }
                             }
                             //else In raid map, no need to do anything, raid manager will disable effects itself
@@ -196,7 +196,7 @@ namespace EFM
                             // If in hideout
                             if (Mod.currentLocationIndex == 1)
                             {
-                                Mod.currentBaseManager.currentHydrationRate -= effectCaused.value / 60;
+                                Mod.currentHydrationRate -= effectCaused.value / 60;
                             }
                             //else In raid map, no need to do anything, raid manager will disable effects itself
                             EFM_Effect.effects.Remove(effectCaused);
