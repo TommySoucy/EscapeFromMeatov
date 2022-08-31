@@ -14,22 +14,32 @@ namespace EFM
         public List<EFM_CustomItemWrapper> customItems = new List<EFM_CustomItemWrapper>();
         public List<EFM_VanillaItemDescriptor> vanillaItems = new List<EFM_VanillaItemDescriptor>();
         public bool block;
+        public ProcessorCollider[] colliders;
 
         public void OnEnable()
         {
-            if(manager.baseManager.activeCheckProcessors[0] != null)
+            if(manager.baseManager.activeCheckProcessors[block ? 0 : 1] != null)
             {
-                manager.baseManager.activeCheckProcessors[0].gameObject.SetActive(false);
-                manager.baseManager.activeCheckProcessors[1].gameObject.SetActive(false);
+                manager.baseManager.activeCheckProcessors[block ? 0 : 1].gameObject.SetActive(false);
             }
             manager.baseManager.activeCheckProcessors[block ? 0 : 1] = this;
+
+            if(colliders == null)
+            {
+                colliders = new ProcessorCollider[transform.childCount];
+                for(int i=0; i < colliders.Length; ++i)
+                {
+                    ProcessorCollider currentCollider = transform.GetChild(i).gameObject.AddComponent<ProcessorCollider>();
+                    currentCollider.processor = this;
+                }
+            }
         }
 
         public void OnDisable()
         {
             for (int i = 0; i < manager.upgradeDialogs.Length; ++i)
             {
-                if (!manager.upgradeDialogs[i].activeSelf)
+                if (manager.upgradeDialogs[i].activeSelf)
                 {
                     manager.upgradeDialogs[i].SetActive(false);
                 }
@@ -57,8 +67,9 @@ namespace EFM
             Mod.currentBaseManager.activeCheckProcessors[block ? 0 : 1] = null;
         }
 
-        public void OnTriggerEnter(Collider other)
+        public void TriggerEnter(Collider other)
         {
+            Mod.instance.LogInfo("Area upgrade processor, block?: " + block + " on trigger enter called");
             Transform currentTransform = other.transform;
             for(int i=0; i< maxUpCheck; ++i)
             {
@@ -152,6 +163,10 @@ namespace EFM
                         }
                         break;
                     }
+                    else
+                    {
+                        currentTransform = currentTransform.parent;
+                    }
                 }
                 else
                 {
@@ -160,7 +175,7 @@ namespace EFM
             }
         }
 
-        public void OnTriggerExit(Collider other)
+        public void TriggerExit(Collider other)
         {
             Transform currentTransform = other.transform;
             for (int i = 0; i < maxUpCheck; ++i)
@@ -253,6 +268,10 @@ namespace EFM
                         }
                         break;
                     }
+                    else
+                    {
+                        currentTransform = currentTransform.parent;
+                    }
                 }
                 else
                 {
@@ -285,6 +304,21 @@ namespace EFM
                 manager.upgradeDialogs[1].SetActive(false);
                 manager.upgradeDialogs[2].SetActive(true);
             }
+        }
+    }
+
+    public class ProcessorCollider : MonoBehaviour
+    {
+        public EFM_AreaUpgradeCheckProcessor processor;
+
+        public void OnTriggerEnter(Collider other)
+        {
+            processor.TriggerEnter(other);
+        }
+
+        public void OnTriggerExit(Collider other)
+        {
+            processor.TriggerExit(other);
         }
     }
 }

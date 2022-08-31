@@ -3874,7 +3874,7 @@ namespace EFM
                 skipPatch = false;
 
                 // Event if skipping, we still want to make sure that if the slot is not null, we set the item's parent to null
-                // Also make sure that if it is an equip slot, wear the equipment and set active depending on player status display
+                // Also make sure that if it is an equip slot, set active depending on player status display
                 if (slot != null)
                 {
                     __instance.SetParentage(null);
@@ -3882,24 +3882,6 @@ namespace EFM
                     // This is for in case we harnessed backpack to the shoulder slot
                     if (slot is EFM_EquipmentSlot)
                     {
-                        // Make equipment the size of its QBPoseOverride because by default the game only sets rotation
-                        if (__instance.QBPoseOverride != null)
-                        {
-                            __instance.transform.localScale = __instance.QBPoseOverride.localScale;
-
-                            // Also set the slot's poseoverride to the QBPoseOverride of the item so it get positionned properly
-                            // Multiply poseoverride position by 10 because our pose override is set in cm not relativ to scale of QBTransform but H3 sets position relative to it
-                            slot.PoseOverride.localPosition = __instance.QBPoseOverride.localPosition * 10;
-                        }
-
-                        // If this is backpack slot, also set left shoulder to the object
-                        if (slot.Equals(Mod.equipmentSlots[0]))
-                        {
-                            Mod.leftShoulderObject = __instance.gameObject;
-                        }
-
-                        EFM_EquipmentSlot.WearEquipment(__instance.GetComponent<EFM_CustomItemWrapper>());
-
                         __instance.gameObject.SetActive(Mod.playerStatusManager.displayed);
                     }
                 }
