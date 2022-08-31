@@ -209,6 +209,7 @@ namespace EFM
             Mod.instance.LogInfo("Add notification called");
             notificationSound.Play();
             GameObject notification = Instantiate(notificationPrefab, notificationsParent);
+            notification.SetActive(true);
             notification.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = text;
             notification.AddComponent<EFM_DestroyTimer>().timer = 5;
         }
