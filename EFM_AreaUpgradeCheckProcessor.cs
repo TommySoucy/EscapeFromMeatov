@@ -215,7 +215,7 @@ namespace EFM
                                 {
                                     customItems[customItems.Count - 1].upgradeCheckBlockedIndex = customItems[customItems.Count - 1].upgradeCheckBlockedIndex == -1 ? -1 : CIW.upgradeCheckWarnedIndex;
                                     customItems[customItems.Count - 1].upgradeCheckWarnedIndex = customItems[customItems.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : CIW.upgradeCheckWarnedIndex;
-                                    customItems[CIW.upgradeCheckBlockedIndex] = customItems[customItems.Count - 1];
+                                    customItems[CIW.upgradeCheckWarnedIndex] = customItems[customItems.Count - 1];
                                     customItems.RemoveAt(customItems.Count - 1);
                                     CIW.RemoveHighlight();
                                 }
@@ -257,7 +257,7 @@ namespace EFM
                                 {
                                     vanillaItems[vanillaItems.Count - 1].upgradeCheckBlockedIndex = vanillaItems[vanillaItems.Count - 1].upgradeCheckBlockedIndex == -1 ? -1 : VID.upgradeCheckWarnedIndex;
                                     vanillaItems[vanillaItems.Count - 1].upgradeCheckWarnedIndex = vanillaItems[vanillaItems.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : VID.upgradeCheckWarnedIndex;
-                                    vanillaItems[VID.upgradeCheckBlockedIndex] = vanillaItems[vanillaItems.Count - 1];
+                                    vanillaItems[VID.upgradeCheckWarnedIndex] = vanillaItems[vanillaItems.Count - 1];
                                     vanillaItems.RemoveAt(vanillaItems.Count - 1);
                                     VID.RemoveHighlight();
                                 }

@@ -143,8 +143,8 @@ namespace EFM
 
             // Init notificaiton stuff
             notificationsParent = transform.GetChild(0).GetChild(12);
-            notificationPrefab = notificationsParent.GetChild(1).gameObject;
-            notificationSound = notificationsParent.GetChild(0).GetComponent<AudioSource>();
+            notificationPrefab = notificationsParent.GetChild(0).gameObject;
+            notificationSound = transform.GetChild(6).GetComponent<AudioSource>();
 
             // Set background pointable
             FVRPointable backgroundPointable = transform.GetChild(0).gameObject.AddComponent<FVRPointable>();

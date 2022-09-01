@@ -465,617 +465,338 @@ namespace EFM
 		public void TakeInput()
 		{
 			FVRViveHand hand = physObj.m_hand;
+			bool usageButtonDown = false;
+			bool usageButtonPressed = false;
+			bool usageButtonUp = false;
 			if (hand.CMode == ControlMode.Index)
-			{
-				// If A has started being pressed this frame
-				if (hand.Input.AXButtonDown)
-				{
-					switch (itemType)
-					{
-						case Mod.ItemType.ArmoredRig:
-						case Mod.ItemType.Rig:
-						case Mod.ItemType.Backpack:
-						case Mod.ItemType.BodyArmor:
-						case Mod.ItemType.Container:
-						case Mod.ItemType.Pouch:
-							ToggleMode(true, hand.IsThisTheRightHand);
-							break;
-						case Mod.ItemType.Money:
-							if (splittingStack)
-							{
-								// End splitting
-								if (splitAmount != stack || splitAmount == 0)
-								{
-									stack -= splitAmount;
-
-									GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
-									if (Mod.currentLocationIndex == 1) // In hideout
-									{
-										itemObject.transform.parent = Mod.currentBaseManager.transform.GetChild(Mod.currentBaseManager.transform.childCount - 2);
-										EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-										CIW.stack = splitAmount;
-										Mod.currentBaseManager.baseInventoryObjects[ID].Add(itemObject);
-									}
-									else // In raid
-									{
-										itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
-										EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-										CIW.stack = splitAmount;
-									}
-								}
-								// else the chosen amount is 0 or max, meaning cancel the split
-								CancelSplit();
-							}
-							else
-							{
-								// Start splitting
-								Mod.stackSplitUI.SetActive(true);
-								Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
-								Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
-								stackSplitStartPosition = hand.transform.position;
-								stackSplitRightVector = hand.transform.right;
-								stackSplitRightVector.y = 0;
-
-								splittingStack = true;
-								Mod.amountChoiceUIUp = true;
-								Mod.splittingItem = this;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-
-				// If A is being pressed this frame
-				if (hand.Input.AXButtonPressed)
-				{
-					switch (itemType)
-					{
-						case Mod.ItemType.Consumable:
-							bool otherHandConsuming = false;
-							if (!validConsumePress)
-							{
-								otherHandConsuming = hand.OtherHand.GetComponent<EFM_Hand>().consuming;
-							}
-							if (!otherHandConsuming)
-							{
-								hand.GetComponent<EFM_Hand>().consuming = true;
-
-								// Increment timer
-								consumableTimer += Time.deltaTime;
-
-								float use = Mathf.Clamp01(consumableTimer / useTime);
-								Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
-								if (amountRate == 0)
-								{
-									// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
-									if (consumableTimer >= useTime)
-									{
-										Mod.consumeUIText.color = Color.green;
-									}
-									else
-									{
-										Mod.consumeUIText.color = Color.red;
-									}
-								}
-								else
-								{
-									Mod.consumeUIText.color = Color.white;
-								}
-								Mod.consumeUI.transform.parent = hand.transform;
-								Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
-								Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
-								Mod.consumeUI.SetActive(true);
-								validConsumePress = true;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-
-				// If A has been released this frame
-				if (hand.Input.AXButtonUp)
-				{
-					// If last frame the consume button was being pressed
-					if (validConsumePress)
-					{
-						validConsumePress = false;
-						hand.GetComponent<EFM_Hand>().consuming = false;
-						Mod.consumeUI.SetActive(false);
-						Mod.instance.LogInfo("Valid consume released");
-
-						if (amountRate == -1)
-						{
-							Mod.instance.LogInfo("\tAmount rate -1");
-							if (maxAmount > 0)
-							{
-								Mod.instance.LogInfo("\t\tConsuming, amountRate == -1, maxAmount > 0, consumableTimer: " + consumableTimer + ", useTime: " + useTime);
-								// Consume for the fraction timer/useTime of remaining amount. If timer >= useTime, we consume the whole thing
-								int amountToConsume = consumableTimer >= useTime ? amount : (int)(amount * (consumableTimer / useTime));
-								Mod.instance.LogInfo("\t\tAmount to consume: " + amountToConsume);
-								if (amount - amountToConsume <= 0)
-								{
-									// Attempt to apply effects at full effectiveness
-									// Consume if succesful
-									if (ApplyEffects(1, amountToConsume))
-									{
-										amount = 0;
-									}
-								}
-								else
-								{
-									// Apply effects at partial effectiveness
-									if (ApplyEffects(amountToConsume / maxAmount, amountToConsume))
-									{
-										amount -= amountToConsume;
-									}
-								}
-							}
-							//else // This should never happen anymore because single unit consumable have amountRate = 0 and maxAmount = 1
-							//{
-							//	// Consume the whole thing if timer >= useTime because this is a single unit consumable
-							//	if(consumableTimer >= useTime)
-							//  {
-							//		// Attempt to apply effects at full effectiveness
-							//		// Consume if succesful
-							//		if (ApplyEffects(1, 0))
-							//		{
-							//			amount = 0;
-							//			Destroy(gameObject);
-							//		}
-							//	}
-							//}
-						}
-						else if (amountRate == 0)
-						{
-							Mod.instance.LogInfo("\tAmount rate 0");
-							// This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
-							if (consumableTimer >= useTime)
-							{
-								Mod.instance.LogInfo("\t\tConsumable timer >= useTime");
-								if (ApplyEffects(1, 1))
-								{
-									amount -= 1;
-								}
-								// Apply effects at full effectiveness
-							}
-						}
-						else
-						{
-							Mod.instance.LogInfo("\tAmount rate else");
-							// Consume timer/useTime of to amountRate
-							int amountToConsume = consumableTimer >= useTime ? (int)amountRate : (int)(amountRate * (consumableTimer / useTime));
-							Mod.instance.LogInfo("\tAmount to consume: "+ amountToConsume);
-							if (consumableTimer >= useTime)
-							{
-								Mod.instance.LogInfo("\t\tConsumable timer >= useTime");
-								// Apply effects at full effectiveness
-								// NOTE: In the case we have an amount rate, here, we only remove the used amount if no other effects  have been applied
-								// so only if ApplyEffects returns false.
-								if (!ApplyEffects(1, amountToConsume))
-								{
-									Mod.instance.LogInfo("\t\t\tNo effects applied, using consumed amount to heal");
-									// Here we also have to apply amount consumed as health to relevant parts
-									// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
-									// If this ever changes, we will need to have an additional flag for healing items
-									int actualAmountConsumed = 0;
-									int partIndex = -1;
-									if (targettedPart != -1)
-									{
-										partIndex = targettedPart;
-									}
-									else // No part targetted, prioritize least health TODO: Make a setting to prioritize by part first instead, and as we go through more important parts first, those will be prioritized if health is equal
-									{
-										int leastIndex = -1;
-										float leastAmount = 1000;
-										for (int i = 0; i < Mod.health.Length; ++i)
-										{
-											if (Mod.health[i] < leastAmount)
-											{
-												leastIndex = i;
-											}
-										}
-										if (leastIndex > 0)
-										{
-											partIndex = leastIndex;
-										}
-									}
-
-									if (partIndex != -1)
-									{
-										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
-										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
-											Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
-										}
-										else // In raid, take raid max health
-										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
-											Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
-										}
-									}
-									// else, no target part and all parts are at max health
-
-									amount -= actualAmountConsumed;
-									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
-								}
-							}
-							else
-							{
-								Mod.instance.LogInfo("\t\tConsumable timer < useTime");
-
-								// Apply effects at effectiveness * amountToConsume / amountRate
-								if (!ApplyEffects(amountToConsume / amountRate, amountToConsume))
-								{
-									// Here we also have to apply amount consumed as health to relevant parts
-									// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
-									// If this ever changes, we will need to have an additional flag for healing items
-									int actualAmountConsumed = 0;
-									int partIndex = -1;
-									if (targettedPart != -1)
-									{
-										partIndex = targettedPart;
-									}
-									else // No part targetted, prioritize least health, and as we go through more important parts first, those will be prioritized if health is equal
-									{
-										int leastIndex = -1;
-										float leastAmount = 1000;
-										for (int i = 0; i < Mod.health.Length; ++i)
-										{
-											if (Mod.health[i] < leastAmount)
-											{
-												leastIndex = i;
-											}
-										}
-										if (leastIndex > 0)
-										{
-											partIndex = leastIndex;
-										}
-									}
-
-									if (partIndex != -1)
-									{
-										if (Mod.currentLocationIndex == 1) // In hideout, take base max health
-										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
-											Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
-										}
-										else // In raid, take raid max health
-										{
-											actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
-											Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
-										}
-									}
-									// else, no target part and all parts are at max health
-
-									amount -= actualAmountConsumed;
-									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
-								}
-							}
-						}
-
-						consumableTimer = 0;
-
-						if (amount == 0)
-						{
-							// Update player inventory and weight
-							Mod.RemoveFromPlayerInventory(transform, true);
-							Mod.weight -= currentWeight;
-							destroyed = true;
-							physObj.ForceBreakInteraction();
-							Destroy(gameObject);
-
-							if (Mod.currentLocationIndex == 1)
-							{
-								foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
-								{
-									areaManager.UpdateBasedOnItem(ID);
-								}
-							}
-						}
-					}
-				}
+            {
+				usageButtonDown = hand.Input.AXButtonDown;
+				usageButtonPressed = hand.Input.AXButtonPressed;
+				usageButtonUp = hand.Input.AXButtonUp;
 			}
 			else if(hand.CMode == ControlMode.Vive)
 			{
 				Vector2 touchpadAxes = hand.Input.TouchpadAxes;
-
-				// If touchpad has started being pressed this frame
-				if (hand.Input.TouchpadDown)
+				if (touchpadAxes.magnitude > 0.3f && Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
 				{
-					Vector2 TouchpadClickInitiation = touchpadAxes;
-					if (touchpadAxes.magnitude > 0.3f)
-					{
-						if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
-						{
-							switch (itemType)
-							{
-								case Mod.ItemType.ArmoredRig:
-								case Mod.ItemType.Rig:
-								case Mod.ItemType.Backpack:
-								case Mod.ItemType.BodyArmor:
-								case Mod.ItemType.Container:
-								case Mod.ItemType.Pouch:
-									ToggleMode(true, hand.IsThisTheRightHand);
-									break;
-								case Mod.ItemType.Money:
-                                    if (splittingStack)
-                                    {
-										// End splitting
-										if (splitAmount != stack || splitAmount == 0)
-										{
-											stack -= splitAmount;
-
-											GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
-											if (Mod.currentLocationIndex == 1) // In hideout
-                                            {
-												itemObject.transform.parent = Mod.currentBaseManager.transform.GetChild(Mod.currentBaseManager.transform.childCount - 2);
-												EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-												CIW.stack = splitAmount;
-												Mod.currentBaseManager.baseInventoryObjects[ID].Add(itemObject);
-											}
-                                            else // In raid
-											{
-												itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
-												EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-												CIW.stack = splitAmount;
-											}
-										}
-										// else the chosen amount is 0 or max, meaning cancel the split
-										CancelSplit();
-									}
-                                    else
-                                    {
-										// Start splitting
-										Mod.stackSplitUI.SetActive(true);
-										Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
-										Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
-										stackSplitStartPosition = hand.transform.position;
-										stackSplitRightVector = hand.transform.right;
-										stackSplitRightVector.y = 0;
-
-										splittingStack = true;
-										Mod.amountChoiceUIUp = true;
-										Mod.splittingItem = this;
-                                    }
-									break;
-								default:
-									break;
-							}
-						}
-					}
+					usageButtonDown = hand.Input.TouchpadDown;
+					usageButtonPressed = hand.Input.TouchpadPressed;
+					usageButtonUp = hand.Input.TouchpadUp;
 				}
+			}
 
-				// If the touchpadd is being pressed
-				if (hand.Input.TouchpadPressed)
+			// If A has started being pressed this frame
+			if (usageButtonDown)
+			{
+				switch (itemType)
 				{
-					if (touchpadAxes.magnitude > 0.3f)
-					{
-						if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
+					case Mod.ItemType.ArmoredRig:
+					case Mod.ItemType.Rig:
+					case Mod.ItemType.Backpack:
+					case Mod.ItemType.BodyArmor:
+					case Mod.ItemType.Container:
+					case Mod.ItemType.Pouch:
+						ToggleMode(true, hand.IsThisTheRightHand);
+						break;
+					case Mod.ItemType.Money:
+						if (splittingStack)
 						{
-							switch (itemType)
+							// End splitting
+							if (splitAmount != stack || splitAmount == 0)
 							{
-								case Mod.ItemType.Consumable:
-									bool otherHandConsuming = false;
-                                    if (!validConsumePress)
-                                    {
-										otherHandConsuming = hand.OtherHand.GetComponent<EFM_Hand>().consuming;
-                                    }
-									if (!otherHandConsuming)
-									{
-										hand.GetComponent<EFM_Hand>().consuming = true;
+								stack -= splitAmount;
 
-										// Increment timer
-										consumableTimer += Time.deltaTime;
-
-										float use = Mathf.Clamp01(consumableTimer / useTime);
-										Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount :  amountRate);
-										if (amountRate == 0)
-										{
-											// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
-											if (consumableTimer >= useTime)
-											{
-												Mod.consumeUIText.color = Color.green;
-                                            }
-                                            else
-											{
-												Mod.consumeUIText.color = Color.red;
-											}
-                                        }
-                                        else
-										{
-											Mod.consumeUIText.color = Color.white;
-										}
-										Mod.consumeUI.transform.parent = hand.transform;
-										Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
-										Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
-										Mod.consumeUI.SetActive(true);
-										validConsumePress = true;
-									}
-									break;
-								default:
-									break;
-							}
-                        }
-                        else
-                        {
-							// Cancel consumable timer
-							consumableTimer = 0;
-							validConsumePress = false;
-							hand.GetComponent<EFM_Hand>().consuming = false;
-							Mod.consumeUI.SetActive(false);
-						}
-					}
-				}
-
-				// If touchpad has been released this frame
-				if (hand.Input.TouchpadUp)
-				{
-                    // If last frame the consume button was being pressed
-                    if (validConsumePress)
-                    {
-						validConsumePress = false;
-						hand.GetComponent<EFM_Hand>().consuming = false;
-						Mod.consumeUI.SetActive(false);
-
-						if (amountRate == -1)
-                        {
-							if(maxAmount > 0)
-							{
-								Mod.instance.LogInfo("Consuming, amountRate == -1, maxAmount > 0, consumableTimer: "+consumableTimer+ ", useTime: "+useTime);
-								// Consume for the fraction timer/useTime of remaining amount. If timer >= useTime, we consume the whole thing
-								int amountToConsume = consumableTimer >= useTime ? amount : (int)(amount * (consumableTimer / useTime));
-								Mod.instance.LogInfo("Amount to consume: " + amountToConsume);
-								if (amount - amountToConsume <= 0)
-                                {
-									// Attempt to apply effects at full effectiveness
-									// Consume if succesful
-									if (ApplyEffects(1, amountToConsume))
-                                    {
-										amount = 0;
-									}
-                                }
-                                else
+								GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
+								if (Mod.currentLocationIndex == 1) // In hideout
 								{
-									// Apply effects at partial effectiveness
-									if (ApplyEffects(amountToConsume / maxAmount, amountToConsume))
-									{
-										amount -= amountToConsume;
-									}
+									itemObject.transform.parent = Mod.currentBaseManager.transform.GetChild(Mod.currentBaseManager.transform.childCount - 2);
+									EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+									CIW.stack = splitAmount;
+									Mod.currentBaseManager.baseInventoryObjects[ID].Add(itemObject);
+								}
+								else // In raid
+								{
+									itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
+									EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+									CIW.stack = splitAmount;
 								}
 							}
-							//else // This should never happen anymore because single unit consumable have amountRate = 0 and maxAmount = 1
-							//{
-							//	// Consume the whole thing if timer >= useTime because this is a single unit consumable
-							//	if(consumableTimer >= useTime)
-							//  {
-							//		// Attempt to apply effects at full effectiveness
-							//		// Consume if succesful
-							//		if (ApplyEffects(1, 0))
-							//		{
-							//			amount = 0;
-							//			Destroy(gameObject);
-							//		}
-							//	}
-							//}
-                        }
-						else if(amountRate == 0)
-                        {
-							// This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
-							if (consumableTimer >= useTime)
-							{
-								if (ApplyEffects(1, 1))
-								{
-									amount -= 1;
-								}
-								// Apply effects at full effectiveness
-							}
+							// else the chosen amount is 0 or max, meaning cancel the split
+							CancelSplit();
 						}
-                        else
-                        {
-							// Consume timer/useTime of to amountRate
-							int amountToConsume = consumableTimer >= useTime ? (int)amountRate : (int)(amountRate * (consumableTimer / useTime));
-							if (consumableTimer >= useTime)
+						else
+						{
+							// Start splitting
+							Mod.stackSplitUI.SetActive(true);
+							Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
+							Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
+							stackSplitStartPosition = hand.transform.position;
+							stackSplitRightVector = hand.transform.right;
+							stackSplitRightVector.y = 0;
+
+							splittingStack = true;
+							Mod.amountChoiceUIUp = true;
+							Mod.splittingItem = this;
+						}
+						break;
+					default:
+						break;
+				}
+			}
+
+			// If A is being pressed this frame
+			if (usageButtonPressed)
+			{
+				switch (itemType)
+				{
+					case Mod.ItemType.Consumable:
+						bool otherHandConsuming = false;
+						if (!validConsumePress)
+						{
+							otherHandConsuming = hand.OtherHand.GetComponent<EFM_Hand>().consuming;
+						}
+						if (!otherHandConsuming)
+						{
+							hand.GetComponent<EFM_Hand>().consuming = true;
+
+							// Increment timer
+							consumableTimer += Time.deltaTime;
+
+							float use = Mathf.Clamp01(consumableTimer / useTime);
+							Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
+							if (amountRate == 0)
 							{
-								// Apply effects at full effectiveness
-								if (ApplyEffects(1, amountToConsume))
+								// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
+								if (consumableTimer >= useTime)
 								{
-									// Here we also have to apply amount consumed as health to relevant parts
-									// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
-									// If this ever changes, we will need to have an additional flag for healing items
-									int actualAmountConsumed = 0;
-									int partIndex = -1;
-									if (targettedPart == -1)
-									{
-										partIndex = targettedPart;
-									}
-									else // No part targetted, prioritize least health, and as we go through more important parts first, those will be prioritized if health is equal
-									{
-										int leastIndex = -1;
-										float leastAmount = 1000;
-										for (int i = 0; i < Mod.health.Length; ++i)
-										{
-											if (Mod.health[i] < leastAmount)
-											{
-												leastIndex = i;
-											}
-										}
-										if (leastIndex > 0)
-										{
-											partIndex = leastIndex;
-										}
-									}
-
-									if (partIndex != -1)
-									{
-										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
-										Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
-									}
-									// else, no target part and all parts are at max health
-
-									amount -= actualAmountConsumed;
+									Mod.consumeUIText.color = Color.green;
+								}
+								else
+								{
+									Mod.consumeUIText.color = Color.red;
 								}
 							}
 							else
 							{
-								// Apply effects at effectiveness * amountToConsume / amountRate
-								if (ApplyEffects(amountToConsume / amountRate, amountToConsume))
-								{
-									// Here we also have to apply amount consumed as health to relevant parts
-									// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
-									// If this ever changes, we will need to have an additional flag for healing items
-									int actualAmountConsumed = 0;
-									int partIndex = -1;
-									if (targettedPart == -1)
-									{
-										partIndex = targettedPart;
-									}
-									else // No part targetted, prioritize least health, and as we go through more important parts first, those will be prioritized if health is equal
-									{
-										int leastIndex = -1;
-										float leastAmount = 1000;
-										for (int i = 0; i < Mod.health.Length; ++i)
-										{
-											if (Mod.health[i] < leastAmount)
-											{
-												leastIndex = i;
-											}
-										}
-										if (leastIndex > 0)
-										{
-											partIndex = leastIndex;
-										}
-									}
+								Mod.consumeUIText.color = Color.white;
+							}
+							Mod.consumeUI.transform.parent = hand.transform;
+							Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+							Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+							Mod.consumeUI.SetActive(true);
+							validConsumePress = true;
+						}
+						break;
+					default:
+						break;
+				}
+			}
 
-									if (partIndex != -1)
+			// If A has been released this frame
+			if (usageButtonUp)
+			{
+				// If last frame the consume button was being pressed
+				if (validConsumePress)
+				{
+					validConsumePress = false;
+					hand.GetComponent<EFM_Hand>().consuming = false;
+					Mod.consumeUI.SetActive(false);
+					Mod.instance.LogInfo("Valid consume released");
+
+					if (amountRate == -1)
+					{
+						Mod.instance.LogInfo("\tAmount rate -1");
+						if (maxAmount > 0)
+						{
+							Mod.instance.LogInfo("\t\tConsuming, amountRate == -1, maxAmount > 0, consumableTimer: " + consumableTimer + ", useTime: " + useTime);
+							// Consume for the fraction timer/useTime of remaining amount. If timer >= useTime, we consume the whole thing
+							int amountToConsume = consumableTimer >= useTime ? amount : (int)(amount * (consumableTimer / useTime));
+							Mod.instance.LogInfo("\t\tAmount to consume: " + amountToConsume);
+							if (amount - amountToConsume <= 0)
+							{
+								// Attempt to apply effects at full effectiveness
+								// Consume if succesful
+								if (ApplyEffects(1, amountToConsume))
+								{
+									amount = 0;
+								}
+							}
+							else
+							{
+								// Apply effects at partial effectiveness
+								if (ApplyEffects(amountToConsume / maxAmount, amountToConsume))
+								{
+									amount -= amountToConsume;
+								}
+							}
+						}
+						//else // This should never happen anymore because single unit consumable have amountRate = 0 and maxAmount = 1
+						//{
+						//	// Consume the whole thing if timer >= useTime because this is a single unit consumable
+						//	if(consumableTimer >= useTime)
+						//  {
+						//		// Attempt to apply effects at full effectiveness
+						//		// Consume if succesful
+						//		if (ApplyEffects(1, 0))
+						//		{
+						//			amount = 0;
+						//			Destroy(gameObject);
+						//		}
+						//	}
+						//}
+					}
+					else if (amountRate == 0)
+					{
+						Mod.instance.LogInfo("\tAmount rate 0");
+						// This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
+						if (consumableTimer >= useTime)
+						{
+							Mod.instance.LogInfo("\t\tConsumable timer >= useTime");
+							if (ApplyEffects(1, 1))
+							{
+								amount -= 1;
+							}
+							// Apply effects at full effectiveness
+						}
+					}
+					else
+					{
+						Mod.instance.LogInfo("\tAmount rate else");
+						// Consume timer/useTime of to amountRate
+						int amountToConsume = consumableTimer >= useTime ? (int)amountRate : (int)(amountRate * (consumableTimer / useTime));
+						Mod.instance.LogInfo("\tAmount to consume: "+ amountToConsume);
+						if (consumableTimer >= useTime)
+						{
+							Mod.instance.LogInfo("\t\tConsumable timer >= useTime");
+							// Apply effects at full effectiveness
+							// NOTE: In the case we have an amount rate, here, we only remove the used amount if no other effects  have been applied
+							// so only if ApplyEffects returns false.
+							if (!ApplyEffects(1, amountToConsume))
+							{
+								Mod.instance.LogInfo("\t\t\tNo effects applied, using consumed amount to heal");
+								// Here we also have to apply amount consumed as health to relevant parts
+								// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
+								// If this ever changes, we will need to have an additional flag for healing items
+								int actualAmountConsumed = 0;
+								int partIndex = -1;
+								if (targettedPart != -1)
+								{
+									partIndex = targettedPart;
+								}
+								else // No part targetted, prioritize least health TODO: Make a setting to prioritize by part first instead, and as we go through more important parts first, those will be prioritized if health is equal
+								{
+									int leastIndex = -1;
+									float leastAmount = 1000;
+									for (int i = 0; i < Mod.health.Length; ++i)
+									{
+										if (Mod.health[i] < leastAmount)
+										{
+											leastIndex = i;
+											leastAmount = Mod.health[i];
+										}
+									}
+									if (leastIndex >= 0)
+									{
+										partIndex = leastIndex;
+									}
+								}
+
+								if (partIndex != -1)
+								{
+									if (Mod.currentLocationIndex == 1) // In hideout, take base max health
 									{
 										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
 										Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
 									}
-									// else, no target part and all parts are at max health
+									else // In raid, take raid max health
+									{
+										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
+										Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
+									}
+								}
+								// else, no target part and all parts are at max health
 
-									amount -= actualAmountConsumed;
+								amount -= actualAmountConsumed;
+								if (actualAmountConsumed > 0)
+								{
+									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
 								}
 							}
 						}
-
-						consumableTimer = 0;
-
-						if (amount == 0)
+						else
 						{
-							// Update player inventory and weight
-							Mod.RemoveFromPlayerInventory(transform, true);
-							Mod.weight -= currentWeight;
-							destroyed = true;
-							Destroy(gameObject);
+							Mod.instance.LogInfo("\t\tConsumable timer < useTime");
 
-							if (Mod.currentLocationIndex == 1)
+							// Apply effects at effectiveness * amountToConsume / amountRate
+							if (!ApplyEffects(amountToConsume / amountRate, amountToConsume))
 							{
-								foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+								// Here we also have to apply amount consumed as health to relevant parts
+								// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
+								// If this ever changes, we will need to have an additional flag for healing items
+								int actualAmountConsumed = 0;
+								int partIndex = -1;
+								if (targettedPart != -1)
 								{
-									areaManager.UpdateBasedOnItem(ID);
+									partIndex = targettedPart;
 								}
+								else // No part targetted, prioritize least health, and as we go through more important parts first, those will be prioritized if health is equal
+								{
+									int leastIndex = -1;
+									float leastAmount = 1000;
+									for (int i = 0; i < Mod.health.Length; ++i)
+									{
+										if (Mod.health[i] < leastAmount)
+										{
+											leastIndex = i;
+											leastAmount = Mod.health[i];
+										}
+									}
+									if (leastIndex >= 0)
+									{
+										partIndex = leastIndex;
+									}
+								}
+
+								if (partIndex != -1)
+								{
+									if (Mod.currentLocationIndex == 1) // In hideout, take base max health
+									{
+										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
+										Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
+									}
+									else // In raid, take raid max health
+									{
+										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
+										Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
+									}
+								}
+								// else, no target part and all parts are at max health
+
+								amount -= actualAmountConsumed;
+								if (actualAmountConsumed > 0)
+								{
+									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
+								}
+							}
+						}
+					}
+
+					consumableTimer = 0;
+
+					if (amount == 0)
+					{
+						// Update player inventory and weight
+						Mod.RemoveFromPlayerInventory(transform, true);
+						Mod.weight -= currentWeight;
+						destroyed = true;
+						physObj.ForceBreakInteraction();
+						Destroy(gameObject);
+
+						if (Mod.currentLocationIndex == 1)
+						{
+							foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+							{
+								areaManager.UpdateBasedOnItem(ID);
 							}
 						}
 					}
