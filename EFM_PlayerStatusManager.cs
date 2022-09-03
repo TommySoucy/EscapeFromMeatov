@@ -28,6 +28,8 @@ namespace EFM
         private Transform notificationsParent;
         private GameObject notificationPrefab;
         private AudioSource notificationSound;
+        private AudioSource openSound;
+        private AudioSource closeSound;
 
         private AudioSource buttonClickAudio;
         private List<TraderTask> taskList;
@@ -146,6 +148,10 @@ namespace EFM
             notificationPrefab = notificationsParent.GetChild(0).gameObject;
             notificationSound = transform.GetChild(6).GetComponent<AudioSource>();
 
+            // Init open/close sounds
+            openSound = transform.GetChild(7).GetComponent<AudioSource>();
+            openSound = transform.GetChild(8).GetComponent<AudioSource>();
+
             // Set background pointable
             FVRPointable backgroundPointable = transform.GetChild(0).gameObject.AddComponent<FVRPointable>();
             backgroundPointable.MaxPointingRange = 30;
@@ -154,6 +160,8 @@ namespace EFM
             transform.GetChild(0).gameObject.SetActive(false);
             transform.GetChild(1).gameObject.SetActive(false);
             transform.GetChild(2).gameObject.SetActive(false);
+
+            UpdatePlayerLevel();
 
             init = true;
         }
@@ -228,11 +236,11 @@ namespace EFM
 
             if (this.displayed)
             {
-                // TODO: Player inventory closing sound
+                openSound.Play();
             }
             else
             {
-                // TODO: Play inventory opening sound
+                closeSound.Play();
             }
 
             foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
