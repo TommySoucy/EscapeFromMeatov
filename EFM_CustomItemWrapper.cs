@@ -468,13 +468,13 @@ namespace EFM
 			bool usageButtonDown = false;
 			bool usageButtonPressed = false;
 			bool usageButtonUp = false;
-			if (hand.CMode == ControlMode.Index)
+			if (hand.CMode == ControlMode.Index || hand.CMode == ControlMode.Oculus)
             {
 				usageButtonDown = hand.Input.AXButtonDown;
 				usageButtonPressed = hand.Input.AXButtonPressed;
 				usageButtonUp = hand.Input.AXButtonUp;
 			}
-			else if(hand.CMode == ControlMode.Vive)
+			else if(hand.CMode == ControlMode.Vive || hand.CMode == ControlMode.WMR)
 			{
 				Vector2 touchpadAxes = hand.Input.TouchpadAxes;
 				if (touchpadAxes.magnitude > 0.3f && Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)

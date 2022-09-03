@@ -829,7 +829,7 @@ namespace EFM
                 }
             }
             // De/Activate buy deal button as necessary
-            bool canDeal = true;
+            bool canDeal = trader.standing >= 0;
             for (int i = 0; i < prices.Count; ++i)
             {
                 AssortmentPriceData priceData = prices[i];
@@ -3016,6 +3016,7 @@ namespace EFM
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalInsurePrice.ToString();
                 }
                 Transform insurePriceFulfilledIcons = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(2);
+                Transform insureDealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
 
                 if (itemInsureable || itemID.Equals("201") || itemID.Equals("203"))
                 {
@@ -3025,11 +3026,17 @@ namespace EFM
                         {
                             insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(true);
                             insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(false);
+
+                            insureDealButton.GetComponent<Collider>().enabled = true;
+                            insureDealButton.GetChild(1).GetComponent<Text>().color = Color.white;
                         }
                         else
                         {
                             insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(false);
                             insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(true);
+
+                            insureDealButton.GetComponent<Collider>().enabled = false;
+                            insureDealButton.GetChild(1).GetComponent<Text>().color = Color.gray;
                         }
                     }
                     else if (Mod.traderStatuses[currentTraderIndex].currency == 1)
@@ -3038,11 +3045,17 @@ namespace EFM
                         {
                             insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(true);
                             insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(false);
+
+                            insureDealButton.GetComponent<Collider>().enabled = true;
+                            insureDealButton.GetChild(1).GetComponent<Text>().color = Color.white;
                         }
                         else
                         {
                             insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(false);
                             insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(true);
+
+                            insureDealButton.GetComponent<Collider>().enabled = false;
+                            insureDealButton.GetChild(1).GetComponent<Text>().color = Color.gray;
                         }
                     }
                 }
@@ -3494,6 +3507,7 @@ namespace EFM
                 // else, if we are removing an item and it is not an insureable item (not in insureItemShowcaseElements) we dont need to do anything
                 traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalInsurePrice.ToString();
                 Transform insurePriceFulfilledIcons = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(2);
+                Transform insureDealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
 
                 Mod.instance.LogInfo("0");
                 if (insureable || itemID.Equals("201") || itemID.Equals("203"))
@@ -3504,11 +3518,17 @@ namespace EFM
                         {
                             insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(true);
                             insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(false);
+
+                            insureDealButton.GetComponent<Collider>().enabled = true;
+                            insureDealButton.GetChild(1).GetComponent<Text>().color = Color.white;
                         }
                         else
                         {
                             insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(false);
                             insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(true);
+
+                            insureDealButton.GetComponent<Collider>().enabled = false;
+                            insureDealButton.GetChild(1).GetComponent<Text>().color = Color.gray;
                         }
                     }
                     else if (Mod.traderStatuses[currentTraderIndex].currency == 1)
@@ -3517,11 +3537,17 @@ namespace EFM
                         {
                             insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(true);
                             insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(false);
+
+                            insureDealButton.GetComponent<Collider>().enabled = true;
+                            insureDealButton.GetChild(1).GetComponent<Text>().color = Color.white;
                         }
                         else
                         {
                             insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(false);
                             insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(true);
+
+                            insureDealButton.GetComponent<Collider>().enabled = false;
+                            insureDealButton.GetChild(1).GetComponent<Text>().color = Color.gray;
                         }
                     }
                 }
@@ -4162,9 +4188,6 @@ namespace EFM
 
         public void OnInsureDealClick()
         {
-            // Clear insure showcase completely, considering all those items are now insured
-            // Deactivate deal button
-
             // Set all insureable items in trade volume as insured
             foreach (KeyValuePair<string, int> item in tradeVolumeInventory)
             {

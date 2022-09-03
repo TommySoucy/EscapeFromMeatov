@@ -212,6 +212,10 @@ namespace EFM
             notification.SetActive(true);
             notification.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = text;
             notification.AddComponent<EFM_DestroyTimer>().timer = 5;
+            if(notificationsParent.childCount > 10)
+            {
+                Destroy(notificationsParent.GetChild(1));
+            }
         }
 
         public void SetDisplayed(bool displayed)

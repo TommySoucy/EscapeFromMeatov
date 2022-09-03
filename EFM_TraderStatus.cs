@@ -590,6 +590,11 @@ namespace EFM
 
         public bool ItemInsureable(string itemID, List<string> ancestors)
         {
+            if (!(bool)Mod.traderBaseDB[index]["insurance"]["availability"])
+            {
+                return false;
+            }
+
             // 5448bf274bdc2dfc2f8b456a secure container
             // 5f4f9eb969cdc30ff33f09db compass
             // 5447e1d04bdc2dff2f8b4567 knife (all melee really, it also includes axes)

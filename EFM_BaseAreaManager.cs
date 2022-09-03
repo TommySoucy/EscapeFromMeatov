@@ -317,14 +317,12 @@ namespace EFM
                 if (level != 1)
                 {
                     transform.GetChild(1).gameObject.SetActive(false);
-                    transform.GetChild(level).GetComponent<AudioSource>().enabled = false;
                     transform.GetChild(level).gameObject.SetActive(true);
                 }
             }
             else if(level != 0)
             {
                 transform.GetChild(0).gameObject.SetActive(false);
-                transform.GetChild(level).GetComponent<AudioSource>().enabled = false;
                 transform.GetChild(level).gameObject.SetActive(true);
                 if (transform.GetChild(transform.childCount - 1).childCount > 0)
                 {
@@ -3281,7 +3279,7 @@ namespace EFM
             transform.GetChild(level + 1).gameObject.SetActive(true);
 
             // Transfer items to new slots and make slotItems bigger depending on new slot count
-            if(level < slots.Count)
+            if (level < slots.Count)
             {
                 if (slots[level] != null && slots[level].Count > 0)
                 {
@@ -3307,6 +3305,8 @@ namespace EFM
             SetEffectsActive(false);
 
             ++level;
+
+            transform.GetChild(level).GetComponent<AudioSource>().Play();
 
             UpdateAreaState();
             foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)

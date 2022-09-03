@@ -368,6 +368,54 @@ namespace EFM
                 {
                     currentRaidManager.KillPlayer();
                 }
+
+                if (Input.GetKeyDown(KeyCode.Keypad2))
+                {
+                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+                    foreach(GameObject root in roots)
+                    {
+                        DestroyLODs(root.transform);
+                    }
+                }
+            }
+        }
+
+        private void DestroyLODs(Transform root)
+        {
+            LogInfo("destroy LODs on "+root.name);
+            LODGroup lodGroup = root.GetComponent<LODGroup>();
+            if(lodGroup != null)
+            {
+                LOD[] lods = lodGroup.GetLODs();
+                if (lods != null)
+                {
+                    for (int i = 1; i < lods.Length; ++i)
+                    {
+                        Renderer[] renderers = lods[i].renderers;
+                        if (renderers != null)
+                        {
+                            for (int j = renderers.Length - 1; j >= 0; --j)
+                            {
+                                Renderer renderer = renderers[j];
+                                if (renderer != null)
+                                {
+                                    MeshFilter mf = renderer.GetComponent<MeshFilter>();
+                                    if (mf != null)
+                                    {
+                                        Destroy(mf);
+                                    }
+                                    Destroy(renderer);
+                                }
+                            }
+                        }
+                    }
+                }
+                Destroy(lodGroup);
+            }
+
+            foreach(Transform child in root)
+            {
+                DestroyLODs(child);
             }
         }
 
@@ -1767,6 +1815,54 @@ namespace EFM
                     }
                 }
             }
+            else if(vanillaItemDescriptor != null)
+            {
+                if (physObj is FVRFireArm)
+                {
+                    FVRFireArm asFireArm = (FVRFireArm)physObj;
+
+                    // Ammo container
+                    if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
+                    {
+                        EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
+                        if (ammoContainerVID != null)
+                        {
+                            AddToPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
+                        }
+                        //else Mag could be internal, not interactable, and so, no VID
+                    }
+                    else if (asFireArm.UsesClips && asFireArm.Clip != null)
+                    {
+                        EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>();
+                        if (ammoContainerVID != null)
+                        {
+                            AddToPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
+                        }
+                        //else Clip could be internal, not interactable, and so, no VID
+                    }
+
+                    // Attachments
+                    if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
+                    {
+                        foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
+                        {
+                            AddToPlayerInventory(attachment.transform, updateTypeLists);
+                        }
+                    }
+                }
+                else if (physObj is FVRFireArmAttachment)
+                {
+                    FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)physObj;
+
+                    if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
+                    {
+                        foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
+                        {
+                            AddToPlayerInventory(attachment.transform, updateTypeLists);
+                        }
+                    }
+                }
+            }
         }
         
         public static void RemoveFromPlayerInventory(Transform item, bool updateTypeLists)
@@ -1941,6 +2037,54 @@ namespace EFM
                         if(innerItem != null)
                         {
                             RemoveFromPlayerInventory(innerItem.transform, updateTypeLists);
+                        }
+                    }
+                }
+            }
+            else if (vanillaItemDescriptor != null)
+            {
+                if (physObj is FVRFireArm)
+                {
+                    FVRFireArm asFireArm = (FVRFireArm)physObj;
+
+                    // Ammo container
+                    if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
+                    {
+                        EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
+                        if (ammoContainerVID != null)
+                        {
+                            RemoveFromPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
+                        }
+                        //else Mag could be internal, not interactable, and so, no VID
+                    }
+                    else if (asFireArm.UsesClips && asFireArm.Clip != null)
+                    {
+                        EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>();
+                        if (ammoContainerVID != null)
+                        {
+                            RemoveFromPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
+                        }
+                        //else Clip could be internal, not interactable, and so, no VID
+                    }
+
+                    // Attachments
+                    if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
+                    {
+                        foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
+                        {
+                            RemoveFromPlayerInventory(attachment.transform, updateTypeLists);
+                        }
+                    }
+                }
+                else if (physObj is FVRFireArmAttachment)
+                {
+                    FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)physObj;
+
+                    if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
+                    {
+                        foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
+                        {
+                            RemoveFromPlayerInventory(attachment.transform, updateTypeLists);
                         }
                     }
                 }
@@ -2503,7 +2647,7 @@ namespace EFM
         {
             // Set LOD bias
             // TODO: This is dependent on which headseat is being used
-            QualitySettings.lodBias = 15;
+            QualitySettings.lodBias = 18;
 
             // Get root
             GameObject menuRoot = GameObject.Find("Menu");
@@ -3135,6 +3279,41 @@ namespace EFM
                 if (primary.transform.parent == null)
                 {
                     DropItem(hand, primary);
+                }
+            }
+            else if(__instance is FVRFireArmAttachment)
+            {
+                FVRFireArmAttachment asAttachment = (FVRFireArmAttachment)__instance;
+                if (asAttachment.Sensor.CurHoveredMount != null)
+                {
+                    EFM_CustomItemWrapper attachmentParentCIW = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<EFM_CustomItemWrapper>();
+                    EFM_VanillaItemDescriptor attachmentParentVID = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<EFM_VanillaItemDescriptor>();
+
+                    int newLocationIndex = -1;
+                    if(attachmentParentCIW != null)
+                    {
+                        newLocationIndex = attachmentParentCIW.locationIndex;
+                    }
+                    else if(attachmentParentVID != null)
+                    {
+                        newLocationIndex = attachmentParentVID.locationIndex;
+                    }
+
+                    BeginInteractionPatch.SetItemLocationIndex(newLocationIndex, CIW, VID, true);
+
+                    if(newLocationIndex != 0)
+                    {
+                        Mod.RemoveFromPlayerInventory(__instance.transform, false);
+
+                        if(newLocationIndex == 1)
+                        {
+                            Mod.currentBaseManager.AddToBaseInventory(__instance.transform, false);
+                        }
+                    }
+                }
+                else
+                {
+                    DropItem(hand, asAttachment);
                 }
             }
             else if (__instance is FVRPhysicalObject)
@@ -4144,7 +4323,10 @@ namespace EFM
                 if (!customItemWrapper.looted)
                 {
                     customItemWrapper.looted = true;
-                    Mod.AddExperience(customItemWrapper.lootExperience, 1);
+                    if (customItemWrapper.lootExperience > 0)
+                    {
+                        Mod.AddExperience(customItemWrapper.lootExperience, 1);
+                    }
                 }
 
                 // Update lists
@@ -4192,7 +4374,10 @@ namespace EFM
                 if (!vanillaItemDescriptor.looted)
                 {
                     vanillaItemDescriptor.looted = true;
-                    Mod.AddExperience(vanillaItemDescriptor.lootExperience, 1);
+                    if (vanillaItemDescriptor.lootExperience > 0)
+                    {
+                        Mod.AddExperience(vanillaItemDescriptor.lootExperience, 1);
+                    }
                 }
 
                 if(__instance is FVRFireArm || (__instance is FVRMeleeWeapon && !vanillaItemDescriptor.inAll))
@@ -5580,7 +5765,7 @@ namespace EFM
             if (__instance.Input.TouchpadTouchDown)
             {
                 // Store whether we are in range for description so that we can only activate description if we STARTED touching within the range
-                if (__instance.CMode == ControlMode.Vive)
+                if (__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR)
                 {
                     if (__instance.IsThisTheRightHand)
                     {
@@ -5591,7 +5776,7 @@ namespace EFM
                         leftTouchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.3f;
                     }
                 }
-                else if(__instance.CMode == ControlMode.Index)
+                else if(__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus)
                 {
                     if (__instance.IsThisTheRightHand)
                     {
@@ -5604,8 +5789,8 @@ namespace EFM
                 }
             }
             else if (__instance.Input.TouchpadTouchUp ||
-                    (__instance.CMode == ControlMode.Vive && __instance.Input.TouchpadAxes.magnitude >= 0.3f) || 
-                    (__instance.CMode == ControlMode.Index && __instance.Input.TouchpadAxes.y > 0))
+                    ((__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR) && __instance.Input.TouchpadAxes.magnitude >= 0.3f) || 
+                    ((__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) && __instance.Input.TouchpadAxes.y > 0))
             {
                 if (__instance.IsThisTheRightHand)
                 {
@@ -5689,7 +5874,7 @@ namespace EFM
 
             // Might have to cancel movement if touching TP for description
             // Should only be applicable with Vive since movement and description share the touchpad
-            if (__instance.CMode == ControlMode.Vive)
+            if (__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR)
             {
                 if (!(__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange))
                 {
@@ -5721,7 +5906,7 @@ namespace EFM
             bool flag = false;
             bool flag2 = false;
             bool fullDescInput = false;
-            if (__instance.CMode == ControlMode.Index) // Usually we would check if streamlined here, but in meatov, it will always be streamlined if index
+            if (__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) // Usually we would check if streamlined here, but in meatov, it will always be streamlined if index
             {
                 flag = __instance.Input.BYButtonDown;
 
@@ -5739,7 +5924,7 @@ namespace EFM
                     leftPreviousFrameTPAxisY = touchpadAxisY;
                 }
             }
-            else if(__instance.CMode == ControlMode.Vive)
+            else if(__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR)
             {
                 flag = touchpadDown;
 
@@ -5818,7 +6003,7 @@ namespace EFM
                     }
                 }
             }
-            else if(!(__instance.CMode == ControlMode.Index && fullDescInput)) // Dont want to disable if we arent in desc range but we have full desc input
+            else if(!((__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) && fullDescInput)) // Dont want to disable if we arent in desc range but we have full desc input
             {
                 if (Mod.rightDescriptionManager != null)
                 {
@@ -5875,8 +6060,8 @@ namespace EFM
             if (___m_state == FVRViveHand.HandState.Empty && __instance.CurrentHoveredQuickbeltSlot == null)
             {
                 // Dont have the grab laser if we didnt start touching the touchpad within desc range
-                if ((__instance.CMode == ControlMode.Index && flag2) ||
-                    (__instance.CMode == ControlMode.Vive && flag2 && (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange)))
+                if (((__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) && flag2) ||
+                    ((__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR) && flag2 && (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange)))
                 {
                     if (!__instance.GrabLaser.gameObject.activeSelf)
                     {
