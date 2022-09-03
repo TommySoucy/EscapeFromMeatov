@@ -17,7 +17,6 @@ namespace EFM
         public bool hoverValid;
         public FVRViveHand fvrHand;
         public bool consuming;
-        public GameObject currentHeldItem;
 
         private void Awake()
         {
@@ -173,15 +172,18 @@ namespace EFM
                 return;
             }
 
+            bool mustBuzz = false;
             if (collider.gameObject.GetComponent<EFM_Switch>() != null)
             {
                 collidingSwitch = collider.gameObject.GetComponent<EFM_Switch>();
                 switchColliders.Add(collider);
+                mustBuzz = true;
             }
             else if (collider.transform.parent != null && collider.transform.parent.GetComponent<EFM_TradeVolume>() != null)
             {
                 collidingTradeVolume = collider.transform.parent.GetComponent<EFM_TradeVolume>();
                 tradeVolumeCollider = collider;
+                mustBuzz = true;
             }
             else if (collider.transform.parent != null)
             {
@@ -192,6 +194,7 @@ namespace EFM
                     {
                         collidingTogglableWrapper = lootContainerCIW;
                         togglableColliders.Add(collider);
+                        mustBuzz = true;
                     }
                 }
                 else if (collider.transform.parent.name.Equals("Interactives") && collider.transform.parent.parent != null)
@@ -201,6 +204,7 @@ namespace EFM
                     {
                         collidingTogglableWrapper = lootContainerCIW;
                         togglableColliders.Add(collider);
+                        mustBuzz = true;
                     }
                 }
                 else if (collider.transform.parent.parent != null)
@@ -215,6 +219,7 @@ namespace EFM
                         {
                             collidingTogglableWrapper = itemCIW;
                             togglableColliders.Add(collider);
+                            mustBuzz = true;
                         }
                     }
                 }
@@ -330,14 +335,9 @@ namespace EFM
                     collidingContainerWrapper.SetContainerHovered(false);
                 }
             }
-            else if(collidingSwitch != null || collidingTogglableWrapper != null)
+            else if(mustBuzz)
             {
                 fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
-            }
-            else if(collidingTradeVolume != null)
-            {
-                fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
-                collidingTradeVolume.SetContainerHovered(true);
             }
         }
 
@@ -446,17 +446,17 @@ namespace EFM
 
                 collidingContainerWrapper = null;
             }
-            else if (collidingSwitch != null && switchColliders.Remove(collider) && switchColliders.Count == 0)
+            if (collidingSwitch != null && switchColliders.Remove(collider) && switchColliders.Count == 0)
             {
                 collidingSwitch = null;
             }
-            else if (collidingTradeVolume != null && tradeVolumeCollider.Equals(collider))
+            if (collidingTradeVolume != null && tradeVolumeCollider.Equals(collider))
             {
                 collidingTradeVolume.SetContainerHovered(false);
                 collidingTradeVolume = null;
                 tradeVolumeCollider = null;
             }
-            else if (collidingTogglableWrapper != null && togglableColliders.Remove(collider) && togglableColliders.Count == 0)
+            if (collidingTogglableWrapper != null && togglableColliders.Remove(collider) && togglableColliders.Count == 0)
             {
                 collidingTogglableWrapper = null;
             }

@@ -1631,13 +1631,13 @@ namespace EFM
             }
 
             // Check hands
-            if (leftHand.currentHeldItem != null)
+            if (leftHand.fvrHand.CurrentInteractable != null)
             {
-                AddToPlayerInventory(leftHand.currentHeldItem.transform, true);
+                AddToPlayerInventory(leftHand.fvrHand.CurrentInteractable.transform, true);
             }
-            if (rightHand.currentHeldItem != null)
+            if (rightHand.fvrHand.CurrentInteractable != null)
             {
-                AddToPlayerInventory(rightHand.currentHeldItem.transform, true);
+                AddToPlayerInventory(rightHand.fvrHand.CurrentInteractable.transform, true);
             }
         }
 
@@ -3176,8 +3176,6 @@ namespace EFM
                 return; // No need to process Item that has neither
             }
 
-            hand.GetComponent<EFM_Hand>().currentHeldItem = null;
-
             // Stop here if dropping in a quick belt slot or if this is a door
             if ((__instance is FVRPhysicalObject && (__instance as FVRPhysicalObject).QuickbeltSlot != null))
             {
@@ -4232,8 +4230,6 @@ namespace EFM
             // while the equipment slots arent displayed, so the backpack is inactive, we must activate it
             Mod.instance.LogInfo("Began interacting with " + __instance.name +", qbs null?: "+(__instance.QuickbeltSlot == null)+", harnessed?: "+ __instance.m_isHardnessed);
             __instance.gameObject.SetActive(true);
-           
-            hand.GetComponent<EFM_Hand>().currentHeldItem = __instance.gameObject;
 
             // If the item is harnessed to a quickbelt slot, must scale it to 1 while interacting with it in case it was scaled down in the slot
             if(__instance.QuickbeltSlot != null && __instance.m_isHardnessed)
@@ -4310,11 +4306,11 @@ namespace EFM
                     customItemWrapper.itemType == Mod.ItemType.ArmoredRig ||
                     customItemWrapper.itemType == Mod.ItemType.Rig)
                 {
-                    if (hand.IsThisTheRightHand && Mod.rightHand.collidingTogglableWrapper != null && Mod.rightHand.collidingTogglableWrapper.Equals(customItemWrapper))
+                    if (hand.IsThisTheRightHand && Mod.rightHand.collidingTogglableWrapper != null && Mod.rightHand.collidingTogglableWrapper == customItemWrapper)
                     {
                         Mod.rightHand.collidingTogglableWrapper = null;
                     }
-                    else if(!hand.IsThisTheRightHand && Mod.leftHand.collidingTogglableWrapper != null && Mod.leftHand.collidingTogglableWrapper.Equals(customItemWrapper))
+                    else if(!hand.IsThisTheRightHand && Mod.leftHand.collidingTogglableWrapper != null && Mod.leftHand.collidingTogglableWrapper == customItemWrapper)
                     {
                         Mod.leftHand.collidingTogglableWrapper = null;
                     }
