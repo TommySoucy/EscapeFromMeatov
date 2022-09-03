@@ -150,7 +150,7 @@ namespace EFM
 
             // Init open/close sounds
             openSound = transform.GetChild(7).GetComponent<AudioSource>();
-            openSound = transform.GetChild(8).GetComponent<AudioSource>();
+            closeSound = transform.GetChild(8).GetComponent<AudioSource>();
 
             // Set background pointable
             FVRPointable backgroundPointable = transform.GetChild(0).gameObject.AddComponent<FVRPointable>();
@@ -214,7 +214,6 @@ namespace EFM
 
         public void AddNotification(string text)
         {
-            Mod.instance.LogInfo("Add notification called");
             notificationSound.Play();
             GameObject notification = Instantiate(notificationPrefab, notificationsParent);
             notification.SetActive(true);
@@ -222,7 +221,9 @@ namespace EFM
             notification.AddComponent<EFM_DestroyTimer>().timer = 5;
             if(notificationsParent.childCount > 10)
             {
-                Destroy(notificationsParent.GetChild(1));
+                GameObject firstChild = notificationsParent.GetChild(1).gameObject;
+                firstChild.SetActive(false);
+                Destroy(firstChild);
             }
         }
 

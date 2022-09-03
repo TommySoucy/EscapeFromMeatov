@@ -1304,6 +1304,7 @@ namespace EFM
                 // Spawn standard edition starting items
                 Transform itemRoot = transform.GetChild(transform.childCount - 2);
                 GameObject.Instantiate(Mod.itemPrefabs[199], new Vector3(0.782999f, 0.6760001f, 6.609f), Quaternion.Euler(0f, 37.55229f, 0f), itemRoot);
+                GameObject.Instantiate(IM.OD["UtilityFlashlight"].GetGameObject(), new Vector3(0.782999f, 0.8260001f, 6.609f), Quaternion.Euler(0f, 37.55229f, 0f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(16.685f, 0.405f, -2.755f), Quaternion.Euler(328.4395f, 270.6471f, 2.003955E-06f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(8.198049f, 0.4181025f, -6.029191f), Quaternion.Euler(346.8106f, 0f, 0f), itemRoot);
                 GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(-4.905951f, 0.4161026f, 23.27681f), Quaternion.Euler(348.9087f, 0f, 0f), itemRoot);
@@ -4036,7 +4037,7 @@ namespace EFM
             chosenCharIndex = charIndex;
 
             // Update chosen char text
-            chosenCharacter.text = charIndex == 0 ? "Raider" : "Scavenger";
+            chosenCharacter.text = charIndex == 0 ? "PMC" : "Scav";
 
             canvas.GetChild(3).gameObject.SetActive(false);
             canvas.GetChild(4).gameObject.SetActive(true);
@@ -4091,7 +4092,6 @@ namespace EFM
                     chosenMapIndex = 0;
                     chosenCharIndex = 0;
                     chosenTimeIndex = 0;
-                    chosenMap.text = "Factory";
                     Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
                     break;
             }
