@@ -69,7 +69,6 @@ namespace EFM
         public static Sprite[] traderAvatars; // avatar_russian_small, avatar_therapist_small, avatar_fence_small, avatar_ah_small, avatar_peacekeeper_small, avatar_tech_small, avatar_ragman_small, avatar_jaeger_small
         public static Sprite[] areaIcons; // icon_vents, icon_security, icon_watercloset, icon_stash, icon_generators, icon_heating, icon_rain_collector, icon_medstation, icon_kitchen, icon_restplace, icon_workbench, icon_intelligence_center, icon_shooting_range, icon_library, icon_scav_case, icon_illumination, icon_placeoffame, icon_afu, icon_solarpower, icon_boozegen, icon_bitcionfarm, icon_christmas_illumination
         public static Dictionary<string, Sprite> bonusIcons;
-        public static Sprite[] skillIcons;
         public static Sprite emptyItemSlotIcon;
         public static Sprite dollarCurrencySprite;
         public static Sprite euroCurrencySprite;
@@ -1653,7 +1652,7 @@ namespace EFM
                     Mod.traderStatuses[i].Init();
                 }
 
-                // Add tasks to player status
+                // Add active tasks to player status list
                 foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
                 {
                     if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
@@ -1667,7 +1666,7 @@ namespace EFM
                 }
 
                 // Init exploration trigger bools
-                if(Mod.triggeredExplorationTriggers == null)
+                if (Mod.triggeredExplorationTriggers == null)
                 {
                     Mod.triggeredExplorationTriggers = new List<List<bool>>();
                 }
@@ -1873,7 +1872,7 @@ namespace EFM
                     Mod.traderStatuses[i].Init();
                 }
 
-                // Add tasks to player status
+                // Add active tasks to player status list
                 foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
                 {
                     if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
@@ -3248,71 +3247,6 @@ namespace EFM
                 bonusIcons.Add("RagfairCommission", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money"));
                 bonusIcons.Add("/files/Hideout/icon_hideout_createitem_generic.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_createitem_generic"));
                 bonusIcons.Add("MaximumEnergyReserve", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_batterycharge"));
-                skillIcons = new Sprite[64];
-                skillIcons[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_endurance");
-                skillIcons[1] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_strength");
-                skillIcons[2] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_vitality");
-                skillIcons[3] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_health");
-                skillIcons[4] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_stressresistance");
-                skillIcons[5] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_metabolism");
-                skillIcons[6] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_physical_immunity");
-                skillIcons[7] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_perception");
-                skillIcons[8] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_intellect");
-                skillIcons[9] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_attention");
-                skillIcons[10] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_charisma");
-                skillIcons[11] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_mental_memory");
-                skillIcons[12] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_pistols");
-                skillIcons[13] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_revolvers");
-                skillIcons[14] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_smgs");
-                skillIcons[15] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_assaultrifles");
-                skillIcons[16] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_shotguns");
-                skillIcons[17] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_sniperrifles");
-                skillIcons[18] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_lmgs");
-                skillIcons[19] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_hmgs");
-                skillIcons[20] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_launchers");
-                skillIcons[21] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_ugls");
-                skillIcons[22] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_grenades");
-                skillIcons[23] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_melee");
-                skillIcons[24] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_dmrs");
-                skillIcons[25] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_recoilcontrol");
-                skillIcons[26] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_weapondrawing");
-                skillIcons[27] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_troubleshooting");
-                skillIcons[28] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_surgery");
-                skillIcons[29] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_covertmovement");
-                skillIcons[30] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_search");
-                skillIcons[31] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_magdrills");
-                skillIcons[32] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_sniping");
-                skillIcons[33] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_pronemovement");
-                skillIcons[34] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_fieldmedical");
-                skillIcons[35] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_basicmedical");
-                skillIcons[36] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_lightarmor");
-                skillIcons[37] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_heavyarmor");
-                skillIcons[38] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_basicweaponmodding");
-                skillIcons[39] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_advancedweaponmodding");
-                skillIcons[40] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_nightoperations");
-                skillIcons[41] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_silentoperations");
-                skillIcons[42] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_lockpicking");
-                skillIcons[43] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_weapontreatment");
-                skillIcons[44] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_freetrading");
-                skillIcons[45] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_auctions");
-                skillIcons[46] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_cleanoperations");
-                skillIcons[47] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_barter");
-                skillIcons[48] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_shadowconnections");
-                skillIcons[49] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_taskperformance");
-                skillIcons[50] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_crafting");
-                skillIcons[51] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_hideoutmanagement");
-                skillIcons[52] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_combat_weaponswitch");
-                skillIcons[53] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_practical_equipmentmanagement");
-                skillIcons[54] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_aksystems");
-                skillIcons[55] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_assaultoperations");
-                skillIcons[56] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_authority");
-                skillIcons[57] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_heavycaliber");
-                skillIcons[58] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_bear_rawpower");
-                skillIcons[59] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_arsystems");
-                skillIcons[60] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_deepweaponmodding");
-                skillIcons[61] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_longrangeoptics");
-                skillIcons[62] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_negotiations");
-                skillIcons[63] = Mod.baseAssetsBundle.LoadAsset<Sprite>("skill_special_usec_tactics");
 
                 // Area specific sounds
                 areaProductionSounds = new AudioClip[22,2];

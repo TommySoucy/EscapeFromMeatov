@@ -18,7 +18,7 @@ namespace EFM
         }
         public SkillType skillType;
 
-        public float progress; // Actual
+        public float progress; // Actual, 1 lvl ea. 100
         public float currentProgress; // Affected by effects, this is the one we should check while playing
     }
 }

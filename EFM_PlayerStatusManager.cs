@@ -30,6 +30,7 @@ namespace EFM
         private AudioSource notificationSound;
         private AudioSource openSound;
         private AudioSource closeSound;
+        private GameObject[] skills;
 
         private AudioSource buttonClickAudio;
         private List<TraderTask> taskList;
@@ -126,12 +127,12 @@ namespace EFM
             // Init task list, fill it with trader tasks currently active and complete, set buttons and hoverscrolls
             EFM_HoverScroll downHoverScroll = transform.GetChild(1).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
             EFM_HoverScroll upHoverScroll = transform.GetChild(1).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
-            downHoverScroll.MaxPointingRange = 30;
+            downHoverScroll.MaxPointingRange = 10;
             downHoverScroll.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             downHoverScroll.scrollbar = transform.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
             downHoverScroll.other = upHoverScroll;
             downHoverScroll.up = false;
-            upHoverScroll.MaxPointingRange = 30;
+            upHoverScroll.MaxPointingRange = 10;
             upHoverScroll.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             upHoverScroll.scrollbar = transform.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
             upHoverScroll.other = downHoverScroll;
@@ -139,9 +140,47 @@ namespace EFM
             // Set task list toggle button
             EFM_PointableButton taskListButton = transform.GetChild(1).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
             taskListButton.SetButton();
-            taskListButton.MaxPointingRange = 30;
+            taskListButton.MaxPointingRange = 10;
             taskListButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             taskListButton.Button.onClick.AddListener(() => { OnToggleTaskListClick(); });
+
+            // Init skill list
+            EFM_HoverScroll skillDownHoverScroll = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+            EFM_HoverScroll skillUpHoverScroll = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+            skillDownHoverScroll.MaxPointingRange = 10;
+            skillDownHoverScroll.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
+            skillDownHoverScroll.scrollbar = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+            skillDownHoverScroll.other = skillUpHoverScroll;
+            skillDownHoverScroll.up = false;
+            skillUpHoverScroll.MaxPointingRange = 10;
+            skillUpHoverScroll.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
+            skillUpHoverScroll.scrollbar = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
+            skillUpHoverScroll.other = skillDownHoverScroll;
+            skillUpHoverScroll.up = true;
+            // Set task list toggle button
+            EFM_PointableButton skillListButton = transform.GetChild(9).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            skillListButton.SetButton();
+            skillListButton.MaxPointingRange = 10;
+            skillListButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
+            skillListButton.Button.onClick.AddListener(OnToggleSkillListClick);
+            Transform skillList = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject skillPairPrefab = skillList.GetChild(0).gameObject;
+            GameObject skillPrefab = skillPairPrefab.transform.GetChild(0).gameObject;
+            Transform currentSkillPair = Instantiate(skillPairPrefab, skillList).transform;
+            skills = new GameObject[Mod.skills.Length];
+            for (int i=0; i < Mod.skills.Length; ++i)
+            {
+                if(currentSkillPair.childCount == 3)
+                {
+                    currentSkillPair = Instantiate(skillPairPrefab, skillList).transform;
+                }
+
+                GameObject currentSkill = Instantiate(skillPrefab, currentSkillPair);
+                currentSkill.transform.GetChild(0).GetComponent<Image>().sprite = Mod.skillIcons[i];
+                currentSkill.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("{0} lvl. {1} ({2:0}/100)", Mod.SkillIndexToName(i), (int)(Mod.skills[i].currentProgress/100), Mod.skills[i].currentProgress);
+                currentSkill.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(Mod.skills[i].currentProgress % 100, 4.73f);
+                skills[i] = currentSkill;
+            }
 
             // Init notificaiton stuff
             notificationsParent = transform.GetChild(0).GetChild(12);
@@ -173,7 +212,7 @@ namespace EFM
                 return;
             }
 
-            if (displayed && Vector3.Distance(setPosition, GM.CurrentPlayerRoot.position) > 10)
+            if (displayed && Vector3.Distance(setPosition, GM.CurrentPlayerRoot.position) > 5)
             {
                 SetDisplayed(false);
             }
@@ -367,6 +406,14 @@ namespace EFM
             transform.GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(listNowActive);
             transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(!listNowActive);
             transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.SetActive(listNowActive);
+        }
+
+        private void OnToggleSkillListClick()
+        {
+            bool listNowActive = !transform.GetChild(9).GetChild(0).GetChild(1).gameObject.activeSelf;
+            transform.GetChild(9).GetChild(0).GetChild(1).gameObject.SetActive(listNowActive);
+            transform.GetChild(9).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(!listNowActive);
+            transform.GetChild(9).GetChild(0).GetChild(0).GetChild(2).gameObject.SetActive(listNowActive);
         }
 
         public void UpdateWeight()

@@ -2395,7 +2395,7 @@ namespace EFM
                             skillRequirementScript.level = skillRequiredLevel;
                             skillRequirementScript.index = skillRequirementIndex;
 
-                            skillRequirement.transform.GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.skillIcons[skillRequirementIndex]; // Skill icon
+                            skillRequirement.transform.GetChild(0).GetComponent<Image>().sprite = Mod.skillIcons[skillRequirementIndex]; // Skill icon
                             if (skillRequirementIndex == 51)
                             {
                                 skillRequirement.transform.GetChild(0).GetChild(1).GetChild(0).gameObject.SetActive(true);

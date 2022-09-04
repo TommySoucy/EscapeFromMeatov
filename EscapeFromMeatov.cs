@@ -233,6 +233,7 @@ namespace EFM
         public static Sprite cartridgeIcon;
         public static Sprite[] playerLevelIcons;
         public static AudioClip[] barbedWireClips;
+        public static Sprite[] skillIcons;
 
         // DB
         public static JObject areasDB;
@@ -543,6 +544,71 @@ namespace EFM
             {
                 barbedWireClips[i] = assetsBundle.LoadAsset<AudioClip>("barbwire"+(i+1));
             }
+            skillIcons = new Sprite[64];
+            skillIcons[0] = assetsBundle.LoadAsset<Sprite>("skill_physical_endurance");
+            skillIcons[1] = assetsBundle.LoadAsset<Sprite>("skill_physical_strength");
+            skillIcons[2] = assetsBundle.LoadAsset<Sprite>("skill_physical_vitality");
+            skillIcons[3] = assetsBundle.LoadAsset<Sprite>("skill_physical_health");
+            skillIcons[4] = assetsBundle.LoadAsset<Sprite>("skill_mental_stressresistance");
+            skillIcons[5] = assetsBundle.LoadAsset<Sprite>("skill_physical_metabolism");
+            skillIcons[6] = assetsBundle.LoadAsset<Sprite>("skill_physical_immunity");
+            skillIcons[7] = assetsBundle.LoadAsset<Sprite>("skill_mental_perception");
+            skillIcons[8] = assetsBundle.LoadAsset<Sprite>("skill_mental_intellect");
+            skillIcons[9] = assetsBundle.LoadAsset<Sprite>("skill_mental_attention");
+            skillIcons[10] = assetsBundle.LoadAsset<Sprite>("skill_mental_charisma");
+            skillIcons[11] = assetsBundle.LoadAsset<Sprite>("skill_mental_memory");
+            skillIcons[12] = assetsBundle.LoadAsset<Sprite>("skill_combat_pistols");
+            skillIcons[13] = assetsBundle.LoadAsset<Sprite>("skill_combat_revolvers");
+            skillIcons[14] = assetsBundle.LoadAsset<Sprite>("skill_combat_smgs");
+            skillIcons[15] = assetsBundle.LoadAsset<Sprite>("skill_combat_assaultrifles");
+            skillIcons[16] = assetsBundle.LoadAsset<Sprite>("skill_combat_shotguns");
+            skillIcons[17] = assetsBundle.LoadAsset<Sprite>("skill_combat_sniperrifles");
+            skillIcons[18] = assetsBundle.LoadAsset<Sprite>("skill_combat_lmgs");
+            skillIcons[19] = assetsBundle.LoadAsset<Sprite>("skill_combat_hmgs");
+            skillIcons[20] = assetsBundle.LoadAsset<Sprite>("skill_combat_launchers");
+            skillIcons[21] = assetsBundle.LoadAsset<Sprite>("skill_combat_ugls");
+            skillIcons[22] = assetsBundle.LoadAsset<Sprite>("skill_combat_grenades");
+            skillIcons[23] = assetsBundle.LoadAsset<Sprite>("skill_combat_melee");
+            skillIcons[24] = assetsBundle.LoadAsset<Sprite>("skill_combat_dmrs");
+            skillIcons[25] = assetsBundle.LoadAsset<Sprite>("skill_combat_recoilcontrol");
+            skillIcons[26] = assetsBundle.LoadAsset<Sprite>("skill_combat_weapondrawing");
+            skillIcons[27] = assetsBundle.LoadAsset<Sprite>("skill_combat_troubleshooting");
+            skillIcons[28] = assetsBundle.LoadAsset<Sprite>("skill_practical_surgery");
+            skillIcons[29] = assetsBundle.LoadAsset<Sprite>("skill_practical_covertmovement");
+            skillIcons[30] = assetsBundle.LoadAsset<Sprite>("skill_practical_search");
+            skillIcons[31] = assetsBundle.LoadAsset<Sprite>("skill_practical_magdrills");
+            skillIcons[32] = assetsBundle.LoadAsset<Sprite>("skill_practical_sniping");
+            skillIcons[33] = assetsBundle.LoadAsset<Sprite>("skill_practical_pronemovement");
+            skillIcons[34] = assetsBundle.LoadAsset<Sprite>("skill_practical_fieldmedical");
+            skillIcons[35] = assetsBundle.LoadAsset<Sprite>("skill_practical_basicmedical");
+            skillIcons[36] = assetsBundle.LoadAsset<Sprite>("skill_practical_lightarmor");
+            skillIcons[37] = assetsBundle.LoadAsset<Sprite>("skill_practical_heavyarmor");
+            skillIcons[38] = assetsBundle.LoadAsset<Sprite>("skill_practical_basicweaponmodding");
+            skillIcons[39] = assetsBundle.LoadAsset<Sprite>("skill_practical_advancedweaponmodding");
+            skillIcons[40] = assetsBundle.LoadAsset<Sprite>("skill_practical_nightoperations");
+            skillIcons[41] = assetsBundle.LoadAsset<Sprite>("skill_practical_silentoperations");
+            skillIcons[42] = assetsBundle.LoadAsset<Sprite>("skill_practical_lockpicking");
+            skillIcons[43] = assetsBundle.LoadAsset<Sprite>("skill_practical_weapontreatment");
+            skillIcons[44] = assetsBundle.LoadAsset<Sprite>("skill_practical_freetrading");
+            skillIcons[45] = assetsBundle.LoadAsset<Sprite>("skill_practical_auctions");
+            skillIcons[46] = assetsBundle.LoadAsset<Sprite>("skill_practical_cleanoperations");
+            skillIcons[47] = assetsBundle.LoadAsset<Sprite>("skill_practical_barter");
+            skillIcons[48] = assetsBundle.LoadAsset<Sprite>("skill_practical_shadowconnections");
+            skillIcons[49] = assetsBundle.LoadAsset<Sprite>("skill_practical_taskperformance");
+            skillIcons[50] = assetsBundle.LoadAsset<Sprite>("skill_practical_crafting");
+            skillIcons[51] = assetsBundle.LoadAsset<Sprite>("skill_practical_hideoutmanagement");
+            skillIcons[52] = assetsBundle.LoadAsset<Sprite>("skill_combat_weaponswitch");
+            skillIcons[53] = assetsBundle.LoadAsset<Sprite>("skill_practical_equipmentmanagement");
+            skillIcons[54] = assetsBundle.LoadAsset<Sprite>("skill_special_bear_aksystems");
+            skillIcons[55] = assetsBundle.LoadAsset<Sprite>("skill_special_bear_assaultoperations");
+            skillIcons[56] = assetsBundle.LoadAsset<Sprite>("skill_special_bear_authority");
+            skillIcons[57] = assetsBundle.LoadAsset<Sprite>("skill_special_bear_heavycaliber");
+            skillIcons[58] = assetsBundle.LoadAsset<Sprite>("skill_special_bear_rawpower");
+            skillIcons[59] = assetsBundle.LoadAsset<Sprite>("skill_special_usec_arsystems");
+            skillIcons[60] = assetsBundle.LoadAsset<Sprite>("skill_special_usec_deepweaponmodding");
+            skillIcons[61] = assetsBundle.LoadAsset<Sprite>("skill_special_usec_longrangeoptics");
+            skillIcons[62] = assetsBundle.LoadAsset<Sprite>("skill_special_usec_negotiations");
+            skillIcons[63] = assetsBundle.LoadAsset<Sprite>("skill_special_usec_tactics");
 
             // Load pockets configuration
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
@@ -2860,6 +2926,144 @@ namespace EFM
                 default:
                     Mod.instance.LogError("SkillNameToIndex received name: "+name);
                     return 0;
+            }
+        }
+
+        public static string SkillIndexToName(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return "Endurance";
+                case 1:
+                    return "Strength";
+                case 2:
+                    return "Vitality";
+                case 3:
+                    return "Health";
+                case 4:
+                    return "StressResistance";
+                case 5:
+                    return "Metabolism";
+                case 6:
+                    return "Immunity";
+                case 7:
+                    return "Perception";
+                case 8:
+                    return "Intellect";
+                case 9:
+                    return "Attention";
+                case 10:
+                    return "Charisma";
+                case 11:
+                    return "Memory";
+                case 12:
+                    return "Pistols";
+                case 13:
+                    return "Revolvers";
+                case 14:
+                    return "SMG";
+                case 15:
+                    return "Assault";
+                case 16:
+                    return "Shotgun";
+                case 17:
+                    return "Sniper";
+                case 18:
+                    return "LMG";
+                case 19:
+                    return "HMG";
+                case 20:
+                    return "Launcher";
+                case 21:
+                    return "AttachedLauncher";
+                case 22:
+                    return "Throwing";
+                case 23:
+                    return "Melee";
+                case 24:
+                    return "DMR";
+                case 25:
+                    return "RecoilControl";
+                case 26:
+                    return "AimDrills";
+                case 27:
+                    return "Troubleshooting";
+                case 28:
+                    return "Surgery";
+                case 29:
+                    return "CovertMovement";
+                case 30:
+                    return "Search";
+                case 31:
+                    return "MagDrills";
+                case 32:
+                    return "Sniping";
+                case 33:
+                    return "ProneMovement";
+                case 34:
+                    return "FieldMedicine";
+                case 35:
+                    return "FirstAid";
+                case 36:
+                    return "LightVests";
+                case 37:
+                    return "HeavyVests";
+                case 38:
+                    return "WeaponModding";
+                case 39:
+                    return "AdvancedModding";
+                case 40:
+                    return "NightOps";
+                case 41:
+                    return "SilentOps";
+                case 42:
+                    return "Lockpicking";
+                case 43:
+                    return "WeaponTreatment";
+                case 44:
+                    return "FreeTrading";
+                case 45:
+                    return "Auctions";
+                case 46:
+                    return "Cleanoperations";
+                case 47:
+                    return "Barter";
+                case 48:
+                    return "Shadowconnections";
+                case 49:
+                    return "Taskperformance";
+                case 50:
+                    return "Crafting";
+                case 51:
+                    return "HideoutManagement";
+                case 52:
+                    return "WeaponSwitch";
+                case 53:
+                    return "EquipmentManagement";
+                case 54:
+                    return "AKSystems";
+                case 55:
+                    return "AssaultOperations";
+                case 56:
+                    return "Authority";
+                case 57:
+                    return "HeavyCaliber";
+                case 58:
+                    return "RawPower";
+                case 59:
+                    return "ARSystems";
+                case 60:
+                    return "DeepWeaponModding";
+                case 61:
+                    return "LongRangeOptics";
+                case 62:
+                    return "Negotiations";
+                case 63:
+                    return "Tactics";
+                default:
+                    Mod.instance.LogError("SkillIndexToName received index: "+index);
+                    return "";
             }
         }
 
