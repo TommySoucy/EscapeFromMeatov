@@ -41,6 +41,9 @@ namespace EFM
         private Text medicalScreenTotalHealthText;
         private Text totalTreatmentPriceText;
         private Text scavTimerText;
+        private Collider scavButtonCollider;
+        private Text scavButtonText;
+        private GameObject charChoicePanel;
 
         // Assets
         public static GameObject areaCanvasPrefab; // AreaCanvas
@@ -224,12 +227,11 @@ namespace EFM
             if(scavTimer <= 0)
             {
                 // Enable Scav button, disable scav timer text
-                GameObject scavButtonOject = buttons[3][1].gameObject;
-                scavButtonOject.GetComponent<Collider>().enabled = false;
-                scavButtonOject.transform.GetChild(2).GetComponent<Text>().color = Color.grey;
+                scavButtonCollider.enabled = false;
+                scavButtonText.color = Color.grey;
                 scavTimerText.gameObject.SetActive(false);
             }
-            else
+            else if(charChoicePanel.activeSelf)
             {
                 // Update scav timer text
                 scavTimerText.text = Mod.FormatTimeString(scavTimer);
@@ -237,9 +239,8 @@ namespace EFM
                 if (!scavTimerText.gameObject.activeSelf)
                 {
                     // Disable Scav button, Enable scav timer text
-                    GameObject scavButtonOject = buttons[3][1].gameObject;
-                    scavButtonOject.GetComponent<Collider>().enabled = true;
-                    scavButtonOject.transform.GetChild(2).GetComponent<Text>().color = Color.white;
+                    scavButtonCollider.enabled = true;
+                    scavButtonText.color = Color.white;
                     scavTimerText.gameObject.SetActive(true);
                 }
             }
@@ -1196,6 +1197,10 @@ namespace EFM
                 Mod.currentEnergyRate -= Mod.raidEnergyRate;
                 Mod.currentHydrationRate -= Mod.raidHydrationRate;
             }
+            if (currentSkillGroupLevelingBoosts == null)
+            {
+                currentSkillGroupLevelingBoosts = new Dictionary<EFM_Skill.SkillType, float>();
+            }
 
             ProcessData();
 
@@ -1396,6 +1401,7 @@ namespace EFM
                         Mod.skills[i].skillType = EFM_Skill.SkillType.Special;
                     }
                 }
+
                 Mod.health = new float[7];
                 for (int i = 0; i < 7; ++i)
                 {
@@ -1896,16 +1902,19 @@ namespace EFM
             }
 
             // Load scav return items
-            Transform scavReturnNodeParent = transform.GetChild(1).GetChild(25);
-            JArray loadedScavReturnItems = (JArray)data["scavReturnItems"];
-            for (int i = 0; i < loadedScavReturnItems.Count; ++i)
+            if (data["scavReturnItems"] != null)
             {
-                if(loadedScavReturnItems[i] == null || loadedScavReturnItems[i].Type == JTokenType.Null)
+                Transform scavReturnNodeParent = transform.GetChild(1).GetChild(25);
+                JArray loadedScavReturnItems = (JArray)data["scavReturnItems"];
+                for (int i = 0; i < loadedScavReturnItems.Count; ++i)
                 {
-                    continue;
-                }
+                    if (loadedScavReturnItems[i] == null || loadedScavReturnItems[i].Type == JTokenType.Null)
+                    {
+                        continue;
+                    }
 
-                LoadSavedItem(scavReturnNodeParent.GetChild(i), loadedScavReturnItems[i]);
+                    LoadSavedItem(scavReturnNodeParent.GetChild(i), loadedScavReturnItems[i]);
+                }
             }
 
             // Check for insuredSets
@@ -3304,6 +3313,9 @@ namespace EFM
             chosenMap = canvas.GetChild(6).GetChild(4).GetComponentInChildren<Text>();
             chosenTime = canvas.GetChild(6).GetChild(5).GetComponentInChildren<Text>();
             scavTimerText = canvas.GetChild(3).GetChild(4).GetComponent<Text>();
+            scavButtonCollider = canvas.GetChild(3).GetChild(2).GetComponent<Collider>();
+            scavButtonText = canvas.GetChild(3).GetChild(2).GetChild(2).GetComponent<Text>();
+            charChoicePanel = canvas.GetChild(3).gameObject;
 
             // Areas
             if (areaCanvasPrefab == null)
@@ -3955,6 +3967,29 @@ namespace EFM
                 {
                     scavTimer = 600 * (currentScavCooldownTimer - currentScavCooldownTimer * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100));
                 }
+            }
+
+            // Init status skills
+            Transform skillList = Mod.playerStatusManager.transform.GetChild(9).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
+            GameObject skillPairPrefab = skillList.GetChild(0).gameObject;
+            GameObject skillPrefab = skillPairPrefab.transform.GetChild(0).gameObject;
+            Transform currentSkillPair = Instantiate(skillPairPrefab, skillList).transform;
+            currentSkillPair.gameObject.SetActive(true);
+            Mod.playerStatusManager.skills = new GameObject[Mod.skills.Length];
+            for (int i = 0; i < Mod.skills.Length; ++i)
+            {
+                if (currentSkillPair.childCount == 3)
+                {
+                    currentSkillPair = Instantiate(skillPairPrefab, skillList).transform;
+                    currentSkillPair.gameObject.SetActive(true);
+                }
+
+                GameObject currentSkill = Instantiate(skillPrefab, currentSkillPair);
+                currentSkill.SetActive(true);
+                currentSkill.transform.GetChild(0).GetComponent<Image>().sprite = Mod.skillIcons[i];
+                currentSkill.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(i), (int)(Mod.skills[i].currentProgress / 100), Mod.skills[i].currentProgress % 100);
+                currentSkill.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(Mod.skills[i].currentProgress % 100, 4.73f);
+                Mod.playerStatusManager.skills[i] = currentSkill;
             }
         }
 

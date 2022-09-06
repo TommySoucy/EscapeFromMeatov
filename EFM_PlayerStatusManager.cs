@@ -30,7 +30,7 @@ namespace EFM
         private AudioSource notificationSound;
         private AudioSource openSound;
         private AudioSource closeSound;
-        private GameObject[] skills;
+        public GameObject[] skills;
 
         private AudioSource buttonClickAudio;
         private List<TraderTask> taskList;
@@ -163,24 +163,6 @@ namespace EFM
             skillListButton.MaxPointingRange = 10;
             skillListButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             skillListButton.Button.onClick.AddListener(OnToggleSkillListClick);
-            Transform skillList = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-            GameObject skillPairPrefab = skillList.GetChild(0).gameObject;
-            GameObject skillPrefab = skillPairPrefab.transform.GetChild(0).gameObject;
-            Transform currentSkillPair = Instantiate(skillPairPrefab, skillList).transform;
-            skills = new GameObject[Mod.skills.Length];
-            for (int i=0; i < Mod.skills.Length; ++i)
-            {
-                if(currentSkillPair.childCount == 3)
-                {
-                    currentSkillPair = Instantiate(skillPairPrefab, skillList).transform;
-                }
-
-                GameObject currentSkill = Instantiate(skillPrefab, currentSkillPair);
-                currentSkill.transform.GetChild(0).GetComponent<Image>().sprite = Mod.skillIcons[i];
-                currentSkill.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(i), (int)(Mod.skills[i].currentProgress/100), Mod.skills[i].currentProgress%100);
-                currentSkill.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(Mod.skills[i].currentProgress % 100, 4.73f);
-                skills[i] = currentSkill;
-            }
 
             // Init notificaiton stuff
             notificationsParent = transform.GetChild(0).GetChild(12);

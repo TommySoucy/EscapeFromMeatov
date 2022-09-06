@@ -418,12 +418,7 @@ namespace EFM
                                 Renderer renderer = renderers[j];
                                 if (renderer != null)
                                 {
-                                    MeshFilter mf = renderer.GetComponent<MeshFilter>();
-                                    if (mf != null)
-                                    {
-                                        Destroy(mf);
-                                    }
-                                    Destroy(renderer);
+                                    Destroy(renderer.gameObject);
                                 }
                             }
                         }
@@ -1521,10 +1516,10 @@ namespace EFM
             EFM_Skill.pistolWeaponShotAction = (float)skillsSettings["Pistol"]["WeaponShotAction"];
             EFM_Skill.pistolWeaponChamberAction = (float)skillsSettings["Pistol"]["WeaponChamberAction"];
 
-            // Revolver
-            EFM_Skill.revolverWeaponReloadAction = (float)skillsSettings["Revolver"]["WeaponReloadAction"];
-            EFM_Skill.revolverWeaponShotAction = (float)skillsSettings["Revolver"]["WeaponShotAction"];
-            EFM_Skill.revolverWeaponChamberAction = (float)skillsSettings["Revolver"]["WeaponChamberAction"];
+            // Revolver, uses Pistol values
+            EFM_Skill.revolverWeaponReloadAction = (float)skillsSettings["Pistol"]["WeaponReloadAction"];
+            EFM_Skill.revolverWeaponShotAction = (float)skillsSettings["Pistol"]["WeaponShotAction"];
+            EFM_Skill.revolverWeaponChamberAction = (float)skillsSettings["Pistol"]["WeaponChamberAction"];
 
             // SMG, uses assault values
             EFM_Skill.SMGWeaponReloadAction = (float)skillsSettings["Assault"]["WeaponReloadAction"];
@@ -8049,7 +8044,10 @@ namespace EFM
                 {
                     a += normalized * 2f;
                 }
-                a += a * (0.004f * (Mod.skills[1].currentProgress / 100));
+                if (Mod.skills != null)
+                {
+                    a += a * (0.004f * (Mod.skills[1].currentProgress / 100));
+                }
                 if (___m_twoAxisGrounded)
                 {
                     ___m_twoAxisVelocity.x = a.x;
@@ -8094,9 +8092,15 @@ namespace EFM
             }
 
             // Update fall damage depending on grounded and previous velocity
-            UpdateFallDamage(___m_twoAxisGrounded);
+            if (Mod.currentLocationIndex == 2)
+            {
+                UpdateFallDamage(___m_twoAxisGrounded);
+            }
 
-            UpdateMovementAction(___m_twoAxisVelocity, ___m_sprintingEngaged);
+            if (Mod.skills != null)
+            {
+                UpdateMovementAction(___m_twoAxisVelocity, ___m_sprintingEngaged);
+            }
 
             wasGrounded = ___m_twoAxisGrounded;
             previousVelocity = ___m_twoAxisVelocity;
