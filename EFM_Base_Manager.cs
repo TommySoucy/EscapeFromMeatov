@@ -3975,7 +3975,7 @@ namespace EFM
             GameObject skillPrefab = skillPairPrefab.transform.GetChild(0).gameObject;
             Transform currentSkillPair = Instantiate(skillPairPrefab, skillList).transform;
             currentSkillPair.gameObject.SetActive(true);
-            Mod.playerStatusManager.skills = new GameObject[Mod.skills.Length];
+            Mod.playerStatusManager.skills = new SkillUI[Mod.skills.Length];
             for (int i = 0; i < Mod.skills.Length; ++i)
             {
                 if (currentSkillPair.childCount == 3)
@@ -3984,13 +3984,19 @@ namespace EFM
                     currentSkillPair.gameObject.SetActive(true);
                 }
 
+                SkillUI skillUI = new SkillUI();
                 GameObject currentSkill = Instantiate(skillPrefab, currentSkillPair);
                 currentSkill.SetActive(true);
                 currentSkill.transform.GetChild(0).GetComponent<Image>().sprite = Mod.skillIcons[i];
-                currentSkill.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(i), (int)(Mod.skills[i].currentProgress / 100), Mod.skills[i].currentProgress % 100);
-                currentSkill.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(Mod.skills[i].currentProgress % 100, 4.73f);
-                Mod.playerStatusManager.skills[i] = currentSkill;
+                skillUI.text = currentSkill.transform.GetChild(1).GetChild(0).GetComponent<Text>();
+                skillUI.text.text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(i), (int)(Mod.skills[i].currentProgress / 100), Mod.skills[i].currentProgress % 100);
+                skillUI.progressBarRectTransform = currentSkill.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<RectTransform>();
+                skillUI.progressBarRectTransform.sizeDelta = new Vector2(Mod.skills[i].currentProgress % 100, 4.73f);
+                skillUI.diminishingReturns = currentSkill.transform.GetChild(1).GetChild(2).gameObject;
+                skillUI.increasing = currentSkill.transform.GetChild(1).GetChild(3).gameObject;
+                Mod.playerStatusManager.skills[i] = skillUI;
             }
+
         }
 
         private void UpdateTreatmentApply()

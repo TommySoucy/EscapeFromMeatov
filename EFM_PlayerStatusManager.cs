@@ -30,7 +30,7 @@ namespace EFM
         private AudioSource notificationSound;
         private AudioSource openSound;
         private AudioSource closeSound;
-        public GameObject[] skills;
+        public SkillUI[] skills;
 
         private AudioSource buttonClickAudio;
         private List<TraderTask> taskList;
@@ -152,11 +152,13 @@ namespace EFM
             skillDownHoverScroll.scrollbar = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
             skillDownHoverScroll.other = skillUpHoverScroll;
             skillDownHoverScroll.up = false;
+            skillDownHoverScroll.rate = 0.2f;
             skillUpHoverScroll.MaxPointingRange = 10;
             skillUpHoverScroll.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             skillUpHoverScroll.scrollbar = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
             skillUpHoverScroll.other = skillDownHoverScroll;
             skillUpHoverScroll.up = true;
+            skillUpHoverScroll.rate = 0.2f;
             // Set task list toggle button
             EFM_PointableButton skillListButton = transform.GetChild(9).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
             skillListButton.SetButton();
@@ -230,10 +232,25 @@ namespace EFM
 
         public void UpdateSkillUI(int skillIndex)
         {
-            Transform skillDetails = skills[skillIndex].transform.GetChild(1);
             float currentProgress = Mod.skills[skillIndex].currentProgress % 100;
-            skillDetails.GetChild(0).GetComponent<Text>().text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(skillIndex), Mod.skills[skillIndex].currentProgress / 100, currentProgress);
-            skillDetails.GetChild(1).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(currentProgress, 4.73f);
+            skills[skillIndex].text.text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(skillIndex), Mod.skills[skillIndex].currentProgress / 100, currentProgress);
+            skills[skillIndex].progressBarRectTransform.sizeDelta = new Vector2(currentProgress, 4.73f);
+
+            if (Mod.skills[skillIndex].increasing)
+            {
+                skills[skillIndex].increasing.SetActive(true);
+                skills[skillIndex].diminishingReturns.SetActive(false);
+            }
+            else if (Mod.skills[skillIndex].dimishingReturns)
+            {
+                skills[skillIndex].increasing.SetActive(false);
+                skills[skillIndex].diminishingReturns.SetActive(true);
+            }
+            else
+            {
+                skills[skillIndex].increasing.SetActive(false);
+                skills[skillIndex].diminishingReturns.SetActive(false);
+            }
         }
 
         public void SetExtractionLimitTimer(float raidTimeLeft)
@@ -263,6 +280,7 @@ namespace EFM
             transform.GetChild(0).gameObject.SetActive(this.displayed);
             transform.GetChild(1).gameObject.SetActive(this.displayed);
             transform.GetChild(2).gameObject.SetActive(this.displayed);
+            transform.GetChild(9).gameObject.SetActive(this.displayed);
 
             if (this.displayed)
             {
@@ -704,5 +722,13 @@ namespace EFM
                 upHoverScroll.gameObject.SetActive(false);
             }
         }
+    }
+
+    public class SkillUI
+    {
+        public Text text;
+        public RectTransform progressBarRectTransform;
+        public GameObject increasing;
+        public GameObject diminishingReturns;
     }
 }

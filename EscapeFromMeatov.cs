@@ -15,6 +15,7 @@ using Valve.VR;
 using UnityEngine.UI;
 using System.Reflection.Emit;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 namespace EFM
 {
@@ -396,6 +397,88 @@ namespace EFM
                         DestroyLODs(root.transform);
                     }
                 }
+
+                if (Input.GetKeyDown(KeyCode.Keypad3))
+                {
+                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+                    foreach(GameObject root in roots)
+                    {
+                        SetProbeSettings(root.transform, UnityEngine.Rendering.LightProbeUsage.Off, UnityEngine.Rendering.ReflectionProbeUsage.Off);
+                    }
+                }
+
+                if (Input.GetKeyDown(KeyCode.Keypad4))
+                {
+                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+                    foreach(GameObject root in roots)
+                    {
+                        SetProbeSettings(root.transform, UnityEngine.Rendering.LightProbeUsage.BlendProbes, UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes);
+                    }
+                }
+
+                if (Input.GetKeyDown(KeyCode.Keypad5))
+                {
+                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+                    foreach(GameObject root in roots)
+                    {
+                        DestroyGraphicRayCasters(root.transform);
+                    }
+                }
+
+                if (Input.GetKeyDown(KeyCode.Keypad6))
+                {
+                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+                    foreach(GameObject root in roots)
+                    {
+                        SetRaycastTarget(root.transform);
+                    }
+                }
+            }
+        }
+
+        private void DestroyGraphicRayCasters(Transform root)
+        {
+            GraphicRaycaster rc = root.GetComponent<GraphicRaycaster>();
+            if (rc != null)
+            {
+                Destroy(rc);
+            }
+            foreach (Transform child in root)
+            {
+                DestroyGraphicRayCasters(child);
+            }
+        }
+
+        private void SetRaycastTarget(Transform root)
+        {
+            Graphic[] rc = root.GetComponents<Graphic>();
+            if (rc != null)
+            {
+                foreach(Graphic g in rc)
+                {
+                    if(g != null)
+                    {
+                        g.raycastTarget = false;
+                    }
+                }
+            }
+            foreach (Transform child in root)
+            {
+                SetRaycastTarget(child);
+            }
+        }
+
+        private void SetProbeSettings(Transform root, UnityEngine.Rendering.LightProbeUsage light, UnityEngine.Rendering.ReflectionProbeUsage reflect)
+        {
+            MeshRenderer mr = root.GetComponent<MeshRenderer>();
+            if (mr != null)
+            {
+                mr.lightProbeUsage = light;
+                mr.reflectionProbeUsage = reflect;
+            }
+            foreach (Transform child in root)
+            {
+                SetProbeSettings(child, light, reflect);
             }
         }
 
@@ -2460,16 +2543,16 @@ namespace EFM
         {
             // Globals SkillsSettings
             // Skip if in scav raid
-            if (Mod.currentLocationIndex == 2 && (Mod.chosenCharIndex == 1 || Mod.skills[skillIndex].raidProgress >= 200)) // Max 2 levels per raid TODO: should be unique to each skill
+            if (Mod.currentLocationIndex == 1 || Mod.chosenCharIndex == 1 || Mod.skills[skillIndex].raidProgress >= 300) // Max 3 levels per raid TODO: should be unique to each skill
             {
                 return;
             }
 
             float preLevel = Mod.skills[skillIndex].progress / 100;
 
-            float actualAmountToAdd = (xp * ((skillIndex >= 12 && skillIndex <= 24) ? EFM_Skill.weaponSkillProgressRate : EFM_Skill.skillProgressRate) 
-                                    + xp * (EFM_Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(Mod.skills[skillIndex].skillType) ? EFM_Base_Manager.currentSkillGroupLevelingBoosts[Mod.skills[skillIndex].skillType] : 0))
-                                    * (Mod.skills[skillIndex].dimishingReturns ? 0.5f : 1);
+            float actualAmountToAdd = xp * ((skillIndex >= 12 && skillIndex <= 24) ? EFM_Skill.weaponSkillProgressRate : EFM_Skill.skillProgressRate);
+            actualAmountToAdd += actualAmountToAdd * (EFM_Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(Mod.skills[skillIndex].skillType) ? EFM_Base_Manager.currentSkillGroupLevelingBoosts[Mod.skills[skillIndex].skillType] : 0);
+            actualAmountToAdd *= Mod.skills[skillIndex].dimishingReturns ? 0.5f : 1;
 
             Mod.skills[skillIndex].progress += actualAmountToAdd;
             Mod.skills[skillIndex].currentProgress += actualAmountToAdd;
@@ -2477,7 +2560,7 @@ namespace EFM
             if (Mod.currentLocationIndex == 2)
             {
                 Mod.skills[skillIndex].raidProgress += actualAmountToAdd;
-                if (Mod.skills[skillIndex].raidProgress >= 100) // dimishing returns at 1 level per raid TODO: should be unique to each skill
+                if (Mod.skills[skillIndex].raidProgress >= 200) // dimishing returns at 2 levels per raid TODO: should be unique to each skill
                 {
                     Mod.skills[skillIndex].dimishingReturns = true;
                     Mod.skills[skillIndex].increasing = false;
@@ -2984,6 +3067,24 @@ namespace EFM
             MethodInfo dequeueAndPlayDebugPatchPrefix = typeof(DequeueAndPlayDebugPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(dequeueAndPlayDebugPatchOriginal, new HarmonyMethod(dequeueAndPlayDebugPatchPrefix));
+
+            //// EventSystemUpdateDebugPatch
+            //MethodInfo eventSystemUpdateDebugPatchOriginal = typeof(EventSystem).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo eventSystemUpdateDebugPatchPrefix = typeof(EventSystemUpdateDebugPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            //harmony.Patch(eventSystemUpdateDebugPatchOriginal, new HarmonyMethod(eventSystemUpdateDebugPatchPrefix));
+
+            //// inputModuleProcessDebugPatch
+            //MethodInfo inputModuleProcessDebugPatchOriginal = typeof(StandaloneInputModule).GetMethod("Process", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo inputModuleProcessDebugPatchPrefix = typeof(inputModuleProcessDebugPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            //harmony.Patch(inputModuleProcessDebugPatchOriginal, new HarmonyMethod(inputModuleProcessDebugPatchPrefix));
+
+            //// InteractiveGlobalUpdateDebugPatch
+            //MethodInfo interactiveGlobalUpdateDebugPatchOriginal = typeof(FVRInteractiveObject).GetMethod("GlobalUpdate", BindingFlags.Public | BindingFlags.Static);
+            //MethodInfo interactiveGlobalUpdateDebugPatchPrefix = typeof(InteractiveGlobalUpdateDebugPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            //harmony.Patch(interactiveGlobalUpdateDebugPatchOriginal, new HarmonyMethod(interactiveGlobalUpdateDebugPatchPrefix));
 
             //// PlayClipDebugPatch
             //MethodInfo playClipDebugPatchOriginal = typeof(AudioSourcePool).GetMethod("PlayClip", BindingFlags.Public | BindingFlags.Instance);
@@ -9557,6 +9658,57 @@ namespace EFM
     #endregion
 
     #region DebugPatches
+    class EventSystemUpdateDebugPatch
+    {
+        static void Prefix(ref EventSystem __instance)
+        {
+            Mod.instance.LogInfo("Update called on event sys in scene " + __instance.gameObject.scene.name + "  physically at: ");
+            Transform parent = __instance.transform.parent;
+            while(parent != null)
+            {
+                Mod.instance.LogInfo(parent.name);
+                parent = parent.parent;
+            }
+            
+            BaseInputModule sim = __instance.GetComponent<BaseInputModule>();
+            if(sim != null)
+            {
+                sim.enabled = false;
+                GameObject.Destroy(sim);
+            }
+            GameObject.Destroy(__instance);
+        }
+    }
+
+    class InteractiveGlobalUpdateDebugPatch
+    {
+        static bool Prefix()
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    class inputModuleProcessDebugPatch
+    {
+        static void Prefix(ref StandaloneInputModule __instance)
+        {
+            Mod.instance.LogInfo("Process called on standalone input module in scene "+__instance.gameObject.scene.name+" physically at: ");
+            Transform parent = __instance.transform.parent;
+            while(parent != null)
+            {
+                Mod.instance.LogInfo(parent.name);
+                parent = parent.parent;
+            }
+
+            GameObject.Destroy(__instance);
+        }
+    }
+
     class DequeueAndPlayDebugPatch
     {
         //AudioSourcePool private instance

@@ -557,14 +557,15 @@ namespace EFM
             }
 
             // Set hoverscrolls depending on description height
-            if (descriptionHeight > 1000)
+            if (descriptionHeight > 1050)
             {
-                upHoverScroll.gameObject.SetActive(true); // Only down should be activated at first
+                upHoverScroll.gameObject.SetActive(false); // Only down should be activated at first
+                downHoverScroll.gameObject.SetActive(true);
 
                 // We want to move set amount every second, we know the height = 1 so if want to move half of height per second,
                 // we want to move at rate of amount we want/height, this will give us a fraction of scroll bar to move per second
-                upHoverScroll.rate = 1000 / (descriptionHeight - 1000);
-                downHoverScroll.rate = 1000 / (descriptionHeight - 1000);
+                upHoverScroll.rate = 1050 / (descriptionHeight - 1050);
+                downHoverScroll.rate = 1050 / (descriptionHeight - 1050);
             }
         }
 
