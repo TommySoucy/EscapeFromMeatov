@@ -12,6 +12,12 @@ namespace EFM
         bool triggered = false;
         public void OnTriggerEnter(Collider other)
         {
+            // Skip if in scav raid
+            if (Mod.currentLocationIndex == 2 && Mod.chosenCharIndex == 1)
+            {
+                return;
+            }
+
             Mod.instance.LogInfo("Exploration trigger, on trigger enter: " + other.name);
             if (!triggered && (other.gameObject.layer == 15 || other.gameObject.layer == 9))
             {

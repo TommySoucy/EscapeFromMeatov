@@ -177,7 +177,7 @@ namespace EFM
 
                 GameObject currentSkill = Instantiate(skillPrefab, currentSkillPair);
                 currentSkill.transform.GetChild(0).GetComponent<Image>().sprite = Mod.skillIcons[i];
-                currentSkill.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("{0} lvl. {1} ({2:0}/100)", Mod.SkillIndexToName(i), (int)(Mod.skills[i].currentProgress/100), Mod.skills[i].currentProgress);
+                currentSkill.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(i), (int)(Mod.skills[i].currentProgress/100), Mod.skills[i].currentProgress%100);
                 currentSkill.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(Mod.skills[i].currentProgress % 100, 4.73f);
                 skills[i] = currentSkill;
             }
@@ -244,6 +244,14 @@ namespace EFM
             {
                 --mustUpdateTaskListHeight;
             }
+        }
+
+        public void UpdateSkillUI(int skillIndex)
+        {
+            Transform skillDetails = skills[skillIndex].transform.GetChild(1);
+            float currentProgress = Mod.skills[skillIndex].currentProgress % 100;
+            skillDetails.GetChild(0).GetComponent<Text>().text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(skillIndex), Mod.skills[skillIndex].currentProgress / 100, currentProgress);
+            skillDetails.GetChild(1).GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(currentProgress, 4.73f);
         }
 
         public void SetExtractionLimitTimer(float raidTimeLeft)

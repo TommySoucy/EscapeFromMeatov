@@ -48,7 +48,7 @@ namespace EFM
 			// Set vanillaIDs and customIDs lists with ID of items to spawn when opened
 			int successfulAttempts = 0;
 			Mod.instance.LogInfo("\tSpawning attempts...");
-			for (int i=0; i < 20; ++i) // 20 spawn attempts
+			for (int i=0; i < 20 + (UnityEngine.Random.value <= Mod.skills[30].currentProgress / 10000 ? 2 : 0) + (UnityEngine.Random.value <= Mod.skills[9].currentProgress / 10000 ? 2 : 0); ++i) // 20 spawn attempts + chance of 2 more if high enough search skill and also for attention skill 
             {
 				string randomFilterID = spawnFilter[UnityEngine.Random.Range(0, spawnFilter.Count - 1)];
 				Mod.instance.LogInfo("\t\trandomFilterID: "+ randomFilterID);
@@ -157,6 +157,9 @@ namespace EFM
             {
 				if(customIDs.Count > 0)
                 {
+					Mod.AddSkillExp(EFM_Skill.findAction, 30);
+					Mod.AddSkillExp(EFM_Skill.findActionTrue, 9);
+
 					int itemID = customIDs[customIDs.Count - 1];
 					customIDs.RemoveAt(customIDs.Count - 1);
 					GameObject itemObject = Instantiate(Mod.itemPrefabs[itemID], itemObjectsRoot);
@@ -229,6 +232,8 @@ namespace EFM
 		{
 			foreach(string vanillaID in vanillaIDs)
 			{
+				Mod.AddSkillExp(EFM_Skill.findAction, 30);
+				Mod.AddSkillExp(EFM_Skill.findActionTrue, 9);
 				yield return IM.OD[vanillaID].GetGameObjectAsync();
 				GameObject itemPrefab = IM.OD[vanillaID].GetGameObject();
 				if(itemPrefab == null)

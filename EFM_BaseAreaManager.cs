@@ -427,6 +427,9 @@ namespace EFM
                     List<string> completed = new List<string>();
                     foreach (KeyValuePair<string, EFM_AreaProduction> activeProduction in activeProductions)
                     {
+                        // TODO: EFM_Skill.pointsPerHourCrafting / 3600 * Time.deltaTime would be way too small,
+                        // should prob keep a counter and every minute or something we add the proper amount
+                        Mod.AddSkillExp(Mathf.Max(EFM_Skill.pointsPerHourCrafting / 3600 * Time.deltaTime, 0.00001f), 50);
                         activeProduction.Value.timeLeft -= Time.deltaTime;
                         if (activeProduction.Value.timeLeft <= 0)
                         {
@@ -451,7 +454,7 @@ namespace EFM
                                     mustUpdateUI = false;
 
                                     // Reset timer
-                                    activeProduction.Value.timeLeft = activeProduction.Value.productionTime;
+                                    activeProduction.Value.timeLeft = activeProduction.Value.productionTime - (activeProduction.Value.productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress/100) / 100));
 
                                     // Update timeLeft on production status
                                     int[] formattedTimeLeft = FormatTime(activeProduction.Value.timeLeft);
@@ -473,6 +476,10 @@ namespace EFM
                                 activeProduction.Value.active = false;
                                 completed.Add(activeProduction.Key);
                             }
+
+                            // Add skill points
+                            Mod.AddSkillExp(EFM_Skill.skillPointsPerCraft, 51);
+                            Mod.AddSkillExp(EFM_Skill.intellectSkillProgress, 8);
 
                             if (mustUpdateUI)
                             {
@@ -748,7 +755,9 @@ namespace EFM
                         if(consumptionTimer <= 0)
                         {
                             consume = true;
-                            consumptionTimer = 757.89f;
+                            consumptionTimer = 757.89f
+                                             + 757.89f * (Mod.skills[51].currentProgress/100) * EFM_Skill.consumptionReductionPerLevel 
+                                             + 757.89f * (EFM_Base_Manager.currentFuelConsumption + EFM_Base_Manager.currentFuelConsumption * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100));
                         }
                         break;
                     case 6: // Water collector
@@ -756,7 +765,7 @@ namespace EFM
                         if (consumptionTimer <= 0)
                         {
                             consume = true;
-                            consumptionTimer = 295.45f;
+                            consumptionTimer = 295.45f + 295.45f * (Mod.skills[51].currentProgress / 100) * EFM_Skill.consumptionReductionPerLevel;
                         }
                         break;
                     case 17: // AFU
@@ -764,7 +773,7 @@ namespace EFM
                         if (consumptionTimer <= 0)
                         {
                             consume = true;
-                            consumptionTimer = 211.76f;
+                            consumptionTimer = 211.76f + 211.76f * (Mod.skills[51].currentProgress / 100) * EFM_Skill.consumptionReductionPerLevel;
                         }
                         break;
                     default:
@@ -781,6 +790,23 @@ namespace EFM
                             if(CIW.amount > 0)
                             {
                                 --CIW.amount;
+
+                                switch (areaIndex)
+                                {
+                                    case 4:
+                                        Mod.AddSkillExp(EFM_Skill.generatorPointsPerResourceSpent, 51);
+                                        if(baseManager.baseAreaManagers[18].level == 1)
+                                        {
+                                            Mod.AddSkillExp(EFM_Skill.solarPowerPointsPerResourceSpent, 51);
+                                        }
+                                        break;
+                                    case 6:
+                                        Mod.AddSkillExp(EFM_Skill.waterCollectorPointsPerResourceSpent, 51);
+                                        break;
+                                    case 17:
+                                        Mod.AddSkillExp(EFM_Skill.AFUPointsPerResourceSpent, 51);
+                                        break;
+                                }
 
                                 // Make inactive if no other slots have item with amount in them
                                 if(CIW.amount == 0)
@@ -3246,7 +3272,9 @@ namespace EFM
                 constructing = true;
                 constructionTimer = (int)Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["constructionTime"];
             }
-            
+
+            // Add skill points
+            Mod.AddSkillExp(EFM_Skill.skillPointsPerAreaUpgrade, 51);
         }
 
         public void OnUpgradeCancelClicked()
@@ -3562,7 +3590,7 @@ namespace EFM
                     // the production was already in progress but it did not have an item in its slot
                     if(productions[productionID].timeLeft <= 0)
                     {
-                        productions[productionID].timeLeft = productions[productionID].productionTime;
+                        productions[productionID].timeLeft = productions[productionID].productionTime - (productions[productionID].productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
                     }
 
                     activeProductions.Add(productionID, productions[productionID]);
@@ -3829,7 +3857,7 @@ namespace EFM
                 // the production was already in progress but it did not have an item in its slot
                 if(productions[productionID].timeLeft <= 0)
                 {
-                    productions[productionID].timeLeft = productions[productionID].productionTime;
+                    productions[productionID].timeLeft = productions[productionID].productionTime - (productions[productionID].productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
                 }
 
                 activeProductions.Add(productionID, productions[productionID]);
@@ -4334,7 +4362,7 @@ namespace EFM
 
             // Set production active
             production.active = true;
-            production.timeLeft = production.productionTime;
+            production.timeLeft = production.productionTime - (production.productionTime * (EFM_Skill.craftTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
             activeProductions.Add(productionID, production);
 
             PlayProductionStartSound();
@@ -4925,7 +4953,7 @@ namespace EFM
                             // the production was already in progress but it did not have an item in its slot
                             if (production.Value.timeLeft <= 0)
                             {
-                                production.Value.timeLeft = production.Value.productionTime;
+                                production.Value.timeLeft = production.Value.productionTime - (production.Value.productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
                             }
 
                             activeProductions.Add(production.Key, production.Value);
@@ -5283,7 +5311,7 @@ namespace EFM
                         // Only set timeLeft to productionTime if there isnt already some time left, 0 timeLeft could happen if we paused it the frame it reached <= 0
                         if (production.Value.timeLeft <= 0)
                         {
-                            production.Value.timeLeft = production.Value.productionTime;
+                            production.Value.timeLeft = production.Value.productionTime - (production.Value.productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100)); ;
                         }
 
                         activeProductions.Add(production.Key, production.Value);

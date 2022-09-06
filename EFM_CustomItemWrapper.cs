@@ -831,12 +831,16 @@ namespace EFM
                 {
 					// Health
 					case EFM_Effect_Consumable.EffectConsumable.Hydration:
-						Mod.hydration += consumeEffect.value * effectiveness;
+						float hydrationAmount = consumeEffect.value * effectiveness;
+						Mod.hydration += hydrationAmount;
+						Mod.AddSkillExp(hydrationAmount * (EFM_Skill.hydrationRecoveryRate / 100), 5);
 						++appliedEffectCount;
 						Mod.instance.LogInfo("\tApplied hydration");
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Energy:
-						Mod.energy += consumeEffect.value * effectiveness;
+						float energyAmount = consumeEffect.value * effectiveness;
+						Mod.energy += energyAmount;
+						Mod.AddSkillExp(energyAmount * (EFM_Skill.energyRecoveryRate / 100), 5);
 						++appliedEffectCount;
 						Mod.instance.LogInfo("\tApplied energy");
 						break;
@@ -918,7 +922,8 @@ namespace EFM
 							if (EFM_Effect.effects[i].effectType == EFM_Effect.EffectType.Pain && EFM_Effect.effects[i].active)
 							{
 								EFM_Effect.effects[i].active = false;
-								EFM_Effect.effects[i].inactiveTimer = consumeEffect.duration * effectiveness;
+								float timer = consumeEffect.duration * effectiveness;
+								EFM_Effect.effects[i].inactiveTimer = timer + timer * (EFM_Skill.immunityPainKiller * (Mod.skills[6].currentProgress / 100) / 100);
 								Mod.AddExperience((int)(painExperience * effectiveness), 2, "Treatment experience - Pain ({0})");
 								painApplied = true;
 								++appliedEffectCount;
@@ -1220,6 +1225,7 @@ namespace EFM
 									Mod.currentMaxHealth[lowestPartIndex] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
                                 }
 								Mod.AddExperience(breakPartExperience, 2, "Treatment experience - Destroyed Part ({0})");
+								Mod.AddSkillExp(EFM_Skill.surgerySkillProgress/EFM_Skill.surgeryAction, 28);
 								Mod.instance.LogInfo("\t\tFound destroyed part effect at effect index " + highest);
 								return true;
 							}
@@ -1390,8 +1396,25 @@ namespace EFM
 					case EFM_Effect.EffectType.DamageModifier:
 						effect.value = 1 + buff.value;
 						break;
+				}
+
+				if (effect.value < 0)
+				{
+					if (Mod.skills[6].currentProgress / 100 >= 51 && UnityEngine.Random.value < (EFM_Skill.stimulatorNegativeBuff * 51 / 100))
+                    {
+						EFM_Effect.effects.RemoveAt(EFM_Effect.effects.Count - 1);
+                    }
+
+					effect.timer += effect.timer * (EFM_Base_Manager.currentDebuffEndDelay - EFM_Base_Manager.currentDebuffEndDelay * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)) 
+								  - effect.timer * (EFM_Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
+
+					effect.value += effect.value * (EFM_Skill.immunityMiscEffects * (Mod.skills[6].currentProgress / 100) / 100);
                 }
-            }
+                else
+                {
+					effect.timer += effect.timer * (EFM_Skill.increasePositiveEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
+                }
+			}
 
 			// Return true if at least one effect was used
 			Mod.instance.LogInfo("\tApplied effect count: "+appliedEffectCount+" returning: "+(appliedEffectCount > 0));
@@ -1426,6 +1449,8 @@ namespace EFM
 				{
 					SetContainerOpen(true, isRightHand);
 					gameObject.GetComponent<EFM_LootContainer>().shouldSpawnItems = true;
+
+					Mod.AddSkillExp(EFM_Skill.searchAction, 30);
 				}
 			}
 			else

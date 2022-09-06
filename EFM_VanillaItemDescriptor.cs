@@ -39,6 +39,8 @@ namespace EFM
         public bool inAll = true;
         public int weight; // The original weight of the item. We need to keep it ourselves because we would usually use the RB mass but the RB gets destroyed when a mag gets put in a firearm
         public int volume;
+        public Mod.WeaponClass weaponClass;
+        private long previousDescriptionTime;
         private bool _insured;
         public bool insured
         {
@@ -208,6 +210,21 @@ namespace EFM
 
         public DescriptionPack GetDescriptionPack()
         {
+            if (physObj == null)
+            {
+                physObj = gameObject.GetComponent<FVRPhysicalObject>();
+            }
+            if (physObj is FVRFireArmMagazine) 
+            { 
+                // Checking amount of ammo in mag only counts once per minute for a unique mag
+                long currentTime = Mod.currentLocationIndex == 1 ? Mod.currentBaseManager.GetTimeSeconds() : Mod.currentRaidManager.GetTimeSeconds();
+                if (currentTime - previousDescriptionTime > 60)
+                {
+                    Mod.AddSkillExp(EFM_Skill.magazineCheckAction, 31);
+                }
+                previousDescriptionTime = currentTime;
+            }
+
             descriptionPack.amount = (Mod.baseInventory.ContainsKey(H3ID) ? Mod.baseInventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
             for (int i = 0; i < 22; ++i)
             {

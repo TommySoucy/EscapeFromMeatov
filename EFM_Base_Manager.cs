@@ -40,6 +40,7 @@ namespace EFM
         private Text[] medicalScreenPartHealthTexts;
         private Text medicalScreenTotalHealthText;
         private Text totalTreatmentPriceText;
+        private Text scavTimerText;
 
         // Assets
         public static GameObject areaCanvasPrefab; // AreaCanvas
@@ -104,6 +105,7 @@ namespace EFM
         private float deployTimer;
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         private int insuredSetIndex = 0;
+        private float scavTimer;
         public List<EFM_BaseAreaManager> baseAreaManagers;
         public Dictionary<string, List<GameObject>> baseInventoryObjects;
         private Dictionary<int, int[]> fullPartConditions;
@@ -114,14 +116,13 @@ namespace EFM
         public EFM_GCManager GCManager;
         public EFM_AreaUpgradeCheckProcessor[] activeCheckProcessors = new EFM_AreaUpgradeCheckProcessor[2];
 
-        // TODO make sure the following are used where they should
         public static float currentExperienceRate = 1;
-        public static float currentQuestMoneyReward = 1;
-        public static float currentFuelConsumption = 1;
-        public static float currentDebuffEndDelay = 1;
+        public static float currentQuestMoneyReward = 0;// TODO dont forget to use EFM_Skill.skillBoostPercent
+        public static float currentFuelConsumption = 0; 
+        public static float currentDebuffEndDelay = 0; 
         public static float currentScavCooldownTimer = 1;
         public static float currentInsuranceReturnTime = 1;
-        public static float currentRagfairCommission = 1;
+        public static float currentRagfairCommission = 1; // TODO: Implement, dont forget to use EFM_Skill.skillBoostPercent
         public static Dictionary<EFM_Skill.SkillType, float> currentSkillGroupLevelingBoosts;
 
         private void Update()
@@ -130,6 +131,8 @@ namespace EFM
             {
                 UpdateTime();
             }
+
+            UpdateScavTimer();
 
             UpdateEffects();
 
@@ -169,6 +172,21 @@ namespace EFM
                     Mod.saveSlotIndex = 5;
                     SaveBase();
 
+                    // Reset player stats if scav raid
+                    if(chosenCharIndex == 1)
+                    {
+                        // TODO: Maybe make these somewhat random? The scav may not have max energy and hydration for example
+                        EFM_Effect.RemoveEffects();
+                        for(int i=0; i < Mod.health.Length; ++i)
+                        {
+                            Mod.health[i] = Mod.defaultMaxHealth[i];
+                        }
+                        Mod.energy = Mod.maxEnergy;
+                        Mod.hydration = Mod.maxHydration;
+                        Mod.stamina = Mod.maxStamina;
+                        Mod.weight = 0;
+                    }
+
                     SteamVR_LoadLevel.Begin("Meatov"+ chosenMap.text+ "Scene", false, 0.5f, 0f, 0f, 0f, 1f);
                     countdownDeploy = false;
                 }
@@ -196,6 +214,33 @@ namespace EFM
                 {
                     raidCountdownTitle.text = "Loading map:";
                     raidCountdown.text = (Mod.currentRaidBundleRequest.progress * 100).ToString() + "%";
+                }
+            }
+        }
+
+        private void UpdateScavTimer()
+        {
+            scavTimer -= Time.deltaTime;
+            if(scavTimer <= 0)
+            {
+                // Enable Scav button, disable scav timer text
+                GameObject scavButtonOject = buttons[3][1].gameObject;
+                scavButtonOject.GetComponent<Collider>().enabled = false;
+                scavButtonOject.transform.GetChild(2).GetComponent<Text>().color = Color.grey;
+                scavTimerText.gameObject.SetActive(false);
+            }
+            else
+            {
+                // Update scav timer text
+                scavTimerText.text = Mod.FormatTimeString(scavTimer);
+
+                if (!scavTimerText.gameObject.activeSelf)
+                {
+                    // Disable Scav button, Enable scav timer text
+                    GameObject scavButtonOject = buttons[3][1].gameObject;
+                    scavButtonOject.GetComponent<Collider>().enabled = true;
+                    scavButtonOject.transform.GetChild(2).GetComponent<Text>().color = Color.white;
+                    scavTimerText.gameObject.SetActive(true);
                 }
             }
         }
@@ -345,18 +390,38 @@ namespace EFM
                             {
                                 case EFM_Effect.EffectType.SkillRate:
                                     Mod.skills[effect.skillIndex].currentProgress -= effect.value;
+                                    if(effect.value < 0)
+                                    {
+                                        Mod.AddSkillExp(5, 6);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.EnergyRate:
                                     Mod.currentEnergyRate -= effect.value;
+                                    if (effect.value < 0)
+                                    {
+                                        Mod.AddSkillExp(5, 6);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.HydrationRate:
                                     Mod.currentHydrationRate -= effect.value;
+                                    if (effect.value < 0)
+                                    {
+                                        Mod.AddSkillExp(5, 6);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.MaxStamina:
                                     Mod.currentMaxStamina -= effect.value;
+                                    if (effect.value < 0)
+                                    {
+                                        Mod.AddSkillExp(5, 6);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.StaminaRate:
                                     Mod.currentStaminaEffect -= effect.value;
+                                    if (effect.value < 0)
+                                    {
+                                        Mod.AddSkillExp(5, 6);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.HandsTremor:
                                     // TODO: Stop tremors if there are not other tremor effects
@@ -364,6 +429,7 @@ namespace EFM
                                     {
                                         Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                                     }
+                                    Mod.AddSkillExp(5, 6);
                                     break;
                                 case EFM_Effect.EffectType.QuantumTunnelling:
                                     // TODO: Stop QuantumTunnelling
@@ -371,6 +437,7 @@ namespace EFM
                                     {
                                         Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(false);
                                     }
+                                    Mod.AddSkillExp(5, 6);
                                     break;
                                 case EFM_Effect.EffectType.HealthRate:
                                     float[] arrayToUse = effect.nonLethal ? Mod.currentNonLethalHealthRates : Mod.currentHealthRates;
@@ -384,6 +451,10 @@ namespace EFM
                                     else
                                     {
                                         arrayToUse[effect.partIndex] -= effect.value;
+                                    }
+                                    if (effect.value < 0)
+                                    {
+                                        Mod.AddSkillExp(5, 6);
                                     }
                                     break;
                                 case EFM_Effect.EffectType.RemoveAllBloodLosses:
@@ -410,12 +481,22 @@ namespace EFM
                                             Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(false);
                                         }
                                     }
+                                    Mod.AddSkillExp(5, 6);
                                     break;
                                 case EFM_Effect.EffectType.WeightLimit:
-                                    Mod.currentWeightLimit -= (int)(effect.value * 1000);
+                                    Mod.effectWeightLimitBonus -= effect.value * 1000;
+                                    Mod.currentWeightLimit = (int)(Mod.baseWeightLimit + Mod.effectWeightLimitBonus + Mod.skillWeightLimitBonus);
+                                    if (effect.value < 0)
+                                    {
+                                        Mod.AddSkillExp(5, 6);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.DamageModifier:
                                     Mod.currentDamageModifier -= effect.value;
+                                    if (effect.value < 0)
+                                    {
+                                        Mod.AddSkillExp(5, 6);
+                                    }
                                     break;
                                 case EFM_Effect.EffectType.Pain:
                                     // Remove all tremors caused by this pain and disable tremors if no other tremors active
@@ -445,6 +526,8 @@ namespace EFM
                                     {
                                         Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(false);
                                     }
+
+                                    Mod.AddSkillExp(5, 6);
                                     break;
                                 case EFM_Effect.EffectType.StomachBloodloss:
                                     --Mod.stomachBloodLossCount;
@@ -452,6 +535,8 @@ namespace EFM
                                     {
                                         Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(false);
                                     }
+
+                                    Mod.AddSkillExp(5, 6);
                                     break;
                                 case EFM_Effect.EffectType.UnknownToxin:
                                     // Remove all effects caused by this toxin
@@ -493,6 +578,8 @@ namespace EFM
                                     {
                                         Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(false);
                                     }
+
+                                    Mod.AddSkillExp(5, 6);
                                     break;
                                 case EFM_Effect.EffectType.BodyTemperature:
                                     Mod.temperatureOffset -= effect.value;
@@ -535,6 +622,8 @@ namespace EFM
                                     {
                                         Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
                                     }
+
+                                    Mod.AddSkillExp(5, 6);
                                     break;
                                 case EFM_Effect.EffectType.Fracture:
                                     // Remove all effects caused by this fracture
@@ -569,6 +658,8 @@ namespace EFM
                                     {
                                         Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.SetActive(true);
                                     }
+
+                                    Mod.AddSkillExp(5, 6);
                                     break;
                             }
 
@@ -697,25 +788,32 @@ namespace EFM
                                 }
                                 break;
                             case EFM_Effect.EffectType.WeightLimit:
-                                Mod.currentWeightLimit += (int)(effect.value * 1000);
+                                Mod.effectWeightLimitBonus += effect.value * 1000;
+                                Mod.currentWeightLimit = (int)(Mod.baseWeightLimit + Mod.effectWeightLimitBonus + Mod.skillWeightLimitBonus);
                                 break;
                             case EFM_Effect.EffectType.DamageModifier:
                                 Mod.currentDamageModifier += effect.value;
                                 break;
                             case EFM_Effect.EffectType.Pain:
-                                // Add a tremor effect
-                                EFM_Effect newTremor = new EFM_Effect();
-                                newTremor.effectType = EFM_Effect.EffectType.HandsTremor;
-                                newTremor.delay = 5;
-                                newTremor.hasTimer = effect.hasTimer;
-                                newTremor.timer = effect.timer;
-                                EFM_Effect.effects.Add(newTremor);
-                                effect.caused.Add(newTremor);
+                                if (UnityEngine.Random.value < 1 - (Mod.skills[4].currentProgress / 10000))
+                                {
+                                    // Add a tremor effect
+                                    EFM_Effect newTremor = new EFM_Effect();
+                                    newTremor.effectType = EFM_Effect.EffectType.HandsTremor;
+                                    newTremor.delay = 5;
+                                    newTremor.hasTimer = effect.hasTimer;
+                                    newTremor.timer = effect.timer + effect.timer * (currentDebuffEndDelay - currentDebuffEndDelay * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                                    - effect.timer * (EFM_Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
+                                    EFM_Effect.effects.Add(newTremor);
+                                    effect.caused.Add(newTremor);
+                                }
 
                                 if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
                                 {
                                     Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(true);
                                 }
+
+                                Mod.AddSkillExp(EFM_Skill.stressResistanceHealthNegativeEffect, 4);
                                 break;
                             case EFM_Effect.EffectType.StomachBloodloss:
                                 ++Mod.stomachBloodLossCount;
@@ -730,7 +828,8 @@ namespace EFM
                                 newToxinPain.effectType = EFM_Effect.EffectType.Pain;
                                 newToxinPain.delay = 5;
                                 newToxinPain.hasTimer = effect.hasTimer;
-                                newToxinPain.timer = effect.timer;
+                                newToxinPain.timer = effect.timer + effect.timer * (currentDebuffEndDelay - currentDebuffEndDelay * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                                   - effect.timer * (EFM_Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
                                 newToxinPain.partIndex = 0;
                                 EFM_Effect.effects.Add(newToxinPain);
                                 effect.caused.Add(newToxinPain);
@@ -738,9 +837,10 @@ namespace EFM
                                 EFM_Effect newToxinHealthRate = new EFM_Effect();
                                 newToxinHealthRate.effectType = EFM_Effect.EffectType.HealthRate;
                                 newToxinHealthRate.delay = 5;
-                                newToxinHealthRate.value = -25;
+                                newToxinHealthRate.value = -25 + 25 * (EFM_Skill.immunityPoisonBuff * (Mod.skills[6].currentProgress / 100) / 100);
                                 newToxinHealthRate.hasTimer = effect.hasTimer;
-                                newToxinHealthRate.timer = effect.timer;
+                                newToxinHealthRate.timer = effect.timer + effect.timer * (currentDebuffEndDelay - currentDebuffEndDelay * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                                         - effect.timer * (EFM_Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
                                 EFM_Effect.effects.Add(newToxinHealthRate);
                                 effect.caused.Add(newToxinHealthRate);
 
@@ -770,7 +870,8 @@ namespace EFM
                                 newLightBleedingHealthRate.delay = 5;
                                 newLightBleedingHealthRate.value = -8;
                                 newLightBleedingHealthRate.hasTimer = effect.hasTimer;
-                                newLightBleedingHealthRate.timer = effect.timer;
+                                newLightBleedingHealthRate.timer = effect.timer + effect.timer * (currentDebuffEndDelay - currentDebuffEndDelay * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                                                 - effect.timer * (EFM_Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
                                 newLightBleedingHealthRate.partIndex = effect.partIndex;
                                 newLightBleedingHealthRate.nonLethal = true;
                                 EFM_Effect.effects.Add(newLightBleedingHealthRate);
@@ -781,7 +882,8 @@ namespace EFM
                                 newLightBleedingEnergyRate.delay = 5;
                                 newLightBleedingEnergyRate.value = -5;
                                 newLightBleedingEnergyRate.hasTimer = effect.hasTimer;
-                                newLightBleedingEnergyRate.timer = effect.timer;
+                                newLightBleedingEnergyRate.timer = effect.timer + effect.timer * (currentDebuffEndDelay - currentDebuffEndDelay * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                                                 - effect.timer * (EFM_Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
                                 newLightBleedingEnergyRate.partIndex = effect.partIndex;
                                 EFM_Effect.effects.Add(newLightBleedingEnergyRate);
                                 effect.caused.Add(newLightBleedingEnergyRate);
@@ -798,7 +900,8 @@ namespace EFM
                                 newHeavyBleedingHealthRate.delay = 5;
                                 newHeavyBleedingHealthRate.value = -13.5f;
                                 newHeavyBleedingHealthRate.hasTimer = effect.hasTimer;
-                                newHeavyBleedingHealthRate.timer = effect.timer;
+                                newHeavyBleedingHealthRate.timer = effect.timer + effect.timer * (currentDebuffEndDelay - currentDebuffEndDelay * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                                                 - effect.timer * (EFM_Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
                                 newHeavyBleedingHealthRate.nonLethal = true;
                                 EFM_Effect.effects.Add(newHeavyBleedingHealthRate);
                                 effect.caused.Add(newHeavyBleedingHealthRate);
@@ -808,7 +911,8 @@ namespace EFM
                                 newHeavyBleedingEnergyRate.delay = 5;
                                 newHeavyBleedingEnergyRate.value = -6;
                                 newHeavyBleedingEnergyRate.hasTimer = effect.hasTimer;
-                                newHeavyBleedingEnergyRate.timer = effect.timer;
+                                newHeavyBleedingEnergyRate.timer = effect.timer + effect.timer * (currentDebuffEndDelay - currentDebuffEndDelay * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                                                 - effect.timer * (EFM_Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
                                 newHeavyBleedingEnergyRate.partIndex = effect.partIndex;
                                 EFM_Effect.effects.Add(newHeavyBleedingEnergyRate);
                                 effect.caused.Add(newHeavyBleedingEnergyRate);
@@ -824,7 +928,8 @@ namespace EFM
                                 newFracturePain.effectType = EFM_Effect.EffectType.Pain;
                                 newFracturePain.delay = 5;
                                 newFracturePain.hasTimer = effect.hasTimer;
-                                newFracturePain.timer = effect.timer;
+                                newFracturePain.timer = effect.timer + effect.timer * (currentDebuffEndDelay - currentDebuffEndDelay * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                                      - effect.timer * (EFM_Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
                                 EFM_Effect.effects.Add(newFracturePain);
                                 effect.caused.Add(newFracturePain);
 
@@ -1098,7 +1203,7 @@ namespace EFM
 
             InitTime();
 
-            if (Mod.justFinishedRaid)
+            if (Mod.justFinishedRaid && Mod.chosenCharIndex == 0)
             {
                 FinishRaid(Mod.raidState); // This will save on autosave
 
@@ -1687,8 +1792,11 @@ namespace EFM
                     Mod.playerInventoryObjects = new Dictionary<string, List<GameObject>>();
                 }
 
+                scavTimer = 0;
+
                 Mod.playerInventory.Clear();
                 Mod.playerInventoryObjects.Clear();
+                Mod.insuredItems = new List<InsuredSet>();
 
                 Mod.preventLoadMagUpdateLists = false;
 
@@ -1701,7 +1809,7 @@ namespace EFM
             // Load player status if not loading in from a raid
             long secondsSinceSave = GetTimeSeconds() - (long)data["time"];
             float minutesSinceSave = secondsSinceSave / 60.0f;
-            if (!Mod.justFinishedRaid)
+            if (!Mod.justFinishedRaid || Mod.chosenCharIndex == 1)
             {
                 Mod.level = (int)data["level"];
                 Mod.experience = (int)data["experience"];
@@ -1728,7 +1836,19 @@ namespace EFM
                 {
                     Mod.skills[i] = new EFM_Skill();
                     Mod.skills[i].progress = (float)data["skills"][i]["progress"];
-                    Mod.skills[i].currentProgress = (float)data["skills"][i]["currentProgress"];
+                    Mod.skills[i].currentProgress = Mod.skills[i].progress;
+
+                    if(i == 0)
+                    {
+                        float enduranceLevel = Mod.skills[0].progress / 100;
+                        Mod.maxStamina += (float)data["maxStamina"] / 100 * enduranceLevel;
+
+                        if (enduranceLevel >= 51)
+                        {
+                            Mod.maxStamina += 20;
+                        }
+                    }
+
                     // 0-6 unless 4 physical
                     // 28-53 unless 52 practical
                     // 54-63 special
@@ -1747,6 +1867,18 @@ namespace EFM
                 }
             }
 
+            if (Mod.justFinishedRaid)
+            {
+                for (int i = 0; i < 64; ++i)
+                {
+                    Mod.skills[i].increasing = false;
+                    Mod.skills[i].dimishingReturns = false;
+                    Mod.skills[i].raidProgress = 0;
+                }
+            }
+
+            scavTimer = (long)data["lastScavRaidTime"] + 600 - GetTimeSeconds();
+
             // Instantiate items
             Transform itemsRoot = transform.GetChild(2);
             JArray loadedItems = (JArray)data["items"];
@@ -1754,8 +1886,8 @@ namespace EFM
             {
                 JToken item = loadedItems[i];
 
-                // If just finished raid, skip any items that are on player since we want to keep what player found in raid
-                if (Mod.justFinishedRaid && ((item["PhysicalObject"]["equipSlot"] != null && (int)item["PhysicalObject"]["equipSlot"] != -1) || (int)item["PhysicalObject"]["heldMode"] != 0 || (int)item["PhysicalObject"]["m_quickBeltSlot"] != -1 || item["pocketSlotIndex"] != null || item["isRightShoulder"] != null))
+                // If just finished raid as PMC, skip any items that are on player since we want to keep what player found in raid
+                if (Mod.justFinishedRaid && Mod.chosenCharIndex == 0 && ((item["PhysicalObject"]["equipSlot"] != null && (int)item["PhysicalObject"]["equipSlot"] != -1) || (int)item["PhysicalObject"]["heldMode"] != 0 || (int)item["PhysicalObject"]["m_quickBeltSlot"] != -1 || item["pocketSlotIndex"] != null || item["isRightShoulder"] != null))
                 {
                     continue;
                 }
@@ -1763,8 +1895,24 @@ namespace EFM
                 LoadSavedItem(itemsRoot, item);
             }
 
+            // Load scav return items
+            Transform scavReturnNodeParent = transform.GetChild(1).GetChild(25);
+            JArray loadedScavReturnItems = (JArray)data["scavReturnItems"];
+            for (int i = 0; i < loadedScavReturnItems.Count; ++i)
+            {
+                if(loadedScavReturnItems[i] == null || loadedScavReturnItems[i].Type == JTokenType.Null)
+                {
+                    continue;
+                }
+
+                LoadSavedItem(scavReturnNodeParent.GetChild(i), loadedScavReturnItems[i]);
+            }
+
             // Check for insuredSets
-            Mod.insuredItems = new List<InsuredSet>();
+            if (Mod.insuredItems == null) 
+            {
+                Mod.insuredItems = new List<InsuredSet>();
+            }
             if (data["insuredSets"] != null)
             {
                 JArray loadedInsuredSets = (JArray)data["insuredSets"];
@@ -3017,7 +3165,7 @@ namespace EFM
             buttons[0] = new Button[4];
             buttons[1] = new Button[7];
             buttons[2] = new Button[6];
-            buttons[3] = new Button[3];
+            buttons[3] = new Button[4];
             buttons[4] = new Button[2];
             buttons[5] = new Button[3];
             buttons[6] = new Button[2];
@@ -3047,9 +3195,10 @@ namespace EFM
             buttons[2][4] = canvas.GetChild(2).GetChild(5).GetComponent<Button>(); // Save Slot 4
             buttons[2][5] = canvas.GetChild(2).GetChild(6).GetComponent<Button>(); // Save Back
 
-            buttons[3][0] = canvas.GetChild(3).GetChild(1).GetComponent<Button>(); // Char Main
-            buttons[3][1] = canvas.GetChild(3).GetChild(2).GetComponent<Button>(); // Char Raider
+            buttons[3][0] = canvas.GetChild(3).GetChild(1).GetComponent<Button>(); // Char PMC
+            buttons[3][1] = canvas.GetChild(3).GetChild(2).GetComponent<Button>(); // Char Scav
             buttons[3][2] = canvas.GetChild(3).GetChild(3).GetComponent<Button>(); // Char Back
+            buttons[3][3] = canvas.GetChild(3).GetChild(5).GetChild(0).GetComponent<Button>(); // Scav block dialog OK
 
             buttons[4][0] = canvas.GetChild(4).GetChild(1).GetComponent<Button>(); // Map Mansion
             buttons[4][1] = canvas.GetChild(4).GetChild(2).GetComponent<Button>(); // Map Back
@@ -3114,6 +3263,7 @@ namespace EFM
             buttons[3][0].onClick.AddListener(() => { OnCharClicked(0); });
             buttons[3][1].onClick.AddListener(() => { OnCharClicked(1); });
             buttons[3][2].onClick.AddListener(() => { OnBackClicked(3); });
+            buttons[3][3].onClick.AddListener(OnScavBlockOKClicked);
 
             buttons[4][0].onClick.AddListener(() => { OnMapClicked(0); });
             buttons[4][1].onClick.AddListener(() => { OnBackClicked(4); });
@@ -3153,6 +3303,7 @@ namespace EFM
             chosenCharacter = canvas.GetChild(6).GetChild(3).GetComponentInChildren<Text>();
             chosenMap = canvas.GetChild(6).GetChild(4).GetComponentInChildren<Text>();
             chosenTime = canvas.GetChild(6).GetChild(5).GetComponentInChildren<Text>();
+            scavTimerText = canvas.GetChild(3).GetChild(4).GetComponent<Text>();
 
             // Areas
             if (areaCanvasPrefab == null)
@@ -3456,347 +3607,354 @@ namespace EFM
 
             if (Mod.justFinishedRaid)
             {
-                // Spawn with less health and energy/hydration if killed or MIA
-                int raidResultExp = 0; // TODO: Add bonus for how long we survived
-                if (Mod.raidState == FinishRaidState.KIA || Mod.raidState == FinishRaidState.MIA)
+                if (Mod.chosenCharIndex == 0)
                 {
-                    for (int i = 0; i < Mod.health.Length; ++i)
+                    // Spawn with less health and energy/hydration if killed or MIA
+                    int raidResultExp = 0; // TODO: Add bonus for how long we survived
+                    if (Mod.raidState == FinishRaidState.KIA || Mod.raidState == FinishRaidState.MIA)
                     {
-                        Mod.health[i] = 0.3f * Mod.currentMaxHealth[i];
+                        for (int i = 0; i < Mod.health.Length; ++i)
+                        {
+                            Mod.health[i] = 0.3f * Mod.currentMaxHealth[i];
+                        }
+
+                        Mod.hydration = 0.3f * Mod.maxHydration;
+                        Mod.energy = 0.3f * Mod.maxEnergy;
+
+                        // Remove all effects
+                        EFM_Effect.RemoveEffects();
+                    }
+                    else if (Mod.raidState == FinishRaidState.Survived)
+                    {
+                        raidResultExp = 600 + (int)(Mod.raidTime / 60 * 10); // Survive exp + bonus of 10 exp / min
+                        Mod.AddExperience(600);
                     }
 
-                    Mod.hydration = 0.3f * Mod.maxHydration;
-                    Mod.energy = 0.3f * Mod.maxEnergy;
+                    Mod.instance.LogInfo("Base init: Just finished raid");
+                    Transform raidReportScreen = transform.GetChild(0).GetChild(0).GetChild(12);
+                    medicalScreen = transform.GetChild(0).GetChild(0).GetChild(13);
+                    float raidReportListHeight = 141; // Default height not including None kill
+                    float medicalListHeight = 26;
 
-                    // Remove all effects
-                    EFM_Effect.RemoveEffects();
-                }
-                else if (Mod.raidState == FinishRaidState.Survived)
-                {
-                    raidResultExp = 600 + (int)(Mod.raidTime / 60 * 10); // Survive exp + bonus of 10 exp / min
-                    Mod.AddExperience(600);
-                }
+                    // Activate raid report, deactivate hideout menu
+                    transform.GetChild(0).GetChild(0).GetChild(0).gameObject.SetActive(false);
+                    transform.GetChild(0).GetChild(0).GetChild(12).gameObject.SetActive(true);
 
-                Mod.instance.LogInfo("Base init: Just finished raid");
-                Transform raidReportScreen = transform.GetChild(0).GetChild(0).GetChild(12);
-                medicalScreen = transform.GetChild(0).GetChild(0).GetChild(13);
-                float raidReportListHeight = 141; // Default height not including None kill
-                float medicalListHeight = 26;
+                    // Set raid result in title
+                    string raidResultString = Mod.raidState == FinishRaidState.RunThrough ? "Run Through" : Mod.raidState.ToString();
+                    raidReportScreen.GetChild(0).GetComponent<Text>().text = "Raid Report: " + raidResultString;
 
-                // Activate raid report, deactivate hideout menu
-                transform.GetChild(0).GetChild(0).GetChild(0).gameObject.SetActive(false);
-                transform.GetChild(0).GetChild(0).GetChild(12).gameObject.SetActive(true);
-
-                // Set raid result in title
-                string raidResultString = Mod.raidState == FinishRaidState.RunThrough ? "Run Through" : Mod.raidState.ToString();
-                raidReportScreen.GetChild(0).GetComponent<Text>().text = "Raid Report: " + raidResultString;
-
-                // Set experience elements
-                raidReportScreen.GetChild(2).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.playerLevelIcons[Mod.level / 5];
-                raidReportScreen.GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
-                int expForNextLevel = 0;
-                for(int i=0; i < Mod.level; ++i)
-                {
-                    expForNextLevel += (int)Mod.XPPerLevel[Mod.level]["exp"];
-                }
-                raidReportScreen.GetChild(2).GetChild(1).GetChild(1).GetComponent<Image>().rectTransform.sizeDelta = new Vector2(450 * (Mod.experience / (float)expForNextLevel), 12.8f);
-                raidReportScreen.GetChild(2).GetChild(1).GetChild(2).GetComponent<Text>().text = Mod.experience.ToString()+"/"+expForNextLevel;
-
-                Transform listContent = raidReportScreen.GetChild(3).GetChild(0).GetChild(0);
-                int expTotal = 0;
-
-                Mod.instance.LogInfo("\tSet raid report xp");
-                // Fill kill list
-                int killCount = 0;
-                if (Mod.killList != null && Mod.killList.Count > 0)
-                {
-                    Mod.instance.LogInfo("\tHave kills, adding to list");
-                    // Disable none
-                    listContent.GetChild(0).GetChild(1).gameObject.SetActive(false);
-
-                    // Add each kill
-                    foreach (KeyValuePair<string, int> kill in Mod.killList)
+                    // Set experience elements
+                    raidReportScreen.GetChild(2).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.playerLevelIcons[Mod.level / 5];
+                    raidReportScreen.GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
+                    int expForNextLevel = 0;
+                    for (int i = 0; i < Mod.level; ++i)
                     {
-                        GameObject killElement = Instantiate(listContent.GetChild(0).GetChild(2).gameObject, listContent.GetChild(0));
-                        killElement.SetActive(true);
-                        killElement.transform.GetChild(0).GetComponent<Text>().text = kill.Key;
-                        killElement.transform.GetChild(1).GetComponent<Text>().text = kill.Value.ToString()+" exp";
-
-                        expTotal += kill.Value;
-
-                        raidReportListHeight += 21;
-                        ++killCount;
+                        expForNextLevel += (int)Mod.XPPerLevel[Mod.level]["exp"];
                     }
-                }
-                else
-                {
-                    Mod.instance.LogInfo("\tNo kills");
-                    raidReportListHeight += 21; // Add none kill
-                }
+                    raidReportScreen.GetChild(2).GetChild(1).GetChild(1).GetComponent<Image>().rectTransform.sizeDelta = new Vector2(450 * (Mod.experience / (float)expForNextLevel), 12.8f);
+                    raidReportScreen.GetChild(2).GetChild(1).GetChild(2).GetComponent<Text>().text = Mod.experience.ToString() + "/" + expForNextLevel;
 
-                // Set other
-                listContent.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = Mod.lootingExp.ToString() + " exp";
-                expTotal += Mod.lootingExp;
-                listContent.GetChild(1).GetChild(2).GetChild(1).GetComponent<Text>().text = Mod.healingExp.ToString() + " exp";
-                expTotal += Mod.healingExp;
-                listContent.GetChild(1).GetChild(3).GetChild(1).GetComponent<Text>().text = Mod.explorationExp.ToString() + " exp";
-                expTotal += Mod.explorationExp;
-                listContent.GetChild(1).GetChild(4).GetChild(0).GetComponent<Text>().text = "Raid Result ("+ raidResultString+")";
-                listContent.GetChild(1).GetChild(4).GetChild(1).GetComponent<Text>().text = raidResultExp.ToString() + " exp";
-                expTotal += raidResultExp;
+                    Transform listContent = raidReportScreen.GetChild(3).GetChild(0).GetChild(0);
+                    int expTotal = 0;
 
-                Mod.instance.LogInfo("\tSet other xp");
-                // Set total
-                listContent.GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = expTotal.ToString()+" exp";
-
-                Mod.instance.LogInfo("\tSetting hoverscrolls, killcount: "+killCount);
-                // Set hover scrolls
-                if (killCount >= 8)
-                {
-                    Mod.instance.LogInfo("\t\tkillcount >= 8, activating kill list hover scrolls");
-                    EFM_HoverScroll raidReportListDownHoverScroll = raidReportScreen.GetChild(3).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
-                    EFM_HoverScroll raidReportListUpHoverScroll = raidReportScreen.GetChild(3).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
-                    raidReportListDownHoverScroll.MaxPointingRange = 30;
-                    raidReportListDownHoverScroll.hoverSound = hoverAudio;
-                    raidReportListDownHoverScroll.scrollbar = raidReportScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                    raidReportListDownHoverScroll.other = raidReportListUpHoverScroll;
-                    raidReportListDownHoverScroll.up = false;
-                    raidReportListUpHoverScroll.MaxPointingRange = 30;
-                    raidReportListUpHoverScroll.hoverSound = hoverAudio;
-                    raidReportListUpHoverScroll.scrollbar = raidReportScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                    raidReportListUpHoverScroll.other = raidReportListDownHoverScroll;
-                    raidReportListUpHoverScroll.up = true;
-
-                    raidReportListUpHoverScroll.rate = 309 / (raidReportListHeight - 309);
-                    raidReportListDownHoverScroll.rate = 309 / (raidReportListHeight - 309);
-                    raidReportListDownHoverScroll.gameObject.SetActive(true);
-                }
-                Mod.instance.LogInfo("\tSet hoverscrolls, setting medical");
-
-
-                // Set medical body
-                Dictionary<int, bool[]> partConditions = new Dictionary<int, bool[]>();
-                foreach(EFM_Effect effect in EFM_Effect.effects)
-                {
-                    if(effect.partIndex > -1)
+                    Mod.instance.LogInfo("\tSet raid report xp");
+                    // Fill kill list
+                    int killCount = 0;
+                    if (Mod.killList != null && Mod.killList.Count > 0)
                     {
-                        if(effect.effectType == EFM_Effect.EffectType.LightBleeding)
-                        {
-                            if (partConditions.ContainsKey(effect.partIndex))
-                            {
-                                partConditions[effect.partIndex][0] = true;
-                            }
-                            else
-                            {
-                                partConditions.Add(effect.partIndex, new bool[] { true, false, false });
-                            }
-                        }
-                        else if (effect.effectType == EFM_Effect.EffectType.HeavyBleeding)
-                        {
-                            if (partConditions.ContainsKey(effect.partIndex))
-                            {
-                                partConditions[effect.partIndex][1] = true;
-                            }
-                            else
-                            {
-                                partConditions.Add(effect.partIndex, new bool[] { false, true, false });
-                            }
-                        }
-                        else if (effect.effectType == EFM_Effect.EffectType.Fracture)
-                        {
-                            if (partConditions.ContainsKey(effect.partIndex))
-                            {
-                                partConditions[effect.partIndex][2] = true;
-                            }
-                            else
-                            {
-                                partConditions.Add(effect.partIndex, new bool[] { false, false, true });
-                            }
-                        }
-                    }
-                }
-                Mod.instance.LogInfo("\tSet body");
+                        Mod.instance.LogInfo("\tHave kills, adding to list");
+                        // Disable none
+                        listContent.GetChild(0).GetChild(1).gameObject.SetActive(false);
 
-                // Process parts
-                medicalScreenPartImagesParent = medicalScreen.GetChild(4).GetChild(0);
-                Transform partInfoParent = medicalScreen.GetChild(4).GetChild(1);
-                Transform medicalListContent = medicalScreen.GetChild(3).GetChild(0).GetChild(0);
-                medicalScreenPartImages = new Transform[7];
-                medicalScreenPartHealthTexts = new Text[7];
-                totalMedicalTreatmentPrice = 0;
-                fullPartConditions = new Dictionary<int, int[]>();
-                medicalPartElements = new Dictionary<int, GameObject>();
-                int breakPartPrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["BreakPart"]["RemovePrice"];
-                int fracturePrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["Fracture"]["RemovePrice"];
-                int heavyBleedingPrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["HeavyBleeding"]["RemovePrice"];
-                int lightBleedingPrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["RemovePrice"];
-                int healthPrice = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["HealthPointPrice"];
-                int trialLevels = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["TrialLevels"];
-                int trialRaids = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["TrialRaids"];
-                int[] otherConditionCosts = new int[] { lightBleedingPrice, heavyBleedingPrice, fracturePrice };
-                Mod.instance.LogInfo("\tInit part process");
-                for (int partIndex = 0; partIndex < 7; ++partIndex)
-                {
-                    // Set part color
-                    medicalScreenPartImages[partIndex] = medicalScreenPartImagesParent.GetChild(partIndex);
-                    if (Mod.health[partIndex] == 0)
-                    {
-                        medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.black;
+                        // Add each kill
+                        foreach (KeyValuePair<string, int> kill in Mod.killList)
+                        {
+                            GameObject killElement = Instantiate(listContent.GetChild(0).GetChild(2).gameObject, listContent.GetChild(0));
+                            killElement.SetActive(true);
+                            killElement.transform.GetChild(0).GetComponent<Text>().text = kill.Key;
+                            killElement.transform.GetChild(1).GetComponent<Text>().text = kill.Value.ToString() + " exp";
+
+                            expTotal += kill.Value;
+
+                            raidReportListHeight += 21;
+                            ++killCount;
+                        }
                     }
                     else
                     {
-                        medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.Lerp(Color.red, Color.white, Mod.health[partIndex] / Mod.currentMaxHealth[partIndex]);
+                        Mod.instance.LogInfo("\tNo kills");
+                        raidReportListHeight += 21; // Add none kill
                     }
 
-                    // Set part info
-                    medicalScreenPartHealthTexts[partIndex] = partInfoParent.GetChild(partIndex).GetChild(1).GetComponent<Text>();
-                    medicalScreenPartHealthTexts[partIndex].text = String.Format("{0:0}", Mod.health[partIndex]) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[partIndex]);
-                    if (partConditions.ContainsKey(partIndex))
+                    // Set other
+                    listContent.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = Mod.lootingExp.ToString() + " exp";
+                    expTotal += Mod.lootingExp;
+                    listContent.GetChild(1).GetChild(2).GetChild(1).GetComponent<Text>().text = Mod.healingExp.ToString() + " exp";
+                    expTotal += Mod.healingExp;
+                    listContent.GetChild(1).GetChild(3).GetChild(1).GetComponent<Text>().text = Mod.explorationExp.ToString() + " exp";
+                    expTotal += Mod.explorationExp;
+                    listContent.GetChild(1).GetChild(4).GetChild(0).GetComponent<Text>().text = "Raid Result (" + raidResultString + ")";
+                    listContent.GetChild(1).GetChild(4).GetChild(1).GetComponent<Text>().text = raidResultExp.ToString() + " exp";
+                    expTotal += raidResultExp;
+
+                    Mod.instance.LogInfo("\tSet other xp");
+                    // Set total
+                    listContent.GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = expTotal.ToString() + " exp";
+
+                    Mod.instance.LogInfo("\tSetting hoverscrolls, killcount: " + killCount);
+                    // Set hover scrolls
+                    if (killCount >= 8)
                     {
-                        for (int i = 0; i < partConditions[partIndex].Length; ++i)
-                        {
-                            partInfoParent.GetChild(partIndex).GetChild(3).GetChild(i).gameObject.SetActive(partConditions[partIndex][i]);
-                        }
+                        Mod.instance.LogInfo("\t\tkillcount >= 8, activating kill list hover scrolls");
+                        EFM_HoverScroll raidReportListDownHoverScroll = raidReportScreen.GetChild(3).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+                        EFM_HoverScroll raidReportListUpHoverScroll = raidReportScreen.GetChild(3).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+                        raidReportListDownHoverScroll.MaxPointingRange = 30;
+                        raidReportListDownHoverScroll.hoverSound = hoverAudio;
+                        raidReportListDownHoverScroll.scrollbar = raidReportScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
+                        raidReportListDownHoverScroll.other = raidReportListUpHoverScroll;
+                        raidReportListDownHoverScroll.up = false;
+                        raidReportListUpHoverScroll.MaxPointingRange = 30;
+                        raidReportListUpHoverScroll.hoverSound = hoverAudio;
+                        raidReportListUpHoverScroll.scrollbar = raidReportScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
+                        raidReportListUpHoverScroll.other = raidReportListDownHoverScroll;
+                        raidReportListUpHoverScroll.up = true;
+
+                        raidReportListUpHoverScroll.rate = 309 / (raidReportListHeight - 309);
+                        raidReportListDownHoverScroll.rate = 309 / (raidReportListHeight - 309);
+                        raidReportListDownHoverScroll.gameObject.SetActive(true);
                     }
+                    Mod.instance.LogInfo("\tSet hoverscrolls, setting medical");
 
-                    if (partConditions.ContainsKey(partIndex) || Mod.health[partIndex] < Mod.currentMaxHealth[partIndex])
+
+                    // Set medical body
+                    Dictionary<int, bool[]> partConditions = new Dictionary<int, bool[]>();
+                    foreach (EFM_Effect effect in EFM_Effect.effects)
                     {
-                        fullPartConditions.Add(partIndex, new int[5]);
-
-                        // Add to list
-                        GameObject partElement = Instantiate(medicalListContent.GetChild(0).gameObject, medicalListContent);
-                        partElement.transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.GetBodyPartName(partIndex);
-                        partElement.SetActive(true);
-
-                        // Setup logic
-                        EFM_PointableButton pointableButton = partElement.transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
-                        pointableButton.SetButton();
-                        int currentPartIndex = partIndex;
-                        pointableButton.Button.onClick.AddListener(() => { ToggleMedicalPart(currentPartIndex); });
-                        pointableButton.MaxPointingRange = 20;
-                        pointableButton.hoverSound = hoverAudio;
-
-                        medicalPartElements.Add(partIndex, partElement);
-
-                        medicalListHeight += 27;
-
-                        // Process health and destroyed
-                        int partTotalCost = 0;
-                        if (Mod.health[partIndex] < Mod.currentMaxHealth[partIndex])
+                        if (effect.partIndex > -1)
                         {
-                            if(Mod.health[partIndex] <= 0)
+                            if (effect.effectType == EFM_Effect.EffectType.LightBleeding)
                             {
-                                int cost = (int)(breakPartPrice + healthPrice * Mod.currentMaxHealth[partIndex]);
-                                fullPartConditions[partIndex][4] = cost;
-                                totalMedicalTreatmentPrice += cost;
-                                partTotalCost += cost;
-
-                                partElement.transform.GetChild(5).gameObject.SetActive(true);
-                                partElement.transform.GetChild(5).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_MarketManager.FormatCompleteMoneyString(cost);
-
-                                EFM_PointableButton destroyedPartButton = partElement.transform.GetChild(5).gameObject.AddComponent<EFM_PointableButton>();
-                                destroyedPartButton.SetButton();
-                                destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 4); });
-                                destroyedPartButton.MaxPointingRange = 20;
-                                destroyedPartButton.hoverSound = hoverAudio;
-                            }
-                            else // Not destroyed but damaged
-                            {
-                                int hpToHeal = (int)(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]);
-                                int cost = healthPrice * hpToHeal;
-                                fullPartConditions[partIndex][0] = cost;
-                                totalMedicalTreatmentPrice += cost;
-                                partTotalCost += cost;
-
-                                partElement.transform.GetChild(1).gameObject.SetActive(true);
-                                partElement.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_MarketManager.FormatCompleteMoneyString(cost);
-                                partElement.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "Health (" + hpToHeal + ")";
-
-                                EFM_PointableButton destroyedPartButton = partElement.transform.GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
-                                destroyedPartButton.SetButton();
-                                destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 0); });
-                                destroyedPartButton.MaxPointingRange = 20;
-                                destroyedPartButton.hoverSound = hoverAudio;
-                            }
-
-                            medicalListHeight += 22;
-                        }
-
-                        // Process other conditions
-                        if (partConditions.ContainsKey(partIndex))
-                        {
-                            for (int i = 0; i < 3; ++i)
-                            {
-                                if (partConditions[partIndex][i])
+                                if (partConditions.ContainsKey(effect.partIndex))
                                 {
-                                    int cost = otherConditionCosts[i];
-                                    fullPartConditions[partIndex][i + 1] = cost;
-                                    totalMedicalTreatmentPrice += cost;
-                                    partTotalCost += cost;
-
-                                    partElement.transform.GetChild(i + 2).gameObject.SetActive(true);
-                                    partElement.transform.GetChild(i + 2).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_MarketManager.FormatCompleteMoneyString(cost);
-
-                                    EFM_PointableButton destroyedPartButton = partElement.transform.GetChild(i + 2).gameObject.AddComponent<EFM_PointableButton>();
-                                    destroyedPartButton.SetButton();
-                                    destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, i + 1); });
-                                    destroyedPartButton.MaxPointingRange = 20;
-                                    destroyedPartButton.hoverSound = hoverAudio;
-
-                                    medicalListHeight += 22;
+                                    partConditions[effect.partIndex][0] = true;
+                                }
+                                else
+                                {
+                                    partConditions.Add(effect.partIndex, new bool[] { true, false, false });
+                                }
+                            }
+                            else if (effect.effectType == EFM_Effect.EffectType.HeavyBleeding)
+                            {
+                                if (partConditions.ContainsKey(effect.partIndex))
+                                {
+                                    partConditions[effect.partIndex][1] = true;
+                                }
+                                else
+                                {
+                                    partConditions.Add(effect.partIndex, new bool[] { false, true, false });
+                                }
+                            }
+                            else if (effect.effectType == EFM_Effect.EffectType.Fracture)
+                            {
+                                if (partConditions.ContainsKey(effect.partIndex))
+                                {
+                                    partConditions[effect.partIndex][2] = true;
+                                }
+                                else
+                                {
+                                    partConditions.Add(effect.partIndex, new bool[] { false, false, true });
                                 }
                             }
                         }
-
-                        // Set part total cost
-                        partElement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_MarketManager.FormatCompleteMoneyString(partTotalCost);
                     }
+                    Mod.instance.LogInfo("\tSet body");
+
+                    // Process parts
+                    medicalScreenPartImagesParent = medicalScreen.GetChild(4).GetChild(0);
+                    Transform partInfoParent = medicalScreen.GetChild(4).GetChild(1);
+                    Transform medicalListContent = medicalScreen.GetChild(3).GetChild(0).GetChild(0);
+                    medicalScreenPartImages = new Transform[7];
+                    medicalScreenPartHealthTexts = new Text[7];
+                    totalMedicalTreatmentPrice = 0;
+                    fullPartConditions = new Dictionary<int, int[]>();
+                    medicalPartElements = new Dictionary<int, GameObject>();
+                    int breakPartPrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["BreakPart"]["RemovePrice"];
+                    int fracturePrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["Fracture"]["RemovePrice"];
+                    int heavyBleedingPrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["HeavyBleeding"]["RemovePrice"];
+                    int lightBleedingPrice = (int)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["RemovePrice"];
+                    int healthPrice = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["HealthPointPrice"];
+                    int trialLevels = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["TrialLevels"];
+                    int trialRaids = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["TrialRaids"];
+                    int[] otherConditionCosts = new int[] { lightBleedingPrice, heavyBleedingPrice, fracturePrice };
+                    Mod.instance.LogInfo("\tInit part process");
+                    for (int partIndex = 0; partIndex < 7; ++partIndex)
+                    {
+                        // Set part color
+                        medicalScreenPartImages[partIndex] = medicalScreenPartImagesParent.GetChild(partIndex);
+                        if (Mod.health[partIndex] == 0)
+                        {
+                            medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.black;
+                        }
+                        else
+                        {
+                            medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.Lerp(Color.red, Color.white, Mod.health[partIndex] / Mod.currentMaxHealth[partIndex]);
+                        }
+
+                        // Set part info
+                        medicalScreenPartHealthTexts[partIndex] = partInfoParent.GetChild(partIndex).GetChild(1).GetComponent<Text>();
+                        medicalScreenPartHealthTexts[partIndex].text = String.Format("{0:0}", Mod.health[partIndex]) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[partIndex]);
+                        if (partConditions.ContainsKey(partIndex))
+                        {
+                            for (int i = 0; i < partConditions[partIndex].Length; ++i)
+                            {
+                                partInfoParent.GetChild(partIndex).GetChild(3).GetChild(i).gameObject.SetActive(partConditions[partIndex][i]);
+                            }
+                        }
+
+                        if (partConditions.ContainsKey(partIndex) || Mod.health[partIndex] < Mod.currentMaxHealth[partIndex])
+                        {
+                            fullPartConditions.Add(partIndex, new int[5]);
+
+                            // Add to list
+                            GameObject partElement = Instantiate(medicalListContent.GetChild(0).gameObject, medicalListContent);
+                            partElement.transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.GetBodyPartName(partIndex);
+                            partElement.SetActive(true);
+
+                            // Setup logic
+                            EFM_PointableButton pointableButton = partElement.transform.GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+                            pointableButton.SetButton();
+                            int currentPartIndex = partIndex;
+                            pointableButton.Button.onClick.AddListener(() => { ToggleMedicalPart(currentPartIndex); });
+                            pointableButton.MaxPointingRange = 20;
+                            pointableButton.hoverSound = hoverAudio;
+
+                            medicalPartElements.Add(partIndex, partElement);
+
+                            medicalListHeight += 27;
+
+                            // Process health and destroyed
+                            int partTotalCost = 0;
+                            if (Mod.health[partIndex] < Mod.currentMaxHealth[partIndex])
+                            {
+                                if (Mod.health[partIndex] <= 0)
+                                {
+                                    int cost = (int)(breakPartPrice + healthPrice * Mod.currentMaxHealth[partIndex]);
+                                    fullPartConditions[partIndex][4] = cost;
+                                    totalMedicalTreatmentPrice += cost;
+                                    partTotalCost += cost;
+
+                                    partElement.transform.GetChild(5).gameObject.SetActive(true);
+                                    partElement.transform.GetChild(5).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_MarketManager.FormatCompleteMoneyString(cost);
+
+                                    EFM_PointableButton destroyedPartButton = partElement.transform.GetChild(5).gameObject.AddComponent<EFM_PointableButton>();
+                                    destroyedPartButton.SetButton();
+                                    destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 4); });
+                                    destroyedPartButton.MaxPointingRange = 20;
+                                    destroyedPartButton.hoverSound = hoverAudio;
+                                }
+                                else // Not destroyed but damaged
+                                {
+                                    int hpToHeal = (int)(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]);
+                                    int cost = healthPrice * hpToHeal;
+                                    fullPartConditions[partIndex][0] = cost;
+                                    totalMedicalTreatmentPrice += cost;
+                                    partTotalCost += cost;
+
+                                    partElement.transform.GetChild(1).gameObject.SetActive(true);
+                                    partElement.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_MarketManager.FormatCompleteMoneyString(cost);
+                                    partElement.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "Health (" + hpToHeal + ")";
+
+                                    EFM_PointableButton destroyedPartButton = partElement.transform.GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
+                                    destroyedPartButton.SetButton();
+                                    destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 0); });
+                                    destroyedPartButton.MaxPointingRange = 20;
+                                    destroyedPartButton.hoverSound = hoverAudio;
+                                }
+
+                                medicalListHeight += 22;
+                            }
+
+                            // Process other conditions
+                            if (partConditions.ContainsKey(partIndex))
+                            {
+                                for (int i = 0; i < 3; ++i)
+                                {
+                                    if (partConditions[partIndex][i])
+                                    {
+                                        int cost = otherConditionCosts[i];
+                                        fullPartConditions[partIndex][i + 1] = cost;
+                                        totalMedicalTreatmentPrice += cost;
+                                        partTotalCost += cost;
+
+                                        partElement.transform.GetChild(i + 2).gameObject.SetActive(true);
+                                        partElement.transform.GetChild(i + 2).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_MarketManager.FormatCompleteMoneyString(cost);
+
+                                        EFM_PointableButton destroyedPartButton = partElement.transform.GetChild(i + 2).gameObject.AddComponent<EFM_PointableButton>();
+                                        destroyedPartButton.SetButton();
+                                        destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, i + 1); });
+                                        destroyedPartButton.MaxPointingRange = 20;
+                                        destroyedPartButton.hoverSound = hoverAudio;
+
+                                        medicalListHeight += 22;
+                                    }
+                                }
+                            }
+
+                            // Set part total cost
+                            partElement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_MarketManager.FormatCompleteMoneyString(partTotalCost);
+                        }
+                    }
+                    Mod.instance.LogInfo("\tProcessed parts");
+
+                    // Setup total and put as last sibling
+                    totalTreatmentPriceText = medicalListContent.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
+                    totalTreatmentPriceText.text = EFM_MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
+                    medicalListContent.GetChild(1).SetAsLastSibling();
+
+                    // Set total health
+                    float totalHealth = 0;
+                    foreach (float partHealth in Mod.health)
+                    {
+                        totalHealth += partHealth;
+                    }
+                    medicalScreenTotalHealthText = medicalScreen.GetChild(4).GetChild(2).GetChild(1).GetComponent<Text>();
+                    medicalScreenTotalHealthText.text = totalHealth.ToString() + "/440";
+
+                    medicalScreen.GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + EFM_MarketManager.FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("203") ? Mod.baseInventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
+
+                    Mod.instance.LogInfo("\tSet total health");
+                    // Set hover scrolls
+                    if (medicalListHeight >= 377)
+                    {
+                        EFM_HoverScroll medicalListDownHoverScroll = medicalScreen.GetChild(3).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
+                        EFM_HoverScroll merdicalListUpHoverScroll = medicalScreen.GetChild(3).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
+                        medicalListDownHoverScroll.MaxPointingRange = 30;
+                        medicalListDownHoverScroll.hoverSound = hoverAudio;
+                        medicalListDownHoverScroll.scrollbar = medicalScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
+                        medicalListDownHoverScroll.other = merdicalListUpHoverScroll;
+                        medicalListDownHoverScroll.up = false;
+                        merdicalListUpHoverScroll.MaxPointingRange = 30;
+                        merdicalListUpHoverScroll.hoverSound = hoverAudio;
+                        merdicalListUpHoverScroll.scrollbar = medicalScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
+                        merdicalListUpHoverScroll.other = medicalListDownHoverScroll;
+                        merdicalListUpHoverScroll.up = true;
+
+                        merdicalListUpHoverScroll.rate = 377 / (medicalListHeight - 377);
+                        medicalListDownHoverScroll.rate = 377 / (medicalListHeight - 377);
+                        medicalListDownHoverScroll.gameObject.SetActive(true);
+                    }
+                    Mod.instance.LogInfo("\tSet hoverscrolls");
+
+                    UpdateTreatmentApply();
+
+                    // Enable after raid collider to keep player in security room until they're done with after raid report
+                    transform.GetChild(1).GetChild(23).GetChild(3).gameObject.SetActive(true);
                 }
-                Mod.instance.LogInfo("\tProcessed parts");
-
-                // Setup total and put as last sibling
-                totalTreatmentPriceText = medicalListContent.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
-                totalTreatmentPriceText.text = EFM_MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
-                medicalListContent.GetChild(1).SetAsLastSibling();
-
-                // Set total health
-                float totalHealth = 0;
-                foreach(float partHealth in Mod.health)
+                else // Finished scav raid
                 {
-                    totalHealth += partHealth;
+                    scavTimer = 600 * (currentScavCooldownTimer - currentScavCooldownTimer * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100));
                 }
-                medicalScreenTotalHealthText = medicalScreen.GetChild(4).GetChild(2).GetChild(1).GetComponent<Text>();
-                medicalScreenTotalHealthText.text = totalHealth.ToString()+"/440";
-
-                medicalScreen.GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + EFM_MarketManager.FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("203") ? Mod.baseInventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
-
-                Mod.instance.LogInfo("\tSet total health");
-                // Set hover scrolls
-                if (medicalListHeight >= 377)
-                {
-                    EFM_HoverScroll medicalListDownHoverScroll = medicalScreen.GetChild(3).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
-                    EFM_HoverScroll merdicalListUpHoverScroll = medicalScreen.GetChild(3).GetChild(3).gameObject.AddComponent<EFM_HoverScroll>();
-                    medicalListDownHoverScroll.MaxPointingRange = 30;
-                    medicalListDownHoverScroll.hoverSound = hoverAudio;
-                    medicalListDownHoverScroll.scrollbar = medicalScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                    medicalListDownHoverScroll.other = merdicalListUpHoverScroll;
-                    medicalListDownHoverScroll.up = false;
-                    merdicalListUpHoverScroll.MaxPointingRange = 30;
-                    merdicalListUpHoverScroll.hoverSound = hoverAudio;
-                    merdicalListUpHoverScroll.scrollbar = medicalScreen.GetChild(3).GetChild(1).GetComponent<Scrollbar>();
-                    merdicalListUpHoverScroll.other = medicalListDownHoverScroll;
-                    merdicalListUpHoverScroll.up = true;
-
-                    merdicalListUpHoverScroll.rate = 377 / (medicalListHeight - 377);
-                    medicalListDownHoverScroll.rate = 377 / (medicalListHeight - 377);
-                    medicalListDownHoverScroll.gameObject.SetActive(true);
-                }
-                Mod.instance.LogInfo("\tSet hoverscrolls");
-
-                UpdateTreatmentApply();
-
-                // Enable after raid collider to keep player in security room until they're done with after raid report
-                transform.GetChild(1).GetChild(23).GetChild(3).gameObject.SetActive(true);
             }
         }
 
@@ -3964,6 +4122,14 @@ namespace EFM
             }
         }
 
+        public void OnScavBlockOKClicked()
+        {
+            clickAudio.Play();
+
+            buttons[3][0].GetComponent<Collider>().enabled = true;
+            buttons[3][1].GetComponent<Collider>().enabled = true;
+        }
+
         public void OnCharClicked(int charIndex)
         {
             clickAudio.Play();
@@ -3973,8 +4139,29 @@ namespace EFM
             // Update chosen char text
             chosenCharacter.text = charIndex == 0 ? "PMC" : "Scav";
 
-            canvas.GetChild(3).gameObject.SetActive(false);
-            canvas.GetChild(4).gameObject.SetActive(true);
+            bool previousScavItemFound = false;
+            Transform scavRaidItemNodeParent = transform.GetChild(1).GetChild(25);
+            foreach(Transform child in scavRaidItemNodeParent)
+            {
+                if(child.childCount > 0)
+                {
+                    previousScavItemFound = true;
+                    break;
+                }
+            }
+
+            if (previousScavItemFound)
+            {
+                buttons[3][0].GetComponent<Collider>().enabled = false;
+                buttons[3][1].GetComponent<Collider>().enabled = false;
+
+                canvas.GetChild(3).GetChild(5).gameObject.SetActive(true);
+            }
+            else
+            {
+                canvas.GetChild(3).gameObject.SetActive(false);
+                canvas.GetChild(4).gameObject.SetActive(true);
+            }
         }
 
         public void OnMapClicked(int mapIndex)
@@ -4026,6 +4213,7 @@ namespace EFM
                     chosenMapIndex = 0;
                     chosenCharIndex = 0;
                     chosenTimeIndex = 0;
+                    chosenMap.text = "Factory";
                     Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
                     break;
             }
@@ -4363,6 +4551,10 @@ namespace EFM
             JArray saveItems = new JArray();
             saveObject["items"] = saveItems;
 
+            // Reset save data item list
+            JArray scavSaveItems = new JArray();
+            saveObject["scavReturnItems"] = scavSaveItems;
+
             // Save loose items
             Transform itemsRoot = transform.GetChild(2);
             for (int i = 0; i < itemsRoot.childCount; ++i)
@@ -4412,6 +4604,19 @@ namespace EFM
                 SaveItem(saveItems, Mod.rightShoulderObject.transform);
             }
 
+            // Save scav raid return nodes
+            Transform scavReturnNodeParent = transform.GetChild(1).GetChild(25);
+            for (int i=0; i < 15; ++i)
+            {
+                if(scavReturnNodeParent.GetChild(i).childCount > 0)
+                {
+                    SaveItem(scavSaveItems, scavReturnNodeParent.GetChild(i).GetChild(0));
+                }
+                else
+                {
+                    scavSaveItems.Add(null);
+                }
+            }
 
             // Save insuredSets
             Mod.insuredItems = new List<InsuredSet>();

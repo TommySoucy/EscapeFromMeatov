@@ -102,6 +102,7 @@ namespace EFM
         public static List<FVRInteractiveObject> physObjColResetList;
         public static int physObjColResetNeeded;
         public static List<List<bool>> triggeredExplorationTriggers;
+        public static GameObject[] scavRaidReturnItems; // Hands, Equipment, Right shoulder, pockets
 
         // Player
         public static GameObject playerStatusUI;
@@ -146,9 +147,11 @@ namespace EFM
         public static float staminaRestoration = 4.4f;
         public static float jumpStaminaDrain = 16;
         public static float currentStaminaEffect = 0;
-        public static float weightLimit = 55000;
+        public static float baseWeightLimit = 55000;
+        public static float effectWeightLimitBonus = 0;
+        public static float skillWeightLimitBonus = 0;
         public static float currentDamageModifier = 1;
-        public static int stomachBloodLossCount = 0; // If this is 0, in hideout we will regen health otherwise not, in raid we will multiply energy and hydration rate by 5
+        public static int stomachBloodLossCount = 0; // TODO: If this is 0, in hideout we will regen health otherwise not, in raid we will multiply energy and hydration rate by 5
         public static float temperatureOffset = 0;
         public static bool fatigue = false;
         public static EFM_Effect dehydrationEffect;
@@ -281,6 +284,21 @@ namespace EFM
             LootContainer = 16,
 
             DogTag = 17
+        }
+
+        public enum WeaponClass
+        {
+            Pistol = 0,
+            Revolver = 1,
+            SMG = 2,
+            Assault = 3,
+            Shotgun = 4,
+            Sniper = 5,
+            LMG = 6,
+            HMG = 7,
+            Launcher = 8,
+            AttachedLauncher = 9,
+            DMR = 10
         }
 
         public enum ItemRarity
@@ -1425,6 +1443,174 @@ namespace EFM
             {
                 lootContainersByName.Add(container["_name"].ToString(), (JObject)container);
             }
+
+            LoadSkillVars();
+        }
+
+        private void LoadSkillVars()
+        {
+            JToken skillsSettings = globalDB["config"]["SkillsSettings"];
+            EFM_Skill.skillProgressRate = (float)skillsSettings["SkillProgressRate"];
+            EFM_Skill.weaponSkillProgressRate = (float)skillsSettings["WeaponSkillProgressRate"];
+
+            // HideoutManagement
+            EFM_Skill.skillPointsPerAreaUpgrade = (float)skillsSettings["HideoutManagement"]["SkillPointsPerAreaUpgrade"];
+            EFM_Skill.skillPointsPerCraft = (float)skillsSettings["HideoutManagement"]["SkillPointsPerCraft"];
+            EFM_Skill.generatorPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["ResourceSpent"];
+            EFM_Skill.AFUPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["ResourceSpent"];
+            EFM_Skill.waterCollectorPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["ResourceSpent"];
+            EFM_Skill.solarPowerPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["ResourceSpent"];
+            EFM_Skill.consumptionReductionPerLevel = (float)skillsSettings["HideoutManagement"]["ConsumptionReductionPerLevel"];
+            EFM_Skill.skillBoostPercent = (float)skillsSettings["HideoutManagement"]["SkillBoostPercent"];
+
+            // Crafting
+            EFM_Skill.pointsPerHourCrafting = ((float)skillsSettings["Crafting"]["PointsPerCraftingCycle"] + (float)skillsSettings["Crafting"]["PointsPerUniqueCraftCycle"]) / (float)skillsSettings["Crafting"]["CraftingCycleHours"];
+            EFM_Skill.craftTimeReductionPerLevel = (float)skillsSettings["Crafting"]["CraftTimeReductionPerLevel"];
+            EFM_Skill.productionTimeReductionPerLevel = (float)skillsSettings["Crafting"]["ProductionTimeReductionPerLevel"];
+            EFM_Skill.eliteExtraProductions = (float)skillsSettings["Crafting"]["EliteExtraProductions"];
+
+            // Metabolism
+            EFM_Skill.hydrationRecoveryRate = (float)skillsSettings["Metabolism"]["HydrationRecoveryRate"];
+            EFM_Skill.energyRecoveryRate = (float)skillsSettings["Metabolism"]["EnergyRecoveryRate"];
+            EFM_Skill.increasePositiveEffectDurationRate = (float)skillsSettings["Metabolism"]["IncreasePositiveEffectDurationRate"];
+            EFM_Skill.decreaseNegativeEffectDurationRate = (float)skillsSettings["Metabolism"]["DecreaseNegativeEffectDurationRate"];
+            EFM_Skill.decreasePoisonDurationRate = (float)skillsSettings["Metabolism"]["DecreasePoisonDurationRate"];
+
+            // Immunity
+            EFM_Skill.immunityMiscEffects = (float)skillsSettings["Immunity"]["ImmunityMiscEffects"];
+            EFM_Skill.immunityPoisonBuff = (float)skillsSettings["Immunity"]["ImmunityPoisonBuff"];
+            EFM_Skill.immunityPainKiller = (float)skillsSettings["Immunity"]["ImmunityPainKiller"];
+            EFM_Skill.healthNegativeEffect = (float)skillsSettings["Immunity"]["HealthNegativeEffect"];
+            EFM_Skill.stimulatorNegativeBuff = (float)skillsSettings["Immunity"]["StimulatorNegativeBuff"];
+
+            // Endurance
+            EFM_Skill.movementAction = (float)skillsSettings["Endurance"]["MovementAction"];
+            EFM_Skill.sprintAction = (float)skillsSettings["Endurance"]["SprintAction"];
+            EFM_Skill.gainPerFatigueStack = (float)skillsSettings["Endurance"]["GainPerFatigueStack"];
+
+            // Strength
+            EFM_Skill.sprintActionMin = (float)skillsSettings["Strength"]["SprintActionMin"];
+            EFM_Skill.sprintActionMax = (float)skillsSettings["Strength"]["SprintActionMax"];
+            EFM_Skill.movementActionMin = (float)skillsSettings["Strength"]["MovementActionMin"];
+            EFM_Skill.movementActionMax = (float)skillsSettings["Strength"]["MovementActionMax"];
+            EFM_Skill.pushUpMin = (float)skillsSettings["Strength"]["PushUpMin"];
+            EFM_Skill.pushUpMax = (float)skillsSettings["Strength"]["PushUpMax"];
+            EFM_Skill.fistfightAction = (float)skillsSettings["Strength"]["FistfightAction"];
+            EFM_Skill.throwAction = (float)skillsSettings["Strength"]["ThrowAction"];
+
+            // Vitality
+            EFM_Skill.damageTakenAction = (float)skillsSettings["Vitality"]["DamageTakenAction"];
+            EFM_Skill.vitalityHealthNegativeEffect = (float)skillsSettings["Vitality"]["HealthNegativeEffect"];
+
+            // Health
+            EFM_Skill.skillProgress = (float)skillsSettings["Health"]["SkillProgress"];
+
+            // StressResistance
+            EFM_Skill.stressResistanceHealthNegativeEffect = (float)skillsSettings["StressResistance"]["HealthNegativeEffect"];
+            EFM_Skill.lowHPDuration = (float)skillsSettings["StressResistance"]["LowHPDuration"];
+
+            // Throwing
+            EFM_Skill.throwingThrowAction = (float)skillsSettings["Throwing"]["ThrowAction"];
+
+            // RecoilControl
+            EFM_Skill.recoilAction = (float)skillsSettings["RecoilControl"]["RecoilAction"];
+            EFM_Skill.recoilBonusPerLevel = (float)skillsSettings["RecoilControl"]["RecoilBonusPerLevel"];
+
+            // Pistol
+            EFM_Skill.pistolWeaponReloadAction = (float)skillsSettings["Pistol"]["WeaponReloadAction"];
+            EFM_Skill.pistolWeaponShotAction = (float)skillsSettings["Pistol"]["WeaponShotAction"];
+            EFM_Skill.pistolWeaponChamberAction = (float)skillsSettings["Pistol"]["WeaponChamberAction"];
+
+            // Revolver
+            EFM_Skill.revolverWeaponReloadAction = (float)skillsSettings["Revolver"]["WeaponReloadAction"];
+            EFM_Skill.revolverWeaponShotAction = (float)skillsSettings["Revolver"]["WeaponShotAction"];
+            EFM_Skill.revolverWeaponChamberAction = (float)skillsSettings["Revolver"]["WeaponChamberAction"];
+
+            // SMG, uses assault values
+            EFM_Skill.SMGWeaponReloadAction = (float)skillsSettings["Assault"]["WeaponReloadAction"];
+            EFM_Skill.SMGWeaponShotAction = (float)skillsSettings["Assault"]["WeaponShotAction"];
+            EFM_Skill.SMGWeaponChamberAction = (float)skillsSettings["Assault"]["WeaponChamberAction"];
+
+            // Assault
+            EFM_Skill.assaultWeaponReloadAction = (float)skillsSettings["Assault"]["WeaponReloadAction"];
+            EFM_Skill.assaultWeaponShotAction = (float)skillsSettings["Assault"]["WeaponShotAction"];
+            EFM_Skill.assaultWeaponChamberAction = (float)skillsSettings["Assault"]["WeaponChamberAction"];
+
+            // Shotgun
+            EFM_Skill.shotgunWeaponReloadAction = (float)skillsSettings["Shotgun"]["WeaponReloadAction"];
+            EFM_Skill.shotgunWeaponShotAction = (float)skillsSettings["Shotgun"]["WeaponShotAction"];
+            EFM_Skill.shotgunWeaponChamberAction = (float)skillsSettings["Shotgun"]["WeaponChamberAction"];
+
+            // Sniper
+            EFM_Skill.sniperWeaponReloadAction = (float)skillsSettings["Sniper"]["WeaponReloadAction"];
+            EFM_Skill.sniperWeaponShotAction = (float)skillsSettings["Sniper"]["WeaponShotAction"];
+            EFM_Skill.sniperWeaponChamberAction = (float)skillsSettings["Sniper"]["WeaponChamberAction"];
+
+            // HMG, uses DMR values
+            EFM_Skill.HMGWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            EFM_Skill.HMGWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            EFM_Skill.HMGWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+
+            // LMG, uses DMR values
+            EFM_Skill.LMGWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            EFM_Skill.LMGWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            EFM_Skill.LMGWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+
+            // Launcher, uses DMR values
+            EFM_Skill.launcherWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            EFM_Skill.launcherWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            EFM_Skill.launcherWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+
+            // AttachedLauncher, uses DMR values
+            EFM_Skill.attachedLauncherWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            EFM_Skill.attachedLauncherWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            EFM_Skill.attachedLauncherWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+
+            // DMR
+            EFM_Skill.DMRWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            EFM_Skill.DMRWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            EFM_Skill.DMRWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+
+            // CovertMovement
+            EFM_Skill.covertMovementAction = (float)skillsSettings["CovertMovement"]["MovementAction"];
+
+            // Search
+            EFM_Skill.searchAction = (float)skillsSettings["Search"]["SearchAction"];
+            EFM_Skill.findAction = (float)skillsSettings["Search"]["FindAction"];
+
+            // MagDrills
+            EFM_Skill.raidLoadedAmmoAction = (float)skillsSettings["MagDrills"]["RaidLoadedAmmoAction"];
+            EFM_Skill.raidUnloadedAmmoAction = (float)skillsSettings["MagDrills"]["RaidUnloadedAmmoAction"];
+            EFM_Skill.magazineCheckAction = (float)skillsSettings["MagDrills"]["MagazineCheckAction"];
+
+            // Perception
+            EFM_Skill.onlineAction = (float)skillsSettings["Perception"]["OnlineAction"];
+            EFM_Skill.uniqueLoot = (float)skillsSettings["Perception"]["UniqueLoot"];
+
+            // Intellect
+            EFM_Skill.examineAction = (float)skillsSettings["Intellect"]["ExamineAction"];
+            EFM_Skill.intellectSkillProgress = (float)skillsSettings["Intellect"]["SkillProgress"];
+
+            // Attention
+            EFM_Skill.examineWithInstruction = (float)skillsSettings["Attention"]["ExamineWithInstruction"];
+            EFM_Skill.findActionFalse = (float)skillsSettings["Attention"]["FindActionFalse"];
+            EFM_Skill.findActionTrue = (float)skillsSettings["Attention"]["FindActionTrue"];
+
+            // Charisma
+            EFM_Skill.skillProgressInt = (float)skillsSettings["Charisma"]["SkillProgressInt"];
+            EFM_Skill.skillProgressAtn = (float)skillsSettings["Charisma"]["SkillProgressAtn"];
+            EFM_Skill.skillProgressPer = (float)skillsSettings["Charisma"]["SkillProgressPer"];
+
+            // Memory
+            EFM_Skill.anySkillUp = (float)skillsSettings["Memory"]["AnySkillUp"];
+            EFM_Skill.memorySkillProgress = (float)skillsSettings["Memory"]["SkillProgress"];
+
+            // Surgery
+            EFM_Skill.surgeryAction = (float)skillsSettings["Surgery"]["SurgeryAction"];
+            EFM_Skill.surgerySkillProgress = (float)skillsSettings["Surgery"]["SkillProgress"];
+
+            // AimDrills
+            EFM_Skill.weaponShotAction = (float)skillsSettings["AimDrills"]["WeaponShotAction"];
         }
 
         private void LoadDefaultAssets()
@@ -1484,6 +1670,51 @@ namespace EFM
                     else
                     {
                         itemsByParents.Add(parent, new List<string>() { H3ID });
+                    }
+
+                    if (parent.Equals("5447b5cf4bdc2d65278b4567"))
+                    {
+                        descriptor.weaponClass = WeaponClass.Pistol;
+                    }
+                    else if (parent.Equals("617f1ef5e8b54b0998387733"))
+                    {
+                        descriptor.weaponClass = WeaponClass.Revolver;
+                    }
+                    else if (parent.Equals("5447b5e04bdc2d62278b4567"))
+                    {
+                        descriptor.weaponClass = WeaponClass.SMG;
+                    }
+                    else if (parent.Equals("5447b5f14bdc2d61278b4567"))
+                    {
+                        descriptor.weaponClass = WeaponClass.Assault;
+                    }
+                    else if (parent.Equals("5447b6094bdc2dc3278b4567"))
+                    {
+                        descriptor.weaponClass = WeaponClass.Shotgun;
+                    }
+                    else if (parent.Equals("5447b6254bdc2dc3278b4568"))
+                    {
+                        descriptor.weaponClass = WeaponClass.Sniper;
+                    }
+                    else if (parent.Equals("5447b5fc4bdc2d87278b4567"))
+                    {
+                        descriptor.weaponClass = WeaponClass.LMG;
+                    }
+                    else if (parent.Equals("5447bed64bdc2d97278b4568"))
+                    {
+                        descriptor.weaponClass = WeaponClass.HMG;
+                    }
+                    else if (parent.Equals("5447bedf4bdc2d87278b4568"))
+                    {
+                        descriptor.weaponClass = WeaponClass.Launcher;
+                    }
+                    else if (parent.Equals("5447bee84bdc2dc3278b4569"))
+                    {
+                        descriptor.weaponClass = WeaponClass.AttachedLauncher;
+                    }
+                    else if (parent.Equals("5447b6194bdc2d67278b4567"))
+                    {
+                        descriptor.weaponClass = WeaponClass.DMR;
                     }
                 }
 
@@ -2159,6 +2390,15 @@ namespace EFM
 
         public static void AddExperience(int xp, int type = 0 /*0: General (kill, raid result, etc.), 1: Looting, 2: Healing, 3: Exploration*/, string notifMsg = null)
         {
+            // Skip if in scav raid
+            if(Mod.currentLocationIndex == 2 && Mod.chosenCharIndex == 1)
+            {
+                return;
+            }
+
+            // Add skill and area bonuses
+            xp = (int)(xp * (EFM_Base_Manager.currentExperienceRate + EFM_Base_Manager.currentExperienceRate * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)));
+
             int preLevel = level;
             experience += xp;
             int XPForNextLevel = (int)XPPerLevel[level]["exp"]; // XP for current level would be at level - 1
@@ -2219,6 +2459,190 @@ namespace EFM
             {
                 playerStatusManager.AddNotification(string.Format("Gained {0} experience.", xp));
             }
+        }
+
+        public static void AddSkillExp(float xp, int skillIndex)
+        {
+            // Globals SkillsSettings
+            // Skip if in scav raid
+            if (Mod.currentLocationIndex == 2 && (Mod.chosenCharIndex == 1 || Mod.skills[skillIndex].raidProgress >= 200)) // Max 2 levels per raid TODO: should be unique to each skill
+            {
+                return;
+            }
+
+            float preLevel = Mod.skills[skillIndex].progress / 100;
+
+            float actualAmountToAdd = (xp * ((skillIndex >= 12 && skillIndex <= 24) ? EFM_Skill.weaponSkillProgressRate : EFM_Skill.skillProgressRate) 
+                                    + xp * (EFM_Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(Mod.skills[skillIndex].skillType) ? EFM_Base_Manager.currentSkillGroupLevelingBoosts[Mod.skills[skillIndex].skillType] : 0))
+                                    * (Mod.skills[skillIndex].dimishingReturns ? 0.5f : 1);
+
+            Mod.skills[skillIndex].progress += actualAmountToAdd;
+            Mod.skills[skillIndex].currentProgress += actualAmountToAdd;
+
+            if (Mod.currentLocationIndex == 2)
+            {
+                Mod.skills[skillIndex].raidProgress += actualAmountToAdd;
+                if (Mod.skills[skillIndex].raidProgress >= 100) // dimishing returns at 1 level per raid TODO: should be unique to each skill
+                {
+                    Mod.skills[skillIndex].dimishingReturns = true;
+                    Mod.skills[skillIndex].increasing = false;
+                }
+                else
+                {
+                    Mod.skills[skillIndex].increasing = true;
+                }
+            }
+
+            if (Mod.skills[skillIndex].skillType == EFM_Skill.SkillType.Practical || Mod.skills[skillIndex].skillType == EFM_Skill.SkillType.Physical)
+            {
+                float memoryAmount = EFM_Skill.memorySkillProgress / EFM_Skill.anySkillUp * actualAmountToAdd;
+                Mod.skills[11].progress += memoryAmount;
+                Mod.skills[11].currentProgress += memoryAmount;
+
+                Mod.playerStatusManager.UpdateSkillUI(11);
+            }
+
+            float postLevel = Mod.skills[skillIndex].progress / 100;
+
+            if (skillIndex == 0)
+            {
+                Mod.maxStamina += (postLevel - preLevel);
+
+                float healthAmount = EFM_Skill.skillProgress * actualAmountToAdd;
+                Mod.skills[3].progress += healthAmount;
+                Mod.skills[3].currentProgress += healthAmount;
+
+                if (Mod.currentLocationIndex == 2)
+                {
+                    Mod.skills[3].raidProgress += actualAmountToAdd;
+                    if (Mod.skills[3].raidProgress >= 100) // dimishing returns at 1 level per raid TODO: should be unique to each skill
+                    {
+                        Mod.skills[3].dimishingReturns = true;
+                        Mod.skills[3].increasing = false;
+                    }
+                    else
+                    {
+                        Mod.skills[3].increasing = true;
+                    }
+                }
+
+                Mod.playerStatusManager.UpdateSkillUI(3);
+            }
+            else if(skillIndex == 1)
+            {
+                Mod.skillWeightLimitBonus += (postLevel - preLevel);
+                Mod.currentWeightLimit = (int)(Mod.baseWeightLimit + Mod.effectWeightLimitBonus + Mod.skillWeightLimitBonus);
+
+                float healthAmount = EFM_Skill.skillProgress * actualAmountToAdd;
+                Mod.skills[3].progress += healthAmount;
+                Mod.skills[3].currentProgress += healthAmount;
+
+                if (Mod.currentLocationIndex == 2)
+                {
+                    Mod.skills[3].raidProgress += actualAmountToAdd;
+                    if (Mod.skills[3].raidProgress >= 100) // dimishing returns at 1 level per raid TODO: should be unique to each skill
+                    {
+                        Mod.skills[3].dimishingReturns = true;
+                        Mod.skills[3].increasing = false;
+                    }
+                    else
+                    {
+                        Mod.skills[3].increasing = true;
+                    }
+                }
+
+                Mod.playerStatusManager.UpdateSkillUI(3);
+            }
+            else if(skillIndex == 2)
+            {
+                float healthAmount = EFM_Skill.skillProgress * actualAmountToAdd;
+                Mod.skills[3].progress += healthAmount;
+                Mod.skills[3].currentProgress += healthAmount;
+
+                if (Mod.currentLocationIndex == 2)
+                {
+                    Mod.skills[3].raidProgress += actualAmountToAdd;
+                    if (Mod.skills[3].raidProgress >= 100) // dimishing returns at 1 level per raid TODO: should be unique to each skill
+                    {
+                        Mod.skills[3].dimishingReturns = true;
+                        Mod.skills[3].increasing = false;
+                    }
+                    else
+                    {
+                        Mod.skills[3].increasing = true;
+                    }
+                }
+
+                Mod.playerStatusManager.UpdateSkillUI(3);
+            }
+            else if(skillIndex == 7)
+            {
+                float charismaAmount = EFM_Skill.skillProgressPer * actualAmountToAdd;
+                Mod.skills[10].progress += charismaAmount;
+                Mod.skills[10].currentProgress += charismaAmount;
+
+                if (Mod.currentLocationIndex == 2)
+                {
+                    Mod.skills[10].raidProgress += actualAmountToAdd;
+                    if (Mod.skills[10].raidProgress >= 100) // dimishing returns at 1 level per raid TODO: should be unique to each skill
+                    {
+                        Mod.skills[10].dimishingReturns = true;
+                        Mod.skills[10].increasing = false;
+                    }
+                    else
+                    {
+                        Mod.skills[10].increasing = true;
+                    }
+                }
+
+                Mod.playerStatusManager.UpdateSkillUI(10);
+            }
+            else if(skillIndex == 8)
+            {
+                float charismaAmount = EFM_Skill.skillProgressInt * actualAmountToAdd;
+                Mod.skills[10].progress += charismaAmount;
+                Mod.skills[10].currentProgress += charismaAmount;
+
+                if (Mod.currentLocationIndex == 2)
+                {
+                    Mod.skills[10].raidProgress += actualAmountToAdd;
+                    if (Mod.skills[10].raidProgress >= 100) // dimishing returns at 1 level per raid TODO: should be unique to each skill
+                    {
+                        Mod.skills[10].dimishingReturns = true;
+                        Mod.skills[10].increasing = false;
+                    }
+                    else
+                    {
+                        Mod.skills[10].increasing = true;
+                    }
+                }
+
+                Mod.playerStatusManager.UpdateSkillUI(10);
+            }
+            else if(skillIndex == 9)
+            {
+                float charismaAmount = EFM_Skill.skillProgressAtn * actualAmountToAdd;
+                Mod.skills[10].progress += charismaAmount;
+                Mod.skills[10].currentProgress += charismaAmount;
+
+                if (Mod.currentLocationIndex == 2)
+                {
+                    Mod.skills[10].raidProgress += actualAmountToAdd;
+                    if (Mod.skills[10].raidProgress >= 100) // dimishing returns at 1 level per raid TODO: should be unique to each skill
+                    {
+                        Mod.skills[10].dimishingReturns = true;
+                        Mod.skills[10].increasing = false;
+                    }
+                    else
+                    {
+                        Mod.skills[10].increasing = true;
+                    }
+                }
+
+                Mod.playerStatusManager.UpdateSkillUI(10);
+            }
+
+            Mod.playerStatusManager.UpdateSkillUI(skillIndex);
         }
 
         private void DoPatching()
@@ -2512,6 +2936,18 @@ namespace EFM
 
             harmony.Patch(playReleaseSoundPatchOriginal, new HarmonyMethod(playReleaseSoundPatchPrefix));
 
+            // FireArmFirePatch
+            MethodInfo fireArmFirePatchOriginal = typeof(FVRFireArm).GetMethod("Fire", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo fireArmFirePatchPrefix = typeof(FireArmFirePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(fireArmFirePatchOriginal, new HarmonyMethod(fireArmFirePatchPrefix));
+
+            // FireArmRecoilPatch
+            MethodInfo fireArmRecoilPatchOriginal = typeof(FVRFireArm).GetMethod("Recoil", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo fireArmRecoilPatchPrefix = typeof(FireArmRecoilPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(fireArmRecoilPatchOriginal, new HarmonyMethod(fireArmRecoilPatchPrefix));
+
             //// UpdateModeTwoAxisPatch
             //MethodInfo updateModeTwoAxisPatchOriginal = typeof(FVRMovementManager).GetMethod("UpdateModeTwoAxis", BindingFlags.NonPublic | BindingFlags.Instance);
             //MethodInfo updateModeTwoAxisPatchPrefix = typeof(UpdateModeTwoAxisPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -2612,7 +3048,7 @@ namespace EFM
             if (!loading && isGrillhouse && grillHouseSecure)
             {
                 isGrillhouse = false;
-                LoadLevelBeginPatch.secureObjects();
+                LoadLevelBeginPatch.SecureObjects();
                 grillHouseSecure = false;
                 SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
             }
@@ -2715,6 +3151,8 @@ namespace EFM
             // TODO: This is dependent on which headseat is being used
             QualitySettings.lodBias = 18;
 
+            GM.Options.SimulationOptions.PlayerGravityMode = SimulationOptions.GravityMode.Realistic;
+
             // Get root
             GameObject menuRoot = GameObject.Find("Menu");
 
@@ -2744,35 +3182,61 @@ namespace EFM
             }
             securedObjects.Clear();
 
-            // Make sure secured hand objects are put in hands
-            if (Mod.physObjColResetList == null)
+            if (Mod.justFinishedRaid && Mod.chosenCharIndex == 1)
             {
-                Mod.physObjColResetList = new List<FVRInteractiveObject>();
+                // Make sure that all scav return items are in their proper return nodes
+                Transform returnNodeParent = Mod.currentBaseManager.transform.GetChild(1).GetChild(25);
+                for(int i=0; i < 15; ++i)
+                {
+                    FVRPhysicalObject itemPhysObj = Mod.scavRaidReturnItems[i].GetComponent<FVRPhysicalObject>();
+                    itemPhysObj.StoreAndDestroyRigidbody();
+                    Transform currentNode = returnNodeParent.GetChild(i);
+                    Mod.scavRaidReturnItems[i].transform.parent = currentNode;
+                    Mod.scavRaidReturnItems[i].transform.position = currentNode.position;
+                    Mod.scavRaidReturnItems[i].transform.rotation = currentNode.rotation;
+
+                    if(i == 8) // Rig
+                    {
+                        EFM_CustomItemWrapper CIW = Mod.scavRaidReturnItems[i].GetComponent<EFM_CustomItemWrapper>();
+                        if (!CIW.open)
+                        {
+                            CIW.ToggleMode(false);
+                        }
+                    }
+                }
             }
             else
             {
-                Mod.physObjColResetList.Clear();
-            }
-            if (leftHand != null && leftHand.fvrHand != null)
-            {
-                if (securedLeftHandInteractable != null)
+                // Make sure secured hand objects are put in hands
+                if (Mod.physObjColResetList == null)
                 {
-                    // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
-                    Mod.physObjColResetList.Add(securedLeftHandInteractable);
-                    Mod.physObjColResetNeeded = 5;
-                    EndInteractionPatch.ignoreEndInteraction = true;
+                    Mod.physObjColResetList = new List<FVRInteractiveObject>();
                 }
-                leftHand.fvrHand.ForceSetInteractable(securedLeftHandInteractable);
-                securedLeftHandInteractable = null;
-                if (securedRightHandInteractable != null)
+                else
                 {
-                    // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
-                    Mod.physObjColResetList.Add(securedRightHandInteractable);
-                    Mod.physObjColResetNeeded = 5;
-                    EndInteractionPatch.ignoreEndInteraction = true;
+                    Mod.physObjColResetList.Clear();
                 }
-                rightHand.fvrHand.ForceSetInteractable(securedRightHandInteractable);
-                securedRightHandInteractable = null;
+                if (leftHand != null && leftHand.fvrHand != null)
+                {
+                    if (securedLeftHandInteractable != null)
+                    {
+                        // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
+                        Mod.physObjColResetList.Add(securedLeftHandInteractable);
+                        Mod.physObjColResetNeeded = 5;
+                        EndInteractionPatch.ignoreEndInteraction = true;
+                    }
+                    leftHand.fvrHand.ForceSetInteractable(securedLeftHandInteractable);
+                    securedLeftHandInteractable = null;
+                    if (securedRightHandInteractable != null)
+                    {
+                        // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
+                        Mod.physObjColResetList.Add(securedRightHandInteractable);
+                        Mod.physObjColResetNeeded = 5;
+                        EndInteractionPatch.ignoreEndInteraction = true;
+                    }
+                    rightHand.fvrHand.ForceSetInteractable(securedRightHandInteractable);
+                    securedRightHandInteractable = null;
+                }
             }
         }
 
@@ -3126,16 +3590,16 @@ namespace EFM
                         Mod.assetLoaded = true;
                     }
 
-                    secureObjects();
+                    SecureObjects();
                 }
             }
             else if (levelName.Equals("MeatovHideoutScene"))
             {
-                secureObjects(Mod.justFinishedRaid);
+                SecureObjects(Mod.justFinishedRaid);
             }
             else if (levelName.Equals("MeatovFactoryScene") /*TODO: || Other raid scenes*/)
             {
-                secureObjects(true);
+                SecureObjects(Mod.chosenCharIndex == 0); // Dont want to secure equipment if scav raid
             }
         }
 
@@ -3174,7 +3638,7 @@ namespace EFM
             }
         }
 
-        public static void secureObjects(bool secureEquipment = false)
+        public static void SecureObjects(bool secureEquipment = false)
         {
             if (Mod.securedObjects == null)
             {
@@ -3187,36 +3651,36 @@ namespace EFM
             Mod.securedObjects.Add(cameraRig);
             GameObject.DontDestroyOnLoad(cameraRig);
 
-            // Secure held objects
-            if (Mod.leftHand != null && Mod.leftHand.fvrHand != null)
-            {
-                // harnessed will be a root item and will be secured alongside the rig
-                // not harnessed will be dropped in the world following endInteraction and needs to be secured separately
-                Mod.securedLeftHandInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
-                if (Mod.securedLeftHandInteractable != null)
-                {
-                    EndInteractionPatch.ignoreEndInteraction = true;
-                    Mod.securedLeftHandInteractable.EndInteraction(Mod.leftHand.fvrHand);
-                    if (Mod.securedLeftHandInteractable is FVRPhysicalObject && !(Mod.securedLeftHandInteractable as FVRPhysicalObject).m_isHardnessed)
-                    {
-                        SecureObject(Mod.securedLeftHandInteractable.gameObject);
-                    }
-                }
-
-                Mod.securedRightHandInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
-                if (Mod.securedRightHandInteractable != null)
-                {
-                    EndInteractionPatch.ignoreEndInteraction = true;
-                    Mod.securedRightHandInteractable.EndInteraction(Mod.rightHand.fvrHand);
-                    if (Mod.securedRightHandInteractable is FVRPhysicalObject && !(Mod.securedRightHandInteractable as FVRPhysicalObject).m_isHardnessed)
-                    {
-                        SecureObject(Mod.securedRightHandInteractable.gameObject);
-                    }
-                }
-            }
-
             if (secureEquipment)
             {
+                // Secure held objects
+                if (Mod.leftHand != null && Mod.leftHand.fvrHand != null)
+                {
+                    // harnessed will be a root item and will be secured alongside the rig
+                    // not harnessed will be dropped in the world following endInteraction and needs to be secured separately
+                    Mod.securedLeftHandInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
+                    if (Mod.securedLeftHandInteractable != null)
+                    {
+                        EndInteractionPatch.ignoreEndInteraction = true;
+                        Mod.securedLeftHandInteractable.EndInteraction(Mod.leftHand.fvrHand);
+                        if (Mod.securedLeftHandInteractable is FVRPhysicalObject && !(Mod.securedLeftHandInteractable as FVRPhysicalObject).m_isHardnessed)
+                        {
+                            SecureObject(Mod.securedLeftHandInteractable.gameObject);
+                        }
+                    }
+
+                    Mod.securedRightHandInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
+                    if (Mod.securedRightHandInteractable != null)
+                    {
+                        EndInteractionPatch.ignoreEndInteraction = true;
+                        Mod.securedRightHandInteractable.EndInteraction(Mod.rightHand.fvrHand);
+                        if (Mod.securedRightHandInteractable is FVRPhysicalObject && !(Mod.securedRightHandInteractable as FVRPhysicalObject).m_isHardnessed)
+                        {
+                            SecureObject(Mod.securedRightHandInteractable.gameObject);
+                        }
+                    }
+                }
+
                 // Secure equipment
                 if (Mod.equipmentSlots != null)
                 {
@@ -3245,6 +3709,115 @@ namespace EFM
                 if (Mod.rightShoulderObject != null)
                 {
                     SecureObject(Mod.rightShoulderObject);
+                }
+            }
+
+            // If leaving hideout and dont want to secure equipment
+            // Or if just coming back from raid (which will secure equipment) and it was scav raid
+            if((!Mod.justFinishedRaid && !secureEquipment) || (Mod.justFinishedRaid && Mod.chosenCharIndex == 1)) // Make sure all items are removed from player logically
+            {
+                Mod.scavRaidReturnItems = new GameObject[15];
+
+                // Drop items in hand
+                if (GM.CurrentMovementManager.Hands[0].CurrentInteractable != null && !(GM.CurrentMovementManager.Hands[0].CurrentInteractable is FVRPhysicalObject))
+                {
+                    Mod.scavRaidReturnItems[0] = GM.CurrentMovementManager.Hands[0].CurrentInteractable.gameObject;
+                    GM.CurrentMovementManager.Hands[0].CurrentInteractable.ForceBreakInteraction();
+                }
+                if (GM.CurrentMovementManager.Hands[1].CurrentInteractable != null && !(GM.CurrentMovementManager.Hands[1].CurrentInteractable is FVRPhysicalObject))
+                {
+                    Mod.scavRaidReturnItems[1] = GM.CurrentMovementManager.Hands[0].CurrentInteractable.gameObject;
+                    GM.CurrentMovementManager.Hands[1].CurrentInteractable.ForceBreakInteraction();
+                }
+
+                // Unequip all equipment
+                if (EFM_EquipmentSlot.wearingBackpack)
+                {
+                    Mod.scavRaidReturnItems[2] = EFM_EquipmentSlot.currentBackpack.gameObject;
+                    EFM_CustomItemWrapper backpackCIW = EFM_EquipmentSlot.currentBackpack;
+                    FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
+                    backpackPhysObj.SetQuickBeltSlot(null);
+                    EFM_EquipmentSlot.TakeOffEquipment(backpackCIW);
+                }
+                if (EFM_EquipmentSlot.wearingBodyArmor)
+                {
+                    Mod.scavRaidReturnItems[3] = EFM_EquipmentSlot.currentArmor.gameObject;
+                    EFM_CustomItemWrapper bodyArmorCIW = EFM_EquipmentSlot.currentArmor;
+                    FVRPhysicalObject bodyArmorPhysObj = bodyArmorCIW.GetComponent<FVRPhysicalObject>();
+                    bodyArmorPhysObj.SetQuickBeltSlot(null);
+                    EFM_EquipmentSlot.TakeOffEquipment(bodyArmorCIW);
+                }
+                if (EFM_EquipmentSlot.wearingEarpiece)
+                {
+                    Mod.scavRaidReturnItems[4] = EFM_EquipmentSlot.currentEarpiece.gameObject;
+                    EFM_CustomItemWrapper earPieceCIW = EFM_EquipmentSlot.currentEarpiece;
+                    FVRPhysicalObject earPiecePhysObj = earPieceCIW.GetComponent<FVRPhysicalObject>();
+                    earPiecePhysObj.SetQuickBeltSlot(null);
+                    EFM_EquipmentSlot.TakeOffEquipment(earPieceCIW);
+                }
+                if (EFM_EquipmentSlot.wearingHeadwear)
+                {
+                    Mod.scavRaidReturnItems[5] = EFM_EquipmentSlot.currentHeadwear.gameObject;
+                    EFM_CustomItemWrapper headWearCIW = EFM_EquipmentSlot.currentHeadwear;
+                    FVRPhysicalObject headWearPhysObj = headWearCIW.GetComponent<FVRPhysicalObject>();
+                    headWearPhysObj.SetQuickBeltSlot(null);
+                    EFM_EquipmentSlot.TakeOffEquipment(headWearCIW);
+                }
+                if (EFM_EquipmentSlot.wearingFaceCover)
+                {
+                    Mod.scavRaidReturnItems[6] = EFM_EquipmentSlot.currentFaceCover.gameObject;
+                    EFM_CustomItemWrapper faceCoverCIW = EFM_EquipmentSlot.currentFaceCover;
+                    FVRPhysicalObject faceCoverPhysObj = faceCoverCIW.GetComponent<FVRPhysicalObject>();
+                    faceCoverPhysObj.SetQuickBeltSlot(null);
+                    EFM_EquipmentSlot.TakeOffEquipment(faceCoverCIW);
+                }
+                if (EFM_EquipmentSlot.wearingEyewear)
+                {
+                    Mod.scavRaidReturnItems[7] = EFM_EquipmentSlot.currentEyewear.gameObject;
+                    EFM_CustomItemWrapper eyeWearCIW = EFM_EquipmentSlot.currentEyewear;
+                    FVRPhysicalObject eyeWearPhysObj = eyeWearCIW.GetComponent<FVRPhysicalObject>();
+                    eyeWearPhysObj.SetQuickBeltSlot(null);
+                    EFM_EquipmentSlot.TakeOffEquipment(eyeWearCIW);
+                }
+                if (EFM_EquipmentSlot.wearingRig)
+                {
+                    Mod.scavRaidReturnItems[8] = EFM_EquipmentSlot.currentRig.gameObject;
+                    EFM_CustomItemWrapper rigCIW = EFM_EquipmentSlot.currentRig;
+                    FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
+                    rigPhysObj.SetQuickBeltSlot(null);
+                    EFM_EquipmentSlot.TakeOffEquipment(rigCIW);
+                }
+                if (EFM_EquipmentSlot.wearingPouch)
+                {
+                    Mod.scavRaidReturnItems[9] = EFM_EquipmentSlot.currentPouch.gameObject;
+                    EFM_CustomItemWrapper pouchCIW = EFM_EquipmentSlot.currentPouch;
+                    FVRPhysicalObject pouchPhysObj = pouchCIW.GetComponent<FVRPhysicalObject>();
+                    pouchPhysObj.SetQuickBeltSlot(null);
+                    EFM_EquipmentSlot.TakeOffEquipment(pouchCIW);
+                }
+
+                // Right shoulder object
+                if (Mod.rightShoulderObject != null)
+                {
+                    Mod.scavRaidReturnItems[10] = Mod.rightShoulderObject;
+                    EFM_VanillaItemDescriptor rightShoulderVID = Mod.rightShoulderObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    FVRPhysicalObject rightShoulderPhysObj = rightShoulderVID.GetComponent<FVRPhysicalObject>();
+                    rightShoulderPhysObj.SetQuickBeltSlot(null);
+                    Mod.rightShoulderObject = null;
+                }
+
+                // Remove pockets' contents
+                if (GM.CurrentPlayerBody.QBSlots_Internal != null && GM.CurrentPlayerBody.QBSlots_Internal.Count >= 4)
+                {
+                    for (int i = 0; i < 4; ++i)
+                    {
+                        if (GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject != null)
+                        {
+                            Mod.scavRaidReturnItems[10 + i] = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.gameObject;
+                            FVRPhysicalObject pocketItemPhysObj = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject;
+                            pocketItemPhysObj.SetQuickBeltSlot(null);
+                        }
+                    }
                 }
             }
 
@@ -4527,6 +5100,7 @@ namespace EFM
                     {
                         Mod.AddExperience(customItemWrapper.lootExperience, 1);
                     }
+                    Mod.AddSkillExp(EFM_Skill.uniqueLoot, 7);
                 }
 
                 // Update lists
@@ -4578,6 +5152,7 @@ namespace EFM
                     {
                         Mod.AddExperience(vanillaItemDescriptor.lootExperience, 1);
                     }
+                    Mod.AddSkillExp(EFM_Skill.uniqueLoot, 7);
                 }
 
                 if(__instance is FVRFireArm || (__instance is FVRMeleeWeapon && !vanillaItemDescriptor.inAll))
@@ -4892,6 +5467,10 @@ namespace EFM
 
             int actualPartIndex = partIndex;
             float actualAmount = amount;
+            float vitalityLevel = Mod.skills[2].currentProgress / 100;
+            float bleedingChanceModifier = 0.012f * vitalityLevel;
+            float healthLevel = Mod.skills[3].currentProgress / 100;
+            float fractureChanceModifier = 0.012f * healthLevel;
             if (hitbox != null)
             {
                 // Apply damage resist/multiplier based on equipment and body part
@@ -4912,8 +5491,8 @@ namespace EFM
                     // We will actually be applying normal damage to the head, considering if health <= 0 is instant death and it only has 35 HP
 
                     // Process damage resist from EFM_EquipmentSlot.CurrentHelmet
-                    float heavyBleedChance = 0.02f;
-                    float lightBleedChance = 0.1f;
+                    float heavyBleedChance = 0.05f - 0.05f * bleedingChanceModifier;
+                    float lightBleedChance = 0.15f - 0.15f * bleedingChanceModifier;
                     if (EFM_EquipmentSlot.currentHeadwear != null && EFM_EquipmentSlot.currentHeadwear.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentHeadwear.coverage)
                     {
                         heavyBleedChance /= 3;
@@ -4931,6 +5510,11 @@ namespace EFM
                         EFM_Effect heavyBleedEffect = new EFM_Effect();
                         heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = 0;
+                        if (vitalityLevel >= 51) 
+                        {
+                            heavyBleedEffect.hasTimer = true;
+                            heavyBleedEffect.timer = 30;
+                        }
                         EFM_Effect.effects.Add(heavyBleedEffect);
                     }
                     else if (chance <= lightBleedChance)
@@ -4939,6 +5523,11 @@ namespace EFM
                         EFM_Effect lightBleedEffect = new EFM_Effect();
                         lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = 0;
+                        if (vitalityLevel >= 51)
+                        {
+                            lightBleedEffect.hasTimer = true;
+                            lightBleedEffect.timer = 20;
+                        }
                         EFM_Effect.effects.Add(lightBleedEffect);
                     }
                 }
@@ -4965,8 +5554,8 @@ namespace EFM
                         actualPartIndex = 1;
 
                         // Process damage resist from EFM_EquipmentSlot.CurrentArmor
-                        float heavyBleedChance = 0.02f;
-                        float lightBleedChance = 0.1f;
+                        float heavyBleedChance = 0.05f - 0.05f * bleedingChanceModifier;
+                        float lightBleedChance = 0.15f - 0.15f * bleedingChanceModifier;
                         if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
                         {
                             heavyBleedChance /= 3;
@@ -4984,6 +5573,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
@@ -4992,6 +5586,11 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
                     }
@@ -5001,8 +5600,8 @@ namespace EFM
                         actualPartIndex = 2;
 
                         // Process damage resist from EFM_EquipmentSlot.CurrentArmor
-                        float heavyBleedChance = 0.05f;
-                        float lightBleedChance = 0.15f;
+                        float heavyBleedChance = 0.1f - 0.1f * bleedingChanceModifier;
+                        float lightBleedChance = 0.25f - 0.25f * bleedingChanceModifier;
                         if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
                         {
                             heavyBleedChance /= 3;
@@ -5020,6 +5619,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
@@ -5028,6 +5632,11 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
                     }
@@ -5036,9 +5645,9 @@ namespace EFM
                         Mod.instance.LogInfo("\tTo right arm");
                         actualPartIndex = 4;
 
-                        float heavyBleedChance = 0.02f;
-                        float lightBleedChance = 0.1f;
-                        float fractureChance = 0.02f;
+                        float heavyBleedChance = 0.05f - 0.05f * bleedingChanceModifier;
+                        float lightBleedChance = 0.15f - 0.15f * bleedingChanceModifier;
+                        float fractureChance = 0.02f - 0.02f * fractureChanceModifier;
 
                         // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
                         // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
@@ -5049,6 +5658,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
@@ -5057,6 +5671,11 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
 
@@ -5074,9 +5693,9 @@ namespace EFM
                         Mod.instance.LogInfo("\tTo left arm");
                         actualPartIndex = 3;
 
-                        float heavyBleedChance = 0.02f;
-                        float lightBleedChance = 0.1f;
-                        float fractureChance = 0.02f;
+                        float heavyBleedChance = 0.05f - 0.05f * bleedingChanceModifier;
+                        float lightBleedChance = 0.15f - 0.15f * bleedingChanceModifier;
+                        float fractureChance = 0.02f - 0.02f * fractureChanceModifier;
 
                         // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
                         // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
@@ -5087,6 +5706,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
@@ -5095,6 +5719,11 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
 
@@ -5112,9 +5741,9 @@ namespace EFM
                         Mod.instance.LogInfo("\tTo right leg");
                         actualPartIndex = 6;
 
-                        float heavyBleedChance = 0.02f;
-                        float lightBleedChance = 0.1f;
-                        float fractureChance = 0.02f;
+                        float heavyBleedChance = 0.05f - 0.05f * bleedingChanceModifier;
+                        float lightBleedChance = 0.15f - 0.15f * bleedingChanceModifier;
+                        float fractureChance = 0.02f - 0.02f * fractureChanceModifier;
 
                         // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
                         // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
@@ -5125,6 +5754,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
@@ -5133,6 +5767,11 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
 
@@ -5150,9 +5789,9 @@ namespace EFM
                         Mod.instance.LogInfo("\tTo left leg");
                         actualPartIndex = 5;
 
-                        float heavyBleedChance = 0.02f;
-                        float lightBleedChance = 0.1f;
-                        float fractureChance = 0.02f;
+                        float heavyBleedChance = 0.05f - 0.05f * bleedingChanceModifier;
+                        float lightBleedChance = 0.15f - 0.15f * bleedingChanceModifier;
+                        float fractureChance = 0.02f - 0.02f * fractureChanceModifier;
 
                         // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
                         // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
@@ -5163,6 +5802,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
@@ -5171,6 +5815,11 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
 
@@ -5192,9 +5841,9 @@ namespace EFM
                     // Add a damage resist because should do less damage when hit to hand than when hit to torso
                     //damage *= Mod.handDamageResist;
 
-                    float heavyBleedChance = 0.02f;
-                    float lightBleedChance = 0.1f;
-                    float fractureChance = 0.02f;
+                    float heavyBleedChance = 0.05f - 0.05f * bleedingChanceModifier;
+                    float lightBleedChance = 0.15f - 0.15f * bleedingChanceModifier;
+                    float fractureChance = 0.02f - 0.02f * fractureChanceModifier;
 
                     // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
                     // we could set Cutting/Piercing to define bleed chance. Until then, every shot has chance of bleed.
@@ -5205,6 +5854,11 @@ namespace EFM
                         EFM_Effect heavyBleedEffect = new EFM_Effect();
                         heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = actualPartIndex;
+                        if (vitalityLevel >= 51)
+                        {
+                            heavyBleedEffect.hasTimer = true;
+                            heavyBleedEffect.timer = 30;
+                        }
                         EFM_Effect.effects.Add(heavyBleedEffect);
                     }
                     else if (bleedValue <= lightBleedChance)
@@ -5213,6 +5867,11 @@ namespace EFM
                         EFM_Effect lightBleedEffect = new EFM_Effect();
                         lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = actualPartIndex;
+                        if (vitalityLevel >= 51)
+                        {
+                            lightBleedEffect.hasTimer = true;
+                            lightBleedEffect.timer = 20;
+                        }
                         EFM_Effect.effects.Add(lightBleedEffect);
                     }
 
@@ -5237,8 +5896,8 @@ namespace EFM
                         }
 
                         // Process damage resist from EFM_EquipmentSlot.CurrentHelmet
-                        float heavyBleedChance0 = 0.02f;
-                        float lightBleedChance0 = 0.1f;
+                        float heavyBleedChance0 = 0.05f - 0.05f * bleedingChanceModifier;
+                        float lightBleedChance0 = 0.15f - 0.15f * bleedingChanceModifier;
                         if (EFM_EquipmentSlot.currentHeadwear != null && EFM_EquipmentSlot.currentHeadwear.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentHeadwear.coverage)
                         {
                             heavyBleedChance0 /= 3;
@@ -5254,6 +5913,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = 0;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue0 <= lightBleedChance0)
@@ -5261,6 +5925,11 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = 0;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
                         break;
@@ -5271,8 +5940,8 @@ namespace EFM
                         }
 
                         // Process damage resist from EFM_EquipmentSlot.CurrentArmor
-                        float heavyBleedChance1 = 0.02f;
-                        float lightBleedChance1 = 0.1f;
+                        float heavyBleedChance1 = 0.05f - 0.05f * bleedingChanceModifier;
+                        float lightBleedChance1 = 0.15f - 0.15f * bleedingChanceModifier;
                         if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
                         {
                             heavyBleedChance1 /= 3;
@@ -5288,6 +5957,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue1 <= lightBleedChance1)
@@ -5295,13 +5969,18 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
                         break;
                     case 2: // Stomach
                         // Process damage resist from EFM_EquipmentSlot.CurrentArmor
-                        float heavyBleedChance2 = 0.05f;
-                        float lightBleedChance2 = 0.15f;
+                        float heavyBleedChance2 = 0.1f - 0.1f * bleedingChanceModifier;
+                        float lightBleedChance2 = 0.25f - 0.25f * bleedingChanceModifier;
                         if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
                         {
                             heavyBleedChance2 /= 3;
@@ -5317,6 +5996,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue2 <= lightBleedChance2)
@@ -5324,14 +6008,19 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
                         break;
                     case 3: // Left arm
                     case 4: // Right arm
-                        float heavyBleedChanceArm = 0.02f;
-                        float lightBleedChanceArm = 0.1f;
-                        float fractureChanceArm = 0.02f;
+                        float heavyBleedChanceArm = 0.05f - 0.05f * bleedingChanceModifier;
+                        float lightBleedChanceArm = 0.15f - 0.15f * bleedingChanceModifier;
+                        float fractureChanceArm = 0.02f - 0.02f * fractureChanceModifier;
 
                         // Apply possible effects
                         float bleedValue3 = UnityEngine.Random.value;
@@ -5340,6 +6029,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue3 <= lightBleedChanceArm)
@@ -5347,6 +6041,11 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
 
@@ -5361,9 +6060,9 @@ namespace EFM
                         break;
                     case 5:
                     case 6:
-                        float heavyBleedChanceLeg = 0.02f;
-                        float lightBleedChanceLeg = 0.1f;
-                        float fractureChanceLeg = 0.02f;
+                        float heavyBleedChanceLeg = 0.05f - 0.05f * bleedingChanceModifier;
+                        float lightBleedChanceLeg = 0.15f - 0.15f * bleedingChanceModifier;
+                        float fractureChanceLeg = 0.02f - 0.02f * fractureChanceModifier;
 
                         // Apply possible effects
                         float bleedValueLeg = UnityEngine.Random.value;
@@ -5372,6 +6071,11 @@ namespace EFM
                             EFM_Effect heavyBleedEffect = new EFM_Effect();
                             heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                heavyBleedEffect.hasTimer = true;
+                                heavyBleedEffect.timer = 30;
+                            }
                             EFM_Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValueLeg <= lightBleedChanceLeg)
@@ -5379,6 +6083,11 @@ namespace EFM
                             EFM_Effect lightBleedEffect = new EFM_Effect();
                             lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
+                            if (vitalityLevel >= 51)
+                            {
+                                lightBleedEffect.hasTimer = true;
+                                lightBleedEffect.timer = 20;
+                            }
                             EFM_Effect.effects.Add(lightBleedEffect);
                         }
 
@@ -5388,7 +6097,7 @@ namespace EFM
                             fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                             fractureEffect.partIndex = actualPartIndex;
                             EFM_Effect.effects.Add(fractureEffect);
-                            // TODO: Player fracture sound
+                            // TODO: Play fracture sound
                         }
                         break;
                 }
@@ -5401,6 +6110,8 @@ namespace EFM
         {
             if (GM.CurrentSceneSettings.DoesDamageGetRegistered && GM.CurrentSceneSettings.DeathResetPoint != null && !GM.IsDead())
             {
+                Mod.AddSkillExp(EFM_Skill.damageTakenAction * totalDamage, 2);
+
                 GM.CurrentPlayerBody.Health -= totalDamage;
 
                 GM.CurrentPlayerBody.HitEffect();
@@ -6963,6 +7674,7 @@ namespace EFM
                     break;
             }
             num *= 0.65f;
+            num += num * (0.004f * (Mod.skills[1].currentProgress / 100));
             if (__instance.Mode == FVRMovementManager.MovementMode.Armswinger)
             {
                 __instance.DelayGround(0.25f);
@@ -6979,8 +7691,10 @@ namespace EFM
             }
 
             // Use stamina
-            Mod.stamina = Mathf.Max(Mod.stamina - Mod.jumpStaminaDrain, 0);
+            Mod.stamina = Mathf.Max(Mod.stamina - (Mod.jumpStaminaDrain - Mod.jumpStaminaDrain * (0.006f * (Mod.skills[0].progress / 100))), 0);
             Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
+
+            Mod.AddSkillExp(UnityEngine.Random.Range(EFM_Skill.pushUpMin, EFM_Skill.pushUpMax), 1);
 
             // Reset stamina timer
             Mod.staminaTimer = 2;
@@ -7335,6 +8049,7 @@ namespace EFM
                 {
                     a += normalized * 2f;
                 }
+                a += a * (0.004f * (Mod.skills[1].currentProgress / 100));
                 if (___m_twoAxisGrounded)
                 {
                     ___m_twoAxisVelocity.x = a.x;
@@ -7381,10 +8096,35 @@ namespace EFM
             // Update fall damage depending on grounded and previous velocity
             UpdateFallDamage(___m_twoAxisGrounded);
 
+            UpdateMovementAction(___m_twoAxisVelocity, ___m_sprintingEngaged);
+
             wasGrounded = ___m_twoAxisGrounded;
             previousVelocity = ___m_twoAxisVelocity;
 
             return false;
+        }
+
+        private static void UpdateMovementAction(Vector3 velocity, bool sprinting)
+        {
+            Vector3 sideVelocity = velocity;
+            sideVelocity.y = 0;
+
+            if (sprinting)
+            {
+                Mod.AddSkillExp(sideVelocity.magnitude * EFM_Skill.sprintAction, 0);
+                if (Mod.weight <= Mod.currentWeightLimit)
+                {
+                    Mod.AddSkillExp(sideVelocity.magnitude * UnityEngine.Random.Range(EFM_Skill.sprintActionMin, EFM_Skill.sprintActionMax), 1);
+                }
+            }
+            else
+            {
+                Mod.AddSkillExp(sideVelocity.magnitude * EFM_Skill.movementAction, 0);
+                if (Mod.weight <= Mod.currentWeightLimit)
+                {
+                    Mod.AddSkillExp(sideVelocity.magnitude * UnityEngine.Random.Range(EFM_Skill.movementActionMin, EFM_Skill.movementActionMax), 1);
+                }
+            }
         }
 
         private static void UpdateFallDamage(bool grounded)
@@ -7404,15 +8144,15 @@ namespace EFM
                         fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                         fractureEffect.partIndex = 5;
                         EFM_Effect.effects.Add(fractureEffect);
-                        // TODO: Player fracture sound
+                        // TODO: Play fracture sound
                     }
-                    if (UnityEngine.Random.value < 0.125 * (s - safeHeight)) // 100% chance of fracture 8+ meters unsafe fall
+                    if (UnityEngine.Random.value < 0.125 * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
                     {
                         EFM_Effect fractureEffect = new EFM_Effect();
                         fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
                         fractureEffect.partIndex = 6;
                         EFM_Effect.effects.Add(fractureEffect);
-                        // TODO: Player fracture sound
+                        // TODO: Play fracture sound
                     }
 
                     DamagePatch.RegisterPlayerHit(5, distribution * damage, true);
@@ -7477,6 +8217,11 @@ namespace EFM
 
             int postNumRounds = ___m_numRounds;
 
+            if(__instance.m_hand != null)
+            {
+                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+            }
+
             EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
             EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (VID != null)
@@ -7537,6 +8282,11 @@ namespace EFM
 
             int postNumRounds = ___m_numRounds;
 
+            if (__instance.m_hand != null)
+            {
+                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+            }
+
             EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
             EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (VID != null)
@@ -7595,6 +8345,11 @@ namespace EFM
             }
 
             int postNumRounds = ___m_numRounds;
+
+            if (__instance.m_hand != null)
+            {
+                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+            }
 
             EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
             EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
@@ -7655,6 +8410,11 @@ namespace EFM
 
             int postNumRounds = ___m_numRounds;
 
+            if (__instance.m_hand != null)
+            {
+                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+            }
+
             __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
             //TODO: Set weight of firearm this is attached to if it is
         }
@@ -7685,6 +8445,11 @@ namespace EFM
 
             int postNumRounds = ___m_numRounds;
 
+            if (__instance.m_hand != null)
+            {
+                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+            }
+
             __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
             //TODO: Set weight of firearm this is attached to if it is
         }
@@ -7714,6 +8479,11 @@ namespace EFM
 
             int postNumRounds = ___m_numRounds;
 
+            if (__instance.m_hand != null)
+            {
+                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+            }
+
             __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
             //TODO: Set weight of firearm this is attached to if it is
         }
@@ -7741,6 +8511,44 @@ namespace EFM
             {
                 // TODO: Might have to do this for ammo when putting it into a mag?
                 EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the mag when inserting in into a firearm
+
+                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                switch (fireArmVID.weaponClass)
+                {
+                    case Mod.WeaponClass.Pistol:
+                        Mod.AddSkillExp(EFM_Skill.pistolWeaponReloadAction, 12);
+                        break;
+                    case Mod.WeaponClass.Revolver:
+                        Mod.AddSkillExp(EFM_Skill.revolverWeaponReloadAction, 13);
+                        break;
+                    case Mod.WeaponClass.SMG:
+                        Mod.AddSkillExp(EFM_Skill.SMGWeaponReloadAction, 14);
+                        break;
+                    case Mod.WeaponClass.Assault:
+                        Mod.AddSkillExp(EFM_Skill.assaultWeaponReloadAction, 15);
+                        break;
+                    case Mod.WeaponClass.Shotgun:
+                        Mod.AddSkillExp(EFM_Skill.shotgunWeaponReloadAction, 16);
+                        break;
+                    case Mod.WeaponClass.Sniper:
+                        Mod.AddSkillExp(EFM_Skill.sniperWeaponReloadAction, 17);
+                        break;
+                    case Mod.WeaponClass.LMG:
+                        Mod.AddSkillExp(EFM_Skill.LMGWeaponReloadAction, 18);
+                        break;
+                    case Mod.WeaponClass.HMG:
+                        Mod.AddSkillExp(EFM_Skill.HMGWeaponReloadAction, 19);
+                        break;
+                    case Mod.WeaponClass.Launcher:
+                        Mod.AddSkillExp(EFM_Skill.launcherWeaponReloadAction, 20);
+                        break;
+                    case Mod.WeaponClass.AttachedLauncher:
+                        Mod.AddSkillExp(EFM_Skill.attachedLauncherWeaponReloadAction, 21);
+                        break;
+                    case Mod.WeaponClass.DMR:
+                        Mod.AddSkillExp(EFM_Skill.DMRWeaponReloadAction, 24);
+                        break;
+                }
             }
 
             if (__instance.Magazine == null && mag != null)
@@ -7950,7 +8758,45 @@ namespace EFM
 
             if (clip.m_hand != null)
             {
-                EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the mag
+                EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the clip
+
+                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                switch (fireArmVID.weaponClass)
+                {
+                    case Mod.WeaponClass.Pistol:
+                        Mod.AddSkillExp(EFM_Skill.pistolWeaponReloadAction, 12);
+                        break;
+                    case Mod.WeaponClass.Revolver:
+                        Mod.AddSkillExp(EFM_Skill.revolverWeaponReloadAction, 13);
+                        break;
+                    case Mod.WeaponClass.SMG:
+                        Mod.AddSkillExp(EFM_Skill.SMGWeaponReloadAction, 14);
+                        break;
+                    case Mod.WeaponClass.Assault:
+                        Mod.AddSkillExp(EFM_Skill.assaultWeaponReloadAction, 15);
+                        break;
+                    case Mod.WeaponClass.Shotgun:
+                        Mod.AddSkillExp(EFM_Skill.shotgunWeaponReloadAction, 16);
+                        break;
+                    case Mod.WeaponClass.Sniper:
+                        Mod.AddSkillExp(EFM_Skill.sniperWeaponReloadAction, 17);
+                        break;
+                    case Mod.WeaponClass.LMG:
+                        Mod.AddSkillExp(EFM_Skill.LMGWeaponReloadAction, 18);
+                        break;
+                    case Mod.WeaponClass.HMG:
+                        Mod.AddSkillExp(EFM_Skill.HMGWeaponReloadAction, 19);
+                        break;
+                    case Mod.WeaponClass.Launcher:
+                        Mod.AddSkillExp(EFM_Skill.launcherWeaponReloadAction, 20);
+                        break;
+                    case Mod.WeaponClass.AttachedLauncher:
+                        Mod.AddSkillExp(EFM_Skill.attachedLauncherWeaponReloadAction, 21);
+                        break;
+                    case Mod.WeaponClass.DMR:
+                        Mod.AddSkillExp(EFM_Skill.DMRWeaponReloadAction, 24);
+                        break;
+                }
             }
 
             if (__instance.Clip == null && clip != null)
@@ -8165,6 +9011,8 @@ namespace EFM
                 return;
             }
 
+            Mod.AddSkillExp(EFM_Skill.raidLoadedAmmoAction, 31);
+
             if (addedRound)
             {
                 addedRound = false;
@@ -8252,6 +9100,8 @@ namespace EFM
             {
                 return;
             }
+
+            Mod.AddSkillExp(EFM_Skill.raidLoadedAmmoAction, 31);
 
             if (addedRound)
             {
@@ -8574,6 +9424,130 @@ namespace EFM
             }
 
             return false;
+        }
+    }
+
+    // Patches FVRFirearm.Fire to know when a weapon is fired
+    class FireArmFirePatch
+    {
+        static void Prefix(ref FVRFireArm __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if(__instance.m_hand != null)
+            {
+                Mod.AddSkillExp(EFM_Skill.recoilAction, 25);
+                Mod.AddSkillExp(EFM_Skill.weaponShotAction, 26);
+
+                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                switch (fireArmVID.weaponClass)
+                {
+                    case Mod.WeaponClass.Pistol:
+                        Mod.AddSkillExp(EFM_Skill.pistolWeaponShotAction, 12);
+                        break;
+                    case Mod.WeaponClass.Revolver:
+                        Mod.AddSkillExp(EFM_Skill.revolverWeaponShotAction, 13);
+                        break;
+                    case Mod.WeaponClass.SMG:
+                        Mod.AddSkillExp(EFM_Skill.SMGWeaponShotAction, 14);
+                        break;
+                    case Mod.WeaponClass.Assault:
+                        Mod.AddSkillExp(EFM_Skill.assaultWeaponShotAction, 15);
+                        break;
+                    case Mod.WeaponClass.Shotgun:
+                        Mod.AddSkillExp(EFM_Skill.shotgunWeaponShotAction, 16);
+                        break;
+                    case Mod.WeaponClass.Sniper:
+                        Mod.AddSkillExp(EFM_Skill.sniperWeaponShotAction, 17);
+                        break;
+                    case Mod.WeaponClass.LMG:
+                        Mod.AddSkillExp(EFM_Skill.LMGWeaponShotAction, 18);
+                        break;
+                    case Mod.WeaponClass.HMG:
+                        Mod.AddSkillExp(EFM_Skill.HMGWeaponShotAction, 19);
+                        break;
+                    case Mod.WeaponClass.Launcher:
+                        Mod.AddSkillExp(EFM_Skill.launcherWeaponShotAction, 20);
+                        break;
+                    case Mod.WeaponClass.AttachedLauncher:
+                        Mod.AddSkillExp(EFM_Skill.attachedLauncherWeaponShotAction, 21);
+                        break;
+                    case Mod.WeaponClass.DMR:
+                        Mod.AddSkillExp(EFM_Skill.DMRWeaponShotAction, 24);
+                        break;
+                }
+            }
+
+            FireArmRecoilPatch.fromFire = true;
+        }
+    }
+
+    // Patches FVRFirearm.Recoil to control recoil strengh
+    class FireArmRecoilPatch
+    {
+        public static bool fromFire = false;
+
+        static void Prefix(ref FVRFireArm __instance, ref float VerticalRecoilMult)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            // If this recoil is caused by firing firearm (Could be cause by tremors)
+            if (fromFire)
+            {
+                if (__instance.m_hand != null)
+                {
+                    float originalRecoilMult = VerticalRecoilMult;
+                    VerticalRecoilMult -= originalRecoilMult * (EFM_Skill.recoilBonusPerLevel * (Mod.skills[25].currentProgress / 100));
+
+                    EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                    switch (fireArmVID.weaponClass)
+                    {
+                        case Mod.WeaponClass.Pistol:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[12].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.Revolver:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[13].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.SMG:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[14].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.Assault:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[15].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.Shotgun:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[16].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.Sniper:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[17].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.LMG:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[18].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.HMG:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[19].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.Launcher:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[20].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.AttachedLauncher:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[21].currentProgress / 100));
+                            break;
+                        case Mod.WeaponClass.DMR:
+                            VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[24].currentProgress / 100));
+                            break;
+                    }
+
+                    VerticalRecoilMult -= originalRecoilMult * 0.005f * (Mod.skills[26].currentProgress / 100);
+                }
+
+                fromFire = false;
+            }
         }
     }
     #endregion

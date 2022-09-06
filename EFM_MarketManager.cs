@@ -749,6 +749,7 @@ namespace EFM
                                     }
                                 }
                             }
+                            totalPriceCount -= (int)(totalPriceCount * (Mod.skills[10].currentProgress / 10000) / 2); // -25% at elite
                             currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
                             currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = totalPriceCount.ToString();
 
