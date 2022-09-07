@@ -185,8 +185,6 @@ namespace EFM
             transform.GetChild(2).gameObject.SetActive(false);
             transform.GetChild(9).gameObject.SetActive(false);
 
-            UpdatePlayerLevel();
-
             init = true;
         }
 

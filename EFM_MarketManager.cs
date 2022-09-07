@@ -96,11 +96,13 @@ namespace EFM
             if (EFM_TraderStatus.fenceRestockTimer > 0)
             {
                 EFM_TraderStatus.fenceRestockTimer -= Time.deltaTime;
-
-                if(EFM_TraderStatus.fenceRestockTimer <= 0 && currentTraderIndex == 2)
+            }
+            else
+            {
+                EFM_TraderStatus.fenceRestockTimer = Convert.ToSingle((DateTime.Today.ToUniversalTime().AddHours(24) - DateTime.UtcNow).TotalSeconds);
+                if (currentTraderIndex == 2)
                 {
                     SetTrader(2);
-                    EFM_TraderStatus.fenceRestockTimer = Convert.ToSingle((DateTime.Today.ToUniversalTime().AddHours(24) - DateTime.UtcNow).TotalSeconds);
                 }
             }
         }

@@ -97,10 +97,6 @@ namespace EFM
 
         public JToken data;
 
-        public int chosenCharIndex = -1;
-        public int chosenMapIndex = -1;
-        public int chosenTimeIndex = -1;
-
         public float time;
         private bool cancelRaidLoad;
         private bool loadingRaid;
@@ -176,7 +172,7 @@ namespace EFM
                     SaveBase();
 
                     // Reset player stats if scav raid
-                    if(chosenCharIndex == 1)
+                    if(Mod.chosenCharIndex == 1)
                     {
                         // TODO: Maybe make these somewhat random? The scav may not have max energy and hydration for example
                         EFM_Effect.RemoveEffects();
@@ -227,8 +223,8 @@ namespace EFM
             if(scavTimer <= 0)
             {
                 // Enable Scav button, disable scav timer text
-                scavButtonCollider.enabled = false;
-                scavButtonText.color = Color.grey;
+                scavButtonCollider.enabled = true;
+                scavButtonText.color = Color.white;
                 scavTimerText.gameObject.SetActive(false);
             }
             else if(charChoicePanel.activeSelf)
@@ -239,8 +235,8 @@ namespace EFM
                 if (!scavTimerText.gameObject.activeSelf)
                 {
                     // Disable Scav button, Enable scav timer text
-                    scavButtonCollider.enabled = true;
-                    scavButtonText.color = Color.white;
+                    scavButtonCollider.enabled = false;
+                    scavButtonText.color = Color.grey;
                     scavTimerText.gameObject.SetActive(true);
                 }
             }
@@ -1062,7 +1058,7 @@ namespace EFM
             string formattedTime1 = Mod.FormatTimeString(offsetTime);
             timeChoice1.text = formattedTime1;
 
-            chosenTime.text = chosenTimeIndex == 0 ? formattedTime0 : formattedTime1;
+            chosenTime.text = Mod.chosenTimeIndex == 0 ? formattedTime0 : formattedTime1;
         }
 
         public override void Init()
@@ -1743,6 +1739,7 @@ namespace EFM
             if (!Mod.justFinishedRaid || Mod.chosenCharIndex == 1)
             {
                 Mod.level = (int)data["level"];
+                Mod.playerStatusManager.UpdatePlayerLevel();
                 Mod.experience = (int)data["experience"];
                 Mod.health = data["health"].ToObject<float[]>();
                 for(int i=0; i < Mod.health.Length; ++i)
@@ -1809,7 +1806,7 @@ namespace EFM
                 }
             }
 
-            scavTimer = (long)data["lastScavRaidTime"] + 600 - GetTimeSeconds();
+            scavTimer = (long)data["lastScavRaidTime"] + 600 - secondsSinceSave;
 
             // Instantiate items
             Transform itemsRoot = transform.GetChild(2);
@@ -4104,7 +4101,7 @@ namespace EFM
         {
             clickAudio.Play();
 
-            chosenCharIndex = charIndex;
+            Mod.chosenCharIndex = charIndex;
 
             // Update chosen char text
             chosenCharacter.text = charIndex == 0 ? "PMC" : "Scav";
@@ -4138,10 +4135,10 @@ namespace EFM
         {
             clickAudio.Play();
 
-            chosenMapIndex = mapIndex;
+            Mod.chosenMapIndex = mapIndex;
 
             // Update chosen map text
-            switch (chosenMapIndex)
+            switch (Mod.chosenMapIndex)
             {
                 case 0:
                     chosenMap.text = "Factory";
@@ -4158,8 +4155,7 @@ namespace EFM
         {
             clickAudio.Play();
 
-            chosenTimeIndex = timeIndex;
-            Mod.chosenTimeIndex = chosenTimeIndex;
+            Mod.chosenTimeIndex = timeIndex;
             canvas.GetChild(5).gameObject.SetActive(false);
             canvas.GetChild(6).gameObject.SetActive(true);
         }
@@ -4172,7 +4168,7 @@ namespace EFM
             canvas.GetChild(7).gameObject.SetActive(true);
 
             // Begin loading raid map
-            switch (chosenMapIndex)
+            switch (Mod.chosenMapIndex)
             {
                 case 0:
                     loadingRaid = true;
@@ -4180,9 +4176,9 @@ namespace EFM
                     break;
                 default:
                     loadingRaid = true;
-                    chosenMapIndex = 0;
-                    chosenCharIndex = 0;
-                    chosenTimeIndex = 0;
+                    Mod.chosenMapIndex = 0;
+                    Mod.chosenCharIndex = 0;
+                    Mod.chosenTimeIndex = 0;
                     chosenMap.text = "Factory";
                     Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
                     break;
