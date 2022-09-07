@@ -100,6 +100,7 @@ namespace EFM
                 if(EFM_TraderStatus.fenceRestockTimer <= 0 && currentTraderIndex == 2)
                 {
                     SetTrader(2);
+                    EFM_TraderStatus.fenceRestockTimer = Convert.ToSingle((DateTime.Today.ToUniversalTime().AddHours(24) - DateTime.UtcNow).TotalSeconds);
                 }
             }
         }
@@ -664,7 +665,7 @@ namespace EFM
 
                 if (index == 2)
                 {
-                    UnityEngine.Random.InitState(Convert.ToInt32((DateTime.UtcNow - DateTime.Today).TotalHours));
+                    UnityEngine.Random.InitState(Convert.ToInt32((DateTime.UtcNow - DateTime.Today.ToUniversalTime()).TotalHours));
                 }
                 // Add all assort items to showcase
                 for (int i = 1; i <= loyaltyDetails.currentLevel; ++i)

@@ -183,6 +183,7 @@ namespace EFM
             transform.GetChild(0).gameObject.SetActive(false);
             transform.GetChild(1).gameObject.SetActive(false);
             transform.GetChild(2).gameObject.SetActive(false);
+            transform.GetChild(9).gameObject.SetActive(false);
 
             UpdatePlayerLevel();
 
