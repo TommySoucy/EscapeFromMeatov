@@ -92,6 +92,16 @@ namespace EFM
             {
                 --mustUpdateTaskListHeight;
             }
+
+            if (EFM_TraderStatus.fenceRestockTimer > 0)
+            {
+                EFM_TraderStatus.fenceRestockTimer -= Time.deltaTime;
+
+                if(EFM_TraderStatus.fenceRestockTimer <= 0 && currentTraderIndex == 2)
+                {
+                    SetTrader(2);
+                }
+            }
         }
 
         private void TakeInput()
@@ -652,6 +662,10 @@ namespace EFM
                     newPriceUpHoverScroll.up = true;
                 }
 
+                if (index == 2)
+                {
+                    UnityEngine.Random.InitState(Convert.ToInt32((DateTime.UtcNow - DateTime.Today).TotalHours));
+                }
                 // Add all assort items to showcase
                 for (int i = 1; i <= loyaltyDetails.currentLevel; ++i)
                 {
@@ -662,6 +676,12 @@ namespace EFM
                     Sprite lastSprite = null;
                     foreach (KeyValuePair<string, AssortmentItem> item in assort.itemsByID)
                     {
+                        // Have 30% chance of adding any item if the trader is fence
+                        if(index == 2 && UnityEngine.Random.value > 0.3f)
+                        {
+                            continue;
+                        }
+
                         // Skip if this item must be unlocked
                         if (trader.itemsToWaitForUnlock != null && trader.itemsToWaitForUnlock.Contains(item.Key))
                         {
@@ -3776,96 +3796,10 @@ namespace EFM
             }
 
             // Add bought amount of item to trade volume at random pos and rot within it
-            // TODO: Put this spawning item in trade volume functionnality in a method so we can use it from anywhere, we can use it in base to return insured items
-            int amountToSpawn = cartItemCount;
-            if(int.TryParse(cartItem, out int parseResult))
-            {
-                GameObject itemPrefab = Mod.itemPrefabs[parseResult];
-                EFM_CustomItemWrapper prefabCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
-                BoxCollider tradeVolumeCollider = tradeVolume.GetComponentInChildren<BoxCollider>();
-                List<GameObject> objectsList = new List<GameObject>();
-                while (amountToSpawn > 0)
-                {
-                    GameObject spawnedItem = Instantiate(itemPrefab, tradeVolume.itemsRoot);
-                    objectsList.Add(spawnedItem);
-                    float xSize = tradeVolumeCollider.size.x;
-                    float ySize = tradeVolumeCollider.size.y;
-                    float zSize = tradeVolumeCollider.size.z;
-                    spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
-                                                                      UnityEngine.Random.Range(-ySize / 2, ySize / 2),
-                                                                      UnityEngine.Random.Range(-zSize / 2, zSize / 2));
-                    spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
-
-                    // Setup CIW
-                    EFM_CustomItemWrapper itemCIW = spawnedItem.GetComponent<EFM_CustomItemWrapper>();
-                    if(itemCIW.maxAmount > 0)
-                    {
-                        itemCIW.amount = itemCIW.maxAmount;
-                    }
-
-                    if (itemCIW.itemType == Mod.ItemType.AmmoBox)
-                    {
-                        FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
-                        for (int i = 0; i < itemCIW.maxAmount; ++i)
-                        {
-                            asMagazine.AddRound(itemCIW.roundClass, false, false);
-                        }
-                    }
-
-                    // Set stack and remove amount to spawn
-                    if (itemCIW.maxStack > 1)
-                    {
-                        if (amountToSpawn > itemCIW.maxStack)
-                        {
-                            itemCIW.stack = itemCIW.maxStack;
-                            amountToSpawn -= itemCIW.maxStack;
-                        }
-                        else // amountToSpawn <= itemCIW.maxStack
-                        {
-                            itemCIW.stack = amountToSpawn;
-                            amountToSpawn = 0;
-                        }
-                    }
-                    else
-                    {
-                        --amountToSpawn;
-                    }
-
-                    // Add item to tradevolume so it can set its reset cols and kinematic to true
-                    tradeVolume.AddItem(itemCIW.physObj);
-
-                    Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
-
-                    BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
-                }
-                if (tradeVolumeInventory.ContainsKey(cartItem))
-                {
-                    tradeVolumeInventory[cartItem] += cartItemCount;
-                    tradeVolumeInventoryObjects[cartItem].AddRange(objectsList);
-                }
-                else
-                {
-                    tradeVolumeInventory.Add(cartItem, cartItemCount);
-                    tradeVolumeInventoryObjects.Add(cartItem, objectsList);
-                }
-
-                // Set trader immediately because we spawned a custom item
-                SetTrader(currentTraderIndex, cartItem);
-
-                // Update area managers based on item we just added
-                foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
-                {
-                    areaManager.UpdateBasedOnItem(cartItem);
-                }
-            }
-            else
-            {
-                // Spawn vanilla item will handle the updating of proper elements
-                AnvilManager.Run(SpawnVanillaItem(cartItem, amountToSpawn));
-            }
+            SpawnItem(cartItem, cartItemCount);
 
             // Update amount of item in trader's assort
-            Mod.traderStatuses[currentTraderIndex].assortmentByLevel[Mod.traderStatuses[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack -= amountToSpawn;
+            Mod.traderStatuses[currentTraderIndex].assortmentByLevel[Mod.traderStatuses[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack -= cartItemCount;
         }
 
         public IEnumerator SpawnVanillaItem(string ID, int count)
@@ -4581,6 +4515,137 @@ namespace EFM
                     }
                 }
             }
+
+            // Spawn intial equipment 
+            if(task.startingEquipment != null)
+            {
+                GivePlayerRewards(task.startingEquipment);
+            }
+        }
+
+        public void GivePlayerRewards(List<TraderTaskReward> rewards, string taskName = null)
+        {
+            bool resetTrader = false;
+            foreach(TraderTaskReward reward in rewards)
+            {
+                switch(reward.taskRewardType)
+                {
+                    case TraderTaskReward.TaskRewardType.AssortmentUnlock:
+                        Mod.traderStatuses[currentTraderIndex].itemsToWaitForUnlock.Remove(reward.itemID);
+                        resetTrader = true;
+                        break;
+                    case TraderTaskReward.TaskRewardType.TraderUnlock:
+                        Mod.traderStatuses[reward.traderIndex].unlocked = true;
+                        Transform traderImageTransform = transform.GetChild(1).GetChild(24).GetChild(0).GetChild(0).GetChild(0).GetChild(reward.traderIndex);
+                        traderImageTransform.GetComponent<Collider>().enabled = true;
+                        traderImageTransform.GetChild(2).gameObject.SetActive(false);
+                        break;
+                    case TraderTaskReward.TaskRewardType.TraderStanding:
+                        Mod.traderStatuses[reward.traderIndex].standing += reward.standing;
+                        resetTrader = true;
+                        break;
+                    case TraderTaskReward.TaskRewardType.Item:
+                        SpawnItem(reward.itemID, reward.amount);
+                        break;
+                    case TraderTaskReward.TaskRewardType.Experience:
+                        Mod.AddExperience(reward.experience, 3, taskName == null ? "Gained {0} exp. (Task completion)" : "Task \""+taskName+"\" completed! Gained {0} exp.");
+                        break;
+                }
+            }
+            if (resetTrader)
+            {
+                SetTrader(currentTraderIndex);
+            }
+        }
+
+        public void SpawnItem(string itemID, int amount)
+        {
+            int amountToSpawn = amount;
+            if (int.TryParse(cartItem, out int parseResult))
+            {
+                GameObject itemPrefab = Mod.itemPrefabs[parseResult];
+                EFM_CustomItemWrapper prefabCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
+                Transform tradeVolume = this.tradeVolume.transform.GetChild(0);
+                List<GameObject> objectsList = new List<GameObject>();
+                while (amountToSpawn > 0)
+                {
+                    GameObject spawnedItem = Instantiate(itemPrefab, this.tradeVolume.itemsRoot);
+                    objectsList.Add(spawnedItem);
+                    float xSize = tradeVolume.localScale.x;
+                    float ySize = tradeVolume.localScale.y;
+                    float zSize = tradeVolume.localScale.z;
+                    spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
+                                                                      UnityEngine.Random.Range(-ySize / 2, ySize / 2),
+                                                                      UnityEngine.Random.Range(-zSize / 2, zSize / 2));
+                    spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
+
+                    // Setup CIW
+                    EFM_CustomItemWrapper itemCIW = spawnedItem.GetComponent<EFM_CustomItemWrapper>();
+                    if (itemCIW.maxAmount > 0)
+                    {
+                        itemCIW.amount = itemCIW.maxAmount;
+                    }
+
+                    if (itemCIW.itemType == Mod.ItemType.AmmoBox)
+                    {
+                        FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
+                        for (int i = 0; i < itemCIW.maxAmount; ++i)
+                        {
+                            asMagazine.AddRound(itemCIW.roundClass, false, false);
+                        }
+                    }
+
+                    // Set stack and remove amount to spawn
+                    if (itemCIW.maxStack > 1)
+                    {
+                        if (amountToSpawn > itemCIW.maxStack)
+                        {
+                            itemCIW.stack = itemCIW.maxStack;
+                            amountToSpawn -= itemCIW.maxStack;
+                        }
+                        else // amountToSpawn <= itemCIW.maxStack
+                        {
+                            itemCIW.stack = amountToSpawn;
+                            amountToSpawn = 0;
+                        }
+                    }
+                    else
+                    {
+                        --amountToSpawn;
+                    }
+
+                    // Add item to tradevolume so it can set its reset cols and kinematic to true
+                    this.tradeVolume.AddItem(itemCIW.physObj);
+
+                    Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
+
+                    BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
+                }
+                if (tradeVolumeInventory.ContainsKey(cartItem))
+                {
+                    tradeVolumeInventory[cartItem] += cartItemCount;
+                    tradeVolumeInventoryObjects[cartItem].AddRange(objectsList);
+                }
+                else
+                {
+                    tradeVolumeInventory.Add(cartItem, cartItemCount);
+                    tradeVolumeInventoryObjects.Add(cartItem, objectsList);
+                }
+
+                // Set trader immediately because we spawned a custom item
+                SetTrader(currentTraderIndex, cartItem);
+
+                // Update area managers based on item we just added
+                foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+                {
+                    areaManager.UpdateBasedOnItem(cartItem);
+                }
+            }
+            else
+            {
+                // Spawn vanilla item will handle the updating of proper elements
+                AnvilManager.Run(SpawnVanillaItem(cartItem, amountToSpawn));
+            }
         }
 
         public void OnTaskFinishClick(TraderTask task)
@@ -4613,6 +4678,12 @@ namespace EFM
                         EFM_TraderStatus.FulfillCondition(taskCondition);
                     }
                 }
+            }
+
+            // Spawn completion rewards
+            if (task.successRewards != null)
+            {
+                GivePlayerRewards(task.successRewards);
             }
         }
 
@@ -4688,39 +4759,39 @@ namespace EFM
                                     switch (price.ID)
                                     {
                                         case "201":
-                                            if (currencyIndex != 1)
-                                            {
-                                                currencyIndex = 3;
-                                                priceLabelSprite = EFM_Base_Manager.barterSprite;
-                                            }
-                                            else if(currencyIndex == -1)
+                                            if (currencyIndex == -1)
                                             {
                                                 currencyIndex = 1;
                                                 priceLabelSprite = EFM_Base_Manager.dollarCurrencySprite;
                                             }
-                                            break;
-                                        case "202":
-                                            if (currencyIndex != 2)
+                                            else if (currencyIndex != 1)
                                             {
                                                 currencyIndex = 3;
                                                 priceLabelSprite = EFM_Base_Manager.barterSprite;
                                             }
-                                            else if (currencyIndex == -1)
+                                            break;
+                                        case "202":
+                                            if (currencyIndex == -1)
                                             {
                                                 currencyIndex = 2;
                                                 priceLabelSprite = EFM_Base_Manager.euroCurrencySprite;
                                             }
-                                            break;
-                                        case "203":
-                                            if(currencyIndex != 0)
+                                            else if (currencyIndex != 2)
                                             {
                                                 currencyIndex = 3;
                                                 priceLabelSprite = EFM_Base_Manager.barterSprite;
                                             }
-                                            else if (currencyIndex == -1)
+                                            break;
+                                        case "203":
+                                            if (currencyIndex == -1)
                                             {
                                                 currencyIndex = 0;
                                                 priceLabelSprite = EFM_Base_Manager.roubleCurrencySprite;
+                                            }
+                                            else if (currencyIndex != 0)
+                                            {
+                                                currencyIndex = 3;
+                                                priceLabelSprite = EFM_Base_Manager.barterSprite;
                                             }
                                             break;
                                         default:
@@ -5280,7 +5351,7 @@ namespace EFM
             foreach (AssortmentPriceData price in ragfairPrices)
             {
                 int amountToRemove = price.count;
-                tradeVolumeInventory[price.ID] -= (price.count * cartItemCount);
+                tradeVolumeInventory[price.ID] -= (price.count * ragfairCartItemCount);
                 List<GameObject> objectList = tradeVolumeInventoryObjects[price.ID];
                 while (amountToRemove > 0)
                 {
@@ -5360,97 +5431,10 @@ namespace EFM
             }
 
             // Add bought amount of item to trade volume at random pos and rot within it
-            int amountToSpawn = ragfairCartItemCount;
-            if (int.TryParse(cartItem, out int parseResult))
-            {
-                GameObject itemPrefab = Mod.itemPrefabs[parseResult];
-                EFM_CustomItemWrapper prefabCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
-                BoxCollider tradeVolumeCollider = tradeVolume.GetComponentInChildren<BoxCollider>();
-                List<GameObject> objectsList = new List<GameObject>();
-                while (amountToSpawn > 0)
-                {
-                    GameObject spawnedItem = Instantiate(itemPrefab, tradeVolume.itemsRoot);
-                    objectsList.Add(spawnedItem);
-                    float xSize = tradeVolumeCollider.size.x;
-                    float ySize = tradeVolumeCollider.size.y;
-                    float zSize = tradeVolumeCollider.size.z;
-                    spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
-                                                                      UnityEngine.Random.Range(-ySize / 2, ySize / 2),
-                                                                      UnityEngine.Random.Range(-zSize / 2, zSize / 2));
-                    spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
-
-                    // Setup CIW
-                    EFM_CustomItemWrapper itemCIW = spawnedItem.GetComponent<EFM_CustomItemWrapper>();
-                    if (itemCIW.maxAmount > 0)
-                    {
-                        itemCIW.amount = itemCIW.maxAmount;
-                    }
-
-                    if (itemCIW.itemType == Mod.ItemType.AmmoBox)
-                    {
-                        FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
-                        for (int i = 0; i < itemCIW.maxAmount; ++i)
-                        {
-                            asMagazine.AddRound(itemCIW.roundClass, false, false);
-                        }
-                    }
-
-                    // Set stack and remove amount to spawn
-                    if (itemCIW.maxStack > 1)
-                    {
-                        if (amountToSpawn > itemCIW.maxStack)
-                        {
-                            itemCIW.stack = itemCIW.maxStack;
-                            amountToSpawn -= itemCIW.maxStack;
-                        }
-                        else // amountToSpawn <= itemCIW.maxStack
-                        {
-                            itemCIW.stack = amountToSpawn;
-                            amountToSpawn = 0;
-                        }
-                    }
-                    else
-                    {
-                        --amountToSpawn;
-                    }
-
-                    // Set rigidbody to kinematic so it stays in trade volume
-                    itemCIW.physObj.RootRigidbody.isKinematic = true;
-
-                    Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
-
-                    BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
-                }
-                if (tradeVolumeInventory.ContainsKey(ragfairCartItem))
-                {
-                    tradeVolumeInventory[ragfairCartItem] += ragfairCartItemCount;
-                    tradeVolumeInventoryObjects[ragfairCartItem].AddRange(objectsList);
-                }
-                else
-                {
-                    tradeVolumeInventory.Add(ragfairCartItem, ragfairCartItemCount);
-                    tradeVolumeInventoryObjects.Add(cartItem, objectsList);
-                }
-
-                // Update the whole thing
-                if (currentTraderIndex == traderIndex)
-                {
-                    SetTrader(currentTraderIndex);
-                }
-
-                // Update area managers based on item we just added
-                foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
-                {
-                    areaManager.UpdateBasedOnItem(ragfairCartItem);
-                }
-            }
-            else
-            {
-                AnvilManager.Run(SpawnVanillaItem(ragfairCartItem, amountToSpawn));
-            }
+            SpawnItem(ragfairCartItem, ragfairCartItemCount);
 
             // Update amount of item in trader's assort
-            Mod.traderStatuses[traderIndex].assortmentByLevel[Mod.traderStatuses[traderIndex].GetLoyaltyLevel()].itemsByID[ragfairCartItem].stack -= amountToSpawn;
+            Mod.traderStatuses[traderIndex].assortmentByLevel[Mod.traderStatuses[traderIndex].GetLoyaltyLevel()].itemsByID[ragfairCartItem].stack -= ragfairCartItemCount;
         }
 
         public void OnRagfairBuyCancelClick()

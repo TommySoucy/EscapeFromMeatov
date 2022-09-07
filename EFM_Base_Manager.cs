@@ -259,92 +259,7 @@ namespace EFM
                 {
                     foreach(KeyValuePair<string, int> insuredToSpawn in Mod.insuredItems[insuredSetIndex].items)
                     {
-                        int amountToSpawn = insuredToSpawn.Value;
-                        if (int.TryParse(insuredToSpawn.Key, out int parseResult))
-                        {
-                            GameObject itemPrefab = Mod.itemPrefabs[parseResult];
-                            EFM_CustomItemWrapper prefabCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
-                            BoxCollider tradeVolumeCollider = marketManager.tradeVolume.GetComponentInChildren<BoxCollider>();
-                            List<GameObject> objectsList = new List<GameObject>();
-                            while (amountToSpawn > 0)
-                            {
-                                GameObject spawnedItem = Instantiate(itemPrefab, marketManager.tradeVolume.itemsRoot);
-                                objectsList.Add(spawnedItem);
-                                float xSize = tradeVolumeCollider.size.x;
-                                float ySize = tradeVolumeCollider.size.y;
-                                float zSize = tradeVolumeCollider.size.z;
-                                spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
-                                                                                  UnityEngine.Random.Range(-ySize / 2, ySize / 2),
-                                                                                  UnityEngine.Random.Range(-zSize / 2, zSize / 2));
-                                spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
-
-                                // Setup CIW
-                                EFM_CustomItemWrapper itemCIW = spawnedItem.GetComponent<EFM_CustomItemWrapper>();
-                                if (itemCIW.maxAmount > 0)
-                                {
-                                    itemCIW.amount = itemCIW.maxAmount;
-                                }
-
-                                if (itemCIW.itemType == Mod.ItemType.AmmoBox)
-                                {
-                                    FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
-                                    for (int i = 0; i < itemCIW.maxAmount; ++i)
-                                    {
-                                        asMagazine.AddRound(itemCIW.roundClass, false, false);
-                                    }
-                                }
-
-                                // Set stack and remove amount to spawn
-                                if (itemCIW.maxStack > 1)
-                                {
-                                    if (amountToSpawn > itemCIW.maxStack)
-                                    {
-                                        itemCIW.stack = itemCIW.maxStack;
-                                        amountToSpawn -= itemCIW.maxStack;
-                                    }
-                                    else // amountToSpawn <= itemCIW.maxStack
-                                    {
-                                        itemCIW.stack = amountToSpawn;
-                                        amountToSpawn = 0;
-                                    }
-                                }
-                                else
-                                {
-                                    --amountToSpawn;
-                                }
-
-                                // Add item to tradevolume so it can set its reset cols and kinematic to true
-                                marketManager.tradeVolume.AddItem(itemCIW.physObj);
-
-                                Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
-
-                                BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
-                            }
-                            if (marketManager.tradeVolumeInventory.ContainsKey(insuredToSpawn.Key))
-                            {
-                                marketManager.tradeVolumeInventory[insuredToSpawn.Key] += insuredToSpawn.Value;
-                                marketManager.tradeVolumeInventoryObjects[insuredToSpawn.Key].AddRange(objectsList);
-                            }
-                            else
-                            {
-                                marketManager.tradeVolumeInventory.Add(insuredToSpawn.Key, insuredToSpawn.Value);
-                                marketManager.tradeVolumeInventoryObjects.Add(insuredToSpawn.Key, objectsList);
-                            }
-
-                            // Set trader immediately because we spawned a custom item
-                            marketManager.SetTrader(marketManager.currentTraderIndex, insuredToSpawn.Key);
-
-                            // Update area managers based on item we just added
-                            foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
-                            {
-                                areaManager.UpdateBasedOnItem(insuredToSpawn.Key);
-                            }
-                        }
-                        else
-                        {
-                            // Spawn vanilla item will handle the updating of proper elements
-                            AnvilManager.Run(marketManager.SpawnVanillaItem(insuredToSpawn.Key, amountToSpawn));
-                        }
+                        marketManager.SpawnItem(insuredToSpawn.Key, insuredToSpawn.Value);
                     }
 
                     Mod.insuredItems[insuredSetIndex] = Mod.insuredItems[Mod.insuredItems.Count - 1];
@@ -1225,6 +1140,16 @@ namespace EFM
             // Manager GC ourselves
             GCManager = gameObject.AddComponent<EFM_GCManager>();
 
+            // Give any existing rewards to player now
+            if(Mod.rewardsToGive != null && Mod.rewardsToGive.Count > 0)
+            {
+                foreach(List<TraderTaskReward> rewards in Mod.rewardsToGive)
+                {
+                    marketManager.GivePlayerRewards(rewards);
+                }
+                Mod.rewardsToGive = null;
+            }
+
             Mod.justFinishedRaid = false;
 
             // Also set respawn to spawn point
@@ -1872,6 +1797,7 @@ namespace EFM
                     }
                 }
             }
+            EFM_TraderStatus.fenceRestockTimer = (float)data["fenceRestockTimer"] - secondsSinceSave;
 
             if (Mod.justFinishedRaid)
             {
@@ -2027,6 +1953,10 @@ namespace EFM
                 for (int i = 0; i < 8; i++)
                 {
                     Mod.traderStatuses[i].Init();
+                    if (data["traderStatuses"][i]["itemsToWaitForUnlock"] != null)
+                    {
+                        Mod.traderStatuses[i].itemsToWaitForUnlock = data["traderStatuses"][i]["itemsToWaitForUnlock"].ToObject<List<string>>();
+                    }
                 }
 
                 // Add active tasks to player status list
@@ -3996,7 +3926,6 @@ namespace EFM
                 skillUI.increasing = currentSkill.transform.GetChild(1).GetChild(3).gameObject;
                 Mod.playerStatusManager.skills[i] = skillUI;
             }
-
         }
 
         private void UpdateTreatmentApply()
@@ -4460,6 +4389,7 @@ namespace EFM
             saveObject["MIARaidCount"] = Mod.MIARaidCount;
             saveObject["KIARaidCount"] = Mod.KIARaidCount;
             saveObject["failedRaidCount"] = Mod.failedRaidCount;
+            saveObject["fenceRestockTimer"] = EFM_TraderStatus.fenceRestockTimer;
 
             // Write skills
             saveObject["skills"] = new JArray();
@@ -4584,6 +4514,8 @@ namespace EFM
                         }
                     }
                 }
+
+                currentSavedTraderStatus["itemsToWaitForUnlock"] = JArray.FromObject(Mod.traderStatuses[i].itemsToWaitForUnlock);
 
                 savedTraderStatuses.Add(currentSavedTraderStatus);
             }

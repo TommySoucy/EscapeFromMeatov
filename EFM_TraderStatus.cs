@@ -9,6 +9,8 @@ namespace EFM
 {
     public class EFM_TraderStatus
     {
+        public static float fenceRestockTimer = 0;
+
         public string id;
         public int index;
         public string name;
@@ -566,6 +568,13 @@ namespace EFM
                         }
                     }
                 }
+            }
+
+            // If Fence, should be able to sell all items
+            if (index == 2)
+            {
+                categories.Clear();
+                categories.Add("54009119af1c881c07000029"); // All items
             }
         }
 
@@ -1435,6 +1444,24 @@ namespace EFM
                         task.marketListElement = null;
 
                         Mod.currentBaseManager.marketManager.UpdateTaskListHeight();
+                    }
+
+                    if(task.failureRewards != null)
+                    {
+                        Mod.currentBaseManager.marketManager.GivePlayerRewards(task.failureRewards);
+                    }
+                }
+                else // In raid
+                {
+                    if (task.failureRewards != null)
+                    {
+                        // Ensure player gets failure rewards when they get back from raid
+                        if (Mod.rewardsToGive == null)
+                        {
+                            Mod.rewardsToGive = new List<List<TraderTaskReward>>();
+                        }
+
+                        Mod.rewardsToGive.Add(task.failureRewards);
                     }
                 }
                 if(task.statusListElement != null)

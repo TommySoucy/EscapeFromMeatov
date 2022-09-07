@@ -104,6 +104,7 @@ namespace EFM
         public static int physObjColResetNeeded;
         public static List<List<bool>> triggeredExplorationTriggers;
         public static GameObject[] scavRaidReturnItems; // Hands, Equipment, Right shoulder, pockets
+        public static List<List<TraderTaskReward>> rewardsToGive;
 
         // Player
         public static GameObject playerStatusUI;
@@ -1492,7 +1493,14 @@ namespace EFM
             {
                 string traderID = EFM_TraderStatus.IndexToID(i);
                 traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/base.json"));
-                traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/assort.json"));
+                if (i == 2)
+                {
+                    traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/" + traderID + "/assort_fullAssort.json"));
+                }
+                else
+                {
+                    traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/" + traderID + "/assort.json"));
+                }
                 traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/categories.json"));
             }
             globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/globals.json"));
