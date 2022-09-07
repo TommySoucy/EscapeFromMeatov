@@ -2024,6 +2024,15 @@ namespace EFM
             {
                 AddToBaseInventory(item, true);
             }
+
+            // Also add items from scav raid return nodes
+            foreach(Transform node in transform.GetChild(1).GetChild(25))
+            {
+                if (node.childCount > 0) 
+                {
+                    AddToBaseInventory(node.GetChild(0), true);
+                }
+            }
         }
 
         public void AddToBaseInventory(Transform item, bool updateTypeLists)

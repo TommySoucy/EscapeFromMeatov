@@ -59,6 +59,8 @@ namespace EFM
             Mod.explorationExp = 0;
             Mod.raidTime = 0;
 
+            locationData = Mod.locationsBaseDB[GetLocationDataIndex(Mod.chosenMapIndex)];
+
             // Set live data
             for (int i = 0; i < 7; ++i)
             {
@@ -566,7 +568,7 @@ namespace EFM
             }
 
             // Init player if scav
-            if(Mod.chosenCharIndex == 1)
+            if (Mod.chosenCharIndex == 1)
             {
                 BotData playerScavData = GetBotData("playerscav");
                 float averageLevel = (float)locationData["AveragePlayerLevel"];
@@ -920,6 +922,9 @@ namespace EFM
             }
             Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawned weapons");
 
+            // Configure
+            sosigScript.Configure(spawnData.configTemplate);
+
             // Set sosig logic (IFF, path, TODO: difficulty vars, etc)
             int iff = 0;
             switch (spawnData.type)
@@ -1250,10 +1255,7 @@ namespace EFM
                     yield return null;
                 }
 
-                if(!player)
-                {
-                    rigCIW.UpdateRigMode();
-                }
+                rigCIW.UpdateRigMode();
 
                 rigSlotSizes = new FVRPhysicalObject.FVRPhysicalObjectSize[rigCIW.rigSlots.Count];
                 for (int j = 0; j < rigCIW.rigSlots.Count; ++j)
@@ -1276,6 +1278,8 @@ namespace EFM
                 {
                     FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[1];
                     FVRPhysicalObject armorPhysObj = backpackObject.GetComponent<FVRPhysicalObject>();
+                    Mod.AddToPlayerInventory(backpackObject.transform, false);
+                    BeginInteractionPatch.SetItemLocationIndex(0, armorCIW, null);
                     armorPhysObj.SetQuickBeltSlot(equipSlot);
                     armorPhysObj.SetParentage(null);
 
@@ -1302,6 +1306,8 @@ namespace EFM
                 {
                     FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[3];
                     FVRPhysicalObject headWearPhysObj = headWearObject.GetComponent<FVRPhysicalObject>();
+                    Mod.AddToPlayerInventory(headWearObject.transform, false);
+                    BeginInteractionPatch.SetItemLocationIndex(0, headWearCIW, null);
                     headWearPhysObj.SetQuickBeltSlot(equipSlot);
                     headWearPhysObj.SetParentage(null);
 
@@ -1328,6 +1334,8 @@ namespace EFM
                 {
                     FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[2];
                     FVRPhysicalObject earPiecePhysObj = earPieceObject.GetComponent<FVRPhysicalObject>();
+                    Mod.AddToPlayerInventory(earPieceObject.transform, false);
+                    BeginInteractionPatch.SetItemLocationIndex(0, earPieceCIW, null);
                     earPiecePhysObj.SetQuickBeltSlot(equipSlot);
                     earPiecePhysObj.SetParentage(null);
 
@@ -1354,6 +1362,8 @@ namespace EFM
                 {
                     FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[4];
                     FVRPhysicalObject faceCoverPhysObj = faceCoverObject.GetComponent<FVRPhysicalObject>();
+                    Mod.AddToPlayerInventory(faceCoverObject.transform, false);
+                    BeginInteractionPatch.SetItemLocationIndex(0, faceCoverCIW, null);
                     faceCoverPhysObj.SetQuickBeltSlot(equipSlot);
                     faceCoverPhysObj.SetParentage(null);
 
@@ -1380,6 +1390,8 @@ namespace EFM
                 {
                     FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[5];
                     FVRPhysicalObject eyeWearPhysObj = eyeWearObject.GetComponent<FVRPhysicalObject>();
+                    Mod.AddToPlayerInventory(eyeWearObject.transform, false);
+                    BeginInteractionPatch.SetItemLocationIndex(0, eyeWearCIW, null);
                     eyeWearPhysObj.SetQuickBeltSlot(equipSlot);
                     eyeWearPhysObj.SetParentage(null);
 
@@ -1578,18 +1590,6 @@ namespace EFM
                 }
 
                 backpackCIW.UpdateBackpackMode();
-
-                if (player)
-                {
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[0];
-                    FVRPhysicalObject backpackPhysObj = backpackObject.GetComponent<FVRPhysicalObject>();
-                    backpackPhysObj.SetQuickBeltSlot(equipSlot);
-                    backpackPhysObj.SetParentage(null);
-
-                    Mod.leftShoulderObject = backpackPhysObj.gameObject;
-
-                    backpackObject.SetActive(Mod.playerStatusManager.displayed);
-                }
             }
 
             // Spawn primary weapon
@@ -2027,6 +2027,7 @@ namespace EFM
                     weaponFireArm.SetQuickBeltSlot(Mod.rightShoulderSlot);
 
                     EFM_VanillaItemDescriptor VID = weaponObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    Mod.AddToPlayerInventory(weaponObject.transform, false);
                     BeginInteractionPatch.SetItemLocationIndex(0, null, VID);
 
                     Mod.rightShoulderObject = weaponObject;
@@ -2390,19 +2391,22 @@ namespace EFM
                     }
                     else // Not a round, spawn as normal
                     {
-                        Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                        itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                     }
                 }
 
                 bool success = false;
                 int pocketsUSed = inventory.genericPockets.Count;
                 FVRPhysicalObject finalItemPhysObj = itemObject.GetComponent<FVRPhysicalObject>();
+
                 if (inventory.genericPockets.Contains(i))
                 {
                     for(int j=0; j < 4; ++j)
                     {
                         if(GM.CurrentPlayerBody.QBSlots_Internal[j].CurObject == null)
                         {
+                            Mod.AddToPlayerInventory(finalItemPhysObj.transform, false);
+                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<EFM_CustomItemWrapper>(), itemObject.GetComponent<EFM_VanillaItemDescriptor>());
                             finalItemPhysObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[j]);
                             finalItemPhysObj.SetParentage(null);
                             success = true;
@@ -2415,6 +2419,8 @@ namespace EFM
                     {
                         if (GM.CurrentPlayerBody.QBSlots_Internal[j].CurObject == null)
                         {
+                            Mod.AddToPlayerInventory(finalItemPhysObj.transform, false);
+                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<EFM_CustomItemWrapper>(), itemObject.GetComponent<EFM_VanillaItemDescriptor>());
                             finalItemPhysObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[j]);
                             finalItemPhysObj.SetParentage(null);
                             success = true;
@@ -2448,6 +2454,8 @@ namespace EFM
                                 itemObject.transform.localPosition = Vector3.zero;
                             }
                         }
+                        Mod.AddToPlayerInventory(finalItemPhysObj.transform, false);
+                        BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<EFM_CustomItemWrapper>(), itemObject.GetComponent<EFM_VanillaItemDescriptor>());
                         itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
                         success = true;
                     }
@@ -2467,7 +2475,7 @@ namespace EFM
                 yield return null;
             }
 
-            // Equip rig after everything if player, since by then all items that need to be added to it have been
+            // Equip rig/backpack after everything if player, since by then all items that need to be added to it have been
             if (player)
             {
                 // Equip rig
@@ -2475,10 +2483,29 @@ namespace EFM
                 {
                     FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[6];
                     FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
+                    Mod.AddToPlayerInventory(rigCIW.transform, false);
+                    BeginInteractionPatch.SetItemLocationIndex(0, rigCIW, null);
                     rigPhysObj.SetQuickBeltSlot(equipSlot);
                     rigPhysObj.SetParentage(null);
 
                     rigCIW.gameObject.SetActive(Mod.playerStatusManager.displayed);
+                }
+
+                // Equip backpack, this is done after we put items inside because if we put it on player and THEN spawn items inside,
+                // the backpack will be scaled down because is it in equip slot, so when we take it out of there and open it
+                // items will be giant because the whole things gets scaled back up
+                if(backpackCIW != null)
+                {
+                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[0];
+                    FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
+                    Mod.AddToPlayerInventory(backpackCIW.transform, false);
+                    BeginInteractionPatch.SetItemLocationIndex(0, backpackCIW, null);
+                    backpackPhysObj.SetQuickBeltSlot(equipSlot);
+                    backpackPhysObj.SetParentage(null);
+
+                    Mod.leftShoulderObject = backpackPhysObj.gameObject;
+
+                    backpackCIW.gameObject.SetActive(Mod.playerStatusManager.displayed);
                 }
             }
 
@@ -2616,7 +2643,6 @@ namespace EFM
             GM.CurrentSceneSettings.SosigKillEvent += this.OnBotKill;
 
             // Get location's base data
-            locationData = Mod.locationsBaseDB[GetLocationDataIndex(Mod.chosenMapIndex)];
             float averageLevel = (float)locationData["AveragePlayerLevel"];
             maxRaidTime = (float)locationData["escape_time_limit"] * 60;
             maxBotPerZone = (int)locationData["MaxBotPerZone"];
@@ -3725,11 +3751,13 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting special items");
-            int specialItemMin = (int)botDataToUse.generation["items"]["specialItems"]["min"];
-            int specialItemMax = (int)botDataToUse.generation["items"]["specialItems"]["max"];
-            List<string> possibleSpecialItems = inventoryDataToUse["items"]["SpecialLoot"].ToObject<List<string>>();
-            if (specialItemMax > 0 && possibleSpecialItems.Count > 0)
+            if (inventoryDataToUse["items"]["SpecialLoot"] != null)
+            {
+                Mod.instance.LogInfo("\tSetting special items");
+                int specialItemMin = (int)botDataToUse.generation["items"]["specialItems"]["min"];
+                int specialItemMax = (int)botDataToUse.generation["items"]["specialItems"]["max"];
+                List<string> possibleSpecialItems = inventoryDataToUse["items"]["SpecialLoot"].ToObject<List<string>>();
+                if (specialItemMax > 0 && possibleSpecialItems.Count > 0)
             {
                 for (int i = 0; i < specialItemMax; ++i)
                 {
@@ -3778,7 +3806,25 @@ namespace EFM
                         }
                     }
                 }
+                }
             }
+
+            // Build config template
+            newAISpawn.configTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+            newAISpawn.configTemplate.DoesAggroOnFriendlyFire = true;
+            Dictionary<string, JObject> health = botData.health["BodyParts"].ToObject<Dictionary<string, JObject>>();
+            float totalHealth = 0;
+            foreach(KeyValuePair<string, JObject> pair in health)
+            {
+                totalHealth += UnityEngine.Random.Range((float)pair.Value["min"], (float)pair.Value["max"]);
+            }
+            newAISpawn.configTemplate.TotalMustard = 250 + (totalHealth - 440);
+            newAISpawn.configTemplate.ConfusionMultiplier = 1;
+            newAISpawn.configTemplate.StunThreshold = 0;
+            newAISpawn.configTemplate.StunMultiplier = 0;
+            newAISpawn.configTemplate.StunTimeMax = 0;
+            newAISpawn.configTemplate.CanBeKnockedOut = false;
+            newAISpawn.configTemplate.CanBeGrabbed = false;
 
             Mod.instance.LogInfo("\tDone");
             return newAISpawn;
@@ -5748,6 +5794,7 @@ namespace EFM
         public string name;
         public string leaderName;
         public int experienceReward;
+        public SosigConfigTemplate configTemplate;
 
         public AIInventory inventory;
 
