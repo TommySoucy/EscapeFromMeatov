@@ -679,8 +679,8 @@ namespace EFM
                     Sprite lastSprite = null;
                     foreach (KeyValuePair<string, AssortmentItem> item in assort.itemsByID)
                     {
-                        // Have 30% chance of adding any item if the trader is fence
-                        if(index == 2 && UnityEngine.Random.value > 0.3f)
+                        // Have 10% chance of adding any item if the trader is fence
+                        if(index == 2 && UnityEngine.Random.value > 0.1f)
                         {
                             continue;
                         }
@@ -1070,6 +1070,11 @@ namespace EFM
                     {
                         // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
                         actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
+                    }
+
+                    if (currentTraderIndex == 2)
+                    {
+                        actualValue = (int)(actualValue * 0.9f);
                     }
 
                     // Write price to item icon and set correct currency icon
@@ -2704,6 +2709,11 @@ namespace EFM
                             actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
                         }
 
+                        if(currentTraderIndex == 2)
+                        {
+                            actualValue = (int)(actualValue * 0.9f);
+                        }
+
                         if (Mod.traderStatuses[currentTraderIndex].currency == 0)
                         {
                             currencySprite = EFM_Base_Manager.roubleCurrencySprite;
@@ -3312,6 +3322,10 @@ namespace EFM
                     {
                         // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
                         actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
+                    }
+                    if (currentTraderIndex == 2)
+                    {
+                        actualValue = (int)(actualValue * 0.9f);
                     }
                     actualValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? actualValue : (int)Mathf.Max(actualValue * 0.008f, 1);
                     marketItemView.value = marketItemView.value -= actualValue;
