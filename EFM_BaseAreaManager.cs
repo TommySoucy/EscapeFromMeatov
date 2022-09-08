@@ -531,6 +531,7 @@ namespace EFM
                                         itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
                                         EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                        CIW.foundInRaid = true;
                                         BeginInteractionPatch.SetItemLocationIndex(1, CIW, null);
                                         if (CIW.maxAmount > 0)
                                         {
@@ -4491,6 +4492,7 @@ namespace EFM
                         }
 
                         EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                        itemCIW.foundInRaid = true;
                         FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
                         FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
                         asMagazine.RoundType = round.RoundType;
@@ -4520,6 +4522,7 @@ namespace EFM
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
                     EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    VID.foundInRaid = true;
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID);
 
                     Mod.currentBaseManager.AddToBaseInventory(VID.transform, true);
@@ -4537,6 +4540,7 @@ namespace EFM
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
                     EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    VID.foundInRaid = true;
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID);
 
                     Mod.currentBaseManager.AddToBaseInventory(VID.transform, true);
