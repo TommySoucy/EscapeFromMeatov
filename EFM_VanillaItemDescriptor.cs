@@ -379,7 +379,7 @@ namespace EFM
             descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(H3ID) ? Mod.requiredForQuest[H3ID] : 0;
             FVRFireArmMagazine asMagazine = gameObject.GetComponent<FVRFireArmMagazine>();
             FVRFireArmClip asClip = gameObject.GetComponent<FVRFireArmClip>();
-            descriptionPack.containedAmmoClasses = new Dictionary<string, int>();
+            descriptionPack.containedAmmoClassesByType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, int>>();
             if (asMagazine != null)
             {
                 descriptionPack.stack = asMagazine.m_numRounds;
@@ -388,13 +388,22 @@ namespace EFM
                 {
                     if (loadedRound != null)
                     {
-                        if (descriptionPack.containedAmmoClasses.ContainsKey(loadedRound.LR_Class.ToString()))
+                        if (descriptionPack.containedAmmoClassesByType.ContainsKey(asMagazine.RoundType))
                         {
-                            descriptionPack.containedAmmoClasses[loadedRound.LR_Class.ToString()] += 1;
+                            if (descriptionPack.containedAmmoClassesByType[asMagazine.RoundType].ContainsKey(loadedRound.LR_Class))
+                            {
+                                descriptionPack.containedAmmoClassesByType[asMagazine.RoundType][loadedRound.LR_Class] += 1;
+                            }
+                            else
+                            {
+                                descriptionPack.containedAmmoClassesByType[asMagazine.RoundType].Add(loadedRound.LR_Class, 1);
+                            }
                         }
                         else
                         {
-                            descriptionPack.containedAmmoClasses.Add(loadedRound.LR_Class.ToString(), 1);
+                            Dictionary<FireArmRoundClass, int> newDict = new Dictionary<FireArmRoundClass, int>();
+                            newDict.Add(loadedRound.LR_Class, 1);
+                            descriptionPack.containedAmmoClassesByType.Add(asMagazine.RoundType, newDict);
                         }
                     }
                 }
@@ -407,13 +416,22 @@ namespace EFM
                 {
                     if (loadedRound != null)
                     {
-                        if (descriptionPack.containedAmmoClasses.ContainsKey(loadedRound.LR_Class.ToString()))
+                        if (descriptionPack.containedAmmoClassesByType.ContainsKey(asClip.RoundType))
                         {
-                            descriptionPack.containedAmmoClasses[loadedRound.LR_Class.ToString()] += 1;
+                            if (descriptionPack.containedAmmoClassesByType[asClip.RoundType].ContainsKey(loadedRound.LR_Class))
+                            {
+                                descriptionPack.containedAmmoClassesByType[asClip.RoundType][loadedRound.LR_Class] += 1;
+                            }
+                            else
+                            {
+                                descriptionPack.containedAmmoClassesByType[asClip.RoundType].Add(loadedRound.LR_Class, 1);
+                            }
                         }
                         else
                         {
-                            descriptionPack.containedAmmoClasses.Add(loadedRound.LR_Class.ToString(), 1);
+                            Dictionary<FireArmRoundClass, int> newDict = new Dictionary<FireArmRoundClass, int>();
+                            newDict.Add(loadedRound.LR_Class, 1);
+                            descriptionPack.containedAmmoClassesByType.Add(asClip.RoundType, newDict);
                         }
                     }
                 }

@@ -1731,21 +1731,30 @@ namespace EFM
 				FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
 				descriptionPack.stack = asMagazine.m_numRounds;
 				descriptionPack.maxStack = asMagazine.m_capacity;
-				descriptionPack.containedAmmoClasses = new Dictionary<string, int>();
+				descriptionPack.containedAmmoClassesByType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, int>>();
 				foreach(FVRLoadedRound loadedRound in asMagazine.LoadedRounds)
-                {
-					if(loadedRound != null)
-                    {
-                        if (descriptionPack.containedAmmoClasses.ContainsKey(loadedRound.LR_Class.ToString()))
-                        {
-							descriptionPack.containedAmmoClasses[loadedRound.LR_Class.ToString()] += 1;
-						}
-                        else
+				{
+					if (loadedRound != null)
+					{
+						if (descriptionPack.containedAmmoClassesByType.ContainsKey(asMagazine.RoundType))
 						{
-							descriptionPack.containedAmmoClasses.Add(loadedRound.LR_Class.ToString(), 1);
+							if (descriptionPack.containedAmmoClassesByType[asMagazine.RoundType].ContainsKey(loadedRound.LR_Class))
+							{
+								descriptionPack.containedAmmoClassesByType[asMagazine.RoundType][loadedRound.LR_Class] += 1;
+							}
+							else
+							{
+								descriptionPack.containedAmmoClassesByType[asMagazine.RoundType].Add(loadedRound.LR_Class, 1);
+							}
 						}
-                    }
-                }
+						else
+						{
+							Dictionary<FireArmRoundClass, int> newDict = new Dictionary<FireArmRoundClass, int>();
+							newDict.Add(loadedRound.LR_Class, 1);
+							descriptionPack.containedAmmoClassesByType.Add(asMagazine.RoundType, newDict);
+						}
+					}
+				}
             }
 			else if(itemType == Mod.ItemType.DogTag)
 			{

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FistVR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,7 @@ namespace EFM
         public bool isCustom;
         public EFM_CustomItemWrapper customItem;
         public EFM_VanillaItemDescriptor vanillaItem;
-        public Dictionary<string, int> containedAmmoClasses;
+        public Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, int>> containedAmmoClassesByType;
         public string name;
         public string description;
         public Sprite icon;

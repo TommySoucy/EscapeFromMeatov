@@ -529,7 +529,7 @@ namespace EFM
             }
             propertiesText.text = "Weight: " + (this.descriptionPack.weight / 1000.0f) + "kg, Volume: " + (this.descriptionPack.volume / Mod.volumePrecisionMultiplier)+"L ";
 
-            if (this.descriptionPack.containedAmmoClasses != null)
+            if (this.descriptionPack.containedAmmoClassesByType != null)
             {
                 if (ammoContainsTexts == null)
                 {
@@ -543,18 +543,21 @@ namespace EFM
                     }
                     ammoContainsTexts.Clear();
                 }
-                if (this.descriptionPack.containedAmmoClasses.Count > 0)
+                if (this.descriptionPack.containedAmmoClassesByType.Count > 0)
                 {
                     ammoContainsTitle.SetActive(true);
                     descriptionHeight += 55;
-                    foreach (KeyValuePair<string, int> entry in this.descriptionPack.containedAmmoClasses)
+                    foreach (KeyValuePair<FireArmRoundType, Dictionary<FireArmRoundClass, int>> typeEntry in this.descriptionPack.containedAmmoClassesByType)
                     {
-                        GameObject containsInstance = Instantiate(Mod.ammoContainsPrefab, transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0));
-                        containsInstance.transform.SetSiblingIndex(4);
-                        Text neededForInstanceText = containsInstance.transform.GetChild(0).GetComponent<Text>();
-                        neededForInstanceText.text = entry.Key + "("+entry.Value+")";
-                        ammoContainsTexts.Add(containsInstance);
-                        descriptionHeight += 47;
+                        foreach (KeyValuePair<FireArmRoundClass, int> entry in typeEntry.Value)
+                        {
+                            GameObject containsInstance = Instantiate(Mod.ammoContainsPrefab, transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0));
+                            containsInstance.transform.SetSiblingIndex(4);
+                            Text neededForInstanceText = containsInstance.transform.GetChild(0).GetComponent<Text>();
+                            neededForInstanceText.text = typeEntry.Key.ToString() +" "+ entry.Key.ToString() + " (" + entry.Value.ToString() + ")";
+                            ammoContainsTexts.Add(containsInstance);
+                            descriptionHeight += 47;
+                        }
                     }
                 }
                 else
