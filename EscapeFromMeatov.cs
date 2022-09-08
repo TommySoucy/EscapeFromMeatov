@@ -105,6 +105,22 @@ namespace EFM
         public static List<List<bool>> triggeredExplorationTriggers;
         public static GameObject[] scavRaidReturnItems; // Hands, Equipment, Right shoulder, pockets
         public static List<List<TraderTaskReward>> rewardsToGive;
+        public static Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>> taskStartConditionsByType = new Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>>();
+        public static Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>> taskStartCounterConditionsByType = new Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>>();
+        public static Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>> taskCompletionConditionsByType = new Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>>();
+        public static Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>> taskCompletionCounterConditionsByType = new Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>>();
+        public static Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>> taskFailConditionsByType = new Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>>();
+        public static Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>> taskFailCounterConditionsByType = new Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>>();
+        public static Dictionary<string, Dictionary<string, List<TraderTaskCondition>>> taskLeaveItemConditionsByItemIDByZone = new Dictionary<string, Dictionary<string, List<TraderTaskCondition>>>();
+        public static Dictionary<string, List<TraderTaskCondition>> taskVisitPlaceConditionsByZone = new Dictionary<string, List<TraderTaskCondition>>();
+        public static Dictionary<string, List<TraderTaskCounterCondition>> taskVisitPlaceCounterConditionsByZone = new Dictionary<string, List<TraderTaskCounterCondition>>();
+        public static Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> taskHealthEffectCounterConditionsByEffectType = new Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>>();
+        public static Dictionary<string, List<TraderTaskCondition>> taskFindItemConditionsByItemID = new Dictionary<string, List<TraderTaskCondition>>();
+        public static Dictionary<int, List<TraderTaskCondition>> taskSkillConditionsBySkillIndex = new Dictionary<int, List<TraderTaskCondition>>();
+        public static Dictionary<string, Dictionary<string, List<TraderTaskCondition>>> currentTaskLeaveItemConditionsByItemIDByZone;
+        public static Dictionary<string, List<TraderTaskCondition>> currentTaskVisitPlaceConditionsByZone;
+        public static Dictionary<string, List<TraderTaskCounterCondition>> currentTaskVisitPlaceCounterConditionsByZone;
+        public static Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> currentHealthEffectCounterConditionsByEffectType;
 
         // Player
         public static GameObject playerStatusUI;
@@ -2503,6 +2519,15 @@ namespace EFM
                 {
                     currentBaseManager.UpdateBasedOnPlayerLevel();
                 }
+
+                // Update level task conditions
+                if (taskStartConditionsByType.ContainsKey(TraderTaskCondition.ConditionType.Level))
+                {
+                    foreach (TraderTaskCondition condition in taskStartConditionsByType[TraderTaskCondition.ConditionType.Level])
+                    {
+                        EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                    }
+                }
             }
 
             if(type == 1)
@@ -2565,18 +2590,15 @@ namespace EFM
             Mod.skills[skillIndex].progress += actualAmountToAdd;
             Mod.skills[skillIndex].currentProgress += actualAmountToAdd;
 
-            if (Mod.currentLocationIndex == 2)
+            Mod.skills[skillIndex].raidProgress += actualAmountToAdd;
+            if (Mod.skills[skillIndex].raidProgress >= 200) // dimishing returns at 2 levels per raid TODO: should be unique to each skill
             {
-                Mod.skills[skillIndex].raidProgress += actualAmountToAdd;
-                if (Mod.skills[skillIndex].raidProgress >= 200) // dimishing returns at 2 levels per raid TODO: should be unique to each skill
-                {
-                    Mod.skills[skillIndex].dimishingReturns = true;
-                    Mod.skills[skillIndex].increasing = false;
-                }
-                else
-                {
-                    Mod.skills[skillIndex].increasing = true;
-                }
+                Mod.skills[skillIndex].dimishingReturns = true;
+                Mod.skills[skillIndex].increasing = false;
+            }
+            else
+            {
+                Mod.skills[skillIndex].increasing = true;
             }
 
             if (Mod.skills[skillIndex].skillType == EFM_Skill.SkillType.Practical || Mod.skills[skillIndex].skillType == EFM_Skill.SkillType.Physical)
@@ -2590,6 +2612,15 @@ namespace EFM
 
             float postLevel = Mod.skills[skillIndex].progress / 100;
 
+            if(postLevel != preLevel)
+            {
+                foreach (TraderTaskCondition condition in Mod.taskSkillConditionsBySkillIndex[skillIndex])
+                {
+                    EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                }
+            }
+
+            // Skill specific stuff
             if (skillIndex == 0)
             {
                 Mod.maxStamina += (postLevel - preLevel);
@@ -3664,6 +3695,44 @@ namespace EFM
             int minutes = (int)(time % 3600 / 60);
             int seconds = (int)(time % 3600 % 60);
             return String.Format("{0:00}:{1:00}:{2:00}", hours, minutes, seconds);
+        }
+
+        public static bool IDDescribedInList(string IDToUse, List<string> parentsToUse, List<string> whiteList, List<string> blackList)
+        {
+            // If an item's corresponding ID is specified in whitelist, then that is the ID we must check the blacklist against.
+            // If the blacklist contains any of the item's more specific IDs than the ID in the whitelist, then the item does not fit. Otherwise, it fits.
+
+            // Check item ID
+            if (whiteList.Contains(IDToUse))
+            {
+                // The specific item is specified as fitting or not, we dont need to check the list of ancestors
+                //return !collidingContainerWrapper.blackList.Contains(IDToUse);
+
+                // In truth, a specific ID in whitelist should mean that this item fits. The specific ID should never be specified in both white and black lists
+                return true;
+            }
+
+            // Check ancestors
+            for (int i = 0; i < parentsToUse.Count; ++i)
+            {
+                // If whitelist contains the ancestor ID
+                if (whiteList.Contains(parentsToUse[i]))
+                {
+                    // Must check if any prior ancestor IDs are in the blacklist
+                    // If an prior ancestor or the item's ID is found in the blacklist, return false, the item does not fit
+                    for (int j = 0; j < i; ++j)
+                    {
+                        if (blackList.Contains(parentsToUse[j]))
+                        {
+                            return false;
+                        }
+                    }
+                    return !blackList.Contains(IDToUse);
+                }
+            }
+
+            // Getting this far would mean that the item's ID nor any of its ancestors are in the whitelist, so doesn't fit
+            return false;
         }
     }
 
@@ -5200,9 +5269,24 @@ namespace EFM
                 if (!customItemWrapper.looted)
                 {
                     customItemWrapper.looted = true;
-                    if (customItemWrapper.lootExperience > 0)
+                    if (Mod.currentLocationIndex == 2)
                     {
-                        Mod.AddExperience(customItemWrapper.lootExperience, 1);
+                        if (customItemWrapper.lootExperience > 0)
+                        {
+                            Mod.AddExperience(customItemWrapper.lootExperience, 1);
+                        }
+
+                        if (customItemWrapper.foundInRaid && Mod.taskFindItemConditionsByItemID.ContainsKey(customItemWrapper.ID))
+                        {
+                            foreach(TraderTaskCondition condition in Mod.taskFindItemConditionsByItemID[customItemWrapper.ID])
+                            {
+                                if (!condition.fulfilled)
+                                {
+                                    ++condition.itemCount;
+                                    EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                                }
+                            }
+                        }
                     }
                     Mod.AddSkillExp(EFM_Skill.uniqueLoot, 7);
                 }
@@ -5252,9 +5336,24 @@ namespace EFM
                 if (!vanillaItemDescriptor.looted)
                 {
                     vanillaItemDescriptor.looted = true;
-                    if (vanillaItemDescriptor.lootExperience > 0)
+                    if (Mod.currentLocationIndex == 2)
                     {
-                        Mod.AddExperience(vanillaItemDescriptor.lootExperience, 1);
+                        if (vanillaItemDescriptor.lootExperience > 0)
+                        {
+                            Mod.AddExperience(vanillaItemDescriptor.lootExperience, 1);
+                        }
+
+                        if (vanillaItemDescriptor.foundInRaid && Mod.taskFindItemConditionsByItemID.ContainsKey(vanillaItemDescriptor.H3ID))
+                        {
+                            foreach (TraderTaskCondition condition in Mod.taskFindItemConditionsByItemID[vanillaItemDescriptor.H3ID])
+                            {
+                                if (!condition.fulfilled)
+                                {
+                                    ++condition.itemCount;
+                                    EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                                }
+                            }
+                        }
                     }
                     Mod.AddSkillExp(EFM_Skill.uniqueLoot, 7);
                 }

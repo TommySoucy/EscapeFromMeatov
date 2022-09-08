@@ -1685,6 +1685,7 @@ namespace EFM
                 }
 
                 // Add active tasks to player status list
+                // Also check each condition for visibility
                 foreach (KeyValuePair<string, TraderTask> task in EFM_TraderStatus.foundTasks)
                 {
                     if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
@@ -1694,6 +1695,115 @@ namespace EFM
                     else
                     {
                         task.Value.statusListElement = null;
+                    }
+
+                    foreach(TraderTaskCondition condition in task.Value.startConditions)
+                    {
+                        bool visiblityFulfilled = true;
+                        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
+                        {
+                            foreach(TraderTaskCondition visCond in condition.visibilityConditions)
+                            {
+                                if (!visCond.fulfilled)
+                                {
+                                    visiblityFulfilled = false;
+                                    break;
+                                }
+                            }
+                        }
+                        condition.visible = visiblityFulfilled;
+                        if (condition.marketListElement != null) 
+                        {
+                            condition.marketListElement.SetActive(visiblityFulfilled);
+                        }
+                        if(condition.statusListElement != null)
+                        {
+                            condition.statusListElement.SetActive(visiblityFulfilled);
+                        }
+                    }
+
+                    foreach(TraderTaskCondition condition in task.Value.completionConditions)
+                    {
+                        bool visiblityFulfilled = true;
+                        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
+                        {
+                            foreach(TraderTaskCondition visCond in condition.visibilityConditions)
+                            {
+                                if (!visCond.fulfilled)
+                                {
+                                    visiblityFulfilled = false;
+                                    break;
+                                }
+                            }
+                        }
+                        condition.visible = visiblityFulfilled;
+                        if (condition.marketListElement != null) 
+                        {
+                            condition.marketListElement.SetActive(visiblityFulfilled);
+                        }
+                        if(condition.statusListElement != null)
+                        {
+                            condition.statusListElement.SetActive(visiblityFulfilled);
+                        }
+
+                        // Add condition to completion list if necessary
+                        if (condition.visible)
+                        {
+                            if(condition.conditionType == TraderTaskCondition.ConditionType.CounterCreator)
+                            {
+                                foreach (TraderTaskCounterCondition counterCondition in condition.counters)
+                                {
+                                    if (Mod.taskCompletionCounterConditionsByType.ContainsKey(counterCondition.counterConditionType))
+                                    {
+                                        Mod.taskCompletionCounterConditionsByType[counterCondition.counterConditionType].Add(counterCondition);
+                                    }
+                                    else
+                                    {
+                                        List<TraderTaskCounterCondition> newList = new List<TraderTaskCounterCondition>();
+                                        Mod.taskCompletionCounterConditionsByType.Add(counterCondition.counterConditionType, newList);
+                                        newList.Add(counterCondition);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (Mod.taskCompletionConditionsByType.ContainsKey(condition.conditionType))
+                                {
+                                    Mod.taskCompletionConditionsByType[condition.conditionType].Add(condition);
+                                }
+                                else
+                                {
+                                    List<TraderTaskCondition> newList = new List<TraderTaskCondition>();
+                                    Mod.taskCompletionConditionsByType.Add(condition.conditionType, newList);
+                                    newList.Add(condition);
+                                }
+                            }
+                        }
+                    }
+
+                    foreach(TraderTaskCondition condition in task.Value.failConditions)
+                    {
+                        bool visiblityFulfilled = true;
+                        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
+                        {
+                            foreach(TraderTaskCondition visCond in condition.visibilityConditions)
+                            {
+                                if (!visCond.fulfilled)
+                                {
+                                    visiblityFulfilled = false;
+                                    break;
+                                }
+                            }
+                        }
+                        condition.visible = visiblityFulfilled;
+                        if (condition.marketListElement != null) 
+                        {
+                            condition.marketListElement.SetActive(visiblityFulfilled);
+                        }
+                        if(condition.statusListElement != null)
+                        {
+                            condition.statusListElement.SetActive(visiblityFulfilled);
+                        }
                     }
                 }
 
@@ -1966,6 +2076,116 @@ namespace EFM
                     else
                     {
                         task.Value.statusListElement = null;
+                    }
+
+                    // Check for condition visibility
+                    foreach (TraderTaskCondition condition in task.Value.startConditions)
+                    {
+                        bool visiblityFulfilled = true;
+                        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
+                        {
+                            foreach (TraderTaskCondition visCond in condition.visibilityConditions)
+                            {
+                                if (!visCond.fulfilled)
+                                {
+                                    visiblityFulfilled = false;
+                                    break;
+                                }
+                            }
+                        }
+                        condition.visible = visiblityFulfilled;
+                        if (condition.marketListElement != null)
+                        {
+                            condition.marketListElement.SetActive(visiblityFulfilled);
+                        }
+                        if (condition.statusListElement != null)
+                        {
+                            condition.statusListElement.SetActive(visiblityFulfilled);
+                        }
+                    }
+
+                    foreach (TraderTaskCondition condition in task.Value.completionConditions)
+                    {
+                        bool visiblityFulfilled = true;
+                        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
+                        {
+                            foreach (TraderTaskCondition visCond in condition.visibilityConditions)
+                            {
+                                if (!visCond.fulfilled)
+                                {
+                                    visiblityFulfilled = false;
+                                    break;
+                                }
+                            }
+                        }
+                        condition.visible = visiblityFulfilled;
+                        if (condition.marketListElement != null)
+                        {
+                            condition.marketListElement.SetActive(visiblityFulfilled);
+                        }
+                        if (condition.statusListElement != null)
+                        {
+                            condition.statusListElement.SetActive(visiblityFulfilled);
+                        }
+
+                        // Add condition to completion list if necessary
+                        if (condition.visible)
+                        {
+                            if (condition.conditionType == TraderTaskCondition.ConditionType.CounterCreator)
+                            {
+                                foreach (TraderTaskCounterCondition counterCondition in condition.counters)
+                                {
+                                    if (Mod.taskCompletionCounterConditionsByType.ContainsKey(counterCondition.counterConditionType))
+                                    {
+                                        Mod.taskCompletionCounterConditionsByType[counterCondition.counterConditionType].Add(counterCondition);
+                                    }
+                                    else
+                                    {
+                                        List<TraderTaskCounterCondition> newList = new List<TraderTaskCounterCondition>();
+                                        Mod.taskCompletionCounterConditionsByType.Add(counterCondition.counterConditionType, newList);
+                                        newList.Add(counterCondition);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (Mod.taskCompletionConditionsByType.ContainsKey(condition.conditionType))
+                                {
+                                    Mod.taskCompletionConditionsByType[condition.conditionType].Add(condition);
+                                }
+                                else
+                                {
+                                    List<TraderTaskCondition> newList = new List<TraderTaskCondition>();
+                                    Mod.taskCompletionConditionsByType.Add(condition.conditionType, newList);
+                                    newList.Add(condition);
+                                }
+                            }
+                        }
+                    }
+
+                    foreach (TraderTaskCondition condition in task.Value.failConditions)
+                    {
+                        bool visiblityFulfilled = true;
+                        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
+                        {
+                            foreach (TraderTaskCondition visCond in condition.visibilityConditions)
+                            {
+                                if (!visCond.fulfilled)
+                                {
+                                    visiblityFulfilled = false;
+                                    break;
+                                }
+                            }
+                        }
+                        condition.visible = visiblityFulfilled;
+                        if (condition.marketListElement != null)
+                        {
+                            condition.marketListElement.SetActive(visiblityFulfilled);
+                        }
+                        if (condition.statusListElement != null)
+                        {
+                            condition.statusListElement.SetActive(visiblityFulfilled);
+                        }
                     }
                 }
             }
@@ -4869,6 +5089,7 @@ namespace EFM
                 savedItem["amount"] = customItemWrapper.amount;
                 savedItem["looted"] = customItemWrapper.looted;
                 savedItem["insured"] = customItemWrapper.insured;
+                savedItem["foundInRaid"] = customItemWrapper.foundInRaid;
 
                 // Armor
                 if (customItemWrapper.itemType == Mod.ItemType.BodyArmor)
@@ -5069,6 +5290,7 @@ namespace EFM
             {
                 savedItem["looted"] = vanillaItemDescriptor.looted;
                 savedItem["insured"] = vanillaItemDescriptor.insured;
+                savedItem["foundInRaid"] = vanillaItemDescriptor.foundInRaid;
             }
 
             listToAddTo.Add(savedItem);

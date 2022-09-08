@@ -28,6 +28,8 @@ namespace EFM
         public int currentTraderIndex;
         public Dictionary<string, int> tradeVolumeInventory;
         public Dictionary<string, List<GameObject>> tradeVolumeInventoryObjects;
+        public Dictionary<string, int> tradeVolumeFIRInventory;
+        public Dictionary<string, List<GameObject>> tradeVolumeFIRInventoryObjects;
         public string cartItem;
         public int cartItemCount;
         public List<AssortmentPriceData> prices;
@@ -189,6 +191,8 @@ namespace EFM
             {
                 tradeVolumeInventory = new Dictionary<string, int>();
                 tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
+                tradeVolumeFIRInventory = new Dictionary<string, int>();
+                tradeVolumeFIRInventoryObjects = new Dictionary<string, List<GameObject>>();
             }
 
             // Setup the trade volume
@@ -215,6 +219,19 @@ namespace EFM
                         tradeVolumeInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
                         tradeVolumeInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
                     }
+                    if (CIW.foundInRaid)
+                    {
+                        if (tradeVolumeFIRInventory.ContainsKey(CIW.ID))
+                        {
+                            tradeVolumeFIRInventory[CIW.ID] += CIW.maxStack > 1 ? CIW.stack : 1;
+                            tradeVolumeFIRInventoryObjects[CIW.ID].Add(CIW.gameObject);
+                        }
+                        else
+                        {
+                            tradeVolumeFIRInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
+                            tradeVolumeFIRInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
+                        }
+                    }
                 }
                 else
                 {
@@ -227,6 +244,19 @@ namespace EFM
                     {
                         tradeVolumeInventory.Add(VID.H3ID, 1);
                         tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
+                    }
+                    if (VID.foundInRaid)
+                    {
+                        if (tradeVolumeFIRInventory.ContainsKey(VID.H3ID))
+                        {
+                            tradeVolumeFIRInventory[VID.H3ID] += 1;
+                            tradeVolumeFIRInventoryObjects[VID.H3ID].Add(VID.gameObject);
+                        }
+                        else
+                        {
+                            tradeVolumeFIRInventory.Add(VID.H3ID, 1);
+                            tradeVolumeFIRInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
+                        }
                     }
                 }
             }
@@ -1279,8 +1309,20 @@ namespace EFM
                             }
                         }
 
+                        // Setup handover button if necessary
+                        if (currentCondition.conditionType == TraderTaskCondition.ConditionType.HandoverItem || currentCondition.conditionType == TraderTaskCondition.ConditionType.WeaponAssembly)
+                        {
+                            objectiveInfo.GetChild(5).gameObject.SetActive(tradeVolumeFIRInventory.ContainsKey(currentCondition.item) && tradeVolumeFIRInventory[currentCondition.item] > 0);
+
+                            EFM_PointableButton pointableHandOverButton = objectiveInfo.GetChild(5).gameObject.AddComponent<EFM_PointableButton>();
+                            pointableHandOverButton.SetButton();
+                            pointableHandOverButton.Button.onClick.AddListener(() => { OnTaskConditionHandOverClick(currentCondition, objectiveInfo.GetChild(5).gameObject, currentCondition.conditionType == TraderTaskCondition.ConditionType.HandoverItem); });
+                            pointableHandOverButton.MaxPointingRange = 10;
+                            pointableHandOverButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                        }
+
                         // Disable condition gameObject if visibility conditions not met
-                        if(currentCondition.visibilityConditions != null && currentCondition.visibilityConditions.Count > 0)
+                        if (currentCondition.visibilityConditions != null && currentCondition.visibilityConditions.Count > 0)
                         {
                             foreach(TraderTaskCondition visibilityCondition in currentCondition.visibilityConditions)
                             {
@@ -1560,6 +1602,18 @@ namespace EFM
                             }
                         }
 
+                        // Setup handover button if necessary
+                        if (currentCondition.conditionType == TraderTaskCondition.ConditionType.HandoverItem || currentCondition.conditionType == TraderTaskCondition.ConditionType.WeaponAssembly)
+                        {
+                            objectiveInfo.GetChild(5).gameObject.SetActive(tradeVolumeFIRInventory.ContainsKey(currentCondition.item) && tradeVolumeFIRInventory[currentCondition.item] > 0);
+
+                            EFM_PointableButton pointableHandOverButton = objectiveInfo.GetChild(5).gameObject.AddComponent<EFM_PointableButton>();
+                            pointableHandOverButton.SetButton();
+                            pointableHandOverButton.Button.onClick.AddListener(() => { OnTaskConditionHandOverClick(currentCondition, objectiveInfo.GetChild(5).gameObject, currentCondition.conditionType == TraderTaskCondition.ConditionType.HandoverItem); });
+                            pointableHandOverButton.MaxPointingRange = 10;
+                            pointableHandOverButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                        }
+
                         // Disable condition gameObject if visibility conditions not met
                         if (currentCondition.visibilityConditions != null && currentCondition.visibilityConditions.Count > 0)
                         {
@@ -1740,12 +1794,6 @@ namespace EFM
                     pointableTaskShortInfoButton.Button.onClick.AddListener(() => { OnTaskShortInfoClick(description.gameObject); });
                     pointableTaskShortInfoButton.MaxPointingRange = 20;
                     pointableTaskShortInfoButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                    // Start
-                    EFM_PointableButton pointableTaskStartButton = shortInfo.GetChild(6).gameObject.AddComponent<EFM_PointableButton>();
-                    pointableTaskStartButton.SetButton();
-                    pointableTaskStartButton.Button.onClick.AddListener(() => { OnTaskStartClick(task); });
-                    pointableTaskStartButton.MaxPointingRange = 20;
-                    pointableTaskStartButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
                     // Finish
                     EFM_PointableButton pointableTaskFinishButton = shortInfo.GetChild(7).gameObject.AddComponent<EFM_PointableButton>();
                     pointableTaskFinishButton.SetButton();
@@ -1976,12 +2024,6 @@ namespace EFM
                     pointableTaskShortInfoButton.Button.onClick.AddListener(() => { OnTaskShortInfoClick(description.gameObject); });
                     pointableTaskShortInfoButton.MaxPointingRange = 20;
                     pointableTaskShortInfoButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                    // Start
-                    EFM_PointableButton pointableTaskStartButton = shortInfo.GetChild(6).gameObject.AddComponent<EFM_PointableButton>();
-                    pointableTaskStartButton.SetButton();
-                    pointableTaskStartButton.Button.onClick.AddListener(() => { OnTaskStartClick(task); });
-                    pointableTaskStartButton.MaxPointingRange = 20;
-                    pointableTaskStartButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
                     // Finish
                     EFM_PointableButton pointableTaskFinishButton = shortInfo.GetChild(7).gameObject.AddComponent<EFM_PointableButton>();
                     pointableTaskFinishButton.SetButton();
@@ -2389,6 +2431,8 @@ namespace EFM
                     {
                         tradeVolumeInventory = new Dictionary<string, int>();
                         tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
+                        tradeVolumeFIRInventory = new Dictionary<string, int>();
+                        tradeVolumeFIRInventoryObjects = new Dictionary<string, List<GameObject>>();
                     }
                     if (tradeVolumeInventory.ContainsKey(CIW.ID))
                     {
@@ -2400,6 +2444,19 @@ namespace EFM
                         tradeVolumeInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
                         tradeVolumeInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
                     }
+                    if (CIW.foundInRaid)
+                    {
+                        if (tradeVolumeFIRInventory.ContainsKey(CIW.ID))
+                        {
+                            tradeVolumeFIRInventory[CIW.ID] += CIW.maxStack > 1 ? CIW.stack : 1;
+                            tradeVolumeFIRInventoryObjects[CIW.ID].Add(CIW.gameObject);
+                        }
+                        else
+                        {
+                            tradeVolumeFIRInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
+                            tradeVolumeFIRInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
+                        }
+                    }
                 }
                 else
                 {
@@ -2408,6 +2465,8 @@ namespace EFM
                     {
                         tradeVolumeInventory = new Dictionary<string, int>();
                         tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
+                        tradeVolumeFIRInventory = new Dictionary<string, int>();
+                        tradeVolumeFIRInventoryObjects = new Dictionary<string, List<GameObject>>();
                     }
                     if (tradeVolumeInventory.ContainsKey(VID.H3ID))
                     {
@@ -2418,6 +2477,19 @@ namespace EFM
                     {
                         tradeVolumeInventory.Add(VID.H3ID, 1);
                         tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
+                    }
+                    if (VID.foundInRaid)
+                    {
+                        if (tradeVolumeFIRInventory.ContainsKey(VID.H3ID))
+                        {
+                            tradeVolumeFIRInventory[VID.H3ID] += 1;
+                            tradeVolumeFIRInventoryObjects[VID.H3ID].Add(VID.gameObject);
+                        }
+                        else
+                        {
+                            tradeVolumeFIRInventory.Add(VID.H3ID, 1);
+                            tradeVolumeFIRInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
+                        }
                     }
                 }
 
@@ -2792,7 +2864,7 @@ namespace EFM
                     {
                         if (!condition.fulfilled && condition.marketListElement != null)
                         {
-                            if (condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem)
+                            if (((custom && CIW.foundInRaid)||(!custom && VID.foundInRaid)) && condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem)
                             {
                                 condition.marketListElement.transform.GetChild(0).GetChild(0).GetChild(5).gameObject.SetActive(true);
                             }
@@ -3109,6 +3181,16 @@ namespace EFM
                         tradeVolumeInventory.Remove(CIW.ID);
                         tradeVolumeInventoryObjects.Remove(CIW.ID);
                     }
+                    if (CIW.foundInRaid)
+                    {
+                        tradeVolumeFIRInventory[CIW.ID] -= (CIW.maxStack > 1 ? CIW.stack : 1);
+                        tradeVolumeFIRInventoryObjects[CIW.ID].Remove(CIW.gameObject);
+                        if (tradeVolumeFIRInventory[CIW.ID] == 0)
+                        {
+                            tradeVolumeFIRInventory.Remove(CIW.ID);
+                            tradeVolumeFIRInventoryObjects.Remove(CIW.ID);
+                        }
+                    }
                 }
                 else
                 {
@@ -3119,6 +3201,16 @@ namespace EFM
                     {
                         tradeVolumeInventory.Remove(VID.H3ID);
                         tradeVolumeInventoryObjects.Remove(VID.H3ID);
+                    }
+                    if (VID.foundInRaid)
+                    {
+                        tradeVolumeFIRInventory[VID.H3ID] -= 1;
+                        tradeVolumeFIRInventoryObjects[VID.H3ID].Remove(VID.gameObject);
+                        if (tradeVolumeFIRInventory[VID.H3ID] == 0)
+                        {
+                            tradeVolumeFIRInventory.Remove(VID.H3ID);
+                            tradeVolumeFIRInventoryObjects.Remove(VID.H3ID);
+                        }
                     }
                 }
 
@@ -3420,7 +3512,7 @@ namespace EFM
                         if ((condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem || condition.conditionType == TraderTaskCondition.ConditionType.WeaponAssembly) &&
                             !condition.fulfilled && condition.marketListElement != null)
                         {
-                            if (!tradeVolumeInventory.ContainsKey(itemID) || tradeVolumeInventory[itemID] == 0)
+                            if (!tradeVolumeFIRInventory.ContainsKey(itemID) || tradeVolumeFIRInventory[itemID] == 0)
                             {
                                 condition.marketListElement.transform.GetChild(0).GetChild(0).GetChild(5).gameObject.SetActive(false);
                             }
@@ -3722,94 +3814,7 @@ namespace EFM
             // Remove price from trade volume
             foreach(AssortmentPriceData price in prices)
             {
-                // TODO: Make removing items from hideout as a common utility inside base manager, ebcause we also use this in base manager and we could probably use it elsewhere
-                int amountToRemove = price.count;
-                tradeVolumeInventory[price.ID] -= (price.count * cartItemCount);
-                List<GameObject> objectList = tradeVolumeInventoryObjects[price.ID];
-                while (amountToRemove > 0)
-                {
-                    GameObject currentItemObject = objectList[objectList.Count - 1];
-                    EFM_CustomItemWrapper CIW = currentItemObject.GetComponent<EFM_CustomItemWrapper>();
-                    if (CIW != null)
-                    {
-                        if (CIW.maxStack > 1)
-                        {
-                            int stack = CIW.stack;
-                            if(stack - amountToRemove <= 0)
-                            {
-                                amountToRemove -= stack;
-
-                                // Destroy item
-                                objectList.RemoveAt(objectList.Count - 1);
-                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                                CIW.destroyed = true;
-                                currentItemObject.transform.parent = null;
-                                Destroy(currentItemObject);
-                            }
-                            else // stack - amountToRemove > 0
-                            {
-                                CIW.stack -= amountToRemove;
-                                Mod.baseInventory[CIW.ID] -= amountToRemove;
-                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                                amountToRemove = 0;
-                            }
-                        }
-                        else // Doesnt have stack, its a single item
-                        {
-                            // If dogtag must only delete the ones that match the required level
-                            if(CIW.itemType == Mod.ItemType.DogTag)
-                            {
-                                if (CIW.dogtagLevel >= price.dogtagLevel)
-                                {
-                                    --amountToRemove;
-
-                                    // Destroy item
-                                    objectList.RemoveAt(objectList.Count - 1);
-                                    Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                                    CIW.destroyed = true;
-                                    currentItemObject.transform.parent = null;
-                                    Destroy(currentItemObject);
-                                }
-                            }
-                            else
-                            {
-                                --amountToRemove;
-
-                                // Destroy item
-                                objectList.RemoveAt(objectList.Count - 1);
-                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                                CIW.destroyed = true;
-                                currentItemObject.transform.parent = null;
-                                Destroy(currentItemObject);
-                            }
-                        }
-                    }
-                    else // Vanilla item cannot have stack
-                    {
-                        --amountToRemove;
-
-                        // Destroy item
-                        objectList.RemoveAt(objectList.Count - 1);
-                        Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                        currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
-                        currentItemObject.transform.parent = null;
-                        Destroy(currentItemObject);
-                    }
-                }
-
-                // Remove this item from lists if dont have anymore in inventory
-                if (tradeVolumeInventory[price.ID] == 0)
-                {
-                    tradeVolumeInventory.Remove(price.ID);
-                    tradeVolumeInventoryObjects.Remove(price.ID);
-                    // TODO: In this case, we could just destroy all objects in tradeVolumeInventoryObjects[price.Key] right away without having to check stacks like in the while loop above
-                }
-
-                // Update area managers based on item we just removed
-                foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
-                {
-                    areaManager.UpdateBasedOnItem(price.ID);
-                }
+                RemoveItemFromTrade(price.ID, price.count * cartItemCount, price.dogtagLevel);
             }
 
             // Add bought amount of item to trade volume at random pos and rot within it
@@ -4058,7 +4063,6 @@ namespace EFM
                     foreach (GameObject itemObject in tradeVolumeInventoryObjects[item.Key])
                     {
                         // Destroy item
-                        EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                         Mod.currentBaseManager.RemoveFromBaseInventory(itemObject.transform, true);
                         // Unparent object before destroying so it doesnt get processed by settrader
                         itemObject.transform.parent = null;
@@ -4077,6 +4081,8 @@ namespace EFM
             {
                 tradeVolumeInventory.Remove(itemID);
                 tradeVolumeInventoryObjects.Remove(itemID);
+                tradeVolumeFIRInventory.Remove(itemID);
+                tradeVolumeFIRInventoryObjects.Remove(itemID);
             }
 
             // Add sold for item to trade volume
@@ -4164,45 +4170,7 @@ namespace EFM
             // Remove price from trade volume
             int amountToRemove = currentTotalInsurePrice;
             string currencyID = Mod.traderStatuses[currentTraderIndex].currency == 0 ? "203" : "201"; // Roubles, else USD
-            tradeVolumeInventory[currencyID] -= amountToRemove;
-            List<GameObject> objectList = tradeVolumeInventoryObjects[currencyID];
-            while (amountToRemove > 0)
-            {
-                GameObject currentItemObject = objectList[objectList.Count - 1];
-                EFM_CustomItemWrapper CIW = currentItemObject.GetComponent<EFM_CustomItemWrapper>();
-                int stack = CIW.stack;
-                if (stack - amountToRemove <= 0)
-                {
-                    amountToRemove -= stack;
-
-                    // Destroy item
-                    objectList.RemoveAt(objectList.Count - 1);
-                    Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                    CIW.destroyed = true;
-                    currentItemObject.transform.parent = null;
-                    Destroy(currentItemObject);
-                }
-                else // stack - amountToRemove > 0
-                {
-                    CIW.stack -= amountToRemove;
-                    Mod.baseInventory[CIW.ID] -= amountToRemove;
-                    amountToRemove = 0;
-                }
-            }
-
-            // Remove this item from lists if dont have anymore in inventory
-            if (tradeVolumeInventory[currencyID] == 0)
-            {
-                tradeVolumeInventory.Remove(currencyID);
-                tradeVolumeInventoryObjects.Remove(currencyID);
-                // TODO: In this case, we could just destroy all objects in tradeVolumeInventoryObjects[price.Key] right away without having to check stacks like in the while loop above
-            }
-
-            // Update area managers based on item we just removed
-            foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
-            {
-                areaManager.UpdateBasedOnItem(currencyID);
-            }
+            RemoveItemFromTrade(currencyID, amountToRemove);
 
             // Update trader UI
             SetTrader(currentTraderIndex);
@@ -4533,11 +4501,205 @@ namespace EFM
                 }
             }
 
+            // Add completion conditions to list if necessary
+            foreach (TraderTaskCondition condition in task.completionConditions)
+            {
+                if (condition.visible)
+                {
+                    if (condition.conditionType == TraderTaskCondition.ConditionType.CounterCreator)
+                    {
+                        foreach (TraderTaskCounterCondition counterCondition in condition.counters)
+                        {
+                            if (Mod.taskCompletionCounterConditionsByType.ContainsKey(counterCondition.counterConditionType))
+                            {
+                                Mod.taskCompletionCounterConditionsByType[counterCondition.counterConditionType].Add(counterCondition);
+                            }
+                            else
+                            {
+                                List<TraderTaskCounterCondition> newList = new List<TraderTaskCounterCondition>();
+                                Mod.taskCompletionCounterConditionsByType.Add(counterCondition.counterConditionType, newList);
+                                newList.Add(counterCondition);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (Mod.taskCompletionConditionsByType.ContainsKey(condition.conditionType))
+                        {
+                            Mod.taskCompletionConditionsByType[condition.conditionType].Add(condition);
+                        }
+                        else
+                        {
+                            List<TraderTaskCondition> newList = new List<TraderTaskCondition>();
+                            Mod.taskCompletionConditionsByType.Add(condition.conditionType, newList);
+                            newList.Add(condition);
+                        }
+                    }
+                }
+            }
+
             // Spawn intial equipment 
             if(task.startingEquipment != null)
             {
                 GivePlayerRewards(task.startingEquipment);
             }
+        }
+
+        public void RemoveItemFromTrade(string itemID, int amount, int dogtaglevel = -1, bool foundInRaid = false)
+        {
+            int amountToRemove = amount;
+            tradeVolumeInventory[itemID] -= amountToRemove;
+            List<GameObject> objectList = tradeVolumeInventoryObjects[itemID];
+            while (amountToRemove > 0)
+            {
+                GameObject currentItemObject = objectList[objectList.Count - 1];
+                EFM_CustomItemWrapper CIW = currentItemObject.GetComponent<EFM_CustomItemWrapper>();
+                EFM_VanillaItemDescriptor VID = currentItemObject.GetComponent<EFM_VanillaItemDescriptor>();
+                if (CIW != null)
+                {
+                    if(foundInRaid && !CIW.foundInRaid)
+                    {
+                        continue;
+                    }
+
+                    int currentFIRItemObjectIndex = -1;
+                    List<GameObject> FIRObjectList = null;
+                    if (CIW.foundInRaid)
+                    {
+                        FIRObjectList = tradeVolumeFIRInventoryObjects[itemID];
+                        currentFIRItemObjectIndex = FIRObjectList.IndexOf(currentItemObject);
+                    }
+
+                    if (CIW.maxStack > 1)
+                    {
+                        int stack = CIW.stack;
+                        if (stack - amountToRemove <= 0)
+                        {
+                            amountToRemove -= stack;
+
+                            if (CIW.foundInRaid)
+                            {
+                                tradeVolumeFIRInventory[itemID] -= stack;
+                                FIRObjectList[currentFIRItemObjectIndex] = FIRObjectList[FIRObjectList.Count - 1];
+                                FIRObjectList.RemoveAt(FIRObjectList.Count - 1);
+                            }
+
+                            // Destroy item
+                            objectList.RemoveAt(objectList.Count - 1);
+                            Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                            CIW.destroyed = true;
+                            currentItemObject.transform.parent = null;
+                            Destroy(currentItemObject);
+                        }
+                        else // stack - amountToRemove > 0
+                        {
+                            if (CIW.foundInRaid)
+                            {
+                                tradeVolumeFIRInventory[itemID] -= stack;
+                            }
+
+                            CIW.stack -= amountToRemove;
+                            Mod.baseInventory[CIW.ID] -= amountToRemove;
+                            Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                            amountToRemove = 0;
+                        }
+                    }
+                    else // Doesnt have stack, its a single item
+                    {
+                        // If dogtag must only delete the ones that match the required level
+                        if (CIW.itemType == Mod.ItemType.DogTag)
+                        {
+                            if (CIW.dogtagLevel >= dogtaglevel)
+                            {
+                                --amountToRemove;
+
+                                if (CIW.foundInRaid)
+                                {
+                                    tradeVolumeFIRInventory[itemID] -= 1;
+                                    FIRObjectList[currentFIRItemObjectIndex] = FIRObjectList[FIRObjectList.Count - 1];
+                                    FIRObjectList.RemoveAt(FIRObjectList.Count - 1);
+                                }
+
+                                // Destroy item
+                                objectList.RemoveAt(objectList.Count - 1);
+                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                                CIW.destroyed = true;
+                                currentItemObject.transform.parent = null;
+                                Destroy(currentItemObject);
+                            }
+                        }
+                        else
+                        {
+                            --amountToRemove;
+
+                            if (CIW.foundInRaid)
+                            {
+                                tradeVolumeFIRInventory[itemID] -= 1;
+                                FIRObjectList[currentFIRItemObjectIndex] = FIRObjectList[FIRObjectList.Count - 1];
+                                FIRObjectList.RemoveAt(FIRObjectList.Count - 1);
+                            }
+
+                            // Destroy item
+                            objectList.RemoveAt(objectList.Count - 1);
+                            Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                            CIW.destroyed = true;
+                            currentItemObject.transform.parent = null;
+                            Destroy(currentItemObject);
+                        }
+                    }
+                }
+                else // Vanilla item cannot have stack
+                {
+                    if (foundInRaid && !VID.foundInRaid)
+                    {
+                        continue;
+                    }
+
+                    --amountToRemove;
+
+                    if (VID.foundInRaid)
+                    {
+                        List<GameObject> FIRObjectList = tradeVolumeFIRInventoryObjects[itemID];
+                        tradeVolumeFIRInventory[itemID] -= 1;
+                        FIRObjectList[FIRObjectList.IndexOf(currentItemObject)] = FIRObjectList[FIRObjectList.Count - 1];
+                        FIRObjectList.RemoveAt(FIRObjectList.Count - 1);
+                    }
+
+                    // Destroy item
+                    objectList.RemoveAt(objectList.Count - 1);
+                    Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                    currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
+                    currentItemObject.transform.parent = null;
+                    Destroy(currentItemObject);
+                }
+            }
+
+            // Remove this item from lists if dont have anymore in inventory
+            if (tradeVolumeInventory[itemID] == 0)
+            {
+                tradeVolumeInventory.Remove(itemID);
+                tradeVolumeInventoryObjects.Remove(itemID);
+                tradeVolumeFIRInventory.Remove(itemID);
+                tradeVolumeFIRInventoryObjects.Remove(itemID);
+                // TODO: In this case, we could just destroy all objects in tradeVolumeInventoryObjects[price.Key] right away without having to check stacks like in the while loop above
+            }
+
+            // Update area managers based on item we just removed
+            foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+            {
+                areaManager.UpdateBasedOnItem(itemID);
+            }
+        }
+
+        public void OnTaskConditionHandOverClick(TraderTaskCondition condition, GameObject handOverButton, bool FIR)
+        {
+            int actualAmount = Mathf.Min(condition.value - condition.itemCount, tradeVolumeFIRInventory[condition.item]);
+            RemoveItemFromTrade(condition.item, actualAmount, condition.dogtagLevel, FIR);
+            condition.itemCount += actualAmount;
+
+            EFM_TraderStatus.UpdateConditionFulfillment(condition);
+
+            handOverButton.SetActive(false);
         }
 
         public void GivePlayerRewards(List<TraderTaskReward> rewards, string taskName = null)
@@ -4559,6 +4721,18 @@ namespace EFM
                         break;
                     case TraderTaskReward.TaskRewardType.TraderStanding:
                         Mod.traderStatuses[reward.traderIndex].standing += reward.standing;
+                        foreach(TraderTaskCondition condition in Mod.taskStartConditionsByType[TraderTaskCondition.ConditionType.TraderLoyalty])
+                        {
+                            EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                        }
+                        foreach(TraderTaskCondition condition in Mod.taskCompletionConditionsByType[TraderTaskCondition.ConditionType.TraderLoyalty])
+                        {
+                            EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                        }
+                        foreach(TraderTaskCondition condition in Mod.taskFailConditionsByType[TraderTaskCondition.ConditionType.TraderLoyalty])
+                        {
+                            EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                        }
                         resetTrader = true;
                         break;
                     case TraderTaskReward.TaskRewardType.Item:
@@ -5367,84 +5541,8 @@ namespace EFM
             // Remove price from trade volume
             foreach (AssortmentPriceData price in ragfairPrices)
             {
-                int amountToRemove = price.count;
-                tradeVolumeInventory[price.ID] -= (price.count * ragfairCartItemCount);
-                List<GameObject> objectList = tradeVolumeInventoryObjects[price.ID];
-                while (amountToRemove > 0)
-                {
-                    GameObject currentItemObject = objectList[objectList.Count - 1];
-                    EFM_CustomItemWrapper CIW = currentItemObject.GetComponent<EFM_CustomItemWrapper>();
-                    if (CIW != null)
-                    {
-                        if (CIW.maxStack > 1)
-                        {
-                            int stack = CIW.stack;
-                            if (stack - amountToRemove <= 0)
-                            {
-                                amountToRemove -= stack;
-
-                                // Destroy item
-                                objectList.RemoveAt(objectList.Count - 1);
-                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                                CIW.destroyed = true;
-                                currentItemObject.transform.parent = null;
-                                Destroy(currentItemObject);
-                            }
-                            else // stack - amountToRemove > 0
-                            {
-                                CIW.stack -= amountToRemove;
-                                Mod.baseInventory[CIW.ID] -= amountToRemove;
-                                amountToRemove = 0;
-                            }
-                        }
-                        else // Doesnt have stack, its a single item
-                        {
-                            if (CIW.itemType == Mod.ItemType.DogTag)
-                            {
-                                if (CIW.dogtagLevel >= price.dogtagLevel)
-                                {
-                                    --amountToRemove;
-
-                                    // Destroy item
-                                    objectList.RemoveAt(objectList.Count - 1);
-                                    Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                                    CIW.destroyed = true;
-                                    currentItemObject.transform.parent = null;
-                                    Destroy(currentItemObject);
-                                }
-                            }
-                            else
-                            {
-                                --amountToRemove;
-
-                                // Destroy item
-                                objectList.RemoveAt(objectList.Count - 1);
-                                Mod.baseInventory[CIW.ID] -= 1;
-                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                                CIW.destroyed = true;
-                                currentItemObject.transform.parent = null;
-                                Destroy(currentItemObject);
-                            }
-                        }
-                    }
-                    else // Vanilla item cannot have stack
-                    {
-                        --amountToRemove;
-
-                        // Destroy item
-                        objectList.RemoveAt(objectList.Count - 1);
-                        Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
-                        currentItemObject.GetComponent<EFM_VanillaItemDescriptor>().destroyed = true;
-                        currentItemObject.transform.parent = null;
-                        Destroy(currentItemObject);
-                    }
-                }
-
-                // Update area managers based on item we just removed
-                foreach (EFM_BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
-                {
-                    areaManager.UpdateBasedOnItem(price.ID);
-                }
+                int amountToRemove = price.count * ragfairCartItemCount;
+                RemoveItemFromTrade(price.ID, amountToRemove);
             }
 
             // Add bought amount of item to trade volume at random pos and rot within it

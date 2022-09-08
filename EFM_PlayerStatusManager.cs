@@ -31,6 +31,7 @@ namespace EFM
         private AudioSource openSound;
         private AudioSource closeSound;
         public SkillUI[] skills;
+        public string currentZone;
 
         private AudioSource buttonClickAudio;
         private List<TraderTask> taskList;

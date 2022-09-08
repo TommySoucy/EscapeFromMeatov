@@ -11,5 +11,7 @@ namespace EFM
         public int experienceReward;
         public int entityIndex;
         public AIInventory inventory;
+        public AISpawn.AISpawnType type;
+        public bool USEC;
     }
 }

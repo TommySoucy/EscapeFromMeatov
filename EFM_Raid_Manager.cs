@@ -95,6 +95,9 @@ namespace EFM
             Mod.instance.LogInfo("Got spawn");
 
             // Find extractions
+            Mod.currentTaskLeaveItemConditionsByItemIDByZone = new Dictionary<string, Dictionary<string, List<TraderTaskCondition>>>();
+            Mod.currentTaskVisitPlaceConditionsByZone = new Dictionary<string, List<TraderTaskCondition>>();
+            Mod.currentTaskVisitPlaceCounterConditionsByZone = new Dictionary<string, List<TraderTaskCounterCondition>>();
             possibleExtractions = new List<Extraction>();
             Extraction bestCandidate = null; // Must be an extraction without appearance times (always available) and no other requirements. This will be the minimum extraction
             float farthestDistance = float.MinValue;
@@ -103,6 +106,19 @@ namespace EFM
             {
                 Extraction currentExtraction = extractions[extractionIndex];
                 currentExtraction.gameObject = gameObject.transform.GetChild(gameObject.transform.childCount - 2).GetChild(extractionIndex).gameObject;
+                currentExtraction.gameObject.AddComponent<ZoneManager>();
+                if (Mod.taskLeaveItemConditionsByItemIDByZone.ContainsKey(currentExtraction.gameObject.name))
+                {
+                    Mod.currentTaskLeaveItemConditionsByItemIDByZone.Add(currentExtraction.gameObject.name, Mod.taskLeaveItemConditionsByItemIDByZone[currentExtraction.gameObject.name]);
+                }
+                if (Mod.taskVisitPlaceConditionsByZone.ContainsKey(currentExtraction.gameObject.name))
+                {
+                    Mod.currentTaskVisitPlaceConditionsByZone.Add(currentExtraction.gameObject.name, Mod.taskVisitPlaceConditionsByZone[currentExtraction.gameObject.name]);
+                }
+                if (Mod.taskVisitPlaceCounterConditionsByZone.ContainsKey(currentExtraction.gameObject.name))
+                {
+                    Mod.currentTaskVisitPlaceCounterConditionsByZone.Add(currentExtraction.gameObject.name, Mod.taskVisitPlaceCounterConditionsByZone[currentExtraction.gameObject.name]);
+                }
 
                 bool canBeMinimum = (currentExtraction.times == null || currentExtraction.times.Count == 0) &&
                                     (currentExtraction.itemRequirements == null || currentExtraction.itemRequirements.Count == 0) &&
@@ -567,6 +583,52 @@ namespace EFM
                 }
             }
 
+            // Init zones
+            Transform questParent = transform.GetChild(1).GetChild(1).GetChild(3).GetChild(6);
+            foreach(Transform questChild in questParent)
+            {
+                questChild.gameObject.AddComponent<ZoneManager>();
+                LeaveItemProcessor currentLeaveItemProcessor = questChild.gameObject.AddComponent<LeaveItemProcessor>();
+                if (Mod.taskLeaveItemConditionsByItemIDByZone.ContainsKey(questChild.name))
+                {
+                    currentLeaveItemProcessor.itemIDs = new List<string>();
+                    currentLeaveItemProcessor.conditionsByItemID = Mod.taskLeaveItemConditionsByItemIDByZone[questChild.name];
+                    Mod.currentTaskLeaveItemConditionsByItemIDByZone.Add(questChild.name, currentLeaveItemProcessor.conditionsByItemID);
+                    foreach(KeyValuePair<string, List<TraderTaskCondition>> entry in currentLeaveItemProcessor.conditionsByItemID)
+                    {
+                        currentLeaveItemProcessor.itemIDs.Add(entry.Key);
+                    }
+                }
+                if (Mod.taskVisitPlaceConditionsByZone.ContainsKey(questChild.name))
+                {
+                    Mod.currentTaskVisitPlaceConditionsByZone.Add(questChild.name, Mod.taskVisitPlaceConditionsByZone[questChild.name]);
+                }
+                if (Mod.taskVisitPlaceCounterConditionsByZone.ContainsKey(questChild.name))
+                {
+                    Mod.currentTaskVisitPlaceCounterConditionsByZone.Add(questChild.name, Mod.taskVisitPlaceCounterConditionsByZone[questChild.name]);
+                }
+            }
+
+            // Init current health effect counter conditions
+            Mod.currentHealthEffectCounterConditionsByEffectType = new Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>>();
+            foreach(KeyValuePair<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> entry in Mod.currentHealthEffectCounterConditionsByEffectType)
+            {
+                foreach(TraderTaskCounterCondition condition in entry.Value)
+                {
+                    if(condition.parentCondition.task.taskState == TraderTask.TaskState.Active)
+                    {
+                        if (Mod.currentHealthEffectCounterConditionsByEffectType.ContainsKey(entry.Key))
+                        {
+                            Mod.currentHealthEffectCounterConditionsByEffectType[entry.Key].Add(condition);
+                        }
+                        else
+                        {
+                            Mod.currentHealthEffectCounterConditionsByEffectType.Add(entry.Key, new List<TraderTaskCounterCondition>() { condition });
+                        }
+                    }
+                }
+            }
+
             // Init player if scav
             if (Mod.chosenCharIndex == 1)
             {
@@ -658,6 +720,8 @@ namespace EFM
                     Mod.playerStatusManager.SetDisplayed(false);
                     Mod.extractionUI.SetActive(false);
 
+                    ResetHealthEffectCounterConditions();
+
                     EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
 
                     extracted = true;
@@ -726,6 +790,9 @@ namespace EFM
                         Mod.playerStatusManager.SetDisplayed(false);
                         Mod.extractionUI.SetActive(false);
 
+                        UpdateExitStatusCounterConditions();
+                        ResetHealthEffectCounterConditions();
+
                         EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
 
                         extracted = true;
@@ -762,6 +829,177 @@ namespace EFM
             //UpdateTime();
 
             //UpdateSun();
+        }
+
+        private void UpdateExitStatusCounterConditions()
+        {
+            if(Mod.chosenCharIndex == 1)
+            {
+                return;
+            }
+
+            if (Mod.taskStartCounterConditionsByType.ContainsKey(TraderTaskCounterCondition.CounterConditionType.ExitStatus))
+            {
+                List<TraderTaskCounterCondition> startExitStatusCounterConditions = Mod.taskStartCounterConditionsByType[TraderTaskCounterCondition.CounterConditionType.ExitStatus];
+                foreach (TraderTaskCounterCondition counterCondition in startExitStatusCounterConditions)
+                {
+                    // Check task and condition state validity
+                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Locked)
+                    {
+                        break;
+                    }
+
+                    // Check exit status
+                    switch (Mod.raidState)
+                    {
+                        case EFM_Base_Manager.FinishRaidState.Survived:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Survived))
+                            {
+                                break;
+                            }
+                            break;
+                        case EFM_Base_Manager.FinishRaidState.RunThrough:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Runner))
+                            {
+                                break;
+                            }
+                            break;
+                        case EFM_Base_Manager.FinishRaidState.KIA:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Killed))
+                            {
+                                break;
+                            }
+                            break;
+                        case EFM_Base_Manager.FinishRaidState.MIA:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.MissingInAction))
+                            {
+                                break;
+                            }
+                            break;
+                    }
+
+                    // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+                    {
+                        if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+                        {
+                            break;
+                        }
+                    }
+
+                    // Successful kill, increment count and update fulfillment 
+                    counterCondition.completed = true;
+                    EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+                }
+            }
+            if (Mod.taskCompletionCounterConditionsByType.ContainsKey(TraderTaskCounterCondition.CounterConditionType.ExitStatus))
+            {
+                List<TraderTaskCounterCondition> completionExitStatusCounterConditions = Mod.taskCompletionCounterConditionsByType[TraderTaskCounterCondition.CounterConditionType.ExitStatus];
+                foreach (TraderTaskCounterCondition counterCondition in completionExitStatusCounterConditions)
+                {
+                    // Check task and condition state validity
+                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Active)
+                    {
+                        break;
+                    }
+
+                    // Check exit status
+                    switch (Mod.raidState)
+                    {
+                        case EFM_Base_Manager.FinishRaidState.Survived:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Survived))
+                            {
+                                break;
+                            }
+                            break;
+                        case EFM_Base_Manager.FinishRaidState.RunThrough:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Runner))
+                            {
+                                break;
+                            }
+                            break;
+                        case EFM_Base_Manager.FinishRaidState.KIA:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Killed))
+                            {
+                                break;
+                            }
+                            break;
+                        case EFM_Base_Manager.FinishRaidState.MIA:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.MissingInAction))
+                            {
+                                break;
+                            }
+                            break;
+                    }
+
+                    // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+                    {
+                        if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+                        {
+                            break;
+                        }
+                    }
+
+                    // Successful kill, increment count and update fulfillment 
+                    counterCondition.completed = true;
+                    EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+                }
+            }
+            if (Mod.taskFailCounterConditionsByType.ContainsKey(TraderTaskCounterCondition.CounterConditionType.ExitStatus))
+            {
+                List<TraderTaskCounterCondition> failExitStatusCounterConditions = Mod.taskFailCounterConditionsByType[TraderTaskCounterCondition.CounterConditionType.ExitStatus];
+                foreach (TraderTaskCounterCondition counterCondition in failExitStatusCounterConditions)
+                {
+                    // Check task and condition state validity
+                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState == TraderTask.TaskState.Fail)
+                    {
+                        break;
+                    }
+
+                    // Check exit status
+                    switch (Mod.raidState)
+                    {
+                        case EFM_Base_Manager.FinishRaidState.Survived:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Survived))
+                            {
+                                break;
+                            }
+                            break;
+                        case EFM_Base_Manager.FinishRaidState.RunThrough:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Runner))
+                            {
+                                break;
+                            }
+                            break;
+                        case EFM_Base_Manager.FinishRaidState.KIA:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Killed))
+                            {
+                                break;
+                            }
+                            break;
+                        case EFM_Base_Manager.FinishRaidState.MIA:
+                            if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.MissingInAction))
+                            {
+                                break;
+                            }
+                            break;
+                    }
+
+                    // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+                    {
+                        if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+                        {
+                            break;
+                        }
+                    }
+
+                    // Successful kill, increment count and update fulfillment 
+                    counterCondition.completed = true;
+                    EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+                }
+            }
         }
 
         private void UpdateAI()
@@ -875,6 +1113,8 @@ namespace EFM
             AIScript.experienceReward = spawnData.experienceReward;
             AIScript.entityIndex = entities.Count;
             AIScript.inventory = spawnData.inventory;
+            AIScript.USEC = spawnData.USEC;
+            AIScript.type = spawnData.type;
             Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tAdded EFM_AI script");
 
             entities.Add(sosigScript.E);
@@ -1095,6 +1335,9 @@ namespace EFM
                         friendly.SetIFF(1);
                     }
                 }
+
+                // Update kill counter conditions
+                UpdateKillCounterConditions(sosig, AIScript);
             }
 
             // Remove entity from list
@@ -1110,6 +1353,537 @@ namespace EFM
             AnvilManager.Run(SpawnAIInventory(AIScript.inventory, sosig.transform.position + Vector3.up));
         }
 
+        private void UpdateKillCounterConditions(Sosig sosig, EFM_AI AIScript)
+        {
+            if (Mod.chosenCharIndex == 1)
+            {
+                return;
+            }
+
+            if (Mod.taskStartCounterConditionsByType.ContainsKey(TraderTaskCounterCondition.CounterConditionType.Kills))
+            {
+                List<TraderTaskCounterCondition> startKillCounterConditions = Mod.taskStartCounterConditionsByType[TraderTaskCounterCondition.CounterConditionType.Kills];
+                foreach (TraderTaskCounterCondition counterCondition in startKillCounterConditions)
+                {
+                    // Check task and condition state validity
+                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Locked)
+                    {
+                        break;
+                    }
+
+                    // Check kill type
+                    if (!((counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav && AIScript.type == AISpawn.AISpawnType.Scav) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Usec && AIScript.type == AISpawn.AISpawnType.PMC && AIScript.USEC) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIScript.type == AISpawn.AISpawnType.PMC && !AIScript.USEC) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIScript.type == AISpawn.AISpawnType.PMC)))
+                    {
+                        break;
+                    }
+
+                    // Check weapon
+                    if (counterCondition.allowedWeaponIDs != null && counterCondition.allowedWeaponIDs.Count > 0)
+                    {
+                        bool isHoldingAllowedWeapon = false;
+                        FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
+                        if (rightInteractable != null)
+                        {
+                            EFM_VanillaItemDescriptor VID = rightInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                            if (VID != null)
+                            {
+                                foreach (string parent in VID.parents)
+                                {
+                                    if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                    {
+                                        isHoldingAllowedWeapon = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!isHoldingAllowedWeapon)
+                            {
+                                EFM_CustomItemWrapper CIW = rightInteractable.GetComponent<EFM_CustomItemWrapper>();
+                                if (CIW != null)
+                                {
+                                    foreach (string parent in CIW.parents)
+                                    {
+                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                        {
+                                            isHoldingAllowedWeapon = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (!isHoldingAllowedWeapon)
+                        {
+                            FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
+                            if (leftInteractable != null)
+                            {
+                                EFM_VanillaItemDescriptor VID = leftInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                                if (VID != null)
+                                {
+                                    foreach (string parent in VID.parents)
+                                    {
+                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                        {
+                                            isHoldingAllowedWeapon = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!isHoldingAllowedWeapon)
+                                {
+                                    EFM_CustomItemWrapper CIW = leftInteractable.GetComponent<EFM_CustomItemWrapper>();
+                                    if (CIW != null)
+                                    {
+                                        foreach (string parent in CIW.parents)
+                                        {
+                                            if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                            {
+                                                isHoldingAllowedWeapon = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!isHoldingAllowedWeapon)
+                        {
+                            break;
+                        }
+                    }
+
+                    // Check mods inclusive (Weapon must have these mods)
+                    if (counterCondition.weaponModsInclusive != null && counterCondition.weaponModsInclusive.Count > 0)
+                    {
+                        if (Mod.rightHand.fvrHand.CurrentInteractable != null)
+                        {
+                            LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
+                            if (!WeaponHasMods(Mod.rightHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
+                            {
+                                break;
+                            }
+                        }
+                        if (Mod.leftHand.fvrHand.CurrentInteractable != null)
+                        {
+                            LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
+                            if (!WeaponHasMods(Mod.leftHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Check distance
+                    if (counterCondition.distance != -1)
+                    {
+                        if (counterCondition.distanceCompareMode == 0)
+                        {
+                            if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) < counterCondition.distance)
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) > counterCondition.distance)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+                    {
+                        if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+                        {
+                            break;
+                        }
+                    }
+
+                    // Successful kill, increment count and update fulfillment 
+                    ++counterCondition.killCount;
+                    EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+                }
+            }
+            if (Mod.taskCompletionCounterConditionsByType.ContainsKey(TraderTaskCounterCondition.CounterConditionType.Kills))
+            {
+                List<TraderTaskCounterCondition> completionKillCounterConditions = Mod.taskCompletionCounterConditionsByType[TraderTaskCounterCondition.CounterConditionType.Kills];
+                foreach (TraderTaskCounterCondition counterCondition in completionKillCounterConditions)
+                {
+                    // Check task and condition state validity
+                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Active)
+                    {
+                        break;
+                    }
+
+                    // Check kill type
+                    if (!((counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav && AIScript.type == AISpawn.AISpawnType.Scav) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Usec && AIScript.type == AISpawn.AISpawnType.PMC && AIScript.USEC) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIScript.type == AISpawn.AISpawnType.PMC && !AIScript.USEC) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIScript.type == AISpawn.AISpawnType.PMC)))
+                    {
+                        break;
+                    }
+
+                    // Check weapon
+                    if (counterCondition.allowedWeaponIDs != null && counterCondition.allowedWeaponIDs.Count > 0)
+                    {
+                        bool isHoldingAllowedWeapon = false;
+                        FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
+                        if (rightInteractable != null)
+                        {
+                            EFM_VanillaItemDescriptor VID = rightInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                            if (VID != null)
+                            {
+                                foreach (string parent in VID.parents)
+                                {
+                                    if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                    {
+                                        isHoldingAllowedWeapon = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!isHoldingAllowedWeapon)
+                            {
+                                EFM_CustomItemWrapper CIW = rightInteractable.GetComponent<EFM_CustomItemWrapper>();
+                                if (CIW != null)
+                                {
+                                    foreach (string parent in CIW.parents)
+                                    {
+                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                        {
+                                            isHoldingAllowedWeapon = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (!isHoldingAllowedWeapon)
+                        {
+                            FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
+                            if (leftInteractable != null)
+                            {
+                                EFM_VanillaItemDescriptor VID = leftInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                                if (VID != null)
+                                {
+                                    foreach (string parent in VID.parents)
+                                    {
+                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                        {
+                                            isHoldingAllowedWeapon = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!isHoldingAllowedWeapon)
+                                {
+                                    EFM_CustomItemWrapper CIW = leftInteractable.GetComponent<EFM_CustomItemWrapper>();
+                                    if (CIW != null)
+                                    {
+                                        foreach (string parent in CIW.parents)
+                                        {
+                                            if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                            {
+                                                isHoldingAllowedWeapon = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!isHoldingAllowedWeapon)
+                        {
+                            break;
+                        }
+                    }
+
+                    // Check mods inclusive (Weapon must have these mods)
+                    if (counterCondition.weaponModsInclusive != null && counterCondition.weaponModsInclusive.Count > 0)
+                    {
+                        if (Mod.rightHand.fvrHand.CurrentInteractable != null)
+                        {
+                            LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
+                            if (!WeaponHasMods(Mod.rightHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
+                            {
+                                break;
+                            }
+                        }
+                        if (Mod.leftHand.fvrHand.CurrentInteractable != null)
+                        {
+                            LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
+                            if (!WeaponHasMods(Mod.leftHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Check distance
+                    if (counterCondition.distance != -1)
+                    {
+                        if (counterCondition.distanceCompareMode == 0)
+                        {
+                            if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) < counterCondition.distance)
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) > counterCondition.distance)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+                    {
+                        if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+                        {
+                            break;
+                        }
+                    }
+
+                    // Successful kill, increment count and update fulfillment 
+                    ++counterCondition.killCount;
+                    EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+                }
+            }
+            if (Mod.taskFailCounterConditionsByType.ContainsKey(TraderTaskCounterCondition.CounterConditionType.Kills))
+            {
+                List<TraderTaskCounterCondition> failKillCounterConditions = Mod.taskFailCounterConditionsByType[TraderTaskCounterCondition.CounterConditionType.Kills];
+                foreach (TraderTaskCounterCondition counterCondition in failKillCounterConditions)
+                {
+                    // Check task and condition state validity
+                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState == TraderTask.TaskState.Fail)
+                    {
+                        break;
+                    }
+
+                    // Check kill type
+                    if (!((counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav && AIScript.type == AISpawn.AISpawnType.Scav) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Usec && AIScript.type == AISpawn.AISpawnType.PMC && AIScript.USEC) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIScript.type == AISpawn.AISpawnType.PMC && !AIScript.USEC) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIScript.type == AISpawn.AISpawnType.PMC)))
+                    {
+                        break;
+                    }
+
+                    // Check weapon
+                    if (counterCondition.allowedWeaponIDs != null && counterCondition.allowedWeaponIDs.Count > 0)
+                    {
+                        bool isHoldingAllowedWeapon = false;
+                        FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
+                        if (rightInteractable != null)
+                        {
+                            EFM_VanillaItemDescriptor VID = rightInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                            if (VID != null)
+                            {
+                                foreach (string parent in VID.parents)
+                                {
+                                    if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                    {
+                                        isHoldingAllowedWeapon = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!isHoldingAllowedWeapon)
+                            {
+                                EFM_CustomItemWrapper CIW = rightInteractable.GetComponent<EFM_CustomItemWrapper>();
+                                if (CIW != null)
+                                {
+                                    foreach (string parent in CIW.parents)
+                                    {
+                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                        {
+                                            isHoldingAllowedWeapon = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (!isHoldingAllowedWeapon)
+                        {
+                            FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
+                            if (leftInteractable != null)
+                            {
+                                EFM_VanillaItemDescriptor VID = leftInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                                if (VID != null)
+                                {
+                                    foreach (string parent in VID.parents)
+                                    {
+                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                        {
+                                            isHoldingAllowedWeapon = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!isHoldingAllowedWeapon)
+                                {
+                                    EFM_CustomItemWrapper CIW = leftInteractable.GetComponent<EFM_CustomItemWrapper>();
+                                    if (CIW != null)
+                                    {
+                                        foreach (string parent in CIW.parents)
+                                        {
+                                            if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                            {
+                                                isHoldingAllowedWeapon = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!isHoldingAllowedWeapon)
+                        {
+                            break;
+                        }
+                    }
+
+                    // Check mods inclusive (Weapon must have these mods)
+                    if (counterCondition.weaponModsInclusive != null && counterCondition.weaponModsInclusive.Count > 0)
+                    {
+                        if (Mod.rightHand.fvrHand.CurrentInteractable != null)
+                        {
+                            LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
+                            if (!WeaponHasMods(Mod.rightHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
+                            {
+                                break;
+                            }
+                        }
+                        if (Mod.leftHand.fvrHand.CurrentInteractable != null)
+                        {
+                            LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
+                            if (!WeaponHasMods(Mod.leftHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Check distance
+                    if (counterCondition.distance != -1)
+                    {
+                        if (counterCondition.distanceCompareMode == 0)
+                        {
+                            if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) < counterCondition.distance)
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) > counterCondition.distance)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+                    {
+                        if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+                        {
+                            break;
+                        }
+                    }
+
+                    // Successful kill, increment count and update fulfillment 
+                    ++counterCondition.killCount;
+                    EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+                }
+            }
+        }
+
+        public static bool WeaponHasMods(FVRInteractiveObject item, ref LinkedList<string> mods)
+        {
+            if(mods.Count == 0)
+            {
+                return true;
+            }
+
+            FVRFireArm fireArm = item.GetComponent<FVRFireArm>();
+            FVRFireArmAttachment attachment = item.GetComponent<FVRFireArmAttachment>();
+            List<FVRFireArmAttachment> subAttachments = null;
+            if(fireArm != null)
+            {
+                subAttachments = fireArm.Attachments;
+            }
+            else if(attachment != null)
+            {
+                subAttachments = attachment.Attachments;
+            }
+            else
+            {
+                return false;
+            }
+
+            EFM_CustomItemWrapper CIW = item.GetComponent<EFM_CustomItemWrapper>();
+            EFM_VanillaItemDescriptor VID = item.GetComponent<EFM_VanillaItemDescriptor>();
+            List<string> parents = null;
+            if(VID != null)
+            {
+                if (mods.Remove(VID.H3ID) && mods.Count == 0)
+                {
+                    return true;
+                }
+                parents = VID.parents;
+            }
+            else if (CIW != null)
+            {
+                if (mods.Remove(CIW.ID) && mods.Count == 0)
+                {
+                    return true;
+                }
+                parents = CIW.parents;
+            }
+            else
+            {
+                return false;
+            }
+
+            foreach (string parent in VID.parents)
+            {
+                if (mods.Remove(parent) && mods.Count == 0)
+                {
+                    return true;
+                }
+            }
+
+            foreach (FVRFireArmAttachmentMount subAttachmentMount in fireArm.AttachmentMounts)
+            {
+                if (subAttachmentMount.AttachmentsList.Count > 0)
+                {
+                    foreach (FVRFireArmAttachment subAttachment in subAttachmentMount.AttachmentsList)
+                    {
+                        if(WeaponHasMods(subAttachment as FVRInteractiveObject, ref mods))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private IEnumerator SpawnAIInventory(AIInventory inventory, Vector3 pos, bool player = false)
         {
             // Spawn rig
@@ -1123,6 +1897,7 @@ namespace EFM
                 yield return null;
                 
                 rigCIW = rigObject.GetComponent<EFM_CustomItemWrapper>();
+                rigCIW.foundInRaid = true;
 
                 if (!player)
                 {
@@ -1159,6 +1934,7 @@ namespace EFM
                         itemObject = Instantiate(itemPrefab);
                         EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                         FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                        itemCIW.foundInRaid = true;
 
                         // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                         Mod.RemoveFromAll(null, itemCIW, null);
@@ -1207,6 +1983,7 @@ namespace EFM
                                 itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[itemID]]);
                                 EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                 FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                itemCIW.foundInRaid = true;
 
                                 FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                 for (int j = 0; j < amount; ++j)
@@ -1230,6 +2007,7 @@ namespace EFM
 
                                 EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                 FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                itemCIW.foundInRaid = true;
 
                                 FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                 asMagazine.RoundType = roundType;
@@ -1246,6 +2024,7 @@ namespace EFM
                         else // Not a round, spawn as normal
                         {
                             itemObject = Instantiate(itemPrefab);
+                            itemObject.GetComponent<EFM_VanillaItemDescriptor>().foundInRaid = true;
                         }
                     }
 
@@ -1273,6 +2052,7 @@ namespace EFM
                 yield return null;
 
                 EFM_CustomItemWrapper armorCIW = backpackObject.GetComponent<EFM_CustomItemWrapper>();
+                armorCIW.foundInRaid = true;
 
                 if (player)
                 {
@@ -1301,6 +2081,7 @@ namespace EFM
                 yield return null;
 
                 EFM_CustomItemWrapper headWearCIW = headWearObject.GetComponent<EFM_CustomItemWrapper>();
+                headWearCIW.foundInRaid = true;
 
                 if (player)
                 {
@@ -1329,6 +2110,7 @@ namespace EFM
                 yield return null;
 
                 EFM_CustomItemWrapper earPieceCIW = earPieceObject.GetComponent<EFM_CustomItemWrapper>();
+                earPieceCIW.foundInRaid = true;
 
                 if (player)
                 {
@@ -1357,6 +2139,7 @@ namespace EFM
                 yield return null;
 
                 EFM_CustomItemWrapper faceCoverCIW = faceCoverObject.GetComponent<EFM_CustomItemWrapper>();
+                faceCoverCIW.foundInRaid = true;
 
                 if (player)
                 {
@@ -1385,6 +2168,7 @@ namespace EFM
                 yield return null;
 
                 EFM_CustomItemWrapper eyeWearCIW = eyeWearObject.GetComponent<EFM_CustomItemWrapper>();
+                eyeWearCIW.foundInRaid = true;
 
                 if (player)
                 {
@@ -1413,6 +2197,7 @@ namespace EFM
                 EFM_CustomItemWrapper dogtagCIW = dogtagObject.GetComponent<EFM_CustomItemWrapper>();
                 dogtagCIW.dogtagLevel = inventory.dogtagLevel;
                 dogtagCIW.dogtagName = inventory.dogtagName;
+                dogtagCIW.foundInRaid = true;
 
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                 Mod.RemoveFromAll(null, dogtagCIW, null);
@@ -1430,6 +2215,7 @@ namespace EFM
                 yield return null;
 
                 backpackCIW = backpackObject.GetComponent<EFM_CustomItemWrapper>();
+                backpackCIW.foundInRaid = true;
 
                 if (!player)
                 {
@@ -1461,6 +2247,7 @@ namespace EFM
                         itemObject = Instantiate(itemPrefab);
                         EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                         itemPhysObj = itemObject.GetComponent<FVRPhysicalObject>();
+                        itemCIW.foundInRaid = true;
 
                         // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                         Mod.RemoveFromAll(null, itemCIW, null);
@@ -1509,6 +2296,7 @@ namespace EFM
                                 itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[backpackItem]]);
                                 EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                 itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                itemCIW.foundInRaid = true;
 
                                 FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                 for (int j = 0; j < amount; ++j)
@@ -1532,6 +2320,7 @@ namespace EFM
 
                                 EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                                 itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                                itemCIW.foundInRaid = true;
 
                                 FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                                 asMagazine.RoundType = roundType;
@@ -1549,6 +2338,7 @@ namespace EFM
                         {
                             itemObject = Instantiate(itemPrefab);
                             itemPhysObj = itemObject.GetComponent<FVRPhysicalObject>();
+                            itemObject.GetComponent<EFM_VanillaItemDescriptor>().foundInRaid = true;
                         }
                     }
 
@@ -1600,6 +2390,8 @@ namespace EFM
                 GameObject weaponObject = Instantiate(IM.OD[inventory.primaryWeapon].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
+
+                weaponObject.GetComponent<EFM_VanillaItemDescriptor>().foundInRaid = true;
 
                 // FireArmAttachment are attached to FVRFireArmAttachmentMount using attachment.AttachToMount
                 FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
@@ -1655,6 +2447,7 @@ namespace EFM
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
                             EFM_VanillaItemDescriptor magVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            magVID.foundInRaid = true;
                             magVID.takeCurrentLocation = false;
                             FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
                             attachmentPhysObj = attachmentMagazine;
@@ -1666,6 +2459,7 @@ namespace EFM
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
                             EFM_VanillaItemDescriptor clipVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            clipVID.foundInRaid = true;
                             clipVID.takeCurrentLocation = false;
                             FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
                             attachmentPhysObj = attachmentClip;
@@ -1711,6 +2505,7 @@ namespace EFM
                                 {
                                     GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
 
@@ -1736,6 +2531,7 @@ namespace EFM
                                     }
 
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
 
@@ -1755,6 +2551,7 @@ namespace EFM
                         else if(attachmentPrefabPhysObj is FVRFireArmAttachment)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
+                            attachmentObject.GetComponent<EFM_VanillaItemDescriptor>().foundInRaid = true;
                             FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
                             attachmentPhysObj = asAttachment;
                             bool mountFound = false;
@@ -1825,6 +2622,8 @@ namespace EFM
 
                 yield return null;
 
+                weaponObject.GetComponent<EFM_VanillaItemDescriptor>().foundInRaid = true;
+
                 // FireArmAttachment are attached to FVRFireArmAttachmentMount using attachment.AttachToMount
                 FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
                 if(weaponFireArm == null)
@@ -1879,6 +2678,7 @@ namespace EFM
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
                             EFM_VanillaItemDescriptor magVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            magVID.foundInRaid = true;
                             magVID.takeCurrentLocation = false;
                             FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
                             attachmentPhysObj = attachmentMagazine;
@@ -1890,6 +2690,7 @@ namespace EFM
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
                             EFM_VanillaItemDescriptor clipVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            clipVID.foundInRaid = true;
                             clipVID.takeCurrentLocation = false;
                             FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
                             attachmentPhysObj = attachmentClip;
@@ -1935,6 +2736,7 @@ namespace EFM
                                 {
                                     GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
 
@@ -1960,6 +2762,7 @@ namespace EFM
                                     }
 
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
 
@@ -1979,6 +2782,7 @@ namespace EFM
                         else if(attachmentPrefabPhysObj is FVRFireArmAttachment)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
+                            attachmentObject.GetComponent<EFM_VanillaItemDescriptor>().foundInRaid = true;
                             FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
                             attachmentPhysObj = asAttachment;
                             bool mountFound = false;
@@ -2044,6 +2848,8 @@ namespace EFM
 
                 yield return null;
 
+                weaponObject.GetComponent<EFM_VanillaItemDescriptor>().foundInRaid = true;
+
                 // FireArmAttachment are attached to FVRFireArmAttachmentMount using attachment.AttachToMount
                 FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
                 if (weaponFireArm == null)
@@ -2098,6 +2904,7 @@ namespace EFM
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
                             EFM_VanillaItemDescriptor magVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            magVID.foundInRaid = true;
                             magVID.takeCurrentLocation = false;
                             FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
                             attachmentPhysObj = attachmentMagazine;
@@ -2109,6 +2916,7 @@ namespace EFM
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
                             EFM_VanillaItemDescriptor clipVID = attachmentObject.GetComponent<EFM_VanillaItemDescriptor>();
+                            clipVID.foundInRaid = true;
                             clipVID.takeCurrentLocation = false;
                             FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
                             attachmentPhysObj = attachmentClip;
@@ -2154,6 +2962,7 @@ namespace EFM
                                 {
                                     GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
 
@@ -2179,6 +2988,7 @@ namespace EFM
                                     }
 
                                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                                    itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
 
@@ -2198,6 +3008,7 @@ namespace EFM
                         else if (attachmentPrefabPhysObj is FVRFireArmAttachment)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
+                            attachmentObject.GetComponent<EFM_VanillaItemDescriptor>().foundInRaid = true;
                             FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
                             attachmentPhysObj = asAttachment; ;
                             bool mountFound = false;
@@ -2298,6 +3109,7 @@ namespace EFM
                     itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                     Mod.instance.LogInfo("\t\tinstantiated");
                     EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                    itemCIW.foundInRaid = true;
                     Mod.instance.LogInfo("\t\tgot CIW");
                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                     Mod.instance.LogInfo("\t\tgot physobj");
@@ -2351,6 +3163,7 @@ namespace EFM
                         {
                             itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[genericItem]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                             EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                            itemCIW.foundInRaid = true;
                             FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                             FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
@@ -2375,6 +3188,7 @@ namespace EFM
                             }
 
                             EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+                            itemCIW.foundInRaid = true;
                             FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                             FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
@@ -2392,6 +3206,7 @@ namespace EFM
                     else // Not a round, spawn as normal
                     {
                         itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
+                        itemObject.GetComponent<EFM_VanillaItemDescriptor>().foundInRaid = true;
                     }
                 }
 
@@ -2968,6 +3783,7 @@ namespace EFM
                 if (USEC)
                 {
                     newAISpawn.inventory.dogtag = "12";
+                    newAISpawn.USEC = true;
                 }
                 else
                 {
@@ -3965,12 +4781,16 @@ namespace EFM
                 EFM_Effect effect = EFM_Effect.effects[i];
                 if (effect.active)
                 {
+                    UpdateHealthEffectCounterConditions(effect.effectType);
+
                     if (effect.hasTimer || effect.hideoutOnly)
                     {
                         effect.timer -= Time.deltaTime;
                         if (effect.timer <= 0)
                         {
                             effect.active = false;
+
+                            ResetHealthEffectCounterConditions(false, effect.effectType);
 
                             // Unapply effect
                             switch (effect.effectType)
@@ -4863,6 +5683,52 @@ namespace EFM
             }
         }
 
+        public void UpdateHealthEffectCounterConditions(EFM_Effect.EffectType effectType)
+        {
+            if (Mod.chosenCharIndex == 1)
+            {
+                return;
+            }
+
+            if (Mod.currentHealthEffectCounterConditionsByEffectType.ContainsKey(effectType))
+            {
+                List<TraderTaskCounterCondition> healthEffectCounterConditions = Mod.currentHealthEffectCounterConditionsByEffectType[effectType];
+                foreach (TraderTaskCounterCondition counterCondition in healthEffectCounterConditions)
+                {
+                    counterCondition.timer += Time.deltaTime;
+
+                    EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+                }
+            }
+        }
+
+        public void ResetHealthEffectCounterConditions(bool all = true, EFM_Effect.EffectType effectType = EFM_Effect.EffectType.UnknownToxin)
+        {
+            if (all)
+            {
+                foreach (KeyValuePair<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> entry in Mod.currentHealthEffectCounterConditionsByEffectType)
+                {
+                    foreach (TraderTaskCounterCondition counterCondition in entry.Value)
+                    {
+                        counterCondition.timer = 0;
+                    }
+                }
+
+                Mod.currentHealthEffectCounterConditionsByEffectType = null;
+            }
+            else
+            {
+                if (Mod.currentHealthEffectCounterConditionsByEffectType.ContainsKey(effectType))
+                {
+                    List<TraderTaskCounterCondition> healthEffectCounterConditions = Mod.currentHealthEffectCounterConditionsByEffectType[effectType];
+                    foreach (TraderTaskCounterCondition counterCondition in healthEffectCounterConditions)
+                    {
+                        counterCondition.timer = 0;
+                    }
+                }
+            }
+        }
+
         private void FixedUpdate()
         {
             //if (disabledLimits)
@@ -5037,6 +5903,8 @@ namespace EFM
                 itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                 itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
+                itemCIW.foundInRaid = true;
+
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                 Mod.RemoveFromAll(null, itemCIW, null);
 
@@ -5082,6 +5950,7 @@ namespace EFM
                             itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
                             itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
+
                             FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                             for (int j = 0; j < amount; ++j)
                             {
@@ -5117,6 +5986,7 @@ namespace EFM
                             // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                             Mod.RemoveFromAll(null, itemCIW, null);
                         }
+                        itemCIW.foundInRaid = true;
                     }
                     else // Single round, spawn as normal
                     {
@@ -5124,12 +5994,14 @@ namespace EFM
                         itemObject = GameObject.Instantiate(itemPrefab);
                         itemVID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
                         itemPhysObj = itemVID.GetComponent<FVRPhysicalObject>();
+                        itemVID.foundInRaid = true;
                     }
                 }
                 else // Not a round, spawn as normal
                 {
                     itemObject = GameObject.Instantiate(itemPrefab);
                     itemVID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    itemVID.foundInRaid = true;
                     itemPhysObj = itemVID.GetComponent<FVRPhysicalObject>();
 
                     if(itemPhysObj is FVRFireArm)
@@ -5577,6 +6449,9 @@ namespace EFM
             Mod.extractionLimitUI.SetActive(false);
             Mod.extractionUI.SetActive(false);
 
+            UpdateExitStatusCounterConditions();
+            ResetHealthEffectCounterConditions();
+
             EFM_Manager.LoadBase(5); // Load autosave, which is right before the start of raid
 
             extracted = true;
@@ -5626,12 +6501,193 @@ namespace EFM
 
         private void OnTriggerEnter(Collider collider)
         {
+            playerColliders.Add(collider);
             EFM_Raid_Manager.currentManager.currentExtraction = this;
+            Mod.playerStatusManager.currentZone = name;
         }
 
         private void OnTriggerExit(Collider collider)
         {
-            EFM_Raid_Manager.currentManager.currentExtraction = null;
+            if (playerColliders.Remove(collider) && playerColliders.Count == 0)
+            {
+                EFM_Raid_Manager.currentManager.currentExtraction = null;
+                Mod.playerStatusManager.currentZone = null;
+            }
+        }
+    }
+
+    public class LeaveItemProcessor : MonoBehaviour
+    {
+        public static readonly int maxUpCheck = 4;
+        public List<string> itemIDs; // The itemIDs corresponding to the leave item conditions for this location
+        public Dictionary<string, List<TraderTaskCondition>> conditionsByItemID; // The leaveitem conditions for this location
+
+        public void OnTriggerEnter(Collider other)
+        {
+            Transform currentTransform = other.transform;
+            for (int i = 0; i < maxUpCheck; ++i)
+            {
+                if (currentTransform != null)
+                {
+                    EFM_CustomItemWrapper CIW = currentTransform.GetComponent<EFM_CustomItemWrapper>();
+                    EFM_VanillaItemDescriptor VID = currentTransform.GetComponent<EFM_VanillaItemDescriptor>();
+                    if (CIW != null)
+                    {
+                        if (itemIDs.Contains(CIW.ID))
+                        {
+                            CIW.Highlight(Color.green);
+                            CIW.leaveItemProcessor = this;
+                        }
+                        break;
+                    }
+                    else if (VID != null)
+                    {
+                        if (itemIDs.Contains(VID.H3ID))
+                        {
+                            VID.Highlight(Color.green);
+                            VID.leaveItemProcessor = this;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        currentTransform = currentTransform.parent;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        public void OnTriggerExit(Collider other)
+        {
+            Transform currentTransform = other.transform;
+            for (int i = 0; i < maxUpCheck; ++i)
+            {
+                if (currentTransform != null)
+                {
+                    EFM_CustomItemWrapper CIW = currentTransform.GetComponent<EFM_CustomItemWrapper>();
+                    EFM_VanillaItemDescriptor VID = currentTransform.GetComponent<EFM_VanillaItemDescriptor>();
+                    if (CIW != null)
+                    {
+                        if (itemIDs.Contains(CIW.ID))
+                        {
+                            CIW.RemoveHighlight();
+                            CIW.leaveItemProcessor = null;
+                        }
+                        break;
+                    }
+                    else if (VID != null)
+                    {
+                        if (itemIDs.Contains(VID.H3ID))
+                        {
+                            VID.RemoveHighlight();
+                            VID.leaveItemProcessor = null;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        currentTransform = currentTransform.parent;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    public class ZoneManager : MonoBehaviour
+    {
+        private List<Collider> playerColliders;
+
+        private void Start()
+        {
+            playerColliders = new List<Collider>();
+        }
+
+        private void OnTriggerEnter(Collider collider)
+        {
+            playerColliders.Add(collider);
+            if (Mod.playerStatusManager.currentZone == null)
+            {
+                Mod.playerStatusManager.currentZone = name;
+                UpdateVisitPlaceConditions();
+            }
+        }
+
+        private void OnTriggerExit(Collider collider)
+        {
+            if (playerColliders.Remove(collider) && playerColliders.Count == 0)
+            {
+                Mod.playerStatusManager.currentZone = null;
+            }
+        }
+
+        private void UpdateVisitPlaceConditions()
+        {
+            if (Mod.chosenCharIndex == 1)
+            {
+                return;
+            }
+
+            if (Mod.currentTaskVisitPlaceCounterConditionsByZone.ContainsKey(Mod.playerStatusManager.currentZone))
+            {
+                List<TraderTaskCounterCondition> visitPlaceCounterConditions = Mod.currentTaskVisitPlaceCounterConditionsByZone[Mod.playerStatusManager.currentZone];
+                foreach (TraderTaskCounterCondition counterCondition in visitPlaceCounterConditions)
+                {
+                    // Check task and condition state validity
+                    if (!counterCondition.parentCondition.visible)
+                    {
+                        break;
+                    }
+
+                    // Check visited place
+                    if (Mod.playerStatusManager.currentZone == null || !Mod.playerStatusManager.currentZone.Equals(counterCondition.targetPlaceName))
+                    {
+                        break;
+                    }
+
+                    // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+                    {
+                        if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+                        {
+                            break;
+                        }
+                    }
+
+                    // Successful visit, increment count and update fulfillment 
+                    counterCondition.completed = true;
+                    EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+                }
+            }
+            if (Mod.currentTaskVisitPlaceConditionsByZone.ContainsKey(Mod.playerStatusManager.currentZone))
+            {
+                List<TraderTaskCondition> visitPlaceConditions = Mod.currentTaskVisitPlaceConditionsByZone[Mod.playerStatusManager.currentZone];
+                foreach (TraderTaskCondition condition in visitPlaceConditions)
+                {
+                    // Check task and condition state validity
+                    if (!condition.visible)
+                    {
+                        break;
+                    }
+
+                    // Check visited place
+                    if (Mod.playerStatusManager.currentZone == null || !Mod.playerStatusManager.currentZone.Equals(condition.targetPlaceName))
+                    {
+                        break;
+                    }
+
+                    // Successful visit, increment count and update fulfillment 
+                    condition.fulfilled = true;
+                    EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                }
+            }
         }
     }
 
@@ -5795,6 +6851,7 @@ namespace EFM
         public string leaderName;
         public int experienceReward;
         public SosigConfigTemplate configTemplate;
+        public bool USEC;
 
         public AIInventory inventory;
 

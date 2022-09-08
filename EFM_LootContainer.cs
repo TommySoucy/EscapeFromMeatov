@@ -188,6 +188,7 @@ namespace EFM
 					}
 					itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
 					EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+					itemCIW.foundInRaid = true;
 
 					// When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
 					Mod.RemoveFromAll(null, itemCIW, null);
@@ -272,10 +273,12 @@ namespace EFM
 				}
 				itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
 
+				EFM_VanillaItemDescriptor VID = itemObject.GetComponent<EFM_VanillaItemDescriptor>();
+				VID.foundInRaid = true;
 				if(itemObject.GetComponent<FVRInteractiveObject>() is FVRFireArm)
 				{
 					// When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-					Mod.RemoveFromAll(null, null, itemObject.GetComponent<EFM_VanillaItemDescriptor>());
+					Mod.RemoveFromAll(null, null, VID);
 				}
 			}
 			yield break;

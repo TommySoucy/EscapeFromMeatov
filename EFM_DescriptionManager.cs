@@ -21,7 +21,7 @@ namespace EFM
         public GameObject summaryWishlist;
         public GameObject summaryInsuredIcon;
         public GameObject summaryInsuredBorder;
-        public GameObject[] summaryNeededIcons = new GameObject[4]; // Quest, AreaFulfilled, AreaRequired, Wish 
+        public GameObject[] summaryNeededIcons = new GameObject[5]; // Quest, AreaFulfilled, AreaRequired, Wish, FoundInRaid
         public Text summaryWeightText;
         public Text summaryVolumeText;
 
@@ -34,7 +34,7 @@ namespace EFM
         public Text fullNeededForTotalText;
         public GameObject fullInsuredIcon;
         public GameObject fullInsuredBorder;
-        public GameObject[] fullNeededIcons = new GameObject[4]; // Quest, AreaFulfilled, AreaRequired, Wish 
+        public GameObject[] fullNeededIcons = new GameObject[5]; // Quest, AreaFulfilled, AreaRequired, Wish, FoundInRaid
         public Text fullDescriptionText;
         public GameObject compatibleMagsTitle;
         public GameObject compatibleMags;
@@ -70,6 +70,7 @@ namespace EFM
             summaryNeededIcons[1] = summaryElements.GetChild(0).GetChild(3).GetChild(1).gameObject;
             summaryNeededIcons[2] = summaryElements.GetChild(0).GetChild(3).GetChild(2).gameObject;
             summaryNeededIcons[3] = summaryElements.GetChild(0).GetChild(3).GetChild(3).gameObject;
+            summaryNeededIcons[4] = summaryElements.GetChild(0).GetChild(3).GetChild(4).gameObject;
             summaryWeightText = summaryElements.GetChild(1).GetChild(3).GetChild(0).GetComponent<Text>();
             summaryVolumeText = summaryElements.GetChild(1).GetChild(4).GetChild(0).GetComponent<Text>();
 
@@ -87,6 +88,7 @@ namespace EFM
             fullNeededIcons[1] = fullContent.GetChild(1).GetChild(3).GetChild(1).gameObject;
             fullNeededIcons[2] = fullContent.GetChild(1).GetChild(3).GetChild(2).gameObject;
             fullNeededIcons[3] = fullContent.GetChild(1).GetChild(3).GetChild(3).gameObject;
+            fullNeededIcons[4] = fullContent.GetChild(1).GetChild(3).GetChild(4).gameObject;
             fullDescriptionText = fullContent.GetChild(9).GetChild(0).GetComponent<Text>();
             compatibleMagsTitle = fullContent.GetChild(10).gameObject;
             compatibleMags = fullContent.GetChild(11).gameObject;
@@ -277,6 +279,11 @@ namespace EFM
                     summaryAmountStackText.gameObject.SetActive(true);
                     summaryAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
                 }
+                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.customItem.itemType == Mod.ItemType.ArmoredRig)
+                {
+                    summaryAmountStackText.gameObject.SetActive(true);
+                    summaryAmountStackText.text = this.descriptionPack.customItem.amount.ToString() + "/" + this.descriptionPack.customItem.maxAmount;
+                }
                 else
                 {
                     summaryAmountStackText.gameObject.SetActive(false);
@@ -310,9 +317,11 @@ namespace EFM
                 if (this.descriptionPack.amount >= this.descriptionPack.amountRequired)
                 {
                     summaryNeededIcons[1].SetActive(true);
+                    summaryNeededIcons[2].SetActive(false);
                 }
                 else
                 {
+                    summaryNeededIcons[1].SetActive(false);
                     summaryNeededIcons[2].SetActive(true);
                 }
             }
@@ -364,6 +373,11 @@ namespace EFM
                 {
                     fullAmountStackText.gameObject.SetActive(true);
                     fullAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
+                }
+                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.customItem.itemType == Mod.ItemType.ArmoredRig)
+                {
+                    summaryAmountStackText.gameObject.SetActive(true);
+                    summaryAmountStackText.text = this.descriptionPack.customItem.amount.ToString() + "/" + this.descriptionPack.customItem.maxAmount;
                 }
                 else
                 {
@@ -457,9 +471,11 @@ namespace EFM
                 if (this.descriptionPack.amount >= this.descriptionPack.amountRequired)
                 {
                     fullNeededIcons[1].SetActive(true);
+                    fullNeededIcons[2].SetActive(false);
                 }
                 else
                 {
+                    fullNeededIcons[1].SetActive(false);
                     fullNeededIcons[2].SetActive(true);
                 }
             }

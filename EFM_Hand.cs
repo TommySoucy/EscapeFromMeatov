@@ -17,6 +17,7 @@ namespace EFM
         public bool hoverValid;
         public FVRViveHand fvrHand;
         public bool consuming;
+        public bool leaving;
 
         private void Awake()
         {
@@ -297,7 +298,7 @@ namespace EFM
                             if (collidingContainerWrapper.whiteList != null)
                             {
                                 // If whitelist includes item and blacklist doesn't
-                                if (EFM_CustomItemWrapper.ItemFitsInContainer(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
+                                if (Mod.IDDescribedInList(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
                                 {
                                     Mod.instance.LogInfo("\t\t\t\tIt fits in container, setting valid");
                                     hoverValid = true;
@@ -389,7 +390,7 @@ namespace EFM
                             if (collidingContainerWrapper.whiteList != null)
                             {
                                 // If whitelist includes item and blacklist doesn't
-                                if (EFM_CustomItemWrapper.ItemFitsInContainer(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
+                                if (Mod.IDDescribedInList(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
                                 {
                                     Mod.instance.LogInfo("\t\t\t\tIt fits in container, setting valid");
                                     hoverValid = true;

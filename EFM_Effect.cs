@@ -67,6 +67,7 @@ namespace EFM
         public List<EFM_Effect> caused = new List<EFM_Effect>();
         public bool nonLethal = false;
         public bool hideoutOnly = false;
+        public bool fromStimulator = false;
 
         public static void RemoveEffectAt(int index)
         {

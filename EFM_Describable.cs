@@ -43,5 +43,6 @@ namespace EFM
         public int volume;
         public Dictionary<string, int> compatibleAmmoContainers;
         public Dictionary<string, int> compatibleAmmo;
+        public bool foundInRaid;
     }
 }

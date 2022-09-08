@@ -17,7 +17,7 @@ namespace EFM
 		public List<string> parents;
 		public string ID;
 		public bool looted;
-		public bool foundInRaid; // TODO: Implement this, will be false by default, so set to true for any item spawned in raid, also implement save and load
+		public bool foundInRaid;
 		public bool hideoutSpawned;
 		public int lootExperience;
 		public float spawnChance;
@@ -29,6 +29,7 @@ namespace EFM
 		public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid, 3: Area slot. This is to keep track of where an item is in general
 		public EFM_DescriptionManager descriptionManager; // The current description manager displaying this item's description
 		public List<EFM_MarketItemView> marketItemViews;
+		public LeaveItemProcessor leaveItemProcessor;
 		public AudioClip[] itemSounds;
 		public int upgradeCheckBlockedIndex = -1;
 		public int upgradeCheckWarnedIndex = -1;
@@ -185,6 +186,9 @@ namespace EFM
 		public List<EFM_Effect_Consumable> consumeEffects; // Immediate effects or effects that modify/override/give new effects 
 		private float consumableTimer;
 		private bool validConsumePress;
+		private bool validLeaveItemPress;
+		private float leaveItemTime = -1;
+		private float leavingTimer;
         public int targettedPart = -1; // TODO: Implement
 		private static int breakPartExperience = -1;
 		private static int painExperience = -1;
@@ -371,7 +375,7 @@ namespace EFM
 				parentsToUse = VID.parents;
 			}
 
-			if (containingVolume + volumeToUse <= maxVolume && ItemFitsInContainer(IDToUse, parentsToUse, whiteList, blackList))
+			if (containingVolume + volumeToUse <= maxVolume && Mod.IDDescribedInList(IDToUse, parentsToUse, whiteList, blackList))
 			{
 				// Attach item to container
 				// Set all non trigger colliders that are on default layer to trigger so they dont collide with anything
@@ -424,44 +428,6 @@ namespace EFM
 			}
 		}
 
-		public static bool ItemFitsInContainer(string IDToUse, List<string> parentsToUse, List<string> whiteList, List<string> blackList)
-		{
-			// If an item's corresponding ID is specified in whitelist, then that is the ID we must check the blacklist against.
-			// If the blacklist contains any of the item's more specific IDs than the ID in the whitelist, then the item does not fit. Otherwise, it fits.
-
-			// Check item ID
-			if (whiteList.Contains(IDToUse))
-			{
-				// The specific item is specified as fitting or not, we dont need to check the list of ancestors
-				//return !collidingContainerWrapper.blackList.Contains(IDToUse);
-
-				// In truth, a specific ID in whitelist should mean that this item fits. The specific ID should never be specified in both white and black lists
-				return true;
-			}
-
-			// Check ancestors
-			for (int i = 0; i < parentsToUse.Count; ++i)
-			{
-				// If whitelist contains the ancestor ID
-				if (whiteList.Contains(parentsToUse[i]))
-				{
-					// Must check if any prior ancestor IDs are in the blacklist
-					// If an prior ancestor or the item's ID is found in the blacklist, return false, the item does not fit
-					for (int j = 0; j < i; ++j)
-					{
-						if (blackList.Contains(parentsToUse[j]))
-						{
-							return false;
-						}
-					}
-					return !blackList.Contains(IDToUse);
-				}
-			}
-
-			// Getting this far would mean that the item's ID nor any of its ancestors are in the whitelist, so doesn't fit
-			return false;
-		}
-
 		public void TakeInput()
 		{
 			FVRViveHand hand = physObj.m_hand;
@@ -488,107 +454,175 @@ namespace EFM
 			// If A has started being pressed this frame
 			if (usageButtonDown)
 			{
-				switch (itemType)
+				if (leaveItemProcessor == null)
 				{
-					case Mod.ItemType.ArmoredRig:
-					case Mod.ItemType.Rig:
-					case Mod.ItemType.Backpack:
-					case Mod.ItemType.BodyArmor:
-					case Mod.ItemType.Container:
-					case Mod.ItemType.Pouch:
-						ToggleMode(true, hand.IsThisTheRightHand);
-						break;
-					case Mod.ItemType.Money:
-						if (splittingStack)
-						{
-							// End splitting
-							if (splitAmount != stack || splitAmount == 0)
+					switch (itemType)
+					{
+						case Mod.ItemType.ArmoredRig:
+						case Mod.ItemType.Rig:
+						case Mod.ItemType.Backpack:
+						case Mod.ItemType.BodyArmor:
+						case Mod.ItemType.Container:
+						case Mod.ItemType.Pouch:
+							ToggleMode(true, hand.IsThisTheRightHand);
+							break;
+						case Mod.ItemType.Money:
+							if (splittingStack)
 							{
-								stack -= splitAmount;
+								// End splitting
+								if (splitAmount != stack || splitAmount == 0)
+								{
+									stack -= splitAmount;
 
-								GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
-								if (Mod.currentLocationIndex == 1) // In hideout
-								{
-									itemObject.transform.parent = Mod.currentBaseManager.transform.GetChild(Mod.currentBaseManager.transform.childCount - 2);
-									EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-									CIW.stack = splitAmount;
-									Mod.currentBaseManager.baseInventoryObjects[ID].Add(itemObject);
+									GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
+									if (Mod.currentLocationIndex == 1) // In hideout
+									{
+										itemObject.transform.parent = Mod.currentBaseManager.transform.GetChild(Mod.currentBaseManager.transform.childCount - 2);
+										EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+										CIW.stack = splitAmount;
+										Mod.currentBaseManager.baseInventoryObjects[ID].Add(itemObject);
+									}
+									else // In raid
+									{
+										itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
+										EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
+										CIW.stack = splitAmount;
+									}
 								}
-								else // In raid
-								{
-									itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
-									EFM_CustomItemWrapper CIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
-									CIW.stack = splitAmount;
-								}
+								// else the chosen amount is 0 or max, meaning cancel the split
+								CancelSplit();
 							}
-							// else the chosen amount is 0 or max, meaning cancel the split
-							CancelSplit();
-						}
-						else
-						{
-							// Start splitting
-							Mod.stackSplitUI.SetActive(true);
-							Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
-							Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
-							stackSplitStartPosition = hand.transform.position;
-							stackSplitRightVector = hand.transform.right;
-							stackSplitRightVector.y = 0;
+							else
+							{
+								// Start splitting
+								Mod.stackSplitUI.SetActive(true);
+								Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
+								Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
+								stackSplitStartPosition = hand.transform.position;
+								stackSplitRightVector = hand.transform.right;
+								stackSplitRightVector.y = 0;
 
-							splittingStack = true;
-							Mod.amountChoiceUIUp = true;
-							Mod.splittingItem = this;
-						}
-						break;
-					default:
-						break;
-				}
+								splittingStack = true;
+								Mod.amountChoiceUIUp = true;
+								Mod.splittingItem = this;
+							}
+							break;
+						default:
+							break;
+					}
+                }
 			}
 
 			// If A is being pressed this frame
 			if (usageButtonPressed)
 			{
-				switch (itemType)
+				if (leaveItemProcessor == null || validConsumePress)
 				{
-					case Mod.ItemType.Consumable:
-						bool otherHandConsuming = false;
-						if (!validConsumePress)
-						{
-							otherHandConsuming = hand.OtherHand.GetComponent<EFM_Hand>().consuming;
-						}
-						if (!otherHandConsuming)
-						{
-							hand.GetComponent<EFM_Hand>().consuming = true;
-
-							// Increment timer
-							consumableTimer += Time.deltaTime;
-
-							float use = Mathf.Clamp01(consumableTimer / useTime);
-							Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
-							if (amountRate == 0)
+					leavingTimer = 0;
+					switch (itemType)
+					{
+						case Mod.ItemType.Consumable:
+							bool otherHandConsuming = false;
+							if (!validConsumePress)
 							{
-								// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
-								if (consumableTimer >= useTime)
+								otherHandConsuming = hand.OtherHand.GetComponent<EFM_Hand>().consuming;
+							}
+							if (!otherHandConsuming)
+							{
+								hand.GetComponent<EFM_Hand>().consuming = true;
+
+								// Increment timer
+								consumableTimer += Time.deltaTime;
+
+								float use = Mathf.Clamp01(consumableTimer / useTime);
+								Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
+								if (amountRate == 0)
 								{
-									Mod.consumeUIText.color = Color.green;
+									// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
+									if (consumableTimer >= useTime)
+									{
+										Mod.consumeUIText.color = Color.green;
+									}
+									else
+									{
+										Mod.consumeUIText.color = Color.red;
+									}
 								}
 								else
 								{
-									Mod.consumeUIText.color = Color.red;
+									Mod.consumeUIText.color = Color.white;
+								}
+								Mod.consumeUI.transform.parent = hand.transform;
+								Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+								Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+								Mod.consumeUI.SetActive(true);
+								validConsumePress = true;
+							}
+							break;
+						default:
+							break;
+					}
+                }
+                else if(leaveItemProcessor != null)
+                {
+					bool otherHandLeaving = false;
+					if (!validLeaveItemPress)
+					{
+						otherHandLeaving = hand.OtherHand.GetComponent<EFM_Hand>().leaving;
+					}
+					if (!otherHandLeaving)
+					{
+						hand.GetComponent<EFM_Hand>().leaving = true;
+
+						// Increment timer
+						leavingTimer += Time.deltaTime;
+
+						if(leaveItemTime == -1)
+						{
+							List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[ID];
+							leaveItemTime = conditions[conditions.Count - 1].plantTime;
+						}
+
+						Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", leavingTimer, leaveItemTime);
+						Mod.consumeUIText.color = Color.white;
+						Mod.consumeUI.transform.parent = hand.transform;
+						Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+						Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+						Mod.consumeUI.SetActive(true);
+						validLeaveItemPress = true;
+
+						if (leavingTimer >= leaveItemTime)
+						{
+							hand.GetComponent<EFM_Hand>().leaving = false;
+							validLeaveItemPress = false;
+							leavingTimer = 0;
+							leaveItemTime = -1;
+
+							List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[ID];
+							if(conditions.Count > 0)
+							{
+								TraderTaskCondition condition = conditions[conditions.Count - 1];
+								++condition.itemCount;
+								EFM_TraderStatus.UpdateConditionFulfillment(condition);
+								if (condition.fulfilled)
+								{
+									conditions.RemoveAt(conditions.Count - 1);
 								}
 							}
-							else
+							if (conditions.Count == 0)
 							{
-								Mod.consumeUIText.color = Color.white;
+								leaveItemProcessor.conditionsByItemID.Remove(ID);
+								leaveItemProcessor.itemIDs.Remove(ID);
 							}
-							Mod.consumeUI.transform.parent = hand.transform;
-							Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
-							Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
-							Mod.consumeUI.SetActive(true);
-							validConsumePress = true;
+
+							// Update player inventory and weight
+							Mod.RemoveFromPlayerInventory(transform, true);
+							Mod.weight -= currentWeight;
+							destroyed = true;
+							physObj.ForceBreakInteraction();
+							Destroy(gameObject);
 						}
-						break;
-					default:
-						break;
+					}
 				}
 			}
 
@@ -1376,6 +1410,7 @@ namespace EFM
 				effect.timer = buff.duration;
 				effect.hasTimer = buff.duration > 0;
 				effect.delay = buff.delay;
+				effect.fromStimulator = true;
 
 				EFM_Effect.effects.Add(effect);
 
@@ -1720,6 +1755,7 @@ namespace EFM
 			descriptionPack.weight = currentWeight;
 			descriptionPack.volume = volumes[mode];
 			descriptionPack.amountRequiredQuest = Mod.requiredForQuest.ContainsKey(ID) ? Mod.requiredForQuest[ID] : 0;
+			descriptionPack.foundInRaid = foundInRaid;
 
 			return descriptionPack;
         }

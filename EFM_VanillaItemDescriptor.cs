@@ -20,6 +20,7 @@ namespace EFM
         public int creditCost; // Value of item in rubles(?)
         public List<string> parents; // The parent IDs of this item, the categories this item is a part of
         public bool looted; // Whether this item has been looted before
+        public bool foundInRaid;
         public bool hideoutSpawned;
         public string itemName;
         public FVRPhysicalObject physObj; // Reference to the physical object of this item
@@ -34,6 +35,7 @@ namespace EFM
         public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid. This is to keep track of where an item is in general
         public EFM_DescriptionManager descriptionManager; // The current description manager displaying this item's description
         public List<EFM_MarketItemView> marketItemViews;
+        public LeaveItemProcessor leaveItemProcessor;
         public int upgradeCheckBlockedIndex = -1;
         public int upgradeCheckWarnedIndex = -1;
         public bool inAll = true;
@@ -41,6 +43,9 @@ namespace EFM
         public int volume;
         public Mod.WeaponClass weaponClass;
         private long previousDescriptionTime;
+        private bool validLeaveItemPress;
+        private float leavingTimer;
+        private float leaveItemTime = -1;
         private bool _insured;
         public bool insured
         {
@@ -64,6 +69,95 @@ namespace EFM
                 if (descriptionManager != null)
                 {
                     descriptionManager.SetDescriptionPack();
+                }
+            }
+        }
+
+        public void Update()
+        {
+            TakeInput();
+        }
+
+        private void TakeInput()
+        {
+            FVRViveHand hand = physObj.m_hand;
+            bool usageButtonPressed = false;
+            if (hand.CMode == ControlMode.Index || hand.CMode == ControlMode.Oculus)
+            {
+                usageButtonPressed = hand.Input.AXButtonPressed;
+            }
+            else if (hand.CMode == ControlMode.Vive || hand.CMode == ControlMode.WMR)
+            {
+                Vector2 touchpadAxes = hand.Input.TouchpadAxes;
+                if (touchpadAxes.magnitude > 0.3f && Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
+                {
+                    usageButtonPressed = hand.Input.TouchpadPressed;
+                }
+            }
+
+            // If A is being pressed this frame
+            if (usageButtonPressed)
+            {
+                if (leaveItemProcessor != null)
+                {
+                    bool otherHandLeaving = false;
+                    if (!validLeaveItemPress)
+                    {
+                        otherHandLeaving = hand.OtherHand.GetComponent<EFM_Hand>().leaving;
+                    }
+                    if (!otherHandLeaving)
+                    {
+                        hand.GetComponent<EFM_Hand>().leaving = true;
+
+                        // Increment timer
+                        leavingTimer += Time.deltaTime;
+
+                        if (leaveItemTime == -1)
+                        {
+                            List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[H3ID];
+                            leaveItemTime = conditions[conditions.Count - 1].plantTime;
+                        }
+
+                        Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", leavingTimer, leaveItemTime);
+                        Mod.consumeUIText.color = Color.white;
+                        Mod.consumeUI.transform.parent = hand.transform;
+                        Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+                        Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+                        Mod.consumeUI.SetActive(true);
+                        validLeaveItemPress = true;
+
+                        if (leavingTimer >= leaveItemTime)
+                        {
+                            hand.GetComponent<EFM_Hand>().leaving = false;
+                            validLeaveItemPress = false;
+                            leavingTimer = 0;
+                            leaveItemTime = -1;
+
+                            List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[H3ID];
+                            if (conditions.Count > 0)
+                            {
+                                TraderTaskCondition condition = conditions[conditions.Count - 1];
+                                ++condition.itemCount;
+                                EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                                if (condition.fulfilled)
+                                {
+                                    conditions.RemoveAt(conditions.Count - 1);
+                                }
+                            }
+                            if (conditions.Count == 0)
+                            {
+                                leaveItemProcessor.conditionsByItemID.Remove(H3ID);
+                                leaveItemProcessor.itemIDs.Remove(H3ID);
+                            }
+
+                            // Update player inventory and weight
+                            Mod.RemoveFromPlayerInventory(transform, true);
+                            Mod.weight -= currentWeight;
+                            destroyed = true;
+                            physObj.ForceBreakInteraction();
+                            Destroy(gameObject);
+                        }
+                    }
                 }
             }
         }
@@ -324,6 +418,7 @@ namespace EFM
                     }
                 }
             }
+            descriptionPack.foundInRaid = foundInRaid;
 
             return descriptionPack;
         }
