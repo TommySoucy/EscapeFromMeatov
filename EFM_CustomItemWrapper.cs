@@ -652,6 +652,8 @@ namespace EFM
 								if (ApplyEffects(1, amountToConsume))
 								{
 									amount = 0;
+
+									UpdateUseItemCounterConditions();
 								}
 							}
 							else
@@ -660,6 +662,8 @@ namespace EFM
 								if (ApplyEffects(amountToConsume / maxAmount, amountToConsume))
 								{
 									amount -= amountToConsume;
+
+									UpdateUseItemCounterConditions();
 								}
 							}
 						}
@@ -688,6 +692,8 @@ namespace EFM
 							if (ApplyEffects(1, 1))
 							{
 								amount -= 1;
+
+								UpdateUseItemCounterConditions();
 							}
 							// Apply effects at full effectiveness
 						}
@@ -750,7 +756,13 @@ namespace EFM
 								if (actualAmountConsumed > 0)
 								{
 									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
+
+									UpdateUseItemCounterConditions();
 								}
+                            }
+                            else
+							{
+								UpdateUseItemCounterConditions();
 							}
 						}
 						else
@@ -806,7 +818,13 @@ namespace EFM
 								if (actualAmountConsumed > 0)
 								{
 									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
+
+									UpdateUseItemCounterConditions();
 								}
+                            }
+                            else
+							{
+								UpdateUseItemCounterConditions();
 							}
 						}
 					}
@@ -833,6 +851,41 @@ namespace EFM
 				}
 			}
 		}
+
+		private void UpdateUseItemCounterConditions()
+        {
+            if (Mod.currentUseItemCounterConditionsByItemID.ContainsKey(ID))
+            {
+				List<TraderTaskCounterCondition> useItemCounterConditions = Mod.currentUseItemCounterConditionsByItemID[ID];
+				foreach (TraderTaskCounterCondition counterCondition in useItemCounterConditions)
+				{
+					// Check task and condition state validity
+					if (!counterCondition.parentCondition.visible)
+					{
+						continue;
+					}
+
+					// Check constraint counters (Location, Equipment, HealthEffect, InZone)
+					bool constrained = false;
+					foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+					{
+						if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+						{
+							constrained = true;
+							break;
+						}
+					}
+					if (constrained)
+					{
+						continue;
+					}
+
+					// Successful use, increment count and update fulfillment 
+					++counterCondition.useCount;
+					EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+				}
+			}
+        }
 
 		public void CancelSplit()
         {

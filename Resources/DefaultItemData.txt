@@ -50246,7 +50246,9 @@
     },
     {
       "ItemType": 10,
-      "New item": 4.79,
+      "Volumes": [
+        4.79
+      ],
       "ArmorAndRigProperties": {},
       "BackpackProperties": {},
       "DefaultPhysicalObject": {
@@ -66775,6 +66777,40 @@
         "54009119af1c881c07000029"
       ],
       "Volume": 3.27
+    },
+    {
+      "H3ID": "SuppressorTriad",
+      "TarkovID": "56e05b06d2720bb2668b4586",
+      "Description": "Suppressors (sometimes called Silencers) reduce the sound a firearm makes.",
+      "LootExperience": 30,
+      "Rarity": "Rare",
+      "SpawnChance": 2,
+      "CreditCost": 40063,
+      "ContainerProperties": {},
+      "parents": [
+        "550aa4cd4bdc2dd8348b456c",
+        "5448fe394bdc2d0d028b456c",
+        "550aa4154bdc2dd8348b456b",
+        "5448fe124bdc2da5018b4567",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ],
+      "Volume": 0.16
+    },
+    {
+      "H3ID": "Medieval_GermanicAxe1",
+      "TarkovID": "5bc9c1e2d4351e00367fbcf0",
+      "Description": "An antique axe that belonged to the ancient clan of hatchlings called WYCC.",
+      "LootExperience": 20,
+      "Rarity": "Superrare",
+      "SpawnChance": 1,
+      "CreditCost": 94600,
+      "ContainerProperties": {},
+      "parents": [
+        "5447e1d04bdc2dff2f8b4567",
+        "54009119af1c881c07000029"
+      ],
+      "Volume": 1.49
     }
   ]
 }
