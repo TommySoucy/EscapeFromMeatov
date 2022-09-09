@@ -1302,8 +1302,7 @@ namespace EFM
                     condition.targetTraderIndex = IDToIndex(conditionData["_props"]["target"].ToString());
                     break;
                 case "HandoverItem":
-                case "FindItem":
-                    condition.conditionType = TraderTaskCondition.ConditionType.FindItem;
+                    condition.conditionType = TraderTaskCondition.ConditionType.HandoverItem;
                     condition.value = (int)conditionData["_props"]["value"];
                     condition.dogtagLevel = conditionData["_props"]["dogtagLevel"] != null ? (int)conditionData["_props"]["dogtagLevel"] : -1;
                     string originalItemID = conditionData["_props"]["target"][0].ToString();
@@ -1317,6 +1316,37 @@ namespace EFM
                         else
                         {
                             conditionsByItem.Add(condition.item, new List<TraderTaskCondition>() { condition });
+                        }
+                        if (Mod.itemNames.ContainsKey(condition.item))
+                        {
+                            condition.text = "Hand over " + condition.value + " " +Mod.itemNames[condition.item];
+                        }
+                    }
+                    else
+                    {
+                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalItemID);
+                        return false;
+                    }
+                    break;
+                case "FindItem":
+                    condition.conditionType = TraderTaskCondition.ConditionType.FindItem;
+                    condition.value = (int)conditionData["_props"]["value"];
+                    condition.dogtagLevel = conditionData["_props"]["dogtagLevel"] != null ? (int)conditionData["_props"]["dogtagLevel"] : -1;
+                    string originalFindItemID = conditionData["_props"]["target"][0].ToString();
+                    if (Mod.itemMap.ContainsKey(originalFindItemID))
+                    {
+                        condition.item = Mod.itemMap[originalFindItemID];
+                        if (conditionsByItem.ContainsKey(condition.item))
+                        {
+                            conditionsByItem[condition.item].Add(condition);
+                        }
+                        else
+                        {
+                            conditionsByItem.Add(condition.item, new List<TraderTaskCondition>() { condition });
+                        }
+                        if (Mod.itemNames.ContainsKey(condition.item))
+                        {
+                            condition.text = "Find in raid " + condition.value + " " + Mod.itemNames[condition.item];
                         }
 
                         if (!condition.fulfilled)
@@ -1333,7 +1363,7 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalItemID);
+                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalFindItemID);
                         return false;
                     }
                     break;
