@@ -233,7 +233,7 @@ namespace EFM
         public void UpdateSkillUI(int skillIndex)
         {
             float currentProgress = Mod.skills[skillIndex].currentProgress % 100;
-            skills[skillIndex].text.text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(skillIndex), Mod.skills[skillIndex].currentProgress / 100, currentProgress);
+            skills[skillIndex].text.text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(skillIndex), (int)(Mod.skills[skillIndex].currentProgress / 100), currentProgress);
             skills[skillIndex].progressBarRectTransform.sizeDelta = new Vector2(currentProgress, 4.73f);
 
             if (Mod.skills[skillIndex].increasing)

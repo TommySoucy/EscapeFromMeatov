@@ -3169,6 +3169,13 @@ namespace EFM
                     }
                 }
 
+                // Dogtag
+                if (customItemWrapper.itemType == Mod.ItemType.DogTag)
+                {
+                    customItemWrapper.dogtagName = item["dogtagName"].ToString();
+                    customItemWrapper.dogtagLevel = (int)item["dogtagLevel"];
+                }
+
                 // Equip the item if it has an equip slot
                 if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                 {
@@ -5278,10 +5285,17 @@ namespace EFM
                 //}
 
                 // Key
-                //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
+                //if (customItemWrapper.itemType == Mod.ItemType.Key)
                 //{
-                //    Mod.instance.LogInfo("is Consumable");
+                //    Mod.instance.LogInfo("is Key");
                 //}
+
+                // Dogtag
+                if (customItemWrapper.itemType == Mod.ItemType.DogTag)
+                {
+                    savedItem["dogtagName"] = customItemWrapper.dogtagName;
+                    savedItem["dogtagLevel"] = customItemWrapper.dogtagLevel;
+                }
             }
 
             // Vanilla items
