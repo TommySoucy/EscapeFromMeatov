@@ -73,12 +73,7 @@ namespace EFM
             }
         }
 
-        public void Update()
-        {
-            TakeInput();
-        }
-
-        private void TakeInput()
+        public void TakeInput()
         {
             FVRViveHand hand = physObj.m_hand;
             bool usageButtonPressed = false;

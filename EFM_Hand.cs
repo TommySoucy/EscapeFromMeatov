@@ -19,6 +19,12 @@ namespace EFM
         public bool consuming;
         public bool leaving;
 
+        // Held item
+        public bool hasScript;
+        public bool custom;
+        public EFM_CustomItemWrapper CIW;
+        public EFM_VanillaItemDescriptor VID;
+
         private void Awake()
         {
             fvrHand = transform.GetComponent<FVRViveHand>();
@@ -157,11 +163,15 @@ namespace EFM
                     }
                 }
             }
-            else if(fvrHand.CurrentInteractable != null)
+            else if(fvrHand.CurrentInteractable != null && hasScript)
             {
-                if (fvrHand.CurrentInteractable.GetComponent<EFM_CustomItemWrapper>())
+                if (custom)
                 {
-                    fvrHand.CurrentInteractable.GetComponent<EFM_CustomItemWrapper>().TakeInput();
+                    CIW.TakeInput();
+                }
+                else
+                {
+                    VID.TakeInput();
                 }
             }
         }

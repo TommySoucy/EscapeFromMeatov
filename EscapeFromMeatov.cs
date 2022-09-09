@@ -3065,6 +3065,12 @@ namespace EFM
 
             harmony.Patch(fireArmRecoilPatchOriginal, new HarmonyMethod(fireArmRecoilPatchPrefix));
 
+            // HandCurrentInteractableSetPatch
+            MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo handCurrentInteractableSetPatchPrefix = typeof(HandCurrentInteractableSetPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(handCurrentInteractableSetPatchOriginal, new HarmonyMethod(handCurrentInteractableSetPatchPrefix));
+
             //// UpdateModeTwoAxisPatch
             //MethodInfo updateModeTwoAxisPatchOriginal = typeof(FVRMovementManager).GetMethod("UpdateModeTwoAxis", BindingFlags.NonPublic | BindingFlags.Instance);
             //MethodInfo updateModeTwoAxisPatchPrefix = typeof(UpdateModeTwoAxisPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -9759,6 +9765,27 @@ namespace EFM
                 }
 
                 fromFire = false;
+            }
+        }
+    }
+
+    // Patches FVRViveHand.CurrentInteractable.set to keep track of item held
+    class HandCurrentInteractableSetPatch
+    {
+        static void Prefix(ref FVRViveHand __instance, ref FVRInteractiveObject ___m_currentInteractable)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if(___m_currentInteractable != null)
+            {
+                EFM_Hand handToUse = __instance.GetComponent<EFM_Hand>();
+                handToUse.CIW = ___m_currentInteractable.GetComponent<EFM_CustomItemWrapper>();
+                handToUse.VID = ___m_currentInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                handToUse.custom = handToUse.CIW != null;
+                handToUse.hasScript = handToUse.custom || handToUse.VID != null;
             }
         }
     }
