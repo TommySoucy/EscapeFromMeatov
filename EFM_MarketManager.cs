@@ -5523,6 +5523,16 @@ namespace EFM
                     itemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = new Color(1, 0.84706f, 0);
                 }
             }
+
+            if (Mod.activeDescriptionsByItemID.ContainsKey(ID))
+            {
+                foreach(EFM_DescriptionManager descriptionManager in Mod.activeDescriptionsByItemID[ID])
+                {
+                    descriptionManager.wishlistButtonImage.color = new Color(1, 0.84706f, 0);
+                    descriptionManager.fullWishlist.SetActive(true);
+                    descriptionManager.fullNeededIcons[3].SetActive(true);
+                }
+            }
         }
 
         private void UpdateRagFairWishlistHoverscrolls()

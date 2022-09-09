@@ -1113,6 +1113,16 @@ namespace EFM
                 currentSkillGroupLevelingBoosts = new Dictionary<EFM_Skill.SkillType, float>();
             }
 
+            // Manage active descriptions dict
+            if(Mod.activeDescriptionsByItemID != null)
+            {
+                Mod.activeDescriptionsByItemID.Clear();
+            }
+            else
+            {
+                Mod.activeDescriptionsByItemID = new Dictionary<string, List<EFM_DescriptionManager>>();
+            }
+
             ProcessData();
 
             InitUI();

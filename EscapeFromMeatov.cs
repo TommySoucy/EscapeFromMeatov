@@ -87,7 +87,7 @@ namespace EFM
         public static List<string> usedRoundIDs;
         public static Dictionary<string, int> ammoBoxByAmmoID;
         public static Dictionary<string, int> requiredForQuest;
-        public static List<EFM_DescriptionManager> activeDescriptions;
+        public static Dictionary<string, List<EFM_DescriptionManager>> activeDescriptionsByItemID;
         public static List<EFM_AreaSlot> areaSlots;
         public static bool areaSlotShouldUpdate = true;
         public static List<EFM_AreaBonus> activeBonuses;
@@ -3169,7 +3169,7 @@ namespace EFM
             magazinesByType = new Dictionary<FireArmMagazineType, Dictionary<string, int>>();
             clipsByType = new Dictionary<FireArmClipType, Dictionary<string, int>>();
             roundsByType = new Dictionary<FireArmRoundType, Dictionary<string, int>>();
-            activeDescriptions = new List<EFM_DescriptionManager>();
+            activeDescriptionsByItemID = new Dictionary<string, List<EFM_DescriptionManager>>();
             usedRoundIDs = new List<string>();
             ammoBoxByAmmoID = new Dictionary<string, int>();
             itemsByParents = new Dictionary<string, List<string>>();

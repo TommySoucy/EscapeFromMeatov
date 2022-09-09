@@ -74,6 +74,16 @@ namespace EFM
                 Mod.currentHydrationRate -= Mod.hideoutHydrationRate;
             }
 
+            // Manage active descriptions dict
+            if (Mod.activeDescriptionsByItemID != null)
+            {
+                Mod.activeDescriptionsByItemID.Clear();
+            }
+            else
+            {
+                Mod.activeDescriptionsByItemID = new Dictionary<string, List<EFM_DescriptionManager>>();
+            }
+
             // Clear other active slots since we shouldn't have any on load
             Mod.otherActiveSlots.Clear();
 

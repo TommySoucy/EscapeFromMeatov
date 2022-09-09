@@ -46,7 +46,7 @@ namespace EFM
         public EFM_HoverScroll downHoverScroll;
         public EFM_HoverScroll upHoverScroll;
         public GameObject ammoContainsTitle;
-        private Image wishlistButtonImage;
+        public Image wishlistButtonImage;
 
         private AudioSource buttonClickAudio;
         private List<GameObject> areaNeededForTexts;
@@ -138,9 +138,6 @@ namespace EFM
 
             // Inactive by default
             gameObject.SetActive(false);
-
-            // Add to active descriptions list
-            Mod.activeDescriptions.Add(this);
         }
 
         private void Update()
@@ -310,7 +307,16 @@ namespace EFM
             {
                 summaryNeededForTotalText.gameObject.SetActive(false);
             }
-            summaryWishlist.SetActive(this.descriptionPack.onWishlist);
+            if (this.descriptionPack.onWishlist)
+            {
+                summaryWishlist.SetActive(true);
+                wishlistButtonImage.color = new Color(1, 0.84706f, 0);
+            }
+            else
+            {
+                summaryWishlist.SetActive(false);
+                wishlistButtonImage.color = Color.black;
+            }
             summaryInsuredIcon.SetActive(this.descriptionPack.insured);
             summaryInsuredBorder.SetActive(this.descriptionPack.insured);
             summaryNeededIcons[0].SetActive(this.descriptionPack.amountRequiredQuest > 0);
@@ -588,12 +594,25 @@ namespace EFM
             transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
             transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
             transform.parent = null;
+
+            if (Mod.activeDescriptionsByItemID.ContainsKey(descriptionPack.ID))
+            {
+                Mod.activeDescriptionsByItemID[descriptionPack.ID].Add(this);
+            }
+            else
+            {
+                Mod.activeDescriptionsByItemID.Add(descriptionPack.ID, new List<EFM_DescriptionManager>() { this });
+            }
         }
 
         public void OnExitClick()
         {
             buttonClickAudio.Play();
-            Mod.activeDescriptions.Remove(this);
+            Mod.activeDescriptionsByItemID[descriptionPack.ID].Remove(this);
+            if(Mod.activeDescriptionsByItemID[descriptionPack.ID].Count == 0)
+            {
+                Mod.activeDescriptionsByItemID.Remove(descriptionPack.ID);
+            }
             Destroy(gameObject);
         }
 
@@ -621,10 +640,42 @@ namespace EFM
             if (descriptionPack.onWishlist)
             {
                 Mod.wishList.Remove(itemID);
+
+                wishlistButtonImage.color = new Color(1, 0.84706f, 0);
+                fullWishlist.SetActive(true);
+                summaryWishlist.SetActive(true);
+                fullNeededIcons[3].SetActive(true);
+                summaryNeededIcons[3].SetActive(true);
+
+                if (Mod.activeDescriptionsByItemID.ContainsKey(descriptionPack.ID))
+                {
+                    foreach (EFM_DescriptionManager descManager in Mod.activeDescriptionsByItemID[descriptionPack.ID])
+                    {
+                        descManager.wishlistButtonImage.color = new Color(1, 0.84706f, 0);
+                        descManager.fullWishlist.SetActive(true);
+                        descManager.fullNeededIcons[3].SetActive(true);
+                    }
+                }
             }
             else
             {
                 Mod.wishList.Add(itemID);
+
+                wishlistButtonImage.color = Color.black;
+                fullWishlist.SetActive(false);
+                summaryWishlist.SetActive(false);
+                fullNeededIcons[3].SetActive(false);
+                summaryNeededIcons[3].SetActive(false);
+
+                if (Mod.activeDescriptionsByItemID.ContainsKey(descriptionPack.ID))
+                {
+                    foreach (EFM_DescriptionManager descManager in Mod.activeDescriptionsByItemID[descriptionPack.ID])
+                    {
+                        descManager.wishlistButtonImage.color = Color.black;
+                        descManager.fullWishlist.SetActive(false);
+                        descManager.fullNeededIcons[3].SetActive(false);
+                    }
+                }
             }
 
             // If currently in hideout, otherwise we are in raid, and we dont need to modify the market because it doesnt exist
@@ -643,13 +694,10 @@ namespace EFM
                             itemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = Color.black;
                         }
                     }
-                    wishlistButtonImage.color = Color.black;
                 }
                 else
                 {
-                    
                     Mod.currentBaseManager.marketManager.AddItemToWishlist(itemID);
-                    wishlistButtonImage.color = new Color(1, 0.84706f, 0);
                 }
             }
 
