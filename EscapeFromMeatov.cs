@@ -9817,10 +9817,13 @@ namespace EFM
 
             if(d.Source_IFF == 0)
             {
+                EFM_AI AIScript = __instance.S.GetComponent<EFM_AI>();
+                AISpawn.AISpawnType AIType = AIScript.type;
+                bool AIUsec = AIScript.USEC;
                 switch (__instance.BodyPart)
                 {
                     case SosigLink.SosigBodyPart.Head:
-                        UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart.Head, d.point);
+                        UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart.Head, d.point, AIType, AIUsec);
                         break;
                     case SosigLink.SosigBodyPart.Torso:
                         float thoraxChance = 0.5f; // 50%
@@ -9845,7 +9848,7 @@ namespace EFM
                         {
                             chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
                         }
-                        UpdateShotsCounterConditions(chosenBodyPart, d.point);
+                        UpdateShotsCounterConditions(chosenBodyPart, d.point, AIType, AIUsec);
                         break;
                     case SosigLink.SosigBodyPart.UpperLink:
                         float stomachChance = 0.5f; // 50%
@@ -9870,7 +9873,7 @@ namespace EFM
                         {
                             upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
                         }
-                        UpdateShotsCounterConditions(upperChosenBodyPart, d.point);
+                        UpdateShotsCounterConditions(upperChosenBodyPart, d.point, AIType, AIUsec);
                         break;
                     case SosigLink.SosigBodyPart.LowerLink:
                         float lowerStomachChance = 0.20f; // 20%
@@ -9890,18 +9893,28 @@ namespace EFM
                         {
                             lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightLeg;
                         }
-                        UpdateShotsCounterConditions(lowerChosenBodyPart, d.point);
+                        UpdateShotsCounterConditions(lowerChosenBodyPart, d.point, AIType, AIUsec);
                         break;
                 }
             }
         }
 
-        static void UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart bodyPart, Vector3 hitPoint)
+        static void UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart bodyPart, Vector3 hitPoint, AISpawn.AISpawnType AIType, bool USEC)
         {
             foreach(TraderTaskCounterCondition counterCondition in Mod.currentShotsCounterConditionsByBodyPart[bodyPart])
             {
                 // Check condition state validity
                 if (!counterCondition.parentCondition.visible)
+                {
+                    continue;
+                }
+
+                // Check enemy type
+                if (!((counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Any) ||
+                      (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav && AIType == AISpawn.AISpawnType.Scav) ||
+                      (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Usec && AIType == AISpawn.AISpawnType.PMC && USEC) ||
+                      (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIType == AISpawn.AISpawnType.PMC && !USEC) ||
+                      (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIType == AISpawn.AISpawnType.PMC)))
                 {
                     continue;
                 }

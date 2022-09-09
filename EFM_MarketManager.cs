@@ -4851,15 +4851,45 @@ namespace EFM
             // Remove task from active task list of player status
             if(task.statusListElement != null)
             {
+                foreach (TraderTaskCondition condition in task.startConditions)
+                {
+                    condition.statusListElement = null;
+                }
+                foreach (TraderTaskCondition condition in task.completionConditions)
+                {
+                    condition.statusListElement = null;
+                }
+                foreach (TraderTaskCondition condition in task.failConditions)
+                {
+                    condition.statusListElement = null;
+                }
+
                 Destroy(task.statusListElement);
                 task.statusListElement = null;
+
+                Mod.playerStatusManager.UpdateTaskListHeight();
             }
 
             // Remove from trader task list if exists
             if (task.marketListElement != null)
             {
+                foreach (TraderTaskCondition condition in task.startConditions)
+                {
+                    condition.marketListElement = null;
+                }
+                foreach (TraderTaskCondition condition in task.completionConditions)
+                {
+                    condition.marketListElement = null;
+                }
+                foreach (TraderTaskCondition condition in task.failConditions)
+                {
+                    condition.marketListElement = null;
+                }
+
                 Destroy(task.marketListElement);
                 task.marketListElement = null;
+
+                UpdateTaskListHeight();
             }
 
             // Update conditions that are dependent on this task being successfully completed, then update everything depending on those conditions

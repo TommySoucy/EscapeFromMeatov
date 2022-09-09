@@ -1493,7 +1493,8 @@ namespace EFM
                     }
 
                     // Check kill type
-                    if (!((counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav && AIScript.type == AISpawn.AISpawnType.Scav) ||
+                    if (!((counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Any) ||
+                          (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav && AIScript.type == AISpawn.AISpawnType.Scav) ||
                           (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Usec && AIScript.type == AISpawn.AISpawnType.PMC && AIScript.USEC) ||
                           (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIScript.type == AISpawn.AISpawnType.PMC && !AIScript.USEC) ||
                           (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIScript.type == AISpawn.AISpawnType.PMC)))

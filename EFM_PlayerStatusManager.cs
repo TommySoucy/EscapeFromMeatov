@@ -515,7 +515,7 @@ namespace EFM
                 ++totalCount;
                 GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
                 currentObjectiveElement.SetActive(true);
-                currentCondition.marketListElement = currentObjectiveElement;
+                currentCondition.statusListElement = currentObjectiveElement;
 
                 Transform objectiveInfo = currentObjectiveElement.transform.GetChild(0).GetChild(0);
                 objectiveInfo.GetChild(1).GetComponent<Text>().text = currentCondition.text;
@@ -669,7 +669,7 @@ namespace EFM
             pointableTaskShortInfoButton.SetButton();
             pointableTaskShortInfoButton.Button.onClick.AddListener(() => { OnTaskShortInfoClick(description.gameObject); });
             pointableTaskShortInfoButton.MaxPointingRange = 20;
-            pointableTaskShortInfoButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            pointableTaskShortInfoButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
 
             // Add to UI lists
             if (taskUIList == null)

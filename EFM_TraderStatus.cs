@@ -949,6 +949,10 @@ namespace EFM
                                 {
                                     newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear;
                                 }
+                                else if(counter["_props"]["target"].ToString().Equals("Any"))
+                                {
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Any;
+                                }
                                 else
                                 {
                                     Mod.instance.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with kill counter with unhandled target type: " + counter["_props"]["target"].ToString());
@@ -1011,11 +1015,11 @@ namespace EFM
                                 break;
                             case "Shots":
                                 newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.Shots;
-                                List<string> targetStrings = counter["_props"]["target"].ToObject<List<string>>();
+                                List<string> bodyParts = counter["_props"]["bodyPart"].ToObject<List<string>>();
                                 newCounter.counterConditionTargetBodyParts = new List<TraderTaskCounterCondition.CounterConditionTargetBodyPart>();
-                                foreach (string targetString in targetStrings)
+                                foreach (string bodyPartString in bodyParts)
                                 {
-                                    switch (targetString)
+                                    switch (bodyPartString)
                                     {
                                         case "Head":
                                             newCounter.counterConditionTargetBodyParts.Add(TraderTaskCounterCondition.CounterConditionTargetBodyPart.Head);
@@ -1042,6 +1046,30 @@ namespace EFM
                                             Mod.instance.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with shots counter with unhandled target type: " + counter["_props"]["target"].ToString());
                                             break;
                                     }
+                                }
+                                if (counter["_props"]["target"].ToString().Equals("Savage"))
+                                {
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav;
+                                }
+                                else if (counter["_props"]["target"].ToString().Equals("AnyPmc"))
+                                {
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC;
+                                }
+                                else if (counter["_props"]["target"].ToString().Equals("Usec"))
+                                {
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Usec;
+                                }
+                                else if (counter["_props"]["target"].ToString().Equals("Bear"))
+                                {
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear;
+                                }
+                                else if (counter["_props"]["target"].ToString().Equals("Any"))
+                                {
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Any;
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with kill counter with unhandled target type: " + counter["_props"]["target"].ToString());
                                 }
                                 if (counter["_props"]["weapon"] != null)
                                 {
@@ -1395,6 +1423,7 @@ namespace EFM
                                 Mod.instance.LogError("Trader " + index + " buildtask: " + task.ID + ", condition: " + condition.ID + ", unhandled counter type: " + counter["_parent"].ToString());
                                 return false;
                         }
+                        condition.counters.Add(newCounter);
                     }
                     break;
                 case "Level":
@@ -1798,10 +1827,43 @@ namespace EFM
                 {
                     if (task.marketListElement != null)
                     {
+                        foreach (TraderTaskCondition condition in task.startConditions)
+                        {
+                            condition.marketListElement = null;
+                        }
+                        foreach (TraderTaskCondition condition in task.completionConditions)
+                        {
+                            condition.marketListElement = null;
+                        }
+                        foreach (TraderTaskCondition condition in task.failConditions)
+                        {
+                            condition.marketListElement = null;
+                        }
+
                         GameObject.Destroy(task.marketListElement);
                         task.marketListElement = null;
 
                         Mod.currentBaseManager.marketManager.UpdateTaskListHeight();
+                    }
+                    if (task.statusListElement != null)
+                    {
+                        foreach (TraderTaskCondition condition in task.startConditions)
+                        {
+                            condition.statusListElement = null;
+                        }
+                        foreach (TraderTaskCondition condition in task.completionConditions)
+                        {
+                            condition.statusListElement = null;
+                        }
+                        foreach (TraderTaskCondition condition in task.failConditions)
+                        {
+                            condition.statusListElement = null;
+                        }
+
+                        GameObject.Destroy(task.statusListElement);
+                        task.statusListElement = null;
+
+                        Mod.playerStatusManager.UpdateTaskListHeight();
                     }
 
                     if(task.failureRewards != null)
@@ -1900,10 +1962,14 @@ namespace EFM
             {
                 EFM_TraderStatus.UpdateTaskAvailability(condition.task);
             }
-            else if (condition.task.taskState == TraderTask.TaskState.Active)
-            {
+            //else if (condition.task.taskState == TraderTask.TaskState.Active)
+            //{
+                // TODO: Review, some quests we want to be able to complete before they are unlocked (TraderLoyalty/Skill/Level quests for example)
+                // Some we also want to be able to fail before they are unlocked or active (Being able to take some quests can be dependent on whether we did another particular quest first)
+                // Not being able to fail certain types of quests before they are unlocked or started is handled by the conditions
+                // The relevant ones will simply not work towards fulfillment if they are not a type that should
                 EFM_TraderStatus.UpdateTaskCompletion(condition.task);
-            }
+            //}
         }
 
         public static bool CheckCounterConditionConstraint(TraderTaskCounterCondition counterCondition)
@@ -2315,7 +2381,8 @@ namespace EFM
             Scav, // Savage
             PMC, // AnyPmc
             Usec,
-            Bear
+            Bear,
+            Any
         }
         public CounterConditionTargetEnemy counterConditionTargetEnemy;
         public List<string> allowedWeaponIDs;

@@ -46,6 +46,7 @@ namespace EFM
         public EFM_HoverScroll downHoverScroll;
         public EFM_HoverScroll upHoverScroll;
         public GameObject ammoContainsTitle;
+        private Image wishlistButtonImage;
 
         private AudioSource buttonClickAudio;
         private List<GameObject> areaNeededForTexts;
@@ -109,6 +110,7 @@ namespace EFM
 
             // Set Wishlist button (color when active: FFD800FF)
             EFM_PointableButton wishlistButton = transform.GetChild(0).GetChild(1).GetChild(5).gameObject.AddComponent<EFM_PointableButton>();
+            wishlistButtonImage = wishlistButton.GetComponent<Image>();
             wishlistButton.SetButton();
             wishlistButton.MaxPointingRange = 30;
             wishlistButton.hoverSound = transform.GetChild(0).GetChild(1).GetChild(3).GetComponent<AudioSource>();
@@ -312,24 +314,24 @@ namespace EFM
             summaryInsuredIcon.SetActive(this.descriptionPack.insured);
             summaryInsuredBorder.SetActive(this.descriptionPack.insured);
             summaryNeededIcons[0].SetActive(this.descriptionPack.amountRequiredQuest > 0);
-            if (this.descriptionPack.amountRequired > 0)
-            {
-                if (this.descriptionPack.amount >= this.descriptionPack.amountRequired)
-                {
-                    summaryNeededIcons[1].SetActive(true);
-                    summaryNeededIcons[2].SetActive(false);
-                }
-                else
-                {
-                    summaryNeededIcons[1].SetActive(false);
-                    summaryNeededIcons[2].SetActive(true);
-                }
-            }
-            else
-            {
-                summaryNeededIcons[1].SetActive(false);
-                summaryNeededIcons[2].SetActive(false);
-            }
+            //if (this.descriptionPack.amountRequired > 0)
+            //{
+            //    if (this.descriptionPack.amount >= this.descriptionPack.amountRequired)
+            //    {
+            //        summaryNeededIcons[1].SetActive(true);
+            //        summaryNeededIcons[2].SetActive(false);
+            //    }
+            //    else
+            //    {
+            //        summaryNeededIcons[1].SetActive(false);
+            //        summaryNeededIcons[2].SetActive(true);
+            //    }
+            //}
+            //else
+            //{
+            //    summaryNeededIcons[1].SetActive(false);
+            //    summaryNeededIcons[2].SetActive(false);
+            //}
             summaryNeededIcons[3].SetActive(this.descriptionPack.onWishlist);
             summaryWeightText.text = (this.descriptionPack.weight / 1000.0f).ToString()+"kg";
             summaryVolumeText.text = (this.descriptionPack.volume / Mod.volumePrecisionMultiplier).ToString()+"L";
@@ -441,6 +443,8 @@ namespace EFM
                 }
                 areaNeededForTexts.Clear();
             }
+            bool shouldHaveBlueCheckMark = false;
+            bool shouldHaveGreenCheckMark = false;
             for (int i = 0; i < 22; ++i)
             {
                 if (this.descriptionPack.amountRequiredPerArea[i] > 0)
@@ -454,10 +458,12 @@ namespace EFM
                     if (this.descriptionPack.amount >= this.descriptionPack.amountRequiredPerArea[i])
                     {
                         neededForInstanceText.color = Color.green;
+                        shouldHaveGreenCheckMark = true;
                     }
                     else
                     {
                         neededForInstanceText.color = Color.blue;
+                        shouldHaveGreenCheckMark = true;
                     }
                     areaNeededForTexts.Add(neededForInstance);
                     descriptionHeight += 47;
@@ -466,24 +472,11 @@ namespace EFM
             fullInsuredIcon.SetActive(this.descriptionPack.insured);
             fullInsuredBorder.SetActive(this.descriptionPack.insured);
             fullNeededIcons[0].SetActive(this.descriptionPack.amountRequiredQuest > 0);
-            if (this.descriptionPack.amountRequired > 0)
-            {
-                if (this.descriptionPack.amount >= this.descriptionPack.amountRequired)
-                {
-                    fullNeededIcons[1].SetActive(true);
-                    fullNeededIcons[2].SetActive(false);
-                }
-                else
-                {
-                    fullNeededIcons[1].SetActive(false);
-                    fullNeededIcons[2].SetActive(true);
-                }
-            }
-            else
-            {
-                fullNeededIcons[1].SetActive(false);
-                fullNeededIcons[2].SetActive(false);
-            }
+            fullNeededIcons[1].SetActive(shouldHaveGreenCheckMark);
+            fullNeededIcons[2].SetActive(shouldHaveBlueCheckMark);
+            // Do the summary checkmarks here because dependent on info we only get for full
+            summaryNeededIcons[1].SetActive(shouldHaveGreenCheckMark);
+            summaryNeededIcons[2].SetActive(shouldHaveBlueCheckMark);
             fullNeededIcons[3].SetActive(this.descriptionPack.onWishlist);
             fullDescriptionText.text = this.descriptionPack.description;
             descriptionHeight += fullDescriptionText.preferredHeight;
@@ -554,7 +547,7 @@ namespace EFM
                             GameObject containsInstance = Instantiate(Mod.ammoContainsPrefab, transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0));
                             containsInstance.transform.SetSiblingIndex(4);
                             Text neededForInstanceText = containsInstance.transform.GetChild(0).GetComponent<Text>();
-                            neededForInstanceText.text = typeEntry.Key.ToString() +" "+ entry.Key.ToString() + " (" + entry.Value.ToString() + ")";
+                            neededForInstanceText.text = AM.GetFullRoundName(typeEntry.Key, entry.Key) + " (" + entry.Value.ToString() + ")";
                             ammoContainsTexts.Add(containsInstance);
                             descriptionHeight += 47;
                         }
@@ -606,6 +599,8 @@ namespace EFM
 
         public void OnWishlistClick()
         {
+            buttonClickAudio.Play();
+
             string itemID;
             if (descriptionPack.isPhysical)
             {
@@ -648,10 +643,13 @@ namespace EFM
                             itemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = Color.black;
                         }
                     }
+                    wishlistButtonImage.color = Color.black;
                 }
                 else
                 {
+                    
                     Mod.currentBaseManager.marketManager.AddItemToWishlist(itemID);
+                    wishlistButtonImage.color = new Color(1, 0.84706f, 0);
                 }
             }
 
