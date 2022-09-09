@@ -1323,11 +1323,11 @@ namespace EFM
                         {
                             if (Mod.taskFindItemConditionsByItemID.ContainsKey(condition.item))
                             {
-                                Mod.taskFindItemConditionsByItemID.Add(condition.item, new List<TraderTaskCondition>() { condition });
+                                Mod.taskFindItemConditionsByItemID[condition.item].Add(condition);
                             }
                             else
                             {
-                                Mod.taskFindItemConditionsByItemID[condition.item].Add(condition);
+                                Mod.taskFindItemConditionsByItemID.Add(condition.item, new List<TraderTaskCondition>() { condition });
                             }
                         }
                     }
