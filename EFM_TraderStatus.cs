@@ -725,7 +725,7 @@ namespace EFM
                     {
                         TraderTaskCondition newCondition = new TraderTaskCondition();
 
-                        if (!SetCondition(newCondition, startConditionData, questLocale, taskSaveData, newTask, true, true))
+                        if (!SetCondition(newCondition, startConditionData, questLocale, taskSaveData, newTask, true, true, false))
                         {
                             continue;
                         }
@@ -746,7 +746,7 @@ namespace EFM
                 {
                     TraderTaskCondition newCondition = new TraderTaskCondition();
 
-                    if(!SetCondition(newCondition, completionConditionData, questLocale, taskSaveData, newTask, false))
+                    if(!SetCondition(newCondition, completionConditionData, questLocale, taskSaveData, newTask, false, false, false))
                     {
                         continue;
                     }
@@ -762,7 +762,7 @@ namespace EFM
                 {
                     TraderTaskCondition newCondition = new TraderTaskCondition();
 
-                    if(!SetCondition(newCondition, failConditionData, questLocale, taskSaveData, newTask, true, false))
+                    if(!SetCondition(newCondition, failConditionData, questLocale, taskSaveData, newTask, true, false, true))
                     {
                         continue;
                     }
@@ -863,9 +863,10 @@ namespace EFM
             }
         }
 
-        private bool SetCondition(TraderTaskCondition condition, JObject conditionData, JObject taskLocale, JObject taskSaveData, TraderTask task, bool addToList, bool startCondition = false)
+        private bool SetCondition(TraderTaskCondition condition, JObject conditionData, JObject taskLocale, JObject taskSaveData, TraderTask task, bool addToList, bool startCondition, bool failCondition)
         {
             condition.ID = conditionData["_props"]["id"].ToString();
+            condition.failCondition = failCondition;
             condition.task = task;
             if (taskLocale["conditions"][condition.ID] != null) // This will be null for start/fail conditions
             {
@@ -936,9 +937,21 @@ namespace EFM
                                 {
                                     newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav;
                                 }
-                                else
+                                else if(counter["_props"]["target"].ToString().Equals("AnyPmc"))
                                 {
                                     newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC;
+                                }
+                                else if(counter["_props"]["target"].ToString().Equals("Usec"))
+                                {
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Usec;
+                                }
+                                else if(counter["_props"]["target"].ToString().Equals("Bear"))
+                                {
+                                    newCounter.counterConditionTargetEnemy = TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear;
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with kill counter with unhandled target type: " + counter["_props"]["target"].ToString());
                                 }
                                 if (counter["_props"]["weapon"] != null)
                                 {
@@ -978,12 +991,14 @@ namespace EFM
                                 if (condition.fulfilled)
                                 {
                                     newCounter.killCount = condition.value; // Condition is fulfilled so just set count to max 
+                                    newCounter.completed = true;
                                 }
                                 else // Not fulfilled, need to check for counter save data
                                 {
                                     if(conditionCounterSaveData != null)
                                     {
                                         newCounter.killCount = (int)conditionCounterSaveData["killCount"];
+                                        newCounter.completed = newCounter.killCount >= condition.value;
                                     }
                                     // else, no data but is not dependent on any other task or condition, so counter is at 0
 
@@ -991,6 +1006,94 @@ namespace EFM
                                     if (addToList)
                                     {
                                         AddConditionToList(startCondition, true, null, newCounter);
+                                    }
+                                }
+                                break;
+                            case "Shots":
+                                newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.Shots;
+                                List<string> targetStrings = counter["_props"]["target"].ToObject<List<string>>();
+                                newCounter.counterConditionTargetBodyParts = new List<TraderTaskCounterCondition.CounterConditionTargetBodyPart>();
+                                foreach (string targetString in targetStrings)
+                                {
+                                    switch (targetString)
+                                    {
+                                        case "Head":
+                                            newCounter.counterConditionTargetBodyParts.Add(TraderTaskCounterCondition.CounterConditionTargetBodyPart.Head);
+                                            break;
+                                        case "Thorax":
+                                            newCounter.counterConditionTargetBodyParts.Add(TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax);
+                                            break;
+                                        case "Stomach":
+                                            newCounter.counterConditionTargetBodyParts.Add(TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach);
+                                            break;
+                                        case "LeftArm":
+                                            newCounter.counterConditionTargetBodyParts.Add(TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftArm);
+                                            break;
+                                        case "RightArm":
+                                            newCounter.counterConditionTargetBodyParts.Add(TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightArm);
+                                            break;
+                                        case "LeftLeg":
+                                            newCounter.counterConditionTargetBodyParts.Add(TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftLeg);
+                                            break;
+                                        case "RightLeg":
+                                            newCounter.counterConditionTargetBodyParts.Add(TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightLeg);
+                                            break;
+                                        default:
+                                            Mod.instance.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with shots counter with unhandled target type: " + counter["_props"]["target"].ToString());
+                                            break;
+                                    }
+                                }
+                                if (counter["_props"]["weapon"] != null)
+                                {
+                                    newCounter.allowedWeaponIDs = counter["_props"]["weapon"].ToObject<List<string>>();
+                                    for (int i = 0; i < newCounter.allowedWeaponIDs.Count; ++i)
+                                    {
+                                        if (Mod.itemMap.ContainsKey(newCounter.allowedWeaponIDs[i]))
+                                        {
+                                            newCounter.allowedWeaponIDs[i] = Mod.itemMap[newCounter.allowedWeaponIDs[i]];
+                                        }
+                                        //else Item is either missing or this is a category of item
+                                    }
+                                }
+                                if (counter["_props"]["distance"] != null) 
+                                {
+                                    newCounter.distance = (float)counter["_props"]["distance"]["value"];
+                                    if (counter["_props"]["distance"]["compareMethod"].ToString().Equals("<="))
+                                    {
+                                        newCounter.distanceCompareMode = 1;
+                                    }
+                                }
+
+                                if (condition.fulfilled)
+                                {
+                                    newCounter.shotCount = condition.value; // Condition is fulfilled so just set count to max 
+                                    newCounter.completed = true;
+                                }
+                                else // Not fulfilled, need to check for counter save data
+                                {
+                                    if(conditionCounterSaveData != null && conditionSaveData["shotCount"] != null)
+                                    {
+                                        newCounter.shotCount = (int)conditionCounterSaveData["shotCount"];
+                                        newCounter.completed = newCounter.shotCount > condition.value;
+                                    }
+                                    // else, no data but is not dependent on any other task or condition, so counter is at 0
+
+                                    // Only add to list of not already fulfilled
+                                    if (addToList)
+                                    {
+                                        AddConditionToList(startCondition, true, null, newCounter);
+                                    }
+
+                                    foreach (TraderTaskCounterCondition.CounterConditionTargetBodyPart bodyPart in newCounter.counterConditionTargetBodyParts)
+                                    {
+                                        if (Mod.taskShotsCounterConditionsByBodyPart.ContainsKey(bodyPart))
+                                        {
+                                            Mod.taskShotsCounterConditionsByBodyPart[bodyPart].Add(newCounter);
+                                        }
+                                        else
+                                        {
+                                            Mod.taskShotsCounterConditionsByBodyPart.Add(bodyPart, new List<TraderTaskCounterCondition>() { newCounter });
+                                        }
                                     }
                                 }
                                 break;
@@ -1241,6 +1344,46 @@ namespace EFM
                                 newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.InZone;
                                 newCounter.zoneIDs = counter["_props"]["zoneIds"].ToObject<List<string>>();
                                 // This is a constraint condition, it does not have live data of its own, so no loading save data
+
+                                // Only add to list of not already fulfilled
+                                if (addToList)
+                                {
+                                    AddConditionToList(startCondition, true, null, newCounter);
+                                }
+                                break;
+                            case "UseItem":
+                                newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.UseItem;
+                                newCounter.itemIDs = counter["_props"]["target"].ToObject<List<string>>();
+                                newCounter.useCountCompareMode = counter["_props"]["compareMethod"].ToString().Equals("<=") ? 1 : 0;
+                                for (int i=0; i < newCounter.itemIDs.Count; ++i)
+                                {
+                                    if (Mod.itemMap.ContainsKey(newCounter.itemIDs[i]))
+                                    {
+                                        newCounter.itemIDs[i] = Mod.itemMap[newCounter.itemIDs[i]];
+                                    }
+                                    // else the item is either missing or is a category
+                                }
+
+                                if (condition.fulfilled)
+                                {
+                                    newCounter.useCount = condition.value;
+                                    newCounter.completed = true; // Condition is fulfilled so just set as completed
+                                }
+                                else // Not fulfilled, need to check for counter save data
+                                {
+                                    if (conditionCounterSaveData != null)
+                                    {
+                                        newCounter.useCount = (int)conditionCounterSaveData["useCount"];
+                                        newCounter.completed = newCounter.useCountCompareMode == 0 ? (newCounter.useCount >= condition.value):(newCounter.useCount <= condition.value);
+                                    }
+                                    // else, no data but is not dependent on any other task or condition, so not completed
+
+                                    // Only add to list of not already fulfilled
+                                    if (addToList)
+                                    {
+                                        AddConditionToList(startCondition, true, null, newCounter);
+                                    }
+                                }
 
                                 // Only add to list of not already fulfilled
                                 if (addToList)
@@ -1820,6 +1963,28 @@ namespace EFM
                         UpdateConditionFulfillment(counterCondition.parentCondition);
                     }
                     break;
+                case TraderTaskCounterCondition.CounterConditionType.Shots:
+                    if (counterCondition.completed)
+                    {
+                        return;
+                    }
+                    if (counterCondition.shotCount >= counterCondition.parentCondition.value)
+                    {
+                        counterCondition.completed = true;
+                        UpdateConditionFulfillment(counterCondition.parentCondition);
+                    }
+                    break;
+                case TraderTaskCounterCondition.CounterConditionType.UseItem:
+                    if (counterCondition.completed)
+                    {
+                        return;
+                    }
+                    counterCondition.completed = counterCondition.useCountCompareMode == 0 ? (counterCondition.useCount >= counterCondition.parentCondition.value) : (counterCondition.useCount <= counterCondition.parentCondition.value);
+                    if (counterCondition.completed)
+                    {
+                        UpdateConditionFulfillment(counterCondition.parentCondition);
+                    }
+                    break;
                 case TraderTaskCounterCondition.CounterConditionType.ExitStatus:
                     // See first comment of method
                     if (counterCondition.completed)
@@ -2048,6 +2213,7 @@ namespace EFM
         public string ID;
         public List<TraderTaskCondition> visibilityConditions;
         public bool visible = true;
+        public bool failCondition;
 
         // Level: The level to compare with
         // Skill: The skill to compare with
@@ -2135,7 +2301,9 @@ namespace EFM
             Location,
             HealthEffect,
             Equipment,
-            InZone
+            InZone,
+            Shots,
+            UseItem
         }
         public CounterConditionType counterConditionType;
         public string ID;
@@ -2156,6 +2324,21 @@ namespace EFM
         public int distanceCompareMode; //0: >=, 1: <=
 
         public int killCount; // Live data
+
+        // Shots
+        public enum CounterConditionTargetBodyPart
+        {
+            Head,
+            Thorax,
+            Stomach,
+            LeftArm,
+            RightArm,
+            LeftLeg,
+            RightLeg
+        }
+        public List<CounterConditionTargetBodyPart> counterConditionTargetBodyParts;
+
+        public int shotCount; // Live data
 
         // ExitStatus
         public enum CounterConditionTargetExitStatus
@@ -2202,6 +2385,12 @@ namespace EFM
 
         // InZone
         public List<string> zoneIDs;
+
+        // UseItem
+        public List<string> itemIDs;
+        public int useCountCompareMode;
+
+        public int useCount; // Live data
     }
 
     public class TraderTaskReward

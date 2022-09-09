@@ -4741,6 +4741,7 @@ namespace EFM
                                 JObject counterConditionSaveData = new JObject();
                                 conditionSaveData["counters"][traderTaskCounterCondition.ID] = counterConditionSaveData;
                                 counterConditionSaveData["killCount"] = traderTaskCounterCondition.killCount;
+                                counterConditionSaveData["shotCount"] = traderTaskCounterCondition.shotCount;
                                 counterConditionSaveData["completed"] = traderTaskCounterCondition.completed;
                             }
                         }

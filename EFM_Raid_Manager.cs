@@ -107,17 +107,35 @@ namespace EFM
                 Extraction currentExtraction = extractions[extractionIndex];
                 currentExtraction.gameObject = gameObject.transform.GetChild(gameObject.transform.childCount - 2).GetChild(extractionIndex).gameObject;
                 currentExtraction.gameObject.AddComponent<ZoneManager>();
-                if (Mod.taskLeaveItemConditionsByItemIDByZone.ContainsKey(currentExtraction.gameObject.name))
-                {
-                    Mod.currentTaskLeaveItemConditionsByItemIDByZone.Add(currentExtraction.gameObject.name, Mod.taskLeaveItemConditionsByItemIDByZone[currentExtraction.gameObject.name]);
-                }
                 if (Mod.taskVisitPlaceConditionsByZone.ContainsKey(currentExtraction.gameObject.name))
                 {
-                    Mod.currentTaskVisitPlaceConditionsByZone.Add(currentExtraction.gameObject.name, Mod.taskVisitPlaceConditionsByZone[currentExtraction.gameObject.name]);
+                    List<TraderTaskCondition> conditions = Mod.taskVisitPlaceConditionsByZone[currentExtraction.gameObject.name];
+                    for(int i=conditions.Count-1; i>=0; --i)
+                    {
+                        if(conditions[i].failCondition && conditions[i].task.taskState != TraderTask.TaskState.Active)
+                        {
+                            conditions.RemoveAt(i);
+                        }
+                    }
+                    if (conditions.Count > 0)
+                    {
+                        Mod.currentTaskVisitPlaceConditionsByZone.Add(currentExtraction.gameObject.name, conditions);
+                    }
                 }
                 if (Mod.taskVisitPlaceCounterConditionsByZone.ContainsKey(currentExtraction.gameObject.name))
                 {
-                    Mod.currentTaskVisitPlaceCounterConditionsByZone.Add(currentExtraction.gameObject.name, Mod.taskVisitPlaceCounterConditionsByZone[currentExtraction.gameObject.name]);
+                    List<TraderTaskCounterCondition> counterConditions = Mod.taskVisitPlaceCounterConditionsByZone[currentExtraction.gameObject.name];
+                    for (int i = counterConditions.Count - 1; i >= 0; --i)
+                    {
+                        if (counterConditions[i].parentCondition.failCondition && counterConditions[i].parentCondition.task.taskState != TraderTask.TaskState.Active)
+                        {
+                            counterConditions.RemoveAt(i);
+                        }
+                    }
+                    if (counterConditions.Count > 0)
+                    {
+                        Mod.currentTaskVisitPlaceCounterConditionsByZone.Add(currentExtraction.gameObject.name, counterConditions);
+                    }
                 }
 
                 bool canBeMinimum = (currentExtraction.times == null || currentExtraction.times.Count == 0) &&
@@ -594,24 +612,54 @@ namespace EFM
                     currentLeaveItemProcessor.itemIDs = new List<string>();
                     currentLeaveItemProcessor.conditionsByItemID = Mod.taskLeaveItemConditionsByItemIDByZone[questChild.name];
                     Mod.currentTaskLeaveItemConditionsByItemIDByZone.Add(questChild.name, currentLeaveItemProcessor.conditionsByItemID);
+                    // Add itemID if there is at least one condition in the list that is not a fail condition or if hte task is active
                     foreach(KeyValuePair<string, List<TraderTaskCondition>> entry in currentLeaveItemProcessor.conditionsByItemID)
                     {
-                        currentLeaveItemProcessor.itemIDs.Add(entry.Key);
+                        foreach(TraderTaskCondition condition in entry.Value)
+                        {
+                            if(!condition.failCondition || condition.task.taskState == TraderTask.TaskState.Active)
+                            {
+                                currentLeaveItemProcessor.itemIDs.Add(entry.Key);
+                                break;
+                            }
+                        }
                     }
                 }
                 if (Mod.taskVisitPlaceConditionsByZone.ContainsKey(questChild.name))
                 {
-                    Mod.currentTaskVisitPlaceConditionsByZone.Add(questChild.name, Mod.taskVisitPlaceConditionsByZone[questChild.name]);
+                    List<TraderTaskCondition> conditions = Mod.taskVisitPlaceConditionsByZone[questChild.name];
+                    for (int i = conditions.Count - 1; i >= 0; --i)
+                    {
+                        if (conditions[i].failCondition && conditions[i].task.taskState != TraderTask.TaskState.Active)
+                        {
+                            conditions.RemoveAt(i);
+                        }
+                    }
+                    if (conditions.Count > 0)
+                    {
+                        Mod.currentTaskVisitPlaceConditionsByZone.Add(questChild.name, conditions);
+                    }
                 }
                 if (Mod.taskVisitPlaceCounterConditionsByZone.ContainsKey(questChild.name))
                 {
-                    Mod.currentTaskVisitPlaceCounterConditionsByZone.Add(questChild.name, Mod.taskVisitPlaceCounterConditionsByZone[questChild.name]);
+                    List<TraderTaskCounterCondition> counterConditions = Mod.taskVisitPlaceCounterConditionsByZone[questChild.name];
+                    for (int i = counterConditions.Count - 1; i >= 0; --i)
+                    {
+                        if (counterConditions[i].parentCondition.failCondition && counterConditions[i].parentCondition.task.taskState != TraderTask.TaskState.Active)
+                        {
+                            counterConditions.RemoveAt(i);
+                        }
+                    }
+                    if (counterConditions.Count > 0)
+                    {
+                        Mod.currentTaskVisitPlaceCounterConditionsByZone.Add(questChild.name, counterConditions);
+                    }
                 }
             }
 
             // Init current health effect counter conditions
             Mod.currentHealthEffectCounterConditionsByEffectType = new Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>>();
-            foreach(KeyValuePair<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> entry in Mod.currentHealthEffectCounterConditionsByEffectType)
+            foreach(KeyValuePair<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> entry in Mod.taskHealthEffectCounterConditionsByEffectType)
             {
                 foreach(TraderTaskCounterCondition condition in entry.Value)
                 {
@@ -624,6 +672,48 @@ namespace EFM
                         else
                         {
                             Mod.currentHealthEffectCounterConditionsByEffectType.Add(entry.Key, new List<TraderTaskCounterCondition>() { condition });
+                        }
+                    }
+                }
+            }
+
+            // Init current shots counter conditions
+            Mod.currentShotsCounterConditionsByBodyPart = new Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>>();
+            foreach(KeyValuePair<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>> entry in Mod.taskShotsCounterConditionsByBodyPart)
+            {
+                foreach(TraderTaskCounterCondition condition in entry.Value)
+                {
+                    if (condition.parentCondition.task.taskState == TraderTask.TaskState.Locked ||
+                        condition.parentCondition.task.taskState == TraderTask.TaskState.Active)
+                    {
+                        if (Mod.currentShotsCounterConditionsByBodyPart.ContainsKey(entry.Key))
+                        {
+                            Mod.currentShotsCounterConditionsByBodyPart[entry.Key].Add(condition);
+                        }
+                        else
+                        {
+                            Mod.currentShotsCounterConditionsByBodyPart.Add(entry.Key, new List<TraderTaskCounterCondition>() { condition });
+                        }
+                    }
+                }
+            }
+
+            // Init current use item counter conditions
+            Mod.currentUseItemCounterConditionsByItemID = new Dictionary<string, List<TraderTaskCounterCondition>>();
+            foreach(KeyValuePair<string, List<TraderTaskCounterCondition>> entry in Mod.taskUseItemCounterConditionsByItemID)
+            {
+                foreach(TraderTaskCounterCondition condition in entry.Value)
+                {
+                    if (condition.parentCondition.task.taskState == TraderTask.TaskState.Locked ||
+                        condition.parentCondition.task.taskState == TraderTask.TaskState.Active)
+                    {
+                        if (Mod.currentUseItemCounterConditionsByItemID.ContainsKey(entry.Key))
+                        {
+                            Mod.currentUseItemCounterConditionsByItemID[entry.Key].Add(condition);
+                        }
+                        else
+                        {
+                            Mod.currentUseItemCounterConditionsByItemID.Add(entry.Key, new List<TraderTaskCounterCondition>() { condition });
                         }
                     }
                 }
@@ -846,45 +936,56 @@ namespace EFM
                     // Check task and condition state validity
                     if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Locked)
                     {
-                        break;
+                        continue;
                     }
 
                     // Check exit status
+                    bool wrongStatus = false;
                     switch (Mod.raidState)
                     {
                         case EFM_Base_Manager.FinishRaidState.Survived:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Survived))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                         case EFM_Base_Manager.FinishRaidState.RunThrough:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Runner))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                         case EFM_Base_Manager.FinishRaidState.KIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Killed))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                         case EFM_Base_Manager.FinishRaidState.MIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.MissingInAction))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                     }
+                    if (wrongStatus)
+                    {
+                        continue;
+                    }
 
                     // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    bool constrained = false;
                     foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
                     {
                         if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
                         {
+                            constrained = true;
                             break;
                         }
+                    }
+                    if (constrained)
+                    {
+                        continue;
                     }
 
                     // Successful kill, increment count and update fulfillment 
@@ -900,45 +1001,56 @@ namespace EFM
                     // Check task and condition state validity
                     if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Active)
                     {
-                        break;
+                        continue;
                     }
 
                     // Check exit status
+                    bool wrongStatus = false;
                     switch (Mod.raidState)
                     {
                         case EFM_Base_Manager.FinishRaidState.Survived:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Survived))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                         case EFM_Base_Manager.FinishRaidState.RunThrough:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Runner))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                         case EFM_Base_Manager.FinishRaidState.KIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Killed))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                         case EFM_Base_Manager.FinishRaidState.MIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.MissingInAction))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                     }
+                    if (wrongStatus)
+                    {
+                        continue;
+                    }
 
                     // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    bool constrained = false;
                     foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
                     {
                         if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
                         {
+                            constrained = true;
                             break;
                         }
+                    }
+                    if (constrained)
+                    {
+                        continue;
                     }
 
                     // Successful kill, increment count and update fulfillment 
@@ -952,47 +1064,58 @@ namespace EFM
                 foreach (TraderTaskCounterCondition counterCondition in failExitStatusCounterConditions)
                 {
                     // Check task and condition state validity
-                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState == TraderTask.TaskState.Fail)
+                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Active)
                     {
-                        break;
+                        continue;
                     }
 
                     // Check exit status
+                    bool wrongStatus = false;
                     switch (Mod.raidState)
                     {
                         case EFM_Base_Manager.FinishRaidState.Survived:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Survived))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                         case EFM_Base_Manager.FinishRaidState.RunThrough:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Runner))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                         case EFM_Base_Manager.FinishRaidState.KIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Killed))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                         case EFM_Base_Manager.FinishRaidState.MIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.MissingInAction))
                             {
-                                break;
+                                wrongStatus = true;
                             }
                             break;
                     }
+                    if (wrongStatus)
+                    {
+                        continue;
+                    }
 
                     // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    bool constrained = false;
                     foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
                     {
                         if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
                         {
+                            constrained = true;
                             break;
                         }
+                    }
+                    if (constrained)
+                    {
+                        continue;
                     }
 
                     // Successful kill, increment count and update fulfillment 
@@ -1170,21 +1293,14 @@ namespace EFM
             switch (spawnData.type)
             {
                 case AISpawn.AISpawnType.Scav:
-                    if(Mod.chosenCharIndex == 0)
-                    {
-                        iff = 1;
-                    }
-                    else // Player is scav, leave IFF as 0
-                    {
+                    if(Mod.chosenCharIndex == 1)
+                    { 
                         if(friendlyAI != null)
                         {
                             friendlyAI.Add(sosigScript);
                         }
-                        else // friendlyAI is only nulled when the player kills a friendly scavs, then all scavs should be enemies instead even if player is scav
-                        {
-                            iff = 1;
-                        }
                     }
+                    iff = 1;
 
                     sosigScript.CurrentOrder = Sosig.SosigOrder.Wander;
                     sosigScript.FallbackOrder = Sosig.SosigOrder.Wander;
@@ -1298,6 +1414,12 @@ namespace EFM
             sosigScript.Priority.SetAllEnemy();
             sosigScript.Priority.MakeFriendly(iff);
 
+            // If player scav, also make player iff friendly
+            if (Mod.chosenCharIndex == 1)
+            {
+                sosigScript.Priority.MakeFriendly(0);
+            }
+
             sosigScript.CanBeGrabbed = false;
             sosigScript.CanBeKnockedOut = false;
 
@@ -1327,12 +1449,11 @@ namespace EFM
                 Mod.killList.Add(sosig.name, AIScript.experienceReward);
 
                 // Have to make all scavs enemies if this was a friendly scav that was killed
-                if(sosig.GetOriginalIFFTeam() == 0)
+                if(sosig.GetOriginalIFFTeam() == 1)
                 {
                     foreach(Sosig friendly in friendlyAI)
                     {
-                        friendly.SetOriginalIFFTeam(1);
-                        friendly.SetIFF(1);
+                        friendly.Priority.MakeEnemy(0);
                     }
                 }
 
@@ -1368,7 +1489,7 @@ namespace EFM
                     // Check task and condition state validity
                     if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Locked)
                     {
-                        break;
+                        continue;
                     }
 
                     // Check kill type
@@ -1377,7 +1498,7 @@ namespace EFM
                           (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIScript.type == AISpawn.AISpawnType.PMC && !AIScript.USEC) ||
                           (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIScript.type == AISpawn.AISpawnType.PMC)))
                     {
-                        break;
+                        continue;
                     }
 
                     // Check weapon
@@ -1452,7 +1573,7 @@ namespace EFM
 
                         if (!isHoldingAllowedWeapon)
                         {
-                            break;
+                            continue;
                         }
                     }
 
@@ -1464,7 +1585,7 @@ namespace EFM
                             LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
                             if (!WeaponHasMods(Mod.rightHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
                             {
-                                break;
+                                continue;
                             }
                         }
                         if (Mod.leftHand.fvrHand.CurrentInteractable != null)
@@ -1472,7 +1593,7 @@ namespace EFM
                             LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
                             if (!WeaponHasMods(Mod.leftHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
                             {
-                                break;
+                                continue;
                             }
                         }
                     }
@@ -1484,25 +1605,31 @@ namespace EFM
                         {
                             if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) < counterCondition.distance)
                             {
-                                break;
+                                continue;
                             }
                         }
                         else
                         {
                             if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) > counterCondition.distance)
                             {
-                                break;
+                                continue;
                             }
                         }
                     }
 
                     // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    bool constrained = false;
                     foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
                     {
                         if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
                         {
+                            constrained = true;
                             break;
                         }
+                    }
+                    if (constrained)
+                    {
+                        continue;
                     }
 
                     // Successful kill, increment count and update fulfillment 
@@ -1518,7 +1645,7 @@ namespace EFM
                     // Check task and condition state validity
                     if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Active)
                     {
-                        break;
+                        continue;
                     }
 
                     // Check kill type
@@ -1527,7 +1654,7 @@ namespace EFM
                           (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIScript.type == AISpawn.AISpawnType.PMC && !AIScript.USEC) ||
                           (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIScript.type == AISpawn.AISpawnType.PMC)))
                     {
-                        break;
+                        continue;
                     }
 
                     // Check weapon
@@ -1602,7 +1729,7 @@ namespace EFM
 
                         if (!isHoldingAllowedWeapon)
                         {
-                            break;
+                            continue;
                         }
                     }
 
@@ -1614,7 +1741,7 @@ namespace EFM
                             LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
                             if (!WeaponHasMods(Mod.rightHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
                             {
-                                break;
+                                continue;
                             }
                         }
                         if (Mod.leftHand.fvrHand.CurrentInteractable != null)
@@ -1622,7 +1749,7 @@ namespace EFM
                             LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
                             if (!WeaponHasMods(Mod.leftHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
                             {
-                                break;
+                                continue;
                             }
                         }
                     }
@@ -1634,25 +1761,31 @@ namespace EFM
                         {
                             if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) < counterCondition.distance)
                             {
-                                break;
+                                continue;
                             }
                         }
                         else
                         {
                             if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) > counterCondition.distance)
                             {
-                                break;
+                                continue;
                             }
                         }
                     }
 
                     // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    bool constrained = false;
                     foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
                     {
                         if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
                         {
+                            constrained = true;
                             break;
                         }
+                    }
+                    if (constrained)
+                    {
+                        continue;
                     }
 
                     // Successful kill, increment count and update fulfillment 
@@ -1666,9 +1799,9 @@ namespace EFM
                 foreach (TraderTaskCounterCondition counterCondition in failKillCounterConditions)
                 {
                     // Check task and condition state validity
-                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState == TraderTask.TaskState.Fail)
+                    if (!counterCondition.parentCondition.visible || counterCondition.parentCondition.task.taskState != TraderTask.TaskState.Active)
                     {
-                        break;
+                        continue;
                     }
 
                     // Check kill type
@@ -1677,7 +1810,7 @@ namespace EFM
                           (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIScript.type == AISpawn.AISpawnType.PMC && !AIScript.USEC) ||
                           (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIScript.type == AISpawn.AISpawnType.PMC)))
                     {
-                        break;
+                        continue;
                     }
 
                     // Check weapon
@@ -1752,7 +1885,7 @@ namespace EFM
 
                         if (!isHoldingAllowedWeapon)
                         {
-                            break;
+                            continue;
                         }
                     }
 
@@ -1764,7 +1897,7 @@ namespace EFM
                             LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
                             if (!WeaponHasMods(Mod.rightHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
                             {
-                                break;
+                                continue;
                             }
                         }
                         if (Mod.leftHand.fvrHand.CurrentInteractable != null)
@@ -1772,7 +1905,7 @@ namespace EFM
                             LinkedList<string> tempWeaponMod = new LinkedList<string>(counterCondition.weaponModsInclusive);
                             if (!WeaponHasMods(Mod.leftHand.fvrHand.CurrentInteractable, ref tempWeaponMod))
                             {
-                                break;
+                                continue;
                             }
                         }
                     }
@@ -1784,25 +1917,31 @@ namespace EFM
                         {
                             if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) < counterCondition.distance)
                             {
-                                break;
+                                continue;
                             }
                         }
                         else
                         {
                             if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, sosig.transform.position) > counterCondition.distance)
                             {
-                                break;
+                                continue;
                             }
                         }
                     }
 
                     // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    bool constrained = false;
                     foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
                     {
                         if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
                         {
+                            constrained = true;
                             break;
                         }
+                    }
+                    if (constrained)
+                    {
+                        continue;
                     }
 
                     // Successful kill, increment count and update fulfillment 
@@ -3810,8 +3949,6 @@ namespace EFM
                 }
             }
             Mod.instance.LogInfo("\tGot inventory data");
-
-            // TODO: Set variables for difficulty
 
             // Set equipment
             Mod.instance.LogInfo("\tSetting head equipment");
@@ -6643,22 +6780,28 @@ namespace EFM
                     // Check task and condition state validity
                     if (!counterCondition.parentCondition.visible)
                     {
-                        break;
+                        continue;
                     }
 
                     // Check visited place
                     if (Mod.playerStatusManager.currentZone == null || !Mod.playerStatusManager.currentZone.Equals(counterCondition.targetPlaceName))
                     {
-                        break;
+                        continue;
                     }
 
                     // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                    bool constrained = false;
                     foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
                     {
                         if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
                         {
+                            constrained = true;
                             break;
                         }
+                    }
+                    if (constrained)
+                    {
+                        continue;
                     }
 
                     // Successful visit, increment count and update fulfillment 
@@ -6674,13 +6817,13 @@ namespace EFM
                     // Check task and condition state validity
                     if (!condition.visible)
                     {
-                        break;
+                        continue;
                     }
 
                     // Check visited place
                     if (Mod.playerStatusManager.currentZone == null || !Mod.playerStatusManager.currentZone.Equals(condition.targetPlaceName))
                     {
-                        break;
+                        continue;
                     }
 
                     // Successful visit, increment count and update fulfillment 

@@ -115,12 +115,16 @@ namespace EFM
         public static Dictionary<string, List<TraderTaskCondition>> taskVisitPlaceConditionsByZone = new Dictionary<string, List<TraderTaskCondition>>();
         public static Dictionary<string, List<TraderTaskCounterCondition>> taskVisitPlaceCounterConditionsByZone = new Dictionary<string, List<TraderTaskCounterCondition>>();
         public static Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> taskHealthEffectCounterConditionsByEffectType = new Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>>();
+        public static Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>> taskShotsCounterConditionsByBodyPart = new Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>>();
+        public static Dictionary<string, List<TraderTaskCounterCondition>> taskUseItemCounterConditionsByItemID = new Dictionary<string, List<TraderTaskCounterCondition>>();
         public static Dictionary<string, List<TraderTaskCondition>> taskFindItemConditionsByItemID = new Dictionary<string, List<TraderTaskCondition>>();
         public static Dictionary<int, List<TraderTaskCondition>> taskSkillConditionsBySkillIndex = new Dictionary<int, List<TraderTaskCondition>>();
         public static Dictionary<string, Dictionary<string, List<TraderTaskCondition>>> currentTaskLeaveItemConditionsByItemIDByZone;
         public static Dictionary<string, List<TraderTaskCondition>> currentTaskVisitPlaceConditionsByZone;
         public static Dictionary<string, List<TraderTaskCounterCondition>> currentTaskVisitPlaceCounterConditionsByZone;
         public static Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> currentHealthEffectCounterConditionsByEffectType;
+        public static Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>> currentShotsCounterConditionsByBodyPart;
+        public static Dictionary<string, List<TraderTaskCounterCondition>> currentUseItemCounterConditionsByItemID;
 
         // Player
         public static GameObject playerStatusUI;
@@ -3071,6 +3075,12 @@ namespace EFM
 
             harmony.Patch(handCurrentInteractableSetPatchOriginal, new HarmonyMethod(handCurrentInteractableSetPatchPrefix));
 
+            // SosigLinkDamagePatch
+            MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo sosigLinkDamagePatchPrefix = typeof(SosigLinkDamagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(sosigLinkDamagePatchOriginal, new HarmonyMethod(sosigLinkDamagePatchPrefix));
+
             //// UpdateModeTwoAxisPatch
             //MethodInfo updateModeTwoAxisPatchOriginal = typeof(FVRMovementManager).GetMethod("UpdateModeTwoAxis", BindingFlags.NonPublic | BindingFlags.Instance);
             //MethodInfo updateModeTwoAxisPatchPrefix = typeof(UpdateModeTwoAxisPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -5286,6 +5296,11 @@ namespace EFM
                         {
                             foreach(TraderTaskCondition condition in Mod.taskFindItemConditionsByItemID[customItemWrapper.ID])
                             {
+                                if(condition.failCondition && condition.task.taskState != TraderTask.TaskState.Active)
+                                {
+                                    continue;
+                                }
+
                                 if (!condition.fulfilled)
                                 {
                                     ++condition.itemCount;
@@ -9786,6 +9801,224 @@ namespace EFM
                 handToUse.VID = ___m_currentInteractable.GetComponent<EFM_VanillaItemDescriptor>();
                 handToUse.custom = handToUse.CIW != null;
                 handToUse.hasScript = handToUse.custom || handToUse.VID != null;
+            }
+        }
+    }
+
+    // Patches SosigLink.Damage to keep track of player shots on AI
+    class SosigLinkDamagePatch
+    {
+        static void Prefix(ref SosigLink __instance, Damage d)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if(d.Source_IFF == 0)
+            {
+                switch (__instance.BodyPart)
+                {
+                    case SosigLink.SosigBodyPart.Head:
+                        UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart.Head, d.point);
+                        break;
+                    case SosigLink.SosigBodyPart.Torso:
+                        float thoraxChance = 0.5f; // 50%
+                        float leftArmChance = 0.65f; // 15%
+                        float rightArmChance = 0.8f; // 15%
+                        // float stomachChance = 1f; // 20%
+                        TraderTaskCounterCondition.CounterConditionTargetBodyPart chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                        float rand = UnityEngine.Random.value;
+                        if(rand <= thoraxChance)
+                        {
+                            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                        }
+                        else if(rand <= leftArmChance)
+                        {
+                            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftArm;
+                        }
+                        else if(rand <= rightArmChance)
+                        {
+                            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightArm;
+                        }
+                        else
+                        {
+                            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
+                        }
+                        UpdateShotsCounterConditions(chosenBodyPart, d.point);
+                        break;
+                    case SosigLink.SosigBodyPart.UpperLink:
+                        float stomachChance = 0.5f; // 50%
+                        float upperLeftLegChance = 0.65f; // 15%
+                        float upperRightLegChance = 0.8f; // 15%
+                        // float thoraxChance = 1f; // 20%
+                        TraderTaskCounterCondition.CounterConditionTargetBodyPart upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                        float upperRand = UnityEngine.Random.value;
+                        if (upperRand <= stomachChance)
+                        {
+                            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
+                        }
+                        else if (upperRand <= upperLeftLegChance)
+                        {
+                            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftLeg;
+                        }
+                        else if (upperRand <= upperRightLegChance)
+                        {
+                            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightLeg;
+                        }
+                        else
+                        {
+                            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                        }
+                        UpdateShotsCounterConditions(upperChosenBodyPart, d.point);
+                        break;
+                    case SosigLink.SosigBodyPart.LowerLink:
+                        float lowerStomachChance = 0.20f; // 20%
+                        float leftLegChance = 0.6f; // 40%
+                        // float rightLegChance = 1f; // 40%
+                        TraderTaskCounterCondition.CounterConditionTargetBodyPart lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                        float lowerRand = UnityEngine.Random.value;
+                        if (lowerRand <= lowerStomachChance)
+                        {
+                            lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
+                        }
+                        else if (lowerRand <= leftLegChance)
+                        {
+                            lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftLeg;
+                        }
+                        else
+                        {
+                            lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightLeg;
+                        }
+                        UpdateShotsCounterConditions(lowerChosenBodyPart, d.point);
+                        break;
+                }
+            }
+        }
+
+        static void UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart bodyPart, Vector3 hitPoint)
+        {
+            foreach(TraderTaskCounterCondition counterCondition in Mod.currentShotsCounterConditionsByBodyPart[bodyPart])
+            {
+                // Check condition state validity
+                if (!counterCondition.parentCondition.visible)
+                {
+                    continue;
+                }
+
+                // Check weapon
+                if (counterCondition.allowedWeaponIDs != null && counterCondition.allowedWeaponIDs.Count > 0)
+                {
+                    bool isHoldingAllowedWeapon = false;
+                    FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
+                    if (rightInteractable != null)
+                    {
+                        EFM_VanillaItemDescriptor VID = rightInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                        if (VID != null)
+                        {
+                            foreach (string parent in VID.parents)
+                            {
+                                if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                {
+                                    isHoldingAllowedWeapon = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!isHoldingAllowedWeapon)
+                        {
+                            EFM_CustomItemWrapper CIW = rightInteractable.GetComponent<EFM_CustomItemWrapper>();
+                            if (CIW != null)
+                            {
+                                foreach (string parent in CIW.parents)
+                                {
+                                    if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                    {
+                                        isHoldingAllowedWeapon = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (!isHoldingAllowedWeapon)
+                    {
+                        FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
+                        if (leftInteractable != null)
+                        {
+                            EFM_VanillaItemDescriptor VID = leftInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                            if (VID != null)
+                            {
+                                foreach (string parent in VID.parents)
+                                {
+                                    if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                    {
+                                        isHoldingAllowedWeapon = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!isHoldingAllowedWeapon)
+                            {
+                                EFM_CustomItemWrapper CIW = leftInteractable.GetComponent<EFM_CustomItemWrapper>();
+                                if (CIW != null)
+                                {
+                                    foreach (string parent in CIW.parents)
+                                    {
+                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
+                                        {
+                                            isHoldingAllowedWeapon = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!isHoldingAllowedWeapon)
+                    {
+                        continue;
+                    }
+                }
+
+                // Check distance
+                if (counterCondition.distance != -1)
+                {
+                    if (counterCondition.distanceCompareMode == 0)
+                    {
+                        if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, hitPoint) < counterCondition.distance)
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, hitPoint) > counterCondition.distance)
+                        {
+                            continue;
+                        }
+                    }
+                }
+
+                // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+                bool constrained = false;
+                foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+                {
+                    if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+                    {
+                        constrained = true;
+                        break;
+                    }
+                }
+                if (constrained)
+                {
+                    continue;
+                }
+
+                // Successful shot, increment count and update fulfillment 
+                ++counterCondition.shotCount;
+                EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
             }
         }
     }
