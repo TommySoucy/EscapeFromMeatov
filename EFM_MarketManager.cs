@@ -2393,6 +2393,10 @@ namespace EFM
                 Mod.instance.LogInfo("\tgot description");
                 if (description.activeSelf) 
                 {
+                    // This here is why we update a frame after we need to update
+                    // Because sizeDelta is only updated the frame after any change to the UI
+                    // Since this may be the first time we activated the task's desciption,
+                    // we must wait to the frame after to get the size
                     taskListHeight += description.GetComponent<RectTransform>().sizeDelta.y;
                 }
             }

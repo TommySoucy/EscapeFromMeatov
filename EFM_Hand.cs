@@ -167,11 +167,11 @@ namespace EFM
             {
                 if (custom)
                 {
-                    CIW.TakeInput();
+                    CIW.TakeInput(fvrHand, this);
                 }
                 else
                 {
-                    VID.TakeInput();
+                    VID.TakeInput(fvrHand, this);
                 }
             }
         }

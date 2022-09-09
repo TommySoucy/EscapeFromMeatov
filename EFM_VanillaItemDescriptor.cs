@@ -73,9 +73,8 @@ namespace EFM
             }
         }
 
-        public void TakeInput()
+        public void TakeInput(FVRViveHand hand, EFM_Hand EFMHand)
         {
-            FVRViveHand hand = physObj.m_hand;
             bool usageButtonPressed = false;
             if (hand.CMode == ControlMode.Index || hand.CMode == ControlMode.Oculus)
             {
@@ -98,11 +97,11 @@ namespace EFM
                     bool otherHandLeaving = false;
                     if (!validLeaveItemPress)
                     {
-                        otherHandLeaving = hand.OtherHand.GetComponent<EFM_Hand>().leaving;
+                        otherHandLeaving = EFMHand.otherHand.leaving;
                     }
                     if (!otherHandLeaving)
                     {
-                        hand.GetComponent<EFM_Hand>().leaving = true;
+                        EFMHand.leaving = true;
 
                         // Increment timer
                         leavingTimer += Time.deltaTime;
@@ -123,7 +122,7 @@ namespace EFM
 
                         if (leavingTimer >= leaveItemTime)
                         {
-                            hand.GetComponent<EFM_Hand>().leaving = false;
+                            EFMHand.leaving = false;
                             validLeaveItemPress = false;
                             leavingTimer = 0;
                             leaveItemTime = -1;

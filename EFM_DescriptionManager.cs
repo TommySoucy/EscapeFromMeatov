@@ -578,6 +578,7 @@ namespace EFM
             // Set hoverscrolls depending on description height
             if (descriptionHeight > 1050)
             {
+                Mod.instance.LogInfo("Item full desc hoverscrolls activated for height of "+descriptionHeight);
                 upHoverScroll.gameObject.SetActive(false); // Only down should be activated at first
                 downHoverScroll.gameObject.SetActive(true);
 

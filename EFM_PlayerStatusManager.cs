@@ -144,6 +144,9 @@ namespace EFM
             taskListButton.MaxPointingRange = 10;
             taskListButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             taskListButton.Button.onClick.AddListener(() => { OnToggleTaskListClick(); });
+            // Add task list background pointable
+            FVRPointable rightBackgroundPointable = transform.GetChild(1).GetChild(0).GetChild(1).gameObject.AddComponent<FVRPointable>();
+            rightBackgroundPointable.MaxPointingRange = 5;
 
             // Init skill list
             EFM_HoverScroll skillDownHoverScroll = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<EFM_HoverScroll>();
@@ -153,19 +156,22 @@ namespace EFM
             skillDownHoverScroll.scrollbar = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
             skillDownHoverScroll.other = skillUpHoverScroll;
             skillDownHoverScroll.up = false;
-            skillDownHoverScroll.rate = 0.2f;
+            skillDownHoverScroll.rate = 0.3f;
             skillUpHoverScroll.MaxPointingRange = 10;
             skillUpHoverScroll.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             skillUpHoverScroll.scrollbar = transform.GetChild(9).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
             skillUpHoverScroll.other = skillDownHoverScroll;
             skillUpHoverScroll.up = true;
-            skillUpHoverScroll.rate = 0.2f;
-            // Set task list toggle button
+            skillUpHoverScroll.rate = 0.3f;
+            // Set skill list toggle button
             EFM_PointableButton skillListButton = transform.GetChild(9).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
             skillListButton.SetButton();
             skillListButton.MaxPointingRange = 10;
             skillListButton.hoverSound = transform.GetChild(4).GetComponent<AudioSource>();
             skillListButton.Button.onClick.AddListener(OnToggleSkillListClick);
+            // Add skill list background pointable
+            FVRPointable leftBackgroundPointable = transform.GetChild(9).GetChild(0).GetChild(1).gameObject.AddComponent<FVRPointable>();
+            leftBackgroundPointable.MaxPointingRange = 5;
 
             // Init notificaiton stuff
             notificationsParent = transform.GetChild(0).GetChild(12);
@@ -178,7 +184,7 @@ namespace EFM
 
             // Set background pointable
             FVRPointable backgroundPointable = transform.GetChild(0).gameObject.AddComponent<FVRPointable>();
-            backgroundPointable.MaxPointingRange = 30;
+            backgroundPointable.MaxPointingRange = 5;
 
             // Set as not active by default
             transform.GetChild(0).gameObject.SetActive(false);
@@ -709,6 +715,21 @@ namespace EFM
             EFM_HoverScroll upHoverScroll = transform.GetChild(1).GetChild(0).GetChild(1).GetChild(3).GetComponent<EFM_HoverScroll>();
             Transform tasksParent = transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             float taskListHeight = 29 * (tasksParent.childCount - 1);
+
+            // Also need to add height of open descriptions
+            for (int i = 1; i < tasksParent.childCount; ++i)
+            {
+                GameObject description = tasksParent.GetChild(i).GetChild(1).gameObject;
+                if (description.activeSelf)
+                {
+                    // This here is why we update a frame after we need to update
+                    // Because sizeDelta is only updated the frame after any change to the UI
+                    // Since this may be the first time we activated the task's desciption,
+                    // we must wait to the frame after to get the size
+                    taskListHeight += description.GetComponent<RectTransform>().sizeDelta.y;
+                }
+            }
+
             if (taskListHeight > 245)
             {
                 downHoverScroll.rate = 245 / (taskListHeight - 245);

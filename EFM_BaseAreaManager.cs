@@ -2361,7 +2361,7 @@ namespace EFM
                             {
                                 Mod.instance.LogInfo("\t\t0");
                                 traderRequirement.transform.GetChild(0).GetChild(1).GetChild(1).gameObject.SetActive(true);
-                                traderRequirement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = String.Concat(Enumerable.Repeat("I", (int)requirement["loyaltyLevel"]));
+                                traderRequirement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = EFM_TraderStatus.LoyaltyLevelToRoman((int)requirement["loyaltyLevel"]);
                             }
                             Mod.instance.LogInfo("\t0");
                             // Check if requirement is met
@@ -2435,7 +2435,7 @@ namespace EFM
 
                             // Check if requirement is met
                             float skillLevel = Mod.skills[skillRequirementIndex].currentProgress / 100;
-                            if (skillLevel >= skillRequirementIndex)
+                            if (skillLevel >= skillRequiredLevel)
                             {
                                 skillRequirement.transform.GetChild(1).GetComponent<Image>().sprite = EFM_Base_Manager.requirementFulfilled;
                             }

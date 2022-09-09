@@ -428,9 +428,8 @@ namespace EFM
 			}
 		}
 
-		public void TakeInput()
+		public void TakeInput(FVRViveHand hand, EFM_Hand EFMHand)
 		{
-			FVRViveHand hand = physObj.m_hand;
 			bool usageButtonDown = false;
 			bool usageButtonPressed = false;
 			bool usageButtonUp = false;
@@ -525,11 +524,11 @@ namespace EFM
 							bool otherHandConsuming = false;
 							if (!validConsumePress)
 							{
-								otherHandConsuming = hand.OtherHand.GetComponent<EFM_Hand>().consuming;
+								otherHandConsuming = EFMHand.otherHand.consuming;
 							}
 							if (!otherHandConsuming)
 							{
-								hand.GetComponent<EFM_Hand>().consuming = true;
+								EFMHand.consuming = true;
 
 								// Increment timer
 								consumableTimer += Time.deltaTime;
@@ -568,11 +567,11 @@ namespace EFM
 					bool otherHandLeaving = false;
 					if (!validLeaveItemPress)
 					{
-						otherHandLeaving = hand.OtherHand.GetComponent<EFM_Hand>().leaving;
+						otherHandLeaving = EFMHand.otherHand.leaving;
 					}
 					if (!otherHandLeaving)
 					{
-						hand.GetComponent<EFM_Hand>().leaving = true;
+						EFMHand.leaving = true;
 
 						// Increment timer
 						leavingTimer += Time.deltaTime;
@@ -593,7 +592,7 @@ namespace EFM
 
 						if (leavingTimer >= leaveItemTime)
 						{
-							hand.GetComponent<EFM_Hand>().leaving = false;
+							EFMHand.leaving = false;
 							validLeaveItemPress = false;
 							leavingTimer = 0;
 							leaveItemTime = -1;
