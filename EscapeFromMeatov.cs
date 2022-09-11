@@ -261,14 +261,14 @@ namespace EFM
         public static Sprite[] skillIcons;
 
         // DB
-        public static JObject areasDB;
+        public static JArray areasDB;
         public static JObject localDB;
-        public static Dictionary<string, string> itemMap;
+        public static Dictionary<string, ItemMapEntry> itemMap;
         public static JObject[] traderBaseDB;
         public static JObject[] traderAssortDB;
         public static JArray[] traderCategoriesDB;
         public static JObject globalDB;
-        public static JArray questDB;
+        public static JObject questDB;
         public static JArray XPPerLevel;
         public static JObject mapData;
         public static JObject[] locationsLootDB;
@@ -292,11 +292,11 @@ namespace EFM
             ArmoredRig = 3,
             Helmet = 4,
             Backpack = 5,
-            Container = 6, 
-            Pouch = 7, 
+            Container = 6,
+            Pouch = 7,
             AmmoBox = 8,
             Money = 9,
-            Consumable = 10, 
+            Consumable = 10,
             Key = 11,
             Earpiece = 12,
             FaceCover = 13,
@@ -351,7 +351,7 @@ namespace EFM
             if (Input.GetKeyDown(KeyCode.KeypadPeriod))
             {
                 debug = !debug;
-                LogWarning("Debug active: "+ debug);
+                LogWarning("Debug active: " + debug);
             }
             if (debug)
             {
@@ -374,7 +374,7 @@ namespace EFM
                 if (Input.GetKeyDown(KeyCode.H))
                 {
                     FieldInfo genericPoolField = typeof(SM).GetField("m_pool_generic", BindingFlags.NonPublic | BindingFlags.Instance);
-                    Logger.LogInfo("Generic pool null?: "+(genericPoolField.GetValue(ManagerSingleton<SM>.Instance) == null));
+                    Logger.LogInfo("Generic pool null?: " + (genericPoolField.GetValue(ManagerSingleton<SM>.Instance) == null));
                 }
 
                 if (Input.GetKeyDown(KeyCode.O))
@@ -413,7 +413,7 @@ namespace EFM
                 if (Input.GetKeyDown(KeyCode.Keypad2))
                 {
                     GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach(GameObject root in roots)
+                    foreach (GameObject root in roots)
                     {
                         DestroyLODs(root.transform);
                     }
@@ -422,7 +422,7 @@ namespace EFM
                 if (Input.GetKeyDown(KeyCode.Keypad3))
                 {
                     GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach(GameObject root in roots)
+                    foreach (GameObject root in roots)
                     {
                         SetProbeSettings(root.transform, UnityEngine.Rendering.LightProbeUsage.Off, UnityEngine.Rendering.ReflectionProbeUsage.Off);
                     }
@@ -431,7 +431,7 @@ namespace EFM
                 if (Input.GetKeyDown(KeyCode.Keypad4))
                 {
                     GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach(GameObject root in roots)
+                    foreach (GameObject root in roots)
                     {
                         SetProbeSettings(root.transform, UnityEngine.Rendering.LightProbeUsage.BlendProbes, UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes);
                     }
@@ -440,7 +440,7 @@ namespace EFM
                 if (Input.GetKeyDown(KeyCode.Keypad5))
                 {
                     GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach(GameObject root in roots)
+                    foreach (GameObject root in roots)
                     {
                         DestroyGraphicRayCasters(root.transform);
                     }
@@ -449,7 +449,7 @@ namespace EFM
                 if (Input.GetKeyDown(KeyCode.Keypad6))
                 {
                     GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach(GameObject root in roots)
+                    foreach (GameObject root in roots)
                     {
                         SetRaycastTarget(root.transform);
                     }
@@ -475,9 +475,9 @@ namespace EFM
             Graphic[] rc = root.GetComponents<Graphic>();
             if (rc != null)
             {
-                foreach(Graphic g in rc)
+                foreach (Graphic g in rc)
                 {
-                    if(g != null)
+                    if (g != null)
                     {
                         g.raycastTarget = false;
                     }
@@ -505,9 +505,9 @@ namespace EFM
 
         private void DestroyLODs(Transform root)
         {
-            LogInfo("destroy LODs on "+root.name);
+            LogInfo("destroy LODs on " + root.name);
             LODGroup lodGroup = root.GetComponent<LODGroup>();
-            if(lodGroup != null)
+            if (lodGroup != null)
             {
                 LOD[] lods = lodGroup.GetLODs();
                 if (lods != null)
@@ -531,7 +531,7 @@ namespace EFM
                 Destroy(lodGroup);
             }
 
-            foreach(Transform child in root)
+            foreach (Transform child in root)
             {
                 DestroyLODs(child);
             }
@@ -539,9 +539,9 @@ namespace EFM
 
         private void DumpObjectIDs()
         {
-            foreach(string key in IM.OD.Keys)
+            foreach (string key in IM.OD.Keys)
             {
-                Logger.LogInfo("key: "+key+": "+IM.OD[key].DisplayName);
+                Logger.LogInfo("key: " + key + ": " + IM.OD[key].DisplayName);
             }
         }
 
@@ -589,9 +589,9 @@ namespace EFM
             FileInfo[] files = dir.GetFiles("*.*");
             foreach (FileInfo f in files)
             {
-                Logger.LogInfo(levelString + "File: "+f.FullName);
+                Logger.LogInfo(levelString + "File: " + f.FullName);
             }
-            DirectoryInfo[] dirs = dir.GetDirectories(); 
+            DirectoryInfo[] dirs = dir.GetDirectories();
             foreach (DirectoryInfo d in dirs)
             {
                 Logger.LogInfo(levelString + "Directory: " + d.FullName);
@@ -652,14 +652,14 @@ namespace EFM
             staminaBarPrefab = assetsBundle.LoadAsset<GameObject>("StaminaBar");
             cartridgeIcon = assetsBundle.LoadAsset<Sprite>("ItemCartridge_Icon");
             playerLevelIcons = new Sprite[16];
-            for(int i=1; i <= 16; ++i)
+            for (int i = 1; i <= 16; ++i)
             {
-                playerLevelIcons[i - 1] = assetsBundle.LoadAsset<Sprite>("rank"+(i*5));
+                playerLevelIcons[i - 1] = assetsBundle.LoadAsset<Sprite>("rank" + (i * 5));
             }
             barbedWireClips = new AudioClip[3];
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
-                barbedWireClips[i] = assetsBundle.LoadAsset<AudioClip>("barbwire"+(i+1));
+                barbedWireClips[i] = assetsBundle.LoadAsset<AudioClip>("barbwire" + (i + 1));
             }
             skillIcons = new Sprite[64];
             skillIcons[0] = assetsBundle.LoadAsset<Sprite>("skill_physical_endurance");
@@ -799,14 +799,14 @@ namespace EFM
             string[] soundCategories = new string[] { "drop", "pickup", "offline_use", "open", "use", "use_loop" };
             for (int i = 0; i < ((JArray)defaultItemsData["ItemDefaults"]).Count; ++i)
             {
-                LogInfo("\tLoading Item"+i);
-                GameObject itemPrefab = assetsBundle.LoadAsset<GameObject>("Item"+i);
+                LogInfo("\tLoading Item" + i);
+                GameObject itemPrefab = assetsBundle.LoadAsset<GameObject>("Item" + i);
                 itemPrefab.name = defaultItemsData["ItemDefaults"][i]["DefaultPhysicalObject"]["DefaultObjectWrapper"]["DisplayName"].ToString();
 
                 itemPrefabs.Add(itemPrefab);
                 itemNames.Add(i.ToString(), itemPrefab.name);
 
-                Sprite itemIcon = assetsBundle.LoadAsset<Sprite>("Item"+i+"_Icon");
+                Sprite itemIcon = assetsBundle.LoadAsset<Sprite>("Item" + i + "_Icon");
                 itemIcons.Add(i.ToString(), itemIcon);
 
                 int itemType = ((int)defaultItemsData["ItemDefaults"][i]["ItemType"]);
@@ -817,7 +817,7 @@ namespace EFM
                 {
                     itemPhysicalObject = itemPrefab.AddComponent<FVRFireArmMagazine>();
                 }
-                else if(itemType == 11)
+                else if (itemType == 11)
                 {
                     itemPhysicalObject = itemPrefab.AddComponent<LockKey>();
                 }
@@ -881,7 +881,7 @@ namespace EFM
                 itemObjectWrapper.TagPowerupType = (FVRObject.OTagPowerupType)((int)defaultObjectWrapper["TagPowerupType"]);
                 itemObjectWrapper.TagThrownType = (FVRObject.OTagThrownType)((int)defaultObjectWrapper["TagThrownType"]);
                 itemObjectWrapper.MagazineType = (FireArmMagazineType)((int)defaultObjectWrapper["MagazineType"]);
-                itemObjectWrapper.CreditCost = (int)defaultObjectWrapper["CreditCost"]; 
+                itemObjectWrapper.CreditCost = (int)defaultObjectWrapper["CreditCost"];
                 itemObjectWrapper.OSple = (bool)defaultObjectWrapper["OSple"];
 
                 // Add custom item wrapper
@@ -890,7 +890,7 @@ namespace EFM
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 float[] tempVolumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
                 customItemWrapper.volumes = new int[tempVolumes.Length];
-                for(int volIndex=0; volIndex < tempVolumes.Length; ++volIndex)
+                for (int volIndex = 0; volIndex < tempVolumes.Length; ++volIndex)
                 {
                     customItemWrapper.volumes[volIndex] = (int)(tempVolumes[volIndex] * Mod.volumePrecisionMultiplier);
                 }
@@ -921,7 +921,7 @@ namespace EFM
                     customItemWrapper.maxAmount = (int)defaultItemsData["ItemDefaults"][i]["MaxAmount"];
                     customItemWrapper._amount = customItemWrapper.maxAmount;
                 }
-                if(defaultItemsData["ItemDefaults"][i]["BlocksEarpiece"] != null)
+                if (defaultItemsData["ItemDefaults"][i]["BlocksEarpiece"] != null)
                 {
                     customItemWrapper.blocksEarpiece = (bool)defaultItemsData["ItemDefaults"][i]["BlocksEarpiece"];
                     customItemWrapper.blocksEyewear = (bool)defaultItemsData["ItemDefaults"][i]["BlocksEyewear"];
@@ -936,12 +936,12 @@ namespace EFM
                     {
                         sounds = new AudioClip[soundCategories.Length];
                         int count = 0;
-                        for(int j=0; j < sounds.Length; ++j)
+                        for (int j = 0; j < sounds.Length; ++j)
                         {
                             sounds[j] = assetsBundle.LoadAsset<AudioClip>(itemSound + "_" + soundCategories[j]);
                             count += sounds[j] == null ? 0 : 1;
                         }
-                        if(count == 0)
+                        if (count == 0)
                         {
                             LogError("No item sound found for category: " + itemSound);
                             itemPhysicalObject.HandlingGrabSound = HandlingGrabType.Generic;
@@ -978,7 +978,7 @@ namespace EFM
 
                 // Fill customItemWrapper Colliders
                 List<Collider> colliders = new List<Collider>();
-                foreach(Transform collider in itemPrefab.transform.GetChild(0).GetChild(itemPrefab.transform.GetChild(0).childCount - 1))
+                foreach (Transform collider in itemPrefab.transform.GetChild(0).GetChild(itemPrefab.transform.GetChild(0).childCount - 1))
                 {
                     colliders.Add(collider.GetComponent<Collider>());
                 }
@@ -986,7 +986,7 @@ namespace EFM
 
                 // Add an EFM_OtherInteractable to each child under Interactives recursively and add them to interactiveSets
                 List<GameObject> interactiveSets = new List<GameObject>();
-                foreach(Transform interactive in itemPrefab.transform.GetChild(3))
+                foreach (Transform interactive in itemPrefab.transform.GetChild(3))
                 {
                     interactiveSets.Add(MakeItemInteractiveSet(interactive, itemPhysicalObject));
                 }
@@ -994,7 +994,7 @@ namespace EFM
 
                 // Fill customItemWrapper models
                 List<GameObject> models = new List<GameObject>();
-                foreach(Transform model in itemPrefab.transform.GetChild(0))
+                foreach (Transform model in itemPrefab.transform.GetChild(0))
                 {
                     models.Add(model.gameObject);
                 }
@@ -1021,7 +1021,7 @@ namespace EFM
                 {
                     // Setup the slots for the player rig config and the rig config
                     int slotCount = 0;
-                    GameObject quickBeltConfiguration = assetsBundle.LoadAsset<GameObject>("Item"+i+"Configuration");
+                    GameObject quickBeltConfiguration = assetsBundle.LoadAsset<GameObject>("Item" + i + "Configuration");
                     customItemWrapper.rigSlots = new List<FVRQuickBeltSlot>();
                     for (int j = 0; j < quickBeltConfiguration.transform.childCount; ++j)
                     {
@@ -1050,7 +1050,7 @@ namespace EFM
                         rigSlotComponent.HoverGeo.SetActive(false);
                         rigSlotComponent.PoseOverride = rigSlotObject.transform.GetChild(0).GetChild(2);
                         rigSlotComponent.Shape = slotShape;
-                        if(slotShape == FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear)
+                        if (slotShape == FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear)
                         {
                             slotComponent.RectBounds = slotObject.transform.GetChild(0);
                             rigSlotComponent.RectBounds = rigSlotObject.transform.GetChild(0);
@@ -1168,7 +1168,7 @@ namespace EFM
                 }
 
                 // Container
-                if(itemType == 6)
+                if (itemType == 6)
                 {
                     // Set MainContainer renderers and their material
                     GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
@@ -1184,14 +1184,14 @@ namespace EFM
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
-                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"]* Mod.volumePrecisionMultiplier);
+                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"] * Mod.volumePrecisionMultiplier);
 
                     // Set filter lists
                     SetFilterListsFor(customItemWrapper, i);
                 }
 
                 // Pouch
-                if(itemType == 7)
+                if (itemType == 7)
                 {
                     // Set MainContainer renderers and their material
                     GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
@@ -1207,14 +1207,14 @@ namespace EFM
                     customItemWrapper.volumeIndicatorText = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).GetComponentInChildren<Text>();
                     customItemWrapper.volumeIndicator = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 3).gameObject;
                     customItemWrapper.containerItemRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
-                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"]* Mod.volumePrecisionMultiplier);
+                    customItemWrapper.maxVolume = (int)((float)defaultItemsData["ItemDefaults"][i]["ContainerProperties"]["MaxVolume"] * Mod.volumePrecisionMultiplier);
 
                     // Set filter lists
                     SetFilterListsFor(customItemWrapper, i);
                 }
 
                 // Ammobox
-                if(itemType == 8)
+                if (itemType == 8)
                 {
                     // Make sure keys use the poseoverride when grabbing, easier to add rounds to and round extract transform is positionned accordingly
                     itemPhysicalObject.UseGrabPointChild = false;
@@ -1270,7 +1270,7 @@ namespace EFM
                     // Add stacktriggers
                     Transform triggerRoot = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 1);
                     customItemWrapper.stackTriggers = new GameObject[3];
-                    for(int j=0; j < 3; ++j)
+                    for (int j = 0; j < 3; ++j)
                     {
                         GameObject triggerObject = triggerRoot.GetChild(j).gameObject;
                         EFM_StackTrigger currentStackTrigger = triggerObject.AddComponent<EFM_StackTrigger>();
@@ -1307,7 +1307,7 @@ namespace EFM
                             customItemWrapper.consumeEffects.Add(consumableEffect);
                             consumableEffect.delay = (float)damageEntry.Value["delay"];
                             consumableEffect.duration = (float)damageEntry.Value["duration"];
-                            if(damageEntry.Value["cost"] != null)
+                            if (damageEntry.Value["cost"] != null)
                             {
                                 consumableEffect.cost = (int)damageEntry.Value["cost"];
                             }
@@ -1373,8 +1373,8 @@ namespace EFM
                     customItemWrapper.effects = new List<EFM_Effect_Buff>();
                     if (defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"] != null)
                     {
-                        JArray buffs = (JArray)globalDB["config"]["Health"]["Stimulator"]["Buffs"][defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"].ToString()];
-                        foreach(JToken buff in buffs)
+                        JArray buffs = (JArray)globalDB["config"]["Health"]["Effects"]["Stimulator"]["Buffs"][defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"].ToString()];
+                        foreach (JToken buff in buffs)
                         {
                             EFM_Effect_Buff currentBuff = new EFM_Effect_Buff();
                             currentBuff.effectType = (EFM_Effect.EffectType)Enum.Parse(typeof(EFM_Effect.EffectType), buff["BuffType"].ToString());
@@ -1423,12 +1423,12 @@ namespace EFM
         private void AddCategories(List<string> parents)
         {
             // If necessary, init categ tree root with item ID
-            if(itemCategories == null)
+            if (itemCategories == null)
             {
                 itemCategories = new EFM_CategoryTreeNode(null, "54009119af1c881c07000029", "Item");
             }
             EFM_CategoryTreeNode currentParent = itemCategories;
-            for(int i = parents.Count - 2; i >= 0; i--)
+            for (int i = parents.Count - 2; i >= 0; i--)
             {
                 string ID = parents[i];
                 EFM_CategoryTreeNode foundChild = currentParent.FindChild(ID);
@@ -1477,7 +1477,19 @@ namespace EFM
                 {
                     if (itemMap.ContainsKey(whiteListElement.ToString()))
                     {
-                        customItemWrapper.whiteList.Add(itemMap[whiteListElement.ToString()]);
+                        ItemMapEntry entry = itemMap[whiteListElement.ToString()];
+                        switch (entry.mode)
+                        {
+                            case 0:
+                                customItemWrapper.whiteList.Add(entry.ID);
+                                break;
+                            case 1:
+                                customItemWrapper.whiteList.AddRange(entry.modulIDs);
+                                break;
+                            case 2:
+                                customItemWrapper.whiteList.Add(entry.otherModID);
+                                break;
+                        }
                     }
                     else
                     {
@@ -1491,7 +1503,19 @@ namespace EFM
                 {
                     if (itemMap.ContainsKey(blackListElement.ToString()))
                     {
-                        customItemWrapper.blackList.Add(itemMap[blackListElement.ToString()]);
+                        ItemMapEntry entry = itemMap[blackListElement.ToString()];
+                        switch (entry.mode)
+                        {
+                            case 0:
+                                customItemWrapper.blackList.Add(entry.ID);
+                                break;
+                            case 1:
+                                customItemWrapper.blackList.AddRange(entry.modulIDs);
+                                break;
+                            case 2:
+                                customItemWrapper.blackList.Add(entry.otherModID);
+                                break;
+                        }
                     }
                     else
                     {
@@ -1503,49 +1527,57 @@ namespace EFM
 
         private void LoadDB()
         {
-            areasDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/areas.json"));
-            localDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/local.json"));
+            areasDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Areas.json"));
+            localDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Locale.json"));
             ParseItemMap();
             traderBaseDB = new JObject[8];
             traderAssortDB = new JObject[8];
             traderCategoriesDB = new JArray[8];
-            for (int i=0; i < 8; ++i)
+            for (int i = 0; i < 8; ++i)
             {
                 string traderID = EFM_TraderStatus.IndexToID(i);
-                traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/base.json"));
-                if (i == 2)
-                {
-                    traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/" + traderID + "/assort_fullAssort.json"));
-                }
-                else
-                {
-                    traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/" + traderID + "/assort.json"));
-                }
-                traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/traders/"+traderID+"/categories.json"));
+                traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Traders/" + traderID + "/base.json"));
+                traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Traders/" + traderID + "/assort.json"));
+
+                // TODO: Review, we dont currently use the categories right now because I thought these were the categories of items we coudl sell
+                // to the trader but apparently they are jsut UI stuff, IDs only used for UI locale
+                // We need to find actual sell IDs or just keep using the current method we have of deciding whichi tems we can sell, which is
+                // that we can only sell to them items of type of items they sell themselves, unless its fence, to whom we can sell anything at reduced price
+                //traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Traders/" + traderID + "/categories.json"));
             }
-            globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/globals.json"));
+            globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Globals.json"));
             MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
             MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
-            questDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/quests.json"));
+            questDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Quests.json"));
             XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
-            mapData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/EscapeFromMeatovMapData.txt"));
+            mapData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/EscapeFromMeatovMapData.json"));
             locationsLootDB = new JObject[9];
-            string[] locationLootFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/Locations/");
+            locationsBaseDB = new JObject[9];
+            string[] locationLootFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/DB/Locations/loot");
+            string[] locationBaseFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/Locations/base");
             // TODO: 12.12? loc loot files are missing data for items that spawn with parent
             // Take factory day lootpoint (101)1736994 for example
-            for (int i = 0; i < locationLootFiles.Length; ++i)
+            for (int i=0; i < 12; ++i)
             {
-                locationsLootDB[i] = JObject.Parse(File.ReadAllText(locationLootFiles[i]));
+                string fileName = Mod.LocationIndexToDataName(i) + ".json";
+                foreach (string locationLootFile in locationLootFiles)
+                {
+                    if (locationLootFile.EndsWith(fileName))
+                    {
+                        locationsLootDB[i] = JObject.Parse(File.ReadAllText(locationLootFile));
+                    }
+                }
+                foreach (string locationBaseFile in locationBaseFiles)
+                {
+                    if (locationBaseFile.EndsWith(fileName))
+                    {
+                        locationsBaseDB[i] = JObject.Parse(File.ReadAllText(locationBaseFile));
+                    }
+                }
             }
-            locationsBaseDB = new JObject[9];
-            string[] locationBaseFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/Locations/base");
-            for (int i = 0; i < locationBaseFiles.Length; ++i)
-            {
-                locationsBaseDB[i] = JObject.Parse(File.ReadAllText(locationBaseFiles[i]));
-            }
-            lootContainerDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/LootContainer.json"));
+            lootContainerDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/LootContainer.json"));
             lootContainersByName = new Dictionary<string, JObject>();
-            foreach(JToken container in lootContainerDB)
+            foreach (JToken container in lootContainerDB)
             {
                 lootContainersByName.Add(container["_name"].ToString(), (JObject)container);
             }
@@ -1740,7 +1772,7 @@ namespace EFM
             vanillaItems = new Dictionary<string, EFM_VanillaItemDescriptor>();
             JArray vanillaItemsRaw = (JArray)defaultItemsData["VanillaItems"];
 
-            foreach(JToken vanillaItemRaw in vanillaItemsRaw)
+            foreach (JToken vanillaItemRaw in vanillaItemsRaw)
             {
                 string H3ID = vanillaItemRaw["H3ID"].ToString();
                 Mod.instance.LogInfo("Setting vanilla Item: " + H3ID);
@@ -1833,7 +1865,7 @@ namespace EFM
                 {
                     FVRFireArm asFireArm = physObj as FVRFireArm;
                     descriptor.compatibilityValue = 3;
-                    if (asFireArm.UsesMagazines) 
+                    if (asFireArm.UsesMagazines)
                     {
                         descriptor.usesAmmoContainers = true;
                         descriptor.usesMags = true;
@@ -1847,17 +1879,17 @@ namespace EFM
                     }
                     descriptor.roundType = asFireArm.RoundType;
                 }
-                else if(physObj is FVRFireArmMagazine)
+                else if (physObj is FVRFireArmMagazine)
                 {
                     descriptor.compatibilityValue = 1;
                     descriptor.roundType = (physObj as FVRFireArmMagazine).RoundType;
                 }
-                else if(physObj is FVRFireArmClip)
+                else if (physObj is FVRFireArmClip)
                 {
                     descriptor.compatibilityValue = 1;
                     descriptor.roundType = (physObj as FVRFireArmClip).RoundType;
                 }
-                else if(physObj is Speedloader)
+                else if (physObj is Speedloader)
                 {
                     descriptor.compatibilityValue = 1;
                     descriptor.roundType = (physObj as Speedloader).Chambers[0].Type;
@@ -1892,39 +1924,47 @@ namespace EFM
 
         private void ParseItemMap()
         {
-            itemMap = new Dictionary<string, string>();
+            itemMap = new Dictionary<string, ItemMapEntry>();
 
-            try
+            Dictionary<string, JObject> itemMapData = JObject.Parse(File.ReadAllText("BepinEx/Plugins/EscapeFromMeatov/DB/ItemMap.json")).ToObject<Dictionary<string, JObject>>();
+
+            foreach(KeyValuePair<string, JObject> item in itemMapData)
             {
-                string[] lines = System.IO.File.ReadAllLines("BepinEx/Plugins/EscapeFromMeatov/itemMap.txt");
+                ItemMapEntry newEntry = new ItemMapEntry();
+                newEntry.ID = item.Value["H3ID"].ToString();
+                newEntry.modulIDs = item.Value["Modul"].ToObject<string[]>();
+                newEntry.otherModID = item.Value["OtherMod"].ToString();
 
-                foreach (string line in lines)
+                bool gotModul = false;
+                if(newEntry.modulIDs.Length > 0)
                 {
-                    if (line.Length == 0 || line[0] == '#')
+                    bool missing = false;
+                    foreach(string modulID in newEntry.modulIDs)
                     {
-                        continue;
+                        // TODO: Review if this is the correct way of checking if the items are installed
+                        // Will have to check if the gun mods load their items in OD or somewhere else
+                        if (!IM.OD.ContainsKey(modulID))
+                        {
+                            missing = true;
+                            break;
+                        }
                     }
-
-                    string trimmedLine = line.Trim();
-                    string[] tokens = trimmedLine.Split(':');
-
-                    if (tokens.Length == 0)
+                    if (!missing)
                     {
-                        continue;
-                    }
-
-                    if (itemMap.ContainsKey(tokens[0]))
-                    {
-                        Logger.LogError("Key: " + tokens[0] + ":"+tokens[1]+" already exists in itemMap!");
-                    }
-                    else
-                    {
-                        itemMap.Add(tokens[0], tokens[1]);
+                        gotModul = true;
+                        newEntry.mode = 1;
                     }
                 }
+                if(!gotModul && newEntry.otherModID != null && !newEntry.otherModID.Equals(""))
+                {
+                    if (IM.OD.ContainsKey(newEntry.otherModID))
+                    {
+                        newEntry.mode = 2;
+                    }
+                }
+
+                itemMap.Add(item.Key, newEntry);
             }
-            catch (FileNotFoundException ex) { Logger.LogInfo("Couldn't find itemMap.txt. Error: " + ex.Message); }
-            catch (Exception ex) { Logger.LogInfo("Couldn't read itemMap.txt. Error: " + ex.Message); }
         }
 
         private GameObject MakeItemInteractiveSet(Transform root, FVRPhysicalObject itemPhysicalObject)
@@ -2010,7 +2050,7 @@ namespace EFM
             playerInventoryObjects.Clear();
 
             // Check equipment
-            foreach(EFM_EquipmentSlot equipSlot in equipmentSlots)
+            foreach (EFM_EquipmentSlot equipSlot in equipmentSlots)
             {
                 if (equipSlot.CurObject != null)
                 {
@@ -2019,7 +2059,7 @@ namespace EFM
             }
 
             // Check quickbelt slots, only the first 4, the rest will be processed directly from the equipped rig while processing equipment above
-            for(int i=0; i < 4; ++i)
+            for (int i = 0; i < 4; ++i)
             {
                 if (GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject != null)
                 {
@@ -2028,7 +2068,7 @@ namespace EFM
             }
 
             // Check right shoulder slot, left not necessary because already processed with backpack while processing equipment above
-            if(rightShoulderObject != null)
+            if (rightShoulderObject != null)
             {
                 AddToPlayerInventory(rightShoulderObject.transform, true);
             }
@@ -2198,27 +2238,27 @@ namespace EFM
             }
 
             // Check for more items that may be contained inside this one
-            if(customItemWrapper != null)
+            if (customItemWrapper != null)
             {
-                if(customItemWrapper.itemType == ItemType.Backpack || customItemWrapper.itemType == ItemType.Container || customItemWrapper.itemType == ItemType.Pouch)
+                if (customItemWrapper.itemType == ItemType.Backpack || customItemWrapper.itemType == ItemType.Container || customItemWrapper.itemType == ItemType.Pouch)
                 {
                     foreach (Transform innerItem in customItemWrapper.containerItemRoot)
                     {
                         AddToPlayerInventory(innerItem, updateTypeLists);
                     }
                 }
-                else if(customItemWrapper.itemType == ItemType.Rig || customItemWrapper.itemType == ItemType.ArmoredRig)
+                else if (customItemWrapper.itemType == ItemType.Rig || customItemWrapper.itemType == ItemType.ArmoredRig)
                 {
                     foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
                     {
-                        if(innerItem != null)
+                        if (innerItem != null)
                         {
                             AddToPlayerInventory(innerItem.transform, updateTypeLists);
                         }
                     }
                 }
             }
-            else if(vanillaItemDescriptor != null)
+            else if (vanillaItemDescriptor != null)
             {
                 if (physObj is FVRFireArm)
                 {
@@ -2267,13 +2307,13 @@ namespace EFM
                 }
             }
         }
-        
+
         public static void RemoveFromPlayerInventory(Transform item, bool updateTypeLists)
         {
             EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
             EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
-            if(physObj == null || physObj.ObjectWrapper == null)
+            if (physObj == null || physObj.ObjectWrapper == null)
             {
                 return; // Grenade pin for example, has no wrapper
             }
@@ -2288,7 +2328,7 @@ namespace EFM
                 Mod.instance.LogError("Attempting to remove " + itemID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
-            if(playerInventory[itemID] == 0)
+            if (playerInventory[itemID] == 0)
             {
                 playerInventory.Remove(itemID);
                 playerInventoryObjects.Remove(itemID);
@@ -2424,20 +2464,20 @@ namespace EFM
             }
 
             // Check for more items that may be contained inside this one
-            if(customItemWrapper != null)
+            if (customItemWrapper != null)
             {
-                if(customItemWrapper.itemType == ItemType.Backpack || customItemWrapper.itemType == ItemType.Container || customItemWrapper.itemType == ItemType.Pouch)
+                if (customItemWrapper.itemType == ItemType.Backpack || customItemWrapper.itemType == ItemType.Container || customItemWrapper.itemType == ItemType.Pouch)
                 {
                     foreach (Transform innerItem in customItemWrapper.containerItemRoot)
                     {
                         RemoveFromPlayerInventory(innerItem, updateTypeLists);
                     }
                 }
-                else if(customItemWrapper.itemType == ItemType.Rig || customItemWrapper.itemType == ItemType.ArmoredRig)
+                else if (customItemWrapper.itemType == ItemType.Rig || customItemWrapper.itemType == ItemType.ArmoredRig)
                 {
                     foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
                     {
-                        if(innerItem != null)
+                        if (innerItem != null)
                         {
                             RemoveFromPlayerInventory(innerItem.transform, updateTypeLists);
                         }
@@ -2497,7 +2537,7 @@ namespace EFM
         public static void AddExperience(int xp, int type = 0 /*0: General (kill, raid result, etc.), 1: Looting, 2: Healing, 3: Exploration*/, string notifMsg = null)
         {
             // Skip if in scav raid
-            if(Mod.currentLocationIndex == 2 && Mod.chosenCharIndex == 1)
+            if (Mod.currentLocationIndex == 2 && Mod.chosenCharIndex == 1)
             {
                 return;
             }
@@ -2511,7 +2551,7 @@ namespace EFM
             while (experience >= XPForNextLevel)
             {
                 ++level;
-                experience -= XPForNextLevel; 
+                experience -= XPForNextLevel;
                 XPForNextLevel = (int)XPPerLevel[level]["exp"];
             }
 
@@ -2534,10 +2574,10 @@ namespace EFM
                 }
             }
 
-            if(type == 1)
+            if (type == 1)
             {
                 Mod.lootingExp += xp;
-                if(notifMsg == null)
+                if (notifMsg == null)
                 {
                     playerStatusManager.AddNotification(string.Format("Gained {0} looting experience.", xp));
                 }
@@ -2546,7 +2586,7 @@ namespace EFM
                     playerStatusManager.AddNotification(string.Format(notifMsg, xp));
                 }
             }
-            else if(type == 2)
+            else if (type == 2)
             {
                 Mod.healingExp += xp;
                 if (notifMsg == null)
@@ -2558,7 +2598,7 @@ namespace EFM
                     playerStatusManager.AddNotification(string.Format(notifMsg, xp));
                 }
             }
-            else if(type == 3)
+            else if (type == 3)
             {
                 Mod.explorationExp += xp;
                 if (notifMsg == null)
@@ -2616,7 +2656,7 @@ namespace EFM
 
             float postLevel = Mod.skills[skillIndex].progress / 100;
 
-            if(postLevel != preLevel)
+            if (postLevel != preLevel)
             {
                 foreach (TraderTaskCondition condition in Mod.taskSkillConditionsBySkillIndex[skillIndex])
                 {
@@ -2649,7 +2689,7 @@ namespace EFM
 
                 Mod.playerStatusManager.UpdateSkillUI(3);
             }
-            else if(skillIndex == 1)
+            else if (skillIndex == 1)
             {
                 Mod.skillWeightLimitBonus += (postLevel - preLevel);
                 Mod.currentWeightLimit = (int)(Mod.baseWeightLimit + Mod.effectWeightLimitBonus + Mod.skillWeightLimitBonus);
@@ -2674,7 +2714,7 @@ namespace EFM
 
                 Mod.playerStatusManager.UpdateSkillUI(3);
             }
-            else if(skillIndex == 2)
+            else if (skillIndex == 2)
             {
                 float healthAmount = EFM_Skill.skillProgress * actualAmountToAdd;
                 Mod.skills[3].progress += healthAmount;
@@ -2696,7 +2736,7 @@ namespace EFM
 
                 Mod.playerStatusManager.UpdateSkillUI(3);
             }
-            else if(skillIndex == 7)
+            else if (skillIndex == 7)
             {
                 float charismaAmount = EFM_Skill.skillProgressPer * actualAmountToAdd;
                 Mod.skills[10].progress += charismaAmount;
@@ -2718,7 +2758,7 @@ namespace EFM
 
                 Mod.playerStatusManager.UpdateSkillUI(10);
             }
-            else if(skillIndex == 8)
+            else if (skillIndex == 8)
             {
                 float charismaAmount = EFM_Skill.skillProgressInt * actualAmountToAdd;
                 Mod.skills[10].progress += charismaAmount;
@@ -2740,7 +2780,7 @@ namespace EFM
 
                 Mod.playerStatusManager.UpdateSkillUI(10);
             }
-            else if(skillIndex == 9)
+            else if (skillIndex == 9)
             {
                 float charismaAmount = EFM_Skill.skillProgressAtn * actualAmountToAdd;
                 Mod.skills[10].progress += charismaAmount;
@@ -2914,7 +2954,7 @@ namespace EFM
             harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
 
             // MagRemoveRoundPatch
-            MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] {}, null);
+            MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
             MethodInfo magRemoveRoundPatchPrefix = typeof(MagRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo magRemoveRoundPatchPostfix = typeof(MagRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -3207,7 +3247,7 @@ namespace EFM
 
         public void OnSceneLoaded(Scene loadedScene, LoadSceneMode loadedSceneMode)
         {
-            if(loadedScene.name.Equals("MainMenu3"))
+            if (loadedScene.name.Equals("MainMenu3"))
             {
                 Mod.currentLocationIndex = -1;
                 inMeatovScene = false;
@@ -3321,7 +3361,7 @@ namespace EFM
 
         private void UnsecureObjects()
         {
-            if(securedObjects == null)
+            if (securedObjects == null)
             {
                 securedObjects = new List<GameObject>();
                 return;
@@ -3337,7 +3377,7 @@ namespace EFM
             {
                 // Make sure that all scav return items are in their proper return nodes
                 Transform returnNodeParent = Mod.currentBaseManager.transform.GetChild(1).GetChild(25);
-                for(int i=0; i < 15; ++i)
+                for (int i = 0; i < 15; ++i)
                 {
                     FVRPhysicalObject itemPhysObj = Mod.scavRaidReturnItems[i].GetComponent<FVRPhysicalObject>();
                     itemPhysObj.StoreAndDestroyRigidbody();
@@ -3346,7 +3386,7 @@ namespace EFM
                     Mod.scavRaidReturnItems[i].transform.position = currentNode.position;
                     Mod.scavRaidReturnItems[i].transform.rotation = currentNode.rotation;
 
-                    if(i == 8) // Rig
+                    if (i == 8) // Rig
                     {
                         EFM_CustomItemWrapper CIW = Mod.scavRaidReturnItems[i].GetComponent<EFM_CustomItemWrapper>();
                         if (!CIW.open)
@@ -3539,7 +3579,7 @@ namespace EFM
                 case "Tactics":
                     return 63;
                 default:
-                    Mod.instance.LogError("SkillNameToIndex received name: "+name);
+                    Mod.instance.LogError("SkillNameToIndex received name: " + name);
                     return 0;
             }
         }
@@ -3677,7 +3717,7 @@ namespace EFM
                 case 63:
                     return "Tactics";
                 default:
-                    Mod.instance.LogError("SkillIndexToName received index: "+index);
+                    Mod.instance.LogError("SkillIndexToName received index: " + index);
                     return "";
             }
         }
@@ -3703,6 +3743,38 @@ namespace EFM
                 default:
                     return "None";
             }
+        }
+
+        public static string LocationIndexToDataName(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return "factory4_day";
+                case 1:
+                    return "bigmap";
+                case 2:
+                    return "interchange";
+                case 3:
+                    return "laboratory";
+                case 4:
+                    return "woods";
+                case 5:
+                    return "shoreline";
+                case 6:
+                    return "rezervbase";
+                case 7:
+                    return "lighthouse";
+                case 8:
+                    return "tarkovstreets";
+                case 9:
+                    return "suburbs";
+                case 10:
+                    return "terminal";
+                case 11:
+                    return "town";
+            }
+            return null;
         }
 
         public static string FormatTimeString(float time)
@@ -3750,6 +3822,15 @@ namespace EFM
             // Getting this far would mean that the item's ID nor any of its ancestors are in the whitelist, so doesn't fit
             return false;
         }
+    }
+
+    public class ItemMapEntry
+    {
+        public int mode = 0; // 0 vanilla, 1 Modul, 2 other mod
+
+        public string ID;
+        public string[] modulIDs;
+        public string otherModID;
     }
 
     #region GamePatches

@@ -429,7 +429,19 @@ namespace EFM
                     string itemID = null;
                     if (Mod.itemMap.ContainsKey(originalID))
                     {
-                        itemID = Mod.itemMap[originalID];
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                itemID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                itemID = itemMapEntry.otherModID;
+                                break;
+                        }
                     }
                     else
                     {
@@ -471,7 +483,19 @@ namespace EFM
                     string itemID = null;
                     if (Mod.itemMap.ContainsKey(originalID))
                     {
-                        itemID = Mod.itemMap[originalID];
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                itemID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                itemID = itemMapEntry.otherModID;
+                                break;
+                        }
                     }
                     else
                     {
@@ -3985,7 +4009,20 @@ namespace EFM
                         string headEquipID = possibleHeadEquip[UnityEngine.Random.Range(0, possibleHeadEquip.Count)].ToString();
                         if (Mod.itemMap.ContainsKey(headEquipID))
                         {
-                            string actualHeadEquipID = Mod.itemMap[headEquipID];
+                            string actualHeadEquipID = null;
+                            ItemMapEntry itemMapEntry = Mod.itemMap[headEquipID];
+                            switch (itemMapEntry.mode)
+                            {
+                                case 0:
+                                    actualHeadEquipID = itemMapEntry.ID;
+                                    break;
+                                case 1:
+                                    actualHeadEquipID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                    break;
+                                case 2:
+                                    actualHeadEquipID = itemMapEntry.otherModID;
+                                    break;
+                            }
                             Mod.instance.LogInfo("\t\t\tChosen ID: " + actualHeadEquipID);
 
                             // Add sosig outfit item if applicable
@@ -4055,7 +4092,20 @@ namespace EFM
                     string rigID = possibleRigs[UnityEngine.Random.Range(0, possibleRigs.Count)].ToString();
                     if (Mod.itemMap.ContainsKey(rigID))
                     {
-                        string actualRigID = Mod.itemMap[rigID];
+                        string actualRigID = null;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[rigID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                actualRigID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                actualRigID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                actualRigID = itemMapEntry.otherModID;
+                                break;
+                        }
                         Mod.instance.LogInfo("\t\tChosen ID: " + actualRigID);
                         newAISpawn.inventory.rig = actualRigID;
 
@@ -4114,7 +4164,20 @@ namespace EFM
                         string armorID = possibleArmors[UnityEngine.Random.Range(0, possibleArmors.Count)].ToString();
                         if (Mod.itemMap.ContainsKey(armorID))
                         {
-                            string actualArmorID = Mod.itemMap[armorID];
+                            string actualArmorID = null;
+                            ItemMapEntry itemMapEntry = Mod.itemMap[armorID];
+                            switch (itemMapEntry.mode)
+                            {
+                                case 0:
+                                    actualArmorID = itemMapEntry.ID;
+                                    break;
+                                case 1:
+                                    actualArmorID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                    break;
+                                case 2:
+                                    actualArmorID = itemMapEntry.otherModID;
+                                    break;
+                            }
                             Mod.instance.LogInfo("\t\tChosen ID: " + actualArmorID);
                             newAISpawn.inventory.armor = actualArmorID;
 
@@ -4156,7 +4219,20 @@ namespace EFM
                     string backpackID = possibleBackpacks[UnityEngine.Random.Range(0, possibleBackpacks.Count)].ToString();
                     if (Mod.itemMap.ContainsKey(backpackID))
                     {
-                        string actualBackpackID = Mod.itemMap[backpackID];
+                        string actualBackpackID = null;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[backpackID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                actualBackpackID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                actualBackpackID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                actualBackpackID = itemMapEntry.otherModID;
+                                break;
+                        }
                         Mod.instance.LogInfo("\t\tChosen ID: " + actualBackpackID);
                         newAISpawn.inventory.backpack = actualBackpackID;
 
@@ -4206,7 +4282,20 @@ namespace EFM
                     string PWID = possiblePW[UnityEngine.Random.Range(0, possiblePW.Count)].ToString();
                     if (Mod.itemMap.ContainsKey(PWID))
                     {
-                        string actualPWID = Mod.itemMap[PWID];
+                        string actualPWID = null;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[PWID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                actualPWID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                actualPWID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                actualPWID = itemMapEntry.otherModID;
+                                break;
+                        }
                         Mod.instance.LogInfo("\t\tChosen ID: " + actualPWID);
                         newAISpawn.inventory.primaryWeapon = actualPWID;
 
@@ -4249,7 +4338,20 @@ namespace EFM
                     string SWID = possibleSW[UnityEngine.Random.Range(0, possibleSW.Count)].ToString();
                     if (Mod.itemMap.ContainsKey(SWID))
                     {
-                        string actualSWID = Mod.itemMap[SWID];
+                        string actualSWID = null;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[SWID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                actualSWID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                actualSWID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                actualSWID = itemMapEntry.otherModID;
+                                break;
+                        }
                         Mod.instance.LogInfo("\t\tChosen ID: " + actualSWID);
                         newAISpawn.inventory.secondaryWeapon = actualSWID;
 
@@ -4292,7 +4394,20 @@ namespace EFM
                     string holsterID = possibleHolster[UnityEngine.Random.Range(0, possibleHolster.Count)].ToString();
                     if (Mod.itemMap.ContainsKey(holsterID))
                     {
-                        string actualHolsterID = Mod.itemMap[holsterID];
+                        string actualHolsterID = null;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[holsterID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                actualHolsterID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                actualHolsterID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                actualHolsterID = itemMapEntry.otherModID;
+                                break;
+                        }
                         Mod.instance.LogInfo("\t\tChosen ID: " + actualHolsterID);
                         newAISpawn.inventory.holster = actualHolsterID;
 
@@ -4345,7 +4460,20 @@ namespace EFM
                     string scabbardID = possibleScabbard[UnityEngine.Random.Range(0, possibleScabbard.Count)].ToString();
                     if (Mod.itemMap.ContainsKey(scabbardID))
                     {
-                        string actualScabbardID = Mod.itemMap[scabbardID];
+                        string actualScabbardID = null;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[scabbardID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                actualScabbardID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                actualScabbardID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                actualScabbardID = itemMapEntry.otherModID;
+                                break;
+                        }
                         Mod.instance.LogInfo("\t\tChosen ID: " + actualScabbardID);
                         newAISpawn.inventory.generic.Add(actualScabbardID);
 
@@ -4450,7 +4578,20 @@ namespace EFM
                 {
                     if (Mod.itemMap.ContainsKey(itemID))
                     {
-                        string actualItemID = Mod.itemMap[itemID];
+                        string actualItemID = null;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[itemID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                actualItemID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                actualItemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                actualItemID = itemMapEntry.otherModID;
+                                break;
+                        }
                         GameObject itemPrefab = null;
                         bool custom = false;
                         if (int.TryParse(actualItemID, out int parseResult))
@@ -4725,7 +4866,20 @@ namespace EFM
             {
                 for (int i = 0; i < specialItemMax; ++i)
                 {
-                    string specialItemID = Mod.itemMap[possibleSpecialItems[UnityEngine.Random.Range(0, possibleSpecialItems.Count)]];
+                    string specialItemID = null;
+                    ItemMapEntry itemMapEntry = Mod.itemMap[possibleSpecialItems[UnityEngine.Random.Range(0, possibleSpecialItems.Count)]];
+                    switch (itemMapEntry.mode)
+                    {
+                        case 0:
+                            specialItemID = itemMapEntry.ID;
+                            break;
+                        case 1:
+                            specialItemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                            break;
+                        case 2:
+                            specialItemID = itemMapEntry.otherModID;
+                            break;
+                    }
                     object[] specialItemData = GetItemData(specialItemID);
 
                     if (i >= specialItemMin && UnityEngine.Random.value > (float.Parse(specialItemData[2] as string) / 100))
@@ -4862,7 +5016,20 @@ namespace EFM
                         string modID = modEntryToUse.Value[UnityEngine.Random.Range(0, modEntryToUse.Value.Count)];
                         if (Mod.itemMap.ContainsKey(modID))
                         {
-                            string actualModID = Mod.itemMap[modID];
+                            string actualModID = null;
+                            ItemMapEntry itemMapEntry = Mod.itemMap[modID];
+                            switch (itemMapEntry.mode)
+                            {
+                                case 0:
+                                    actualModID = itemMapEntry.ID;
+                                    break;
+                                case 1:
+                                    actualModID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                    break;
+                                case 2:
+                                    actualModID = itemMapEntry.otherModID;
+                                    break;
+                            }
                             if (modEntryToUse.Key.Equals("mod_magazine"))
                             {
                                 ammoContainerID = actualModID;

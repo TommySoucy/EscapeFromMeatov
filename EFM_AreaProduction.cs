@@ -29,7 +29,7 @@ namespace EFM
     {
         public bool resource;
 
-        public string ID;
+        public string[] IDs;
         public int count; // A "Resource" type requirement will have a "resource" property instead of count
         public bool isFunctional; // This means the item could have contents inside? or is composed of multiple items? firearms for example
     }

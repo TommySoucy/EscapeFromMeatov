@@ -28,7 +28,7 @@ namespace EFM
         public float consumptionTimer;
         public GameObject[] slotItems; // Slots that could contain items, like generator that could have gas cans
         public List<List<EFM_AreaSlot>> slots;
-        public Dictionary<string, EFM_AreaProduction> productions; // Productions that can be activated on this area
+        public Dictionary<string, Dictionary<string, EFM_AreaProduction>> productionsByItemIDByProdID; // Productions that can be activated on this area
         public Dictionary<string, EFM_AreaProduction> activeProductions = new Dictionary<string, EFM_AreaProduction>(); // Currently active productions
         public List<EFM_ScavCaseProduction> activeScavCaseProductions;
         public float constructionTimer; // How much time is actually left on the construction
@@ -70,7 +70,7 @@ namespace EFM
 
         public void Init()
         {
-            needsFuel = (bool)Mod.areasDB["areaDefaults"][areaIndex]["needsFuel"];
+            needsFuel = (bool)Mod.areasDB[areaIndex]["needsFuel"];
 
             // Init each level's upgrade check processors
             bool lastLevelFound = false;
@@ -561,7 +561,7 @@ namespace EFM
                                     }
                                     else
                                     {
-                                        AnvilManager.Run(SpawnVanillaItem(itemID, 1, outputVolumeCollider, "scav"));
+                                        AnvilManager.Run(SpawnVanillaItem(itemID, 1, outputVolumeCollider, "scav", null));
                                     }
                                 }
                             }
@@ -643,17 +643,20 @@ namespace EFM
                         // Check if currently producing and how many productions are done and waiting to be collected
                         int doneCount = 0;
                         int totalCount = 0;
-                        foreach (KeyValuePair<string, EFM_AreaProduction> production in productions)
+                        foreach (KeyValuePair<string, Dictionary<string, EFM_AreaProduction>> productionEntry in productionsByItemIDByProdID)
                         {
-                            if (production.Value.active)
+                            foreach (KeyValuePair<string, EFM_AreaProduction> production in productionEntry.Value)
                             {
-                                ++totalCount;
-                            }
-                            else
-                            {
-                                if (production.Value.productionCount > 0)
+                                if (production.Value.active)
                                 {
-                                    ++doneCount;
+                                    ++totalCount;
+                                }
+                                else
+                                {
+                                    if (production.Value.productionCount > 0)
+                                    {
+                                        ++doneCount;
+                                    }
                                 }
                             }
                         }
@@ -702,17 +705,20 @@ namespace EFM
                     // Check if currently producing and how many productions are done and waiting to be collected
                     int doneCount = 0;
                     int totalCount = 0;
-                    foreach (KeyValuePair<string, EFM_AreaProduction> production in productions)
+                    foreach (KeyValuePair<string, Dictionary<string, EFM_AreaProduction>> productionEntry in productionsByItemIDByProdID)
                     {
-                        if (production.Value.active)
+                        foreach (KeyValuePair<string, EFM_AreaProduction> production in productionEntry.Value)
                         {
-                            ++totalCount;
-                        }
-                        else
-                        {
-                            if (production.Value.productionCount > 0)
+                            if (production.Value.active)
                             {
-                                ++doneCount;
+                                ++totalCount;
+                            }
+                            else
+                            {
+                                if (production.Value.productionCount > 0)
+                                {
+                                    ++doneCount;
+                                }
                             }
                         }
                     }
@@ -1007,7 +1013,7 @@ namespace EFM
 
                     // Full middle
                     areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_"+areaIndex+"_stage_1_description"].ToString();
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][1]["bonuses"], "FUTURE BONUSES");
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB[areaIndex]["stages"]["1"]["bonuses"], "FUTURE BONUSES");
                     
                     // Full middle 2
                     // Nothing, when constructing the first level we show that description and future bonuses on middle
@@ -1041,12 +1047,12 @@ namespace EFM
 
                     // Full middle
                     areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_"+level+"_description"].ToString();
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level]["bonuses"], "CURRENT BONUSES");
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB[areaIndex]["stages"][level.ToString()]["bonuses"], "CURRENT BONUSES");
                     SetProductions();
 
                     // Full middle 2
                     areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_" + (level + 1) + "_description"].ToString();
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(3), false, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["bonuses"], "FUTURE BONUSES");
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(3), false, Mod.areasDB[areaIndex]["stages"][(level + 1).ToString()]["bonuses"], "FUTURE BONUSES");
 
                     // Full bottom
                     Transform bottom = areaCanvas.transform.GetChild(1).GetChild(3);
@@ -1123,7 +1129,7 @@ namespace EFM
                 else
                 {
                     Mod.instance.LogInfo("\t\tgen not running");
-                    if (level > 0 && (bool)Mod.areasDB["areaDefaults"][areaIndex]["needsFuel"])
+                    if (level > 0 && (bool)Mod.areasDB[areaIndex]["needsFuel"])
                     {
                         Mod.instance.LogInfo("\t\t\tbut needs fuel");
                         areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(8).gameObject.SetActive(true); // Out of fuel icon
@@ -1190,8 +1196,8 @@ namespace EFM
                     // Full middle
                     Mod.instance.LogInfo("\t\t\t0");
                     areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_1_description"].ToString();
-                    SetRequirements(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(2), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][1]["requirements"]);
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][1]["bonuses"], "FUTURE BONUSES");
+                    SetRequirements(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(2), true, Mod.areasDB[areaIndex]["stages"]["1"]["requirements"]);
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB[areaIndex]["stages"]["1"]["bonuses"], "FUTURE BONUSES");
                     SetProductions();
                     Mod.instance.LogWarning("MIDDLEHEIGHT = " + middleHeight);
                     if (middleHeight > 360)
@@ -1246,7 +1252,7 @@ namespace EFM
                     else
                     {
                         Mod.instance.LogInfo("\t\t\t\treqs not fulfilled");
-                        if ((bool)Mod.areasDB["areaDefaults"][areaIndex]["needsFuel"] && !generatorRunning)
+                        if ((bool)Mod.areasDB[areaIndex]["needsFuel"] && !generatorRunning)
                         {
                             Mod.instance.LogInfo("\t\t\t\t\tneed fuel but gen not running");
                             areaCanvas.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = "Out of Fuel"; // Status text
@@ -1276,16 +1282,17 @@ namespace EFM
                     // Middle will show current level (no requirements) and middle 2 will show next level (with requirements), if there is a next level
                     //Full middle
                     areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_" + level + "_description"].ToString();
-                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level]["bonuses"], "CURRENT BONUSES");
+                    SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB[areaIndex]["stages"][level.ToString()]["bonuses"], "CURRENT BONUSES");
                     SetProductions();
 
                     // Full middle 2, and full bottom and bottom 2
-                    if (Mod.areasDB["areaDefaults"][areaIndex].Value<JArray>("stages").Count >= level) // Check if we have a next level
+                    Dictionary<string, JObject> stages = Mod.areasDB[areaIndex]["stages"].ToObject<Dictionary<string, JObject>>();
+                    if (stages.Count >= level) // Check if we have a next level
                     {
                         Mod.instance.LogInfo("\t\thas a next level");
                         areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_" + (level + 1) + "_description"].ToString();
-                        SetRequirements(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(1), false, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["requirements"]);
-                        SetBonuses(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(2), false, Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["bonuses"], "FUTURE BONUSES");
+                        SetRequirements(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(1), false, Mod.areasDB[areaIndex]["stages"][(level + 1).ToString()]["requirements"]);
+                        SetBonuses(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(2), false, Mod.areasDB[areaIndex]["stages"][(level + 1).ToString()]["bonuses"], "FUTURE BONUSES");
                         if (middle2Height > 350)
                         {
                             areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject.SetActive(true);
@@ -1489,17 +1496,20 @@ namespace EFM
         {
             Mod.instance.LogInfo("SetProductions called on "+areaIndex+" at level "+level);
             // Reset productions
-            if (this.productions == null)
+            if (this.productionsByItemIDByProdID == null)
             {
-                this.productions = new Dictionary<string, EFM_AreaProduction>();
+                this.productionsByItemIDByProdID = new Dictionary<string, Dictionary<string, EFM_AreaProduction>>();
             }
             else
             {
-                foreach (KeyValuePair<string, EFM_AreaProduction> production in this.productions)
+                foreach (KeyValuePair<string, Dictionary<string, EFM_AreaProduction>> productionEntry in this.productionsByItemIDByProdID)
                 {
-                    Destroy(production.Value.gameObject);
+                    foreach (KeyValuePair<string, EFM_AreaProduction> production in productionEntry.Value)
+                    {
+                        Destroy(production.Value.gameObject);
+                    }
                 }
-                this.productions.Clear();
+                this.productionsByItemIDByProdID.Clear();
             }
             if (farmingViewByItemID == null)
             {
@@ -1517,7 +1527,7 @@ namespace EFM
             JArray productions = new JArray();
             for (int i = 0; i <= level; ++i)
             {
-                foreach(JToken production in Mod.areasDB["areaDefaults"][areaIndex]["stages"][i]["productions"] as JArray)
+                foreach(JToken production in Mod.areasDB[areaIndex]["stages"][i.ToString()]["productions"] as JArray)
                 {
                     productions.Add(production);
                 }
@@ -1636,12 +1646,38 @@ namespace EFM
                 Mod.instance.LogInfo("Area does not have productions");
                 loadedProductions = new JArray();
             }
-            Dictionary<string, JToken> productionsDict = new Dictionary<string, JToken>();
+            Dictionary<string, Dictionary<string, JToken>> productionsDictByItemIDByProdID = new Dictionary<string, Dictionary<string, JToken>>();
             Mod.instance.LogInfo("Loading productions");
             foreach (JToken loadedProduction in loadedProductions)
             {
-                Mod.instance.LogInfo("Loading production "+ loadedProduction["_id"].ToString());
-                productionsDict.Add(loadedProduction["_id"].ToString(), loadedProduction);
+                string[] endProducts = null;
+                ItemMapEntry itemMapEntry = Mod.itemMap[loadedProduction["endProduct"].ToString()];
+                switch (itemMapEntry.mode)
+                {
+                    case 0:
+                        endProducts = new string[] { itemMapEntry.ID };
+                        break;
+                    case 1:
+                        endProducts = itemMapEntry.modulIDs;
+                        break;
+                    case 2:
+                        endProducts = new string[] { itemMapEntry.otherModID };
+                        break;
+                }
+
+                foreach(string endProduct in endProducts)
+                {
+                    if (productionsDictByItemIDByProdID.ContainsKey(loadedProduction["_id"].ToString()))
+                    {
+                        productionsDictByItemIDByProdID[loadedProduction["_id"].ToString()].Add(endProduct, loadedProduction);
+                    }
+                    else
+                    {
+                        Dictionary<string, JToken> newDict = new Dictionary<string, JToken>();
+                        newDict.Add(endProduct, loadedProduction);
+                        productionsDictByItemIDByProdID.Add(loadedProduction["_id"].ToString(), newDict);
+                    }
+                }
             }
             Mod.instance.LogInfo("Done loading productions");
 
@@ -1664,342 +1700,425 @@ namespace EFM
                 GameObject newProduceView = null;
                 if ((bool)production["continuous"])
                 {
-                    Mod.instance.LogInfo("2");
-                    newFarmingView = Instantiate(farmingView, productionsParent);
-                    middleHeight += 99.8f; // farming view height
-                    if (!firstProduction)
+                    string[] endProducts = null;
+                    ItemMapEntry itemMapEntry = Mod.itemMap[production["endProduct"].ToString()];
+                    switch (itemMapEntry.mode)
                     {
-                        middleHeight += 18; // spacing
+                        case 0:
+                            endProducts = new string[] { itemMapEntry.ID };
+                            break;
+                        case 1:
+                            endProducts = itemMapEntry.modulIDs;
+                            break;
+                        case 2:
+                            endProducts = new string[] { itemMapEntry.otherModID };
+                            break;
                     }
-                    productionScript = newFarmingView.AddComponent<EFM_AreaProduction>();
 
-                    Mod.instance.LogInfo("2");
-                    productionScript.continuous = true;
-                    productionScript.ID = production["_id"].ToString();
-                    productionScript.productionTime = (float)production["productionTime"];
-                    productionScript.endProduct = Mod.itemMap[production["endProduct"].ToString()];
-                    productionScript.count = (int)production["count"];
-                    productionScript.productionLimitCount = (int)production["productionLimitCount"];
-
-                    Mod.instance.LogInfo("2");
-                    // Init UI
-                    if (Mod.itemIcons.ContainsKey(productionScript.endProduct))
+                    foreach (string endProduct in endProducts)
                     {
-                        newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
-                    }
-                    else
-                    {
-                        AnvilManager.Run(Mod.SetVanillaIcon(productionScript.endProduct, newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).GetComponent<Image>()));
-                    }
-                    newFarmingView.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewSetAllClick(productionScript.ID); });
-                    newFarmingView.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewSetOneClick(productionScript.ID); });
-                    newFarmingView.transform.GetChild(1).GetChild(1).GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewRemoveOneClick(productionScript.ID); });
-                    newFarmingView.transform.GetChild(1).GetChild(5).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnProductionGetItemsClick(productionScript.ID); });
-
-                    // Setup end product itemIcon
-                    EFM_ItemIcon currentItemIconScript = newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
-                    currentItemIconScript.itemID = productionScript.endProduct;
-                    currentItemIconScript.itemName = Mod.itemNames[productionScript.endProduct];
-                    currentItemIconScript.description = Mod.itemDescriptions[productionScript.endProduct];
-                    currentItemIconScript.weight = Mod.itemWeights[productionScript.endProduct];
-                    currentItemIconScript.volume = Mod.itemVolumes[productionScript.endProduct];
-
-                    Mod.instance.LogInfo("2");
-                    // Depending on save data
-                    // If data about this production has been saved
-                    if (productionsDict.ContainsKey(productionScript.ID))
-                    {
-                        Mod.instance.LogInfo("3");
-                        activeProductions.Add(productionScript.ID, productionScript);
-
-                        productionScript.active = true;
-                        productionScript.timeLeft = (float)productionsDict[productionScript.ID]["timeLeft"] - secondsSinceSave;
-                        productionScript.productionCount = (int)productionsDict[productionScript.ID]["productionCount"];
-
-                        Mod.instance.LogInfo("3");
-                        // Set production count
-                        newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionScript.productionCount.ToString() + "/" + productionScript.productionLimitCount;
-
-                        Mod.instance.LogInfo("3");
-                        // Set installed item count
-                        int installedCount = GetFilledSlotCount();
-                        newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = installedCount.ToString();
-
-                        Mod.instance.LogInfo("3");
-                        // It is possible we have an unclaimed amount of item
-                        if (productionScript.productionCount > 0)
+                        Mod.instance.LogInfo("2");
+                        newFarmingView = Instantiate(farmingView, productionsParent);
+                        middleHeight += 99.8f; // farming view height
+                        if (!firstProduction)
                         {
-                            // Activate get items button
-                            newFarmingView.transform.GetChild(1).GetChild(5).GetChild(0).gameObject.SetActive(true);
+                            middleHeight += 18; // spacing
+                        }
+                        productionScript = newFarmingView.AddComponent<EFM_AreaProduction>();
+
+                        Mod.instance.LogInfo("2");
+                        productionScript.continuous = true;
+                        productionScript.ID = production["_id"].ToString();
+                        productionScript.productionTime = (float)production["productionTime"];
+                        productionScript.endProduct = endProduct;
+                        productionScript.count = (int)production["count"];
+                        productionScript.productionLimitCount = (int)production["productionLimitCount"];
+
+                        Mod.instance.LogInfo("2");
+                        // Init UI
+                        if (Mod.itemIcons.ContainsKey(productionScript.endProduct))
+                        {
+                            newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(productionScript.endProduct, newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).GetComponent<Image>()));
+                        }
+                        newFarmingView.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewSetAllClick(productionScript.ID, endProduct); });
+                        newFarmingView.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewSetOneClick(productionScript.ID, endProduct); });
+                        newFarmingView.transform.GetChild(1).GetChild(1).GetChild(2).GetComponent<Button>().onClick.AddListener(() => { OnFarmingViewRemoveOneClick(productionScript.ID, endProduct); });
+                        newFarmingView.transform.GetChild(1).GetChild(5).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnProductionGetItemsClick(productionScript.ID, endProduct); });
+
+                        // Setup end product itemIcon
+                        EFM_ItemIcon currentItemIconScript = newFarmingView.transform.GetChild(1).GetChild(4).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                        currentItemIconScript.itemID = productionScript.endProduct;
+                        currentItemIconScript.itemName = Mod.itemNames[productionScript.endProduct];
+                        currentItemIconScript.description = Mod.itemDescriptions[productionScript.endProduct];
+                        currentItemIconScript.weight = Mod.itemWeights[productionScript.endProduct];
+                        currentItemIconScript.volume = Mod.itemVolumes[productionScript.endProduct];
+
+                        Mod.instance.LogInfo("2");
+                        // Depending on save data
+                        // If data about this production has been saved
+                        if (productionsDictByItemIDByProdID.ContainsKey(productionScript.ID) && productionsDictByItemIDByProdID[productionScript.ID].ContainsKey(endProduct))
+                        {
+                            Mod.instance.LogInfo("3");
+                            activeProductions.Add(productionScript.ID, productionScript);
+
+                            productionScript.active = true;
+                            productionScript.timeLeft = (float)productionsDictByItemIDByProdID[productionScript.ID][endProduct]["timeLeft"] - secondsSinceSave;
+                            productionScript.productionCount = (int)productionsDictByItemIDByProdID[productionScript.ID][endProduct]["productionCount"];
+
+                            Mod.instance.LogInfo("3");
+                            // Set production count
+                            newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionScript.productionCount.ToString() + "/" + productionScript.productionLimitCount;
+
+                            Mod.instance.LogInfo("3");
+                            // Set installed item count
+                            int installedCount = GetFilledSlotCount();
+                            newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = installedCount.ToString();
+
+                            Mod.instance.LogInfo("3");
+                            // It is possible we have an unclaimed amount of item
+                            if (productionScript.productionCount > 0)
+                            {
+                                // Activate get items button
+                                newFarmingView.transform.GetChild(1).GetChild(5).GetChild(0).gameObject.SetActive(true);
+                            }
+
+                            Mod.instance.LogInfo("3");
+                            // If have necessary items to produce and not at production limit yet
+                            if (installedCount > 0 && productionScript.productionCount < productionScript.productionLimitCount)
+                            {
+                                // Activate production status
+                                newFarmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
+
+                                // Also set initial string
+                                bool needsFuel = (bool)Mod.areasDB[areaIndex]["needsFuel"];
+                                if ((needsFuel && generatorRunning) || !needsFuel)
+                                {
+                                    // Production is in progress
+                                    int[] formattedTimeLeft = FormatTime(productionScript.timeLeft);
+                                    newFarmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                                }
+                                else
+                                {
+                                    // Production is paused
+                                    int[] formattedTimeLeft = FormatTime(productionScript.timeLeft);
+                                    newFarmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Paused\n({0:00}:{1:00}:{2:00})", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                                }
+                            }
                         }
 
-                        Mod.instance.LogInfo("3");
-                        // If have necessary items to produce and not at production limit yet
-                        if (installedCount > 0 && productionScript.productionCount < productionScript.productionLimitCount)
+                        // Fill requirements
+                        productionScript.requirements = new List<AreaProductionRequirement>();
+                        foreach (JObject requirement in production["requirements"])
                         {
-                            // Activate production status
-                            newFarmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
+                            Mod.instance.LogInfo("2");
+                            if (requirement["type"].ToString().Equals("Resource"))
+                            {
+                                Mod.instance.LogInfo("3");
+                                AreaProductionRequirement currentRequirement = new AreaProductionRequirement();
+                                currentRequirement.resource = true;
+                                ItemMapEntry requirementItemMapEntry = Mod.itemMap[requirement["templateId"].ToString()];
+                                switch (requirementItemMapEntry.mode)
+                                {
+                                    case 0:
+                                        currentRequirement.IDs = new string[] { requirementItemMapEntry.ID };
+                                        break;
+                                    case 1:
+                                        currentRequirement.IDs = requirementItemMapEntry.modulIDs;
+                                        break;
+                                    case 2:
+                                        currentRequirement.IDs = new string[] { requirementItemMapEntry.otherModID };
+                                        break;
+                                }
+                                if (Mod.itemIcons.ContainsKey(currentRequirement.IDs[0]))
+                                {
+                                    Sprite icon = Mod.itemIcons[currentRequirement.IDs[0]];
+                                    newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
+                                    newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
+                                }
+                                else
+                                {
+                                    AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.IDs[0], newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>()));
+                                    AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.IDs[0], newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+                                }
+                                currentRequirement.count = (int)requirement["resource"];
 
-                            // Also set initial string
-                            bool needsFuel = (bool)Mod.areasDB["areaDefaults"][areaIndex]["needsFuel"];
-                            if ((needsFuel && generatorRunning) || !needsFuel)
-                            {
-                                // Production is in progress
-                                int[] formattedTimeLeft = FormatTime(productionScript.timeLeft);
-                                newFarmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                                // Setup farm cost itemIcon
+                                string itemName = Mod.itemNames[currentRequirement.IDs[0]];
+                                string itemDescription = Mod.itemDescriptions[currentRequirement.IDs[0]];
+                                int itemWeight = Mod.itemWeights[currentRequirement.IDs[0]];
+                                int itemVolume = Mod.itemVolumes[currentRequirement.IDs[0]];
+                                EFM_ItemIcon costItemIconScript = newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                                costItemIconScript.itemID = currentRequirement.IDs[0];
+                                costItemIconScript.itemName = itemName;
+                                costItemIconScript.description = itemDescription;
+                                costItemIconScript.weight = itemWeight;
+                                costItemIconScript.volume = itemVolume;
+                                EFM_ItemIcon costInstalledItemIconScript = newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                                costInstalledItemIconScript.itemID = currentRequirement.IDs[0];
+                                costInstalledItemIconScript.itemName = itemName;
+                                costInstalledItemIconScript.description = itemDescription;
+                                costInstalledItemIconScript.weight = itemWeight;
+                                costInstalledItemIconScript.volume = itemVolume;
+
+                                Mod.instance.LogInfo("3");
+                                productionScript.requirements.Add(currentRequirement);
+
+                                Mod.instance.LogInfo("3");
+                                int amountInInventory = 0;
+                                foreach (string possibleReqItem in currentRequirement.IDs)
+                                {
+                                    amountInInventory += (Mod.baseInventory.ContainsKey(possibleReqItem) ? Mod.baseInventory[possibleReqItem] : 0);
+                                    amountInInventory += (Mod.playerInventory.ContainsKey(possibleReqItem) ? Mod.playerInventory[possibleReqItem] : 0);
+
+                                    if (farmingViewByItemID.ContainsKey(possibleReqItem))
+                                    {
+                                        farmingViewByItemID[possibleReqItem].Add(newFarmingView.transform);
+                                    }
+                                    else
+                                    {
+                                        farmingViewByItemID.Add(possibleReqItem, new List<Transform>() { newFarmingView.transform });
+                                    }
+                                }
+                                newFarmingView.transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = amountInInventory.ToString() + " (STASH)";
+                                Mod.instance.LogInfo("3");
                             }
-                            else
+                            else if (requirement["type"].ToString().Equals("Item"))
                             {
-                                // Production is paused
-                                int[] formattedTimeLeft = FormatTime(productionScript.timeLeft);
-                                newFarmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Paused\n({0:00}:{1:00}:{2:00})", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                                Mod.instance.LogInfo("4");
+                                AreaProductionRequirement currentRequirement = new AreaProductionRequirement();
+                                ItemMapEntry requirementItemMapEntry = Mod.itemMap[requirement["templateId"].ToString()];
+                                switch (requirementItemMapEntry.mode)
+                                {
+                                    case 0:
+                                        currentRequirement.IDs = new string[] { requirementItemMapEntry.ID };
+                                        break;
+                                    case 1:
+                                        currentRequirement.IDs = requirementItemMapEntry.modulIDs;
+                                        break;
+                                    case 2:
+                                        currentRequirement.IDs = new string[] { requirementItemMapEntry.otherModID };
+                                        break;
+                                }
+                                currentRequirement.count = (int)requirement["count"];
+                                currentRequirement.isFunctional = (bool)requirement["isFunctional"];
+
+                                Mod.instance.LogInfo("4");
+                                productionScript.requirements.Add(currentRequirement);
+
+                                Mod.instance.LogInfo("4");
+                                int amountInInventory = 0;
+                                foreach (string possibleReqItem in currentRequirement.IDs)
+                                {
+                                    amountInInventory += (Mod.baseInventory.ContainsKey(possibleReqItem) ? Mod.baseInventory[possibleReqItem] : 0);
+                                    amountInInventory += (Mod.playerInventory.ContainsKey(possibleReqItem) ? Mod.playerInventory[possibleReqItem] : 0);
+                                }
+                                Mod.instance.LogInfo("4");
+                                if (newFarmingView != null)
+                                {
+                                    newFarmingView.transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = amountInInventory.ToString() + " (STASH)";
+
+                                    if (Mod.itemIcons.ContainsKey(currentRequirement.IDs[0]))
+                                    {
+                                        Sprite icon = Mod.itemIcons[currentRequirement.IDs[0]];
+                                        newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
+                                        newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
+                                    }
+                                    else
+                                    {
+                                        AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.IDs[0], newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>()));
+                                        AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.IDs[0], newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+                                    }
+
+                                    foreach (string possibleReqItem in currentRequirement.IDs)
+                                    {
+                                        if (farmingViewByItemID.ContainsKey(possibleReqItem))
+                                        {
+                                            farmingViewByItemID[possibleReqItem].Add(newFarmingView.transform);
+                                        }
+                                        else
+                                        {
+                                            farmingViewByItemID.Add(possibleReqItem, new List<Transform>() { newFarmingView.transform });
+                                        }
+                                    }
+
+                                    // Setup farm cost itemIcon
+                                    string itemName = Mod.itemNames[currentRequirement.IDs[0]];
+                                    string itemDescription = Mod.itemDescriptions[currentRequirement.IDs[0]];
+                                    int itemWeight = Mod.itemWeights[currentRequirement.IDs[0]];
+                                    int itemVolume = Mod.itemVolumes[currentRequirement.IDs[0]];
+                                    EFM_ItemIcon costItemIconScript = newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                                    costItemIconScript.itemID = currentRequirement.IDs[0];
+                                    costItemIconScript.itemName = itemName;
+                                    costItemIconScript.description = itemDescription;
+                                    costItemIconScript.weight = itemWeight;
+                                    costItemIconScript.volume = itemVolume;
+                                    EFM_ItemIcon costInstalledItemIconScript = newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                                    costInstalledItemIconScript.itemID = currentRequirement.IDs[0];
+                                    costInstalledItemIconScript.itemName = itemName;
+                                    costInstalledItemIconScript.description = itemDescription;
+                                    costInstalledItemIconScript.weight = itemWeight;
+                                    costInstalledItemIconScript.volume = itemVolume;
+                                }
+                                else
+                                {
+                                    GameObject newRequirement = Instantiate(newProduceView.transform.GetChild(1).GetChild(0).gameObject, newProduceView.transform.GetChild(1));
+                                    if (Mod.itemIcons.ContainsKey(currentRequirement.IDs[0]))
+                                    {
+                                        newRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.IDs[0]];
+                                    }
+                                    else
+                                    {
+                                        AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.IDs[0], newRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>()));
+                                    }
+                                    newRequirement.transform.GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = Mathf.Min(amountInInventory, currentRequirement.count).ToString() + "/" + currentRequirement.count;
+                                    if (amountInInventory > currentRequirement.count)
+                                    {
+                                        newRequirement.transform.GetChild(1).GetChild(1).GetChild(0).gameObject.SetActive(false);
+                                        newRequirement.transform.GetChild(1).GetChild(1).GetChild(1).gameObject.SetActive(true);
+                                    }
+
+                                    foreach (string possibleReqItem in currentRequirement.IDs)
+                                    {
+                                        if (produceViewByItemID.ContainsKey(possibleReqItem))
+                                        {
+                                            produceViewByItemID[possibleReqItem].Add(newProduceView.transform);
+                                        }
+                                        else
+                                        {
+                                            produceViewByItemID.Add(possibleReqItem, new List<Transform>() { newProduceView.transform });
+                                        }
+                                    }
+
+                                    // Setup production cost itemIcon
+                                    EFM_ItemIcon costItemIconScript = newRequirement.transform.GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
+                                    costItemIconScript.itemID = currentRequirement.IDs[0];
+                                    costItemIconScript.itemName = Mod.itemNames[currentRequirement.IDs[0]];
+                                    costItemIconScript.description = Mod.itemDescriptions[currentRequirement.IDs[0]];
+                                    costItemIconScript.weight = Mod.itemWeights[currentRequirement.IDs[0]];
+                                    costItemIconScript.volume = Mod.itemVolumes[currentRequirement.IDs[0]];
+                                }
                             }
                         }
+                        Mod.instance.LogInfo("1");
+
+                        // Add the production to the list
+                        if (this.productionsByItemIDByProdID.ContainsKey(productionScript.ID))
+                        {
+                            this.productionsByItemIDByProdID[productionScript.ID].Add(endProduct, productionScript);
+                        }
+                        else
+                        {
+                            Dictionary<string, EFM_AreaProduction> newDict = new Dictionary<string, EFM_AreaProduction>();
+                            newDict.Add(endProduct, productionScript);
+                            this.productionsByItemIDByProdID.Add(productionScript.ID, newDict);
+                        }
+
+                        firstProduction = false;
                     }
                 }
                 else
                 {
-                    Mod.instance.LogInfo("4");
-                    newProduceView = Instantiate(produceView, productionsParent);
-                    middleHeight += 141.8f; // produce view height
-                    if (!firstProduction)
+                    string[] endProducts = null;
+                    ItemMapEntry itemMapEntry = Mod.itemMap[production["endProduct"].ToString()];
+                    switch (itemMapEntry.mode)
                     {
-                        middleHeight += 18; // spacing
+                        case 0:
+                            endProducts = new string[] { itemMapEntry.ID };
+                            break;
+                        case 1:
+                            endProducts = itemMapEntry.modulIDs;
+                            break;
+                        case 2:
+                            endProducts = new string[] { itemMapEntry.otherModID };
+                            break;
                     }
-                    productionScript = newProduceView.AddComponent<EFM_AreaProduction>();
 
-                    Mod.instance.LogInfo("4");
-                    productionScript.continuous = true;
-                    productionScript.ID = production["_id"].ToString();
-                    productionScript.productionTime = (float)production["productionTime"];
-                    productionScript.endProduct = Mod.itemMap[production["endProduct"].ToString()];
-                    productionScript.count = (int)production["count"];
-
-                    Mod.instance.LogInfo("4");
-                    // Init UI
-                    if (Mod.itemIcons.ContainsKey(productionScript.endProduct))
+                    foreach (string endProduct in endProducts)
                     {
-                        newProduceView.transform.GetChild(3).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
-                    }
-                    else
-                    {
-                        AnvilManager.Run(Mod.SetVanillaIcon(productionScript.endProduct, newProduceView.transform.GetChild(3).GetChild(0).GetChild(2).GetComponent<Image>()));
-                    }
-                    newProduceView.transform.GetChild(3).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionScript.count.ToString();
-                    newProduceView.transform.GetChild(4).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnProduceViewStartClick(productionScript.ID); });
-                    newProduceView.transform.GetChild(4).GetChild(1).GetComponent<Button>().onClick.AddListener(() => { OnProductionGetItemsClick(productionScript.ID); });
-
-                    Mod.instance.LogInfo("4");
-                    // Depending on save data
-                    // If data about this production has been saved
-                    if (productionsDict.ContainsKey(productionScript.ID))
-                    {
-                        Mod.instance.LogInfo("5");
-                        activeProductions.Add(productionScript.ID, productionScript);
-
-                        productionScript.active = true;
-                        productionScript.timeLeft = (float)productionsDict[productionScript.ID]["timeLeft"];
-
-                        Mod.instance.LogInfo("5");
-                        // Deactivate start button because for sure we cant start production if already active
-                        newProduceView.transform.GetChild(4).GetChild(0).gameObject.SetActive(false);
-
-                        Mod.instance.LogInfo("5");
-                        // It is possible we have an unclaimed amount of items
-                        if (productionScript.timeLeft <= 0)
+                        Mod.instance.LogInfo("4");
+                        newProduceView = Instantiate(produceView, productionsParent);
+                        middleHeight += 141.8f; // produce view height
+                        if (!firstProduction)
                         {
-                            // Activate get items button
-                            newProduceView.transform.GetChild(4).GetChild(1).gameObject.SetActive(true);
+                            middleHeight += 18; // spacing
                         }
-                        else // productionScript.timeLeft > 0
-                        {
-                            // Activate production status
-                            newProduceView.transform.GetChild(4).GetChild(2).gameObject.SetActive(true);
+                        productionScript = newProduceView.AddComponent<EFM_AreaProduction>();
 
-                            // Also set initial string
-                            bool needsFuel = (bool)Mod.areasDB["areaDefaults"][areaIndex]["needsFuel"];
-                            if ((needsFuel && generatorRunning) || !needsFuel)
+                        Mod.instance.LogInfo("4");
+                        productionScript.continuous = true;
+                        productionScript.ID = production["_id"].ToString();
+                        productionScript.productionTime = (float)production["productionTime"];
+                        productionScript.endProduct = endProduct;
+                        productionScript.count = (int)production["count"];
+
+                        Mod.instance.LogInfo("4");
+                        // Init UI
+                        if (Mod.itemIcons.ContainsKey(productionScript.endProduct))
+                        {
+                            newProduceView.transform.GetChild(3).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[productionScript.endProduct];
+                        }
+                        else
+                        {
+                            AnvilManager.Run(Mod.SetVanillaIcon(productionScript.endProduct, newProduceView.transform.GetChild(3).GetChild(0).GetChild(2).GetComponent<Image>()));
+                        }
+                        newProduceView.transform.GetChild(3).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionScript.count.ToString();
+                        newProduceView.transform.GetChild(4).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnProduceViewStartClick(productionScript.ID, endProduct); });
+                        newProduceView.transform.GetChild(4).GetChild(1).GetComponent<Button>().onClick.AddListener(() => { OnProductionGetItemsClick(productionScript.ID, endProduct); });
+
+                        Mod.instance.LogInfo("4");
+                        // Depending on save data
+                        // If data about this production has been saved
+                        if (productionsDictByItemIDByProdID.ContainsKey(productionScript.ID) && productionsDictByItemIDByProdID[productionScript.ID].ContainsKey(endProduct))
+                        {
+                            Mod.instance.LogInfo("5");
+                            activeProductions.Add(productionScript.ID, productionScript);
+
+                            productionScript.active = true;
+                            productionScript.timeLeft = (float)productionsDictByItemIDByProdID[productionScript.ID][endProduct]["timeLeft"];
+
+                            Mod.instance.LogInfo("5");
+                            // Deactivate start button because for sure we cant start production if already active
+                            newProduceView.transform.GetChild(4).GetChild(0).gameObject.SetActive(false);
+
+                            Mod.instance.LogInfo("5");
+                            // It is possible we have an unclaimed amount of items
+                            if (productionScript.timeLeft <= 0)
                             {
-                                // Production is in progress
-                                int hours = (int)(productionScript.timeLeft / 3600);
-                                int minutes = (int)((productionScript.timeLeft % 3600) / 60);
-                                int seconds = (int)((productionScript.timeLeft % 3600) % 60);
-                                newProduceView.transform.GetChild(4).GetChild(2).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", hours, minutes, seconds);
+                                // Activate get items button
+                                newProduceView.transform.GetChild(4).GetChild(1).gameObject.SetActive(true);
                             }
-                            else
+                            else // productionScript.timeLeft > 0
                             {
-                                // Production is paused
-                                int hours = (int)(productionScript.timeLeft / 3600);
-                                int minutes = (int)((productionScript.timeLeft % 3600) / 60);
-                                int seconds = (int)((productionScript.timeLeft % 3600) % 60);
-                                newProduceView.transform.GetChild(4).GetChild(2).GetChild(0).GetComponent<Text>().text = String.Format("Paused\n({0:00}:{1:00}:{2:00})", hours, minutes, seconds);
+                                // Activate production status
+                                newProduceView.transform.GetChild(4).GetChild(2).gameObject.SetActive(true);
+
+                                // Also set initial string
+                                bool needsFuel = (bool)Mod.areasDB[areaIndex]["needsFuel"];
+                                if ((needsFuel && generatorRunning) || !needsFuel)
+                                {
+                                    // Production is in progress
+                                    int hours = (int)(productionScript.timeLeft / 3600);
+                                    int minutes = (int)((productionScript.timeLeft % 3600) / 60);
+                                    int seconds = (int)((productionScript.timeLeft % 3600) % 60);
+                                    newProduceView.transform.GetChild(4).GetChild(2).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", hours, minutes, seconds);
+                                }
+                                else
+                                {
+                                    // Production is paused
+                                    int hours = (int)(productionScript.timeLeft / 3600);
+                                    int minutes = (int)((productionScript.timeLeft % 3600) / 60);
+                                    int seconds = (int)((productionScript.timeLeft % 3600) % 60);
+                                    newProduceView.transform.GetChild(4).GetChild(2).GetChild(0).GetComponent<Text>().text = String.Format("Paused\n({0:00}:{1:00}:{2:00})", hours, minutes, seconds);
+                                }
                             }
                         }
                     }
                 }
                 Mod.instance.LogInfo("1");
-
-                // Fill requirements
-                productionScript.requirements = new List<AreaProductionRequirement>();
-                foreach(JObject requirement in production["requirements"])
-                {
-                    Mod.instance.LogInfo("2");
-                    if (requirement["type"].ToString().Equals("Resource"))
-                    {
-                        Mod.instance.LogInfo("3");
-                        AreaProductionRequirement currentRequirement = new AreaProductionRequirement();
-                        currentRequirement.resource = true;
-                        currentRequirement.ID = Mod.itemMap[requirement["templateId"].ToString()];
-                        if (Mod.itemIcons.ContainsKey(currentRequirement.ID))
-                        {
-                            Sprite icon = Mod.itemIcons[currentRequirement.ID];
-                            newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
-                            newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
-                        }
-                        else
-                        {
-                            AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>()));
-                            AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
-                        }
-                        currentRequirement.count = (int)requirement["resource"];
-
-                        // Setup farm cost itemIcon
-                        string itemName = Mod.itemNames[currentRequirement.ID];
-                        string itemDescription = Mod.itemDescriptions[currentRequirement.ID];
-                        int itemWeight = Mod.itemWeights[currentRequirement.ID];
-                        int itemVolume = Mod.itemVolumes[currentRequirement.ID];
-                        EFM_ItemIcon costItemIconScript = newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
-                        costItemIconScript.itemID = currentRequirement.ID;
-                        costItemIconScript.itemName = itemName;
-                        costItemIconScript.description = itemDescription;
-                        costItemIconScript.weight = itemWeight;
-                        costItemIconScript.volume = itemVolume;
-                        EFM_ItemIcon costInstalledItemIconScript = newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
-                        costInstalledItemIconScript.itemID = currentRequirement.ID;
-                        costInstalledItemIconScript.itemName = itemName;
-                        costInstalledItemIconScript.description = itemDescription;
-                        costInstalledItemIconScript.weight = itemWeight;
-                        costInstalledItemIconScript.volume = itemVolume;
-
-                        Mod.instance.LogInfo("3");
-                        productionScript.requirements.Add(currentRequirement);
-
-                        Mod.instance.LogInfo("3");
-                        int amountInInventory = (Mod.baseInventory.ContainsKey(currentRequirement.ID) ? Mod.baseInventory[currentRequirement.ID] : 0) +
-                                                (Mod.playerInventory.ContainsKey(currentRequirement.ID) ? Mod.playerInventory[currentRequirement.ID] : 0);
-                        newFarmingView.transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = amountInInventory.ToString() + " (STASH)";
-
-                        Mod.instance.LogInfo("3");
-                        if (farmingViewByItemID.ContainsKey(currentRequirement.ID))
-                        {
-                            farmingViewByItemID[currentRequirement.ID].Add(newFarmingView.transform);
-                        }
-                        else
-                        {
-                            farmingViewByItemID.Add(currentRequirement.ID, new List<Transform>() { newFarmingView.transform });
-                        }
-                    }
-                    else if (requirement["type"].ToString().Equals("Item"))
-                    {
-                        Mod.instance.LogInfo("4");
-                        AreaProductionRequirement currentRequirement = new AreaProductionRequirement();
-                        currentRequirement.ID = Mod.itemMap[requirement["templateId"].ToString()];
-                        currentRequirement.count = (int)requirement["count"];
-                        currentRequirement.isFunctional = (bool)requirement["isFunctional"];
-
-                        Mod.instance.LogInfo("4");
-                        productionScript.requirements.Add(currentRequirement);
-
-                        Mod.instance.LogInfo("4");
-                        int amountInInventory = (Mod.baseInventory.ContainsKey(currentRequirement.ID) ? Mod.baseInventory[currentRequirement.ID] : 0) +
-                                                (Mod.playerInventory.ContainsKey(currentRequirement.ID) ? Mod.playerInventory[currentRequirement.ID] : 0);
-                        Mod.instance.LogInfo("4");
-                        if (newFarmingView != null)
-                        {
-                            newFarmingView.transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = amountInInventory.ToString() + " (STASH)";
-
-                            if (Mod.itemIcons.ContainsKey(currentRequirement.ID))
-                            {
-                                Sprite icon = Mod.itemIcons[currentRequirement.ID];
-                                newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
-                                newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = icon;
-                            }
-                            else
-                            {
-                                AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>()));
-                                AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
-                            }
-
-                            if (farmingViewByItemID.ContainsKey(currentRequirement.ID))
-                            {
-                                farmingViewByItemID[currentRequirement.ID].Add(newFarmingView.transform);
-                            }
-                            else
-                            {
-                                farmingViewByItemID.Add(currentRequirement.ID, new List<Transform>() { newFarmingView.transform });
-                            }
-
-                            // Setup farm cost itemIcon
-                            string itemName = Mod.itemNames[currentRequirement.ID];
-                            string itemDescription = Mod.itemDescriptions[currentRequirement.ID];
-                            int itemWeight = Mod.itemWeights[currentRequirement.ID];
-                            int itemVolume = Mod.itemVolumes[currentRequirement.ID];
-                            EFM_ItemIcon costItemIconScript = newFarmingView.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
-                            costItemIconScript.itemID = currentRequirement.ID;
-                            costItemIconScript.itemName = itemName;
-                            costItemIconScript.description = itemDescription;
-                            costItemIconScript.weight = itemWeight;
-                            costItemIconScript.volume = itemVolume;
-                            EFM_ItemIcon costInstalledItemIconScript = newFarmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
-                            costInstalledItemIconScript.itemID = currentRequirement.ID;
-                            costInstalledItemIconScript.itemName = itemName;
-                            costInstalledItemIconScript.description = itemDescription;
-                            costInstalledItemIconScript.weight = itemWeight;
-                            costInstalledItemIconScript.volume = itemVolume;
-                        }
-                        else
-                        {
-                            GameObject newRequirement = Instantiate(newProduceView.transform.GetChild(1).GetChild(0).gameObject, newProduceView.transform.GetChild(1));
-                            if (Mod.itemIcons.ContainsKey(currentRequirement.ID))
-                            {
-                                newRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currentRequirement.ID];
-                            }
-                            else
-                            {
-                                AnvilManager.Run(Mod.SetVanillaIcon(currentRequirement.ID, newRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>()));
-                            }
-                            newRequirement.transform.GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = Mathf.Min(amountInInventory, currentRequirement.count).ToString() + "/" + currentRequirement.count;
-                            if(amountInInventory > currentRequirement.count)
-                            {
-                                newRequirement.transform.GetChild(1).GetChild(1).GetChild(0).gameObject.SetActive(false);
-                                newRequirement.transform.GetChild(1).GetChild(1).GetChild(1).gameObject.SetActive(true);
-                            }
-
-                            if (produceViewByItemID.ContainsKey(currentRequirement.ID))
-                            {
-                                produceViewByItemID[currentRequirement.ID].Add(newProduceView.transform);
-                            }
-                            else
-                            {
-                                produceViewByItemID.Add(currentRequirement.ID, new List<Transform>() { newProduceView.transform });
-                            }
-
-                            // Setup production cost itemIcon
-                            EFM_ItemIcon costItemIconScript = newRequirement.transform.GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
-                            costItemIconScript.itemID = currentRequirement.ID;
-                            costItemIconScript.itemName = Mod.itemNames[currentRequirement.ID];
-                            costItemIconScript.description = Mod.itemDescriptions[currentRequirement.ID];
-                            costItemIconScript.weight = Mod.itemWeights[currentRequirement.ID];
-                            costItemIconScript.volume = Mod.itemVolumes[currentRequirement.ID];
-                        }
-                    }
-                }
-                Mod.instance.LogInfo("1");
-
-                // Add the production to the list
-                this.productions.Add(productionScript.ID, productionScript);
-
-                firstProduction = false;
             }
             Mod.instance.LogInfo("0");
 
@@ -2215,7 +2334,6 @@ namespace EFM
                             Mod.instance.LogInfo("\t0");
                             GameObject itemRequirement = Instantiate(EFM_Base_Manager.itemRequirementPrefab, itemRequirementParentToUse);
                             EFM_AreaRequirement itemRequirementScript = itemRequirement.AddComponent<EFM_AreaRequirement>();
-                            itemRequirements.Add(itemRequirementScript);
                             itemRequirementScript.requirementType = EFM_AreaRequirement.RequirementType.Item;
                             int itemAmountNeeded = (int)requirement["count"];
                             string itemTemplateID = requirement["templateId"].ToString();
@@ -2225,59 +2343,75 @@ namespace EFM
                             if (Mod.itemMap.ContainsKey(itemTemplateID))
                             {
                                 Mod.instance.LogInfo("\t\t0");
-                                string actualID = Mod.itemMap[itemTemplateID];
-                                if (Mod.itemIcons.ContainsKey(actualID))
+                                string[] actualIDs = null;
+                                ItemMapEntry itemMapEntry = Mod.itemMap[itemTemplateID];
+                                switch (itemMapEntry.mode)
                                 {
-                                    itemRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[actualID];
+                                    case 0:
+                                        actualIDs = new string[] { itemMapEntry.ID };
+                                        break;
+                                    case 1:
+                                        actualIDs = itemMapEntry.modulIDs;
+                                        break;
+                                    case 2:
+                                        actualIDs = new string[] { itemMapEntry.otherModID };
+                                        break;
+                                }
+                                if (Mod.itemIcons.ContainsKey(actualIDs[0]))
+                                {
+                                    itemRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[actualIDs[0]];
                                 }
                                 else
                                 {
-                                    AnvilManager.Run(Mod.SetVanillaIcon(actualID, itemRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>()));
+                                    AnvilManager.Run(Mod.SetVanillaIcon(actualIDs[0], itemRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>()));
                                 }
                                 Mod.instance.LogInfo("\t\t0");
 
                                 // Setup item req itemIcon
                                 EFM_ItemIcon reqItemIconScript = itemRequirement.transform.GetChild(0).GetChild(2).gameObject.AddComponent<EFM_ItemIcon>();
-                                reqItemIconScript.itemID = actualID;
-                                reqItemIconScript.itemName = Mod.itemNames[actualID];
-                                reqItemIconScript.description = Mod.itemDescriptions[actualID];
-                                reqItemIconScript.weight = Mod.itemWeights[actualID];
-                                reqItemIconScript.volume = Mod.itemVolumes[actualID];
+                                reqItemIconScript.itemID = actualIDs[0];
+                                reqItemIconScript.itemName = Mod.itemNames[actualIDs[0]];
+                                reqItemIconScript.description = Mod.itemDescriptions[actualIDs[0]];
+                                reqItemIconScript.weight = Mod.itemWeights[actualIDs[0]];
+                                reqItemIconScript.volume = Mod.itemVolumes[actualIDs[0]];
 
                                 int itemAmountInInventory = 0;
                                 Mod.instance.LogInfo("\t\t base manager null?: "+(baseManager == null));
                                 Mod.instance.LogInfo("\t\t base inventory null?: "+(Mod.baseInventory == null));
-                                if (Mod.baseInventory.ContainsKey(actualID))
+                                foreach (string itemReqID in actualIDs)
                                 {
-                                    Mod.instance.LogInfo("\t\t\t0");
-                                    itemAmountInInventory = Mod.baseInventory[actualID];
-                                }
-                                if (Mod.playerInventory.ContainsKey(actualID))
-                                {
-                                    Mod.instance.LogInfo("\t\t\t0");
-                                    itemAmountInInventory += Mod.playerInventory[actualID];
-                                }
+                                    if (Mod.baseInventory.ContainsKey(itemReqID))
+                                    {
+                                        Mod.instance.LogInfo("\t\t\t0");
+                                        itemAmountInInventory = Mod.baseInventory[itemReqID];
+                                    }
+                                    if (Mod.playerInventory.ContainsKey(itemReqID))
+                                    {
+                                        Mod.instance.LogInfo("\t\t\t0");
+                                        itemAmountInInventory += Mod.playerInventory[itemReqID];
+                                    }
 
-                                if (Mod.requiredPerArea[areaIndex].ContainsKey(actualID))
-                                {
-                                    Mod.requiredPerArea[areaIndex][actualID] = itemAmountNeeded;
-                                }
-                                else
-                                {
-                                    Mod.requiredPerArea[areaIndex].Add(actualID, itemAmountNeeded);
+                                    if (Mod.requiredPerArea[areaIndex].ContainsKey(itemReqID))
+                                    {
+                                        Mod.requiredPerArea[areaIndex][itemReqID] = itemAmountNeeded;
+                                    }
+                                    else
+                                    {
+                                        Mod.requiredPerArea[areaIndex].Add(itemReqID, itemAmountNeeded);
+                                    }
+
+                                    if (itemRequirementsByItemID.ContainsKey(itemReqID))
+                                    {
+                                        itemRequirementsByItemID[itemReqID].Add(itemRequirement.transform);
+                                    }
+                                    else
+                                    {
+                                        itemRequirementsByItemID.Add(itemReqID, new List<Transform>() { itemRequirement.transform });
+                                    }
                                 }
 
                                 Mod.instance.LogInfo("\t\t0");
                                 itemRequirement.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = Mathf.Min(itemAmountNeeded, itemAmountInInventory).ToString() + "/" + itemAmountNeeded; // Area level
-
-                                if (itemRequirementsByItemID.ContainsKey(actualID))
-                                {
-                                    itemRequirementsByItemID[actualID].Add(itemRequirement.transform);
-                                }
-                                else
-                                {
-                                    itemRequirementsByItemID.Add(actualID, new List<Transform>() { itemRequirement.transform });
-                                }
 
                                 Mod.instance.LogInfo("\t\t0");
                                 // Check if requirement is met
@@ -2295,9 +2429,12 @@ namespace EFM
                                     Mod.instance.LogInfo("\t\t\tSprite after setting null?: " + (itemRequirement.transform.GetChild(1).GetChild(1).GetComponent<Image>().sprite == null));
                                 }
                                 Mod.instance.LogInfo("\t\t0");
+
+                                itemRequirements.Add(itemRequirementScript);
                             }
                             else
                             {
+                                Destroy(itemRequirement);
                                 Mod.instance.LogError("Area " + areaIndex + " requires item with ID: " + requirement["templateId"].ToString() + " but this item is not in the item map!");
                             }
                             break;
@@ -2418,7 +2555,7 @@ namespace EFM
                             skillRequirements.Add(skillRequirementScript);
                             skillRequirementScript.requirementType = EFM_AreaRequirement.RequirementType.Skill;
                             int skillRequiredLevel = (int)requirement["skillLevel"];
-                            int skillRequirementIndex = (int)requirement["skillIndex"];
+                            int skillRequirementIndex = Mod.SkillNameToIndex(requirement["skillName"].ToString());
                             skillRequirementScript.level = skillRequiredLevel;
                             skillRequirementScript.index = skillRequirementIndex;
 
@@ -2463,10 +2600,10 @@ namespace EFM
             }
 
             // Add all bonuses to this.bonuses, including ones from previous levels
-            JArray stagesData = Mod.areasDB["areaDefaults"][areaIndex]["stages"] as JArray;
+            JArray stagesData = Mod.areasDB[areaIndex]["stages"] as JArray;
             for(int i = 0; i <= level; ++i)
             {
-                foreach (JToken bonusData in Mod.areasDB["areaDefaults"][areaIndex]["stages"][i]["bonuses"])
+                foreach (JToken bonusData in Mod.areasDB[areaIndex]["stages"][i.ToString()]["bonuses"])
                 {
                     EFM_AreaBonus bonus = new EFM_AreaBonus();
                     bonus.bonusType = (EFM_AreaBonus.BonusType)Enum.Parse(typeof(EFM_AreaBonus.BonusType), bonusData["type"].ToString());
@@ -2505,11 +2642,27 @@ namespace EFM
                     Sprite bonusIcon = null;
                     if (areaBonus["icon"] != null && !areaBonus["icon"].ToString().Equals(""))
                     {
-                        bonusIcon = EFM_Base_Manager.bonusIcons[areaBonus["icon"].ToString()];
+                        string areaBonusIcon = areaBonus["icon"].ToString();
+                        if (EFM_Base_Manager.bonusIcons.ContainsKey(areaBonusIcon))
+                        {
+                            bonusIcon = EFM_Base_Manager.bonusIcons[areaBonusIcon];
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Missing bonusicon: " + areaBonusIcon + " for area: " + areaIndex);
+                        }
                     }
                     else
                     {
-                        bonusIcon = EFM_Base_Manager.bonusIcons[areaBonus["type"].ToString()];
+                        string areaBonusIcon = areaBonus["type"].ToString();
+                        if (EFM_Base_Manager.bonusIcons.ContainsKey(areaBonusIcon))
+                        {
+                            bonusIcon = EFM_Base_Manager.bonusIcons[areaBonus["type"].ToString()];
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Missing bonusicon: " + areaBonusIcon + " for area: " + areaIndex);
+                        }
                     }
                     bonus.transform.GetChild(0).GetComponent<Image>().sprite = bonusIcon; // Bonus icon
                     if (areaBonus["type"].ToString().Equals("TextBonus"))
@@ -2584,111 +2737,120 @@ namespace EFM
                     return baseManager.baseAreaManagers[(int)requirement["areaType"]].level >= (int)requirement["requiredLevel"];
                 case "Item":
                     Mod.instance.LogInfo("\t\t\t\tItem: "+requirement["templateId"]+":");
-                    string itemID = "";
                     if (Mod.itemMap.ContainsKey(requirement["templateId"].ToString()))
                     {
-                        if (int.TryParse(Mod.itemMap[requirement["templateId"].ToString()], out int tryParseResult))
+                        string[] itemIDs = null;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[requirement["templateId"].ToString()];
+                        switch (itemMapEntry.mode)
                         {
-                            itemID = tryParseResult.ToString();
-                        }
-                        else // Is not a custom item
-                        {
-                            itemID = Mod.itemMap[requirement["templateId"].ToString()];
+                            case 0:
+                                itemIDs = new string[] { itemMapEntry.ID };
+                                break;
+                            case 1:
+                                itemIDs = itemMapEntry.modulIDs;
+                                break;
+                            case 2:
+                                itemIDs = new string[] { itemMapEntry.otherModID };
+                                break;
                         }
 
                         int itemAmountNeeded = (int)requirement["count"];
 
                         // Have to check each item object because if it has CIW, if it is container or rig, can only count if it has no contents
                         int itemAmountInInventory = 0;
-                        if (Mod.baseInventory.ContainsKey(itemID) && Mod.baseInventory[itemID] > 0)
+
+                        foreach (string itemID in itemIDs)
                         {
-                            foreach(GameObject obj in baseManager.baseInventoryObjects[itemID])
+                            if (Mod.baseInventory.ContainsKey(itemID) && Mod.baseInventory[itemID] > 0)
                             {
-                                EFM_CustomItemWrapper CIW = obj.GetComponent<EFM_CustomItemWrapper>();
-                                if(CIW != null)
+                                foreach (GameObject obj in baseManager.baseInventoryObjects[itemID])
                                 {
-                                    if(CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                                    EFM_CustomItemWrapper CIW = obj.GetComponent<EFM_CustomItemWrapper>();
+                                    if (CIW != null)
                                     {
-                                        bool containsItem = false;
-                                        foreach(GameObject itemInSlot in CIW.itemsInSlots)
+                                        if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
                                         {
-                                            if(itemInSlot != null)
+                                            bool containsItem = false;
+                                            foreach (GameObject itemInSlot in CIW.itemsInSlots)
                                             {
-                                                containsItem = true;
-                                                break;
+                                                if (itemInSlot != null)
+                                                {
+                                                    containsItem = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!containsItem)
+                                            {
+                                                ++itemAmountInInventory;
                                             }
                                         }
-
-                                        if (!containsItem)
+                                        else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                                        {
+                                            if (CIW.containerItemRoot.childCount == 0)
+                                            {
+                                                ++itemAmountInInventory;
+                                            }
+                                        }
+                                        else if (CIW.stack > 0)
+                                        {
+                                            itemAmountInInventory += CIW.stack;
+                                        }
+                                        else
                                         {
                                             ++itemAmountInInventory;
                                         }
-                                    }
-                                    else if(CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
-                                    {
-                                        if (CIW.containerItemRoot.childCount == 0)
-                                        {
-                                            ++itemAmountInInventory;
-                                        }
-                                    }
-                                    else if(CIW.stack > 0)
-                                    {
-                                        itemAmountInInventory += CIW.stack;
                                     }
                                     else
                                     {
                                         ++itemAmountInInventory;
                                     }
-                                }
-                                else
-                                {
-                                    ++itemAmountInInventory;
                                 }
                             }
-                        }
-                        if (Mod.playerInventory.ContainsKey(itemID) && Mod.playerInventory[itemID] > 0)
-                        {
-                            foreach (GameObject obj in Mod.playerInventoryObjects[itemID])
+                            if (Mod.playerInventory.ContainsKey(itemID) && Mod.playerInventory[itemID] > 0)
                             {
-                                EFM_CustomItemWrapper CIW = obj.GetComponent<EFM_CustomItemWrapper>();
-                                if (CIW != null)
+                                foreach (GameObject obj in Mod.playerInventoryObjects[itemID])
                                 {
-                                    if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                                    EFM_CustomItemWrapper CIW = obj.GetComponent<EFM_CustomItemWrapper>();
+                                    if (CIW != null)
                                     {
-                                        bool containsItem = false;
-                                        foreach (GameObject itemInSlot in CIW.itemsInSlots)
+                                        if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
                                         {
-                                            if (itemInSlot != null)
+                                            bool containsItem = false;
+                                            foreach (GameObject itemInSlot in CIW.itemsInSlots)
                                             {
-                                                containsItem = true;
-                                                break;
+                                                if (itemInSlot != null)
+                                                {
+                                                    containsItem = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!containsItem)
+                                            {
+                                                ++itemAmountInInventory;
                                             }
                                         }
-
-                                        if (!containsItem)
+                                        else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                                        {
+                                            if (CIW.containerItemRoot.childCount == 0)
+                                            {
+                                                ++itemAmountInInventory;
+                                            }
+                                        }
+                                        else if (CIW.stack > 0)
+                                        {
+                                            itemAmountInInventory += CIW.stack;
+                                        }
+                                        else
                                         {
                                             ++itemAmountInInventory;
                                         }
-                                    }
-                                    else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
-                                    {
-                                        if (CIW.containerItemRoot.childCount == 0)
-                                        {
-                                            ++itemAmountInInventory;
-                                        }
-                                    }
-                                    else if (CIW.stack > 0)
-                                    {
-                                        itemAmountInInventory += CIW.stack;
                                     }
                                     else
                                     {
                                         ++itemAmountInInventory;
                                     }
-                                }
-                                else
-                                {
-                                    ++itemAmountInInventory;
                                 }
                             }
                         }
@@ -2705,7 +2867,7 @@ namespace EFM
                     return Mod.traderStatuses[traderIndex].GetLoyaltyLevel() >= (int)requirement["loyaltyLevel"];
                 case "Skill":
                     Mod.instance.LogInfo("\t\t\t\tSkill");
-                    float skillLevel = Mod.skills[(int)requirement["skillIndex"]].currentProgress / 100;
+                    float skillLevel = Mod.skills[Mod.SkillNameToIndex(requirement["skillName"].ToString())].currentProgress / 100;
                     return skillLevel >= (int)requirement["skillLevel"];
                 default:
                     return true;
@@ -2844,10 +3006,10 @@ namespace EFM
                 {
                     Mod.instance.LogInfo("\tAll");
                     // Check if there are requirements
-                    if (Mod.areasDB["areaDefaults"][areaIndex]["stages"][levelToUse] != null && Mod.areasDB["areaDefaults"][areaIndex]["stages"][levelToUse]["requirements"] != null)
+                    if (Mod.areasDB[areaIndex]["stages"][levelToUse.ToString()] != null && Mod.areasDB[areaIndex]["stages"][levelToUse.ToString()]["requirements"] != null)
                     {
                         Mod.instance.LogInfo("\t\tThere are requirements");
-                        foreach (JToken requirement in Mod.areasDB["areaDefaults"][areaIndex]["stages"][levelToUse]["requirements"])
+                        foreach (JToken requirement in Mod.areasDB[areaIndex]["stages"][levelToUse.ToString()]["requirements"])
                         {
                             Mod.instance.LogInfo("\t\t\tChecking requirement of type: " + requirement["type"]);
                             if (!GetRequirementFullfilled(requirement))
@@ -2858,9 +3020,9 @@ namespace EFM
                         }
                     }
                 }
-                else if (Mod.areasDB["areaDefaults"][areaIndex]["stages"][levelToUse] != null && Mod.areasDB["areaDefaults"][areaIndex]["stages"][levelToUse]["requirements"] != null)
+                else if (Mod.areasDB[areaIndex]["stages"][levelToUse.ToString()] != null && Mod.areasDB[areaIndex]["stages"][levelToUse.ToString()]["requirements"] != null)
                 {
-                    foreach (JToken requirement in Mod.areasDB["areaDefaults"][areaIndex]["stages"][levelToUse]["requirements"])
+                    foreach (JToken requirement in Mod.areasDB[areaIndex]["stages"][levelToUse.ToString()]["requirements"])
                     {
                         if (requirementTypeIndex == 0 && requirement["type"].ToString().Equals("Area"))
                         {
@@ -2873,18 +3035,28 @@ namespace EFM
                         {
                             if (Mod.itemMap.ContainsKey(requirement["templateId"].ToString()))
                             {
-                                string itemID = "";
-                                if (int.TryParse(Mod.itemMap[requirement["templateId"].ToString()], out int tryParseResult))
+                                string[] itemIDs = null;
+                                ItemMapEntry itemMapEntry = Mod.itemMap[requirement["templateId"].ToString()];
+                                switch (itemMapEntry.mode)
                                 {
-                                    itemID = tryParseResult.ToString();
-                                }
-                                else // Is not a custom item
-                                {
-                                    itemID = Mod.itemMap[requirement["templateId"].ToString()];
+                                    case 0:
+                                        itemIDs = new string[] { itemMapEntry.ID };
+                                        break;
+                                    case 1:
+                                        itemIDs = itemMapEntry.modulIDs;
+                                        break;
+                                    case 2:
+                                        itemIDs = new string[] { itemMapEntry.otherModID };
+                                        break;
                                 }
 
                                 int itemAmountNeeded = (int)requirement["count"];
-                                int itemAmountInInventory = (Mod.baseInventory.ContainsKey(itemID) ? Mod.baseInventory[itemID] : 0) + (Mod.playerInventory.ContainsKey(itemID) ? Mod.playerInventory[itemID] : 0);
+                                int itemAmountInInventory = 0;
+                                foreach(string itemID in itemIDs)
+                                {
+                                    itemAmountInInventory += Mod.baseInventory.ContainsKey(itemID) ? Mod.baseInventory[itemID] : 0;
+                                    itemAmountInInventory += Mod.playerInventory.ContainsKey(itemID) ? Mod.playerInventory[itemID] : 0;
+                                }
 
                                 if (itemAmountInInventory < itemAmountNeeded)
                                 {
@@ -2902,7 +3074,7 @@ namespace EFM
                         }
                         else if (requirementTypeIndex == 3 && requirement["type"].ToString().Equals("Skill"))
                         {
-                            float skillLevel = Mod.skills[(int)requirement["skillIndex"]].currentProgress / 100;
+                            float skillLevel = Mod.skills[Mod.SkillNameToIndex(requirement["skillName"].ToString())].currentProgress / 100;
                             if (skillLevel < (int)requirement["skillLevel"])
                             {
                                 return false;
@@ -3048,32 +3220,57 @@ namespace EFM
             buttonClickSound.Play();
 
             // Remove items from inventory
-            foreach (JToken requirement in Mod.areasDB["areaDefaults"][areaIndex]["stages"][level+1]["requirements"])
+            foreach (JToken requirement in Mod.areasDB[areaIndex]["stages"][(level+1).ToString()]["requirements"])
             {
                 if (requirement["type"].ToString().Equals("Item"))
                 {
-                    string actualID = Mod.itemMap[requirement["templateId"].ToString()];
+                    string[] actualIDs = null;
+                    ItemMapEntry itemMapEntry = Mod.itemMap[requirement["templateId"].ToString()];
+                    switch (itemMapEntry.mode)
+                    {
+                        case 0:
+                            actualIDs = new string[] { itemMapEntry.ID };
+                            break;
+                        case 1:
+                            actualIDs = itemMapEntry.modulIDs;
+                            break;
+                        case 2:
+                            actualIDs = new string[] { itemMapEntry.otherModID };
+                            break;
+                    }
                     int amountToRemove = (int)requirement["count"];
                     int amountToRemoveFromBase = 0;
                     int amountToRemoveFromPlayer = 0;
-                    if (Mod.baseInventory.ContainsKey(actualID))
+                    int amountInBaseInventory = 0;
+                    foreach(string actualID in actualIDs)
                     {
-                        if(Mod.baseInventory[actualID] >= amountToRemove)
+                        if (Mod.baseInventory.ContainsKey(actualID))
                         {
-                            amountToRemoveFromBase = amountToRemove;
+                            amountInBaseInventory += Mod.baseInventory[actualID];
                         }
-                        else
-                        {
-                            amountToRemoveFromBase = Mod.baseInventory[actualID];
-                            amountToRemoveFromPlayer = amountToRemove - Mod.baseInventory[actualID];
-                        }
+                    }
+                    if(amountInBaseInventory >= amountToRemove)
+                    {
+                        amountToRemoveFromBase = amountToRemove;
                     }
                     else
                     {
-                        amountToRemoveFromPlayer = amountToRemove;
+                        amountToRemoveFromBase = amountInBaseInventory;
+                        amountToRemoveFromPlayer = amountToRemove - amountInBaseInventory;
                     }
-                    if (amountToRemoveFromBase > 0)
+                    List<string> actualIDsUsed = new List<string>();
+                    int actualIDIndex = 0;
+                    while (amountToRemoveFromBase > 0)
                     {
+                        string actualID = actualIDs[actualIDIndex++];
+                        if (!Mod.baseInventory.ContainsKey(actualID))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            actualIDsUsed.Add(actualID);
+                        }
                         Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - amountToRemoveFromBase;
                         List<GameObject> objectList = baseManager.baseInventoryObjects[actualID];
                         for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i)
@@ -3155,8 +3352,19 @@ namespace EFM
                             }
                         }
                     }
-                    if (amountToRemoveFromPlayer > 0)
+
+                    actualIDIndex = 0;
+                    while (amountToRemoveFromPlayer > 0)
                     {
+                        string actualID = actualIDs[actualIDIndex++];
+                        if (!Mod.playerInventory.ContainsKey(actualID))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            actualIDsUsed.Add(actualID);
+                        }
                         Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - amountToRemoveFromPlayer;
                         List<GameObject> objectList = Mod.playerInventoryObjects[actualID];
                         for (int i = objectList.Count - 1, j = amountToRemoveFromPlayer; i >= 0 && j > 0; --i)
@@ -3257,21 +3465,24 @@ namespace EFM
 
                     foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
                     {
-                        baseAreaManager.UpdateBasedOnItem(actualID);
+                        foreach (string actualIDUsed in actualIDsUsed)
+                        {
+                            baseAreaManager.UpdateBasedOnItem(actualIDUsed);
+                        }
                     }
                 }
             }
             // Remove required for area entry, because it will be refilled when we update the area state
             Mod.requiredPerArea[areaIndex] = null;
 
-            if ((int)Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["constructionTime"] == 0)
+            if ((int)Mod.areasDB[areaIndex]["stages"][(level + 1).ToString()]["constructionTime"] == 0)
             {
                 Upgrade();
             }
             else
             {
                 constructing = true;
-                constructionTimer = (int)Mod.areasDB["areaDefaults"][areaIndex]["stages"][level + 1]["constructionTime"];
+                constructionTimer = (int)Mod.areasDB[areaIndex]["stages"][(level + 1).ToString()]["constructionTime"];
             }
 
             // Add skill points
@@ -3345,107 +3556,393 @@ namespace EFM
             SetEffectsActive(true);
         }
 
-        public void OnFarmingViewSetAllClick(string productionID)
+        public void OnFarmingViewSetAllClick(string productionID, string endProduct)
         {
-            string requiredItemID = productions[productionID].requirements[0].ID;
+            string[] requiredItemIDs = productionsByItemIDByProdID[productionID][endProduct].requirements[0].IDs;
             bool custom = false;
 
-            int amountInPlayerInventory = 0;
-            int amountInBaseInventory = 0;
-            if (Mod.baseInventory.ContainsKey(requiredItemID))
+            int totalAmountInInventory = 0;
+            int totalSlotsToFillCount = 0;
+            foreach (string requiredItemID in requiredItemIDs)
             {
-                foreach(GameObject itemInstanceObject in baseManager.baseInventoryObjects[requiredItemID])
+                int amountInPlayerInventory = 0;
+                int amountInBaseInventory = 0;
+                if (Mod.baseInventory.ContainsKey(requiredItemID))
                 {
-                    EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
-                    if (itemCIW != null)
+                    foreach (GameObject itemInstanceObject in baseManager.baseInventoryObjects[requiredItemID])
                     {
-                        custom = true;
-                        if (itemCIW.maxAmount > 0)
+                        EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
+                        if (itemCIW != null)
                         {
-                            if (itemCIW.amount > 0)
+                            custom = true;
+                            if (itemCIW.maxAmount > 0)
+                            {
+                                if (itemCIW.amount > 0)
+                                {
+                                    ++amountInBaseInventory;
+                                }
+                            }
+                            else if (itemCIW.maxStack > 0)
+                            {
+                                amountInBaseInventory += itemCIW.stack;
+                            }
+                            else
                             {
                                 ++amountInBaseInventory;
                             }
-                        }
-                        else if (itemCIW.maxStack > 0)
-                        {
-                            amountInBaseInventory += itemCIW.stack;
                         }
                         else
                         {
                             ++amountInBaseInventory;
                         }
                     }
-                    else
-                    {
-                        ++amountInBaseInventory;
-                    }
                 }
-            }
-            if (Mod.playerInventory.ContainsKey(requiredItemID))
-            {
-                foreach (GameObject itemInstanceObject in Mod.playerInventoryObjects[requiredItemID])
+                if (Mod.playerInventory.ContainsKey(requiredItemID))
                 {
-                    EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
-                    if (itemCIW != null)
+                    foreach (GameObject itemInstanceObject in Mod.playerInventoryObjects[requiredItemID])
                     {
-                        custom = true;
-                        if (itemCIW.maxAmount > 0)
+                        EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
+                        if (itemCIW != null)
                         {
-                            if (itemCIW.amount > 0)
+                            custom = true;
+                            if (itemCIW.maxAmount > 0)
+                            {
+                                if (itemCIW.amount > 0)
+                                {
+                                    ++amountInPlayerInventory;
+                                }
+                            }
+                            else if (itemCIW.maxStack > 0)
+                            {
+                                amountInPlayerInventory += itemCIW.stack;
+                            }
+                            else
                             {
                                 ++amountInPlayerInventory;
                             }
-                        }
-                        else if (itemCIW.maxStack > 0)
-                        {
-                            amountInPlayerInventory += itemCIW.stack;
                         }
                         else
                         {
                             ++amountInPlayerInventory;
                         }
                     }
-                    else
+                }
+
+                int amountInInventory = amountInBaseInventory + amountInPlayerInventory;
+                totalAmountInInventory += amountInInventory;
+                if (amountInInventory == 0)
+                {
+                    return;
+                }
+
+                // Check number of slots available 
+                int filledSlotCount = GetFilledSlotCount();
+                int slotsToFillCount = slots[level].Count() - filledSlotCount;
+                totalSlotsToFillCount += slotsToFillCount;
+                if (slotsToFillCount == 0)
+                {
+                    return;
+                }
+
+                // Get item's prefab CIW if it is a custom item
+                EFM_CustomItemWrapper CIW = null;
+                if (custom)
+                {
+                    CIW = Mod.itemPrefabs[int.Parse(requiredItemID)].GetComponentInChildren<EFM_CustomItemWrapper>();
+                }
+
+                // If item custom and has an amount
+                if (custom && CIW.maxAmount != 0)
+                {
+                    // Take the most used up instances of this item we can find
+                    for (int i = 0; i < slotsToFillCount && i < amountInInventory; ++i)
                     {
-                        ++amountInPlayerInventory;
+                        int currentLeastAmount = CIW.maxAmount;
+                        GameObject leastInstanceObject = null;
+                        List<GameObject> listToUse = null;
+
+                        // Choose which list of objects to use
+                        if (amountInBaseInventory > 0)
+                        {
+                            listToUse = baseManager.baseInventoryObjects[requiredItemID];
+                        }
+                        else // Have to take from player inventory
+                        {
+                            listToUse = Mod.playerInventoryObjects[requiredItemID];
+                        }
+
+                        // Find least amount object that has more than 0 amount
+                        for (int j = listToUse.Count - 1; j >= 0; --j)
+                        {
+                            EFM_CustomItemWrapper instanceCIW = listToUse[j].GetComponentInChildren<EFM_CustomItemWrapper>();
+                            if (instanceCIW.amount > 0 && instanceCIW.amount <= currentLeastAmount)
+                            {
+                                currentLeastAmount = instanceCIW.amount;
+                                leastInstanceObject = listToUse[j];
+                            }
+                        }
+
+                        // Set the item's slot to the first available one
+                        for (int slotIndex = 0; slotIndex < slots[level].Count; ++slotIndex)
+                        {
+                            if (slots[level][slotIndex].CurObject == null)
+                            {
+                                FVRPhysicalObject slotItemPhysObj = leastInstanceObject.GetComponentInChildren<FVRPhysicalObject>();
+                                Mod.areaSlotShouldUpdate = false;
+                                slotItemPhysObj.SetQuickBeltSlot(slots[level][slotIndex]);
+                                slotItemPhysObj.SetParentage(slots[level][slotIndex].QuickbeltRoot);
+                                ++filledSlotCount;
+
+                                EFM_CustomItemWrapper instanceCIW = slotItemPhysObj.GetComponent<EFM_CustomItemWrapper>();
+                                EFM_Base_Manager.RemoveFromContainer(leastInstanceObject.transform, instanceCIW, null);
+                                int preLocationIndex = instanceCIW.locationIndex;
+                                BeginInteractionPatch.SetItemLocationIndex(3, instanceCIW, null);
+                                if (preLocationIndex == 0) // If was on player
+                                {
+                                    amountInInventory -= instanceCIW.stack;
+                                    Mod.RemoveFromPlayerInventory(instanceCIW.transform, true);
+                                }
+                                else // Was in hideout
+                                {
+                                    amountInInventory -= instanceCIW.stack;
+                                    Mod.currentBaseManager.RemoveFromBaseInventory(instanceCIW.transform, true);
+                                }
+                                break;
+                            }
+                        }
                     }
+                }
+                else // either vanilla or does not have an amount
+                {
+                    for (int i = 0; i < slotsToFillCount && i < (amountInBaseInventory + amountInPlayerInventory); ++i)
+                    {
+                        GameObject instanceObject = null;
+                        List<GameObject> listToUse = null;
+
+                        // Choose which list of objects to use
+                        if (amountInBaseInventory > 0)
+                        {
+                            listToUse = baseManager.baseInventoryObjects[requiredItemID];
+                        }
+                        else // Have to take from player inventory
+                        {
+                            listToUse = Mod.playerInventoryObjects[requiredItemID];
+                        }
+
+                        // Take the last item from the list
+                        instanceObject = listToUse[listToUse.Count - 1];
+
+                        // Set the item's slot to the first available one
+                        for (int slotIndex = 0; slotIndex < slots[level].Count; ++slotIndex)
+                        {
+                            if (slots[level][slotIndex].CurObject == null)
+                            {
+                                FVRPhysicalObject slotItemPhysObj = instanceObject.GetComponentInChildren<FVRPhysicalObject>();
+                                Mod.areaSlotShouldUpdate = false;
+                                slotItemPhysObj.SetQuickBeltSlot(slots[level][slotIndex]);
+                                slotItemPhysObj.SetParentage(slots[level][slotIndex].QuickbeltRoot);
+                                ++filledSlotCount;
+
+                                EFM_CustomItemWrapper instanceCIW = slotItemPhysObj.GetComponent<EFM_CustomItemWrapper>();
+                                EFM_VanillaItemDescriptor instanceVID = slotItemPhysObj.GetComponent<EFM_VanillaItemDescriptor>();
+                                EFM_Base_Manager.RemoveFromContainer(instanceObject.transform, null, instanceVID);
+                                int preLocationIndex = -1;
+                                if (custom)
+                                {
+                                    preLocationIndex = instanceCIW.locationIndex;
+                                }
+                                else
+                                {
+                                    preLocationIndex = instanceVID.locationIndex;
+                                }
+                                BeginInteractionPatch.SetItemLocationIndex(3, instanceCIW, instanceVID);
+                                if (preLocationIndex == 0) // If was on player
+                                {
+                                    int amountToRemove = custom ? instanceCIW.stack : 1;
+                                    amountInInventory -= amountToRemove;
+                                    Mod.RemoveFromPlayerInventory(instanceCIW.transform, true);
+                                }
+                                else // Was in hideout
+                                {
+                                    int amountToRemove = custom ? instanceCIW.stack : 1;
+                                    amountInInventory -= amountToRemove;
+                                    Mod.currentBaseManager.RemoveFromBaseInventory(instanceObject.transform, true);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
+                {
+                    baseAreaManager.UpdateBasedOnItem(requiredItemID, true, amountInInventory);
                 }
             }
 
-            int amountInInventory = amountInBaseInventory + amountInPlayerInventory;
-            if (amountInInventory == 0)
+            // Update UI of the production itself
+            GameObject farmingView = productionsByItemIDByProdID[productionID][endProduct].gameObject;
+            int installedAmount = Mathf.Min(totalAmountInInventory, totalSlotsToFillCount);
+            productionsByItemIDByProdID[productionID][endProduct].installedCount += installedAmount;
+
+            if(installedAmount > 0)
             {
-                return;
+                PlaySlotInputSound();
             }
 
-            // Check number of slots available 
-            int filledSlotCount = GetFilledSlotCount();
-            int slotsToFillCount = slots[level].Count() - filledSlotCount;
-            if(slotsToFillCount == 0)
+            farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionsByItemIDByProdID[productionID][endProduct].installedCount.ToString();
+            if(productionsByItemIDByProdID[productionID][endProduct].installedCount > 0)
             {
-                return;
-            }
-
-            // Get item's prefab CIW if it is a custom item
-            EFM_CustomItemWrapper CIW = null;
-            if(custom)
-            {
-                CIW = Mod.itemPrefabs[int.Parse(requiredItemID)].GetComponentInChildren<EFM_CustomItemWrapper>();
-            }
-
-            // If item custom and has an amount
-            if(custom && CIW.maxAmount != 0)
-            {
-                // Take the most used up instances of this item we can find
-                for(int i = 0; i < slotsToFillCount && i < amountInInventory; ++i)
+                if (Mod.itemIcons.ContainsKey(requiredItemIDs[0]))
                 {
+                    farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[requiredItemIDs[0]];
+                }
+                else
+                {
+                    AnvilManager.Run(Mod.SetVanillaIcon(requiredItemIDs[0], farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+                }
+                if (!productionsByItemIDByProdID[productionID][endProduct].active)
+                {
+                    productionsByItemIDByProdID[productionID][endProduct].active = true;
+
+                    // Only set timeLeft to productinTime if there isnt already some time left, because that would mean that 
+                    // the production was already in progress but it did not have an item in its slot
+                    if(productionsByItemIDByProdID[productionID][endProduct].timeLeft <= 0)
+                    {
+                        productionsByItemIDByProdID[productionID][endProduct].timeLeft = productionsByItemIDByProdID[productionID][endProduct].productionTime - (productionsByItemIDByProdID[productionID][endProduct].productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
+                    }
+
+                    activeProductions.Add(productionID, productionsByItemIDByProdID[productionID][endProduct]);
+
+                    PlayProductionStartSound();
+                }
+
+                // Set production status
+                farmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
+                int[] formattedTimeLeft = FormatTime(productionsByItemIDByProdID[productionID][endProduct].timeLeft);
+                if (generatorRunning) 
+                {
+                    farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                }
+                else
+                {
+                    farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Paused\n({0:00}:{1:00}:{2:00})", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                }
+            }
+            else
+            {
+                farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = EFM_Base_Manager.emptyItemSlotIcon;
+                if (productionsByItemIDByProdID[productionID][endProduct].active)
+                {
+                    productionsByItemIDByProdID[productionID][endProduct].active = false;
+
+                    activeProductions.Remove(productionID);
+                }
+            }
+        }
+        
+        public void OnFarmingViewSetOneClick(string productionID, string endProduct)
+        {
+            // Just return if we have none of necessary item in inventory
+            string[] requiredItemIDs = productionsByItemIDByProdID[productionID][endProduct].requirements[0].IDs;
+            bool custom = false;
+
+            foreach (string requiredItemID in requiredItemIDs)
+            {
+                int amountInPlayerInventory = 0;
+                int amountInBaseInventory = 0;
+                if (Mod.baseInventory.ContainsKey(requiredItemID))
+                {
+                    foreach (GameObject itemInstanceObject in baseManager.baseInventoryObjects[requiredItemID])
+                    {
+                        EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
+                        if (itemCIW != null)
+                        {
+                            custom = true;
+                            if (itemCIW.maxAmount > 0)
+                            {
+                                if (itemCIW.amount > 0)
+                                {
+                                    ++amountInBaseInventory;
+                                }
+                            }
+                            else if (itemCIW.maxStack > 0)
+                            {
+                                amountInBaseInventory += itemCIW.stack;
+                            }
+                            else
+                            {
+                                ++amountInBaseInventory;
+                            }
+                        }
+                        else
+                        {
+                            ++amountInBaseInventory;
+                        }
+                    }
+                }
+                if (Mod.playerInventory.ContainsKey(requiredItemID))
+                {
+                    foreach (GameObject itemInstanceObject in Mod.playerInventoryObjects[requiredItemID])
+                    {
+                        EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
+                        if (itemCIW != null)
+                        {
+                            custom = true;
+                            if (itemCIW.maxAmount > 0)
+                            {
+                                if (itemCIW.amount > 0)
+                                {
+                                    ++amountInPlayerInventory;
+                                }
+                            }
+                            else if (itemCIW.maxStack > 0)
+                            {
+                                amountInPlayerInventory += itemCIW.stack;
+                            }
+                            else
+                            {
+                                ++amountInPlayerInventory;
+                            }
+                        }
+                        else
+                        {
+                            ++amountInPlayerInventory;
+                        }
+                    }
+                }
+
+                int amountInInventory = amountInBaseInventory + amountInPlayerInventory;
+                if (amountInInventory == 0)
+                {
+                    return;
+                }
+
+                // Check number of slots available 
+                int filledSlotCount = GetFilledSlotCount();
+                int slotsToFillCount = slots[level].Count() - filledSlotCount;
+                if (slotsToFillCount == 0)
+                {
+                    return;
+                }
+
+                // Get item's prefab CIW if it is a custom item
+                EFM_CustomItemWrapper CIW = null;
+                if (custom)
+                {
+                    CIW = Mod.itemPrefabs[int.Parse(requiredItemID)].GetComponentInChildren<EFM_CustomItemWrapper>();
+                }
+
+                // If item custom and has an amount
+                if (custom && CIW.maxAmount != 0)
+                {
+                    // Take the most used up instances of this item we can find
                     int currentLeastAmount = CIW.maxAmount;
                     GameObject leastInstanceObject = null;
                     List<GameObject> listToUse = null;
 
                     // Choose which list of objects to use
-                    if (amountInBaseInventory > 0) 
+                    if (amountInBaseInventory > 0)
                     {
                         listToUse = baseManager.baseInventoryObjects[requiredItemID];
                     }
@@ -3494,10 +3991,7 @@ namespace EFM
                         }
                     }
                 }
-            }
-            else // either vanilla or does not have an amount
-            {
-                for (int i = 0; i < slotsToFillCount && i < (amountInBaseInventory + amountInPlayerInventory); ++i)
+                else // either vanilla or does not have an amount
                 {
                     GameObject instanceObject = null;
                     List<GameObject> listToUse = null;
@@ -3555,320 +4049,47 @@ namespace EFM
                         }
                     }
                 }
-            }
 
-            foreach(EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
-            {
-                baseAreaManager.UpdateBasedOnItem(requiredItemID, true, amountInInventory);
+                foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
+                {
+                    baseAreaManager.UpdateBasedOnItem(requiredItemID, true, amountInInventory);
+                }
             }
 
             // Update UI of the production itself
-            GameObject farmingView = productions[productionID].gameObject;
-            int installedAmount = Mathf.Min(amountInInventory, slotsToFillCount);
-            productions[productionID].installedCount += installedAmount;
-
-            if(installedAmount > 0)
-            {
-                PlaySlotInputSound();
-            }
-
-            farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productions[productionID].installedCount.ToString();
-            if(productions[productionID].installedCount > 0)
-            {
-                if (Mod.itemIcons.ContainsKey(requiredItemID))
-                {
-                    farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[requiredItemID];
-                }
-                else
-                {
-                    AnvilManager.Run(Mod.SetVanillaIcon(requiredItemID, farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
-                }
-                if (!productions[productionID].active)
-                {
-                    productions[productionID].active = true;
-
-                    // Only set timeLeft to productinTime if there isnt already some time left, because that would mean that 
-                    // the production was already in progress but it did not have an item in its slot
-                    if(productions[productionID].timeLeft <= 0)
-                    {
-                        productions[productionID].timeLeft = productions[productionID].productionTime - (productions[productionID].productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
-                    }
-
-                    activeProductions.Add(productionID, productions[productionID]);
-
-                    PlayProductionStartSound();
-                }
-
-                // Set production status
-                farmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
-                int[] formattedTimeLeft = FormatTime(productions[productionID].timeLeft);
-                if (generatorRunning) 
-                {
-                    farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
-                }
-                else
-                {
-                    farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Paused\n({0:00}:{1:00}:{2:00})", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
-                }
-            }
-            else
-            {
-                farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = EFM_Base_Manager.emptyItemSlotIcon;
-                if (productions[productionID].active)
-                {
-                    productions[productionID].active = false;
-
-                    activeProductions.Remove(productionID);
-                }
-            }
-        }
-        
-        public void OnFarmingViewSetOneClick(string productionID)
-        {
-            // Just return if we have none of necessary item in inventory
-            string requiredItemID = productions[productionID].requirements[0].ID;
-            bool custom = false;
-
-            int amountInPlayerInventory = 0;
-            int amountInBaseInventory = 0;
-            if (Mod.baseInventory.ContainsKey(requiredItemID))
-            {
-                foreach(GameObject itemInstanceObject in baseManager.baseInventoryObjects[requiredItemID])
-                {
-                    EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
-                    if (itemCIW != null)
-                    {
-                        custom = true;
-                        if (itemCIW.maxAmount > 0)
-                        {
-                            if (itemCIW.amount > 0)
-                            {
-                                ++amountInBaseInventory;
-                            }
-                        }
-                        else if (itemCIW.maxStack > 0)
-                        {
-                            amountInBaseInventory += itemCIW.stack;
-                        }
-                        else
-                        {
-                            ++amountInBaseInventory;
-                        }
-                    }
-                    else
-                    {
-                        ++amountInBaseInventory;
-                    }
-                }
-            }
-            if (Mod.playerInventory.ContainsKey(requiredItemID))
-            {
-                foreach (GameObject itemInstanceObject in Mod.playerInventoryObjects[requiredItemID])
-                {
-                    EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
-                    if (itemCIW != null)
-                    {
-                        custom = true;
-                        if (itemCIW.maxAmount > 0)
-                        {
-                            if (itemCIW.amount > 0)
-                            {
-                                ++amountInPlayerInventory;
-                            }
-                        }
-                        else if (itemCIW.maxStack > 0)
-                        {
-                            amountInPlayerInventory += itemCIW.stack;
-                        }
-                        else
-                        {
-                            ++amountInPlayerInventory;
-                        }
-                    }
-                    else
-                    {
-                        ++amountInPlayerInventory;
-                    }
-                }
-            }
-
-            int amountInInventory = amountInBaseInventory + amountInPlayerInventory;
-            if (amountInInventory == 0)
-            {
-                return;
-            }
-
-            // Check number of slots available 
-            int filledSlotCount = GetFilledSlotCount();
-            int slotsToFillCount = slots[level].Count() - filledSlotCount;
-            if(slotsToFillCount == 0)
-            {
-                return;
-            }
-
-            // Get item's prefab CIW if it is a custom item
-            EFM_CustomItemWrapper CIW = null;
-            if(custom)
-            {
-                CIW = Mod.itemPrefabs[int.Parse(requiredItemID)].GetComponentInChildren<EFM_CustomItemWrapper>();
-            }
-
-            // If item custom and has an amount
-            if(custom && CIW.maxAmount != 0)
-            {
-                // Take the most used up instances of this item we can find
-                int currentLeastAmount = CIW.maxAmount;
-                GameObject leastInstanceObject = null;
-                List<GameObject> listToUse = null;
-
-                // Choose which list of objects to use
-                if (amountInBaseInventory > 0) 
-                {
-                    listToUse = baseManager.baseInventoryObjects[requiredItemID];
-                }
-                else // Have to take from player inventory
-                {
-                    listToUse = Mod.playerInventoryObjects[requiredItemID];
-                }
-
-                // Find least amount object that has more than 0 amount
-                for (int j = listToUse.Count - 1; j >= 0; --j)
-                {
-                    EFM_CustomItemWrapper instanceCIW = listToUse[j].GetComponentInChildren<EFM_CustomItemWrapper>();
-                    if (instanceCIW.amount > 0 && instanceCIW.amount <= currentLeastAmount)
-                    {
-                        currentLeastAmount = instanceCIW.amount;
-                        leastInstanceObject = listToUse[j];
-                    }
-                }
-
-                // Set the item's slot to the first available one
-                for (int slotIndex = 0; slotIndex < slots[level].Count; ++slotIndex)
-                {
-                    if (slots[level][slotIndex].CurObject == null)
-                    {
-                        FVRPhysicalObject slotItemPhysObj = leastInstanceObject.GetComponentInChildren<FVRPhysicalObject>();
-                        Mod.areaSlotShouldUpdate = false;
-                        slotItemPhysObj.SetQuickBeltSlot(slots[level][slotIndex]);
-                        slotItemPhysObj.SetParentage(slots[level][slotIndex].QuickbeltRoot);
-                        ++filledSlotCount;
-
-                        EFM_CustomItemWrapper instanceCIW = slotItemPhysObj.GetComponent<EFM_CustomItemWrapper>();
-                        EFM_Base_Manager.RemoveFromContainer(leastInstanceObject.transform, instanceCIW, null);
-                        int preLocationIndex = instanceCIW.locationIndex;
-                        BeginInteractionPatch.SetItemLocationIndex(3, instanceCIW, null);
-                        if (preLocationIndex == 0) // If was on player
-                        {
-                            amountInInventory -= instanceCIW.stack;
-                            Mod.RemoveFromPlayerInventory(instanceCIW.transform, true);
-                        }
-                        else // Was in hideout
-                        {
-                            amountInInventory -= instanceCIW.stack;
-                            Mod.currentBaseManager.RemoveFromBaseInventory(instanceCIW.transform, true);
-                        }
-                        break;
-                    }
-                }
-            }
-            else // either vanilla or does not have an amount
-            {
-                GameObject instanceObject = null;
-                List<GameObject> listToUse = null;
-
-                // Choose which list of objects to use
-                if (amountInBaseInventory > 0)
-                {
-                    listToUse = baseManager.baseInventoryObjects[requiredItemID];
-                }
-                else // Have to take from player inventory
-                {
-                    listToUse = Mod.playerInventoryObjects[requiredItemID];
-                }
-
-                // Take the last item from the list
-                instanceObject = listToUse[listToUse.Count - 1];
-
-                // Set the item's slot to the first available one
-                for (int slotIndex = 0; slotIndex < slots[level].Count; ++slotIndex)
-                {
-                    if (slots[level][slotIndex].CurObject == null)
-                    {
-                        FVRPhysicalObject slotItemPhysObj = instanceObject.GetComponentInChildren<FVRPhysicalObject>();
-                        Mod.areaSlotShouldUpdate = false;
-                        slotItemPhysObj.SetQuickBeltSlot(slots[level][slotIndex]);
-                        slotItemPhysObj.SetParentage(slots[level][slotIndex].QuickbeltRoot);
-                        ++filledSlotCount;
-
-                        EFM_CustomItemWrapper instanceCIW = slotItemPhysObj.GetComponent<EFM_CustomItemWrapper>();
-                        EFM_VanillaItemDescriptor instanceVID = slotItemPhysObj.GetComponent<EFM_VanillaItemDescriptor>();
-                        EFM_Base_Manager.RemoveFromContainer(instanceObject.transform, null, instanceVID);
-                        int preLocationIndex = -1;
-                        if (custom)
-                        {
-                            preLocationIndex = instanceCIW.locationIndex;
-                        }
-                        else
-                        {
-                            preLocationIndex = instanceVID.locationIndex;
-                        }
-                        BeginInteractionPatch.SetItemLocationIndex(3, instanceCIW, instanceVID);
-                        if (preLocationIndex == 0) // If was on player
-                        {
-                            int amountToRemove = custom ? instanceCIW.stack : 1;
-                            amountInInventory -= amountToRemove;
-                            Mod.RemoveFromPlayerInventory(instanceCIW.transform, true);
-                        }
-                        else // Was in hideout
-                        {
-                            int amountToRemove = custom ? instanceCIW.stack : 1;
-                            amountInInventory -= amountToRemove;
-                            Mod.currentBaseManager.RemoveFromBaseInventory(instanceObject.transform, true);
-                        }
-                        break;
-                    }
-                }
-            }
-
-            foreach(EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
-            {
-                baseAreaManager.UpdateBasedOnItem(requiredItemID, true, amountInInventory);
-            }
-
-            // Update UI of the production itself
-            GameObject farmingView = productions[productionID].gameObject;
-            productions[productionID].installedCount += 1;
+            GameObject farmingView = productionsByItemIDByProdID[productionID][endProduct].gameObject;
+            productionsByItemIDByProdID[productionID][endProduct].installedCount += 1;
 
             PlaySlotInputSound();
 
-            farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productions[productionID].installedCount.ToString();
-            if (Mod.itemIcons.ContainsKey(requiredItemID))
+            farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionsByItemIDByProdID[productionID][endProduct].installedCount.ToString();
+            if (Mod.itemIcons.ContainsKey(requiredItemIDs[0]))
             {
-                farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[requiredItemID];
+                farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[requiredItemIDs[0]];
             }
             else
             {
-                AnvilManager.Run(Mod.SetVanillaIcon(requiredItemID, farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+                AnvilManager.Run(Mod.SetVanillaIcon(requiredItemIDs[0], farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
             }
-            if (!productions[productionID].active)
+            if (!productionsByItemIDByProdID[productionID][endProduct].active)
             {
-                productions[productionID].active = true;
+                productionsByItemIDByProdID[productionID][endProduct].active = true;
 
                 // Only set timeLeft to productinTime if there isnt already some time left, because that would mean that 
                 // the production was already in progress but it did not have an item in its slot
-                if(productions[productionID].timeLeft <= 0)
+                if(productionsByItemIDByProdID[productionID][endProduct].timeLeft <= 0)
                 {
-                    productions[productionID].timeLeft = productions[productionID].productionTime - (productions[productionID].productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
+                    productionsByItemIDByProdID[productionID][endProduct].timeLeft = productionsByItemIDByProdID[productionID][endProduct].productionTime - (productionsByItemIDByProdID[productionID][endProduct].productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
                 }
 
-                activeProductions.Add(productionID, productions[productionID]);
+                activeProductions.Add(productionID, productionsByItemIDByProdID[productionID][endProduct]);
 
                 PlayProductionStartSound();
             }
 
             // Set production status
             farmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
-            int[] formattedTimeLeft = FormatTime(productions[productionID].timeLeft);
+            int[] formattedTimeLeft = FormatTime(productionsByItemIDByProdID[productionID][endProduct].timeLeft);
             if (generatorRunning) 
             {
                 farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
@@ -3887,7 +4108,7 @@ namespace EFM
             }
         }
 
-        public void OnFarmingViewRemoveOneClick(string productionID)
+        public void OnFarmingViewRemoveOneClick(string productionID, string endProduct)
         {
             // Check if there are filled slots
             // If custom item, take the least used up amount one
@@ -3993,30 +4214,30 @@ namespace EFM
             }
 
             // Update UI of the production itself
-            GameObject farmingView = productions[productionID].gameObject;
-            productions[productionID].installedCount -= 1;
+            GameObject farmingView = productionsByItemIDByProdID[productionID][endProduct].gameObject;
+            productionsByItemIDByProdID[productionID][endProduct].installedCount -= 1;
 
-            farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productions[productionID].installedCount.ToString();
-            if (productions[productionID].installedCount == 0)
+            farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionsByItemIDByProdID[productionID][endProduct].installedCount.ToString();
+            if (productionsByItemIDByProdID[productionID][endProduct].installedCount == 0)
             {
                 farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = EFM_Base_Manager.emptyItemSlotIcon;
-                if (productions[productionID].active)
+                if (productionsByItemIDByProdID[productionID][endProduct].active)
                 {
-                    productions[productionID].active = false;
+                    productionsByItemIDByProdID[productionID][endProduct].active = false;
 
                     activeProductions.Remove(productionID);
                 }
             }
         }
 
-        public void OnProductionGetItemsClick(string productionID)
+        public void OnProductionGetItemsClick(string productionID, string endProduct)
         {
             // Spawn necessary number of items
             // UpdateBasedOnItem with spawned item ID
             // Resume production if it was continuous and at limit
             // Reset production if it was not continuous
             // MAke sure getitems button is disabled
-            EFM_AreaProduction production = productions[productionID];
+            EFM_AreaProduction production = productionsByItemIDByProdID[productionID][endProduct];
             string itemID = production.endProduct;
             int amount = production.productionCount;
             Transform outputVolume = transform.GetChild(transform.childCount - 3);
@@ -4145,97 +4366,157 @@ namespace EFM
             }
             else
             {
-                AnvilManager.Run(SpawnVanillaItem(itemID, amount, outputVolumeCollider, productionID));
+                AnvilManager.Run(SpawnVanillaItem(itemID, amount, outputVolumeCollider, productionID, endProduct));
             }
 
             production.productionCount = 0;
         }
 
-        public void OnProduceViewStartClick(string productionID)
+        public void OnProduceViewStartClick(string productionID, string endProduct)
         {
             // For each requirement remove needed amount of item from inventory
             // Update UI of requirements and of the production itself to indicate it is active
             // Set production logically as active
-            EFM_AreaProduction production = productions[productionID];
+            EFM_AreaProduction production = productionsByItemIDByProdID[productionID][endProduct];
             foreach (AreaProductionRequirement requirement in production.requirements)
             {
-                string requiredItemID = requirement.ID;
+                string[] requiredItemIDs = requirement.IDs;
                 int amountToRemove = requirement.count;
-                int amountToRemoveFromBase = 0;
-                int amountToRemoveFromPlayer = 0;
-                int amountInBase = 0;
-                int amountOnPlayer = 0;
-                if (Mod.baseInventory.ContainsKey(requiredItemID))
+
+                foreach (string requiredItemID in requiredItemIDs)
                 {
-                    amountInBase = Mod.baseInventory[requiredItemID];
-                    if (amountInBase >= amountToRemove)
+                    int amountInPlayerInventory = 0;
+                    int amountInBaseInventory = 0;
+                    int amountToRemoveFromBase = 0;
+                    int amountToRemoveFromPlayer = 0;
+                    if (Mod.baseInventory.ContainsKey(requiredItemID))
+                    {
+                        foreach (GameObject itemInstanceObject in baseManager.baseInventoryObjects[requiredItemID])
+                        {
+                            EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
+                            if (itemCIW != null)
+                            {
+                                if (itemCIW.maxAmount > 0)
+                                {
+                                    if (itemCIW.amount > 0)
+                                    {
+                                        ++amountInBaseInventory;
+                                    }
+                                }
+                                else if (itemCIW.maxStack > 0)
+                                {
+                                    amountInBaseInventory += itemCIW.stack;
+                                }
+                                else
+                                {
+                                    ++amountInBaseInventory;
+                                }
+                            }
+                            else
+                            {
+                                ++amountInBaseInventory;
+                            }
+                        }
+                    }
+                    if (Mod.playerInventory.ContainsKey(requiredItemID))
+                    {
+                        foreach (GameObject itemInstanceObject in Mod.playerInventoryObjects[requiredItemID])
+                        {
+                            EFM_CustomItemWrapper itemCIW = itemInstanceObject.GetComponentInChildren<EFM_CustomItemWrapper>();
+                            if (itemCIW != null)
+                            {
+                                if (itemCIW.maxAmount > 0)
+                                {
+                                    if (itemCIW.amount > 0)
+                                    {
+                                        ++amountInPlayerInventory;
+                                    }
+                                }
+                                else if (itemCIW.maxStack > 0)
+                                {
+                                    amountInPlayerInventory += itemCIW.stack;
+                                }
+                                else
+                                {
+                                    ++amountInPlayerInventory;
+                                }
+                            }
+                            else
+                            {
+                                ++amountInPlayerInventory;
+                            }
+                        }
+                    }
+
+                    if(amountInBaseInventory >= amountToRemove)
                     {
                         amountToRemoveFromBase = amountToRemove;
                     }
                     else
                     {
-                        amountToRemoveFromBase = Mod.baseInventory[requiredItemID];
-                        amountToRemoveFromPlayer = amountToRemove - Mod.baseInventory[requiredItemID];
+                        amountToRemoveFromBase = amountInBaseInventory;
+                        amountToRemoveFromPlayer = Mathf.Min(amountToRemove - amountToRemoveFromBase, amountInPlayerInventory);
                     }
-                }
-                else
-                {
-                    amountToRemoveFromPlayer = amountToRemove;
-                }
-                if (Mod.playerInventory.ContainsKey(requiredItemID))
-                {
-                    amountOnPlayer = Mod.playerInventory[requiredItemID];
-                }
-                if (amountToRemoveFromBase > 0)
-                {
-                    amountInBase -= amountToRemoveFromBase;
-                    Mod.baseInventory[requiredItemID] = Mod.baseInventory[requiredItemID] - amountToRemoveFromBase;
-                    List<GameObject> objectList = baseManager.baseInventoryObjects[requiredItemID];
-                    for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i)
+
+                    if (amountToRemoveFromBase > 0)
                     {
-                        GameObject toCheck = objectList[objectList.Count - 1];
-                        EFM_CustomItemWrapper CIW = toCheck.GetComponent<EFM_CustomItemWrapper>();
-                        if (CIW != null)
+                        amountInBaseInventory -= amountToRemoveFromBase;
+                        Mod.baseInventory[requiredItemID] = Mod.baseInventory[requiredItemID] - amountToRemoveFromBase;
+                        List<GameObject> objectList = baseManager.baseInventoryObjects[requiredItemID];
+                        for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i)
                         {
-                            if (CIW.stack > 0)
+                            GameObject toCheck = objectList[objectList.Count - 1];
+                            EFM_CustomItemWrapper CIW = toCheck.GetComponent<EFM_CustomItemWrapper>();
+                            if (CIW != null)
                             {
-                                if (CIW.stack > amountToRemoveFromBase)
+                                if (CIW.stack > 0)
                                 {
-                                    CIW.stack = CIW.stack - amountToRemoveFromBase;
-                                }
-                                else // CIW.stack <= amountToRemoveFromBase
-                                {
-                                    j -= CIW.stack;
-                                    objectList.RemoveAt(objectList.Count - 1);
-                                    CIW.physObj.SetQuickBeltSlot(null);
-                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
-                                    Destroy(toCheck);
-                                }
-                            }
-                            else if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
-                            {
-                                bool containsItem = false;
-                                foreach (GameObject itemInSlot in CIW.itemsInSlots)
-                                {
-                                    if (itemInSlot != null)
+                                    if (CIW.stack > amountToRemoveFromBase)
                                     {
-                                        containsItem = true;
-                                        break;
+                                        CIW.stack = CIW.stack - amountToRemoveFromBase;
+                                    }
+                                    else // CIW.stack <= amountToRemoveFromBase
+                                    {
+                                        j -= CIW.stack;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        CIW.physObj.SetQuickBeltSlot(null);
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
+                                        Destroy(toCheck);
                                     }
                                 }
-
-                                if (!containsItem)
+                                else if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
                                 {
-                                    --j;
-                                    objectList.RemoveAt(objectList.Count - 1);
-                                    CIW.physObj.SetQuickBeltSlot(null);
-                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
-                                    Destroy(toCheck);
+                                    bool containsItem = false;
+                                    foreach (GameObject itemInSlot in CIW.itemsInSlots)
+                                    {
+                                        if (itemInSlot != null)
+                                        {
+                                            containsItem = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!containsItem)
+                                    {
+                                        --j;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        CIW.physObj.SetQuickBeltSlot(null);
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
+                                        Destroy(toCheck);
+                                    }
                                 }
-                            }
-                            else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
-                            {
-                                if (CIW.containerItemRoot.childCount == 0)
+                                else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                                {
+                                    if (CIW.containerItemRoot.childCount == 0)
+                                    {
+                                        --j;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        CIW.physObj.SetQuickBeltSlot(null);
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
+                                        Destroy(toCheck);
+                                    }
+                                }
+                                else
                                 {
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
@@ -4248,43 +4529,78 @@ namespace EFM
                             {
                                 --j;
                                 objectList.RemoveAt(objectList.Count - 1);
-                                CIW.physObj.SetQuickBeltSlot(null);
-                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
+                                EFM_VanillaItemDescriptor VID = toCheck.GetComponent<EFM_VanillaItemDescriptor>();
+                                VID.physObj.SetQuickBeltSlot(null);
+                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, null, VID);
                                 Destroy(toCheck);
                             }
                         }
-                        else
-                        {
-                            --j;
-                            objectList.RemoveAt(objectList.Count - 1);
-                            EFM_VanillaItemDescriptor VID = toCheck.GetComponent<EFM_VanillaItemDescriptor>();
-                            VID.physObj.SetQuickBeltSlot(null);
-                            EFM_Base_Manager.RemoveFromContainer(toCheck.transform, null, VID);
-                            Destroy(toCheck);
-                        }
                     }
-                }
-                if (amountToRemoveFromPlayer > 0)
-                {
-                    amountOnPlayer -= amountToRemoveFromPlayer;
-                    Mod.playerInventory[requiredItemID] = Mod.playerInventory[requiredItemID] - amountToRemoveFromPlayer;
-                    List<GameObject> objectList = Mod.playerInventoryObjects[requiredItemID];
-                    for (int i = objectList.Count - 1, j = amountToRemoveFromPlayer; i >= 0 && j > 0; --i)
+                    if (amountToRemoveFromPlayer > 0)
                     {
-                        GameObject toCheck = objectList[objectList.Count - 1];
-                        EFM_CustomItemWrapper CIW = toCheck.GetComponent<EFM_CustomItemWrapper>();
-                        EFM_VanillaItemDescriptor VID = toCheck.GetComponent<EFM_VanillaItemDescriptor>();
-                        if (CIW != null)
+                        amountInPlayerInventory -= amountToRemoveFromPlayer;
+                        Mod.playerInventory[requiredItemID] = Mod.playerInventory[requiredItemID] - amountToRemoveFromPlayer;
+                        List<GameObject> objectList = Mod.playerInventoryObjects[requiredItemID];
+                        for (int i = objectList.Count - 1, j = amountToRemoveFromPlayer; i >= 0 && j > 0; --i)
                         {
-                            if (CIW.stack > 0)
+                            GameObject toCheck = objectList[objectList.Count - 1];
+                            EFM_CustomItemWrapper CIW = toCheck.GetComponent<EFM_CustomItemWrapper>();
+                            EFM_VanillaItemDescriptor VID = toCheck.GetComponent<EFM_VanillaItemDescriptor>();
+                            if (CIW != null)
                             {
-                                if (CIW.stack > amountToRemoveFromPlayer)
+                                if (CIW.stack > 0)
                                 {
-                                    CIW.stack = CIW.stack - amountToRemoveFromPlayer;
+                                    if (CIW.stack > amountToRemoveFromPlayer)
+                                    {
+                                        CIW.stack = CIW.stack - amountToRemoveFromPlayer;
+                                    }
+                                    else // CIW.stack <= amountToRemoveFromBase
+                                    {
+                                        j -= CIW.stack;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        CIW.physObj.SetQuickBeltSlot(null);
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
+                                        Destroy(toCheck);
+                                        Mod.weight -= CIW.currentWeight;
+                                    }
                                 }
-                                else // CIW.stack <= amountToRemoveFromBase
+                                else if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
                                 {
-                                    j -= CIW.stack;
+                                    bool containsItem = false;
+                                    foreach (GameObject itemInSlot in CIW.itemsInSlots)
+                                    {
+                                        if (itemInSlot != null)
+                                        {
+                                            containsItem = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!containsItem)
+                                    {
+                                        --j;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        CIW.physObj.SetQuickBeltSlot(null);
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
+                                        Destroy(toCheck);
+                                        Mod.weight -= VID.currentWeight;
+                                    }
+                                }
+                                else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                                {
+                                    if (CIW.containerItemRoot.childCount == 0)
+                                    {
+                                        --j;
+                                        objectList.RemoveAt(objectList.Count - 1);
+                                        CIW.physObj.SetQuickBeltSlot(null);
+                                        EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
+                                        Destroy(toCheck);
+                                        Mod.weight -= VID.currentWeight;
+                                    }
+                                }
+                                else
+                                {
+                                    --j;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
                                     EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
@@ -4292,66 +4608,34 @@ namespace EFM
                                     Mod.weight -= CIW.currentWeight;
                                 }
                             }
-                            else if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
-                            {
-                                bool containsItem = false;
-                                foreach (GameObject itemInSlot in CIW.itemsInSlots)
-                                {
-                                    if (itemInSlot != null)
-                                    {
-                                        containsItem = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!containsItem)
-                                {
-                                    --j;
-                                    objectList.RemoveAt(objectList.Count - 1);
-                                    CIW.physObj.SetQuickBeltSlot(null);
-                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
-                                    Destroy(toCheck);
-                                    Mod.weight -= VID.currentWeight;
-                                }
-                            }
-                            else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
-                            {
-                                if (CIW.containerItemRoot.childCount == 0)
-                                {
-                                    --j;
-                                    objectList.RemoveAt(objectList.Count - 1);
-                                    CIW.physObj.SetQuickBeltSlot(null);
-                                    EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
-                                    Destroy(toCheck);
-                                    Mod.weight -= VID.currentWeight;
-                                }
-                            }
-                            else
+                            else // VID != null
                             {
                                 --j;
                                 objectList.RemoveAt(objectList.Count - 1);
-                                CIW.physObj.SetQuickBeltSlot(null);
-                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, CIW, null);
+                                VID.physObj.SetQuickBeltSlot(null);
+                                EFM_Base_Manager.RemoveFromContainer(toCheck.transform, null, VID);
                                 Destroy(toCheck);
-                                Mod.weight -= CIW.currentWeight;
+                                Mod.weight -= VID.currentWeight;
                             }
                         }
-                        else // VID != null
-                        {
-                            --j;
-                            objectList.RemoveAt(objectList.Count - 1);
-                            VID.physObj.SetQuickBeltSlot(null);
-                            EFM_Base_Manager.RemoveFromContainer(toCheck.transform, null, VID);
-                            Destroy(toCheck);
-                            Mod.weight -= VID.currentWeight;
-                        }
                     }
-                }
 
-                // Update all requirement UI
-                foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
-                {
-                    baseAreaManager.UpdateBasedOnItem(requiredItemID, true, amountInBase + amountOnPlayer);
+                    amountToRemove -= (amountToRemoveFromBase + amountToRemoveFromPlayer);
+
+                    // Update all requirement UI
+                    foreach (EFM_BaseAreaManager baseAreaManager in baseManager.baseAreaManagers)
+                    {
+                        baseAreaManager.UpdateBasedOnItem(requiredItemID, false, (amountInBaseInventory - amountToRemoveFromBase) + (amountInPlayerInventory - amountToRemoveFromPlayer));
+                    }
+
+                    if(amountToRemove > 0)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -4432,7 +4716,7 @@ namespace EFM
             PlayProductionStartSound();
         }
 
-        private IEnumerator SpawnVanillaItem(string ID, int count, BoxCollider outputVolume, string fromProductionID)
+        private IEnumerator SpawnVanillaItem(string ID, int count, BoxCollider outputVolume, string fromProductionID, string endProduct)
         {
             yield return IM.OD[ID].GetGameObjectAsync();
             GameObject itemPrefab = IM.OD[ID].GetGameObject();
@@ -4570,7 +4854,7 @@ namespace EFM
             // Update production
             if (!fromProductionID.Equals("scav"))
             {
-                EFM_AreaProduction production = productions[fromProductionID];
+                EFM_AreaProduction production = productionsByItemIDByProdID[fromProductionID][endProduct];
                 production.productionCount = 0;
                 if (production.continuous)
                 {
@@ -4780,7 +5064,7 @@ namespace EFM
                     bool requirementsFulfilled = true;
                     for (int i = 0; i < production.requirements.Count; ++i)
                     {
-                        if (production.requirements[i].ID == itemID)
+                        if (production.requirements[i].IDs.Contains(itemID))
                         {
                             requirement = production.requirements[i];
                             requirementIndex = i;
@@ -4931,62 +5215,65 @@ namespace EFM
 
             // If area has continuous production, we must update the farming view's UI and maybe start it
             // Here we assume a single continuous production, considering they use the slots at inputs, there should not be mroe than 1
-            foreach (KeyValuePair<string, EFM_AreaProduction> production in productions)
+            foreach (KeyValuePair<string, Dictionary<string, EFM_AreaProduction>> productionEntry in productionsByItemIDByProdID)
             {
-                if (production.Value.continuous)
+                foreach (KeyValuePair<string, EFM_AreaProduction> production in productionEntry.Value)
                 {
-                    Transform farmingView = production.Value.transform;
-
-                    // Update UI and logic
-                    farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = production.Value.installedCount.ToString();
-                    if (filledSlotCount > 0)
+                    if (production.Value.continuous)
                     {
-                        if (Mod.itemIcons.ContainsKey(production.Value.requirements[0].ID))
-                        {
-                            farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[production.Value.requirements[0].ID];
-                        }
-                        else
-                        {
-                            AnvilManager.Run(Mod.SetVanillaIcon(production.Value.requirements[0].ID, farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
-                        }
-                        if (!production.Value.active)
-                        {
-                            production.Value.active = true;
+                        Transform farmingView = production.Value.transform;
 
-                            // Only set timeLeft to productinTime if there isnt already some time left, because that would mean that 
-                            // the production was already in progress but it did not have an item in its slot
-                            if (production.Value.timeLeft <= 0)
+                        // Update UI and logic
+                        farmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = production.Value.installedCount.ToString();
+                        if (filledSlotCount > 0)
+                        {
+                            if (Mod.itemIcons.ContainsKey(production.Value.requirements[0].IDs[0]))
                             {
-                                production.Value.timeLeft = production.Value.productionTime - (production.Value.productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
+                                farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[production.Value.requirements[0].IDs[0]];
+                            }
+                            else
+                            {
+                                AnvilManager.Run(Mod.SetVanillaIcon(production.Value.requirements[0].IDs[0], farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>()));
+                            }
+                            if (!production.Value.active)
+                            {
+                                production.Value.active = true;
+
+                                // Only set timeLeft to productinTime if there isnt already some time left, because that would mean that 
+                                // the production was already in progress but it did not have an item in its slot
+                                if (production.Value.timeLeft <= 0)
+                                {
+                                    production.Value.timeLeft = production.Value.productionTime - (production.Value.productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100));
+                                }
+
+                                activeProductions.Add(production.Key, production.Value);
                             }
 
-                            activeProductions.Add(production.Key, production.Value);
-                        }
-
-                        // Set production status
-                        farmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
-                        int[] formattedTimeLeft = FormatTime(production.Value.timeLeft);
-                        if (generatorRunning)
-                        {
-                            farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                            // Set production status
+                            farmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
+                            int[] formattedTimeLeft = FormatTime(production.Value.timeLeft);
+                            if (generatorRunning)
+                            {
+                                farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                            }
+                            else
+                            {
+                                farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Paused\n({0:00}:{1:00}:{2:00})", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                            }
                         }
                         else
                         {
-                            farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Paused\n({0:00}:{1:00}:{2:00})", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
-                        }
-                    }
-                    else
-                    {
-                        farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = EFM_Base_Manager.emptyItemSlotIcon;
-                        if (production.Value.active)
-                        {
-                            production.Value.active = false;
+                            farmingView.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(2).GetComponent<Image>().sprite = EFM_Base_Manager.emptyItemSlotIcon;
+                            if (production.Value.active)
+                            {
+                                production.Value.active = false;
 
-                            activeProductions.Remove(production.Key);
+                                activeProductions.Remove(production.Key);
+                            }
                         }
-                    }
 
-                    break;
+                        break;
+                    }
                 }
             }
 
@@ -5071,7 +5358,7 @@ namespace EFM
                     areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = EFM_Base_Manager.areaBackgroundNormalSprite; // Icon background color
 
                     // Dependent on fuel
-                    if ((bool)Mod.areasDB["areaDefaults"][areaIndex]["needsFuel"])
+                    if ((bool)Mod.areasDB[areaIndex]["needsFuel"])
                     {
                         if (generatorRunning)
                         {
@@ -5087,17 +5374,20 @@ namespace EFM
                                 // Dependent on production
                                 int doneCount = 0;
                                 int totalCount = 0;
-                                foreach(KeyValuePair<string, EFM_AreaProduction> production in productions)
+                                foreach(KeyValuePair<string, Dictionary<string, EFM_AreaProduction>> productionEntry in productionsByItemIDByProdID)
                                 {
-                                    if (production.Value.active)
+                                    foreach (KeyValuePair<string, EFM_AreaProduction> production in productionEntry.Value)
                                     {
-                                        ++totalCount;
-                                    }
-                                    else
-                                    {
-                                        if(production.Value.productionCount > 0)
+                                        if (production.Value.active)
                                         {
-                                            ++doneCount;
+                                            ++totalCount;
+                                        }
+                                        else
+                                        {
+                                            if (production.Value.productionCount > 0)
+                                            {
+                                                ++doneCount;
+                                            }
                                         }
                                     }
                                 }
@@ -5293,49 +5583,52 @@ namespace EFM
         public void ResumeProductions()
         {
             Mod.instance.LogInfo("Resume productions called on area: " + areaIndex);
-            if(productions == null)
+            if(productionsByItemIDByProdID == null)
             {
                 return;
             }
             Mod.instance.LogInfo("\tHas productions");
 
-            foreach (KeyValuePair<string, EFM_AreaProduction> production in productions)
+            foreach (KeyValuePair<string, Dictionary<string, EFM_AreaProduction>> productionEntry in productionsByItemIDByProdID)
             {
-                Mod.instance.LogInfo("\t\tProduction: "+production.Key);
-                if (production.Value.timeLeft > 0 && !activeProductions.ContainsKey(production.Key))
+                foreach (KeyValuePair<string, EFM_AreaProduction> production in productionEntry.Value)
                 {
-                    Mod.instance.LogInfo("\t\t\tNot active but should be");
-                    if (production.Value.continuous)
+                    Mod.instance.LogInfo("\t\tProduction: " + production.Key);
+                    if (production.Value.timeLeft > 0 && !activeProductions.ContainsKey(production.Key))
                     {
-                        Mod.instance.LogInfo("\t\t\t\tContinuous");
-                        GameObject farmingView = production.Value.gameObject;
-
-                        production.Value.active = true;
-
-                        // Only set timeLeft to productionTime if there isnt already some time left, 0 timeLeft could happen if we paused it the frame it reached <= 0
-                        if (production.Value.timeLeft <= 0)
+                        Mod.instance.LogInfo("\t\t\tNot active but should be");
+                        if (production.Value.continuous)
                         {
-                            production.Value.timeLeft = production.Value.productionTime - (production.Value.productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100)); ;
+                            Mod.instance.LogInfo("\t\t\t\tContinuous");
+                            GameObject farmingView = production.Value.gameObject;
+
+                            production.Value.active = true;
+
+                            // Only set timeLeft to productionTime if there isnt already some time left, 0 timeLeft could happen if we paused it the frame it reached <= 0
+                            if (production.Value.timeLeft <= 0)
+                            {
+                                production.Value.timeLeft = production.Value.productionTime - (production.Value.productionTime * (EFM_Skill.productionTimeReductionPerLevel * (Mod.skills[50].currentProgress / 100) / 100)); ;
+                            }
+
+                            activeProductions.Add(production.Key, production.Value);
+
+                            // Set production status
+                            farmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
+                            int[] formattedTimeLeft = FormatTime(production.Value.timeLeft);
+
+                            farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
                         }
+                        else if (production.Value.timeLeft > 0)
+                        {
+                            Mod.instance.LogInfo("\t\t\t\tNon Continuous");
+                            production.Value.active = true;
+                            activeProductions.Add(production.Key, production.Value);
 
-                        activeProductions.Add(production.Key, production.Value);
+                            GameObject produceView = production.Value.gameObject;
+                            int[] formattedTimeLeft = FormatTime(production.Value.timeLeft);
 
-                        // Set production status
-                        farmingView.transform.GetChild(1).GetChild(5).GetChild(1).gameObject.SetActive(true);
-                        int[] formattedTimeLeft = FormatTime(production.Value.timeLeft);
-
-                        farmingView.transform.GetChild(1).GetChild(5).GetChild(1).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
-                    }
-                    else if(production.Value.timeLeft > 0)
-                    {
-                        Mod.instance.LogInfo("\t\t\t\tNon Continuous");
-                        production.Value.active = true;
-                        activeProductions.Add(production.Key, production.Value);
-
-                        GameObject produceView = production.Value.gameObject;
-                        int[] formattedTimeLeft = FormatTime(production.Value.timeLeft);
-
-                        produceView.transform.GetChild(4).GetChild(2).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                            produceView.transform.GetChild(4).GetChild(2).GetChild(0).GetComponent<Text>().text = String.Format("Producing\n({0:00}:{1:00}:{2:00})...", formattedTimeLeft[0], formattedTimeLeft[1], formattedTimeLeft[2]);
+                        }
                     }
                 }
             }

@@ -582,13 +582,14 @@ namespace EFM
                     case TraderTaskReward.TaskRewardType.Item:
                         GameObject currentRewardItemElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
                         currentRewardItemElement.SetActive(true);
-                        if (Mod.itemIcons.ContainsKey(reward.itemID))
+                        string randomReward = reward.itemIDs[UnityEngine.Random.Range(0, reward.itemIDs.Length)];
+                        if (Mod.itemIcons.ContainsKey(randomReward))
                         {
-                            currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
+                            currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[randomReward];
                         }
                         else
                         {
-                            AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                            AnvilManager.Run(Mod.SetVanillaIcon(randomReward, currentRewardItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
                         }
                         if (reward.amount > 1)
                         {
@@ -598,16 +599,16 @@ namespace EFM
                         {
                             currentRewardItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
                         }
-                        string itemRewardName = Mod.itemNames[reward.itemID];
+                        string itemRewardName = Mod.itemNames[randomReward];
                         currentRewardItemElement.transform.GetChild(2).GetComponent<Text>().text = itemRewardName;
 
                         // Setup ItemIcon
                         EFM_ItemIcon itemIconScript = currentRewardItemElement.transform.GetChild(0).GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
-                        itemIconScript.itemID = reward.itemID;
+                        itemIconScript.itemID = randomReward;
                         itemIconScript.itemName = itemRewardName;
-                        itemIconScript.description = Mod.itemDescriptions[reward.itemID];
-                        itemIconScript.weight = Mod.itemWeights[reward.itemID];
-                        itemIconScript.volume = Mod.itemVolumes[reward.itemID];
+                        itemIconScript.description = Mod.itemDescriptions[randomReward];
+                        itemIconScript.weight = Mod.itemWeights[randomReward];
+                        itemIconScript.volume = Mod.itemVolumes[randomReward];
                         break;
                     case TraderTaskReward.TaskRewardType.TraderUnlock:
                         GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
@@ -630,27 +631,30 @@ namespace EFM
                         currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.experience > 0 ? "+" : "-") + reward.experience;
                         break;
                     case TraderTaskReward.TaskRewardType.AssortmentUnlock:
-                        GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
-                        currentRewardAssortElement.SetActive(true);
-                        if (Mod.itemIcons.ContainsKey(reward.itemID))
+                        foreach (string unlockReward in reward.itemIDs)
                         {
-                            currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemID];
-                        }
-                        else
-                        {
-                            AnvilManager.Run(Mod.SetVanillaIcon(reward.itemID, currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
-                        }
-                        currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
-                        string assortRewardName = Mod.itemNames[reward.itemID];
-                        currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = assortRewardName;
+                            GameObject currentRewardAssortElement = Instantiate(currentRewardHorizontal.GetChild(0).gameObject, currentRewardHorizontal);
+                            currentRewardAssortElement.SetActive(true);
+                            if (Mod.itemIcons.ContainsKey(unlockReward))
+                            {
+                                currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[unlockReward];
+                            }
+                            else
+                            {
+                                AnvilManager.Run(Mod.SetVanillaIcon(unlockReward, currentRewardAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                            }
+                            currentRewardAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                            string assortRewardName = Mod.itemNames[unlockReward];
+                            currentRewardAssortElement.transform.GetChild(2).GetComponent<Text>().text = assortRewardName;
 
-                        // Setup ItemIcon
-                        EFM_ItemIcon assortIconScript = currentRewardAssortElement.transform.GetChild(0).GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
-                        assortIconScript.itemID = reward.itemID;
-                        assortIconScript.itemName = assortRewardName;
-                        assortIconScript.description = Mod.itemDescriptions[reward.itemID];
-                        assortIconScript.weight = Mod.itemWeights[reward.itemID];
-                        assortIconScript.volume = Mod.itemVolumes[reward.itemID];
+                            // Setup ItemIcon
+                            EFM_ItemIcon assortIconScript = currentRewardAssortElement.transform.GetChild(0).GetChild(0).gameObject.AddComponent<EFM_ItemIcon>();
+                            assortIconScript.itemID = unlockReward;
+                            assortIconScript.itemName = assortRewardName;
+                            assortIconScript.description = Mod.itemDescriptions[unlockReward];
+                            assortIconScript.weight = Mod.itemWeights[unlockReward];
+                            assortIconScript.volume = Mod.itemVolumes[unlockReward];
+                        }
                         break;
                     default:
                         break;

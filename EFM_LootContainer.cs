@@ -52,14 +52,26 @@ namespace EFM
             {
 				string randomFilterID = spawnFilter[UnityEngine.Random.Range(0, spawnFilter.Count - 1)];
 				Mod.instance.LogInfo("\t\trandomFilterID: "+ randomFilterID);
-				string itemID;
+				string itemID = "";
                 if (Mod.itemsByParents.TryGetValue(randomFilterID, out List<string> possibleItems))
                 {
 					itemID = possibleItems[UnityEngine.Random.Range(0, possibleItems.Count - 1)];
                 }
                 else if(Mod.itemMap.ContainsKey(randomFilterID))
                 {
-					itemID = Mod.itemMap[randomFilterID];
+					ItemMapEntry entry = Mod.itemMap[randomFilterID];
+					switch (entry.mode)
+					{
+						case 0:
+							itemID = entry.ID;
+							break;
+						case 1:
+							itemID = entry.modulIDs[UnityEngine.Random.Range(0, entry.modulIDs.Length)];
+							break;
+						case 2:
+							itemID = entry.otherModID;
+							break;
+					}
                 }
                 else
                 {

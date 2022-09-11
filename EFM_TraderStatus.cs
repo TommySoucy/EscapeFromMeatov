@@ -246,185 +246,429 @@ namespace EFM
         private void BuildAssortments(JObject assortData)
         {
             // TODO: based on traderData["previousRestockTime"] and current time, decide whether we should load amounts of items from save (If havent restocked yet since last save) or just set default (has restocked since)
-            Dictionary<string, JObject> data = assortData.ToObject<Dictionary<string, JObject>>();
+            Mod.instance.LogInfo("BuildAssorts called on trader: " + index);
             assortmentByLevel = new Dictionary<int, TraderAssortment>();
-            foreach (KeyValuePair<string, JObject> entry in data)
+            foreach (JToken entry in assortData["items"])
             {
-                if((entry.Value["items"] as JArray).Count > 0)
+                if (entry["parentId"].ToString().Equals("hideout"))
                 {
                     // Only add item if we have an ID for it
-                    JObject parentItem = entry.Value["items"][0] as JObject;
-                    string parentItemID = parentItem["_tpl"].ToString();
-                    string actualParentItemID = "";
-                    if (Mod.itemMap.ContainsKey(parentItemID))
+                    string entryID = entry["_id"].ToString(); 
+                    Mod.instance.LogInfo("\tentryID " + entryID);
+                    string itemID = entry["_tpl"].ToString();
+                    int loyaltyLevel = (int)assortData["loyal_level_items"][entryID];
+                    JArray barterSchemes = assortData["barter_scheme"][entryID][0] as JArray;
+                    string[] actualItemIDs = null;
+                    if (Mod.itemMap.ContainsKey(itemID))
                     {
-                        actualParentItemID = Mod.itemMap[parentItemID];
+                        ItemMapEntry itemMapEntry = Mod.itemMap[itemID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                actualItemIDs = new string[] { itemMapEntry.ID };
+                                break;
+                            case 1:
+                                actualItemIDs = itemMapEntry.modulIDs;
+                                break;
+                            case 2:
+                                actualItemIDs = new string[] { itemMapEntry.otherModID };
+                                break;
+                        }
                     }
                     else
                     {
                         continue;
                     }
 
-                    // Add new assort for this level or get the one already there
-                    int loyaltyLevel = (int)entry.Value["loyalty"];
-                    TraderAssortment currentAssort = null;
-                    if (!assortmentByLevel.ContainsKey(loyaltyLevel))
+                    Mod.instance.LogInfo("\tGot item ids");
+                    foreach (string actualParentItemID in actualItemIDs)
                     {
-                        currentAssort = new TraderAssortment();
-                        currentAssort.level = loyaltyLevel;
-                        currentAssort.itemsByID = new Dictionary<string, AssortmentItem>();
-                        assortmentByLevel.Add(loyaltyLevel, currentAssort);
-                    }
-                    else
-                    {
-                        currentAssort = assortmentByLevel[loyaltyLevel];
-                    }
-
-                    // Add all the items in the assort
-                    if (currentAssort.itemsByID.ContainsKey(actualParentItemID))
-                    {
-                        if (parentItem["upd"] != null && parentItem["upd"]["StackObjectsCount"] != null)
+                        Mod.instance.LogInfo("\t\tAdding "+actualParentItemID);
+                        // Add new assort for this level or get the one already there
+                        TraderAssortment currentAssort = null;
+                        if (!assortmentByLevel.ContainsKey(loyaltyLevel))
                         {
-                            currentAssort.itemsByID[actualParentItemID].stack += (int)parentItem["upd"]["StackObjectsCount"];
+                            currentAssort = new TraderAssortment();
+                            currentAssort.level = loyaltyLevel;
+                            currentAssort.itemsByID = new Dictionary<string, AssortmentItem>();
+                            assortmentByLevel.Add(loyaltyLevel, currentAssort);
                         }
                         else
                         {
-                            currentAssort.itemsByID[actualParentItemID].stack += 100; // TODO: Review trader 579dc571d53a0658a154fbec, their assort does not specify stack
+                            currentAssort = assortmentByLevel[loyaltyLevel];
                         }
 
-                        // Build entry's pricelist
-                        List<AssortmentPriceData> currentPrices = new List<AssortmentPriceData>();
-                        bool onlyCurrency = true;
-                        int totalRoubles = 0;
-                        foreach (JObject price in entry.Value["barter_scheme"][0])
+                        // Add all the items in the assort
+                        if (currentAssort.itemsByID.ContainsKey(actualParentItemID))
                         {
-                            string priceID = price["_tpl"].ToString();
-                            if (Mod.itemMap.ContainsKey(priceID))
+                            Mod.instance.LogInfo("\t\t\tItem already has an assort entry, adding a new price of applicable");
+                            if (entry["upd"] != null && entry["upd"]["StackObjectsCount"] != null)
                             {
-                                AssortmentPriceData priceData = new AssortmentPriceData();
-                                priceData.ID = Mod.itemMap[priceID];
-                                priceData.count = (int)price["count"];
-
-                                if(priceData.ID.Equals("11") || priceData.ID.Equals("12"))
-                                {
-                                    priceData.priceItemType = AssortmentPriceData.PriceItemType.Dogtag;
-                                    priceData.USEC = price["side"].ToString().Equals("usec");
-                                    priceData.dogtagLevel = (int)price["level"];
-                                }
-                                else
-                                {
-                                    priceData.priceItemType = AssortmentPriceData.PriceItemType.Other;
-                                }
-
-                                bool alreadyContainsID = false;
-                                AssortmentPriceData otherPriceData = null;
-                                foreach(AssortmentPriceData otherAssortPriceData in currentPrices)
-                                {
-                                    if (otherAssortPriceData.ID.Equals(priceData.ID))
-                                    {
-                                        otherPriceData = otherAssortPriceData;
-                                        alreadyContainsID = true;
-                                        break;
-                                    }
-                                }
-                                if (alreadyContainsID)
-                                {
-                                    if(priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-                                    {
-                                        if(otherPriceData.dogtagLevel == priceData.dogtagLevel && otherPriceData.USEC == priceData.USEC)
-                                        {
-                                            otherPriceData.count += priceData.count;
-                                        }
-                                        else
-                                        {
-                                            currentPrices.Add(priceData);
-                                        }
-                                    }
-                                    else if(priceData.priceItemType == AssortmentPriceData.PriceItemType.Other)
-                                    {
-                                        // This should just be a price that maps to the same ID as another, so just increment the count
-                                        otherPriceData.count += priceData.count;
-                                    }
-                                }
-                                else
-                                {
-                                    currentPrices.Add(priceData);
-                                }
-
-                                if (priceData.ID.Equals("203"))
-                                {
-                                    totalRoubles += priceData.count;
-                                }
-                                else if (priceData.ID.Equals("201"))
-                                {
-                                    totalRoubles += priceData.count * 125;
-                                }
-                                else
-                                {
-                                    onlyCurrency = false;
-                                }
+                                currentAssort.itemsByID[actualParentItemID].stack += (int)entry["upd"]["StackObjectsCount"];
                             }
                             else
                             {
-                                Mod.instance.LogError("Assort entry: " + entry.Key + " has price ID: " + priceID + " missing from itemMap.");
+                                currentAssort.itemsByID[actualParentItemID].stack += 100; // TODO: Review trader 579dc571d53a0658a154fbec, their assort does not specify stack
+                            }
+
+                            // Build entry's pricelist
+                            List<AssortmentPriceData> currentPrices = new List<AssortmentPriceData>();
+                            bool onlyCurrency = true;
+                            int totalRoubles = 0;
+                            bool useFallback = false;
+                            bool missingFallback = false;
+                            for (int i = 0; i < 2; ++i)
+                            {
+                                foreach (JObject price in barterSchemes)
+                                {
+                                    string priceID = price["_tpl"].ToString();
+                                    if (Mod.itemMap.ContainsKey(priceID))
+                                    {
+                                        string[] priceIDs = null;
+                                        ItemMapEntry itemMapEntry = Mod.itemMap[priceID];
+                                        if (!useFallback && itemMapEntry.mode == 0 && (itemMapEntry.ID == null || itemMapEntry.ID.ToString().Equals("")))
+                                        {
+                                            if ((assortData["barter_scheme"][entryID] as JArray).Count <= 1)
+                                            {
+                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
+                                                missingFallback = true;
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                useFallback = true;
+                                                currentPrices.Clear();
+                                                barterSchemes = assortData["barter_scheme"][entryID][1] as JArray;
+                                                break;
+                                            }
+                                        }
+                                        switch (itemMapEntry.mode)
+                                        {
+                                            case 0:
+                                                priceIDs = new string[] { itemMapEntry.ID };
+                                                break;
+                                            case 1:
+                                                priceIDs = itemMapEntry.modulIDs;
+                                                break;
+                                            case 2:
+                                                priceIDs = new string[] { itemMapEntry.otherModID };
+                                                break;
+                                        }
+                                        foreach (string newPriceID in priceIDs)
+                                        {
+                                            AssortmentPriceData priceData = new AssortmentPriceData();
+                                            priceData.ID = newPriceID;
+                                            priceData.count = (int)price["count"];
+
+                                            if (priceData.ID.Equals("11") || priceData.ID.Equals("12"))
+                                            {
+                                                priceData.priceItemType = AssortmentPriceData.PriceItemType.Dogtag;
+                                                priceData.USEC = price["side"].ToString().Equals("usec");
+                                                priceData.dogtagLevel = (int)price["level"];
+                                            }
+                                            else
+                                            {
+                                                priceData.priceItemType = AssortmentPriceData.PriceItemType.Other;
+                                            }
+
+                                            bool alreadyContainsID = false;
+                                            AssortmentPriceData otherPriceData = null;
+                                            foreach (AssortmentPriceData otherAssortPriceData in currentPrices)
+                                            {
+                                                if (otherAssortPriceData.ID.Equals(priceData.ID))
+                                                {
+                                                    otherPriceData = otherAssortPriceData;
+                                                    alreadyContainsID = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (alreadyContainsID)
+                                            {
+                                                if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                                {
+                                                    if (otherPriceData.dogtagLevel == priceData.dogtagLevel && otherPriceData.USEC == priceData.USEC)
+                                                    {
+                                                        otherPriceData.count += priceData.count;
+                                                    }
+                                                    else
+                                                    {
+                                                        currentPrices.Add(priceData);
+                                                    }
+                                                }
+                                                else if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Other)
+                                                {
+                                                    // This should just be a price that maps to the same ID as another, so just increment the count
+                                                    otherPriceData.count += priceData.count;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                currentPrices.Add(priceData);
+                                            }
+
+                                            if (priceData.ID.Equals("203"))
+                                            {
+                                                totalRoubles += priceData.count;
+                                            }
+                                            else if (priceData.ID.Equals("201"))
+                                            {
+                                                totalRoubles += priceData.count * 125;
+                                            }
+                                            else
+                                            {
+                                                onlyCurrency = false;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (useFallback)
+                                        {
+                                            Mod.instance.LogError("Trader " + index + " assort entry " + entryID + " fallback ID missing from item map");
+                                        }
+                                        else
+                                        {
+                                            if ((assortData["barter_scheme"][entryID] as JArray).Count <= 1)
+                                            {
+                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
+                                                missingFallback = true;
+                                            }
+                                            else
+                                            {
+                                                useFallback = true;
+                                                currentPrices.Clear();
+                                                barterSchemes = assortData["barter_scheme"][entryID][1] as JArray;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (!useFallback || missingFallback)
+                                {
+                                    break;
+                                }
+                            }
+
+                            // Ensure that this exact pricelist doesn't already exist, only add the pricelist if it isnt there yet
+                            bool priceListFound = false;
+                            foreach (List<AssortmentPriceData> existingPriceList in currentAssort.itemsByID[actualParentItemID].prices)
+                            {
+                                bool allFound = true;
+                                foreach (AssortmentPriceData price in currentPrices)
+                                {
+                                    bool foundID = false;
+                                    AssortmentPriceData otherPriceData = null;
+                                    foreach (AssortmentPriceData otherAssortPriceData in existingPriceList)
+                                    {
+                                        if (otherAssortPriceData.ID.Equals(price.ID))
+                                        {
+                                            otherPriceData = otherAssortPriceData;
+                                            foundID = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (price.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                    {
+                                        if (!foundID || otherPriceData.dogtagLevel != price.dogtagLevel || otherPriceData.USEC != price.USEC)
+                                        {
+                                            allFound = false;
+                                            break;
+                                        }
+                                    }
+                                    else if (price.priceItemType == AssortmentPriceData.PriceItemType.Other)
+                                    {
+                                        if (!foundID)
+                                        {
+                                            allFound = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (allFound)
+                                {
+                                    priceListFound = true;
+                                    break;
+                                }
+                            }
+                            if (!priceListFound && !missingFallback)
+                            {
+                                currentAssort.itemsByID[actualParentItemID].prices.Add(currentPrices);
+
+                                if (onlyCurrency)
+                                {
+                                    if (Mod.lowestBuyValueByItem == null)
+                                    {
+                                        Mod.lowestBuyValueByItem = new Dictionary<string, int>();
+                                    }
+                                    if (Mod.lowestBuyValueByItem.ContainsKey(actualParentItemID))
+                                    {
+                                        if (Mod.lowestBuyValueByItem[actualParentItemID] > totalRoubles)
+                                        {
+                                            Mod.lowestBuyValueByItem[actualParentItemID] = totalRoubles;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Mod.lowestBuyValueByItem.Add(actualParentItemID, totalRoubles);
+                                    }
+                                }
                             }
                         }
-
-                        // Ensure that this exact pricelist doesn't already exist, only add the pricelist if it isnt there yet
-                        bool priceListFound = false;
-                        foreach (List<AssortmentPriceData> existingPriceList in currentAssort.itemsByID[actualParentItemID].prices)
+                        else
                         {
-                            bool allFound = true;
-                            foreach (AssortmentPriceData price in currentPrices)
+                            Mod.instance.LogInfo("\t\t\tItem does not already have an assort entry");
+                            AssortmentItem item = new AssortmentItem();
+                            item.ID = actualParentItemID;
+                            item.prices = new List<List<AssortmentPriceData>>();
+                            List<AssortmentPriceData> currentPrices = new List<AssortmentPriceData>();
+                            item.prices.Add(currentPrices);
+                            bool onlyCurrency = true;
+                            int totalRoubles = 0;
+                            bool useFallback = false;
+                            bool missingFallback = false;
+                            for (int i = 0; i < 2; ++i)
                             {
-                                bool foundID = false;
-                                AssortmentPriceData otherPriceData = null;
-                                foreach (AssortmentPriceData otherAssortPriceData in existingPriceList)
+                                foreach (JObject price in barterSchemes)
                                 {
-                                    if (otherAssortPriceData.ID.Equals(price.ID))
+                                    string priceID = price["_tpl"].ToString();
+                                    if (Mod.itemMap.ContainsKey(priceID))
                                     {
-                                        otherPriceData = otherAssortPriceData;
-                                        foundID = true;
-                                        break;
+                                        string[] priceIDs = null;
+                                        ItemMapEntry itemMapEntry = Mod.itemMap[priceID];
+                                        if (!useFallback && itemMapEntry.mode == 0 && (itemMapEntry.ID == null || itemMapEntry.ID.ToString().Equals("")))
+                                        {
+                                            if ((assortData["barter_scheme"][entryID] as JArray).Count <= 1)
+                                            {
+                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
+                                                missingFallback = true;
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                useFallback = true;
+                                                currentPrices.Clear();
+                                                barterSchemes = assortData["barter_scheme"][entryID][1] as JArray;
+                                                break;
+                                            }
+                                        }
+                                        switch (itemMapEntry.mode)
+                                        {
+                                            case 0:
+                                                priceIDs = new string[] { itemMapEntry.ID };
+                                                break;
+                                            case 1:
+                                                priceIDs = itemMapEntry.modulIDs;
+                                                break;
+                                            case 2:
+                                                priceIDs = new string[] { itemMapEntry.otherModID };
+                                                break;
+                                        }
+
+                                        foreach (string newPriceID in priceIDs)
+                                        {
+                                            AssortmentPriceData priceData = new AssortmentPriceData();
+                                            priceData.ID = newPriceID;
+                                            priceData.count = (int)price["count"];
+
+                                            if (priceData.ID.Equals("11") || priceData.ID.Equals("12"))
+                                            {
+                                                priceData.priceItemType = AssortmentPriceData.PriceItemType.Dogtag;
+                                                priceData.USEC = price["side"].ToString().Equals("usec");
+                                                priceData.dogtagLevel = (int)price["level"];
+                                            }
+                                            else
+                                            {
+                                                priceData.priceItemType = AssortmentPriceData.PriceItemType.Other;
+                                            }
+
+                                            bool alreadyContainsID = false;
+                                            AssortmentPriceData otherPriceData = null;
+                                            foreach (AssortmentPriceData otherAssortPriceData in currentPrices)
+                                            {
+                                                if (otherAssortPriceData.ID.Equals(priceData.ID))
+                                                {
+                                                    otherPriceData = otherAssortPriceData;
+                                                    alreadyContainsID = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (alreadyContainsID)
+                                            {
+                                                if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                                {
+                                                    if (otherPriceData.dogtagLevel == priceData.dogtagLevel && otherPriceData.USEC == priceData.USEC)
+                                                    {
+                                                        otherPriceData.count += priceData.count;
+                                                    }
+                                                    else
+                                                    {
+                                                        currentPrices.Add(priceData);
+                                                    }
+                                                }
+                                                else if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Other)
+                                                {
+                                                    // This should just be a price that maps to the same ID as another, so just increment the count
+                                                    otherPriceData.count += priceData.count;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                currentPrices.Add(priceData);
+                                            }
+
+                                            if (priceData.ID.Equals("203"))
+                                            {
+                                                totalRoubles += priceData.count;
+                                            }
+                                            else if (priceData.ID.Equals("201"))
+                                            {
+                                                totalRoubles += priceData.count * 125;
+                                            }
+                                            else
+                                            {
+                                                onlyCurrency = false;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (useFallback)
+                                        {
+                                            Mod.instance.LogError("Trader " + index + " assort entry " + entryID + " fallback ID missing from item map");
+                                        }
+                                        else
+                                        {
+                                            if ((assortData["barter_scheme"][entryID] as JArray).Count <= 1)
+                                            {
+                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
+                                                missingFallback = true;
+                                            }
+                                            else
+                                            {
+                                                useFallback = true;
+                                                currentPrices.Clear();
+                                                barterSchemes = assortData["barter_scheme"][entryID][1] as JArray;
+                                            }
+                                        }
                                     }
                                 }
 
-                                if (price.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
+                                if (!useFallback || missingFallback)
                                 {
-                                    if (!foundID || otherPriceData.dogtagLevel != price.dogtagLevel || otherPriceData.USEC != price.USEC)
-                                    {
-                                        allFound = false;
-                                        break;
-                                    }
-                                }
-                                else if(price.priceItemType == AssortmentPriceData.PriceItemType.Other)
-                                {
-                                    if (!foundID)
-                                    {
-                                        allFound = false;
-                                        break;
-                                    }
+                                    break;
                                 }
                             }
-                            if (allFound)
-                            {
-                                priceListFound = true;
-                                break;
-                            }
-                        }
-                        if (!priceListFound)
-                        {
-                            currentAssort.itemsByID[actualParentItemID].prices.Add(currentPrices);
 
                             if (onlyCurrency)
                             {
-                                if(Mod.lowestBuyValueByItem == null)
+                                if (Mod.lowestBuyValueByItem == null)
                                 {
                                     Mod.lowestBuyValueByItem = new Dictionary<string, int>();
                                 }
                                 if (Mod.lowestBuyValueByItem.ContainsKey(actualParentItemID))
                                 {
-                                    if(Mod.lowestBuyValueByItem[actualParentItemID] > totalRoubles)
+                                    if (Mod.lowestBuyValueByItem[actualParentItemID] > totalRoubles)
                                     {
                                         Mod.lowestBuyValueByItem[actualParentItemID] = totalRoubles;
                                     }
@@ -434,137 +678,39 @@ namespace EFM
                                     Mod.lowestBuyValueByItem.Add(actualParentItemID, totalRoubles);
                                 }
                             }
-                        }
-                    }
-                    else
-                    {
-                        AssortmentItem item = new AssortmentItem();
-                        item.ID = actualParentItemID;
-                        item.prices = new List<List<AssortmentPriceData>>();
-                        List<AssortmentPriceData> currentPrices = new List<AssortmentPriceData>();
-                        item.prices.Add(currentPrices);
-                        bool onlyCurrency = true;
-                        int totalRoubles = 0;
-                        foreach (JObject price in entry.Value["barter_scheme"][0])
-                        {
-                            string priceID = price["_tpl"].ToString();
-                            if (Mod.itemMap.ContainsKey(priceID))
+
+                            if (entry["upd"] != null && entry["upd"]["StackObjectsCount"] != null)
                             {
-                                AssortmentPriceData priceData = new AssortmentPriceData();
-                                priceData.ID = Mod.itemMap[priceID];
-                                priceData.count = (int)price["count"];
+                                item.stack = (int)entry["upd"]["StackObjectsCount"];
+                            }
+                            else
+                            {
+                                item.stack = 100; // TODO: Review trader 579dc571d53a0658a154fbec, their assort does not specify stack
+                            }
 
-                                if (priceData.ID.Equals("11") || priceData.ID.Equals("12"))
-                                {
-                                    priceData.priceItemType = AssortmentPriceData.PriceItemType.Dogtag;
-                                    priceData.USEC = price["side"].ToString().Equals("usec");
-                                    priceData.dogtagLevel = (int)price["level"];
-                                }
-                                else
-                                {
-                                    priceData.priceItemType = AssortmentPriceData.PriceItemType.Other;
-                                }
+                            if (entry["upd"] != null && entry["upd"]["BuyRestrictionMax"] != null)
+                            {
+                                item.buyRestrictionMax = (int)entry["upd"]["BuyRestrictionMax"];
+                            }
 
-                                bool alreadyContainsID = false;
-                                AssortmentPriceData otherPriceData = null;
-                                foreach (AssortmentPriceData otherAssortPriceData in currentPrices)
-                                {
-                                    if (otherAssortPriceData.ID.Equals(priceData.ID))
-                                    {
-                                        otherPriceData = otherAssortPriceData;
-                                        alreadyContainsID = true;
-                                        break;
-                                    }
-                                }
-                                if (alreadyContainsID)
-                                {
-                                    if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-                                    {
-                                        if (otherPriceData.dogtagLevel == priceData.dogtagLevel && otherPriceData.USEC == priceData.USEC)
-                                        {
-                                            otherPriceData.count += priceData.count;
-                                        }
-                                        else
-                                        {
-                                            currentPrices.Add(priceData);
-                                        }
-                                    }
-                                    else if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Other)
-                                    {
-                                        // This should just be a price that maps to the same ID as another, so just increment the count
-                                        otherPriceData.count += priceData.count;
-                                    }
-                                }
-                                else
-                                {
-                                    currentPrices.Add(priceData);
-                                }
+                            if (!missingFallback)
+                            {
+                                currentAssort.itemsByID.Add(item.ID, item);
+                            }
 
-                                if (priceData.ID.Equals("203"))
+                            // Add the first of this item's ancestor to the list of sell categories if not already in there
+                            if (Mod.itemAncestors.ContainsKey(item.ID))
+                            {
+                                string firstAncestor = Mod.itemAncestors[item.ID][0];
+                                if (!categories.Contains(firstAncestor))
                                 {
-                                    totalRoubles += priceData.count;
-                                }
-                                else if (priceData.ID.Equals("201"))
-                                {
-                                    totalRoubles += priceData.count * 125;
-                                }
-                                else
-                                {
-                                    onlyCurrency = false;
+                                    categories.Add(firstAncestor);
                                 }
                             }
                             else
                             {
-                                Mod.instance.LogError("Assort entry: " + entry.Key + " has price ID: " + priceID + " missing from itemMap.");
+                                Mod.instance.LogError("Item ancestors does not contain a list for item: " + item.ID);
                             }
-                        }
-
-                        if (onlyCurrency)
-                        {
-                            if (Mod.lowestBuyValueByItem == null)
-                            {
-                                Mod.lowestBuyValueByItem = new Dictionary<string, int>();
-                            }
-                            if (Mod.lowestBuyValueByItem.ContainsKey(actualParentItemID))
-                            {
-                                if (Mod.lowestBuyValueByItem[actualParentItemID] > totalRoubles)
-                                {
-                                    Mod.lowestBuyValueByItem[actualParentItemID] = totalRoubles;
-                                }
-                            }
-                            else
-                            {
-                                Mod.lowestBuyValueByItem.Add(actualParentItemID, totalRoubles);
-                            }
-                        }
-
-                        if (parentItem["upd"] != null && parentItem["upd"]["StackObjectsCount"] != null)
-                        {
-                            item.stack = (int)parentItem["upd"]["StackObjectsCount"];
-                        }
-                        else
-                        {
-                            item.stack = 100; // TODO: Review trader 579dc571d53a0658a154fbec, their assort does not specify stack
-                        }
-
-                        if(parentItem["upd"] != null && parentItem["upd"]["BuyRestrictionMax"] != null)
-                        {
-                            item.buyRestrictionMax = (int)parentItem["upd"]["BuyRestrictionMax"];
-                        }
-                        currentAssort.itemsByID.Add(item.ID, item);
-
-                        // Add the first of this item's ancestor to the list of sell categories if not already in there
-                        if (Mod.itemAncestors.ContainsKey(item.ID))
-                        {
-                            string firstAncestor = Mod.itemAncestors[item.ID][0];
-                            if (!categories.Contains(firstAncestor))
-                            {
-                                categories.Add(firstAncestor);
-                            }
-                        }
-                        else
-                        {
-                            Mod.instance.LogError("Item ancestors does not contain a list for item: " + item.ID);
                         }
                     }
                 }
@@ -648,12 +794,13 @@ namespace EFM
             }
 
             // Get raw tasks
+            Dictionary<string, JObject> tasksData = Mod.questDB.ToObject<Dictionary<string, JObject>>();
             Dictionary<string, JObject> rawTasks = new Dictionary<string, JObject>();
-            foreach (JObject rawTask in Mod.questDB)
+            foreach (KeyValuePair<string, JObject> rawTask in tasksData)
             {
-                if (rawTask["traderId"].ToString().Equals(id))
+                if (rawTask.Value["traderId"].ToString().Equals(id))
                 {
-                    rawTasks.Add(rawTask["_id"].ToString(), rawTask);
+                    rawTasks.Add(rawTask.Key, rawTask.Value);
                 }
             }
 
@@ -812,6 +959,7 @@ namespace EFM
 
         private void SetReward(TraderTaskReward reward, JObject rewardData, TraderTask task, List<TraderTaskReward> listToFill)
         {
+            bool useFallback = false;
             switch (rewardData["type"].ToString())
             {
                 case "Experience":
@@ -827,16 +975,81 @@ namespace EFM
                     break;
                 case "Item":
                     string originalItemID = rewardData["items"][0]["_tpl"].ToString();
+                    reward.taskRewardType = TraderTaskReward.TaskRewardType.Item;
                     if (Mod.itemMap.ContainsKey(originalItemID))
                     {
-                        reward.taskRewardType = TraderTaskReward.TaskRewardType.Item;
-                        reward.itemID = Mod.itemMap[originalItemID];
-                        reward.amount = int.Parse(rewardData["value"].ToString());
-                        listToFill.Add(reward);
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalItemID];
+                        if(itemMapEntry.mode == 0 && (itemMapEntry.ID == null || itemMapEntry.ID.Equals("")))
+                        {
+                            useFallback = true;
+                        }
+                        if (!useFallback)
+                        {
+                            switch (itemMapEntry.mode)
+                            {
+                                case 0:
+                                    reward.itemIDs = new string[] { itemMapEntry.ID };
+                                    break;
+                                case 1:
+                                    reward.itemIDs = itemMapEntry.modulIDs;
+                                    break;
+                                case 2:
+                                    reward.itemIDs = new string[] { itemMapEntry.otherModID };
+                                    break;
+                            }
+
+                            reward.amount = int.Parse(rewardData["value"].ToString());
+                            listToFill.Add(reward);
+                        }
                     }
                     else
                     {
-                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has item reward with missing item: " + originalItemID);
+                        useFallback = true;
+                    }
+
+                    if (useFallback)
+                    {
+                        if ((rewardData["items"] as JArray).Count > 1)
+                        {
+                            originalItemID = rewardData["items"][1]["_tpl"].ToString();
+                            if (originalItemID.Equals(""))
+                            {
+                                // This is an empty fallback, so there will be no reward, unless the mod for this item is implemented
+                                return;
+                            }
+                            if (Mod.itemMap.ContainsKey(originalItemID))
+                            {
+                                ItemMapEntry itemMapEntry = Mod.itemMap[originalItemID];
+                                if (itemMapEntry.mode == 0 && (itemMapEntry.ID == null || itemMapEntry.ID.Equals("")))
+                                {
+                                    Mod.instance.LogError("Item reward for task: " + task.ID + " had missing main entry, but fallback " + originalItemID + " is on mode 0 but is also missing H3ID");
+                                    return;
+                                }
+                                switch (itemMapEntry.mode)
+                                {
+                                    case 0:
+                                        reward.itemIDs = new string[] { itemMapEntry.ID };
+                                        break;
+                                    case 1:
+                                        reward.itemIDs = itemMapEntry.modulIDs;
+                                        break;
+                                    case 2:
+                                        reward.itemIDs = new string[] { itemMapEntry.otherModID };
+                                        break;
+                                }
+
+                                reward.amount = int.Parse(rewardData["value"].ToString());
+                                listToFill.Add(reward);
+                            }
+                            else
+                            {
+                                Mod.instance.LogError("Item reward for task: " + task.ID + " had missing main entry, but fallback " + originalItemID + " is also missing");
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("Item reward for task: " + task.ID + " had missing main entry, but fallback data was missing entirely");
+                        }
                     }
                     break;
                 case "AssortmentUnlock":
@@ -844,14 +1057,66 @@ namespace EFM
                     if (Mod.itemMap.ContainsKey(originalAssortUnlockItemID))
                     {
                         reward.taskRewardType = TraderTaskReward.TaskRewardType.AssortmentUnlock;
-                        reward.itemID = Mod.itemMap[originalAssortUnlockItemID];
-                        listToFill.Add(reward);
+
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalAssortUnlockItemID];
+                        if (itemMapEntry.mode == 0 && (itemMapEntry.ID == null || itemMapEntry.ID.Equals("")))
+                        {
+                            useFallback = true;
+                        }
+                        if (!useFallback)
+                        {
+                            switch (itemMapEntry.mode)
+                            {
+                                case 0:
+                                    reward.itemIDs = new string[] { itemMapEntry.ID };
+                                    break;
+                                case 1:
+                                    reward.itemIDs = itemMapEntry.modulIDs;
+                                    break;
+                                case 2:
+                                    reward.itemIDs = new string[] { itemMapEntry.otherModID };
+                                    break;
+                            }
+
+                            listToFill.Add(reward);
+                            itemsToWaitForUnlock.Add(originalAssortUnlockItemID);
+                        }
                     }
                     else
                     {
-                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has ite0m unlock reward with missing item: " + originalAssortUnlockItemID);
+                        useFallback = true;
                     }
-                    itemsToWaitForUnlock.Add(originalAssortUnlockItemID);
+
+                    if (useFallback)
+                    {
+                        if ((rewardData["items"] as JArray).Count > 1)
+                        {
+                            originalAssortUnlockItemID = rewardData["items"][1]["_tpl"].ToString();
+                            if (!originalAssortUnlockItemID.Equals(""))
+                            {
+                                ItemMapEntry itemMapEntry = Mod.itemMap[originalAssortUnlockItemID];
+                                switch (itemMapEntry.mode)
+                                {
+                                    case 0:
+                                        reward.itemIDs = new string[] { itemMapEntry.ID };
+                                        break;
+                                    case 1:
+                                        reward.itemIDs = itemMapEntry.modulIDs;
+                                        break;
+                                    case 2:
+                                        reward.itemIDs = new string[] { itemMapEntry.otherModID };
+                                        break;
+                                }
+
+                                listToFill.Add(reward);
+                                itemsToWaitForUnlock.Add(originalAssortUnlockItemID);
+                            }
+                        }
+                        else
+                        {
+                            Mod.instance.LogError("AssortmentUnlock reward for task: " + task.ID + " had missing main entry, but fallback data was missing entirely");
+                        }
+                    }
                     break;
                 case "TraderUnlock":
                     reward.taskRewardType = TraderTaskReward.TaskRewardType.TraderUnlock;
@@ -959,12 +1224,25 @@ namespace EFM
                                 }
                                 if (counter["_props"]["weapon"] != null)
                                 {
-                                    newCounter.allowedWeaponIDs = counter["_props"]["weapon"].ToObject<List<string>>();
-                                    for (int i = 0; i < newCounter.allowedWeaponIDs.Count; ++i)
+                                    newCounter.allowedWeaponIDs = new List<string>();
+                                    List<string> originalIDs = counter["_props"]["weapon"].ToObject<List<string>>();
+                                    for (int i = 0; i < originalIDs.Count; ++i)
                                     {
-                                        if (Mod.itemMap.ContainsKey(newCounter.allowedWeaponIDs[i]))
+                                        if (Mod.itemMap.ContainsKey(originalIDs[i]))
                                         {
-                                            newCounter.allowedWeaponIDs[i] = Mod.itemMap[newCounter.allowedWeaponIDs[i]];
+                                            ItemMapEntry itemMapEntry = Mod.itemMap[originalIDs[i]];
+                                            switch (itemMapEntry.mode)
+                                            {
+                                                case 0:
+                                                    newCounter.allowedWeaponIDs.Add(itemMapEntry.ID);
+                                                    break;
+                                                case 1:
+                                                    newCounter.allowedWeaponIDs.AddRange(itemMapEntry.modulIDs);
+                                                    break;
+                                                case 2:
+                                                    newCounter.allowedWeaponIDs.Add(itemMapEntry.otherModID);
+                                                    break;
+                                            }
                                         }
                                         //else Item is either missing or this is a category of item
                                     }
@@ -978,7 +1256,23 @@ namespace EFM
                                         string lastElement = weaponMod[weaponMod.Count - 1].ToString();
                                         if (Mod.itemMap.ContainsKey(lastElement))
                                         {
-                                            newCounter.weaponModsInclusive.Add(Mod.itemMap[lastElement]);
+                                            ItemMapEntry itemMapEntry = Mod.itemMap[lastElement];
+                                            if(itemMapEntry.mode == 0 && (itemMapEntry.ID == null || itemMapEntry.ID.ToString().Equals("")))
+                                            {
+                                                continue;
+                                            }
+                                            switch (itemMapEntry.mode)
+                                            {
+                                                case 0:
+                                                    newCounter.weaponModsInclusive.Add(itemMapEntry.ID);
+                                                    break;
+                                                case 1:
+                                                    newCounter.weaponModsInclusive.AddRange(itemMapEntry.modulIDs);
+                                                    break;
+                                                case 2:
+                                                    newCounter.weaponModsInclusive.Add(itemMapEntry.otherModID);
+                                                    break;
+                                            }
                                         }
                                         //else Item is either missing or this is a category of item
                                     }
@@ -1073,12 +1367,25 @@ namespace EFM
                                 }
                                 if (counter["_props"]["weapon"] != null)
                                 {
-                                    newCounter.allowedWeaponIDs = counter["_props"]["weapon"].ToObject<List<string>>();
-                                    for (int i = 0; i < newCounter.allowedWeaponIDs.Count; ++i)
+                                    newCounter.allowedWeaponIDs = new List<string>();
+                                    List<string> originalIDs = counter["_props"]["weapon"].ToObject<List<string>>();
+                                    for (int i = 0; i < originalIDs.Count; ++i)
                                     {
-                                        if (Mod.itemMap.ContainsKey(newCounter.allowedWeaponIDs[i]))
+                                        if (Mod.itemMap.ContainsKey(originalIDs[i]))
                                         {
-                                            newCounter.allowedWeaponIDs[i] = Mod.itemMap[newCounter.allowedWeaponIDs[i]];
+                                            ItemMapEntry itemMapEntry = Mod.itemMap[originalIDs[i]];
+                                            switch (itemMapEntry.mode)
+                                            {
+                                                case 0:
+                                                    newCounter.allowedWeaponIDs.Add(itemMapEntry.ID);
+                                                    break;
+                                                case 1:
+                                                    newCounter.allowedWeaponIDs.AddRange(itemMapEntry.modulIDs);
+                                                    break;
+                                                case 2:
+                                                    newCounter.allowedWeaponIDs.Add(itemMapEntry.otherModID);
+                                                    break;
+                                            }
                                         }
                                         //else Item is either missing or this is a category of item
                                     }
@@ -1342,7 +1649,23 @@ namespace EFM
                                         string equipID = equipArray[equipArray.Count - 1].ToString();
                                         if (Mod.itemMap.ContainsKey(equipID))
                                         {
-                                            newCounter.equipmentExclusive.Add(Mod.itemMap[equipID]);
+                                            ItemMapEntry itemMapEntry = Mod.itemMap[equipID];
+                                            if (itemMapEntry.mode == 0 && (itemMapEntry.ID == null || itemMapEntry.ID.ToString().Equals("")))
+                                            {
+                                                continue;
+                                            }
+                                            switch (itemMapEntry.mode)
+                                            {
+                                                case 0:
+                                                    newCounter.equipmentExclusive.Add(itemMapEntry.ID);
+                                                    break;
+                                                case 1:
+                                                    newCounter.equipmentExclusive.AddRange(itemMapEntry.modulIDs);
+                                                    break;
+                                                case 2:
+                                                    newCounter.equipmentExclusive.Add(itemMapEntry.otherModID);
+                                                    break;
+                                            }
                                         }
                                         // else there is some equipment that isnt implemented (yet?)
                                     }
@@ -1355,7 +1678,19 @@ namespace EFM
                                         string equipID = equipArray[equipArray.Count - 1].ToString();
                                         if (Mod.itemMap.ContainsKey(equipID))
                                         {
-                                            newCounter.equipmentInclusive.Add(Mod.itemMap[equipID]);
+                                            ItemMapEntry itemMapEntry = Mod.itemMap[equipID];
+                                            switch (itemMapEntry.mode)
+                                            {
+                                                case 0:
+                                                    newCounter.equipmentInclusive.Add(itemMapEntry.ID);
+                                                    break;
+                                                case 1:
+                                                    newCounter.equipmentInclusive.AddRange(itemMapEntry.modulIDs);
+                                                    break;
+                                                case 2:
+                                                    newCounter.equipmentInclusive.Add(itemMapEntry.otherModID);
+                                                    break;
+                                            }
                                         }
                                         // else there is some equipment that isnt implemented (yet?)
                                     }
@@ -1381,13 +1716,26 @@ namespace EFM
                                 break;
                             case "UseItem":
                                 newCounter.counterConditionType = TraderTaskCounterCondition.CounterConditionType.UseItem;
-                                newCounter.itemIDs = counter["_props"]["target"].ToObject<List<string>>();
+                                newCounter.itemIDs = new List<string>();
+                                List<string> useItemOriginalIDs = counter["_props"]["target"].ToObject<List<string>>();
                                 newCounter.useCountCompareMode = counter["_props"]["compareMethod"].ToString().Equals("<=") ? 1 : 0;
                                 for (int i=0; i < newCounter.itemIDs.Count; ++i)
                                 {
-                                    if (Mod.itemMap.ContainsKey(newCounter.itemIDs[i]))
+                                    if (Mod.itemMap.ContainsKey(useItemOriginalIDs[i]))
                                     {
-                                        newCounter.itemIDs[i] = Mod.itemMap[newCounter.itemIDs[i]];
+                                        ItemMapEntry itemMapEntry = Mod.itemMap[useItemOriginalIDs[i]];
+                                        switch (itemMapEntry.mode)
+                                        {
+                                            case 0:
+                                                newCounter.itemIDs.Add(itemMapEntry.ID);
+                                                break;
+                                            case 1:
+                                                newCounter.itemIDs.AddRange(itemMapEntry.modulIDs);
+                                                break;
+                                            case 2:
+                                                newCounter.itemIDs.Add(itemMapEntry.otherModID);
+                                                break;
+                                        }
                                     }
                                     // else the item is either missing or is a category
                                 }
@@ -1480,18 +1828,33 @@ namespace EFM
                     string originalItemID = conditionData["_props"]["target"][0].ToString();
                     if (Mod.itemMap.ContainsKey(originalItemID))
                     {
-                        condition.item = Mod.itemMap[originalItemID];
-                        if (conditionsByItem.ContainsKey(condition.item))
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalItemID];
+                        switch (itemMapEntry.mode)
                         {
-                            conditionsByItem[condition.item].Add(condition);
+                            case 0:
+                                condition.items = new string[] { itemMapEntry.ID };
+                                break;
+                            case 1:
+                                condition.items = itemMapEntry.modulIDs;
+                                break;
+                            case 2:
+                                condition.items = new string[] { itemMapEntry.otherModID };
+                                break;
                         }
-                        else
+                        foreach (string item in condition.items)
                         {
-                            conditionsByItem.Add(condition.item, new List<TraderTaskCondition>() { condition });
-                        }
-                        if (Mod.itemNames.ContainsKey(condition.item))
-                        {
-                            condition.text = "Hand over " + condition.value + " " +Mod.itemNames[condition.item];
+                            if (conditionsByItem.ContainsKey(item))
+                            {
+                                conditionsByItem[item].Add(condition);
+                            }
+                            else
+                            {
+                                conditionsByItem.Add(item, new List<TraderTaskCondition>() { condition });
+                            }
+                            if (Mod.itemNames.ContainsKey(item))
+                            {
+                                condition.text = "Hand over " + condition.value + " " + Mod.itemNames[item];
+                            }
                         }
                     }
                     else
@@ -1507,29 +1870,44 @@ namespace EFM
                     string originalFindItemID = conditionData["_props"]["target"][0].ToString();
                     if (Mod.itemMap.ContainsKey(originalFindItemID))
                     {
-                        condition.item = Mod.itemMap[originalFindItemID];
-                        if (conditionsByItem.ContainsKey(condition.item))
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalFindItemID];
+                        switch (itemMapEntry.mode)
                         {
-                            conditionsByItem[condition.item].Add(condition);
+                            case 0:
+                                condition.items = new string[] { itemMapEntry.ID };
+                                break;
+                            case 1:
+                                condition.items = itemMapEntry.modulIDs;
+                                break;
+                            case 2:
+                                condition.items = new string[] { itemMapEntry.otherModID };
+                                break;
                         }
-                        else
+                        foreach (string item in condition.items)
                         {
-                            conditionsByItem.Add(condition.item, new List<TraderTaskCondition>() { condition });
-                        }
-                        if (Mod.itemNames.ContainsKey(condition.item))
-                        {
-                            condition.text = "Find in raid " + condition.value + " " + Mod.itemNames[condition.item];
-                        }
-
-                        if (!condition.fulfilled)
-                        {
-                            if (Mod.taskFindItemConditionsByItemID.ContainsKey(condition.item))
+                            if (conditionsByItem.ContainsKey(item))
                             {
-                                Mod.taskFindItemConditionsByItemID[condition.item].Add(condition);
+                                conditionsByItem[item].Add(condition);
                             }
                             else
                             {
-                                Mod.taskFindItemConditionsByItemID.Add(condition.item, new List<TraderTaskCondition>() { condition });
+                                conditionsByItem.Add(item, new List<TraderTaskCondition>() { condition });
+                            }
+                            if (Mod.itemNames.ContainsKey(item))
+                            {
+                                condition.text = "Find in raid " + condition.value + " " + Mod.itemNames[item];
+                            }
+
+                            if (!condition.fulfilled)
+                            {
+                                if (Mod.taskFindItemConditionsByItemID.ContainsKey(item))
+                                {
+                                    Mod.taskFindItemConditionsByItemID[item].Add(condition);
+                                }
+                                else
+                                {
+                                    Mod.taskFindItemConditionsByItemID.Add(item, new List<TraderTaskCondition>() { condition });
+                                }
                             }
                         }
                     }
@@ -1539,21 +1917,57 @@ namespace EFM
                         return false;
                     }
                     break;
+                case "PlaceBeacon":
                 case "LeaveItemAtLocation":
                     condition.conditionType = TraderTaskCondition.ConditionType.LeaveItemAtLocation;
                     condition.value = (int)conditionData["_props"]["value"];
                     condition.plantTime = conditionData["_props"]["plantTime"] != null ? (float)conditionData["_props"]["plantTime"] : 0;
+                    condition.locationID = conditionData["_props"]["zoneId"].ToString();
                     string originalLeaveItemID = conditionData["_props"]["target"][0].ToString();
                     if (Mod.itemMap.ContainsKey(originalLeaveItemID))
                     {
-                        condition.item = Mod.itemMap[originalLeaveItemID];
-                        if (conditionsByItem.ContainsKey(condition.item))
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalLeaveItemID];
+                        switch (itemMapEntry.mode)
                         {
-                            conditionsByItem[condition.item].Add(condition);
+                            case 0:
+                                condition.items = new string[] { itemMapEntry.ID };
+                                break;
+                            case 1:
+                                condition.items = itemMapEntry.modulIDs;
+                                break;
+                            case 2:
+                                condition.items = new string[] { itemMapEntry.otherModID };
+                                break;
                         }
-                        else
+
+                        foreach (string item in condition.items)
                         {
-                            conditionsByItem.Add(condition.item, new List<TraderTaskCondition>() { condition });
+                            if (conditionsByItem.ContainsKey(item))
+                            {
+                                conditionsByItem[item].Add(condition);
+                            }
+                            else
+                            {
+                                conditionsByItem.Add(item, new List<TraderTaskCondition>() { condition });
+                            }
+
+                            if (Mod.taskLeaveItemConditionsByItemIDByZone.ContainsKey(condition.locationID))
+                            {
+                                if (Mod.taskLeaveItemConditionsByItemIDByZone[condition.locationID].ContainsKey(item))
+                                {
+                                    Mod.taskLeaveItemConditionsByItemIDByZone[condition.locationID][item].Add(condition);
+                                }
+                                else
+                                {
+                                    Mod.taskLeaveItemConditionsByItemIDByZone[condition.locationID].Add(item, new List<TraderTaskCondition>() { condition });
+                                }
+                            }
+                            else
+                            {
+                                Dictionary<string, List<TraderTaskCondition>> conditionsByItemID = new Dictionary<string, List<TraderTaskCondition>>();
+                                conditionsByItemID.Add(item, new List<TraderTaskCondition>() { condition });
+                                Mod.taskLeaveItemConditionsByItemIDByZone.Add(condition.locationID, conditionsByItemID);
+                            }
                         }
                     }
                     else
@@ -1561,7 +1975,6 @@ namespace EFM
                         Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has missing leave condition item: " + originalLeaveItemID);
                         return false;
                     }
-                    condition.locationID = conditionData["_props"]["zoneId"].ToString();
                     string zoneLocation = condition.locationID.Split('_')[0];
                     if (task.location.Equals("Any"))
                     {
@@ -1570,24 +1983,6 @@ namespace EFM
                     else if(!task.location.Equals(zoneLocation))
                     {
                         task.location = "Multiple";
-                    }
-
-                    if (Mod.taskLeaveItemConditionsByItemIDByZone.ContainsKey(condition.locationID))
-                    {
-                        if (Mod.taskLeaveItemConditionsByItemIDByZone[condition.locationID].ContainsKey(condition.item))
-                        {
-                            Mod.taskLeaveItemConditionsByItemIDByZone[condition.locationID][condition.item].Add(condition);
-                        }
-                        else
-                        {
-                            Mod.taskLeaveItemConditionsByItemIDByZone[condition.locationID].Add(condition.item, new List<TraderTaskCondition>() { condition });
-                        }
-                    }
-                    else
-                    {
-                        Dictionary<string, List<TraderTaskCondition>> conditionsByItemID = new Dictionary<string, List<TraderTaskCondition>>();
-                        conditionsByItemID.Add(condition.item, new List<TraderTaskCondition>() { condition });
-                        Mod.taskLeaveItemConditionsByItemIDByZone.Add(condition.locationID, conditionsByItemID);
                     }
                     break;
                 case "Skill":
@@ -1629,14 +2024,30 @@ namespace EFM
                     string originalTargetWeaponID = conditionData["_props"]["target"][0].ToString();
                     if (Mod.itemMap.ContainsKey(originalTargetWeaponID))
                     {
-                        condition.targetWeapon = Mod.itemMap[originalTargetWeaponID];
-                        if (conditionsByItem.ContainsKey(condition.targetWeapon))
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalTargetWeaponID];
+                        switch (itemMapEntry.mode)
                         {
-                            conditionsByItem[condition.targetWeapon].Add(condition);
+                            case 0:
+                                condition.targetWeapons = new string[] { itemMapEntry.ID };
+                                break;
+                            case 1:
+                                condition.targetWeapons = itemMapEntry.modulIDs;
+                                break;
+                            case 2:
+                                condition.targetWeapons = new string[] { itemMapEntry.otherModID };
+                                break;
                         }
-                        else
+
+                        foreach (string weapon in condition.targetWeapons)
                         {
-                            conditionsByItem.Add(condition.targetWeapon, new List<TraderTaskCondition>() { condition });
+                            if (conditionsByItem.ContainsKey(weapon))
+                            {
+                                conditionsByItem[weapon].Add(condition);
+                            }
+                            else
+                            {
+                                conditionsByItem.Add(weapon, new List<TraderTaskCondition>() { condition });
+                            }
                         }
                     }
                     else
@@ -2299,7 +2710,7 @@ namespace EFM
         public int targetTraderIndex;
 
         // HandOverItem, FindItem, LeaveItemAtLocation
-        public string item;
+        public string[] items;
         public int dogtagLevel;
 
         // LeaveItemAtLocation
@@ -2318,7 +2729,7 @@ namespace EFM
         public string targetPlaceName;
 
         // WeaponAssembly
-        public string targetWeapon;
+        public string[] targetWeapons;
         public List<List<string>> targetAttachmentTypes; // Attachment categories that the weapon must have one of each
         public List<string> targetAttachments; // Specific attachments the weapon must have
         public bool suppressed;
@@ -2482,7 +2893,7 @@ namespace EFM
         public float standing;
 
         // Item
-        public string itemID;
+        public string[] itemIDs;
         public int amount;
     }
 }
