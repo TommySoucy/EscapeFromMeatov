@@ -1309,7 +1309,13 @@ namespace EFM
 								if(Mod.currentLocationIndex == 2)
                                 {
 									Mod.currentMaxHealth[lowestPartIndex] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
-                                }
+									float totalMaxHealth = 0;
+									foreach (float bodyPartMaxHealth in Mod.currentMaxHealth)
+									{
+										totalMaxHealth += bodyPartMaxHealth;
+									}
+									GM.CurrentPlayerBody.SetHealthThreshold(totalMaxHealth);
+								}
 								Mod.AddExperience(breakPartExperience, 2, "Treatment experience - Destroyed Part ({0})");
 								Mod.AddSkillExp(EFM_Skill.surgerySkillProgress/EFM_Skill.surgeryAction, 28);
 								Mod.instance.LogInfo("\t\tFound destroyed part effect at effect index " + highest);
@@ -1352,6 +1358,12 @@ namespace EFM
 								if (Mod.currentLocationIndex == 2)
 								{
 									Mod.currentMaxHealth[targettedPart] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
+									float totalMaxHealth = 0;
+									foreach (float bodyPartMaxHealth in Mod.currentMaxHealth)
+									{
+										totalMaxHealth += bodyPartMaxHealth;
+									}
+									GM.CurrentPlayerBody.SetHealthThreshold(totalMaxHealth);
 								}
 								Mod.AddExperience(breakPartExperience, 2, "Treatment experience - Destroyed Part ({0})");
 								Mod.instance.LogInfo("\t\tFound destroyed part effect at effect index " + index);

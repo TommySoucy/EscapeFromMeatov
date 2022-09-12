@@ -64,9 +64,9 @@ namespace EFM
             if (!hideoutLoaded)
             {
                 Mod.instance.LogInfo("base null, loading bundle from file for first time");
-                Mod.baseAssetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovHideoutAssets.ab");
+                Mod.baseAssetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovHideoutAssets.ab");
                 Mod.instance.LogInfo("Loaded hideout bunble from file, loading hideout prefab");
-                Mod.baseBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovHideout.ab");
+                Mod.baseBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovHideout.ab");
                 Mod.instance.LogInfo("Loaded hideout prefab");
                 hideoutLoaded = true;
             }

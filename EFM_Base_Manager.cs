@@ -1096,11 +1096,14 @@ namespace EFM
             }
 
             // Set live data
+            float totalMaxHealth = 0;
             for (int i = 0; i < 7; ++i)
             {
                 Mod.currentMaxHealth[i] = Mod.defaultMaxHealth[i];
+                totalMaxHealth += Mod.currentMaxHealth[i];
                 Mod.currentHealthRates[i] += Mod.hideoutHealthRates[i];
             }
+            GM.CurrentPlayerBody.SetHealthThreshold(totalMaxHealth);
             Mod.currentEnergyRate += Mod.hideoutEnergyRate;
             Mod.currentHydrationRate += Mod.hideoutHydrationRate;
             if (Mod.justFinishedRaid)
@@ -4418,7 +4421,7 @@ namespace EFM
             {
                 case 0:
                     loadingRaid = true;
-                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
+                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovFactory.ab");
                     break;
                 default:
                     loadingRaid = true;
@@ -4426,7 +4429,7 @@ namespace EFM
                     Mod.chosenCharIndex = 0;
                     Mod.chosenTimeIndex = 0;
                     chosenMap.text = "Factory";
-                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovFactory.ab");
+                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovFactory.ab");
                     break;
             }
         }

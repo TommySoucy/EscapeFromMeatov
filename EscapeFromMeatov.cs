@@ -633,8 +633,8 @@ namespace EFM
         {
             LogInfo("Loading assets and scene bundles");
             // Load mod's AssetBundle
-            assetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovAssets.ab");
-            menuBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovMenu.ab");
+            assetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovAssets.ab");
+            menuBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovMenu.ab");
 
             LogInfo("Loading Main assets");
             // Load assets
@@ -1554,7 +1554,7 @@ namespace EFM
             locationsLootDB = new JObject[9];
             locationsBaseDB = new JObject[9];
             string[] locationLootFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/DB/Locations/loot");
-            string[] locationBaseFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/Locations/base");
+            string[] locationBaseFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/DB/Locations/base");
             // TODO: 12.12? loc loot files are missing data for items that spawn with parent
             // Take factory day lootpoint (101)1736994 for example
             for (int i=0; i < 12; ++i)
@@ -1753,7 +1753,7 @@ namespace EFM
 
         private void LoadDefaultAssets()
         {
-            defaultAssetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovDefaultAssets.ab");
+            defaultAssetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovDefaultAssets.ab");
 
             sceneDefImage = defaultAssetsBundle.LoadAsset<Sprite>("MeatovThumbnail");
             mainMenuPointable = defaultAssetsBundle.LoadAsset<GameObject>("MeatovPointable");
