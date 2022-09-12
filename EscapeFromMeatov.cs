@@ -1551,8 +1551,8 @@ namespace EFM
             questDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Quests.json"));
             XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
             mapData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/EscapeFromMeatovMapData.json"));
-            locationsLootDB = new JObject[9];
-            locationsBaseDB = new JObject[9];
+            locationsLootDB = new JObject[12];
+            locationsBaseDB = new JObject[12];
             string[] locationLootFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/DB/Locations/loot");
             string[] locationBaseFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/DB/Locations/base");
             // TODO: 12.12? loc loot files are missing data for items that spawn with parent
