@@ -116,7 +116,7 @@ namespace EFM
         public EFM_AreaUpgradeCheckProcessor[] activeCheckProcessors = new EFM_AreaUpgradeCheckProcessor[2];
 
         public static float currentExperienceRate = 1;
-        public static float currentQuestMoneyReward = 0;// TODO dont forget to use EFM_Skill.skillBoostPercent
+        public static float currentQuestMoneyReward = 0;
         public static float currentFuelConsumption = 0; 
         public static float currentDebuffEndDelay = 0; 
         public static float currentScavCooldownTimer = 1;

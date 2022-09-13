@@ -944,7 +944,7 @@ namespace EFM
                         int count = 0;
                         for (int j = 0; j < sounds.Length; ++j)
                         {
-                            sounds[j] = assetsBundles[assetBundleIndex].LoadAsset<AudioClip>(itemSound + "_" + soundCategories[j]);
+                            sounds[j] = assetsBundles[0].LoadAsset<AudioClip>(itemSound + "_" + soundCategories[j]);
                             count += sounds[j] == null ? 0 : 1;
                         }
                         if (count == 0)

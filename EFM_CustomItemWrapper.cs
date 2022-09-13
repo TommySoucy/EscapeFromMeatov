@@ -225,6 +225,7 @@ namespace EFM
 
 				prefabCIW = Mod.itemPrefabs[int.Parse(ID)].GetComponent<EFM_CustomItemWrapper>();
 
+				descriptionPack.ID = ID;
 				descriptionPack.isCustom = true;
 				descriptionPack.isPhysical = true;
 				descriptionPack.customItem = this;

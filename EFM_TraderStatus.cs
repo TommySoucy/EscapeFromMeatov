@@ -445,6 +445,18 @@ namespace EFM
                                 }
                             }
 
+                            // Skip the rest if this price is an error anyway
+                            if (missingFallback)
+                            {
+                                continue;
+                            }
+
+                            // Ensure that the price isn't exactly the same as the assort item itself
+                            if(currentPrices.Count == 1 && currentPrices[0].ID.Equals(actualParentItemID))
+                            {
+                                continue;
+                            }
+
                             // Ensure that this exact pricelist doesn't already exist, only add the pricelist if it isnt there yet
                             bool priceListFound = false;
                             foreach (List<AssortmentPriceData> existingPriceList in currentAssort.itemsByID[actualParentItemID].prices)
@@ -653,6 +665,18 @@ namespace EFM
                                 {
                                     break;
                                 }
+                            }
+
+                            // Skip the rest if this price is an error anyway
+                            if (missingFallback)
+                            {
+                                continue;
+                            }
+
+                            // Ensure that the price isn't exactly the same as the assort item itself
+                            if (currentPrices.Count == 1 && currentPrices[0].ID.Equals(actualParentItemID))
+                            {
+                                continue;
                             }
 
                             if (onlyCurrency)

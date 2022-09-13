@@ -191,6 +191,7 @@ namespace EFM
                 locationIndex = Mod.currentLocationIndex;
             }
 
+            descriptionPack.ID = H3ID;
             descriptionPack = new DescriptionPack();
             descriptionPack.isCustom = false;
             descriptionPack.isPhysical = true;

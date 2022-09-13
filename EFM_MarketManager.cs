@@ -4839,7 +4839,13 @@ namespace EFM
                         resetTrader = true;
                         break;
                     case TraderTaskReward.TaskRewardType.Item:
-                        SpawnItem(reward.itemIDs[UnityEngine.Random.Range(0, reward.itemIDs.Length)], reward.amount);
+                        string randomItemRewardID = reward.itemIDs[UnityEngine.Random.Range(0, reward.itemIDs.Length)];
+                        int actualAmount = reward.amount;
+                        if (randomItemRewardID.Equals("201") || randomItemRewardID.Equals("202") || randomItemRewardID.Equals("203"))
+                        {
+                            actualAmount += (int)(actualAmount * EFM_Base_Manager.currentQuestMoneyReward);
+                        }
+                        SpawnItem(randomItemRewardID, actualAmount);
                         break;
                     case TraderTaskReward.TaskRewardType.Experience:
                         Mod.AddExperience(reward.experience, 3, taskName == null ? "Gained {0} exp. (Task completion)" : "Task \""+taskName+"\" completed! Gained {0} exp.");

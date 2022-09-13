@@ -469,7 +469,7 @@ namespace EFM
                     else
                     {
                         neededForInstanceText.color = Color.blue;
-                        shouldHaveGreenCheckMark = true;
+                        shouldHaveBlueCheckMark = true;
                     }
                     areaNeededForTexts.Add(neededForInstance);
                     descriptionHeight += 47;
