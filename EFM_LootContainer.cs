@@ -50,12 +50,12 @@ namespace EFM
 			Mod.instance.LogInfo("\tSpawning attempts...");
 			for (int i=0; i < 20 + (UnityEngine.Random.value <= Mod.skills[30].currentProgress / 10000 ? 2 : 0) + (UnityEngine.Random.value <= Mod.skills[9].currentProgress / 10000 ? 2 : 0); ++i) // 20 spawn attempts + chance of 2 more if high enough search skill and also for attention skill 
             {
-				string randomFilterID = spawnFilter[UnityEngine.Random.Range(0, spawnFilter.Count - 1)];
+				string randomFilterID = spawnFilter[UnityEngine.Random.Range(0, spawnFilter.Count)];
 				Mod.instance.LogInfo("\t\trandomFilterID: "+ randomFilterID);
 				string itemID = "";
                 if (Mod.itemsByParents.TryGetValue(randomFilterID, out List<string> possibleItems))
                 {
-					itemID = possibleItems[UnityEngine.Random.Range(0, possibleItems.Count - 1)];
+					itemID = possibleItems[UnityEngine.Random.Range(0, possibleItems.Count)];
                 }
                 else if(Mod.itemMap.ContainsKey(randomFilterID))
                 {

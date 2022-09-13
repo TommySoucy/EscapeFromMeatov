@@ -409,116 +409,116 @@ namespace EFM
             Mod.instance.LogInfo("Initialized doors, spawning loose loot");
 
             // Spawn loose loot
-            JObject locationDB = Mod.locationsLootDB[GetLocationDataIndex(Mod.chosenMapIndex)];
+            JObject locationDB = Mod.locationsLootDB[Mod.chosenMapIndex];
             Transform itemsRoot = transform.GetChild(1).GetChild(1).GetChild(2);
-            List<string> missingForced = new List<string>();
-            List<string> missingDynamic = new List<string>();
             // Forced, always spawns TODO: Unless player has it already? Unless player doesnt have the quest yet?
-            Mod.instance.LogInfo("Spawning forced loot");
+            Mod.instance.LogInfo("Spawning forced loot, forced null?: "+(locationDB["forced"] == null));
             foreach (JToken forced in locationDB["forced"])
             {
-                JArray items = forced["Items"].Value<JArray>();
+                Mod.instance.LogInfo("Forced entry, items null?: "+(forced["Items"] == null));
                 Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
                 Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
                 List<string> unspawnedParents = new List<string>();
 
-                for (int i = 0; i < items.Count; ++i)
+                // Get item from item map
+                string originalID = forced["Items"][0].Type !=  JTokenType.String ? forced["Items"][0]["_tpl"].ToString() : forced["Items"][0].ToString();
+                Mod.instance.LogInfo("Got ID");
+                string itemID = null;
+                if (Mod.itemMap.ContainsKey(originalID))
                 {
-                    // Get item from item map
-                    string originalID = items[i]["_tpl"].ToString();
-                    string itemID = null;
-                    if (Mod.itemMap.ContainsKey(originalID))
+                    ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
+                    switch (itemMapEntry.mode)
                     {
-                        ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
-                        switch (itemMapEntry.mode)
-                        {
-                            case 0:
-                                itemID = itemMapEntry.ID;
-                                break;
-                            case 1:
-                                itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
-                                break;
-                            case 2:
-                                itemID = itemMapEntry.otherModID;
-                                break;
-                        }
+                        case 0:
+                            itemID = itemMapEntry.ID;
+                            break;
+                        case 1:
+                            itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                            break;
+                        case 2:
+                            itemID = itemMapEntry.otherModID;
+                            break;
                     }
-                    else
-                    {
-                        missingForced.Add(originalID);
-
-                        // Spawn random round instead
-                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
-                    }
-
-                    // Get item prefab
-                    GameObject itemPrefab = null;
-                    if (int.TryParse(itemID, out int index))
-                    {
-                        itemPrefab = Mod.itemPrefabs[index];
-                    }
-                    else
-                    {
-                        itemPrefab = IM.OD[itemID].GetGameObject();
-                    }
-
-                    // Spawn item
-                    SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItemCIWs, spawnedItemVIDs, unspawnedParents, forced, originalID, false);
                 }
+                else
+                {
+                    // Spawn random round instead
+                    itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
+                }
+
+                // Get item prefab
+                GameObject itemPrefab = null;
+                if (int.TryParse(itemID, out int index))
+                {
+                    itemPrefab = Mod.itemPrefabs[index];
+                }
+                else
+                {
+                    itemPrefab = IM.OD[itemID].GetGameObject();
+                }
+
+                // Spawn item
+                SpawnLootItem(itemPrefab, itemsRoot, itemID, forced, originalID, false);
             }
 
             // Dynamic, has chance of spawning
             Mod.instance.LogInfo("Spawning dynamic loot");
             foreach (JToken dynamicSpawn in locationDB["dynamic"])
             {
-                JArray items = dynamicSpawn["Items"].Value<JArray>();
                 Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
                 Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
                 List<string> unspawnedParents = new List<string>();
 
-                for (int i = 0; i < items.Count; ++i)
+                // Get item from item map
+                string[] lootTableIDSplit = dynamicSpawn["id"].ToString().Split(' ');
+                string originalID = null;
+                if (lootTableIDSplit.Length == 1 || Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)] == null || Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)][lootTableIDSplit[0]] == null)
                 {
-                    // Get item from item map
-                    string originalID = items[i]["_tpl"].ToString();
-                    string itemID = null;
-                    if (Mod.itemMap.ContainsKey(originalID))
-                    {
-                        ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
-                        switch (itemMapEntry.mode)
-                        {
-                            case 0:
-                                itemID = itemMapEntry.ID;
-                                break;
-                            case 1:
-                                itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
-                                break;
-                            case 2:
-                                itemID = itemMapEntry.otherModID;
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        missingForced.Add(originalID);
-
-                        // Spawn random round instead
-                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
-                    }
-
-                    // Get item prefab
-                    GameObject itemPrefab = null;
-                    if (int.TryParse(itemID, out int index))
-                    {
-                        itemPrefab = Mod.itemPrefabs[index];
-                    }
-                    else
-                    {
-                        itemPrefab = IM.OD[itemID].GetGameObject();
-                    }
-
-                    // Spawn item
-                    SpawnLootItem(itemPrefab, itemsRoot, itemID, items[i], spawnedItemCIWs, spawnedItemVIDs, unspawnedParents, dynamicSpawn, originalID, true);
+                    Mod.instance.LogWarning("Failed to get loot table ID from: "+lootTableIDSplit[0]+", spawning specified item instead");
+                    JArray items = dynamicSpawn["Items"].Value<JArray>();
+                    originalID = items[0].Type != JTokenType.String ? items[0]["_tpl"].ToString() : items[0].ToString();
                 }
+                else
+                {
+                    JArray possibleItems = Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)][lootTableIDSplit[0]]["SpawnList"] as JArray;
+                    originalID = possibleItems[UnityEngine.Random.Range(0, possibleItems.Count)].ToString();
+                }
+                string itemID = null;
+                if (Mod.itemMap.ContainsKey(originalID))
+                {
+                    ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
+                    switch (itemMapEntry.mode)
+                    {
+                        case 0:
+                            itemID = itemMapEntry.ID;
+                            break;
+                        case 1:
+                            itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                            break;
+                        case 2:
+                            itemID = itemMapEntry.otherModID;
+                            break;
+                    }
+                }
+                else
+                {
+                    // Spawn random round instead
+                    itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
+                }
+
+                // Get item prefab
+                GameObject itemPrefab = null;
+                if (int.TryParse(itemID, out int index))
+                {
+                    itemPrefab = Mod.itemPrefabs[index];
+                }
+                else
+                {
+                    itemPrefab = IM.OD[itemID].GetGameObject();
+                }
+
+                // Spawn item
+                SpawnLootItem(itemPrefab, itemsRoot, itemID, dynamicSpawn, originalID, true);
             }
 
             Mod.instance.LogInfo("Done spawning loose loot, initializing container");
@@ -551,7 +551,7 @@ namespace EFM
                         EFM_LootContainer containerScript = container.gameObject.AddComponent<EFM_LootContainer>();
                         containerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
                         JToken gridProps = containerData["_props"]["Grids"][0]["_props"];
-                        containerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)gridProps["cellsH"] * (int)gridProps["cellsV"]);
+                        containerScript.Init(Mod.staticLootTable[containerData["_id"].ToString()]["SpawnList"].ToObject<List<string>>(), (int)gridProps["cellsH"] * (int)gridProps["cellsV"]);
 
                         mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
                         break;
@@ -575,7 +575,7 @@ namespace EFM
                         openableContainerScript.interactable = cover;
                         openableContainerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
                         JToken openableContainergridProps = containerData["_props"]["Grids"][0]["_props"];
-                        openableContainerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)openableContainergridProps["cellsH"] * (int)openableContainergridProps["cellsV"]);
+                        openableContainerScript.Init(Mod.staticLootTable[containerData["_id"].ToString()]["SpawnList"].ToObject<List<string>>(), (int)openableContainergridProps["cellsH"] * (int)openableContainergridProps["cellsV"]);
 
                         mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
                         break;
@@ -596,7 +596,7 @@ namespace EFM
                             drawerScript.interactable = slider;
                             drawerScript.mainContainerCollider = drawerTransform.GetChild(drawerTransform.childCount - 1).GetComponent<Collider>();
                             JToken drawerGridProps = containerData["_props"]["Grids"][0]["_props"];
-                            drawerScript.Init(containerData["_props"]["SpawnFilter"].ToObject<List<string>>(), (int)drawerGridProps["cellsH"] * (int)drawerGridProps["cellsV"]);
+                            drawerScript.Init(Mod.staticLootTable[containerData["_id"].ToString()]["SpawnList"].ToObject<List<string>>(), (int)drawerGridProps["cellsH"] * (int)drawerGridProps["cellsV"]);
 
                             Transform drawerContainer = drawerTransform.GetChild(drawerTransform.childCount - 1);
                             drawerContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
@@ -3633,7 +3633,7 @@ namespace EFM
 
             // Get location's base data
             float averageLevel = (float)locationData["AveragePlayerLevel"];
-            maxRaidTime = (float)locationData["escape_time_limit"] * 60;
+            maxRaidTime = (float)locationData["EscapeTimeLimit"] * 60;
             maxBotPerZone = (int)locationData["MaxBotPerZone"];
 
             // Add AIManager to map
@@ -3863,7 +3863,7 @@ namespace EFM
                     continue;
                 }
 
-                int escortSize = (int)wave["BossEscortAmount"][UnityEngine.Random.Range(0, (wave["BossEscortAmount"] as JArray).Count)] + 1;
+                int escortSize = wave["BossEscortAmount"].Type == JTokenType.Array ? (int)wave["BossEscortAmount"][UnityEngine.Random.Range(0, (wave["BossEscortAmount"] as JArray).Count)] + 1 : int.Parse(wave["BossEscortAmount"].ToString());
                 string raiderSquadName = "Raider" + raiderSquadIndex;
 
 
@@ -3934,10 +3934,8 @@ namespace EFM
                 {
                     botDataToUse = GetBotData("bear");
                 }
-                Mod.instance.LogInfo("\tGot PMC bot data");
             }
 
-            Mod.instance.LogInfo("GenerateAISpawn called, botData null?: " + (botDataToUse == null) + ", with type: " + AIType + " and name: " + (leaderName != null ? leaderName : "None"));
             AISpawn newAISpawn = new AISpawn();
             newAISpawn.type = AIType;
             newAISpawn.experienceReward = UnityEngine.Random.Range((int)botDataToUse.experience["reward"]["min"], (int)botDataToUse.experience["reward"]["max"]);
@@ -3945,12 +3943,10 @@ namespace EFM
             newAISpawn.inventory.generic = new List<string>();
             newAISpawn.inventory.genericPockets = new List<int>();
             newAISpawn.outfitByLink = new Dictionary<int, List<string>>();
-            Mod.instance.LogInfo("\tInited newAISpawn");
 
             float level = Mathf.Min(80, ExpDistrRandOnAvg(averageLevel));
 
             newAISpawn.name = botDataToUse.names[UnityEngine.Random.Range(0, botDataToUse.names.Count)].ToString();
-            Mod.instance.LogInfo("\tgot level: "+level+" and name: "+newAISpawn.name);
 
             if (AIType == AISpawn.AISpawnType.PMC)
             {
@@ -3965,12 +3961,10 @@ namespace EFM
                 }
                 newAISpawn.inventory.dogtagLevel = (int)level;
                 newAISpawn.inventory.dogtagName = newAISpawn.name;
-                Mod.instance.LogInfo("\tSet dogtag");
             }
             else if(AIType == AISpawn.AISpawnType.Boss || AIType == AISpawn.AISpawnType.Follower || AIType == AISpawn.AISpawnType.Raider)
             {
                 newAISpawn.leaderName = leaderName;
-                Mod.instance.LogInfo("\tSet leader name");
             }
 
             // Get inventory data corresponding to level
@@ -3983,10 +3977,8 @@ namespace EFM
                     break;
                 }
             }
-            Mod.instance.LogInfo("\tGot inventory data");
 
             // Set equipment
-            Mod.instance.LogInfo("\tSetting head equipment");
             string[] headSlots = { "Headwear", "Earpiece", "FaceCover", "Eyewear" };
             bool[] headEquipImpossible = new bool[4];
             List<int> headOrder = new List<int> { 0, 1, 2, 3 };
@@ -3999,7 +3991,6 @@ namespace EFM
                     continue;
                 }
                 string actualEquipName = headSlots[actualEquipIndex];
-                Mod.instance.LogInfo("\t\tSetting "+actualEquipName);
 
                 if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"][actualEquipName]) / 100)
                 {
@@ -4023,12 +4014,10 @@ namespace EFM
                                     actualHeadEquipID = itemMapEntry.otherModID;
                                     break;
                             }
-                            Mod.instance.LogInfo("\t\t\tChosen ID: " + actualHeadEquipID);
 
                             // Add sosig outfit item if applicable
                             if (Mod.globalDB["AIItemMap"][actualHeadEquipID] != null)
                             {
-                                Mod.instance.LogInfo("\t\t\t\tGot in AIItemMap");
                                 JObject outfitItemData = Mod.globalDB["AIItemMap"][actualHeadEquipID] as JObject;
                                 int linkIndex = (int)outfitItemData["Link"];
                                 List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
@@ -4040,7 +4029,6 @@ namespace EFM
                                 {
                                     newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
                                 }
-                                Mod.instance.LogInfo("\t\t\t\tAdded to outfitByLink");
                             }
 
                             // Add any restrictions implied by this item
@@ -4155,7 +4143,6 @@ namespace EFM
 
             if (!rigArmored)
             {
-                Mod.instance.LogInfo("\tSetting armor");
                 if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["ArmorVest"]) / 100)
                 {
                     JArray possibleArmors = inventoryDataToUse["equipment"]["ArmorVest"] as JArray;
@@ -4178,13 +4165,11 @@ namespace EFM
                                     actualArmorID = itemMapEntry.otherModID;
                                     break;
                             }
-                            Mod.instance.LogInfo("\t\tChosen ID: " + actualArmorID);
                             newAISpawn.inventory.armor = actualArmorID;
 
                             // Add sosig outfit item if applicable
                             if (Mod.globalDB["AIItemMap"][actualArmorID] != null)
                             {
-                                Mod.instance.LogInfo("\t\t\tGot in AIItemMap");
                                 JObject outfitItemData = Mod.globalDB["AIItemMap"][actualArmorID] as JObject;
                                 int linkIndex = (int)outfitItemData["Link"];
                                 List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
@@ -4196,7 +4181,6 @@ namespace EFM
                                 {
                                     newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
                                 }
-                                Mod.instance.LogInfo("\t\t\tAdded to outfitByLink");
                             }
                         }
                         else
@@ -4233,13 +4217,11 @@ namespace EFM
                                 actualBackpackID = itemMapEntry.otherModID;
                                 break;
                         }
-                        Mod.instance.LogInfo("\t\tChosen ID: " + actualBackpackID);
                         newAISpawn.inventory.backpack = actualBackpackID;
 
                         // Add sosig outfit item if applicable
                         if (Mod.globalDB["AIItemMap"][actualBackpackID] != null)
                         {
-                            Mod.instance.LogInfo("\t\t\tGot in AIItemMap");
                             JObject outfitItemData = Mod.globalDB["AIItemMap"][actualBackpackID] as JObject;
                             int linkIndex = (int)outfitItemData["Link"];
                             List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
@@ -4251,7 +4233,6 @@ namespace EFM
                             {
                                 newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
                             }
-                            Mod.instance.LogInfo("\t\t\tAdded to outfitByLink");
                         }
 
                         // Get backpack data
@@ -4261,7 +4242,6 @@ namespace EFM
                         backpackBlacklist = defaultBackpackData["ContainerProperties"]["BlackList"].ToObject<List<string>>();
                         maxBackpackVolume = (float)defaultBackpackData["BackpackProperties"]["MaxVolume"];
                         newAISpawn.inventory.backpackContents = new List<string>();
-                        Mod.instance.LogInfo("\tProcessed backpack data");
                     }
                     else
                     {
@@ -4270,7 +4250,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting weapon");
             bool hasSosigWeapon = false;
             string[] ammoContainers = new string[3];
             string[] weaponCartridges = new string[3];
@@ -4296,13 +4275,11 @@ namespace EFM
                                 actualPWID = itemMapEntry.otherModID;
                                 break;
                         }
-                        Mod.instance.LogInfo("\t\tChosen ID: " + actualPWID);
                         newAISpawn.inventory.primaryWeapon = actualPWID;
 
                         // Add sosig weapon
                         if (Mod.globalDB["AIWeaponMap"][actualPWID] != null)
                         {
-                            Mod.instance.LogInfo("\t\t\tGot in AIWeaponMap");
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualPWID].ToString();
                             hasSosigWeapon = true;
                         }
@@ -4320,7 +4297,6 @@ namespace EFM
                         {
                             Mod.instance.LogError("AI FirstPrimaryWeapon with ID: "+ actualPWID +" is not a firearm");
                         }
-                        Mod.instance.LogInfo("\t\tProcessed weapon data and mods");
                     }
                     else
                     {
@@ -4329,7 +4305,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting secondary weapon");
             if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["SecondPrimaryWeapon"]) / 100)
             {
                 JArray possibleSW = inventoryDataToUse["equipment"]["SecondPrimaryWeapon"] as JArray;
@@ -4352,13 +4327,11 @@ namespace EFM
                                 actualSWID = itemMapEntry.otherModID;
                                 break;
                         }
-                        Mod.instance.LogInfo("\t\tChosen ID: " + actualSWID);
                         newAISpawn.inventory.secondaryWeapon = actualSWID;
 
                         // Add sosig weapon if necessary
                         if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualSWID] != null)
                         {
-                            Mod.instance.LogInfo("\t\t\tGot in AIWeaponMap");
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualSWID].ToString();
                             hasSosigWeapon = true;
                         }
@@ -4376,7 +4349,6 @@ namespace EFM
                         {
                             Mod.instance.LogError("AI SecondPrimaryWeapon with ID: " + actualSWID + " is not a firearm");
                         }
-                        Mod.instance.LogInfo("\t\tProcessed weapon data and mods");
                     }
                     else
                     {
@@ -4385,7 +4357,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting holster");
             if (rigSlotSizes != null && UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["Holster"]) / 100)
             {
                 JArray possibleHolster = inventoryDataToUse["equipment"]["Holster"] as JArray;
@@ -4408,7 +4379,6 @@ namespace EFM
                                 actualHolsterID = itemMapEntry.otherModID;
                                 break;
                         }
-                        Mod.instance.LogInfo("\t\tChosen ID: " + actualHolsterID);
                         newAISpawn.inventory.holster = actualHolsterID;
 
                         //// Set to holster slot in rig
@@ -4424,7 +4394,6 @@ namespace EFM
                         // Add sosig weapon if necessary
                         if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualHolsterID] != null)
                         {
-                            Mod.instance.LogInfo("\t\t\tGot in AIWeaponMap");
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualHolsterID].ToString();
                             hasSosigWeapon = true;
                         }
@@ -4442,7 +4411,6 @@ namespace EFM
                         {
                             Mod.instance.LogError("AI Holster with ID: " + actualHolsterID + " is not a firearm");
                         }
-                        Mod.instance.LogInfo("\t\tProcessed weapon data and mods");
                     }
                     else
                     {
@@ -4451,7 +4419,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting Scabbard");
             if (UnityEngine.Random.value <= ((float)botDataToUse.chances["equipment"]["Scabbard"]) / 100)
             {
                 JArray possibleScabbard = inventoryDataToUse["equipment"]["Scabbard"] as JArray;
@@ -4474,13 +4441,11 @@ namespace EFM
                                 actualScabbardID = itemMapEntry.otherModID;
                                 break;
                         }
-                        Mod.instance.LogInfo("\t\tChosen ID: " + actualScabbardID);
                         newAISpawn.inventory.generic.Add(actualScabbardID);
 
                         // Add sosig weapon if necessary
                         if (!hasSosigWeapon && Mod.globalDB["AIWeaponMap"][actualScabbardID] != null)
                         {
-                            Mod.instance.LogInfo("\t\t\tGot in AIWeaponMap");
                             newAISpawn.sosigWeapon = Mod.globalDB["AIWeaponMap"][actualScabbardID].ToString();
                             hasSosigWeapon = true;
                         }
@@ -4501,7 +4466,6 @@ namespace EFM
             int pocketsUsed = 0;
             float currentBackpackVolume = 0;
 
-            Mod.instance.LogInfo("\tSetting magazines");
             int ammoContainerItemMin = (int)botDataToUse.generation["items"]["magazines"]["min"];
             int ammoContainerItemMax = (int)botDataToUse.generation["items"]["magazines"]["max"];
             if (ammoContainerItemMax > 0)
@@ -4513,11 +4477,9 @@ namespace EFM
                         continue;
                     }
 
-                    Mod.instance.LogInfo("\t\tFor weapon index: "+ k);
                     for (int i = 0; i < ammoContainerItemMax; ++i)
                     {
                         string ammoContainerItemID = ammoContainers[k];
-                        Mod.instance.LogInfo("\t\t\tGot ammoContainerItemID: "+ ammoContainerItemID);
                         object[] ammoContainerItemData = GetItemData(ammoContainerItemID);
 
                         if (i >= ammoContainerItemMin && UnityEngine.Random.value > (float.Parse(ammoContainerItemData[2] as string) / 100))
@@ -4560,20 +4522,17 @@ namespace EFM
                             newAISpawn.inventory.backpackContents.Add(ammoContainerItemID);
                             currentBackpackVolume += ammoContainerItemVolume;
                         }
-                        Mod.instance.LogInfo("\t\t\tAdded to inventory");
                     }
                 }
             }
 
             // Fill lists of possible types of items for specific parts
-            Mod.instance.LogInfo("\tGetting part specific content");
             Dictionary<string, object[]> possibleHealingItems = new Dictionary<string, object[]>(); // 0 - List of part indices, 1 - size, 2 - volume, 3 - spawn chance
             Dictionary<string, object[]> possibleGrenades = new Dictionary<string, object[]>();
             Dictionary<string, object[]> possibleLooseLoot = new Dictionary<string, object[]>();
             string[] itemParts = new string[] { "TacticalVest", "Pockets", "Backpack" };
             for (int i = 0; i < 3; ++i)
             {
-                Mod.instance.LogInfo("\t\tChecking items in: " + itemParts[i]);
                 foreach (string itemID in inventoryDataToUse["items"][itemParts[i]])
                 {
                     if (Mod.itemMap.ContainsKey(itemID))
@@ -4681,11 +4640,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\t Got a list of " + possibleHealingItems.Count + " possible healing items");
-            Mod.instance.LogInfo("\t Got a list of " + possibleGrenades.Count + " possible grenades");
-            Mod.instance.LogInfo("\t Got a list of " + possibleLooseLoot.Count + " possible loose loot items");
-
-            Mod.instance.LogInfo("\tSetting healing items");
             int healingItemMin = (int)botDataToUse.generation["items"]["healing"]["min"];
             int healingItemMax = (int)botDataToUse.generation["items"]["healing"]["max"];
             if (healingItemMax > 0 && possibleHealingItems.Count > 0)
@@ -4741,7 +4695,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting grenades");
             int grenadeItemMin = (int)botDataToUse.generation["items"]["grenades"]["min"];
             int grenadeItemMax = (int)botDataToUse.generation["items"]["grenades"]["max"];
             if (grenadeItemMax > 0 && possibleGrenades.Count > 0)
@@ -4800,7 +4753,6 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting looseloot");
             int looseLootItemMin = (int)botDataToUse.generation["items"]["looseLoot"]["min"];
             int looseLootItemMax = (int)botDataToUse.generation["items"]["looseLoot"]["max"];
             if (looseLootItemMax > 0 && possibleLooseLoot.Count > 0)
@@ -4858,79 +4810,82 @@ namespace EFM
 
             if (inventoryDataToUse["items"]["SpecialLoot"] != null)
             {
-                Mod.instance.LogInfo("\tSetting special items");
                 int specialItemMin = (int)botDataToUse.generation["items"]["specialItems"]["min"];
                 int specialItemMax = (int)botDataToUse.generation["items"]["specialItems"]["max"];
                 List<string> possibleSpecialItems = inventoryDataToUse["items"]["SpecialLoot"].ToObject<List<string>>();
                 if (specialItemMax > 0 && possibleSpecialItems.Count > 0)
-            {
-                for (int i = 0; i < specialItemMax; ++i)
                 {
-                    string specialItemID = null;
-                    ItemMapEntry itemMapEntry = Mod.itemMap[possibleSpecialItems[UnityEngine.Random.Range(0, possibleSpecialItems.Count)]];
-                    switch (itemMapEntry.mode)
+                    for (int i = 0; i < specialItemMax; ++i)
                     {
-                        case 0:
-                            specialItemID = itemMapEntry.ID;
-                            break;
-                        case 1:
-                            specialItemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
-                            break;
-                        case 2:
-                            specialItemID = itemMapEntry.otherModID;
-                            break;
-                    }
-                    object[] specialItemData = GetItemData(specialItemID);
-
-                    if (i >= specialItemMin && UnityEngine.Random.value > (float.Parse(specialItemData[2] as string) / 100))
-                    {
-                        continue;
-                    }
-
-                    FVRPhysicalObject.FVRPhysicalObjectSize specialItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(specialItemData[0] as string);
-                    float specialItemVolume = float.Parse(specialItemData[1] as string);
-
-                    // First try to put in backpack, then pockets, then rig
-                    bool success = false;
-                    if (maxBackpackVolume > 0 && currentBackpackVolume + specialItemVolume <= maxBackpackVolume)
-                    {
-                        newAISpawn.inventory.backpackContents.Add(specialItemID);
-                        currentBackpackVolume += specialItemVolume;
-                        success = true;
-                    }
-                    if (!success && specialItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
-                    {
-                        newAISpawn.inventory.genericPockets.Add(newAISpawn.inventory.generic.Count);
-                        newAISpawn.inventory.generic.Add(specialItemID);
-                        ++pocketsUsed;
-                        success = true;
-                    }
-                    if (!success && rigSlotSizes != null)
-                    {
-                        bool firstMediumSkipped = false;
-                        for (int j = 0; j < rigSlotSizes.Length; ++j)
+                        string specialItemID = null;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[possibleSpecialItems[UnityEngine.Random.Range(0, possibleSpecialItems.Count)]];
+                        switch (itemMapEntry.mode)
                         {
-                            if (rigSlotSizes[j] == FVRPhysicalObject.FVRPhysicalObjectSize.Medium && !firstMediumSkipped)
-                            {
-                                firstMediumSkipped = true;
-                                continue;
-                            }
-                            if (newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)specialItemSize)
-                            {
-                                newAISpawn.inventory.rigContents[j] = specialItemID;
-                                success = true;
+                            case 0:
+                                specialItemID = itemMapEntry.ID;
                                 break;
+                            case 1:
+                                specialItemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                specialItemID = itemMapEntry.otherModID;
+                                break;
+                        }
+                        object[] specialItemData = GetItemData(specialItemID);
+
+                        if (i >= specialItemMin && UnityEngine.Random.value > (float.Parse(specialItemData[2] as string) / 100))
+                        {
+                            continue;
+                        }
+
+                        FVRPhysicalObject.FVRPhysicalObjectSize specialItemSize = (FVRPhysicalObject.FVRPhysicalObjectSize)int.Parse(specialItemData[0] as string);
+                        float specialItemVolume = float.Parse(specialItemData[1] as string);
+
+                        // First try to put in backpack, then pockets, then rig
+                        bool success = false;
+                        if (maxBackpackVolume > 0 && currentBackpackVolume + specialItemVolume <= maxBackpackVolume)
+                        {
+                            newAISpawn.inventory.backpackContents.Add(specialItemID);
+                            currentBackpackVolume += specialItemVolume;
+                            success = true;
+                        }
+                        if (!success && specialItemSize == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
+                        {
+                            newAISpawn.inventory.genericPockets.Add(newAISpawn.inventory.generic.Count);
+                            newAISpawn.inventory.generic.Add(specialItemID);
+                            ++pocketsUsed;
+                            success = true;
+                        }
+                        if (!success && rigSlotSizes != null)
+                        {
+                            bool firstMediumSkipped = false;
+                            for (int j = 0; j < rigSlotSizes.Length; ++j)
+                            {
+                                if (rigSlotSizes[j] == FVRPhysicalObject.FVRPhysicalObjectSize.Medium && !firstMediumSkipped)
+                                {
+                                    firstMediumSkipped = true;
+                                    continue;
+                                }
+                                if (newAISpawn.inventory.rigContents[j] == null && (int)rigSlotSizes[j] >= (int)specialItemSize)
+                                {
+                                    newAISpawn.inventory.rigContents[j] = specialItemID;
+                                    success = true;
+                                    break;
+                                }
                             }
                         }
                     }
-                }
                 }
             }
 
             // Build config template
             newAISpawn.configTemplate = ScriptableObject.CreateInstance<SosigConfigTemplate>();
+            newAISpawn.configTemplate.LinkDamageMultipliers = new List<float>() { 1, 1, 1, 1 };
+            newAISpawn.configTemplate.LinkStaggerMultipliers = new List<float>() { 1, 1, 1, 1 };
+            newAISpawn.configTemplate.StartingLinkIntegrity = new List<Vector2>() { new Vector2(100, 100), new Vector2(100, 100), new Vector2(100, 100), new Vector2(100, 100) };
+            newAISpawn.configTemplate.StartingChanceBrokenJoint = new List<float>() { 0,0,0,0 };
             newAISpawn.configTemplate.DoesAggroOnFriendlyFire = true;
-            Dictionary<string, JObject> health = botData.health["BodyParts"].ToObject<Dictionary<string, JObject>>();
+            Dictionary<string, JObject> health = botDataToUse.health["BodyParts"].ToObject<Dictionary<string, JObject>>();
             float totalHealth = 0;
             foreach(KeyValuePair<string, JObject> pair in health)
             {
@@ -5053,7 +5008,7 @@ namespace EFM
             BotData botData = new BotData();
 
             // Get inventory data
-            string[] botInventoryFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/bots/"+ name + "/inventory/");
+            string[] botInventoryFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/"+ name + "/inventory/");
             botData.minInventoryLevels = new int[botInventoryFiles.Length];
             botData.inventoryDB = new JObject[botInventoryFiles.Length];
             for (int i = botInventoryFiles.Length - 1; i >= 0; --i)
@@ -5065,11 +5020,11 @@ namespace EFM
             }
 
             // Get other data
-            botData.chances = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/chances.json"));
-            botData.experience = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/experience.json"));
-            botData.generation = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/generation.json"));
-            botData.health = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/health.json"));
-            botData.names = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/bots/" + name + "/names.json"));
+            botData.chances = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/chances.json"));
+            botData.experience = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/experience.json"));
+            botData.generation = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/generation.json"));
+            botData.health = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/health.json"));
+            botData.names = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/names.json"));
 
             return botData;
         }
@@ -6191,9 +6146,7 @@ namespace EFM
             return Convert.ToInt64((DateTime.Now.ToUniversalTime() - epoch).TotalSeconds);
         }
 
-        private GameObject SpawnLootItem(GameObject itemPrefab, Transform itemsRoot, string itemID, JToken itemData,
-                                         Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs, Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs,
-                                         List<string> unspawnedParents, JToken spawnData, string originalID, bool useChance)
+        private GameObject SpawnLootItem(GameObject itemPrefab, Transform itemsRoot, string itemID, JToken spawnData, string originalID, bool useChance)
         {
             Mod.instance.LogInfo("Spawn loot item called with ID: " + itemID);
             GameObject itemObject = null;
@@ -6211,7 +6164,6 @@ namespace EFM
             EFM_VanillaItemDescriptor itemVID = null;
             FireArmRoundType roundType = FireArmRoundType.a106_25mmR;
             FireArmRoundClass roundClass = FireArmRoundClass.a20AP;
-            int amount = 0;
             if (prefabCIW != null)
             {
                 itemObject = GameObject.Instantiate(itemPrefab);
@@ -6224,21 +6176,28 @@ namespace EFM
                 Mod.RemoveFromAll(null, itemCIW, null);
 
                 // Get amount
-                amount = (itemData["upd"] != null && itemData["upd"]["StackObjectsCount"] != null) ? (int)itemData["upd"]["StackObjectsCount"] : 1;
                 if (itemCIW.itemType == Mod.ItemType.Money)
                 {
-                    itemCIW.stack = amount;
+                    if (itemCIW.ID.Equals("201"))
+                    {
+                        itemCIW.stack = UnityEngine.Random.Range(20, 121);
+                    }
+                    else if (itemCIW.ID.Equals("202"))
+                    {
+                        itemCIW.stack = UnityEngine.Random.Range(10, 101);
+                    }
+                    else
+                    {
+                        itemCIW.stack = UnityEngine.Random.Range(500, 5001);
+                    }
                 }
                 else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
                 {
-                    // TODO: Ammo is specified as separate item with the ammobox as its parent, so the ammobox will be filled up separately? Need to confirm
-                    /*
                     FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                     for (int j = 0; j < itemCIW.maxAmount; ++j)
                     {
                         asMagazine.AddRound(itemCIW.roundClass, false, false);
                     }
-                    */
                 }
                 else if (itemCIW.maxAmount > 0)
                 {
@@ -6251,7 +6210,7 @@ namespace EFM
                 {
                     Mod.instance.LogInfo("\tSpawning round with ID: " + prefabVID.H3ID);
                     // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of rounds
-                    amount = (itemData["upd"] != null && itemData["upd"]["StackObjectsCount"] != null) ? (int)itemData["upd"]["StackObjectsCount"] : 1;
+                    int amount = UnityEngine.Random.Range(1, 121);
                     FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
                     roundType = round.RoundType;
                     roundClass = round.RoundClass;
@@ -6327,141 +6286,25 @@ namespace EFM
                 }
             }
 
-            // Position and rotate item
-            if (itemData["parentId"] != null)
+            if (spawnData["Position"].Type == JTokenType.Array)
             {
-                Mod.instance.LogInfo("\t\tHas parent ID");
-                string parentID = itemData["parentId"].ToString();
-                if (unspawnedParents.Contains(parentID))
-                {
-                    Destroy(itemObject);
-                    unspawnedParents.Add(itemData["_id"].ToString());
-                    return null;
-                }
-
-                // Item has a parent which should be a previously spawned item
-                // This parent should be a container of some sort so we need to add this item to the container
-                if (spawnedItemCIWs.ContainsKey(parentID))
-                {
-                    Mod.instance.LogInfo("\t\tParent exists");
-                    EFM_CustomItemWrapper parent = spawnedItemCIWs[parentID];
-
-                    // Check which type of item the parent is, because how we instantiate it depends on that
-                    if(parent.itemType == Mod.ItemType.Rig || parent.itemType == Mod.ItemType.ArmoredRig)
-                    {
-                        // Set item in a random slot that fits it if there is one
-
-                        List<int> fittingSlotIndices = new List<int>();
-                        for (int i = 0; i < parent.rigSlots.Count; ++i)
-                        {
-                            if ((int)parent.rigSlots[i].SizeLimit >= (int)itemPhysObj.Size)
-                            {
-                                fittingSlotIndices.Add(i);
-                            }
-                        }
-
-                        if(fittingSlotIndices.Count > 0)
-                        {
-                            int randomIndex = fittingSlotIndices[UnityEngine.Random.Range(0, fittingSlotIndices.Count - 1)];
-
-                            parent.itemsInSlots[randomIndex] = itemObject;
-                        }
-                        else // No fitting slots, just spawn next to parent
-                        {
-                            itemObject.transform.position = parent.transform.position + Vector3.up; // 1m above parent
-                        }
-                    }
-                    else if(parent.itemType == Mod.ItemType.Backpack || parent.itemType == Mod.ItemType.Container || parent.itemType == Mod.ItemType.Pouch)
-                    {
-                        // Set item in the container, at random pos and rot, if volume fits
-                        bool boxMainContainer = parent.mainContainer.GetComponent<BoxCollider>() != null;
-                        if (parent.AddItemToContainer(itemObject.GetComponent<EFM_CustomItemWrapper>().physObj))
-                        {
-                            if (boxMainContainer)
-                            {
-                                BoxCollider boxCollider = parent.mainContainer.GetComponent<BoxCollider>();
-                                itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-boxCollider.size.x / 2, boxCollider.size.x / 2),
-                                                                                 UnityEngine.Random.Range(-boxCollider.size.y / 2, boxCollider.size.y / 2),
-                                                                                 UnityEngine.Random.Range(-boxCollider.size.z / 2, boxCollider.size.z / 2));
-                            }
-                            else
-                            {
-                                CapsuleCollider capsuleCollider = parent.mainContainer.GetComponent<CapsuleCollider>();
-                                if (capsuleCollider != null)
-                                {
-                                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-capsuleCollider.radius / 2, capsuleCollider.radius / 2),
-                                                                                     UnityEngine.Random.Range(-(capsuleCollider.height / 2 - capsuleCollider.radius), capsuleCollider.height / 2 - capsuleCollider.radius),
-                                                                                     0);
-                                }
-                                else
-                                {
-                                    itemObject.transform.localPosition = Vector3.zero;
-                                }
-                            }
-                            itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
-                        }
-                        else // Could not add item to container, set it next to parent
-                        {
-                            itemObject.transform.position = parent.transform.position + Vector3.up; // 1m above parent
-                        }
-                    }
-                    else if(parent.itemType == Mod.ItemType.AmmoBox)
-                    {
-                        Mod.instance.LogInfo("\t\tParent is ammo box, itemObject null?: "+(itemObject == null));
-                        // Destroy itemObject, Set the ammo box's magazine script's ammo to the one specified and of specified count
-                        Destroy(itemObject);
-                        itemCIW = null;
-                        itemVID = null;
-                        itemObject = null;
-
-                        FVRFireArmMagazine parentAsMagazine = parent.GetComponent<FVRFireArmMagazine>();
-
-                        for (int i = 0; i < amount; ++i)
-                        {
-                            parentAsMagazine.AddRound(roundClass, false, false);
-                        }
-                    }
-                }
-                else
-                {
-                    Mod.instance.LogError("Attempted to spawn loose loot " + itemID + " with original ID " + originalID + " but parentID " + itemData["parentId"].ToString() + " does not exist in spawned items list");
-                }
+                Vector3 position = new Vector3((float)spawnData["Position"][0], (float)spawnData["Position"][1], (float)spawnData["Position"][2]);
+                itemObject.transform.position = position;
             }
-            else
+            if (spawnData["Rotation"].Type == JTokenType.Array)
             {
-                if (useChance && UnityEngine.Random.value > (prefabCIW != null ? prefabCIW.spawnChance : prefabVID.spawnChance) / 100)
-                {
-                    Destroy(itemObject);
-                    unspawnedParents.Add(itemData["_id"].ToString());
-                    return null;
-                }
-
-                if (spawnData["Position"].Type == JTokenType.Array)
-                {
-                    Vector3 position = new Vector3((float)spawnData["Position"][0], (float)spawnData["Position"][1], (float)spawnData["Position"][2]);
-                    itemObject.transform.position = position;
-                }
-                if (spawnData["Rotation"].Type == JTokenType.Array)
-                {
-                    Vector3 rotation = new Vector3((float)spawnData["Rotation"][0], (float)spawnData["Rotation"][1], (float)spawnData["Rotation"][2]);
-                    itemObject.transform.rotation = Quaternion.Euler(rotation);
-                }
-                itemObject.transform.parent = itemsRoot;
+                Vector3 rotation = new Vector3((float)spawnData["Rotation"][0], (float)spawnData["Rotation"][1], (float)spawnData["Rotation"][2]);
+                itemObject.transform.rotation = Quaternion.Euler(rotation);
             }
+            else if(spawnData["randomRotation"] != null && (bool)spawnData["randomRotation"])
+            {
+                itemObject.transform.rotation = UnityEngine.Random.rotation;
+            }
+            itemObject.transform.parent = itemsRoot;
 
             if (itemObject != null)
             {
                 Mod.instance.LogInfo("Spawned loose loot: " + itemObject.name);
-            }
-
-            // Add item wrapper or descriptor to spawned items dict with _id as key
-            if (itemCIW != null)
-            {
-                spawnedItemCIWs.Add(itemData["_id"].ToString(), itemCIW);
-            }
-            else if(itemVID != null)
-            {
-                spawnedItemVIDs.Add(itemData["_id"].ToString(), itemVID);
             }
 
             return itemObject;
@@ -6550,7 +6393,7 @@ namespace EFM
             {
                 return;
             }
-            Mod.instance.LogInfo("Kill player called");
+            Mod.instance.LogInfo("Kill player called:\n "+Environment.StackTrace);
             Mod.dead = true;
 
             // Register insured items that are currently on player

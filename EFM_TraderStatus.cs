@@ -254,7 +254,6 @@ namespace EFM
                 {
                     // Only add item if we have an ID for it
                     string entryID = entry["_id"].ToString(); 
-                    Mod.instance.LogInfo("\tentryID " + entryID);
                     string itemID = entry["_tpl"].ToString();
                     int loyaltyLevel = (int)assortData["loyal_level_items"][entryID];
                     JArray barterSchemes = assortData["barter_scheme"][entryID][0] as JArray;
@@ -280,10 +279,8 @@ namespace EFM
                         continue;
                     }
 
-                    Mod.instance.LogInfo("\tGot item ids");
                     foreach (string actualParentItemID in actualItemIDs)
                     {
-                        Mod.instance.LogInfo("\t\tAdding "+actualParentItemID);
                         // Add new assort for this level or get the one already there
                         TraderAssortment currentAssort = null;
                         if (!assortmentByLevel.ContainsKey(loyaltyLevel))
@@ -301,7 +298,6 @@ namespace EFM
                         // Add all the items in the assort
                         if (currentAssort.itemsByID.ContainsKey(actualParentItemID))
                         {
-                            Mod.instance.LogInfo("\t\t\tItem already has an assort entry, adding a new price of applicable");
                             if (entry["upd"] != null && entry["upd"]["StackObjectsCount"] != null)
                             {
                                 currentAssort.itemsByID[actualParentItemID].stack += (int)entry["upd"]["StackObjectsCount"];
@@ -517,7 +513,6 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogInfo("\t\t\tItem does not already have an assort entry");
                             AssortmentItem item = new AssortmentItem();
                             item.ID = actualParentItemID;
                             item.prices = new List<List<AssortmentPriceData>>();
