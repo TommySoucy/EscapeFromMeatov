@@ -207,15 +207,38 @@ namespace EFM
                 SetDisplayed(false);
             }
 
-            // Left (TODO: Non main hand) menu button
-            if (Mod.leftHand.fvrHand.Input.BYButtonDown)
+            // Left (TODO: Non main hand) menu button for Vive and WMR
+            if (Mod.leftHand.fvrHand.CMode == ControlMode.Vive || Mod.leftHand.fvrHand.CMode == ControlMode.WMR)
             {
-                SetDisplayed(!displayed);
+                if (Mod.leftHand.fvrHand.Input.BYButtonDown)
+                {
+                    SetDisplayed(!displayed);
+                }
+                if (Mod.leftHand.fvrHand.Input.BYButtonPressed && displayed)
+                {
+                    setPosition = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
+                    setRotation = Quaternion.Euler(0, Mod.leftHand.transform.rotation.eulerAngles.y, 0);
+                }
             }
-            if (Mod.leftHand.fvrHand.Input.BYButtonPressed && displayed)
+            else // Index or Oculus
             {
-                setPosition = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
-                setRotation = Quaternion.Euler(0, Mod.leftHand.transform.rotation.eulerAngles.y, 0);
+                if ((Mod.leftHand.fvrHand.Input.BYButtonDown && Mod.leftHand.fvrHand.CurrentInteractable == null) || (Mod.rightHand.fvrHand.Input.BYButtonDown && Mod.rightHand.fvrHand.CurrentInteractable == null))
+                {
+                    SetDisplayed(!displayed);
+                }
+                if (displayed)
+                {
+                    if (Mod.leftHand.fvrHand.Input.BYButtonPressed && Mod.leftHand.fvrHand.CurrentInteractable == null)
+                    {
+                        setPosition = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
+                        setRotation = Quaternion.Euler(0, Mod.leftHand.transform.rotation.eulerAngles.y, 0);
+                    }
+                    else if(Mod.rightHand.fvrHand.Input.BYButtonPressed && Mod.rightHand.fvrHand.CurrentInteractable == null)
+                    {
+                        setPosition = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.6f + Mod.rightHand.transform.right * -0.3f;
+                        setRotation = Quaternion.Euler(0, Mod.rightHand.transform.rotation.eulerAngles.y, 0);
+                    }
+                }
             }
             if (displayed)
             {

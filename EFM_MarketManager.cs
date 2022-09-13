@@ -4861,7 +4861,7 @@ namespace EFM
         public void SpawnItem(string itemID, int amount)
         {
             int amountToSpawn = amount;
-            if (int.TryParse(cartItem, out int parseResult))
+            if (int.TryParse(itemID, out int parseResult))
             {
                 GameObject itemPrefab = Mod.itemPrefabs[parseResult];
                 EFM_CustomItemWrapper prefabCIW = itemPrefab.GetComponent<EFM_CustomItemWrapper>();
@@ -4944,7 +4944,7 @@ namespace EFM
             else
             {
                 // Spawn vanilla item will handle the updating of proper elements
-                AnvilManager.Run(SpawnVanillaItem(cartItem, amountToSpawn));
+                AnvilManager.Run(SpawnVanillaItem(itemID, amountToSpawn));
             }
         }
 

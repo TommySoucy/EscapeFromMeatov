@@ -3129,6 +3129,12 @@ namespace EFM
 
             harmony.Patch(sosigLinkDamagePatchOriginal, new HarmonyMethod(sosigLinkDamagePatchPrefix));
 
+            // PlayerBodyHealPercentPatch
+            MethodInfo playerBodyHealPercentPatchOriginal = typeof(FVRPlayerBody).GetMethod("HealPercent", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo playerBodyHealPercentPatchPrefix = typeof(PlayerBodyHealPercentPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(playerBodyHealPercentPatchOriginal, new HarmonyMethod(playerBodyHealPercentPatchPrefix));
+
             //// UpdateModeTwoAxisPatch
             //MethodInfo updateModeTwoAxisPatchOriginal = typeof(FVRMovementManager).GetMethod("UpdateModeTwoAxis", BindingFlags.NonPublic | BindingFlags.Instance);
             //MethodInfo updateModeTwoAxisPatchPrefix = typeof(UpdateModeTwoAxisPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -6924,6 +6930,8 @@ namespace EFM
     // This completely replaces the original
     class HandUpdatePatch
     {
+        public static bool fullDescDirectionDown = false; // The direction in which to slide finger on touchpad to open full description for index and oculus
+
         static bool leftTouchWithinDescRange;
         static bool rightTouchWithinDescRange;
         static float rightPreviousFrameTPAxisY;
@@ -7004,17 +7012,17 @@ namespace EFM
                 {
                     if (__instance.IsThisTheRightHand)
                     {
-                        rightTouchWithinDescRange = __instance.Input.TouchpadAxes.y <= 0;
+                        rightTouchWithinDescRange = fullDescDirectionDown ? __instance.Input.TouchpadAxes.y >= 0 : __instance.Input.TouchpadAxes.y <= 0;
                     }
                     else
                     {
-                        leftTouchWithinDescRange = __instance.Input.TouchpadAxes.y <= 0f;
+                        leftTouchWithinDescRange = fullDescDirectionDown ? __instance.Input.TouchpadAxes.y >= 0 : __instance.Input.TouchpadAxes.y <= 0;
                     }
                 }
             }
             else if (__instance.Input.TouchpadTouchUp ||
                     ((__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR) && __instance.Input.TouchpadAxes.magnitude >= 0.3f) || 
-                    ((__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) && __instance.Input.TouchpadAxes.y > 0))
+                    ((__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) && fullDescDirectionDown ? __instance.Input.TouchpadAxes.y < 0 : __instance.Input.TouchpadAxes.y > 0))
             {
                 if (__instance.IsThisTheRightHand)
                 {
@@ -7138,7 +7146,7 @@ namespace EFM
                 flag2 = (__instance.IsThisTheRightHand && __instance.Input.BYButtonPressed) || (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange);
 
                 // Check if we move touch from bottom (touch range) to top of touch pad this frame
-                fullDescInput = touchpadTouched && touchpadAxisY > 0 && (__instance.IsThisTheRightHand ? rightPreviousFrameTPAxisY <= 0 : leftPreviousFrameTPAxisY <= 0);
+                fullDescInput = touchpadTouched && (fullDescDirectionDown ? touchpadAxisY < 0 : touchpadAxisY > 0) && (__instance.IsThisTheRightHand ? (fullDescDirectionDown ? rightPreviousFrameTPAxisY >= 0 : rightPreviousFrameTPAxisY <= 0) : (fullDescDirectionDown ? leftPreviousFrameTPAxisY >= 0 : leftPreviousFrameTPAxisY <= 0));
                 if (__instance.IsThisTheRightHand)
                 {
                     rightPreviousFrameTPAxisY = touchpadAxisY;
@@ -7813,7 +7821,6 @@ namespace EFM
 
             if (latestEjectedRound != null)
             {
-                Mod.instance.LogInfo("Ejected round");
                 EFM_VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<EFM_VanillaItemDescriptor>();
 
                 // Set a default location of 0, we assume the round was ejected from a mag in one of the hands, so should begin with a loc index of 0
@@ -7821,7 +7828,6 @@ namespace EFM
 
                 if (latestEjectedRoundLocation == 0)
                 {
-                    Mod.instance.LogInfo("\tNow in hand");
                     BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor);
 
                     // Now on player
@@ -10121,6 +10127,27 @@ namespace EFM
                 // Successful shot, increment count and update fulfillment 
                 ++counterCondition.shotCount;
                 EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+            }
+        }
+    }
+
+    // Patches FVRPlayerBody.HealPercent to keep track of player's healing from H3 sources like dings and other powerups
+    class PlayerBodyHealPercentPatch
+    {
+        static void Prefix(ref FVRPlayerBody __instance, float f, ref float ___m_startingHealth)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            float amountHealed = Mathf.Max(___m_startingHealth * f, ___m_startingHealth - __instance.Health);
+            for(int i=0; i<7;++i)
+            {
+                if(Mod.health[i] != 0)
+                {
+                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + amountHealed / 7, Mod.health[i], Mod.currentMaxHealth[i]);
+                }
             }
         }
     }
