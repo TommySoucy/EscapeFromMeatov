@@ -282,6 +282,9 @@ namespace EFM
         public static Dictionary<string, AudioClip[]> itemSounds;
 
         // Config settings
+        public static JObject config;
+        public static GameObject physicsDoorsToggleCheckmark;
+        public static bool physicsDoors;
 
         // DEBUG
         public bool debug;
@@ -604,32 +607,10 @@ namespace EFM
 
         private void LoadConfig()
         {
-            try
-            {
-                string[] lines = System.IO.File.ReadAllLines("BepinEx/Plugins/EscapeFromMeatov/EscapeFromMeatovConfig.txt");
+            config = JObject.Parse(File.ReadAllText("BepinEx/Plugins/EscapeFromMeatov/DB/EscapeFromMeatovConfig.json"));
 
-                foreach (string line in lines)
-                {
-                    if (line.Length == 0 || line[0] == '#')
-                    {
-                        continue;
-                    }
-
-                    string trimmedLine = line.Trim();
-                    string[] tokens = trimmedLine.Split('=');
-
-                    if (tokens.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    // TODO
-                }
-
-                Logger.LogInfo("Configs loaded");
-            }
-            catch (FileNotFoundException ex) { Logger.LogInfo("Couldn't find EscapeFromMeatovConfig.txt, using default settings instead. Error: " + ex.Message); }
-            catch (Exception ex) { Logger.LogInfo("Couldn't read EscapeFromMeatovConfig.txt, using default settings instead. Error: " + ex.Message); }
+            // Load settings
+            physicsDoors = (bool)config["PhysicalDoors"];
         }
 
         public void LoadAssets()

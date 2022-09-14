@@ -45,6 +45,8 @@ namespace EFM
         private Text scavButtonText;
         private GameObject charChoicePanel;
         private GameObject[] saveConfirmTexts;
+        private Transform optionsPageParent;
+        private Transform[] optionPages;
 
         // Assets
         public static GameObject areaCanvasPrefab; // AreaCanvas
@@ -3488,7 +3490,7 @@ namespace EFM
         {
             // Main hideout menu
             buttons = new Button[12][];
-            buttons[0] = new Button[6];
+            buttons[0] = new Button[7];
             buttons[1] = new Button[7];
             buttons[2] = new Button[6];
             buttons[3] = new Button[4];
@@ -3500,6 +3502,7 @@ namespace EFM
             buttons[9] = new Button[2];
             buttons[10] = new Button[1];
             buttons[11] = new Button[2];
+            buttons[12] = new Button[3];
 
             // Fetch buttons
             canvas = transform.GetChild(0).GetChild(0);
@@ -3509,6 +3512,7 @@ namespace EFM
             buttons[0][3] = canvas.GetChild(0).GetChild(4).GetComponent<Button>(); // Base Back
             buttons[0][4] = canvas.GetChild(0).GetChild(5).GetComponent<Button>(); // Credits
             buttons[0][5] = canvas.GetChild(0).GetChild(6).GetComponent<Button>(); // Donate
+            buttons[0][6] = canvas.GetChild(0).GetChild(7).GetComponent<Button>(); // Options
 
             buttons[1][0] = canvas.GetChild(1).GetChild(1).GetComponent<Button>(); // Load Slot 0
             buttons[1][1] = canvas.GetChild(1).GetChild(2).GetComponent<Button>(); // Load Slot 1
@@ -3552,6 +3556,10 @@ namespace EFM
             buttons[11][0] = canvas.GetChild(15).GetChild(1).GetComponent<Button>(); // Donate donate
             buttons[11][1] = canvas.GetChild(15).GetChild(2).GetComponent<Button>(); // Donate back
 
+            buttons[12][0] = canvas.GetChild(15).GetChild(1).GetComponent<Button>(); // Options back
+            buttons[12][1] = canvas.GetChild(15).GetChild(2).GetComponent<Button>(); // Options Next
+            buttons[12][2] = canvas.GetChild(15).GetChild(3).GetComponent<Button>(); // Options Previous
+
             // Fetch audio sources
             AudioSource hoverAudio = canvas.transform.GetChild(10).GetComponent<AudioSource>();
             clickAudio = canvas.transform.GetChild(11).GetComponent<AudioSource>();
@@ -3581,6 +3589,7 @@ namespace EFM
             buttons[0][3].onClick.AddListener(() => { OnBackClicked(0); });
             buttons[0][4].onClick.AddListener(OnCreditsClicked);
             buttons[0][5].onClick.AddListener(OnDonatePanelClicked);
+            buttons[0][6].onClick.AddListener(OnOptionsClicked);
 
             buttons[1][0].onClick.AddListener(() => { OnLoadSlotClicked(0); });
             buttons[1][1].onClick.AddListener(() => { OnLoadSlotClicked(1); });
@@ -3619,12 +3628,37 @@ namespace EFM
             buttons[9][0].onClick.AddListener(OnMedicalNextClicked);
             buttons[9][1].onClick.AddListener(OnMedicalApplyClicked);
 
-            buttons[10][0].onClick.AddListener(() => { OnBackClicked(7); });
+            buttons[10][0].onClick.AddListener(() => { OnBackClicked(14); });
 
             buttons[11][0].onClick.AddListener(() => { OnDonateClick(canvas.GetChild(15).GetChild(4).gameObject); });
-            buttons[11][1].onClick.AddListener(() => { OnBackClicked(8); });
+            buttons[11][1].onClick.AddListener(() => { OnBackClicked(15); });
 
-            // Set buttons activated depending on presence of save files
+            buttons[12][0].onClick.AddListener(() => { OnBackClicked(16); });
+            buttons[12][1].onClick.AddListener(OnOptionsNextClicked);
+            buttons[12][2].onClick.AddListener(OnOptionsPreviousClicked);
+
+            // Set options next active depending on number of pages
+            optionsPageParent = canvas.GetChild(16).GetChild(4);
+            if (optionsPageParent.childCount > 1)
+            {
+                buttons[12][1].gameObject.SetActive(true);
+            }
+            optionPages = new Transform[optionsPageParent.childCount];
+            for(int i = 0; i < optionsPageParent.childCount; ++i)
+            {
+                optionPages[i] = optionsPageParent.GetChild(i);
+            }
+
+            // Init options UI
+            // Physical doors
+            EFM_PointableButton physDoorToggleButton = optionPages[0].GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            physDoorToggleButton.SetButton();
+            Mod.physicsDoorsToggleCheckmark = physDoorToggleButton.transform.GetChild(0).GetChild(1).gameObject;
+            physDoorToggleButton.MaxPointingRange = 5;
+            physDoorToggleButton.hoverSound = hoverAudio;
+            physDoorToggleButton.Button.onClick.AddListener(OnPhysDoorToggleClicked);
+
+            // Set save buttons activated depending on presence of save files
             if (availableSaveFiles.Count > 0)
             {
                 for (int i = 0; i < 6; ++i)
@@ -4512,6 +4546,13 @@ namespace EFM
             canvas.GetChild(15).gameObject.SetActive(true);
         }
 
+        public void OnOptionsClicked()
+        {
+            clickAudio.Play();
+            canvas.GetChild(0).gameObject.SetActive(false);
+            canvas.GetChild(16).gameObject.SetActive(true);
+        }
+
         public void OnBackClicked(int backIndex)
         {
             clickAudio.Play();
@@ -4523,6 +4564,9 @@ namespace EFM
                 case 1:
                 case 2:
                 case 3:
+                case 14:
+                case 15:
+                case 16:
                     canvas.GetChild(backIndex).gameObject.SetActive(false);
                     canvas.GetChild(0).gameObject.SetActive(true);
                     break;
@@ -4535,6 +4579,58 @@ namespace EFM
                 default:
                     break;
             }
+        }
+
+        public void OnOptionsNextClicked()
+        {
+            clickAudio.Play();
+            for (int i = 0; i < optionPages.Length; ++i)
+            {
+                if (optionPages[i].gameObject.activeSelf)
+                {
+                    optionPages[i].gameObject.SetActive(false);
+                    optionPages[i + 1].gameObject.SetActive(true);
+
+                    if(i + 1 == optionPages.Length - 1)
+                    {
+                        buttons[12][1].gameObject.SetActive(false);
+                    }
+
+                    buttons[12][2].gameObject.SetActive(true);
+
+                    break;
+                }
+            }
+        }
+
+        public void OnOptionsPreviousClicked()
+        {
+            clickAudio.Play();
+            for (int i = 0; i < optionPages.Length; ++i)
+            {
+                if (optionPages[i].gameObject.activeSelf)
+                {
+                    optionPages[i].gameObject.SetActive(false);
+                    optionPages[i - 1].gameObject.SetActive(true);
+
+                    if(i - 1 == 0)
+                    {
+                        buttons[12][2].gameObject.SetActive(false);
+                    }
+
+                    buttons[12][1].gameObject.SetActive(true);
+
+                    break;
+                }
+            }
+        }
+
+        public void OnPhysDoorToggleClicked()
+        {
+            clickAudio.Play();
+            Mod.physicsDoors = !Mod.physicsDoors;
+            Mod.config["PhysicalDoors"] = Mod.physicsDoors;
+            Mod.physicsDoorsToggleCheckmark.SetActive(Mod.physicsDoors);
         }
 
         public void OnScavBlockOKClicked()
