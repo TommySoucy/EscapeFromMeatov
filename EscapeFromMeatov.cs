@@ -3119,9 +3119,9 @@ namespace EFM
 
             // HandCurrentInteractableSetPatch
             MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo handCurrentInteractableSetPatchPrefix = typeof(HandCurrentInteractableSetPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo handCurrentInteractableSetPatchPostfix = typeof(HandCurrentInteractableSetPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(handCurrentInteractableSetPatchOriginal, new HarmonyMethod(handCurrentInteractableSetPatchPrefix));
+            harmony.Patch(handCurrentInteractableSetPatchOriginal, null, new HarmonyMethod(handCurrentInteractableSetPatchPostfix));
 
             // SosigLinkDamagePatch
             MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
@@ -5111,14 +5111,14 @@ namespace EFM
             {
                 skipPatch = false;
 
-                // Event if skipping, we still want to make sure that if the slot is not null, we set the item's parent to null
-                // Also make sure that if it is an equip slot, set active depending on player status display
+                // Even if skipping, we still want to make sure that if the slot is not null, we set the item's parent to null
+                // Also make sure that if it is an equip slot, set active depending on player status display if the item is not being held
                 if (slot != null)
                 {
                     __instance.SetParentage(null);
 
                     // This is for in case we harnessed backpack to the shoulder slot
-                    if (slot is EFM_EquipmentSlot)
+                    if (slot is EFM_EquipmentSlot && __instance.m_hand == null)
                     {
                         __instance.gameObject.SetActive(Mod.playerStatusManager.displayed);
                     }
@@ -5297,11 +5297,12 @@ namespace EFM
             {
                 __instance.transform.localScale = Vector3.one;
 
-                if (__instance.QuickbeltSlot == Mod.rightShoulderSlot) 
-                {
-                    // Set the item's position to approx hand to ensure it doesn't have to collide with anything to get there
-                    __instance.transform.position = hand.transform.position;
-                }
+                // TODO: Will need to review if this is necessary because an item grabbed with both and and then let go with one will shift the item to the hand that is still holding it
+                //if (__instance.QuickbeltSlot == Mod.rightShoulderSlot) 
+                //{
+                //    // Set the item's position to approx hand to ensure it doesn't have to collide with anything to get there
+                //    __instance.transform.position = hand.transform.position;
+                //}
             }
 
             EFM_VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
@@ -5334,8 +5335,10 @@ namespace EFM
                     // Check which PoseOverride to use depending on hand side
                     __instance.PoseOverride = hand.IsThisTheRightHand ? customItemWrapper.rightHandPoseOverride : customItemWrapper.leftHandPoseOverride;
 
-                    // If taken out of shoulderStorage, align with hand
-                    if (Mod.leftShoulderObject != null && Mod.leftShoulderObject.Equals(customItemWrapper.gameObject))
+                    // If taken out of shoulderStorage, align with hand. Only do this if the item is not currently being held
+                    // because if the backpack is harnessed, held, and then switched between hands, it will align with the new hand
+                    // This is prefix so m_hand should still be null if newly grabbed
+                    if (Mod.leftShoulderObject != null && Mod.leftShoulderObject.Equals(customItemWrapper.gameObject) && __instance.m_hand == null)
                     {
                         FVRViveHand.AlignChild(__instance.transform, __instance.PoseOverride, hand.transform);
                     }
@@ -7143,7 +7146,7 @@ namespace EFM
                 flag = __instance.Input.BYButtonDown;
 
                 // Want grab laser if the default BYButtonPressed (vanilla) (TODO: On main hand, right for now) OR if the description is touched
-                flag2 = (__instance.IsThisTheRightHand && __instance.Input.BYButtonPressed) || (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange);
+                flag2 = __instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange;
 
                 // Check if we move touch from bottom (touch range) to top of touch pad this frame
                 fullDescInput = touchpadTouched && (fullDescDirectionDown ? touchpadAxisY < 0 : touchpadAxisY > 0) && (__instance.IsThisTheRightHand ? (fullDescDirectionDown ? rightPreviousFrameTPAxisY >= 0 : rightPreviousFrameTPAxisY <= 0) : (fullDescDirectionDown ? leftPreviousFrameTPAxisY >= 0 : leftPreviousFrameTPAxisY <= 0));
@@ -9882,20 +9885,26 @@ namespace EFM
     // Patches FVRViveHand.CurrentInteractable.set to keep track of item held
     class HandCurrentInteractableSetPatch
     {
-        static void Prefix(ref FVRViveHand __instance, ref FVRInteractiveObject ___m_currentInteractable)
+        static void Postfix(ref FVRViveHand __instance, ref FVRInteractiveObject ___m_currentInteractable)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-            if(___m_currentInteractable != null)
+            EFM_Hand handToUse = __instance.GetComponent<EFM_Hand>();
+            if (___m_currentInteractable != null)
             {
-                EFM_Hand handToUse = __instance.GetComponent<EFM_Hand>();
                 handToUse.CIW = ___m_currentInteractable.GetComponent<EFM_CustomItemWrapper>();
                 handToUse.VID = ___m_currentInteractable.GetComponent<EFM_VanillaItemDescriptor>();
                 handToUse.custom = handToUse.CIW != null;
                 handToUse.hasScript = handToUse.custom || handToUse.VID != null;
+            }
+            else
+            {
+                handToUse.CIW = null;
+                handToUse.VID = null;
+                handToUse.hasScript = false;
             }
         }
     }

@@ -44,6 +44,7 @@ namespace EFM
         private Collider scavButtonCollider;
         private Text scavButtonText;
         private GameObject charChoicePanel;
+        private GameObject[] saveConfirmTexts;
 
         // Assets
         public static GameObject areaCanvasPrefab; // AreaCanvas
@@ -1312,7 +1313,6 @@ namespace EFM
             // Check if we have loaded data
             if (data == null)
             {
-                // TODO: This is a new game, so we need to spawn story/tutorial UI
                 data = new JObject();
                 Mod.level = 1;
                 Mod.skills = new EFM_Skill[64];
@@ -1842,6 +1842,9 @@ namespace EFM
                     Mod.playerInventoryObjects = new Dictionary<string, List<GameObject>>();
                 }
 
+                // Setup tutorial
+                SetupTutorial();
+
                 scavTimer = 0;
 
                 Mod.playerInventory.Clear();
@@ -2229,6 +2232,144 @@ namespace EFM
                     }
                 }
             }
+        }
+
+        private void SetupTutorial()
+        {
+            Transform tutorialTransform = transform.GetChild(0).GetChild(1);
+            tutorialTransform.gameObject.SetActive(true);
+            AudioSource hoverAudio = tutorialTransform.GetChild(21).GetComponent<AudioSource>();
+            FVRPointable backgroundPointable = tutorialTransform.gameObject.AddComponent<FVRPointable>();
+            backgroundPointable.MaxPointingRange = 5;
+            Transform controlsParent = null;
+            switch (Mod.leftHand.fvrHand.CMode)
+            {
+                case ControlMode.Index:
+                    controlsParent = tutorialTransform.GetChild(1);
+                    break;
+                case ControlMode.Oculus:
+                    controlsParent = tutorialTransform.GetChild(2);
+                    break;
+                case ControlMode.Vive:
+                    controlsParent = tutorialTransform.GetChild(3);
+                    break;
+                case ControlMode.WMR:
+                    controlsParent = tutorialTransform.GetChild(4);
+                    break;
+            }
+
+            // Setup welcome
+            // Skip
+            EFM_PointableButton pointableButton = tutorialTransform.GetChild(0).GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
+            pointableButton.SetButton();
+            pointableButton.MaxPointingRange = 5;
+            pointableButton.hoverGraphics = new GameObject[2];
+            pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+            pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+            pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+            pointableButton.toggleTextColor = true;
+            pointableButton.hoverSound = hoverAudio;
+            pointableButton.Button.onClick.AddListener(OnTutorialSkipClick);
+            // Next
+            pointableButton = tutorialTransform.GetChild(0).GetChild(2).gameObject.AddComponent<EFM_PointableButton>();
+            pointableButton.SetButton();
+            pointableButton.MaxPointingRange = 5;
+            pointableButton.hoverGraphics = new GameObject[2];
+            pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+            pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+            pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+            pointableButton.toggleTextColor = true;
+            pointableButton.hoverSound = hoverAudio;
+            pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(tutorialTransform.GetChild(0), controlsParent); });
+
+            // Setup controls buttons
+            for(int i=0; i<controlsParent.childCount;++i)
+            {
+                // Skip
+                pointableButton = controlsParent.GetChild(i).GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
+                pointableButton.SetButton();
+                pointableButton.MaxPointingRange = 5;
+                pointableButton.hoverGraphics = new GameObject[2];
+                pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+                pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+                pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+                pointableButton.toggleTextColor = true;
+                pointableButton.hoverSound = hoverAudio;
+                pointableButton.Button.onClick.AddListener(OnTutorialSkipClick);
+                // Next
+                pointableButton = controlsParent.GetChild(i).GetChild(2).gameObject.AddComponent<EFM_PointableButton>();
+                pointableButton.SetButton();
+                pointableButton.MaxPointingRange = 5;
+                pointableButton.hoverGraphics = new GameObject[2];
+                pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+                pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+                pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+                pointableButton.toggleTextColor = true;
+                pointableButton.hoverSound = hoverAudio;
+                pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(controlsParent.GetChild(i), i == controlsParent.childCount - 1 ? tutorialTransform.GetChild(5) : controlsParent.GetChild(i+1)); });
+            }
+
+            // Setup remaining tutorial screens
+            for (int i=5; i < 18; ++i)
+            {
+                // Skip
+                pointableButton = tutorialTransform.GetChild(i).GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
+                pointableButton.SetButton();
+                pointableButton.MaxPointingRange = 5;
+                pointableButton.hoverGraphics = new GameObject[2];
+                pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+                pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+                pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+                pointableButton.toggleTextColor = true;
+                pointableButton.hoverSound = hoverAudio;
+                pointableButton.Button.onClick.AddListener(OnTutorialSkipClick);
+                // Next
+                pointableButton = tutorialTransform.GetChild(i).GetChild(2).gameObject.AddComponent<EFM_PointableButton>();
+                pointableButton.SetButton();
+                pointableButton.MaxPointingRange = 5;
+                pointableButton.hoverGraphics = new GameObject[2];
+                pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+                pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+                pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+                pointableButton.toggleTextColor = true;
+                pointableButton.hoverSound = hoverAudio;
+                pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(controlsParent.GetChild(i), i == controlsParent.childCount - 1 ? tutorialTransform.GetChild(5) : controlsParent.GetChild(i + 1)); });
+            }
+
+            // Setup end
+            // Skip
+            pointableButton = tutorialTransform.GetChild(18).GetChild(1).gameObject.AddComponent<EFM_PointableButton>();
+            pointableButton.SetButton();
+            pointableButton.MaxPointingRange = 5;
+            pointableButton.hoverGraphics = new GameObject[2];
+            pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+            pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+            pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+            pointableButton.toggleTextColor = true;
+            pointableButton.hoverSound = hoverAudio;
+            pointableButton.Button.onClick.AddListener(OnTutorialSkipClick);
+            // Next
+            pointableButton = tutorialTransform.GetChild(18).GetChild(2).gameObject.AddComponent<EFM_PointableButton>();
+            pointableButton.SetButton();
+            pointableButton.MaxPointingRange = 5;
+            pointableButton.hoverGraphics = new GameObject[2];
+            pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+            pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+            pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+            pointableButton.toggleTextColor = true;
+            pointableButton.hoverSound = hoverAudio;
+            pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(tutorialTransform.GetChild(0), controlsParent); });
+            // Donate
+            pointableButton = tutorialTransform.GetChild(18).GetChild(3).gameObject.AddComponent<EFM_PointableButton>();
+            pointableButton.SetButton();
+            pointableButton.MaxPointingRange = 5;
+            pointableButton.hoverGraphics = new GameObject[2];
+            pointableButton.hoverGraphics[0] = pointableButton.transform.GetChild(0).gameObject; // Background
+            pointableButton.hoverGraphics[1] = pointableButton.transform.GetChild(1).gameObject; // Hover
+            pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
+            pointableButton.toggleTextColor = true;
+            pointableButton.hoverSound = hoverAudio;
+            pointableButton.Button.onClick.AddListener(() => { OnDonateClick(tutorialTransform.GetChild(18).GetChild(5).gameObject); });
         }
 
         public void UpdateBaseInventory()
@@ -3346,8 +3487,8 @@ namespace EFM
         public override void InitUI()
         {
             // Main hideout menu
-            buttons = new Button[10][];
-            buttons[0] = new Button[4];
+            buttons = new Button[12][];
+            buttons[0] = new Button[6];
             buttons[1] = new Button[7];
             buttons[2] = new Button[6];
             buttons[3] = new Button[4];
@@ -3357,6 +3498,8 @@ namespace EFM
             buttons[7] = new Button[1];
             buttons[8] = new Button[1];
             buttons[9] = new Button[2];
+            buttons[10] = new Button[1];
+            buttons[11] = new Button[2];
 
             // Fetch buttons
             canvas = transform.GetChild(0).GetChild(0);
@@ -3364,6 +3507,8 @@ namespace EFM
             buttons[0][1] = canvas.GetChild(0).GetChild(2).GetComponent<Button>(); // Save
             buttons[0][2] = canvas.GetChild(0).GetChild(3).GetComponent<Button>(); // Load
             buttons[0][3] = canvas.GetChild(0).GetChild(4).GetComponent<Button>(); // Base Back
+            buttons[0][4] = canvas.GetChild(0).GetChild(5).GetComponent<Button>(); // Credits
+            buttons[0][5] = canvas.GetChild(0).GetChild(6).GetComponent<Button>(); // Donate
 
             buttons[1][0] = canvas.GetChild(1).GetChild(1).GetComponent<Button>(); // Load Slot 0
             buttons[1][1] = canvas.GetChild(1).GetChild(2).GetComponent<Button>(); // Load Slot 1
@@ -3402,6 +3547,11 @@ namespace EFM
             buttons[9][0] = canvas.GetChild(13).GetChild(1).GetComponent<Button>(); // After raid treatment Next
             buttons[9][1] = canvas.GetChild(13).GetChild(2).GetComponent<Button>(); // After raid treatment Apply
 
+            buttons[10][0] = canvas.GetChild(14).GetChild(1).GetComponent<Button>(); // Credits back
+
+            buttons[11][0] = canvas.GetChild(15).GetChild(1).GetComponent<Button>(); // Donate donate
+            buttons[11][1] = canvas.GetChild(15).GetChild(2).GetComponent<Button>(); // Donate back
+
             // Fetch audio sources
             AudioSource hoverAudio = canvas.transform.GetChild(10).GetComponent<AudioSource>();
             clickAudio = canvas.transform.GetChild(11).GetComponent<AudioSource>();
@@ -3429,6 +3579,8 @@ namespace EFM
             buttons[0][1].onClick.AddListener(OnSaveClicked);
             buttons[0][2].onClick.AddListener(OnLoadClicked);
             buttons[0][3].onClick.AddListener(() => { OnBackClicked(0); });
+            buttons[0][4].onClick.AddListener(OnCreditsClicked);
+            buttons[0][5].onClick.AddListener(OnDonatePanelClicked);
 
             buttons[1][0].onClick.AddListener(() => { OnLoadSlotClicked(0); });
             buttons[1][1].onClick.AddListener(() => { OnLoadSlotClicked(1); });
@@ -3467,6 +3619,11 @@ namespace EFM
             buttons[9][0].onClick.AddListener(OnMedicalNextClicked);
             buttons[9][1].onClick.AddListener(OnMedicalApplyClicked);
 
+            buttons[10][0].onClick.AddListener(() => { OnBackClicked(7); });
+
+            buttons[11][0].onClick.AddListener(() => { OnDonateClick(canvas.GetChild(15).GetChild(4).gameObject); });
+            buttons[11][1].onClick.AddListener(() => { OnBackClicked(8); });
+
             // Set buttons activated depending on presence of save files
             if (availableSaveFiles.Count > 0)
             {
@@ -3492,6 +3649,11 @@ namespace EFM
             scavButtonCollider = canvas.GetChild(3).GetChild(2).GetComponent<Collider>();
             scavButtonText = canvas.GetChild(3).GetChild(2).GetChild(2).GetComponent<Text>();
             charChoicePanel = canvas.GetChild(3).gameObject;
+            saveConfirmTexts = new GameObject[5];
+            for(int i=0; i < 5; ++i)
+            {
+                saveConfirmTexts[i] = canvas.GetChild(2).GetChild(i + 7).gameObject;
+            }
 
             // Areas
             if (areaCanvasPrefab == null)
@@ -4278,6 +4440,27 @@ namespace EFM
             time = scaledTime;
         }
 
+        public void OnTutorialSkipClick()
+        {
+            clickAudio.Play();
+            transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+        }
+
+        public void OnTutorialNextClick(Transform current, Transform next)
+        {
+            clickAudio.Play();
+            current.gameObject.SetActive(false);
+            current.gameObject.SetActive(true);
+        }
+
+        public void OnDonateClick(GameObject text)
+        {
+            clickAudio.Play(); 
+            Application.OpenURL("https://ko-fi.com/tommysoucy");
+            text.SetActive(true);
+            text.AddComponent<TimedDisabler>();
+        }
+
         public void OnSaveClicked()
         {
             canvas.GetChild(0).gameObject.SetActive(false);
@@ -4289,6 +4472,8 @@ namespace EFM
         {
             clickAudio.Play();
             Mod.saveSlotIndex = slotIndex;
+            saveConfirmTexts[slotIndex].SetActive(true);
+            saveConfirmTexts[slotIndex].AddComponent<TimedDisabler>();
             SaveBase();
         }
 
@@ -4311,6 +4496,20 @@ namespace EFM
             clickAudio.Play();
             canvas.GetChild(0).gameObject.SetActive(false);
             canvas.GetChild(3).gameObject.SetActive(true);
+        }
+
+        public void OnCreditsClicked()
+        {
+            clickAudio.Play();
+            canvas.GetChild(0).gameObject.SetActive(false);
+            canvas.GetChild(14).gameObject.SetActive(true);
+        }
+
+        public void OnDonatePanelClicked()
+        {
+            clickAudio.Play();
+            canvas.GetChild(0).gameObject.SetActive(false);
+            canvas.GetChild(15).gameObject.SetActive(true);
         }
 
         public void OnBackClicked(int backIndex)
@@ -5401,6 +5600,27 @@ namespace EFM
         public void UpdateBasedOnPlayerLevel()
         {
             marketManager.UpdateBasedOnPlayerLevel();
+        }
+    }
+
+    public class TimedDisabler : MonoBehaviour
+    {
+        public float time = 1;
+        public float timer;
+
+        public void Start()
+        {
+            timer = time;
+        }
+
+        public void Update()
+        {
+            timer -= Time.deltaTime;
+            if(timer <= 0)
+            {
+                gameObject.SetActive(false);
+                Destroy(this);
+            }
         }
     }
 }
