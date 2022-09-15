@@ -8977,23 +8977,19 @@ namespace EFM
             {
                 return;
             }
-            Mod.instance.LogInfo("FireArmEjectMagPatch postfix called");
             EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
             fireArmVID.currentWeight -= preMagVID.currentWeight;
 
             int currentLocationIndex = 0;
             if(preMagVID.physObj.m_hand == null) // Not in a hand
             {
-                Mod.instance.LogInfo("\tNot being held");
                 currentLocationIndex = Mod.currentLocationIndex;
             }
 
             if(preLocationIndex == 0)
             {
-                Mod.instance.LogInfo("\t\tFrom plaeyr ivnentory");
                 if (currentLocationIndex == 0)
                 {
-                    Mod.instance.LogInfo("\t\tTo player inventory");
                     // Transfered from player to player, from firearm to hand
                     Mod.AddToPlayerInventory(preMagVID.transform, true);
 
@@ -9001,56 +8997,46 @@ namespace EFM
                 }
                 else if(currentLocationIndex == 1)
                 {
-                    Mod.instance.LogInfo("\t\tTo hideout, removing "+ preMagVID.currentWeight+ " weight");
                     // Transfered from player to hideout
                     Mod.currentBaseManager.AddToBaseInventory(preMagVID.transform, true);
                 }
                 else
                 {
-                    Mod.instance.LogInfo("\t\tTo raid");
                     // Transfered from player to raid, no list to update
                 }
             }
             else if(preLocationIndex == 1)
             {
-                Mod.instance.LogInfo("\t\tFrom hideout");
                 if (currentLocationIndex == 0)
                 {
-                    Mod.instance.LogInfo("\t\tTo player inventory");
                     // Transfered from hideout to player, from firearm to hand
                     Mod.AddToPlayerInventory(preMagVID.transform, true);
                 }
                 else if (currentLocationIndex == 1)
                 {
-                    Mod.instance.LogInfo("\t\tTo hideout");
                     // Transfered from hideout to hideout
                     Mod.currentBaseManager.AddToBaseInventory(preMagVID.transform, true);
                 }
                 else
                 {
-                    Mod.instance.LogInfo("\t\tTo raid");
                     // Transfered from hideout to raid
                     Mod.instance.LogError("Fire arm eject mag patch impossible case: Mag ejected from hideout to raid, meaning mag had wrong location index while on player or in raid");
                 }
             }
             else
             {
-                Mod.instance.LogInfo("\t\tFrom raid");
                 if (currentLocationIndex == 0)
                 {
-                    Mod.instance.LogInfo("\t\tTo player inventory");
                     // Transfered from raid to player, from firearm to hand
                     Mod.AddToPlayerInventory(preMagVID.transform, true);
                 }
                 else if (currentLocationIndex == 1)
                 {
-                    Mod.instance.LogInfo("\t\tTo hideout");
                     // Transfered from raid to hideout
                     Mod.instance.LogError("Fire arm eject mag patch impossible case: Mag ejected from raid to hideout, meaning mag had wrong location index while on player or in hideout");
                 }
                 else
                 {
-                    Mod.instance.LogInfo("\t\tTo raid");
                     // Transfered from raid to raid, nothing to update
                 }
             }

@@ -434,9 +434,9 @@ namespace EFM
                 {
                     Mod.instance.LogInfo("\tFound matching effect: "+effectType+" on "+partIndex+" at effect index "+j+" while effects has "+ EFM_Effect.effects.Count+" elements");
                     RemoveEffectAt(j);
-                    --j;
-                    j = Mathf.Min(j, effects.Count - 1);
                 }
+                --j;
+                j = Mathf.Min(j, effects.Count - 1);
             }
         }
     }

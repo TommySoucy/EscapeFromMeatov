@@ -1107,13 +1107,13 @@ namespace EFM
                 Mod.currentHealthRates[i] += Mod.hideoutHealthRates[i];
             }
             GM.CurrentPlayerBody.SetHealthThreshold(totalMaxHealth);
-            Mod.currentEnergyRate += Mod.hideoutEnergyRate;
-            Mod.currentHydrationRate += Mod.hideoutHydrationRate;
             if (Mod.justFinishedRaid)
             {
                 Mod.currentEnergyRate -= Mod.raidEnergyRate;
                 Mod.currentHydrationRate -= Mod.raidHydrationRate;
             }
+            Mod.currentEnergyRate += Mod.hideoutEnergyRate;
+            Mod.currentHydrationRate += Mod.hideoutHydrationRate;
             if (currentSkillGroupLevelingBoosts == null)
             {
                 currentSkillGroupLevelingBoosts = new Dictionary<EFM_Skill.SkillType, float>();
@@ -3636,6 +3636,10 @@ namespace EFM
             buttons[12][0].onClick.AddListener(() => { OnBackClicked(16); });
             buttons[12][1].onClick.AddListener(OnOptionsNextClicked);
             buttons[12][2].onClick.AddListener(OnOptionsPreviousClicked);
+
+            // Add background pointable
+            FVRPointable backgroundPointable = canvas.gameObject.AddComponent<FVRPointable>();
+            backgroundPointable.MaxPointingRange = 5;
 
             // Set options next active depending on number of pages
             optionsPageParent = canvas.GetChild(16).GetChild(4);

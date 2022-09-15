@@ -66,13 +66,10 @@ namespace EFM
             {
                 Mod.currentHealthRates[i] -= Mod.hideoutHealthRates[i];
             }
+            Mod.currentEnergyRate -= Mod.hideoutEnergyRate;
+            Mod.currentHydrationRate -= Mod.hideoutHydrationRate;
             Mod.currentEnergyRate += Mod.raidEnergyRate;
             Mod.currentHydrationRate += Mod.raidHydrationRate;
-            if (Mod.justFinishedRaid)
-            {
-                Mod.currentEnergyRate -= Mod.hideoutEnergyRate;
-                Mod.currentHydrationRate -= Mod.hideoutHydrationRate;
-            }
 
             // Manage active descriptions dict
             if (Mod.activeDescriptionsByItemID != null)
@@ -5960,7 +5957,7 @@ namespace EFM
                 return;
             }
 
-            if (Mod.currentHealthEffectCounterConditionsByEffectType.ContainsKey(effectType))
+            if (Mod.currentHealthEffectCounterConditionsByEffectType != null && Mod.currentHealthEffectCounterConditionsByEffectType.ContainsKey(effectType))
             {
                 List<TraderTaskCounterCondition> healthEffectCounterConditions = Mod.currentHealthEffectCounterConditionsByEffectType[effectType];
                 foreach (TraderTaskCounterCondition counterCondition in healthEffectCounterConditions)

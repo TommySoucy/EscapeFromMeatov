@@ -235,7 +235,9 @@ namespace EFM
                 FVRFireArm asFireArm = (FVRFireArm)item.physObj;
 
                 // Considering 0.015g per round
-                item.currentWeight += 15 * (asFireArm.GetChamberRoundList() == null ? 0 : asFireArm.GetChamberRoundList().Count);
+                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+                // locationIndex so we know when to add/remove weight from player also
+                //item.currentWeight += 15 * (asFireArm.GetChamberRoundList() == null ? 0 : asFireArm.GetChamberRoundList().Count);
 
                 // Ammo container
                 if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
@@ -280,13 +282,17 @@ namespace EFM
             {
                 FVRFireArmMagazine asFireArmMagazine = (FVRFireArmMagazine)item.physObj;
 
-                item.currentWeight += 15 * asFireArmMagazine.m_numRounds;
+                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+                // locationIndex so we know when to add/remove weight from player also
+                //item.currentWeight += 15 * asFireArmMagazine.m_numRounds;
             }
             else if (item.physObj is FVRFireArmClip)
             {
                 FVRFireArmClip asFireArmClip = (FVRFireArmClip)item.physObj;
 
-                item.currentWeight += 15 * asFireArmClip.m_numRounds;
+                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+                // locationIndex so we know when to add/remove weight from player also
+                //item.currentWeight += 15 * asFireArmClip.m_numRounds;
             }
             else if(item.GetComponentInChildren<M203>() != null)
             {

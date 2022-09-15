@@ -29,7 +29,7 @@ namespace EFM
             {
                 audioClips = Mod.barbedWireClips;
                 this.damage = 5;
-                this.damageDistance = 0.1f;
+                this.damageDistance = 0.2f;
             }
             else
             {

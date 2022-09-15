@@ -286,11 +286,13 @@ namespace EFM
 				}
 			}
 			else if(item.itemType == Mod.ItemType.AmmoBox)
-            {
+			{
+				// TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+				// locationIndex so we know when to add/remove weight from player also
 				FVRFireArmMagazine magazine = item.GetComponent<FVRFireArmMagazine>();
 				if (magazine != null)
 				{
-					item.currentWeight += 15 * magazine.m_numRounds;
+					//item.currentWeight += 15 * magazine.m_numRounds;
 				}
             }
 
