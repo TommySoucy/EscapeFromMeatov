@@ -8488,24 +8488,27 @@ namespace EFM
                 return;
             }
 
-            if (__instance.IsFull && round == null)
-            {
-                EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
-                VID.currentWeight -= 15;
-                if(VID.locationIndex == 0)
-                {
-                    Mod.weight -= 15;
-                }
-            }
-            else
-            {
-                EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
-                VID.currentWeight += 15;
-                if (VID.locationIndex == 0)
-                {
-                    Mod.weight += 15;
-                }
-            }
+
+            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+            // locationIndex so we know when to add/remove weight from player also
+            //if (__instance.IsFull && round == null)
+            //{
+            //    EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
+            //    VID.currentWeight -= 15;
+            //    if(VID.locationIndex == 0)
+            //    {
+            //        Mod.weight -= 15;
+            //    }
+            //}
+            //else
+            //{
+            //    EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
+            //    VID.currentWeight += 15;
+            //    if (VID.locationIndex == 0)
+            //    {
+            //        Mod.weight += 15;
+            //    }
+            //}
         }
     }
 
@@ -8538,12 +8541,14 @@ namespace EFM
                 Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
             }
 
+
+            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+            // locationIndex so we know when to add/remove weight from player also
             EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
             EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (VID != null)
             {
-                VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                //TODO: Set weight of firearm this is attached to if it is
+                //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
             }
             else if(CIW != null)
             {
@@ -8556,13 +8561,13 @@ namespace EFM
                     }
                     else
                     {
-                        CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
+                        //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                         CIW.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
-                    CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
+                    //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                     CIW.amount -= (preNumRounds - postNumRounds);
                 }
             }
@@ -8603,11 +8608,14 @@ namespace EFM
                 Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
             }
 
+
+            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+            // locationIndex so we know when to add/remove weight from player also
             EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
             EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (VID != null)
             {
-                VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
+                //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
                 //TODO: Set weight of firearm this is attached to if it is
             }
             else if(CIW != null)
@@ -8621,13 +8629,13 @@ namespace EFM
                     }
                     else
                     {
-                        CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
+                        //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                         CIW.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
-                    CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
+                    //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                     CIW.amount -= (preNumRounds - postNumRounds);
                 }
             }
@@ -8667,11 +8675,14 @@ namespace EFM
                 Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
             }
 
+
+            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+            // locationIndex so we know when to add/remove weight from player also
             EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
             EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
             if (VID != null)
             {
-                VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
+                //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
                 //TODO: Set weight of firearm this is attached to if it is
             }
             else if(CIW != null)
@@ -8685,13 +8696,13 @@ namespace EFM
                     }
                     else
                     {
-                        CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
+                        //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                         CIW.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
-                    CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
+                    //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
                     CIW.amount -= (preNumRounds - postNumRounds);
                 }
             }
@@ -8731,8 +8742,10 @@ namespace EFM
                 Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
             }
 
-            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
-            //TODO: Set weight of firearm this is attached to if it is
+
+            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+            // locationIndex so we know when to add/remove weight from player also
+            //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
         }
     }
 
@@ -8766,8 +8779,10 @@ namespace EFM
                 Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
             }
 
-            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
-            //TODO: Set weight of firearm this is attached to if it is
+
+            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+            // locationIndex so we know when to add/remove weight from player also
+            //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
         }
     }
 
@@ -8800,8 +8815,10 @@ namespace EFM
                 Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
             }
 
-            __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
-            //TODO: Set weight of firearm this is attached to if it is
+
+            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+            // locationIndex so we know when to add/remove weight from player also
+            //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
         }
     }
 
@@ -8871,8 +8888,9 @@ namespace EFM
             {
                 EFM_VanillaItemDescriptor magVID = mag.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                fireArmVID.currentWeight += magVID.currentWeight;
 
-                if(magVID.locationIndex == 0) // Player
+                if (magVID.locationIndex == 0) // Player
                 {
                     // Went from player to firearm location index
                     if (fireArmVID.locationIndex == 0) // Player
@@ -9106,6 +9124,7 @@ namespace EFM
             {
                 EFM_VanillaItemDescriptor clipVID = clip.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                fireArmVID.currentWeight += clipVID.currentWeight;
 
                 if (clipVID.locationIndex == 0) // Player
                 {
@@ -9194,6 +9213,7 @@ namespace EFM
             }
 
             EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            fireArmVID.currentWeight -= preClipVID.currentWeight;
 
             int currentLocationIndex = 0;
             if (preClipVID.physObj.m_hand == null) // Not in a hand
@@ -9288,18 +9308,21 @@ namespace EFM
             if (addedRound)
             {
                 addedRound = false;
-                EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
 
-                if (VID != null)
-                {
-                    VID.currentWeight += 15;
-                }
-                else if(CIW != null)
-                {
-                    CIW.currentWeight += 15;
-                    CIW.amount += 1;
-                }
+                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+                // locationIndex so we know when to add/remove weight from player also
+                //EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                //EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+
+                //if (VID != null)
+                //{
+                //    VID.currentWeight += 15;
+                //}
+                //else if(CIW != null)
+                //{
+                //    CIW.currentWeight += 15;
+                //    CIW.amount += 1;
+                //}
             }
         }
     }
@@ -9332,18 +9355,21 @@ namespace EFM
             if (addedRound)
             {
                 addedRound = false;
-                EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
 
-                if (VID != null)
-                {
-                    VID.currentWeight += 15;
-                }
-                else if (CIW != null)
-                {
-                    CIW.currentWeight += 15;
-                    CIW.amount += 1;
-                }
+                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+                // locationIndex so we know when to add/remove weight from player also
+                //EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                //EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+
+                //if (VID != null)
+                //{
+                //    VID.currentWeight += 15;
+                //}
+                //else if (CIW != null)
+                //{
+                //    CIW.currentWeight += 15;
+                //    CIW.amount += 1;
+                //}
             }
         }
     }
@@ -9378,7 +9404,10 @@ namespace EFM
             if (addedRound)
             {
                 addedRound = false;
-                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 15;
+
+                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+                // locationIndex so we know when to add/remove weight from player also
+                //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 15;
             }
         }
     }
@@ -9411,7 +9440,10 @@ namespace EFM
             if (addedRound)
             {
                 addedRound = false;
-                __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 15;
+
+                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+                // locationIndex so we know when to add/remove weight from player also
+                //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 15;
             }
         }
     }
@@ -9562,7 +9594,9 @@ namespace EFM
             {
                 EFM_VanillaItemDescriptor vanillaItemDescriptor = __result.GetComponent<EFM_VanillaItemDescriptor>();
 
-                BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor, true);
+                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+                // locationIndex so we know when to add/remove weight from player also
+                BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor, false);
 
                 GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
                 if (Mod.currentLocationIndex == 1)

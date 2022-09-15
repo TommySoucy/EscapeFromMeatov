@@ -281,7 +281,7 @@ namespace EFM
                 else if (this.descriptionPack.customItem.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.customItem.itemType == Mod.ItemType.ArmoredRig)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
-                    summaryAmountStackText.text = this.descriptionPack.customItem.amount.ToString() + "/" + this.descriptionPack.customItem.maxAmount;
+                    summaryAmountStackText.text = this.descriptionPack.customItem.armor.ToString() + "/" + this.descriptionPack.customItem.maxArmor;
                 }
                 else
                 {
@@ -385,7 +385,7 @@ namespace EFM
                 else if (this.descriptionPack.customItem.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.customItem.itemType == Mod.ItemType.ArmoredRig)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
-                    summaryAmountStackText.text = this.descriptionPack.customItem.amount.ToString() + "/" + this.descriptionPack.customItem.maxAmount;
+                    summaryAmountStackText.text = this.descriptionPack.customItem.armor.ToString() + "/" + this.descriptionPack.customItem.maxArmor;
                 }
                 else
                 {
