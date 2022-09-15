@@ -1934,7 +1934,7 @@ namespace EFM
                 }
             }
 
-            scavTimer = (long)data["lastScavRaidTime"] + 600 - secondsSinceSave;
+            scavTimer = (long)data["scavTimer"] - secondsSinceSave;
 
             // Instantiate items
             Transform itemsRoot = transform.GetChild(2);
@@ -3489,7 +3489,7 @@ namespace EFM
         public override void InitUI()
         {
             // Main hideout menu
-            buttons = new Button[12][];
+            buttons = new Button[13][];
             buttons[0] = new Button[7];
             buttons[1] = new Button[7];
             buttons[2] = new Button[6];
@@ -3556,9 +3556,9 @@ namespace EFM
             buttons[11][0] = canvas.GetChild(15).GetChild(1).GetComponent<Button>(); // Donate donate
             buttons[11][1] = canvas.GetChild(15).GetChild(2).GetComponent<Button>(); // Donate back
 
-            buttons[12][0] = canvas.GetChild(15).GetChild(1).GetComponent<Button>(); // Options back
-            buttons[12][1] = canvas.GetChild(15).GetChild(2).GetComponent<Button>(); // Options Next
-            buttons[12][2] = canvas.GetChild(15).GetChild(3).GetComponent<Button>(); // Options Previous
+            buttons[12][0] = canvas.GetChild(16).GetChild(1).GetComponent<Button>(); // Options back
+            buttons[12][1] = canvas.GetChild(16).GetChild(2).GetComponent<Button>(); // Options Next
+            buttons[12][2] = canvas.GetChild(16).GetChild(3).GetComponent<Button>(); // Options Previous
 
             // Fetch audio sources
             AudioSource hoverAudio = canvas.transform.GetChild(10).GetComponent<AudioSource>();
@@ -3651,9 +3651,9 @@ namespace EFM
 
             // Init options UI
             // Physical doors
-            EFM_PointableButton physDoorToggleButton = optionPages[0].GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
+            EFM_PointableButton physDoorToggleButton = optionPages[0].GetChild(0).GetChild(0).gameObject.AddComponent<EFM_PointableButton>();
             physDoorToggleButton.SetButton();
-            Mod.physicsDoorsToggleCheckmark = physDoorToggleButton.transform.GetChild(0).GetChild(1).gameObject;
+            Mod.physicsDoorsToggleCheckmark = physDoorToggleButton.transform.GetChild(0).GetChild(0).gameObject;
             physDoorToggleButton.MaxPointingRange = 5;
             physDoorToggleButton.hoverSound = hoverAudio;
             physDoorToggleButton.Button.onClick.AddListener(OnPhysDoorToggleClicked);
@@ -4930,6 +4930,7 @@ namespace EFM
             saveObject["KIARaidCount"] = Mod.KIARaidCount;
             saveObject["failedRaidCount"] = Mod.failedRaidCount;
             saveObject["fenceRestockTimer"] = EFM_TraderStatus.fenceRestockTimer;
+            saveObject["scavTimer"] = scavTimer;
 
             // Write skills
             saveObject["skills"] = new JArray();

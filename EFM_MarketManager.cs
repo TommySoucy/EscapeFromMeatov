@@ -4824,17 +4824,26 @@ namespace EFM
                         break;
                     case TraderTaskReward.TaskRewardType.TraderStanding:
                         Mod.traderStatuses[reward.traderIndex].standing += reward.standing;
-                        foreach(TraderTaskCondition condition in Mod.taskStartConditionsByType[TraderTaskCondition.ConditionType.TraderLoyalty])
+                        if (Mod.taskStartConditionsByType.ContainsKey(TraderTaskCondition.ConditionType.TraderLoyalty))
                         {
-                            EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                            foreach (TraderTaskCondition condition in Mod.taskStartConditionsByType[TraderTaskCondition.ConditionType.TraderLoyalty])
+                            {
+                                EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                            }
                         }
-                        foreach(TraderTaskCondition condition in Mod.taskCompletionConditionsByType[TraderTaskCondition.ConditionType.TraderLoyalty])
+                        if (Mod.taskCompletionConditionsByType.ContainsKey(TraderTaskCondition.ConditionType.TraderLoyalty))
                         {
-                            EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                            foreach (TraderTaskCondition condition in Mod.taskCompletionConditionsByType[TraderTaskCondition.ConditionType.TraderLoyalty])
+                            {
+                                EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                            }
                         }
-                        foreach(TraderTaskCondition condition in Mod.taskFailConditionsByType[TraderTaskCondition.ConditionType.TraderLoyalty])
+                        if (Mod.taskFailConditionsByType.ContainsKey(TraderTaskCondition.ConditionType.TraderLoyalty))
                         {
-                            EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                            foreach (TraderTaskCondition condition in Mod.taskFailConditionsByType[TraderTaskCondition.ConditionType.TraderLoyalty])
+                            {
+                                EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                            }
                         }
                         resetTrader = true;
                         break;

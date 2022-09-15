@@ -223,8 +223,8 @@ namespace EFM
             }
             else // Index or Oculus
             {
-                bool leftItemInteractable = Mod.leftHand.hasScript && Mod.leftHand.custom && (int)Mod.leftHand.CIW.itemType >= 2 && (int)Mod.leftHand.CIW.itemType <= 10;
-                bool rightItemInteractable = Mod.rightHand.hasScript && Mod.rightHand.custom && (int)Mod.rightHand.CIW.itemType >= 2 && (int)Mod.rightHand.CIW.itemType <= 10;
+                bool leftItemInteractable = Mod.leftHand.hasScript && (!Mod.leftHand.custom || ((int)Mod.leftHand.CIW.itemType >= 2 && (int)Mod.leftHand.CIW.itemType <= 10));
+                bool rightItemInteractable = Mod.rightHand.hasScript && (!Mod.rightHand.custom || ((int)Mod.rightHand.CIW.itemType >= 2 && (int)Mod.rightHand.CIW.itemType <= 10));
                 if ((Mod.leftHand.fvrHand.Input.BYButtonDown && !leftItemInteractable && Mod.leftHand.fvrHand.CurrentHoveredQuickbeltSlot == null) ||
                     (Mod.rightHand.fvrHand.Input.BYButtonDown && !rightItemInteractable && Mod.rightHand.fvrHand.CurrentHoveredQuickbeltSlot == null))
                 {

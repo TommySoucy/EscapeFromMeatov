@@ -3260,7 +3260,8 @@ namespace EFM
                     }
                     List<string> actualIDsUsed = new List<string>();
                     int actualIDIndex = 0;
-                    while (amountToRemoveFromBase > 0)
+                    int amountLeftToRemoveFromBase = amountToRemoveFromBase;
+                    while (amountLeftToRemoveFromBase > 0)
                     {
                         string actualID = actualIDs[actualIDIndex++];
                         if (!Mod.baseInventory.ContainsKey(actualID))
@@ -3271,9 +3272,8 @@ namespace EFM
                         {
                             actualIDsUsed.Add(actualID);
                         }
-                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - amountToRemoveFromBase;
                         List<GameObject> objectList = baseManager.baseInventoryObjects[actualID];
-                        for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i)
+                        for (int i = objectList.Count - 1; i >= 0 && amountLeftToRemoveFromBase > 0; --i)
                         {
                             GameObject toCheck = objectList[objectList.Count - 1];
                             EFM_CustomItemWrapper CIW = toCheck.GetComponent<EFM_CustomItemWrapper>();
@@ -3285,11 +3285,13 @@ namespace EFM
                                     if(CIW.stack > amountToRemoveFromBase)
                                     {
                                         CIW.stack = CIW.stack - amountToRemoveFromBase;
-                                        j = 0;
+                                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - amountToRemoveFromBase;
+                                        amountLeftToRemoveFromBase = 0;
                                     }
                                     else // CIW.stack <= amountToRemoveFromBase
                                     {
-                                        j -= CIW.stack;
+                                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - CIW.stack;
+                                        amountLeftToRemoveFromBase -= CIW.stack;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.destroyed = true;
@@ -3311,7 +3313,8 @@ namespace EFM
 
                                     if (!containsItem)
                                     {
-                                        --j;
+                                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
+                                        --amountLeftToRemoveFromBase;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.destroyed = true;
@@ -3323,7 +3326,8 @@ namespace EFM
                                 {
                                     if (CIW.containerItemRoot.childCount == 0)
                                     {
-                                        --j;
+                                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
+                                        --amountLeftToRemoveFromBase;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.destroyed = true;
@@ -3333,7 +3337,8 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    --j;
+                                    Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
+                                    --amountLeftToRemoveFromBase;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
                                     CIW.destroyed = true;
@@ -3343,7 +3348,8 @@ namespace EFM
                             }
                             else
                             {
-                                --j;
+                                Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
+                                --amountLeftToRemoveFromBase;
                                 objectList.RemoveAt(objectList.Count - 1);
                                 VID.physObj.SetQuickBeltSlot(null);
                                 VID.destroyed = true;
@@ -3354,7 +3360,8 @@ namespace EFM
                     }
 
                     actualIDIndex = 0;
-                    while (amountToRemoveFromPlayer > 0)
+                    int amountLeftToRemoveFromPlayer = amountToRemoveFromPlayer;
+                    while (amountLeftToRemoveFromPlayer > 0)
                     {
                         string actualID = actualIDs[actualIDIndex++];
                         if (!Mod.playerInventory.ContainsKey(actualID))
@@ -3365,9 +3372,8 @@ namespace EFM
                         {
                             actualIDsUsed.Add(actualID);
                         }
-                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - amountToRemoveFromPlayer;
                         List<GameObject> objectList = Mod.playerInventoryObjects[actualID];
-                        for (int i = objectList.Count - 1, j = amountToRemoveFromPlayer; i >= 0 && j > 0; --i)
+                        for (int i = objectList.Count - 1; i >= 0 && amountLeftToRemoveFromPlayer > 0; --i)
                         {
                             GameObject toCheck = objectList[objectList.Count - 1];
                             EFM_CustomItemWrapper CIW = toCheck.GetComponent<EFM_CustomItemWrapper>();
@@ -3379,11 +3385,13 @@ namespace EFM
                                     if (CIW.stack > amountToRemoveFromPlayer)
                                     {
                                         CIW.stack = CIW.stack - amountToRemoveFromPlayer;
-                                        j = 0;
+                                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - amountToRemoveFromPlayer;
+                                        amountLeftToRemoveFromPlayer = 0;
                                     }
                                     else // CIW.stack <= amountToRemoveFromBase
                                     {
-                                        j -= CIW.stack;
+                                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - CIW.stack;
+                                        amountLeftToRemoveFromPlayer -= CIW.stack;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.physObj.ForceBreakInteraction();
@@ -3407,7 +3415,8 @@ namespace EFM
 
                                     if (!containsItem)
                                     {
-                                        --j;
+                                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - 1;
+                                        --amountLeftToRemoveFromPlayer;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.physObj.ForceBreakInteraction();
@@ -3421,7 +3430,8 @@ namespace EFM
                                 {
                                     if (CIW.containerItemRoot.childCount == 0)
                                     {
-                                        --j;
+                                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - 1;
+                                        --amountLeftToRemoveFromPlayer;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
                                         CIW.physObj.ForceBreakInteraction();
@@ -3433,7 +3443,8 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    --j;
+                                    Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - 1;
+                                    --amountLeftToRemoveFromPlayer;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
                                     CIW.physObj.ForceBreakInteraction();
@@ -3445,7 +3456,8 @@ namespace EFM
                             }
                             else // VID != null
                             {
-                                --j;
+                                Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - 1;
+                                --amountLeftToRemoveFromPlayer;
                                 objectList.RemoveAt(objectList.Count - 1);
                                 VID.physObj.SetQuickBeltSlot(null);
                                 VID.physObj.ForceBreakInteraction();

@@ -2613,8 +2613,8 @@ namespace EFM
             {
                 return;
             }
-
-            float preLevel = Mod.skills[skillIndex].progress / 100;
+            
+            float preLevel = (int)(Mod.skills[skillIndex].progress / 100);
 
             float actualAmountToAdd = xp * ((skillIndex >= 12 && skillIndex <= 24) ? EFM_Skill.weaponSkillProgressRate : EFM_Skill.skillProgressRate);
             actualAmountToAdd += actualAmountToAdd * (EFM_Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(Mod.skills[skillIndex].skillType) ? EFM_Base_Manager.currentSkillGroupLevelingBoosts[Mod.skills[skillIndex].skillType] : 0);
@@ -2643,9 +2643,9 @@ namespace EFM
                 Mod.playerStatusManager.UpdateSkillUI(11);
             }
 
-            float postLevel = Mod.skills[skillIndex].progress / 100;
+            float postLevel = (int)(Mod.skills[skillIndex].progress / 100);
 
-            if (postLevel != preLevel)
+            if (postLevel != preLevel && Mod.taskSkillConditionsBySkillIndex.ContainsKey(skillIndex))
             {
                 foreach (TraderTaskCondition condition in Mod.taskSkillConditionsBySkillIndex[skillIndex])
                 {
@@ -5102,6 +5102,7 @@ namespace EFM
                     if (slot is EFM_EquipmentSlot && __instance.m_hand == null)
                     {
                         __instance.gameObject.SetActive(Mod.playerStatusManager.displayed);
+                        __instance.GetComponent<EFM_CustomItemWrapper>().UpdateBackpackMode();
                     }
                 }
 
@@ -5605,8 +5606,10 @@ namespace EFM
             }
             else if(vanillaItemDescriptor != null)
             {
+                Mod.instance.LogInfo("SetItemLocationIndex called on " + vanillaItemDescriptor.H3ID + " with current location index: " + vanillaItemDescriptor.locationIndex+ " setting to "+locationIndex);
                 if (updateWeight)
                 {
+                    Mod.instance.LogInfo("\tUpdate weight");
                     if (vanillaItemDescriptor.locationIndex == 0 && locationIndex != 0)
                     {
                         // Taken out of player inventory
@@ -5614,6 +5617,7 @@ namespace EFM
                     }
                     else if (vanillaItemDescriptor.locationIndex != 0 && locationIndex == 0)
                     {
+                        Mod.instance.LogInfo("\t\tAdded to player inventory, adding to weight");
                         // Added to player inventory
                         Mod.weight += vanillaItemDescriptor.currentWeight;
                     }
@@ -8867,7 +8871,6 @@ namespace EFM
             {
                 EFM_VanillaItemDescriptor magVID = mag.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                fireArmVID.currentWeight += magVID.currentWeight;
 
                 if(magVID.locationIndex == 0) // Player
                 {
@@ -8889,9 +8892,6 @@ namespace EFM
                         {
                             Mod.RemoveFromPlayerInventory(magVID.transform, true);
                         }
-
-                        // Update player weight
-                        Mod.weight -= magVID.currentWeight;
                     }
                 }
                 else if(magVID.locationIndex == 1) // Hideout
@@ -8904,9 +8904,6 @@ namespace EFM
                         {
                             Mod.currentBaseManager.RemoveFromBaseInventory(magVID.transform, true);
                         }
-
-                        // Update player weight
-                        Mod.weight += magVID.currentWeight;
                     }
                     else if(fireArmVID.locationIndex == 1) // Hideout
                     {
@@ -8915,8 +8912,6 @@ namespace EFM
                         {
                             Mod.currentBaseManager.RemoveFromBaseInventory(magVID.transform, true);
                         }
-
-                        // No change to player weight
                     }
                     else // Raid
                     {
@@ -8928,9 +8923,6 @@ namespace EFM
                     if (fireArmVID.locationIndex == 0) // Player
                     {
                         // Transfered from raid to player, dont want to add to inventory because it is in firearm
-
-                        // Update player weight
-                        Mod.weight += magVID.currentWeight;
                     }
                 }
 
@@ -8967,20 +8959,23 @@ namespace EFM
             {
                 return;
             }
-
+            Mod.instance.LogInfo("FireArmEjectMagPatch postfix called");
             EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
             fireArmVID.currentWeight -= preMagVID.currentWeight;
 
             int currentLocationIndex = 0;
             if(preMagVID.physObj.m_hand == null) // Not in a hand
             {
+                Mod.instance.LogInfo("\tNot being held");
                 currentLocationIndex = Mod.currentLocationIndex;
             }
 
             if(preLocationIndex == 0)
             {
-                if(currentLocationIndex == 0)
+                Mod.instance.LogInfo("\t\tFrom plaeyr ivnentory");
+                if (currentLocationIndex == 0)
                 {
+                    Mod.instance.LogInfo("\t\tTo player inventory");
                     // Transfered from player to player, from firearm to hand
                     Mod.AddToPlayerInventory(preMagVID.transform, true);
 
@@ -8988,60 +8983,56 @@ namespace EFM
                 }
                 else if(currentLocationIndex == 1)
                 {
+                    Mod.instance.LogInfo("\t\tTo hideout, removing "+ preMagVID.currentWeight+ " weight");
                     // Transfered from player to hideout
                     Mod.currentBaseManager.AddToBaseInventory(preMagVID.transform, true);
-
-                    // Update player weight
-                    Mod.weight -= preMagVID.currentWeight;
                 }
                 else
                 {
+                    Mod.instance.LogInfo("\t\tTo raid");
                     // Transfered from player to raid, no list to update
-
-                    // Update player weight
-                    Mod.weight -= preMagVID.currentWeight;
                 }
             }
             else if(preLocationIndex == 1)
             {
+                Mod.instance.LogInfo("\t\tFrom hideout");
                 if (currentLocationIndex == 0)
                 {
+                    Mod.instance.LogInfo("\t\tTo player inventory");
                     // Transfered from hideout to player, from firearm to hand
                     Mod.AddToPlayerInventory(preMagVID.transform, true);
-
-                    // Update player weight
-                    Mod.weight += preMagVID.currentWeight;
                 }
                 else if (currentLocationIndex == 1)
                 {
+                    Mod.instance.LogInfo("\t\tTo hideout");
                     // Transfered from hideout to hideout
                     Mod.currentBaseManager.AddToBaseInventory(preMagVID.transform, true);
-
-                    // No change to player weight
                 }
                 else
                 {
+                    Mod.instance.LogInfo("\t\tTo raid");
                     // Transfered from hideout to raid
                     Mod.instance.LogError("Fire arm eject mag patch impossible case: Mag ejected from hideout to raid, meaning mag had wrong location index while on player or in raid");
                 }
             }
             else
             {
+                Mod.instance.LogInfo("\t\tFrom raid");
                 if (currentLocationIndex == 0)
                 {
+                    Mod.instance.LogInfo("\t\tTo player inventory");
                     // Transfered from raid to player, from firearm to hand
                     Mod.AddToPlayerInventory(preMagVID.transform, true);
-
-                    // Update player weight
-                    Mod.weight += preMagVID.currentWeight;
                 }
                 else if (currentLocationIndex == 1)
                 {
+                    Mod.instance.LogInfo("\t\tTo hideout");
                     // Transfered from raid to hideout
                     Mod.instance.LogError("Fire arm eject mag patch impossible case: Mag ejected from raid to hideout, meaning mag had wrong location index while on player or in hideout");
                 }
                 else
                 {
+                    Mod.instance.LogInfo("\t\tTo raid");
                     // Transfered from raid to raid, nothing to update
                 }
             }
@@ -9115,7 +9106,6 @@ namespace EFM
             {
                 EFM_VanillaItemDescriptor clipVID = clip.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                fireArmVID.currentWeight += clipVID.currentWeight;
 
                 if (clipVID.locationIndex == 0) // Player
                 {
@@ -9127,8 +9117,6 @@ namespace EFM
                         {
                             Mod.RemoveFromPlayerInventory(clipVID.transform, true);
                         }
-
-                        // No difference to weight
                     }
                     else // Hideout/Raid
                     {
@@ -9137,9 +9125,6 @@ namespace EFM
                         {
                             Mod.RemoveFromPlayerInventory(clipVID.transform, true);
                         }
-
-                        // Update player weight
-                        Mod.weight -= clipVID.currentWeight;
                     }
                 }
                 else if (clipVID.locationIndex == 1) // Hideout
@@ -9152,9 +9137,6 @@ namespace EFM
                         {
                             Mod.currentBaseManager.RemoveFromBaseInventory(clipVID.transform, true);
                         }
-
-                        // Update player weight
-                        Mod.weight += clipVID.currentWeight;
                     }
                     else if (fireArmVID.locationIndex == 1) // Hideout
                     {
@@ -9163,8 +9145,6 @@ namespace EFM
                         {
                             Mod.currentBaseManager.RemoveFromBaseInventory(clipVID.transform, true);
                         }
-
-                        // No change to player weight
                     }
                     else // Raid
                     {
@@ -9176,9 +9156,6 @@ namespace EFM
                     if (fireArmVID.locationIndex == 0) // Player
                     {
                         // Transfered from raid to player, dont want to add to inventory because it is in firearm
-
-                        // Update player weight
-                        Mod.weight += clipVID.currentWeight;
                     }
                 }
 
@@ -9217,7 +9194,6 @@ namespace EFM
             }
 
             EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-            fireArmVID.currentWeight -= preClipVID.currentWeight;
 
             int currentLocationIndex = 0;
             if (preClipVID.physObj.m_hand == null) // Not in a hand
@@ -9231,23 +9207,15 @@ namespace EFM
                 {
                     // Transfered from player to player, from firearm to hand
                     Mod.AddToPlayerInventory(preClipVID.transform, true);
-
-                    // No change to player weight
                 }
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from player to hideout
                     Mod.currentBaseManager.AddToBaseInventory(preClipVID.transform, true);
-
-                    // Update player weight
-                    Mod.weight -= preClipVID.currentWeight;
                 }
                 else
                 {
                     // Transfered from player to raid, no list to update
-
-                    // Update player weight
-                    Mod.weight -= preClipVID.currentWeight;
                 }
             }
             else if (preLocationIndex == 1)
@@ -9256,16 +9224,11 @@ namespace EFM
                 {
                     // Transfered from hideout to player, from firearm to hand
                     Mod.AddToPlayerInventory(preClipVID.transform, true);
-
-                    // Update player weight
-                    Mod.weight += preClipVID.currentWeight;
                 }
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from hideout to hideout
                     Mod.currentBaseManager.AddToBaseInventory(preClipVID.transform, true);
-
-                    // No change to player weight
                 }
                 else
                 {
@@ -9279,9 +9242,6 @@ namespace EFM
                 {
                     // Transfered from raid to player, from firearm to hand
                     Mod.AddToPlayerInventory(preClipVID.transform, true);
-
-                    // Update player weight
-                    Mod.weight += preClipVID.currentWeight;
                 }
                 else if (currentLocationIndex == 1)
                 {
@@ -9986,6 +9946,11 @@ namespace EFM
 
         static void UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart bodyPart, Vector3 hitPoint, AISpawn.AISpawnType AIType, bool USEC)
         {
+            if (!Mod.currentShotsCounterConditionsByBodyPart.ContainsKey(bodyPart))
+            {
+                return;
+            }
+
             foreach(TraderTaskCounterCondition counterCondition in Mod.currentShotsCounterConditionsByBodyPart[bodyPart])
             {
                 // Check condition state validity

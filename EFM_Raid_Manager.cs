@@ -643,7 +643,6 @@ namespace EFM
                 LeaveItemProcessor currentLeaveItemProcessor = questChild.gameObject.AddComponent<LeaveItemProcessor>();
                 if (Mod.taskLeaveItemConditionsByItemIDByZone.ContainsKey(questChild.name))
                 {
-                    currentLeaveItemProcessor.itemIDs = new List<string>();
                     currentLeaveItemProcessor.conditionsByItemID = Mod.taskLeaveItemConditionsByItemIDByZone[questChild.name];
                     Mod.currentTaskLeaveItemConditionsByItemIDByZone.Add(questChild.name, currentLeaveItemProcessor.conditionsByItemID);
                     // Add itemID if there is at least one condition in the list that is not a fail condition or if hte task is active
@@ -1515,6 +1514,7 @@ namespace EFM
                 return;
             }
 
+            // TODO: Put these in current dict at start of raid to prevent taht we look through them all like this every kill we get
             if (Mod.taskStartCounterConditionsByType.ContainsKey(TraderTaskCounterCondition.CounterConditionType.Kills))
             {
                 List<TraderTaskCounterCondition> startKillCounterConditions = Mod.taskStartCounterConditionsByType[TraderTaskCounterCondition.CounterConditionType.Kills];
@@ -6677,7 +6677,7 @@ namespace EFM
     public class LeaveItemProcessor : MonoBehaviour
     {
         public static readonly int maxUpCheck = 4;
-        public List<string> itemIDs; // The itemIDs corresponding to the leave item conditions for this location
+        public List<string> itemIDs = new List<string>(); // The itemIDs corresponding to the leave item conditions for this location
         public Dictionary<string, List<TraderTaskCondition>> conditionsByItemID; // The leaveitem conditions for this location
 
         public void OnTriggerEnter(Collider other)
