@@ -288,6 +288,8 @@ namespace EFM
 
         // DEBUG
         public bool debug;
+        public static bool spawnItems = true;
+        public static bool spawnAI = true;
 
         public enum ItemType
         {
@@ -360,6 +362,18 @@ namespace EFM
             }
             if (debug)
             {
+                if (Input.GetKeyDown(KeyCode.Alpha0))
+                {
+                    spawnAI = !spawnAI;
+                    LogWarning("SpawnAI: " + spawnAI);
+                }
+
+                if (Input.GetKeyDown(KeyCode.Alpha9))
+                {
+                    spawnItems = !spawnItems;
+                    LogWarning("spawnItems: " + spawnItems);
+                }
+
                 if (Input.GetKeyDown(KeyCode.L))
                 {
                     SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
@@ -2624,33 +2638,35 @@ namespace EFM
         {
             // Globals SkillsSettings
             // Skip if in scav raid
-            if (Mod.currentLocationIndex == 1 || Mod.chosenCharIndex == 1 || Mod.skills[skillIndex].raidProgress >= 300) // Max 3 levels per raid TODO: should be unique to each skill
+            EFM_Skill skill = Mod.skills[skillIndex];
+            if (Mod.currentLocationIndex == 1 || Mod.chosenCharIndex == 1 || skill.raidProgress >= 300) // Max 3 levels per raid TODO: should be unique to each skill
             {
                 return;
             }
             Mod.instance.LogInfo("Addskillexp called");
-            
-            float preLevel = (int)(Mod.skills[skillIndex].progress / 100);
+
+            int intPreProgress = (int)skill.progress;
+            float preLevel = (int)(skill.progress / 100);
 
             float actualAmountToAdd = xp * ((skillIndex >= 12 && skillIndex <= 24) ? EFM_Skill.weaponSkillProgressRate : EFM_Skill.skillProgressRate);
-            actualAmountToAdd += actualAmountToAdd * (EFM_Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(Mod.skills[skillIndex].skillType) ? EFM_Base_Manager.currentSkillGroupLevelingBoosts[Mod.skills[skillIndex].skillType] : 0);
-            actualAmountToAdd *= Mod.skills[skillIndex].dimishingReturns ? 0.5f : 1;
+            actualAmountToAdd += actualAmountToAdd * (EFM_Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(skill.skillType) ? EFM_Base_Manager.currentSkillGroupLevelingBoosts[skill.skillType] : 0);
+            actualAmountToAdd *= skill.dimishingReturns ? 0.5f : 1;
 
-            Mod.skills[skillIndex].progress += actualAmountToAdd;
-            Mod.skills[skillIndex].currentProgress += actualAmountToAdd;
+            skill.progress += actualAmountToAdd;
+            skill.currentProgress += actualAmountToAdd;
 
-            Mod.skills[skillIndex].raidProgress += actualAmountToAdd;
-            if (Mod.skills[skillIndex].raidProgress >= 200) // dimishing returns at 2 levels per raid TODO: should be unique to each skill
+            skill.raidProgress += actualAmountToAdd;
+            if (skill.raidProgress >= 200) // dimishing returns at 2 levels per raid TODO: should be unique to each skill
             {
-                Mod.skills[skillIndex].dimishingReturns = true;
-                Mod.skills[skillIndex].increasing = false;
+                skill.dimishingReturns = true;
+                skill.increasing = false;
             }
             else
             {
-                Mod.skills[skillIndex].increasing = true;
+                skill.increasing = true;
             }
 
-            if (Mod.skills[skillIndex].skillType == EFM_Skill.SkillType.Practical || Mod.skills[skillIndex].skillType == EFM_Skill.SkillType.Physical)
+            if (skill.skillType == EFM_Skill.SkillType.Practical || skill.skillType == EFM_Skill.SkillType.Physical)
             {
                 float memoryAmount = EFM_Skill.memorySkillProgress / EFM_Skill.anySkillUp * actualAmountToAdd;
                 Mod.skills[11].progress += memoryAmount;
@@ -2659,7 +2675,7 @@ namespace EFM
                 Mod.playerStatusManager.UpdateSkillUI(11);
             }
 
-            float postLevel = (int)(Mod.skills[skillIndex].progress / 100);
+            float postLevel = (int)(skill.progress / 100);
 
             if (postLevel != preLevel && Mod.taskSkillConditionsBySkillIndex.ContainsKey(skillIndex))
             {
@@ -2808,7 +2824,10 @@ namespace EFM
                 Mod.playerStatusManager.UpdateSkillUI(10);
             }
 
-            Mod.playerStatusManager.UpdateSkillUI(skillIndex);
+            if (intPreProgress < (int)skill.progress)
+            {
+                Mod.playerStatusManager.UpdateSkillUI(skillIndex);
+            }
         }
 
         private void DoPatching()

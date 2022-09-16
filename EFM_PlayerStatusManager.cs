@@ -265,24 +265,25 @@ namespace EFM
 
         public void UpdateSkillUI(int skillIndex)
         {
+            SkillUI skillUI = skills[skillIndex];
             float currentProgress = Mod.skills[skillIndex].currentProgress % 100;
-            skills[skillIndex].text.text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(skillIndex), (int)(Mod.skills[skillIndex].currentProgress / 100), currentProgress);
-            skills[skillIndex].progressBarRectTransform.sizeDelta = new Vector2(currentProgress, 4.73f);
+            skillUI.text.text = String.Format("{0} lvl. {1:0} ({2:0}/100)", Mod.SkillIndexToName(skillIndex), (int)(Mod.skills[skillIndex].currentProgress / 100), currentProgress);
+            skillUI.progressBarRectTransform.sizeDelta = new Vector2(currentProgress, 4.73f);
 
             if (Mod.skills[skillIndex].increasing)
             {
-                skills[skillIndex].increasing.SetActive(true);
-                skills[skillIndex].diminishingReturns.SetActive(false);
+                skillUI.increasing.SetActive(true);
+                skillUI.diminishingReturns.SetActive(false);
             }
             else if (Mod.skills[skillIndex].dimishingReturns)
             {
-                skills[skillIndex].increasing.SetActive(false);
-                skills[skillIndex].diminishingReturns.SetActive(true);
+                skillUI.increasing.SetActive(false);
+                skillUI.diminishingReturns.SetActive(true);
             }
             else
             {
-                skills[skillIndex].increasing.SetActive(false);
-                skills[skillIndex].diminishingReturns.SetActive(false);
+                skillUI.increasing.SetActive(false);
+                skillUI.diminishingReturns.SetActive(false);
             }
         }
 

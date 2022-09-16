@@ -406,116 +406,119 @@ namespace EFM
             Mod.instance.LogInfo("Initialized doors, spawning loose loot");
 
             // Spawn loose loot
-            JObject locationDB = Mod.locationsLootDB[Mod.chosenMapIndex];
-            Transform itemsRoot = transform.GetChild(1).GetChild(1).GetChild(2);
-            // Forced, always spawns TODO: Unless player has it already? Unless player doesnt have the quest yet?
-            Mod.instance.LogInfo("Spawning forced loot, forced null?: "+(locationDB["forced"] == null));
-            foreach (JToken forced in locationDB["forced"])
+            if (Mod.spawnItems)
             {
-                Mod.instance.LogInfo("Forced entry, items null?: "+(forced["Items"] == null));
-                Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
-                Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
-                List<string> unspawnedParents = new List<string>();
-
-                // Get item from item map
-                string originalID = forced["Items"][0].Type !=  JTokenType.String ? forced["Items"][0]["_tpl"].ToString() : forced["Items"][0].ToString();
-                Mod.instance.LogInfo("Got ID");
-                string itemID = null;
-                if (Mod.itemMap.ContainsKey(originalID))
+                JObject locationDB = Mod.locationsLootDB[Mod.chosenMapIndex];
+                Transform itemsRoot = transform.GetChild(1).GetChild(1).GetChild(2);
+                // Forced, always spawns TODO: Unless player has it already? Unless player doesnt have the quest yet?
+                Mod.instance.LogInfo("Spawning forced loot, forced null?: " + (locationDB["forced"] == null));
+                foreach (JToken forced in locationDB["forced"])
                 {
-                    ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
-                    switch (itemMapEntry.mode)
+                    Mod.instance.LogInfo("Forced entry, items null?: " + (forced["Items"] == null));
+                    Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
+                    Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
+                    List<string> unspawnedParents = new List<string>();
+
+                    // Get item from item map
+                    string originalID = forced["Items"][0].Type != JTokenType.String ? forced["Items"][0]["_tpl"].ToString() : forced["Items"][0].ToString();
+                    Mod.instance.LogInfo("Got ID");
+                    string itemID = null;
+                    if (Mod.itemMap.ContainsKey(originalID))
                     {
-                        case 0:
-                            itemID = itemMapEntry.ID;
-                            break;
-                        case 1:
-                            itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
-                            break;
-                        case 2:
-                            itemID = itemMapEntry.otherModID;
-                            break;
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                itemID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                itemID = itemMapEntry.otherModID;
+                                break;
+                        }
                     }
-                }
-                else
-                {
-                    // Spawn random round instead
-                    itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
-                }
-
-                // Get item prefab
-                GameObject itemPrefab = null;
-                if (int.TryParse(itemID, out int index))
-                {
-                    itemPrefab = Mod.itemPrefabs[index];
-                }
-                else
-                {
-                    itemPrefab = IM.OD[itemID].GetGameObject();
-                }
-
-                // Spawn item
-                SpawnLootItem(itemPrefab, itemsRoot, itemID, forced, originalID, false);
-            }
-
-            // Dynamic, has chance of spawning
-            Mod.instance.LogInfo("Spawning dynamic loot");
-            foreach (JToken dynamicSpawn in locationDB["dynamic"])
-            {
-                Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
-                Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
-                List<string> unspawnedParents = new List<string>();
-
-                // Get item from item map
-                string[] lootTableIDSplit = dynamicSpawn["id"].ToString().Split(' ');
-                string originalID = null;
-                if (lootTableIDSplit.Length == 1 || Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)] == null || Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)][lootTableIDSplit[0]] == null)
-                {
-                    Mod.instance.LogWarning("Failed to get loot table ID from: "+lootTableIDSplit[0]+", spawning specified item instead");
-                    JArray items = dynamicSpawn["Items"].Value<JArray>();
-                    originalID = items[0].Type != JTokenType.String ? items[0]["_tpl"].ToString() : items[0].ToString();
-                }
-                else
-                {
-                    JArray possibleItems = Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)][lootTableIDSplit[0]]["SpawnList"] as JArray;
-                    originalID = possibleItems[UnityEngine.Random.Range(0, possibleItems.Count)].ToString();
-                }
-                string itemID = null;
-                if (Mod.itemMap.ContainsKey(originalID))
-                {
-                    ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
-                    switch (itemMapEntry.mode)
+                    else
                     {
-                        case 0:
-                            itemID = itemMapEntry.ID;
-                            break;
-                        case 1:
-                            itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
-                            break;
-                        case 2:
-                            itemID = itemMapEntry.otherModID;
-                            break;
+                        // Spawn random round instead
+                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
                     }
-                }
-                else
-                {
-                    // Spawn random round instead
-                    itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
+
+                    // Get item prefab
+                    GameObject itemPrefab = null;
+                    if (int.TryParse(itemID, out int index))
+                    {
+                        itemPrefab = Mod.itemPrefabs[index];
+                    }
+                    else
+                    {
+                        itemPrefab = IM.OD[itemID].GetGameObject();
+                    }
+
+                    // Spawn item
+                    SpawnLootItem(itemPrefab, itemsRoot, itemID, forced, originalID, false);
                 }
 
-                // Get item prefab
-                GameObject itemPrefab = null;
-                if (int.TryParse(itemID, out int index))
+                // Dynamic, has chance of spawning
+                Mod.instance.LogInfo("Spawning dynamic loot");
+                foreach (JToken dynamicSpawn in locationDB["dynamic"])
                 {
-                    itemPrefab = Mod.itemPrefabs[index];
-                }
-                else
-                {
-                    itemPrefab = IM.OD[itemID].GetGameObject();
-                }
+                    Dictionary<string, EFM_CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, EFM_CustomItemWrapper>();
+                    Dictionary<string, EFM_VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, EFM_VanillaItemDescriptor>();
+                    List<string> unspawnedParents = new List<string>();
 
-                // Spawn item
-                SpawnLootItem(itemPrefab, itemsRoot, itemID, dynamicSpawn, originalID, true);
+                    // Get item from item map
+                    string[] lootTableIDSplit = dynamicSpawn["id"].ToString().Split(' ');
+                    string originalID = null;
+                    if (lootTableIDSplit.Length == 1 || Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)] == null || Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)][lootTableIDSplit[0]] == null)
+                    {
+                        Mod.instance.LogWarning("Failed to get loot table ID from: " + lootTableIDSplit[0] + ", spawning specified item instead");
+                        JArray items = dynamicSpawn["Items"].Value<JArray>();
+                        originalID = items[0].Type != JTokenType.String ? items[0]["_tpl"].ToString() : items[0].ToString();
+                    }
+                    else
+                    {
+                        JArray possibleItems = Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)][lootTableIDSplit[0]]["SpawnList"] as JArray;
+                        originalID = possibleItems[UnityEngine.Random.Range(0, possibleItems.Count)].ToString();
+                    }
+                    string itemID = null;
+                    if (Mod.itemMap.ContainsKey(originalID))
+                    {
+                        ItemMapEntry itemMapEntry = Mod.itemMap[originalID];
+                        switch (itemMapEntry.mode)
+                        {
+                            case 0:
+                                itemID = itemMapEntry.ID;
+                                break;
+                            case 1:
+                                itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
+                                break;
+                            case 2:
+                                itemID = itemMapEntry.otherModID;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // Spawn random round instead
+                        itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
+                    }
+
+                    // Get item prefab
+                    GameObject itemPrefab = null;
+                    if (int.TryParse(itemID, out int index))
+                    {
+                        itemPrefab = Mod.itemPrefabs[index];
+                    }
+                    else
+                    {
+                        itemPrefab = IM.OD[itemID].GetGameObject();
+                    }
+
+                    // Spawn item
+                    SpawnLootItem(itemPrefab, itemsRoot, itemID, dynamicSpawn, originalID, true);
+                }
             }
 
             Mod.instance.LogInfo("Done spawning loose loot, initializing container");
@@ -3660,6 +3663,11 @@ namespace EFM
             entities.Add(GM.CurrentPlayerBody.Hitboxes[0].MyE); // Add player as first entity
             entityRelatedAI = new List<EFM_AI>();
             entityRelatedAI.Add(null); // Place holder for player entity
+
+            if (!Mod.spawnAI)
+            {
+                return;
+            }
 
             // Init AI Cover points
             Transform coverPointsParent = transform.GetChild(1).GetChild(1).GetChild(3).GetChild(0);
