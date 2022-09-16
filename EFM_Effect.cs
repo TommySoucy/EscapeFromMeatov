@@ -212,9 +212,9 @@ namespace EFM
                         }
                     }
 
-                    if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(4).gameObject.activeSelf)
+                    if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(3).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(4).gameObject.SetActive(true);
+                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(3).gameObject.SetActive(true);
                     }
                     Mod.instance.LogInfo("\t\tRemoved");
                     break;

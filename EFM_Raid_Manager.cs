@@ -1262,6 +1262,12 @@ namespace EFM
             sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for grenade
             sosigScript.Inventory.Init();
 
+            // Remove all interactive objects on the sosig from All
+            foreach(FVRInteractiveObject io in sosigObject.GetComponentsInChildren<FVRInteractiveObject>())
+            {
+                Mod.RemoveFromAll(io, null, null);
+            }
+
             EFM_AI AIScript = sosigObject.AddComponent<EFM_AI>();
             AIScript.experienceReward = spawnData.experienceReward;
             AIScript.entityIndex = entities.Count;
@@ -1292,6 +1298,7 @@ namespace EFM
             {
                 yield return IM.OD[spawnData.sosigWeapon].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[spawnData.sosigWeapon].GetGameObject());
+                Mod.RemoveFromAll(null, null, null);
                 SosigWeapon sosigWeapon = weaponObject.GetComponent<SosigWeapon>();
                 sosigWeapon.SetAutoDestroy(true);
                 sosigScript.ForceEquip(sosigWeapon);
@@ -1309,6 +1316,7 @@ namespace EFM
             {
                 yield return IM.OD[spawnData.sosigGrenade].GetGameObjectAsync();
                 GameObject grenadeObject = Instantiate(IM.OD[spawnData.sosigGrenade].GetGameObject());
+                Mod.RemoveFromAll(null, null, null);
                 SosigWeapon sosigGrenade = grenadeObject.GetComponent<SosigWeapon>();
                 sosigGrenade.SetAutoDestroy(true);
                 sosigScript.ForceEquip(sosigGrenade);
@@ -3382,7 +3390,7 @@ namespace EFM
                 }
 
                 bool success = false;
-                int pocketsUSed = inventory.genericPockets.Count;
+                int pocketsUsed = inventory.genericPockets.Count;
                 FVRPhysicalObject finalItemPhysObj = itemObject.GetComponent<FVRPhysicalObject>();
 
                 if (inventory.genericPockets.Contains(i))
@@ -3399,7 +3407,7 @@ namespace EFM
                         }
                     }
                 }
-                if (!success && finalItemPhysObj.Size == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUSed < 4)
+                if (!success && finalItemPhysObj.Size == FVRPhysicalObject.FVRPhysicalObjectSize.Small && pocketsUsed < 4)
                 {
                     for (int j = 0; j < 4; ++j)
                     {
@@ -3410,7 +3418,7 @@ namespace EFM
                             finalItemPhysObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[j]);
                             finalItemPhysObj.SetParentage(null);
                             success = true;
-                            ++pocketsUSed;
+                            ++pocketsUsed;
                         }
                     }
                 }
@@ -5675,29 +5683,29 @@ namespace EFM
             for (int i = 0; i < 7; ++i)
             {
                 maxHealthTotal += Mod.currentMaxHealth[i];
-                if (Mod.health[i] == 0 && !(i == 0 || i == 1)) 
+                if (Mod.health[i] <= 0 && !(i == 0 || i == 1)) 
                 {
                     // Apply currentHealthRates[i] to other parts
                     for (int j = 0; j < 7; ++j)
                     {
                         if (j != i)
                         {
-                            Mod.health[j] = Mathf.Clamp(Mod.health[j] + Mod.currentHealthRates[i] * (Time.deltaTime / 60) / 6, 1, Mod.currentMaxHealth[j]);
+                            Mod.health[j] = Mathf.Clamp(Mod.health[j] + Mod.currentHealthRates[i] * (Time.deltaTime / 60) / 6, 0, Mod.currentMaxHealth[j]);
 
-                            if (Mod.health[j] == 0 && (j == 0 || j == 1))
+                            if (Mod.health[j] <= 0 && (j == 0 || j == 1))
                             {
-                                // TODO: Kill player
+                                KillPlayer();
                             }
                         }
                     }
                 }
-                else if(Mod.currentHealthRates[i] < 0 && Mod.health[i] == 0)
+                else if(Mod.currentHealthRates[i] < 0 && Mod.health[i] <= 0)
                 {
-                    // TODO: Kill player
+                    KillPlayer();
                 }
                 else
                 {
-                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + Mod.currentHealthRates[i] * (Time.deltaTime / 60), 1, Mod.currentMaxHealth[i]);
+                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + Mod.currentHealthRates[i] * (Time.deltaTime / 60), 0, Mod.currentMaxHealth[i]);
                 }
 
                 if (!lethal)
@@ -5716,13 +5724,13 @@ namespace EFM
                     {
                         if (j != i)
                         {
-                            Mod.health[j] = Mathf.Clamp(Mod.health[j] + Mod.currentNonLethalHealthRates[i] * (Time.deltaTime / 60) / 6, 1, Mod.currentMaxHealth[j]);
+                            Mod.health[j] = Mathf.Clamp(Mod.health[j] + Mod.currentNonLethalHealthRates[i] * (Time.deltaTime / 60) / 6, 0, Mod.currentMaxHealth[j]);
                         }
                     }
                 }
                 else
                 {
-                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + Mod.currentNonLethalHealthRates[i] * (Time.deltaTime / 60), 1, Mod.currentMaxHealth[i]);
+                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + Mod.currentNonLethalHealthRates[i] * (Time.deltaTime / 60), 0, Mod.currentMaxHealth[i]);
                 }
                 Mod.playerStatusManager.partHealthTexts[i].text = String.Format("{0:0}", Mod.health[i]) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[i]);
                 Mod.playerStatusManager.partHealthImages[i].color = Color.Lerp(Color.red, Color.white, Mod.health[i] / Mod.currentMaxHealth[i]);
@@ -5753,8 +5761,8 @@ namespace EFM
                 Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(false);
             }
             Mod.playerStatusManager.healthText.text = String.Format("{0:0}/{1:0}", health, maxHealthTotal);
-            GM.CurrentPlayerBody.Health = health;
-            // TODO: Update max health on vanilla display
+            GM.CurrentPlayerBody.SetHealthThreshold(maxHealthTotal);
+            GM.CurrentPlayerBody.Health = health; // This must be done after setting health threshold because setting health threshold also sets health
             if(health < maxHealthTotal / 100 * 20) // Add stress resistance xp if below 20% max health
             {
                 Mod.AddSkillExp(EFM_Skill.lowHPDuration * Time.deltaTime, 4);

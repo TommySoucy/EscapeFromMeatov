@@ -2025,6 +2025,21 @@ namespace EFM
 
                 VID.inAll = false;
             }
+            else if(CIW == null && VID == null)
+            {
+                if (interactiveObject == null)
+                {
+                    interactiveObject = FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1];
+                }
+                FieldInfo indexField = typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic);
+                int currentIndex = (int)indexField.GetValue(interactiveObject);
+
+                FVRInteractiveObject.All[currentIndex] = FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1];
+                indexField.SetValue(FVRInteractiveObject.All[currentIndex], currentIndex);
+                FVRInteractiveObject.All.RemoveAt(FVRInteractiveObject.All.Count - 1);
+
+                indexField.SetValue(interactiveObject, -1);
+            }
         }
 
         public static void UpdatePlayerInventory()
@@ -2613,6 +2628,7 @@ namespace EFM
             {
                 return;
             }
+            Mod.instance.LogInfo("Addskillexp called");
             
             float preLevel = (int)(Mod.skills[skillIndex].progress / 100);
 
@@ -6440,8 +6456,8 @@ namespace EFM
                             if (i != partIndex)
                             {
                                 float actualDamage = Mathf.Min(totalDamage / 6 * destroyedMultiplier[partIndex], Mod.health[i]);
-                                Mod.health[i] -= actualDamage;
-                                actualTotalDamage += actualDamage;
+                                Mod.health[i] = Mathf.Clamp(Mod.health[i] - actualDamage, 0, Mod.currentMaxHealth[i]);
+                                actualTotalDamage += actualDamage; 
 
                                 if (i == 0 || i == 1)
                                 {
@@ -8433,7 +8449,7 @@ namespace EFM
                     Mod.AddSkillExp(sideVelocity.magnitude * UnityEngine.Random.Range(EFM_Skill.sprintActionMin, EFM_Skill.sprintActionMax), 1);
                 }
             }
-            else
+            else if (sideVelocity.magnitude > 0) 
             {
                 Mod.AddSkillExp(sideVelocity.magnitude * EFM_Skill.movementAction, 0);
                 if (Mod.weight <= Mod.currentWeightLimit)

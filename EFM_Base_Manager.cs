@@ -933,9 +933,9 @@ namespace EFM
             for (int i = 0; i < 7; ++i)
             {
                 maxHealthTotal += Mod.currentMaxHealth[i];
-                if (heal[i] && Mod.currentHealthRates[i] > 0)
+                float currentHealthDelta = Mod.currentHealthRates[i] + Mod.currentNonLethalHealthRates[i];
+                if (heal[i] && currentHealthDelta > 0)
                 {
-                    float currentHealthDelta = Mod.currentHealthRates[i] + Mod.currentNonLethalHealthRates[i];
                     Mod.health[i] = Mathf.Clamp(Mod.health[i] + currentHealthDelta * (Time.deltaTime / 60), 1, Mod.currentMaxHealth[i]);
 
                     healthDelta += currentHealthDelta;
@@ -967,8 +967,8 @@ namespace EFM
             {
                 medicalScreenTotalHealthText.text = String.Format("{0:0}/{1}", health, maxHealthTotal); ;
             }
-            GM.CurrentPlayerBody.Health = health;
-            // TODO: Update max health on vanilla display
+            GM.CurrentPlayerBody.SetHealthThreshold(maxHealthTotal);
+            GM.CurrentPlayerBody.Health = health; // This must be done after setting health threshold because setting health threshold also sets health
 
             if (Mod.currentHydrationRate > 0)
             {
