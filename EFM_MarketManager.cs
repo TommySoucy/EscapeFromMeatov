@@ -3907,11 +3907,12 @@ namespace EFM
                 Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
 
                 IM.OD[ID].RefreshCache();
-                do
-                {
-                    Mod.instance.LogInfo("Waiting for cache refresh...");
-                    itemPrefab = IM.OD[ID].GetGameObject();
-                } while (itemPrefab == null);
+                itemPrefab = IM.OD[ID].GetGameObject();
+            }
+            if (itemPrefab == null)
+            {
+                Mod.instance.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
+                yield break;
             }
             EFM_VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<EFM_VanillaItemDescriptor>();
             BoxCollider tradeVolumeCollider = tradeVolume.GetComponentInChildren<BoxCollider>();

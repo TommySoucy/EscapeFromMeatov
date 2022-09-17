@@ -254,11 +254,12 @@ namespace EFM
 					Mod.instance.LogWarning("Attempted to get vanilla prefab for " + vanillaID + ", but the prefab had been destroyed, refreshing cache...");
 
 					IM.OD[vanillaID].RefreshCache();
-					do
-					{
-						Mod.instance.LogInfo("Waiting for cache refresh...");
-						itemPrefab = IM.OD[vanillaID].GetGameObject();
-					} while (itemPrefab == null);
+					itemPrefab = IM.OD[vanillaID].GetGameObject();
+				}
+				if (itemPrefab == null)
+				{
+					Mod.instance.LogError("Attempted to get vanilla prefab for " + vanillaID + ", but the prefab had been destroyed, refreshing cache did nothing");
+					continue;
 				}
 				GameObject itemObject = Instantiate(itemPrefab, itemObjectsRoot);
 				itemObject.GetComponent<Rigidbody>().isKinematic = true;

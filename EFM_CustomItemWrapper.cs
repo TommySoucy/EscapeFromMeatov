@@ -733,7 +733,7 @@ namespace EFM
 									float leastAmount = 1000;
 									for (int i = 0; i < Mod.health.Length; ++i)
 									{
-										if (Mod.health[i] < leastAmount)
+										if (Mod.health[i] < Mod.currentMaxHealth[i] && Mod.health[i] < leastAmount)
 										{
 											leastIndex = i;
 											leastAmount = Mod.health[i];
@@ -790,7 +790,7 @@ namespace EFM
 									float leastAmount = 1000;
 									for (int i = 0; i < Mod.health.Length; ++i)
 									{
-										if (Mod.health[i] < leastAmount)
+										if (Mod.health[i] < Mod.currentMaxHealth[i] && Mod.health[i] < leastAmount)
 										{
 											leastIndex = i;
 											leastAmount = Mod.health[i];

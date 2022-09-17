@@ -290,6 +290,9 @@ namespace EFM
         public bool debug;
         public static bool spawnItems = true;
         public static bool spawnAI = true;
+        public static bool spawnOnlyFirstAI = false;
+        public static bool spawnedFirstAI = false;
+        public static bool forceSpawnAI = false;
 
         public enum ItemType
         {
@@ -366,6 +369,18 @@ namespace EFM
                 {
                     spawnAI = !spawnAI;
                     LogWarning("SpawnAI: " + spawnAI);
+                }
+
+                if (Input.GetKeyDown(KeyCode.Alpha7))
+                {
+                    LogWarning("Forcing AI Spawn");
+                    currentRaidManager.ForceSpawnNextAI();
+                }
+
+                if (Input.GetKeyDown(KeyCode.Alpha8))
+                {
+                    spawnOnlyFirstAI = !spawnOnlyFirstAI;
+                    LogWarning("spawnOnlyFirstAI: " + spawnOnlyFirstAI);
                 }
 
                 if (Input.GetKeyDown(KeyCode.Alpha9))
@@ -1458,11 +1473,11 @@ namespace EFM
                 Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
 
                 IM.OD[ID].RefreshCache();
-                do
-                {
-                    Mod.instance.LogInfo("Waiting for cache refresh...");
-                    itemPrefab = IM.OD[ID].GetGameObject();
-                } while (itemPrefab == null);
+                itemPrefab = IM.OD[ID].GetGameObject();
+            }
+            if (itemPrefab == null)
+            {
+                Mod.instance.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
             }
             FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
             image.sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
@@ -2643,7 +2658,6 @@ namespace EFM
             {
                 return;
             }
-            Mod.instance.LogInfo("Addskillexp called");
 
             int intPreProgress = (int)skill.progress;
             float preLevel = (int)(skill.progress / 100);

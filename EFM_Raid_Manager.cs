@@ -1176,8 +1176,43 @@ namespace EFM
             }
         }
 
+        public void ForceSpawnNextAI()
+        {
+            if (!spawning && nextSpawn != null)
+            {
+                Mod.forceSpawnAI = true;
+                AnvilManager.Run(SpawnAI(nextSpawn));
+                AISpawns.RemoveAt(AISpawns.Count - 1);
+                nextSpawn = AISpawns.Count > 0 ? AISpawns[AISpawns.Count - 1] : null;
+            }
+        }
+
         private IEnumerator SpawnAI(AISpawn spawnData)
         {
+            if (!Mod.forceSpawnAI)
+            {
+                if (!Mod.spawnAI)
+                {
+                    yield break;
+                }
+
+                if (Mod.spawnOnlyFirstAI)
+                {
+                    if (Mod.spawnedFirstAI)
+                    {
+                        yield break;
+                    }
+                    else
+                    {
+                        Mod.spawnedFirstAI = true;
+                    }
+                }
+            }
+            else
+            {
+                Mod.forceSpawnAI = false;
+            }
+
             Mod.instance.LogInfo("SPAWNAI: SpawnAI called with name "+spawnData.name+" of type: "+spawnData.type);
             spawning = true;
             yield return IM.OD["SosigBody_Default"].GetGameObjectAsync();
@@ -1452,8 +1487,8 @@ namespace EFM
             sosigScript.SetIFF(iff);
             sosigScript.SetOriginalIFFTeam(iff);
 
-            sosigScript.Priority.SetAllEnemy();
-            sosigScript.Priority.MakeFriendly(iff);
+            //sosigScript.Priority.SetAllEnemy();
+            //sosigScript.Priority.MakeFriendly(iff);
 
             // If player scav, also make player iff friendly
             if (Mod.chosenCharIndex == 1)
@@ -3275,12 +3310,12 @@ namespace EFM
                         Mod.instance.LogWarning("Attempted to get vanilla prefab for " + genericItem + ", but the prefab had been destroyed, refreshing cache...");
 
                         IM.OD[genericItem].RefreshCache();
-                        do
-                        {
-                            Mod.instance.LogInfo("Waiting for cache refresh...");
-                            itemPrefab = IM.OD[genericItem].GetGameObject();
-                            // TODO: Should probably yield return null here to wait, check every other place we wait for cache refresh also
-                        } while (itemPrefab == null);
+                        itemPrefab = IM.OD[genericItem].GetGameObject();
+                    }
+                    if (itemPrefab == null)
+                    {
+                        Mod.instance.LogError("Attempted to get vanilla prefab for " + genericItem + ", but the prefab had been destroyed, refreshing cache did nothing");
+                        continue;
                     }
                 }
 
@@ -3594,6 +3629,8 @@ namespace EFM
 
         private void InitAI()
         {
+            Mod.spawnedFirstAI = false;
+
             //Cult priest - sectantpriest
             bool spawnCultPriest = false;
             int cultPriestFollowerCount = 0;
@@ -3664,12 +3701,8 @@ namespace EFM
             entityRelatedAI = new List<EFM_AI>();
             entityRelatedAI.Add(null); // Place holder for player entity
 
-            if (!Mod.spawnAI)
-            {
-                return;
-            }
-
             // Init AI Cover points
+
             Transform coverPointsParent = transform.GetChild(1).GetChild(1).GetChild(3).GetChild(0);
             GM.CurrentAIManager.CPM = gameObject.AddComponent<AICoverPointManager>();
             GM.CurrentAIManager.CPM.MyCoverPoints = new List<AICoverPoint>();
@@ -3678,6 +3711,7 @@ namespace EFM
                 AICoverPoint newCoverPoint = coverPointsParent.GetChild(i).gameObject.AddComponent<AICoverPoint>();
                 GM.CurrentAIManager.CPM.MyCoverPoints.Add(newCoverPoint);
             }
+
 
             // Bosses
             if (spawnCultPriest)
@@ -4579,11 +4613,12 @@ namespace EFM
                                 Mod.instance.LogWarning("Attempted to get vanilla prefab for " + actualItemID + ", but the prefab had been destroyed, refreshing cache...");
 
                                 IM.OD[actualItemID].RefreshCache();
-                                do
-                                {
-                                    Mod.instance.LogInfo("Waiting for cache refresh...");
-                                    itemPrefab = IM.OD[actualItemID].GetGameObject();
-                                } while (itemPrefab == null);
+                                itemPrefab = IM.OD[actualItemID].GetGameObject();
+                            }
+                            if (itemPrefab == null)
+                            {
+                                Mod.instance.LogError("Attempted to get vanilla prefab for " + actualItemID + ", but the prefab had been destroyed, refreshing cache did nothing");
+                                continue;
                             }
                         }
                         List<string> itemParents = null;
@@ -6299,14 +6334,14 @@ namespace EFM
                 }
             }
 
-            if (spawnData["Position"].Type == JTokenType.Array)
+            if (spawnData["Position"].Type == JTokenType.Object)
             {
-                Vector3 position = new Vector3((float)spawnData["Position"][0], (float)spawnData["Position"][1], (float)spawnData["Position"][2]);
+                Vector3 position = new Vector3((float)spawnData["Position"]["x"], (float)spawnData["Position"]["y"], (float)spawnData["Position"]["z"]);
                 itemObject.transform.position = position;
             }
-            if (spawnData["Rotation"].Type == JTokenType.Array)
+            if (spawnData["Rotation"].Type == JTokenType.Object)
             {
-                Vector3 rotation = new Vector3((float)spawnData["Rotation"][0], (float)spawnData["Rotation"][1], (float)spawnData["Rotation"][2]);
+                Vector3 rotation = new Vector3((float)spawnData["Rotation"]["x"], (float)spawnData["Rotation"]["y"], (float)spawnData["Rotation"]["z"]);
                 itemObject.transform.rotation = Quaternion.Euler(rotation);
             }
             else if(spawnData["randomRotation"] != null && (bool)spawnData["randomRotation"])
