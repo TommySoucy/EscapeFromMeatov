@@ -198,7 +198,7 @@ namespace EFM
 							itemObject.transform.localPosition = Vector3.zero;
 						}
 					}
-					itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
+					itemObject.transform.localRotation = UnityEngine.Random.rotation;
 					EFM_CustomItemWrapper itemCIW = itemObject.GetComponent<EFM_CustomItemWrapper>();
 					itemCIW.foundInRaid = true;
 

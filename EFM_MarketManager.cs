@@ -3915,7 +3915,7 @@ namespace EFM
                 yield break;
             }
             EFM_VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<EFM_VanillaItemDescriptor>();
-            BoxCollider tradeVolumeCollider = tradeVolume.GetComponentInChildren<BoxCollider>();
+            Transform tradeVolumeBox = tradeVolume.transform.GetChild(0);
             GameObject itemObject = null;
             bool spawnedSmallBox = false;
             bool spawnedBigBox = false;
@@ -3992,9 +3992,9 @@ namespace EFM
                         // Add item to tradevolume so it can set its reset cols and kinematic to true
                         tradeVolume.AddItem(itemCIW.physObj);
 
-                        itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeCollider.size.x / 2, tradeVolumeCollider.size.x / 2),
-                                                                         UnityEngine.Random.Range(-tradeVolumeCollider.size.y / 2, tradeVolumeCollider.size.y / 2),
-                                                                         UnityEngine.Random.Range(-tradeVolumeCollider.size.z / 2, tradeVolumeCollider.size.z / 2));
+                        itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeBox.localScale.x / 2, tradeVolumeBox.localScale.x / 2),
+                                                                         UnityEngine.Random.Range(-tradeVolumeBox.localScale.y / 2, tradeVolumeBox.localScale.y / 2),
+                                                                         UnityEngine.Random.Range(-tradeVolumeBox.localScale.z / 2, tradeVolumeBox.localScale.z / 2));
                         itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
                         BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
@@ -4013,9 +4013,9 @@ namespace EFM
 
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID, false);
 
-                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeCollider.size.x / 2, tradeVolumeCollider.size.x / 2),
-                                                                     UnityEngine.Random.Range(-tradeVolumeCollider.size.y / 2, tradeVolumeCollider.size.y / 2),
-                                                                     UnityEngine.Random.Range(-tradeVolumeCollider.size.z / 2, tradeVolumeCollider.size.z / 2));
+                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeBox.localScale.x / 2, tradeVolumeBox.localScale.x / 2),
+                                                                     UnityEngine.Random.Range(-tradeVolumeBox.localScale.y / 2, tradeVolumeBox.localScale.y / 2),
+                                                                     UnityEngine.Random.Range(-tradeVolumeBox.localScale.z / 2, tradeVolumeBox.localScale.z / 2));
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
                     if (tradeVolumeInventory.ContainsKey(VID.H3ID))
@@ -4044,9 +4044,9 @@ namespace EFM
                     
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID, false);
 
-                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeCollider.size.x / 2, tradeVolumeCollider.size.x / 2),
-                                                                     UnityEngine.Random.Range(-tradeVolumeCollider.size.y / 2, tradeVolumeCollider.size.y / 2),
-                                                                     UnityEngine.Random.Range(-tradeVolumeCollider.size.z / 2, tradeVolumeCollider.size.z / 2));
+                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeBox.localScale.x / 2, tradeVolumeBox.localScale.x / 2),
+                                                                     UnityEngine.Random.Range(-tradeVolumeBox.localScale.y / 2, tradeVolumeBox.localScale.y / 2),
+                                                                     UnityEngine.Random.Range(-tradeVolumeBox.localScale.z / 2, tradeVolumeBox.localScale.z / 2));
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
 
@@ -4083,7 +4083,6 @@ namespace EFM
                     baseAreaManager.UpdateBasedOnItem(ID);
                 }
             }
-            Mod.instance.LogInfo("callingsettrader");
 
             // Refresh trader when done spawning items
             SetTrader(currentTraderIndex, ID);
