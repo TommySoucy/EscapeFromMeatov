@@ -4529,7 +4529,7 @@ namespace EFM
                         string ammoContainerItemID = ammoContainers[k];
                         object[] ammoContainerItemData = GetItemData(ammoContainerItemID);
 
-                        if (i >= ammoContainerItemMin && UnityEngine.Random.value > (float.Parse(ammoContainerItemData[2] as string) / 100))
+                        if (i >= ammoContainerItemMin && UnityEngine.Random.value > float.Parse(ammoContainerItemData[2] as string))
                         {
                             continue;
                         }
@@ -4635,7 +4635,7 @@ namespace EFM
                             }
                             itemParents = itemCIW.parents;
                             itemVolume = itemCIW.volumes[0];
-                            itemSpawnChance = itemCIW.spawnChance;
+                            itemSpawnChance = Mod.GetRaritySpawnChanceMultiplier(itemCIW.rarity);
                         }
                         else
                         {
@@ -4647,7 +4647,7 @@ namespace EFM
                             }
                             itemParents = itemVID.parents;
                             itemVolume = Mod.itemVolumes[actualItemID];
-                            itemSpawnChance = itemVID.spawnChance;
+                            itemSpawnChance = Mod.GetRaritySpawnChanceMultiplier(itemVID.rarity);
                         }
                         itemPhysObj = itemPrefab.GetComponent<FVRPhysicalObject>();
 
@@ -4699,7 +4699,7 @@ namespace EFM
                     object[] healingItemData = possibleHealingItems[healingItemID];
                     List<int> possibleParts = possibleHealingItems[healingItemID][0] as List<int>;
 
-                    if (i >= healingItemMin && UnityEngine.Random.value > (float.Parse(healingItemData[3] as string) / 100))
+                    if (i >= healingItemMin && UnityEngine.Random.value > float.Parse(healingItemData[3] as string))
                     {
                         continue;
                     }
@@ -4754,7 +4754,7 @@ namespace EFM
                     object[] grenadeItemData = possibleGrenades[grenadeItemID];
                     List<int> possibleParts = possibleGrenades[grenadeItemID][0] as List<int>;
 
-                    if (i >= grenadeItemMin && UnityEngine.Random.value > (float.Parse(grenadeItemData[3] as string) / 100))
+                    if (i >= grenadeItemMin && UnityEngine.Random.value > float.Parse(grenadeItemData[3] as string))
                     {
                         continue;
                     }
@@ -4812,7 +4812,7 @@ namespace EFM
                     object[] looseLootItemData = possibleLooseLoot[looseLootItemID];
                     List<int> possibleParts = possibleLooseLoot[looseLootItemID][0] as List<int>;
 
-                    if (i >= looseLootItemMin && UnityEngine.Random.value > (float.Parse(looseLootItemData[3] as string) / 100))
+                    if (i >= looseLootItemMin && UnityEngine.Random.value > float.Parse(looseLootItemData[3] as string))
                     {
                         continue;
                     }
@@ -4881,7 +4881,7 @@ namespace EFM
                         }
                         object[] specialItemData = GetItemData(specialItemID);
 
-                        if (i >= specialItemMin && UnityEngine.Random.value > (float.Parse(specialItemData[2] as string) / 100))
+                        if (i >= specialItemMin && UnityEngine.Random.value > float.Parse(specialItemData[2] as string))
                         {
                             continue;
                         }
@@ -4973,14 +4973,14 @@ namespace EFM
                 EFM_CustomItemWrapper itemCIW = itemPrefab.GetComponentInChildren<EFM_CustomItemWrapper>();
                 itemParents = itemCIW.parents;
                 itemVolume = itemCIW.volumes[0];
-                itemSpawnChance = itemCIW.spawnChance;
+                itemSpawnChance = Mod.GetRaritySpawnChanceMultiplier(itemCIW.rarity);
             }
             else
             {
                 EFM_VanillaItemDescriptor itemVID = itemPrefab.GetComponentInChildren<EFM_VanillaItemDescriptor>();
                 itemParents = itemVID.parents;
                 itemVolume = Mod.itemVolumes[ID];
-                itemSpawnChance = itemVID.spawnChance;
+                itemSpawnChance = Mod.GetRaritySpawnChanceMultiplier(itemVID.rarity);
             }
             itemPhysObj = itemPrefab.GetComponentInChildren<FVRPhysicalObject>();
 

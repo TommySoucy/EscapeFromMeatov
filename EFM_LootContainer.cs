@@ -86,7 +86,7 @@ namespace EFM
                 {
 					EFM_CustomItemWrapper prefabCIW = Mod.itemPrefabs[result].GetComponent<EFM_CustomItemWrapper>();
 
-					if(UnityEngine.Random.value <= prefabCIW.spawnChance / 100)
+					if(UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabCIW.rarity))
                     {
 						++successfulAttempts;
 
@@ -118,7 +118,7 @@ namespace EFM
 							actualItemID = 716;
 						}
 
-						if (UnityEngine.Random.value <= prefabVID.spawnChance / 100)
+						if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity))
 						{
 							++successfulAttempts;
 
@@ -134,7 +134,7 @@ namespace EFM
 					}
                     else
 					{
-						if (UnityEngine.Random.value <= prefabVID.spawnChance / 100)
+						if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity) / 100)
 						{
 							++successfulAttempts;
 
@@ -296,22 +296,5 @@ namespace EFM
 			}
 			yield break;
 		}
-
-		private static float GetRaritySpawnChanceMultiplier(Mod.ItemRarity rarity)
-        {
-            switch (rarity)
-            {
-				case Mod.ItemRarity.Common:
-					return 1;
-				case Mod.ItemRarity.Rare:
-					return 0.7f;
-				case Mod.ItemRarity.Superrare:
-					return 0.4f;
-				case Mod.ItemRarity.Not_exist:
-					return 0;
-				default:
-					return 1;
-            }
-        }
 	}
 }

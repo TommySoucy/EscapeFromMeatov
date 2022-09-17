@@ -3829,6 +3829,23 @@ namespace EFM
             return String.Format("{0:00}:{1:00}:{2:00}", hours, minutes, seconds);
         }
 
+        public static float GetRaritySpawnChanceMultiplier(Mod.ItemRarity rarity)
+        {
+            switch (rarity)
+            {
+                case Mod.ItemRarity.Common:
+                    return 1;
+                case Mod.ItemRarity.Rare:
+                    return 0.7f;
+                case Mod.ItemRarity.Superrare:
+                    return 0.2f;
+                case Mod.ItemRarity.Not_exist:
+                    return 0;
+                default:
+                    return 1;
+            }
+        }
+
         public static bool IDDescribedInList(string IDToUse, List<string> parentsToUse, List<string> whiteList, List<string> blackList)
         {
             // If an item's corresponding ID is specified in whitelist, then that is the ID we must check the blacklist against.
