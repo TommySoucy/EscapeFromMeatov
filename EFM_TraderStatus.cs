@@ -420,13 +420,13 @@ namespace EFM
                                     {
                                         if (useFallback)
                                         {
-                                            Mod.instance.LogError("Trader " + index + " assort entry " + entryID + " fallback ID missing from item map");
+                                            Mod.instance.LogError("Trader " + index + " assort entry " + entryID + " fallback ID ("+ priceID + ") missing from item map");
                                         }
                                         else
                                         {
                                             if ((assortData["barter_scheme"][entryID] as JArray).Count <= 1)
                                             {
-                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
+                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has no item map ID, but is also missing a fallback entirely");
                                                 missingFallback = true;
                                             }
                                             else
