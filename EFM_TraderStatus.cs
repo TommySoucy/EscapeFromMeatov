@@ -1113,22 +1113,29 @@ namespace EFM
                             originalAssortUnlockItemID = rewardData["items"][1]["_tpl"].ToString();
                             if (!originalAssortUnlockItemID.Equals(""))
                             {
-                                ItemMapEntry itemMapEntry = Mod.itemMap[originalAssortUnlockItemID];
-                                switch (itemMapEntry.mode)
+                                if (Mod.itemMap.ContainsKey(originalAssortUnlockItemID))
                                 {
-                                    case 0:
-                                        reward.itemIDs = new string[] { itemMapEntry.ID };
-                                        break;
-                                    case 1:
-                                        reward.itemIDs = itemMapEntry.modulIDs;
-                                        break;
-                                    case 2:
-                                        reward.itemIDs = new string[] { itemMapEntry.otherModID };
-                                        break;
-                                }
+                                    ItemMapEntry itemMapEntry = Mod.itemMap[originalAssortUnlockItemID];
+                                    switch (itemMapEntry.mode)
+                                    {
+                                        case 0:
+                                            reward.itemIDs = new string[] { itemMapEntry.ID };
+                                            break;
+                                        case 1:
+                                            reward.itemIDs = itemMapEntry.modulIDs;
+                                            break;
+                                        case 2:
+                                            reward.itemIDs = new string[] { itemMapEntry.otherModID };
+                                            break;
+                                    }
 
-                                listToFill.Add(reward);
-                                itemsToWaitForUnlock.Add(originalAssortUnlockItemID);
+                                    listToFill.Add(reward);
+                                    itemsToWaitForUnlock.Add(originalAssortUnlockItemID);
+                                }
+                                else
+                                {
+                                    Mod.instance.LogError("AssortmentUnlock reward for task: " + task.ID + " had missing main entry, but fallback ID "+ originalAssortUnlockItemID + " was missing from item map");
+                                }
                             }
                         }
                         else
