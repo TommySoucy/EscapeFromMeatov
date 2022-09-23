@@ -3336,7 +3336,7 @@ namespace EFM
                 // Call a GC collect
                 baseManager.GCManager.gc_collect();
             }
-            else if (loadedScene.name.Equals("MeatovFactoryScene") /*|| other raid scenes*/)
+            else if (loadedScene.name.Equals("MeatovFactoryScene") /*|| TODO other raid scenes*/)
             {
                 Mod.currentLocationIndex = 2;
                 inMeatovScene = true;
@@ -3399,6 +3399,9 @@ namespace EFM
 
             // Also set respawn to spawn point
             GM.CurrentSceneSettings.DeathResetPoint = spawnPoint;
+
+            // Set quickbelt to no slot while in main menu
+            GM.CurrentPlayerBody.ConfigureQuickbelt(0);
 
             // Init menu
             EFM_Menu_Manager menuManager = menuRoot.AddComponent<EFM_Menu_Manager>();

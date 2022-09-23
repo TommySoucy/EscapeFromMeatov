@@ -434,6 +434,7 @@ namespace EFM
                                                 useFallback = true;
                                                 currentPrices.Clear();
                                                 barterSchemes = assortData["barter_scheme"][entryID][1] as JArray;
+                                                break;
                                             }
                                         }
                                     }
@@ -656,6 +657,7 @@ namespace EFM
                                                 useFallback = true;
                                                 currentPrices.Clear();
                                                 barterSchemes = assortData["barter_scheme"][entryID][1] as JArray;
+                                                break;
                                             }
                                         }
                                     }
