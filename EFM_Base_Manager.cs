@@ -3798,6 +3798,8 @@ namespace EFM
                 bonusIcons.Add("RagfairCommission", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money"));
                 bonusIcons.Add("/files/Hideout/icon_hideout_createitem_generic.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_createitem_generic"));
                 bonusIcons.Add("MaximumEnergyReserve", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_batterycharge"));
+                bonusIcons.Add("UnlockArmorRepair", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_itemtype_gear_armor"));
+                bonusIcons.Add("UnlockWeaponRepair", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_itemtype_weapon"));
 
                 // Area specific sounds
                 areaProductionSounds = new AudioClip[22,2];
@@ -4500,7 +4502,7 @@ namespace EFM
         {
             clickAudio.Play();
             current.gameObject.SetActive(false);
-            current.gameObject.SetActive(true);
+            next.gameObject.SetActive(true);
         }
 
         public void OnDonateClick(GameObject text)
