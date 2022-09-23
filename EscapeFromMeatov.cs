@@ -68,6 +68,8 @@ namespace EFM
         public static bool isGrillhouse;
         public static bool inMeatovScene;
         public static int pocketsConfigIndex;
+        public static float distanceTravelledSprinting;
+        public static float distanceTravelledWalking;
         public static GameObject[] itemsInPocketSlots;
         public static FVRQuickBeltSlot[] pocketSlots;
         public static EFM_ShoulderStorage leftShoulderSlot;
@@ -8488,25 +8490,18 @@ namespace EFM
 
         private static void UpdateMovementAction(Vector3 velocity, bool sprinting)
         {
-            Vector3 sideVelocity = velocity;
-            sideVelocity.y = 0;
+            Vector3 sideMovement = velocity * Time.deltaTime;
+            sideMovement.y = 0;
 
             if (sprinting)
             {
-                Mod.AddSkillExp(sideVelocity.magnitude * EFM_Skill.sprintAction, 0);
-                if (Mod.weight <= Mod.currentWeightLimit)
-                {
-                    Mod.AddSkillExp(sideVelocity.magnitude * UnityEngine.Random.Range(EFM_Skill.sprintActionMin, EFM_Skill.sprintActionMax), 1);
-                }
+                Mod.distanceTravelledSprinting += sideMovement.magnitude;
             }
-            else if (sideVelocity.magnitude > 0) 
+            else if (sideMovement.magnitude > 0)
             {
-                Mod.AddSkillExp(sideVelocity.magnitude * EFM_Skill.movementAction, 0);
-                if (Mod.weight <= Mod.currentWeightLimit)
-                {
-                    Mod.AddSkillExp(sideVelocity.magnitude * UnityEngine.Random.Range(EFM_Skill.movementActionMin, EFM_Skill.movementActionMax), 1);
-                }
+                Mod.distanceTravelledWalking += sideMovement.magnitude;
             }
+            // TODO: else if do covert movement
         }
 
         private static void UpdateFallDamage(bool grounded)

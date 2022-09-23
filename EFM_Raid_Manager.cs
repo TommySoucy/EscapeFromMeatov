@@ -58,6 +58,8 @@ namespace EFM
             Mod.healingExp = 0;
             Mod.explorationExp = 0;
             Mod.raidTime = 0;
+            Mod.distanceTravelledSprinting = 0;
+            Mod.distanceTravelledWalking = 0;
 
             locationData = Mod.locationsBaseDB[GetLocationDataIndex(Mod.chosenMapIndex)];
 
@@ -3702,15 +3704,14 @@ namespace EFM
             entityRelatedAI.Add(null); // Place holder for player entity
 
             // Init AI Cover points
-
-            Transform coverPointsParent = transform.GetChild(1).GetChild(1).GetChild(3).GetChild(0);
-            GM.CurrentAIManager.CPM = gameObject.AddComponent<AICoverPointManager>();
-            GM.CurrentAIManager.CPM.MyCoverPoints = new List<AICoverPoint>();
-            for (int i = 0; i < coverPointsParent.childCount; ++i)
-            {
-                AICoverPoint newCoverPoint = coverPointsParent.GetChild(i).gameObject.AddComponent<AICoverPoint>();
-                GM.CurrentAIManager.CPM.MyCoverPoints.Add(newCoverPoint);
-            }
+            //Transform coverPointsParent = transform.GetChild(1).GetChild(1).GetChild(3).GetChild(0);
+            //GM.CurrentAIManager.CPM = gameObject.AddComponent<AICoverPointManager>();
+            //GM.CurrentAIManager.CPM.MyCoverPoints = new List<AICoverPoint>();
+            //for (int i = 0; i < coverPointsParent.childCount; ++i)
+            //{
+            //    AICoverPoint newCoverPoint = coverPointsParent.GetChild(i).gameObject.AddComponent<AICoverPoint>();
+            //    GM.CurrentAIManager.CPM.MyCoverPoints.Add(newCoverPoint);
+            //}
 
 
             // Bosses
@@ -4939,12 +4940,12 @@ namespace EFM
             {
                 totalHealth += UnityEngine.Random.Range((float)pair.Value["min"], (float)pair.Value["max"]);
             }
-            newAISpawn.configTemplate.TotalMustard = 250 + (totalHealth - 440);
-            newAISpawn.configTemplate.ConfusionMultiplier = 1;
-            newAISpawn.configTemplate.StunThreshold = 0;
-            newAISpawn.configTemplate.StunMultiplier = 0;
-            newAISpawn.configTemplate.StunTimeMax = 0;
-            newAISpawn.configTemplate.CanBeKnockedOut = false;
+            newAISpawn.configTemplate.TotalMustard += (totalHealth - 440);
+            //newAISpawn.configTemplate.ConfusionMultiplier = 1;
+            //newAISpawn.configTemplate.StunThreshold = 0;
+            //newAISpawn.configTemplate.StunMultiplier = 0;
+            //newAISpawn.configTemplate.StunTimeMax = 0;
+            //newAISpawn.configTemplate.CanBeKnockedOut = false;
             newAISpawn.configTemplate.CanBeGrabbed = false;
 
             Mod.instance.LogInfo("\tDone");

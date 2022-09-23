@@ -1147,6 +1147,18 @@ namespace EFM
                         Mod.health[i] = 1;
                     }
                 }
+
+                // Add movement skill exp
+                Mod.AddSkillExp(Mod.distanceTravelledSprinting * EFM_Skill.sprintAction, 0);
+                if (Mod.weight <= Mod.currentWeightLimit)
+                {
+                    Mod.AddSkillExp(Mod.distanceTravelledSprinting * UnityEngine.Random.Range(EFM_Skill.sprintActionMin, EFM_Skill.sprintActionMax), 1);
+                }
+                Mod.AddSkillExp(Mod.distanceTravelledWalking * EFM_Skill.movementAction, 0);
+                if (Mod.weight <= Mod.currentWeightLimit)
+                {
+                    Mod.AddSkillExp(Mod.distanceTravelledWalking * UnityEngine.Random.Range(EFM_Skill.movementActionMin, EFM_Skill.movementActionMax), 1);
+                }
             }
 
             // Manager GC ourselves
