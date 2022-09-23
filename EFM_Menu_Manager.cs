@@ -117,10 +117,13 @@ namespace EFM
         public void OnMainBackClicked()
         {
             Mod.menuBundle.Unload(true);
-            Mod.baseBundle.Unload(true);
+            if (Mod.baseBundle != null)
+            {
+                Mod.baseBundle.Unload(true);
+            }
             clickAudio.Play();
 
-            SteamVR_LoadLevel.Begin("MainMenu3", false, 0.5f, 0f, 0f, 0f, 1f);
+            SteamVR_LoadLevel.Begin("MainMenu3", false, 0, 0f, 0f, 0f, 1f);
         }
     }
 }

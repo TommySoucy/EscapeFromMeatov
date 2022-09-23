@@ -3401,7 +3401,7 @@ namespace EFM
             GM.CurrentSceneSettings.DeathResetPoint = spawnPoint;
 
             // Set quickbelt to no slot while in main menu
-            GM.CurrentPlayerBody.ConfigureQuickbelt(0);
+            GM.CurrentPlayerBody.ConfigureQuickbelt(-4);
 
             // Init menu
             EFM_Menu_Manager menuManager = menuRoot.AddComponent<EFM_Menu_Manager>();
@@ -4625,7 +4625,9 @@ namespace EFM
                     }
                 }
 
-                // If -3 also destroy objects in pockets, but dont get rid of the slots themselves
+                // If -3 or -4 also destroy objects in pockets, but dont get rid of the slots themselves
+                // This is unused but was meant to be in case of death. Instead we jsut detach everything from player upon death and then laod base 
+                // and set the config to pockets only
                 if(index == -3)
                 {
                     for (int i = 3; i >= 0; --i)
@@ -4634,6 +4636,29 @@ namespace EFM
                         {
                             GameObject.Destroy(__instance.QBSlots_Internal[i].CurObject.gameObject);
                             __instance.QBSlots_Internal[i].CurObject.ClearQuickbeltState();
+                        }
+                    }
+                }
+
+                // If -4 get rid of any remaining slots
+                if(index == -4)
+                {
+                    for (int i = __instance.QBSlots_Internal.Count - 1; i>=0; --i)
+                    {
+                        if (__instance.QBSlots_Internal[i] == null)
+                        {
+                            __instance.QBSlots_Internal.RemoveAt(i);
+                        }
+                        else if (__instance.QBSlots_Internal[i].IsPlayer)
+                        {
+                            // Destroy objects associated to the slots
+                            if (__instance.QBSlots_Internal[i].CurObject != null)
+                            {
+                                GameObject.Destroy(__instance.QBSlots_Internal[i].CurObject.gameObject);
+                                __instance.QBSlots_Internal[i].CurObject.ClearQuickbeltState();
+                            }
+                            UnityEngine.Object.Destroy(__instance.QBSlots_Internal[i].gameObject);
+                            __instance.QBSlots_Internal.RemoveAt(i);
                         }
                     }
                 }
