@@ -491,6 +491,24 @@ namespace EFM
                         SetRaycastTarget(root.transform);
                     }
                 }
+
+                if (Input.GetKeyDown(KeyCode.Keypad7))
+                {
+                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+                    foreach (GameObject root in roots)
+                    {
+                        SetShadowCastNone(root.transform);
+                    }
+                }
+
+                if (Input.GetKeyDown(KeyCode.Keypad8))
+                {
+                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+                    foreach (GameObject root in roots)
+                    {
+                        PrintSharedMaterialName(root.transform);
+                    }
+                }
             }
         }
 
@@ -537,6 +555,38 @@ namespace EFM
             foreach (Transform child in root)
             {
                 SetProbeSettings(child, light, reflect);
+            }
+        }
+
+        private void SetShadowCastNone(Transform root)
+        {
+            Light light = root.GetComponent<Light>();
+            MeshRenderer mr = root.GetComponent<MeshRenderer>();
+            if (mr != null)
+            {
+                mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                mr.receiveShadows = false;
+            }
+            if (light != null)
+            {
+                light.shadows = LightShadows.None;
+            }
+            foreach (Transform child in root)
+            {
+                SetShadowCastNone(child);
+            }
+        }
+
+        private void PrintSharedMaterialName(Transform root)
+        {
+            MeshRenderer mr = root.GetComponent<MeshRenderer>();
+            if (mr != null)
+            {
+                LogInfo(mr.sharedMaterial.name);
+            }
+            foreach (Transform child in root)
+            {
+                PrintSharedMaterialName(child);
             }
         }
 

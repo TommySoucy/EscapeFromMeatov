@@ -786,7 +786,7 @@ namespace EFM
             InitSun();
 
             // Init reverb system
-            //InitReverb();
+            InitReverb();
 
             // Init AI
             InitAI();
