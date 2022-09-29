@@ -9994,6 +9994,7 @@ namespace EFM
                 return;
             }
 
+            // Keep track of the item's CIW or VID
             EFM_Hand handToUse = __instance.GetComponent<EFM_Hand>();
             if (___m_currentInteractable != null)
             {
@@ -10007,6 +10008,27 @@ namespace EFM
                 handToUse.CIW = null;
                 handToUse.VID = null;
                 handToUse.hasScript = false;
+            }
+
+            // Ensure the Display_InteractionSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
+            // This is only necessary for equipment items because the slots are much smaller than the item itself so we need to know what specific point to put inside the slot
+            if (handToUse.hasScript && handToUse.custom &&
+                (handToUse.CIW.itemType == Mod.ItemType.Backpack ||
+                 handToUse.CIW.itemType == Mod.ItemType.Container ||
+                 handToUse.CIW.itemType == Mod.ItemType.ArmoredRig ||
+                 handToUse.CIW.itemType == Mod.ItemType.Rig ||
+                 handToUse.CIW.itemType == Mod.ItemType.BodyArmor ||
+                 handToUse.CIW.itemType == Mod.ItemType.Eyewear ||
+                 handToUse.CIW.itemType == Mod.ItemType.Headwear ||
+                 handToUse.CIW.itemType == Mod.ItemType.Helmet ||
+                 handToUse.CIW.itemType == Mod.ItemType.Earpiece ||
+                 handToUse.CIW.itemType == Mod.ItemType.Pouch ||
+                 handToUse.CIW.itemType == Mod.ItemType.FaceCover))
+            {
+                if (!__instance.Display_InteractionSphere.activeSelf)
+                {
+                    __instance.Display_InteractionSphere.SetActive(true);
+                }
             }
         }
     }
