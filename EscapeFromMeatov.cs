@@ -4845,17 +4845,19 @@ namespace EFM
             }
             FVRQuickBeltSlot fvrquickBeltSlot = null;
             Vector3 position = __instance.PoseOverride.position;
-            if (__instance.CurrentInteractable != null)
-            {
-                if (__instance.CurrentInteractable.PoseOverride != null)
-                {
-                    position = __instance.CurrentInteractable.PoseOverride.position;
-                }
-                else
-                {
-                    position = __instance.CurrentInteractable.transform.position;
-                }
-            }
+            // To make sure the way items must be positioned relative to a QBS in order to put it inside it is predictable, 
+            // we ignore the held item here, so we will always be using the hand's position to test QB distances
+            //if (__instance.CurrentInteractable != null)
+            //{
+            //    if (__instance.CurrentInteractable.PoseOverride != null)
+            //    {
+            //        position = __instance.CurrentInteractable.PoseOverride.position;
+            //    }
+            //    else
+            //    {
+            //        position = __instance.CurrentInteractable.transform.position;
+            //    }
+            //}
             for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; i++)
             {
                 if (GM.CurrentPlayerBody.QBSlots_Internal[i].IsPointInsideMe(position))
