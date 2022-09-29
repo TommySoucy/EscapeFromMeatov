@@ -1298,8 +1298,7 @@ namespace EFM
             Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tInstantiated sosig, position: " + sosigObject.transform.position);
             Sosig sosigScript = sosigObject.GetComponentInChildren<Sosig>();
             sosigScript.InitHands();
-            sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for weapon
-            sosigScript.Inventory.Slots.Add(new SosigInventory.Slot()); // Add a slot for grenade
+            // TODO: Here, if needed, is where we add new slots, but new slots need to be initialized, we need to set a target transform to each and there might be more, need to check
             sosigScript.Inventory.Init();
 
             // Remove all interactive objects on the sosig from All
