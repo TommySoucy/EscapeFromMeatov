@@ -2320,7 +2320,20 @@ namespace EFM
                 pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
                 pointableButton.toggleTextColor = true;
                 pointableButton.hoverSound = hoverAudio;
-                pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(controlsParent.GetChild(i), i == controlsParent.childCount - 1 ? tutorialTransform.GetChild(5) : controlsParent.GetChild(i+1)); });
+                Transform toHide = null;
+                Transform toShow = null;
+                if(i == controlsParent.childCount - 1)
+                {
+                    toHide = controlsParent;
+                    toShow = tutorialTransform.GetChild(5);
+
+                }
+                else
+                {
+                    toHide = controlsParent.GetChild(i);
+                    toShow = controlsParent.GetChild(i + 1);
+                }
+                pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(toHide, toShow); });
             }
 
             // Setup remaining tutorial screens
@@ -2347,7 +2360,9 @@ namespace EFM
                 pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
                 pointableButton.toggleTextColor = true;
                 pointableButton.hoverSound = hoverAudio;
-                pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(controlsParent.GetChild(i), i == controlsParent.childCount - 1 ? tutorialTransform.GetChild(5) : controlsParent.GetChild(i + 1)); });
+                Transform toHide = tutorialTransform.GetChild(i);
+                Transform toShow = tutorialTransform.GetChild(i+1);
+                pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(toHide, toShow); });
             }
 
             // Setup end
@@ -2372,7 +2387,7 @@ namespace EFM
             pointableButton.buttonText = pointableButton.transform.GetChild(2).GetComponent<Text>();
             pointableButton.toggleTextColor = true;
             pointableButton.hoverSound = hoverAudio;
-            pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(tutorialTransform.GetChild(0), controlsParent); });
+            pointableButton.Button.onClick.AddListener(() => { OnTutorialNextClick(tutorialTransform, null); });
             // Donate
             pointableButton = tutorialTransform.GetChild(18).GetChild(3).gameObject.AddComponent<EFM_PointableButton>();
             pointableButton.SetButton();
@@ -4502,7 +4517,10 @@ namespace EFM
         {
             clickAudio.Play();
             current.gameObject.SetActive(false);
-            next.gameObject.SetActive(true);
+            if (next != null)
+            {
+                next.gameObject.SetActive(true);
+            }
         }
 
         public void OnDonateClick(GameObject text)

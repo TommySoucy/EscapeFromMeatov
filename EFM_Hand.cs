@@ -24,6 +24,7 @@ namespace EFM
         public bool custom;
         public EFM_CustomItemWrapper CIW;
         public EFM_VanillaItemDescriptor VID;
+        public bool updateGrabbity;
 
         private void Awake()
         {
@@ -173,6 +174,15 @@ namespace EFM
                 {
                     VID.TakeInput(fvrHand, this);
                 }
+            }
+
+            if (updateGrabbity)
+            {
+                if (!fvrHand.Grabbity_HoverSphere.gameObject.activeSelf)
+                {
+                    fvrHand.Grabbity_HoverSphere.gameObject.SetActive(true);
+                }
+                fvrHand.Grabbity_HoverSphere.position = fvrHand.PoseOverride.position;
             }
         }
 

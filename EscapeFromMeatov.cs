@@ -10002,33 +10002,48 @@ namespace EFM
                 handToUse.VID = ___m_currentInteractable.GetComponent<EFM_VanillaItemDescriptor>();
                 handToUse.custom = handToUse.CIW != null;
                 handToUse.hasScript = handToUse.custom || handToUse.VID != null;
+
+                // Ensure the Display_InteractionSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
+                // This is only necessary for equipment items because the slots are much smaller than the item itself so we need to know what specific point to put inside the slot
+                if (handToUse.hasScript && handToUse.custom &&
+                    (handToUse.CIW.itemType == Mod.ItemType.Backpack ||
+                     handToUse.CIW.itemType == Mod.ItemType.Container ||
+                     handToUse.CIW.itemType == Mod.ItemType.ArmoredRig ||
+                     handToUse.CIW.itemType == Mod.ItemType.Rig ||
+                     handToUse.CIW.itemType == Mod.ItemType.BodyArmor ||
+                     handToUse.CIW.itemType == Mod.ItemType.Eyewear ||
+                     handToUse.CIW.itemType == Mod.ItemType.Headwear ||
+                     handToUse.CIW.itemType == Mod.ItemType.Helmet ||
+                     handToUse.CIW.itemType == Mod.ItemType.Earpiece ||
+                     handToUse.CIW.itemType == Mod.ItemType.Pouch ||
+                     handToUse.CIW.itemType == Mod.ItemType.FaceCover))
+                {
+                    if (!__instance.Grabbity_HoverSphere.gameObject.activeSelf)
+                    {
+                        __instance.Grabbity_HoverSphere.gameObject.SetActive(true);
+                    }
+                    handToUse.updateGrabbity = true;
+                }
+                else
+                {
+                    if (__instance.Grabbity_HoverSphere.gameObject.activeSelf)
+                    {
+                        __instance.Grabbity_HoverSphere.gameObject.SetActive(false);
+                    }
+                    handToUse.updateGrabbity = false;
+                }
             }
             else
             {
                 handToUse.CIW = null;
                 handToUse.VID = null;
                 handToUse.hasScript = false;
-            }
 
-            // Ensure the Display_InteractionSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
-            // This is only necessary for equipment items because the slots are much smaller than the item itself so we need to know what specific point to put inside the slot
-            if (handToUse.hasScript && handToUse.custom &&
-                (handToUse.CIW.itemType == Mod.ItemType.Backpack ||
-                 handToUse.CIW.itemType == Mod.ItemType.Container ||
-                 handToUse.CIW.itemType == Mod.ItemType.ArmoredRig ||
-                 handToUse.CIW.itemType == Mod.ItemType.Rig ||
-                 handToUse.CIW.itemType == Mod.ItemType.BodyArmor ||
-                 handToUse.CIW.itemType == Mod.ItemType.Eyewear ||
-                 handToUse.CIW.itemType == Mod.ItemType.Headwear ||
-                 handToUse.CIW.itemType == Mod.ItemType.Helmet ||
-                 handToUse.CIW.itemType == Mod.ItemType.Earpiece ||
-                 handToUse.CIW.itemType == Mod.ItemType.Pouch ||
-                 handToUse.CIW.itemType == Mod.ItemType.FaceCover))
-            {
-                if (!__instance.Display_InteractionSphere.activeSelf)
+                if (__instance.Grabbity_HoverSphere.gameObject.activeSelf)
                 {
-                    __instance.Display_InteractionSphere.SetActive(true);
+                    __instance.Grabbity_HoverSphere.gameObject.SetActive(false);
                 }
+                handToUse.updateGrabbity = false;
             }
         }
     }

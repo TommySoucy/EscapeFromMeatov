@@ -12,7 +12,7 @@ namespace EFM
         public AudioSource audioSource;
         public AudioClip[] audioClips;
         public float damage = 5;
-        public float damageDistance = 0.1f;
+        public float damageDistance = 1f;
 
         public List<Collider> headColliders;
         public List<float> headColliderDistances;
