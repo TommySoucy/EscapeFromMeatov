@@ -116,7 +116,6 @@ namespace EFM
 
         public void OnMainBackClicked()
         {
-            Mod.menuBundle.Unload(true);
             if (Mod.baseBundle != null)
             {
                 Mod.baseBundle.Unload(true);
