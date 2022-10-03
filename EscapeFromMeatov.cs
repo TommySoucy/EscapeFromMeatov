@@ -3038,10 +3038,16 @@ namespace EFM
             harmony.Patch(movementManagerTwinstickPatchOriginal, new HarmonyMethod(movementManagerTwinstickPatchPrefix));
 
             // ChamberSetRoundPatch
-            MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool) }, null);
             MethodInfo chamberSetRoundPatchPrefix = typeof(ChamberSetRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
+
+            // ChamberSetRoundGivenPatch
+            MethodInfo chamberSetRoundGivenPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(Vector3), typeof(Quaternion) }, null);
+            MethodInfo chamberSetRoundGivenPatchPrefix = typeof(ChamberSetRoundGivenPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(chamberSetRoundGivenPatchOriginal, new HarmonyMethod(chamberSetRoundGivenPatchPrefix));
 
             // MagRemoveRoundPatch
             MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
@@ -4830,7 +4836,6 @@ namespace EFM
                 return true;
             }
 
-
             if (__instance.CurrentHoveredQuickbeltSlot != null && !__instance.CurrentHoveredQuickbeltSlot.IsSelectable)
             {
                 __instance.CurrentHoveredQuickbeltSlot = null;
@@ -4844,6 +4849,7 @@ namespace EFM
                 __instance.CurrentHoveredQuickbeltSlot = null;
             }
             FVRQuickBeltSlot fvrquickBeltSlot = null;
+            bool flag = false;
             Vector3 position = __instance.PoseOverride.position;
             // To make sure the way items must be positioned relative to a QBS in order to put it inside it is predictable, 
             // we ignore the held item here, so we will always be using the hand's position to test QB distances
@@ -4862,8 +4868,32 @@ namespace EFM
             {
                 if (GM.CurrentPlayerBody.QBSlots_Internal[i].IsPointInsideMe(position))
                 {
+                    flag = true;
                     fvrquickBeltSlot = GM.CurrentPlayerBody.QBSlots_Internal[i];
                     break;
+                }
+            }
+            if (!flag)
+            {
+                for (int j = 0; j < GM.CurrentPlayerBody.QBSlots_Added.Count; j++)
+                {
+                    if (GM.CurrentPlayerBody.QBSlots_Added[j].IsPointInsideMe(position))
+                    {
+                        flag = true;
+                        fvrquickBeltSlot = GM.CurrentPlayerBody.QBSlots_Added[j];
+                        break;
+                    }
+                }
+            }
+            if (!flag)
+            {
+                for (int k = 0; k < GM.CurrentPlayerBody.QuickbeltSlots.Count; k++)
+                {
+                    if (GM.CurrentPlayerBody.QuickbeltSlots[k].IsPointInsideMe(position))
+                    {
+                        fvrquickBeltSlot = GM.CurrentPlayerBody.QuickbeltSlots[k];
+                        break;
+                    }
                 }
             }
 
@@ -6786,7 +6816,7 @@ namespace EFM
     // This completely replaces the original 
     class HandTriggerExitPatch
     {
-        static bool Prefix(Collider collider, ref FVRViveHand __instance)
+        static bool Prefix(Collider collider, ref FVRViveHand __instance, ref bool ___m_isClosestInteractableInPalm)
         {
             if (!Mod.inMeatovScene)
             {
@@ -6797,15 +6827,13 @@ namespace EFM
             EFM_OtherInteractable otherInteractable = collider.gameObject.GetComponent<EFM_OtherInteractable>();
             FVRInteractiveObject interactiveObjectToUse = otherInteractable != null ? otherInteractable.interactiveObject : interactiveObject;
 
-            FieldInfo isClosestInteractableInPalmField = typeof(FVRViveHand).GetField("m_isClosestInteractableInPalm", BindingFlags.NonPublic | BindingFlags.Instance);
-
             if (interactiveObjectToUse != null)
             {
                 FVRInteractiveObject component = interactiveObjectToUse;
                 if (__instance.ClosestPossibleInteractable == component)
                 {
                     __instance.ClosestPossibleInteractable = null;
-                    isClosestInteractableInPalmField.SetValue(__instance, false);
+                    ___m_isClosestInteractableInPalm = false;
                 }
             }
 
@@ -7253,7 +7281,7 @@ namespace EFM
                     typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
                     typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningCounterClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
                     typeof(FVRMovementManager).GetField("m_sprintingEngaged", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
-                    typeof(FVRMovementManager).GetField("m_twoAxisVelocity", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, Vector3.zero);
+                    typeof(FVRMovementManager).GetField("m_smoothLocoVelocity", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, Vector3.zero);
                 }
             }
             else // Any other controller, or any that has enough buttons to have description AND movement at the same time, we should update movement
@@ -7862,7 +7890,12 @@ namespace EFM
                         }
                         if (flag9)
                         {
-                            if (__instance.CurrentInteractable is FVRPhysicalObject && ((FVRPhysicalObject)__instance.CurrentInteractable).QuickbeltSlot == null && !((FVRPhysicalObject)__instance.CurrentInteractable).IsPivotLocked && __instance.CurrentHoveredQuickbeltSlot != null && __instance.CurrentHoveredQuickbeltSlot.HeldObject == null && ((FVRPhysicalObject)__instance.CurrentInteractable).QBSlotType == __instance.CurrentHoveredQuickbeltSlot.Type && __instance.CurrentHoveredQuickbeltSlot.SizeLimit >= ((FVRPhysicalObject)__instance.CurrentInteractable).Size)
+                            if (__instance.CurrentInteractable is FVRPhysicalObject && ((FVRPhysicalObject)__instance.CurrentInteractable).QuickbeltSlot == null &&
+                                !((FVRPhysicalObject)__instance.CurrentInteractable).IsPivotLocked && __instance.CurrentHoveredQuickbeltSlot != null &&
+                                __instance.CurrentHoveredQuickbeltSlot.GetAffixedTo() != (FVRPhysicalObject)__instance.CurrentInteractable && 
+                                __instance.CurrentHoveredQuickbeltSlot.HeldObject == null && 
+                                ((FVRPhysicalObject)__instance.CurrentInteractable).QBSlotType == __instance.CurrentHoveredQuickbeltSlot.Type && 
+                                __instance.CurrentHoveredQuickbeltSlot.SizeLimit >= ((FVRPhysicalObject)__instance.CurrentInteractable).Size)
                             {
                                 // Note: This will call set quick belt slot twice, this is by vanilla design and is not a bug
                                 ((FVRPhysicalObject)__instance.CurrentInteractable).EndInteractionIntoInventorySlot(__instance, __instance.CurrentHoveredQuickbeltSlot);
@@ -8089,8 +8122,7 @@ namespace EFM
     // This completely replaces the original
     class MovementManagerJumpPatch
     {
-        static bool Prefix(ref bool ___m_armSwingerGrounded, ref bool ___m_twoAxisGrounded, ref Vector3 ___m_armSwingerVelocity,
-                           ref Vector3 ___m_twoAxisVelocity, ref FVRMovementManager __instance)
+        static bool Prefix(ref bool ___m_isGrounded, ref Vector3 ___m_smoothLocoVelocity, ref FVRMovementManager __instance)
         {
             if (!Mod.inMeatovScene)
             {
@@ -8103,11 +8135,7 @@ namespace EFM
                 return false;
             }
 
-            if (__instance.Mode == FVRMovementManager.MovementMode.Armswinger && !___m_armSwingerGrounded)
-            {
-                return false;
-            }
-            if ((__instance.Mode == FVRMovementManager.MovementMode.SingleTwoAxis || __instance.Mode == FVRMovementManager.MovementMode.TwinStick) && !___m_twoAxisGrounded)
+            if ((__instance.Mode == FVRMovementManager.MovementMode.Armswinger || __instance.Mode == FVRMovementManager.MovementMode.SingleTwoAxis || __instance.Mode == FVRMovementManager.MovementMode.TwinStick) && !___m_isGrounded)
             {
                 return false;
             }
@@ -8130,19 +8158,12 @@ namespace EFM
             }
             num *= 0.65f;
             num += num * (0.004f * (Mod.skills[1].currentProgress / 100));
-            if (__instance.Mode == FVRMovementManager.MovementMode.Armswinger)
+            if (__instance.Mode == FVRMovementManager.MovementMode.Armswinger || __instance.Mode == FVRMovementManager.MovementMode.SingleTwoAxis || __instance.Mode == FVRMovementManager.MovementMode.TwinStick)
             {
                 __instance.DelayGround(0.25f);
-                ___m_armSwingerVelocity.y = Mathf.Clamp(___m_armSwingerVelocity.y, 0f, ___m_armSwingerVelocity.y);
-                ___m_armSwingerVelocity.y = num;
-                ___m_armSwingerGrounded = false;
-            }
-            else if (__instance.Mode == FVRMovementManager.MovementMode.SingleTwoAxis || __instance.Mode == FVRMovementManager.MovementMode.TwinStick)
-            {
-                __instance.DelayGround(0.25f);
-                ___m_twoAxisVelocity.y = Mathf.Clamp(___m_twoAxisVelocity.y, 0f, ___m_twoAxisVelocity.y);
-                ___m_twoAxisVelocity.y = num;
-                ___m_twoAxisGrounded = false;
+                ___m_smoothLocoVelocity.y = Mathf.Clamp(___m_smoothLocoVelocity.y, 0f, ___m_smoothLocoVelocity.y);
+                ___m_smoothLocoVelocity.y = num;
+                ___m_isGrounded = false;
             }
 
             // Use stamina
@@ -8159,6 +8180,7 @@ namespace EFM
     }
 
     // Patches FVRMovementManager.HandUpdateTwinstick to prevent sprinting in case of lack of stamina
+    // This completely replaces the original
     class MovementManagerUpdatePatch
     {
         private static bool wasGrounded = true;
@@ -8168,8 +8190,8 @@ namespace EFM
 
         static bool Prefix(FVRViveHand hand, ref bool ___m_isRightHandActive, ref bool ___m_isLeftHandActive, ref GameObject ___m_twinStickArrowsRight,
                            ref bool ___m_isTwinStickSmoothTurningCounterClockwise, ref bool ___m_isTwinStickSmoothTurningClockwise, ref GameObject ___m_twinStickArrowsLeft,
-                           ref float ___m_timeSinceSprintDownClick, ref float ___m_timeSinceSnapTurn, ref bool ___m_sprintingEngaged, ref bool ___m_twoAxisGrounded,
-                           ref Vector3 ___m_twoAxisVelocity, ref FVRMovementManager __instance)
+                           ref float ___m_timeSinceSprintDownClick, ref float ___m_timeSinceSnapTurn, ref bool ___m_sprintingEngaged, ref bool ___m_isGrounded,
+                           ref Vector3 ___m_smoothLocoVelocity, ref Vector3 ___worldTPAxis, ref FVRMovementManager __instance)
         {
             if (!Mod.inMeatovScene)
             {
@@ -8452,17 +8474,17 @@ namespace EFM
                         ___m_sprintingEngaged = !___m_sprintingEngaged;
                     }
                 }
-                Vector3 a = Vector3.zero;
+                ___worldTPAxis = Vector3.zero;
                 float y = vector.y;
                 float x = vector.x;
                 switch (GM.Options.MovementOptions.Touchpad_MovementMode)
                 {
                     case FVRMovementManager.TwoAxisMovementMode.Standard:
-                        a = y * hand.PointingTransform.forward + x * hand.PointingTransform.right * 0.75f;
-                        a.y = 0f;
+                        ___worldTPAxis = y * hand.PointingTransform.forward + x * hand.PointingTransform.right * 0.75f;
+                        ___worldTPAxis.y = 0f;
                         break;
                     case FVRMovementManager.TwoAxisMovementMode.Onward:
-                        a = y * hand.Input.Forward + x * hand.Input.Right * 0.75f;
+                        ___worldTPAxis = y * hand.Input.Forward + x * hand.Input.Right * 0.75f;
                         break;
                     case FVRMovementManager.TwoAxisMovementMode.LeveledHand:
                         {
@@ -8472,7 +8494,7 @@ namespace EFM
                             Vector3 right = hand.Input.Right;
                             right.y = 0f;
                             right.Normalize();
-                            a = y * forward + x * right * 0.75f;
+                            ___worldTPAxis = y * forward + x * right * 0.75f;
                             break;
                         }
                     case FVRMovementManager.TwoAxisMovementMode.LeveledHead:
@@ -8483,67 +8505,67 @@ namespace EFM
                             Vector3 right2 = GM.CurrentPlayerBody.Head.right;
                             right2.y = 0f;
                             right2.Normalize();
-                            a = y * forward2 + x * right2 * 0.75f;
+                            ___worldTPAxis = y * forward2 + x * right2 * 0.75f;
                             break;
                         }
                 }
-                Vector3 normalized = a.normalized;
-                a *= GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex];
+                Vector3 normalized = ___worldTPAxis.normalized;
+                ___worldTPAxis *= GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex];
                 if (hand.CMode == ControlMode.Vive && GM.Options.MovementOptions.Touchpad_Confirm == FVRMovementManager.TwoAxisMovementConfirm.OnClick)
                 {
                     if (!flag4)
                     {
-                        a = Vector3.zero;
+                        ___worldTPAxis = Vector3.zero;
                     }
                     else if (___m_sprintingEngaged && GM.Options.MovementOptions.TPLocoSpeedIndex < 5)
                     {
-                        a += normalized * 2f;
+                        ___worldTPAxis += normalized * 2f;
                     }
                 }
                 else if (___m_sprintingEngaged && GM.Options.MovementOptions.TPLocoSpeedIndex < 5)
                 {
-                    a += normalized * 2f;
+                    ___worldTPAxis += normalized * 2f;
                 }
                 if (Mod.skills != null)
                 {
-                    a += a * (0.004f * (Mod.skills[1].currentProgress / 100));
+                    ___worldTPAxis += ___worldTPAxis * (0.004f * (Mod.skills[1].currentProgress / 100));
                 }
-                if (___m_twoAxisGrounded)
+                if (___m_isGrounded)
                 {
-                    ___m_twoAxisVelocity.x = a.x;
-                    ___m_twoAxisVelocity.z = a.z;
+                    ___m_smoothLocoVelocity.x = ___worldTPAxis.x;
+                    ___m_smoothLocoVelocity.z = ___worldTPAxis.z;
                     if (GM.CurrentSceneSettings.UsesMaxSpeedClamp)
                     {
-                        Vector2 vector2 = new Vector2(___m_twoAxisVelocity.x, ___m_twoAxisVelocity.z);
+                        Vector2 vector2 = new Vector2(___m_smoothLocoVelocity.x, ___m_smoothLocoVelocity.z);
                         if (vector2.magnitude > GM.CurrentSceneSettings.MaxSpeedClamp)
                         {
                             vector2 = vector2.normalized * GM.CurrentSceneSettings.MaxSpeedClamp;
-                            ___m_twoAxisVelocity.x = vector2.x;
-                            ___m_twoAxisVelocity.z = vector2.y;
+                            ___m_smoothLocoVelocity.x = vector2.x;
+                            ___m_smoothLocoVelocity.z = vector2.y;
                         }
                     }
                 }
                 else if (GM.CurrentSceneSettings.DoesAllowAirControl)
                 {
-                    Vector3 vector3 = new Vector3(___m_twoAxisVelocity.x, 0f, ___m_twoAxisVelocity.z);
-                    ___m_twoAxisVelocity.x = ___m_twoAxisVelocity.x + a.x * Time.deltaTime;
-                    ___m_twoAxisVelocity.z = ___m_twoAxisVelocity.z + a.z * Time.deltaTime;
-                    Vector3 vector4 = new Vector3(___m_twoAxisVelocity.x, 0f, ___m_twoAxisVelocity.z);
+                    Vector3 vector3 = new Vector3(___m_smoothLocoVelocity.x, 0f, ___m_smoothLocoVelocity.z);
+                    ___m_smoothLocoVelocity.x = ___m_smoothLocoVelocity.x + ___worldTPAxis.x * Time.deltaTime;
+                    ___m_smoothLocoVelocity.z = ___m_smoothLocoVelocity.z + ___worldTPAxis.z * Time.deltaTime;
+                    Vector3 vector4 = new Vector3(___m_smoothLocoVelocity.x, 0f, ___m_smoothLocoVelocity.z);
                     float maxLength = Mathf.Max(1f, vector3.magnitude);
                     vector4 = Vector3.ClampMagnitude(vector4, maxLength);
-                    ___m_twoAxisVelocity.x = vector4.x;
-                    ___m_twoAxisVelocity.z = vector4.z;
+                    ___m_smoothLocoVelocity.x = vector4.x;
+                    ___m_smoothLocoVelocity.z = vector4.z;
                 }
                 else
                 {
-                    Vector3 vector5 = new Vector3(___m_twoAxisVelocity.x, 0f, ___m_twoAxisVelocity.z);
-                    ___m_twoAxisVelocity.x = ___m_twoAxisVelocity.x + a.x * Time.deltaTime * 0.3f;
-                    ___m_twoAxisVelocity.z = ___m_twoAxisVelocity.z + a.z * Time.deltaTime * 0.3f;
-                    Vector3 vector6 = new Vector3(___m_twoAxisVelocity.x, 0f, ___m_twoAxisVelocity.z);
+                    Vector3 vector5 = new Vector3(___m_smoothLocoVelocity.x, 0f, ___m_smoothLocoVelocity.z);
+                    ___m_smoothLocoVelocity.x = ___m_smoothLocoVelocity.x + ___worldTPAxis.x * Time.deltaTime * 0.3f;
+                    ___m_smoothLocoVelocity.z = ___m_smoothLocoVelocity.z + ___worldTPAxis.z * Time.deltaTime * 0.3f;
+                    Vector3 vector6 = new Vector3(___m_smoothLocoVelocity.x, 0f, ___m_smoothLocoVelocity.z);
                     float maxLength2 = Mathf.Max(1f, vector5.magnitude);
                     vector6 = Vector3.ClampMagnitude(vector6, maxLength2);
-                    ___m_twoAxisVelocity.x = vector6.x;
-                    ___m_twoAxisVelocity.z = vector6.z;
+                    ___m_smoothLocoVelocity.x = vector6.x;
+                    ___m_smoothLocoVelocity.z = vector6.z;
                 }
                 if (flag3)
                 {
@@ -8554,16 +8576,16 @@ namespace EFM
             // Update fall damage depending on grounded and previous velocity
             if (Mod.currentLocationIndex == 2)
             {
-                UpdateFallDamage(___m_twoAxisGrounded);
+                UpdateFallDamage(___m_isGrounded);
             }
 
             if (Mod.skills != null)
             {
-                UpdateMovementAction(___m_twoAxisVelocity, ___m_sprintingEngaged);
+                UpdateMovementAction(___m_smoothLocoVelocity, ___m_sprintingEngaged);
             }
 
-            wasGrounded = ___m_twoAxisGrounded;
-            previousVelocity = ___m_twoAxisVelocity;
+            wasGrounded = ___m_isGrounded;
+            previousVelocity = ___m_smoothLocoVelocity;
 
             return false;
         }
@@ -8619,8 +8641,42 @@ namespace EFM
         }
     }
 
-    // Patches FVRFireArmChamber.SetRound to keep track of weight in chamber
+    // Patches FVRFireArmChamber.SetRound(round, bool) to keep track of weight in chamber
     class ChamberSetRoundPatch
+    {
+        static void Prefix(ref FVRFireArmRound round, ref FVRFireArmChamber __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+
+            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
+            // locationIndex so we know when to add/remove weight from player also
+            //if (__instance.IsFull && round == null)
+            //{
+            //    EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
+            //    VID.currentWeight -= 15;
+            //    if(VID.locationIndex == 0)
+            //    {
+            //        Mod.weight -= 15;
+            //    }
+            //}
+            //else
+            //{
+            //    EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
+            //    VID.currentWeight += 15;
+            //    if (VID.locationIndex == 0)
+            //    {
+            //        Mod.weight += 15;
+            //    }
+            //}
+        }
+    }
+
+    // Patches FVRFireArmChamber.SetRound(round, vector3, quaternion) to keep track of weight in chamber
+    class ChamberSetRoundGivenPatch
     {
         static void Prefix(ref FVRFireArmRound round, ref FVRFireArmChamber __instance)
         {
@@ -9621,7 +9677,7 @@ namespace EFM
             {
                 __instance.AttachmentsList.Remove(attachment);
 
-                // Add weight to parent
+                // Remove weight from parent
                 EFM_VanillaItemDescriptor parentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
                 EFM_VanillaItemDescriptor attachmentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
                 parentVID.currentWeight -= attachmentVID.currentWeight;
@@ -9633,7 +9689,7 @@ namespace EFM
         }
     }
 
-    // Patches AIManager.EntityCheck to use our own entity lists instead of OverlapSphere to check other entities
+    // Patches AIManager.EntityCheck to use our own entity lists instead of OverlapSphere to check for other entities
     // This completely replaces the original
     class EntityCheckPatch
     {
@@ -10391,7 +10447,7 @@ namespace EFM
     class UpdateModeTwoAxisPatch
     {
         static bool Prefix(ref FVRMovementManager __instance, bool IsTwinstick, ref Vector3 ___CurNeckPos, ref Vector3 ___LastNeckPos, ref Vector3 ___correctionDir,
-                           ref bool ___m_isLeftHandActive, ref bool ___m_twoAxisGrounded, ref Vector3 ___m_twoAxisVelocity, ref FVRViveHand ___m_authoratativeHand,
+                           ref bool ___m_isLeftHandActive, ref bool ___m_isGrounded, ref Vector3 ___m_smoothLocoVelocity, ref FVRViveHand ___m_authoratativeHand,
                            ref float ___m_armSwingerStepHeight, ref float ___m_delayGroundCheck, ref RaycastHit ___m_hit_ray, ref Vector3 ___m_groundPoint,
                            ref bool ___m_isTwinStickSmoothTurningClockwise, ref bool ___m_isTwinStickSmoothTurningCounterClockwise, ref bool ___IsGrabHolding)
         {
@@ -10407,16 +10463,16 @@ namespace EFM
             }
             if (IsTwinstick)
             {
-                if (!___m_isLeftHandActive && ___m_twoAxisGrounded)
+                if (!___m_isLeftHandActive && ___m_isGrounded)
                 {
-                    ___m_twoAxisVelocity.x = 0f;
-                    ___m_twoAxisVelocity.z = 0f;
+                    ___m_smoothLocoVelocity.x = 0f;
+                    ___m_smoothLocoVelocity.z = 0f;
                 }
             }
-            else if (___m_authoratativeHand == null && ___m_twoAxisGrounded)
+            else if (___m_authoratativeHand == null && ___m_isGrounded)
             {
-                ___m_twoAxisVelocity.x = 0f;
-                ___m_twoAxisVelocity.z = 0f;
+                ___m_smoothLocoVelocity.x = 0f;
+                ___m_smoothLocoVelocity.z = 0f;
             }
             Vector3 vector2 = lastNeckPos;
             Vector3 b = vector2;
@@ -10516,19 +10572,19 @@ namespace EFM
                 if (num2 > 70f)
                 {
                     flag = true;
-                    ___m_twoAxisGrounded = false;
+                    ___m_isGrounded = false;
                     planeNormal = vector3;
                     ___m_groundPoint = groundPoint2;
                 }
                 else
                 {
-                    ___m_twoAxisGrounded = true;
+                    ___m_isGrounded = true;
                     ___m_groundPoint = groundPoint;
                 }
             }
             else
             {
-                ___m_twoAxisGrounded = false;
+                ___m_isGrounded = false;
                 ___m_groundPoint = vector2 - Vector3.up * num;
             }
             Vector3 vector6 = lastNeckPos;
@@ -10547,9 +10603,9 @@ namespace EFM
                 float y2 = Mathf.Clamp(num3 - num5 - 0.15f, min, y);
                 ___m_groundPoint.y = y2;
             }
-            if (___m_twoAxisGrounded)
+            if (___m_isGrounded)
             {
-                ___m_twoAxisVelocity.y = 0f;
+                ___m_smoothLocoVelocity.y = 0f;
             }
             else
             {
@@ -10571,13 +10627,13 @@ namespace EFM
                 }
                 if (!flag)
                 {
-                    ___m_twoAxisVelocity.y = ___m_twoAxisVelocity.y - num6 * Time.deltaTime;
+                    ___m_smoothLocoVelocity.y = ___m_smoothLocoVelocity.y - num6 * Time.deltaTime;
                 }
                 else
                 {
                     Vector3 a3 = Vector3.ProjectOnPlane(-Vector3.up * num6, planeNormal);
-                    ___m_twoAxisVelocity += a3 * Time.deltaTime;
-                    ___m_twoAxisVelocity = Vector3.ProjectOnPlane(___m_twoAxisVelocity, planeNormal);
+                    ___m_smoothLocoVelocity += a3 * Time.deltaTime;
+                    ___m_smoothLocoVelocity = Vector3.ProjectOnPlane(___m_smoothLocoVelocity, planeNormal);
                 }
             }
             float num7 = Mathf.Abs(lastNeckPos.y - GM.CurrentPlayerBody.transform.position.y);
@@ -10586,13 +10642,13 @@ namespace EFM
             point2.y = Mathf.Min(point2.y, num3 - 0.01f);
             point3.y = Mathf.Max(__instance.transform.position.y, ___m_groundPoint.y) + (___m_armSwingerStepHeight + 0.2f);
             point2.y = Mathf.Max(point2.y, point3.y);
-            Vector3 vector7 = ___m_twoAxisVelocity;
-            float maxLength = ___m_twoAxisVelocity.magnitude * Time.deltaTime;
-            if (Physics.CapsuleCast(point2, point3, 0.15f, ___m_twoAxisVelocity, out ___m_hit_ray, ___m_twoAxisVelocity.magnitude * Time.deltaTime + 0.1f, __instance.LM_TeleCast))
+            Vector3 vector7 = ___m_smoothLocoVelocity;
+            float maxLength = ___m_smoothLocoVelocity.magnitude * Time.deltaTime;
+            if (Physics.CapsuleCast(point2, point3, 0.15f, ___m_smoothLocoVelocity, out ___m_hit_ray, ___m_smoothLocoVelocity.magnitude * Time.deltaTime + 0.1f, __instance.LM_TeleCast))
             {
-                vector7 = Vector3.ProjectOnPlane(___m_twoAxisVelocity, ___m_hit_ray.normal);
+                vector7 = Vector3.ProjectOnPlane(___m_smoothLocoVelocity, ___m_hit_ray.normal);
                 maxLength = ___m_hit_ray.distance * 0.5f;
-                if (___m_twoAxisGrounded)
+                if (___m_isGrounded)
                 {
                     vector7.y = 0f;
                 }
@@ -10602,16 +10658,16 @@ namespace EFM
                     maxLength = raycastHit2.distance * 0.5f;
                 }
             }
-            ___m_twoAxisVelocity = vector7;
-            if (___m_twoAxisGrounded)
+            ___m_smoothLocoVelocity = vector7;
+            if (___m_isGrounded)
             {
-                ___m_twoAxisVelocity.y = 0f;
+                ___m_smoothLocoVelocity.y = 0f;
             }
             Vector3 a4 = __instance.transform.position;
-            Vector3 vector8 = ___m_twoAxisVelocity * Time.deltaTime;
+            Vector3 vector8 = ___m_smoothLocoVelocity * Time.deltaTime;
             vector8 = Vector3.ClampMagnitude(vector8, maxLength);
             a4 = __instance.transform.position + vector8;
-            if (___m_twoAxisGrounded)
+            if (___m_isGrounded)
             {
                 a4.y = Mathf.MoveTowards(a4.y, ___m_groundPoint.y, 8f * Time.deltaTime * Mathf.Abs(__instance.transform.position.y - ___m_groundPoint.y));
             }
@@ -10658,12 +10714,12 @@ namespace EFM
                 vector10 = Quaternion.AngleAxis(num8, Vector3.up) * vector10;
                 __instance.transform.SetPositionAndRotation(vector9, Quaternion.LookRotation(vector10, Vector3.up));
             }
-            typeof(FVRMovementManager).GetMethod("SetTopSpeedLastSecond", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { ___m_twoAxisVelocity });
-            //__instance.SetTopSpeedLastSecond(___m_twoAxisVelocity);
+            typeof(FVRMovementManager).GetMethod("SetTopSpeedLastSecond", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { ___m_smoothLocoVelocity });
+            //__instance.SetTopSpeedLastSecond(___m_smoothLocoVelocity);
             if (!___IsGrabHolding)
             {
-                typeof(FVRMovementManager).GetMethod("SetFrameSpeed", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { ___m_twoAxisVelocity });
-                //__instance.SetFrameSpeed(___m_twoAxisVelocity);
+                typeof(FVRMovementManager).GetMethod("SetFrameSpeed", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { ___m_smoothLocoVelocity });
+                //__instance.SetFrameSpeed(___m_smoothLocoVelocity);
             }
             ___LastNeckPos = GM.CurrentPlayerBody.NeckJointTransform.position;
             return false;
@@ -10680,7 +10736,7 @@ namespace EFM
             }
             catch(Exception e)
             {
-                Mod.instance.LogInfo("Exception in IsPointInsideSphereGeo called on " + __instance.name+":\n"+e.StackTrace);
+                Mod.instance.LogError("Exception in IsPointInsideSphereGeo called on " + __instance.name+":\n"+e.StackTrace);
                 __result = false;
             }
             return false;

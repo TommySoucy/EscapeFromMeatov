@@ -336,7 +336,7 @@ namespace EFM
 
         private void UpdateStamina()
         {
-            Vector3 movementVector = (Vector3)typeof(FVRMovementManager).GetField("m_twoAxisVelocity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(GM.CurrentMovementManager);
+            Vector3 movementVector = (Vector3)typeof(FVRMovementManager).GetField("m_smoothLocoVelocity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(GM.CurrentMovementManager);
             bool sprintEngaged = (bool)typeof(FVRMovementManager).GetField("m_sprintingEngaged", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(GM.CurrentMovementManager);
 
             if (sprintEngaged)

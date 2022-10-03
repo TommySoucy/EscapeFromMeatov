@@ -47,11 +47,9 @@ namespace EFM
 
 			// Set vanillaIDs and customIDs lists with ID of items to spawn when opened
 			int successfulAttempts = 0;
-			Mod.instance.LogInfo("\tSpawning attempts...");
 			for (int i=0; i < 20 + (UnityEngine.Random.value <= Mod.skills[30].currentProgress / 10000 ? 2 : 0) + (UnityEngine.Random.value <= Mod.skills[9].currentProgress / 10000 ? 2 : 0); ++i) // 20 spawn attempts + chance of 2 more if high enough search skill and also for attention skill 
             {
 				string randomFilterID = spawnFilter[UnityEngine.Random.Range(0, spawnFilter.Count)];
-				Mod.instance.LogInfo("\t\trandomFilterID: "+ randomFilterID);
 				string itemID = "";
                 if (Mod.itemsByParents.TryGetValue(randomFilterID, out List<string> possibleItems))
                 {
@@ -75,12 +73,10 @@ namespace EFM
                 }
                 else
                 {
-					// TODO: If we have no item of a particular ancestor implemented, we will come here. 
-					// Maybe in this case we want to spawn a single random round instead
-					Mod.instance.LogError("\t\tLoot container has spawn filter ID: " + randomFilterID + " not present in both itemMap and parents dict.");
-					continue;
+                    // Spawn random round instead
+                    itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
+                    continue;
 				}
-				Mod.instance.LogInfo("\t\titemID: " + itemID);
 
 				if (int.TryParse(itemID, out int result))
                 {
@@ -91,8 +87,6 @@ namespace EFM
 						++successfulAttempts;
 
 						customIDs.Add(result);
-
-						Mod.instance.LogInfo("\t\t"+ result);
 
 						if (prefabCIW.itemType == Mod.ItemType.AmmoBox)
                         {
@@ -124,8 +118,6 @@ namespace EFM
 
 							customIDs.Add(actualItemID);
 
-							Mod.instance.LogInfo("\t\t" + actualItemID);
-
 							stackSizes.Add(stackSize);
 							FVRFireArmRound roundScript = IM.OD[itemID].GetGameObject().GetComponent<FVRFireArmRound>();
 							roundClasses.Add(roundScript.RoundClass);
@@ -139,8 +131,6 @@ namespace EFM
 							++successfulAttempts;
 
 							vanillaIDs.Add(itemID);
-
-							Mod.instance.LogInfo("\t\t" + itemID);
 						}
 					}
 				}
@@ -212,10 +202,8 @@ namespace EFM
 					else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
 					{
 						int stackSize = stackSizes[stackSizes.Count - 1];
-						Mod.instance.LogInfo("Spawning ammo box with stack size: " + stackSize);
 						stackSizes.RemoveAt(stackSizes.Count - 1);
 						int actualStackSize = stackSize == -1 ? itemCIW.maxAmount : stackSize;
-						Mod.instance.LogInfo("actualStackSize: " + actualStackSize);
 						FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
 						if(itemID == 715 || itemID == 716)
                         {
