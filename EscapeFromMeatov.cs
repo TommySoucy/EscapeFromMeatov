@@ -16,6 +16,7 @@ using UnityEngine.UI;
 using System.Reflection.Emit;
 using System.Collections;
 using UnityEngine.EventSystems;
+using UnityEngine.AI;
 
 namespace EFM
 {
@@ -3215,8 +3216,9 @@ namespace EFM
             // SosigLinkDamagePatch
             MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo sosigLinkDamagePatchPrefix = typeof(SosigLinkDamagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo sosigLinkDamagePatchPostfix = typeof(SosigLinkDamagePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(sosigLinkDamagePatchOriginal, new HarmonyMethod(sosigLinkDamagePatchPrefix));
+            harmony.Patch(sosigLinkDamagePatchOriginal, new HarmonyMethod(sosigLinkDamagePatchPrefix), new HarmonyMethod(sosigLinkDamagePatchPostfix));
 
             // PlayerBodyHealPercentPatch
             MethodInfo playerBodyHealPercentPatchOriginal = typeof(FVRPlayerBody).GetMethod("HealPercent", BindingFlags.Public | BindingFlags.Instance);
@@ -10196,6 +10198,19 @@ namespace EFM
                         UpdateShotsCounterConditions(lowerChosenBodyPart, d.point, AIType, AIUsec);
                         break;
                 }
+            }
+        }
+
+        static void Postfix(ref SosigLink __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            if(__instance.S.Mustard <= 0)
+            {
+                __instance.S.KillSosig();
             }
         }
 
