@@ -20,7 +20,6 @@ namespace EFM
         public static float extractionTimer;
         public static bool inRaid;
         public static JObject locationData;
-        public static int maxBotPerZone;
 
         private List<Extraction> extractions;
         private List<Extraction> possibleExtractions;
@@ -32,24 +31,24 @@ namespace EFM
         public EFM_GCManager GCManager;
         private float maxRaidTime;
 
-        private List<AISpawn> AISpawns;
-        private AISpawn nextSpawn;
-        private Dictionary<string, Transform> AISquadSpawnTransforms;
-        private List<int> availableIFFs;
-        private int[] spawnedIFFs;
-        private Dictionary<string, int> AISquadIFFs;
-        private Dictionary<string, List<Sosig>> AISquads;
-        private Dictionary<string, int> AISquadSizes;
-        private List<Sosig> friendlyAI;
-        public static List<AIEntity> entities;
-        public static List<EFM_AI> entityRelatedAI;
-
         private List<GameObject> extractionCards;
         private bool extracted;
         private bool spawning;
 
         // AI
         private float initSpawnTimer = 5; // Will only start spawning AI once this much time has elapsed at start of raid
+        public static int maxBotPerZone;
+        private Dictionary<string, int> AISquadIFFs;
+        private Dictionary<string, List<Sosig>> AISquads;
+        private Dictionary<string, int> AISquadSizes;
+        private List<Sosig> friendlyAI;
+        public static List<AIEntity> entities;
+        public static List<EFM_AI> entityRelatedAI;
+        private List<AISpawn> AISpawns;
+        private AISpawn nextSpawn;
+        private Dictionary<string, Transform> AISquadSpawnTransforms;
+        private List<int> availableIFFs;
+        private int[] spawnedIFFs;
 
         public override void Init()
         {
@@ -782,6 +781,14 @@ namespace EFM
             // Init time
             InitTime();
 
+            // Load night lightmaps if necessary
+            if (time <= 21600 || time >= 64800)
+            {
+                //AssetBundle lightmapAssetBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatov" + Mod.chosenMapName + "Night.ab");
+                // TODO: Replace in lightmapsettings, each lightmap in the lightmaps array, lightprobes lightprobe data
+                // TODO: Replace skybox material
+            }
+
             // Init sun
             InitSun();
 
@@ -1340,6 +1347,7 @@ namespace EFM
                 Mod.RemoveFromAll(null, null, null);
                 SosigWeapon sosigWeapon = weaponObject.GetComponent<SosigWeapon>();
                 sosigWeapon.SetAutoDestroy(true);
+                typeof(SosigWeapon).GetField("m_autoDestroyTickDown", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(sosigWeapon, 0);
                 sosigScript.ForceEquip(sosigWeapon);
                 if (sosigWeapon.Type == SosigWeapon.SosigWeaponType.Gun)
                 {
@@ -4941,10 +4949,11 @@ namespace EFM
             }
             newAISpawn.configTemplate.TotalMustard += (totalHealth - 440);
             //newAISpawn.configTemplate.ConfusionMultiplier = 1;
-            //newAISpawn.configTemplate.StunThreshold = 0;
-            //newAISpawn.configTemplate.StunMultiplier = 0;
-            //newAISpawn.configTemplate.StunTimeMax = 0;
-            //newAISpawn.configTemplate.CanBeKnockedOut = false;
+            newAISpawn.configTemplate.StunThreshold = float.MaxValue;
+            newAISpawn.configTemplate.StunMultiplier = 0;
+            newAISpawn.configTemplate.StunTimeMax = 0;
+            newAISpawn.configTemplate.ShudderThreshold = float.MaxValue;
+            newAISpawn.configTemplate.CanBeKnockedOut = false;
             newAISpawn.configTemplate.CanBeGrabbed = false;
 
             Mod.instance.LogInfo("\tDone");

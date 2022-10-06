@@ -4752,6 +4752,7 @@ namespace EFM
             {
                 case 0:
                     loadingRaid = true;
+                    Mod.chosenMapName = "Factory";
                     Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovFactory.ab");
                     break;
                 default:
@@ -4759,6 +4760,7 @@ namespace EFM
                     Mod.chosenMapIndex = 0;
                     Mod.chosenCharIndex = 0;
                     Mod.chosenTimeIndex = 0;
+                    Mod.chosenMapName = "Factory";
                     chosenMap.text = "Factory";
                     Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovFactory.ab");
                     break;

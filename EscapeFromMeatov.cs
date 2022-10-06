@@ -57,6 +57,7 @@ namespace EFM
         public static int chosenCharIndex;
         public static int chosenMapIndex;
         public static int chosenTimeIndex;
+        public static string chosenMapName;
         public static EFM_Base_Manager.FinishRaidState raidState;
         public static bool justFinishedRaid;
         public static Dictionary<string, int> killList;
@@ -3895,11 +3896,11 @@ namespace EFM
             switch (rarity)
             {
                 case Mod.ItemRarity.Common:
-                    return 1;
+                    return 0.85f;
                 case Mod.ItemRarity.Rare:
-                    return 0.7f;
+                    return 0.3f;
                 case Mod.ItemRarity.Superrare:
-                    return 0.2f;
+                    return 0.05f;
                 case Mod.ItemRarity.Not_exist:
                     return 0;
                 default:
