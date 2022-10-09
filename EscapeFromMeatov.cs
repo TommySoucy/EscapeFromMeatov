@@ -3225,7 +3225,7 @@ namespace EFM
             MethodInfo playerBodyHealPercentPatchPrefix = typeof(PlayerBodyHealPercentPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(playerBodyHealPercentPatchOriginal, new HarmonyMethod(playerBodyHealPercentPatchPrefix));
-
+            
             //// UpdateModeTwoAxisPatch
             //MethodInfo updateModeTwoAxisPatchOriginal = typeof(FVRMovementManager).GetMethod("UpdateModeTwoAxis", BindingFlags.NonPublic | BindingFlags.Instance);
             //MethodInfo updateModeTwoAxisPatchPrefix = typeof(UpdateModeTwoAxisPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -4361,15 +4361,18 @@ namespace EFM
                         {
                             __instance.transform.localScale = __instance.QBPoseOverride.localScale;
                         }
+
+                        if (CIW.open)
+                        {
+                            CIW.ToggleMode(false);
+                        }
                     }
                 }
 
                 // Check if area slot
                 if ((__instance as FVRPhysicalObject).QuickbeltSlot is EFM_AreaSlot)
                 {
-                    EFM_CustomItemWrapper heldCustomItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
-                    EFM_VanillaItemDescriptor heldVanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                    BeginInteractionPatch.SetItemLocationIndex(3, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
+                    BeginInteractionPatch.SetItemLocationIndex(3, CIW, VID, true);
 
                     // Was on player
                     Mod.RemoveFromPlayerInventory(__instance.transform, true);
@@ -4384,44 +4387,42 @@ namespace EFM
                     EFM_CustomItemWrapper customItemWrapper = qbs.transform.parent.parent.parent.GetComponent<EFM_CustomItemWrapper>();
                     if (customItemWrapper != null)
                     {
-                        EFM_CustomItemWrapper heldCustomItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
-                        EFM_VanillaItemDescriptor heldVanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                        if (heldCustomItemWrapper != null)
+                        if (CIW != null)
                         {
-                            BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, heldCustomItemWrapper, null);
+                            BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, CIW, null);
 
                             // Update lists
                             if (customItemWrapper.locationIndex == 1)
                             {
                                 // Was on player
-                                Mod.RemoveFromPlayerInventory(heldCustomItemWrapper.transform, false);
+                                Mod.RemoveFromPlayerInventory(CIW.transform, false);
 
                                 // Now in hideout
-                                Mod.currentBaseManager.AddToBaseInventory(heldCustomItemWrapper.transform, false);
+                                Mod.currentBaseManager.AddToBaseInventory(CIW.transform, false);
                             }
                             else if (customItemWrapper.locationIndex == 2)
                             {
                                 // Was on player
-                                Mod.RemoveFromPlayerInventory(heldCustomItemWrapper.transform, true);
+                                Mod.RemoveFromPlayerInventory(CIW.transform, true);
                             }
                         }
-                        else if (heldVanillaItemDescriptor)
+                        else if (VID)
                         {
-                            BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, null, heldVanillaItemDescriptor);
+                            BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, null, VID);
 
                             // Update lists
                             if (customItemWrapper.locationIndex == 1)
                             {
                                 // Was on player
-                                Mod.RemoveFromPlayerInventory(heldVanillaItemDescriptor.transform, false);
+                                Mod.RemoveFromPlayerInventory(VID.transform, false);
 
                                 // Now in hideout
-                                Mod.currentBaseManager.AddToBaseInventory(heldVanillaItemDescriptor.transform, false);
+                                Mod.currentBaseManager.AddToBaseInventory(VID.transform, false);
                             }
                             else if (customItemWrapper.locationIndex == 2)
                             {
                                 // Was on player
-                                Mod.RemoveFromPlayerInventory(heldVanillaItemDescriptor.transform, true);
+                                Mod.RemoveFromPlayerInventory(VID.transform, true);
                             }
                         }
                         return;
