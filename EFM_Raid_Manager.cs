@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
+using Valve.VR.InteractionSystem;
 
 namespace EFM
 {
@@ -784,9 +785,20 @@ namespace EFM
             // Load night lightmaps if necessary
             if (time <= 21600 || time >= 64800)
             {
-                //AssetBundle lightmapAssetBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatov" + Mod.chosenMapName + "Night.ab");
-                // TODO: Replace in lightmapsettings, each lightmap in the lightmaps array, lightprobes lightprobe data
-                // TODO: Replace skybox material
+                AssetBundle lightmapAssetBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatov" + Mod.chosenMapName + "Night.ab");
+                if(lightmapAssetBundle != null)
+                {
+                    foreach(LightmapData lmd in LightmapSettings.lightmaps)
+                    {
+                        lmd.lightmapColor = lightmapAssetBundle.LoadAsset<Texture2D>(lmd.lightmapColor.name);
+                    }
+                    LightmapSettings.lightProbes = lightmapAssetBundle.LoadAsset<LightProbes>(LightmapSettings.lightProbes.name);
+                    RenderSettings.skybox = lightmapAssetBundle.LoadAsset<Material>("SkyNight");
+                }
+                else
+                {
+                    Mod.instance.LogError("Night time raid selected, but EscapeFromMeatov" + Mod.chosenMapName + "Night.ab could not be loaded");
+                }
             }
 
             // Init sun
