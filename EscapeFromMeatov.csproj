@@ -13,6 +13,8 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,81 +37,98 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\h3vr_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>..\..\BepInEx\core\BepInEx.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\h3vr_Data\Managed\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\h3vr_Data\Managed\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="Valve.Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\h3vr_Data\Managed\Valve.Newtonsoft.Json.dll</HintPath>
-    </Reference>
+    <Compile Include="src\EFM_AI.cs" />
+    <Compile Include="src\EFM_AreaBonus.cs" />
+    <Compile Include="src\EFM_AreaProduction.cs" />
+    <Compile Include="src\EFM_AreaRequirement.cs" />
+    <Compile Include="src\EFM_AreasDB.cs" />
+    <Compile Include="src\EFM_AreaSlot.cs" />
+    <Compile Include="src\EFM_AreaUpgradeCheckProcessor.cs" />
+    <Compile Include="src\EFM_BaseAreaManager.cs" />
+    <Compile Include="src\EFM_Base_Manager.cs" />
+    <Compile Include="src\EFM_BotZone.cs" />
+    <Compile Include="src\EFM_CategoryTreeNode.cs" />
+    <Compile Include="src\EFM_CustomItemWrapper.cs" />
+    <Compile Include="src\EFM_DamageVolume.cs" />
+    <Compile Include="src\EFM_Describable.cs" />
+    <Compile Include="src\EFM_DescriptionManager.cs" />
+    <Compile Include="src\EFM_DestroyTimer.cs" />
+    <Compile Include="src\EFM_DoorLockChecker.cs" />
+    <Compile Include="src\EFM_DoorWrapper.cs" />
+    <Compile Include="src\EFM_Effect.cs" />
+    <Compile Include="src\EFM_EquipmentSlot.cs" />
+    <Compile Include="src\EFM_ExperienceTrigger.cs" />
+    <Compile Include="src\EFM_GCManager.cs" />
+    <Compile Include="src\EFM_Hand.cs" />
+    <Compile Include="src\EFM_HoverScroll.cs" />
+    <Compile Include="src\EFM_ItemIcon.cs" />
+    <Compile Include="src\EFM_LootContainer.cs" />
+    <Compile Include="src\EFM_LootContainerCover.cs" />
+    <Compile Include="src\EFM_LootContainerSlider.cs" />
+    <Compile Include="src\EFM_Manager.cs" />
+    <Compile Include="src\EFM_MarketItemView.cs" />
+    <Compile Include="src\EFM_MarketManager.cs" />
+    <Compile Include="src\EFM_Menu_Manager.cs" />
+    <Compile Include="src\EFM_OtherInteractable.cs" />
+    <Compile Include="src\EFM_PlayerStatusManager.cs" />
+    <Compile Include="src\EFM_PointableButton.cs" />
+    <Compile Include="src\EFM_Raid_Manager.cs" />
+    <Compile Include="src\EFM_ShoulderStorage.cs" />
+    <Compile Include="src\EFM_Skill.cs" />
+    <Compile Include="src\EFM_StackTrigger.cs" />
+    <Compile Include="src\EFM_Switch.cs" />
+    <Compile Include="src\EFM_TraderStatus.cs" />
+    <Compile Include="src\EFM_TraderTab.cs" />
+    <Compile Include="src\EFM_TradeVolume.cs" />
+    <Compile Include="src\EFM_VanillaItemDescriptor.cs" />
+    <Compile Include="src\Mod.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EFM_AI.cs" />
-    <Compile Include="EFM_AreaBonus.cs" />
-    <Compile Include="EFM_AreaProduction.cs" />
-    <Compile Include="EFM_AreaRequirement.cs" />
-    <Compile Include="EFM_AreasDB.cs" />
-    <Compile Include="EFM_AreaSlot.cs" />
-    <Compile Include="EFM_AreaUpgradeCheckProcessor.cs" />
-    <Compile Include="EFM_BaseAreaManager.cs" />
-    <Compile Include="EFM_Base_Manager.cs" />
-    <Compile Include="EFM_BotZone.cs" />
-    <Compile Include="EFM_CategoryTreeNode.cs" />
-    <Compile Include="EFM_CustomItemWrapper.cs" />
-    <Compile Include="EFM_DamageVolume.cs" />
-    <Compile Include="EFM_Describable.cs" />
-    <Compile Include="EFM_DescriptionManager.cs" />
-    <Compile Include="EFM_DestroyTimer.cs" />
-    <Compile Include="EFM_DoorLockChecker.cs" />
-    <Compile Include="EFM_DoorWrapper.cs" />
-    <Compile Include="EFM_Effect.cs" />
-    <Compile Include="EFM_EquipmentSlot.cs" />
-    <Compile Include="EFM_ExperienceTrigger.cs" />
-    <Compile Include="EFM_GCManager.cs" />
-    <Compile Include="EFM_Hand.cs" />
-    <Compile Include="EFM_HoverScroll.cs" />
-    <Compile Include="EFM_ItemIcon.cs" />
-    <Compile Include="EFM_LootContainer.cs" />
-    <Compile Include="EFM_LootContainerCover.cs" />
-    <Compile Include="EFM_LootContainerSlider.cs" />
-    <Compile Include="EFM_Manager.cs" />
-    <Compile Include="EFM_MarketItemView.cs" />
-    <Compile Include="EFM_MarketManager.cs" />
-    <Compile Include="EFM_Menu_Manager.cs" />
-    <Compile Include="EFM_OtherInteractable.cs" />
-    <Compile Include="EFM_PlayerStatusManager.cs" />
-    <Compile Include="EFM_PointableButton.cs" />
-    <Compile Include="EFM_Raid_Manager.cs" />
-    <Compile Include="EFM_ShoulderStorage.cs" />
-    <Compile Include="EFM_Skill.cs" />
-    <Compile Include="EFM_StackTrigger.cs" />
-    <Compile Include="EFM_Switch.cs" />
-    <Compile Include="EFM_TraderStatus.cs" />
-    <Compile Include="EFM_TraderTab.cs" />
-    <Compile Include="EFM_TradeVolume.cs" />
-    <Compile Include="EFM_VanillaItemDescriptor.cs" />
-    <Compile Include="EscapeFromMeatov.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="nuget.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony, Version=2.10.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\HarmonyX.2.10.1\lib\net35\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\H3VR.GameLibs.0.110.2\lib\net35\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\H3VR.GameLibs.0.110.2\lib\net35\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx, Version=5.4.21.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\BepInEx.BaseLib.5.4.21\lib\net35\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour, Version=22.3.23.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MonoMod.RuntimeDetour.22.3.23.4\lib\net35\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils, Version=22.3.23.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MonoMod.Utils.22.3.23.4\lib\net35\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\UnityEngine.5.6.1\lib\net35\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\H3VR.GameLibs.0.110.2\lib\net35\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Valve.Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\H3VR.GameLibs.0.110.2\lib\net35\Valve.Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

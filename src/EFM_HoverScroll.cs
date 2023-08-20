@@ -18,7 +18,7 @@ namespace EFM
         public float rate; // fraction of page/s
 		private bool scrolling;
 
-		public void Update()
+		public override void Update()
         {
             base.Update();
 

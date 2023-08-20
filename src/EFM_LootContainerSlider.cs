@@ -17,7 +17,7 @@ namespace EFM
 		public float posZ;
 		private bool m_forceOpen;
 
-		protected override void Awake()
+		public override void Awake()
 		{
 			// Override interactive object awake entirely to prevent from being added to All because unnecessary
 			this.GameObject = gameObject;

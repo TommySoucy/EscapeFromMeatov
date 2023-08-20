@@ -7,16 +7,13 @@ using BepInEx;
 using FistVR;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using Valve.Newtonsoft.Json;
 using UnityEngine.Audio;
-using static FistVR.SM;
 using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
 using System.Reflection.Emit;
 using System.Collections;
 using UnityEngine.EventSystems;
-using UnityEngine.AI;
 
 namespace EFM
 {
@@ -3263,7 +3260,7 @@ namespace EFM
             //harmony.Patch(deadBoltLastHandPatchOriginal, new HarmonyMethod(deadBoltLastHandPatchPrefix));
 
             // DequeueAndPlayDebugPatch
-            MethodInfo dequeueAndPlayDebugPatchOriginal = typeof(AudioSourcePool).GetMethod("DequeueAndPlay", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo dequeueAndPlayDebugPatchOriginal = typeof(SM.AudioSourcePool).GetMethod("DequeueAndPlay", BindingFlags.NonPublic | BindingFlags.Instance);
             MethodInfo dequeueAndPlayDebugPatchPrefix = typeof(DequeueAndPlayDebugPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(dequeueAndPlayDebugPatchOriginal, new HarmonyMethod(dequeueAndPlayDebugPatchPrefix));
@@ -10443,7 +10440,7 @@ namespace EFM
 				return fvrpooledAudioSource;
 			}*/
 
-        static bool Prefix(AudioEvent clipSet, Vector3 pos, Vector2 pitch, Vector2 volume, AudioMixerGroup mixerOverride, ref AudioSourcePool __instance, ref FVRPooledAudioSource __result)
+        static bool Prefix(AudioEvent clipSet, Vector3 pos, Vector2 pitch, Vector2 volume, AudioMixerGroup mixerOverride, ref SM.AudioSourcePool __instance, ref FVRPooledAudioSource __result)
         {
             try
             {
@@ -10816,12 +10813,12 @@ namespace EFM
 				this.ActiveSources.Add(fvrpooledAudioSource);
 				return fvrpooledAudioSource;
 			}*/
-        static bool Prefix(AudioEvent clipSet, Vector3 pos, AudioMixerGroup mixerOverride, ref AudioSourcePool __instance, ref FVRPooledAudioSource __result)
+        static bool Prefix(AudioEvent clipSet, Vector3 pos, AudioMixerGroup mixerOverride, ref SM.AudioSourcePool __instance, ref FVRPooledAudioSource __result)
         {
             Mod.instance.LogInfo("PlayClip debug prefix called on AudioSourcePool with type: "+ __instance .Type+ " with SourceQueue_Disabled count: " + __instance.SourceQueue_Disabled.Count);
-            MethodInfo dequeueAndPlayMethod = typeof(AudioSourcePool).GetMethod("DequeueAndPlay", BindingFlags.NonPublic | BindingFlags.Instance);
-            FieldInfo curSizeField = typeof(AudioSourcePool).GetField("m_curSize", BindingFlags.NonPublic | BindingFlags.Instance);
-            FieldInfo maxSizeField = typeof(AudioSourcePool).GetField("m_maxSize", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo dequeueAndPlayMethod = typeof(SM.AudioSourcePool).GetMethod("DequeueAndPlay", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo curSizeField = typeof(SM.AudioSourcePool).GetField("m_curSize", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo maxSizeField = typeof(SM.AudioSourcePool).GetField("m_maxSize", BindingFlags.NonPublic | BindingFlags.Instance);
             if (clipSet.Clips.Count <= 0)
             {
                 __result = null;
@@ -10868,7 +10865,7 @@ namespace EFM
 				this.m_curSize++;
 			}*/
 
-        static bool Prefix(GameObject prefab, bool active, ref AudioSourcePool __instance)
+        static bool Prefix(GameObject prefab, bool active, ref SM.AudioSourcePool __instance)
         {
             GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(prefab);
             FVRPooledAudioSource component = gameObject.GetComponent<FVRPooledAudioSource>();
@@ -10877,7 +10874,7 @@ namespace EFM
                 gameObject.SetActive(false);
             }
             __instance.SourceQueue_Disabled.Enqueue(component);
-            FieldInfo curSizeField = typeof(AudioSourcePool).GetField("m_curSize", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo curSizeField = typeof(SM.AudioSourcePool).GetField("m_curSize", BindingFlags.NonPublic | BindingFlags.Instance);
             int curSizeVal = (int)curSizeField.GetValue(__instance);
             curSizeField.SetValue(__instance, curSizeVal + 1);
             return false;
