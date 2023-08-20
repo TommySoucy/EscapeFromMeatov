@@ -10,9 +10,9 @@ namespace EFM
     {
         public static readonly int maxUpCheck = 4;
 
-        public EFM_BaseAreaManager manager;
-        public List<EFM_CustomItemWrapper> customItems = new List<EFM_CustomItemWrapper>();
-        public List<EFM_VanillaItemDescriptor> vanillaItems = new List<EFM_VanillaItemDescriptor>();
+        public BaseAreaManager manager;
+        public List<CustomItemWrapper> customItems = new List<CustomItemWrapper>();
+        public List<VanillaItemDescriptor> vanillaItems = new List<VanillaItemDescriptor>();
         public bool block;
         public ProcessorCollider[] colliders;
 
@@ -75,8 +75,8 @@ namespace EFM
             {
                 if(currentTransform != null)
                 {
-                    EFM_CustomItemWrapper CIW = currentTransform.GetComponent<EFM_CustomItemWrapper>();
-                    EFM_VanillaItemDescriptor VID = currentTransform.GetComponent<EFM_VanillaItemDescriptor>();
+                    CustomItemWrapper CIW = currentTransform.GetComponent<CustomItemWrapper>();
+                    VanillaItemDescriptor VID = currentTransform.GetComponent<VanillaItemDescriptor>();
                     if(CIW != null)
                     {
                         if (block)
@@ -182,8 +182,8 @@ namespace EFM
             {
                 if (currentTransform != null)
                 {
-                    EFM_CustomItemWrapper CIW = currentTransform.GetComponent<EFM_CustomItemWrapper>();
-                    EFM_VanillaItemDescriptor VID = currentTransform.GetComponent<EFM_VanillaItemDescriptor>();
+                    CustomItemWrapper CIW = currentTransform.GetComponent<CustomItemWrapper>();
+                    VanillaItemDescriptor VID = currentTransform.GetComponent<VanillaItemDescriptor>();
                     if (CIW != null)
                     {
                         if (block)

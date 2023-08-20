@@ -47,16 +47,16 @@ namespace EFM
         public static int saveSlotIndex = -1;
         public static int currentQuickBeltConfiguration = -1;
         public static int firstCustomConfigIndex = -1;
-        public static List<EFM_EquipmentSlot> equipmentSlots;
+        public static List<EquipmentSlot> equipmentSlots;
         public static bool beginInteractingEquipRig;
-        public static EFM_Hand rightHand;
-        public static EFM_Hand leftHand;
+        public static Hand rightHand;
+        public static Hand leftHand;
         public static List<List<FVRQuickBeltSlot>> otherActiveSlots;
         public static int chosenCharIndex;
         public static int chosenMapIndex;
         public static int chosenTimeIndex;
         public static string chosenMapName;
-        public static EFM_Base_Manager.FinishRaidState raidState;
+        public static Base_Manager.FinishRaidState raidState;
         public static bool justFinishedRaid;
         public static Dictionary<string, int> killList;
         public static int lootingExp = 0;
@@ -71,13 +71,13 @@ namespace EFM
         public static float distanceTravelledWalking;
         public static GameObject[] itemsInPocketSlots;
         public static FVRQuickBeltSlot[] pocketSlots;
-        public static EFM_ShoulderStorage leftShoulderSlot;
-        public static EFM_ShoulderStorage rightShoulderSlot;
+        public static ShoulderStorage leftShoulderSlot;
+        public static ShoulderStorage rightShoulderSlot;
         public static GameObject leftShoulderObject;
         public static GameObject rightShoulderObject;
         public static Dictionary<string, int> baseInventory;
-        public static EFM_Base_Manager currentBaseManager;
-        public static EFM_Raid_Manager currentRaidManager;
+        public static Base_Manager currentBaseManager;
+        public static Raid_Manager currentRaidManager;
         public static Dictionary<string, int>[] requiredPerArea;
         public static List<string> wishList;
         public static Dictionary<FireArmMagazineType, Dictionary<string, int>> magazinesByType;
@@ -88,16 +88,16 @@ namespace EFM
         public static List<string> usedRoundIDs;
         public static Dictionary<string, int> ammoBoxByAmmoID;
         public static Dictionary<string, int> requiredForQuest;
-        public static Dictionary<string, List<EFM_DescriptionManager>> activeDescriptionsByItemID;
-        public static List<EFM_AreaSlot> areaSlots;
+        public static Dictionary<string, List<DescriptionManager>> activeDescriptionsByItemID;
+        public static List<AreaSlot> areaSlots;
         public static bool areaSlotShouldUpdate = true;
-        public static List<EFM_AreaBonus> activeBonuses;
-        public static EFM_TraderStatus[] traderStatuses;
-        public static EFM_CategoryTreeNode itemCategories;
+        public static List<AreaBonus> activeBonuses;
+        public static TraderStatus[] traderStatuses;
+        public static CategoryTreeNode itemCategories;
         public static Dictionary<string, List<string>> itemAncestors;
         public static Dictionary<string, int> lowestBuyValueByItem;
         public static bool amountChoiceUIUp;
-        public static EFM_CustomItemWrapper splittingItem;
+        public static CustomItemWrapper splittingItem;
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
         public static List<KeyValuePair<GameObject, object>> attachmentLocalTransform;
         public static int attachmentCheckNeeded;
@@ -115,7 +115,7 @@ namespace EFM
         public static Dictionary<string, Dictionary<string, List<TraderTaskCondition>>> taskLeaveItemConditionsByItemIDByZone = new Dictionary<string, Dictionary<string, List<TraderTaskCondition>>>();
         public static Dictionary<string, List<TraderTaskCondition>> taskVisitPlaceConditionsByZone = new Dictionary<string, List<TraderTaskCondition>>();
         public static Dictionary<string, List<TraderTaskCounterCondition>> taskVisitPlaceCounterConditionsByZone = new Dictionary<string, List<TraderTaskCounterCondition>>();
-        public static Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> taskHealthEffectCounterConditionsByEffectType = new Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>>();
+        public static Dictionary<Effect.EffectType, List<TraderTaskCounterCondition>> taskHealthEffectCounterConditionsByEffectType = new Dictionary<Effect.EffectType, List<TraderTaskCounterCondition>>();
         public static Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>> taskShotsCounterConditionsByBodyPart = new Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>>();
         public static Dictionary<string, List<TraderTaskCounterCondition>> taskUseItemCounterConditionsByItemID = new Dictionary<string, List<TraderTaskCounterCondition>>();
         public static Dictionary<string, List<TraderTaskCondition>> taskFindItemConditionsByItemID = new Dictionary<string, List<TraderTaskCondition>>();
@@ -123,13 +123,13 @@ namespace EFM
         public static Dictionary<string, Dictionary<string, List<TraderTaskCondition>>> currentTaskLeaveItemConditionsByItemIDByZone;
         public static Dictionary<string, List<TraderTaskCondition>> currentTaskVisitPlaceConditionsByZone;
         public static Dictionary<string, List<TraderTaskCounterCondition>> currentTaskVisitPlaceCounterConditionsByZone;
-        public static Dictionary<EFM_Effect.EffectType, List<TraderTaskCounterCondition>> currentHealthEffectCounterConditionsByEffectType;
+        public static Dictionary<Effect.EffectType, List<TraderTaskCounterCondition>> currentHealthEffectCounterConditionsByEffectType;
         public static Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>> currentShotsCounterConditionsByBodyPart;
         public static Dictionary<string, List<TraderTaskCounterCondition>> currentUseItemCounterConditionsByItemID;
 
         // Player
         public static GameObject playerStatusUI;
-        public static EFM_PlayerStatusManager playerStatusManager;
+        public static PlayerStatusManager playerStatusManager;
         public static Dictionary<string, int> playerInventory;
         public static Dictionary<string, List<GameObject>> playerInventoryObjects;
         public static List<InsuredSet> insuredItems;
@@ -162,7 +162,7 @@ namespace EFM
         public static float stamina = 100;
         public static float maxStamina = 100;
         public static float currentMaxStamina = 100;
-        public static EFM_Skill[] skills;
+        public static Skill[] skills;
         public static int level = 1;
         public static int experience = 0;
         public static float sprintStaminaDrain = 4.1f;
@@ -177,9 +177,9 @@ namespace EFM
         public static int stomachBloodLossCount = 0; // TODO: If this is 0, in hideout we will regen health otherwise not, in raid we will multiply energy and hydration rate by 5
         public static float temperatureOffset = 0;
         public static bool fatigue = false;
-        public static EFM_Effect dehydrationEffect;
-        public static EFM_Effect fatigueEffect;
-        public static EFM_Effect overweightFatigueEffect;
+        public static Effect dehydrationEffect;
+        public static Effect fatigueEffect;
+        public static Effect overweightFatigueEffect;
         public static GameObject consumeUI;
         public static Text consumeUIText;
         public static GameObject stackSplitUI;
@@ -190,9 +190,9 @@ namespace EFM
         public static GameObject extractionLimitUI;
         public static Text extractionLimitUIText;
         public static GameObject leftDescriptionUI;
-        public static EFM_DescriptionManager leftDescriptionManager;
+        public static DescriptionManager leftDescriptionManager;
         public static GameObject rightDescriptionUI;
-        public static EFM_DescriptionManager rightDescriptionManager;
+        public static DescriptionManager rightDescriptionManager;
         public static GameObject staminaBarUI;
         public static int totalRaidCount;
         public static int runThroughRaidCount;
@@ -278,7 +278,7 @@ namespace EFM
         public static JObject dynamicLootTable;
         public static JObject staticLootTable;
         public static JObject defaultItemsData;
-        public static Dictionary<string, EFM_VanillaItemDescriptor> vanillaItems;
+        public static Dictionary<string, VanillaItemDescriptor> vanillaItems;
         public static Dictionary<string, JObject> lootContainersByName;
         public static Dictionary<string, AudioClip[]> itemSounds;
 
@@ -398,7 +398,7 @@ namespace EFM
                 if (Input.GetKeyDown(KeyCode.P))
                 {
                     // Loads new game
-                    EFM_Manager.LoadBase();
+                    Manager.LoadBase();
                 }
 
                 if (Input.GetKeyDown(KeyCode.N))
@@ -415,30 +415,30 @@ namespace EFM
                 if (Input.GetKeyDown(KeyCode.O))
                 {
                     Mod.chosenMapIndex = -1;
-                    GameObject.Find("Hideout").GetComponent<EFM_Base_Manager>().OnConfirmRaidClicked();
+                    GameObject.Find("Hideout").GetComponent<Base_Manager>().OnConfirmRaidClicked();
                 }
 
                 if (Input.GetKeyDown(KeyCode.J))
                 {
-                    EFM_Manager.LoadBase(5);
+                    Manager.LoadBase(5);
                 }
 
                 if (Input.GetKeyDown(KeyCode.H))
                 {
-                    EFM_Manager.LoadBase(-1, true);
+                    Manager.LoadBase(-1, true);
                 }
 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
                     if (GameObject.Find("Hideout") != null)
                     {
-                        GameObject.Find("Hideout").GetComponent<EFM_Base_Manager>().OnSaveSlotClicked(0);
+                        GameObject.Find("Hideout").GetComponent<Base_Manager>().OnSaveSlotClicked(0);
                     }
                 }
 
                 if (Input.GetKeyDown(KeyCode.I))
                 {
-                    EFM_Manager.LoadBase(0);
+                    Manager.LoadBase(0);
                 }
 
                 if (Input.GetKeyDown(KeyCode.Keypad1))
@@ -952,7 +952,7 @@ namespace EFM
                 itemObjectWrapper.OSple = (bool)defaultObjectWrapper["OSple"];
 
                 // Add custom item wrapper
-                EFM_CustomItemWrapper customItemWrapper = itemPrefab.AddComponent<EFM_CustomItemWrapper>();
+                CustomItemWrapper customItemWrapper = itemPrefab.AddComponent<CustomItemWrapper>();
                 customItemWrapper.ID = i.ToString();
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 float[] tempVolumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
@@ -1340,7 +1340,7 @@ namespace EFM
                     for (int j = 0; j < 3; ++j)
                     {
                         GameObject triggerObject = triggerRoot.GetChild(j).gameObject;
-                        EFM_StackTrigger currentStackTrigger = triggerObject.AddComponent<EFM_StackTrigger>();
+                        StackTrigger currentStackTrigger = triggerObject.AddComponent<StackTrigger>();
                         currentStackTrigger.stackableWrapper = customItemWrapper;
 
                         customItemWrapper.stackTriggers[j] = triggerObject;
@@ -1444,13 +1444,13 @@ namespace EFM
                         foreach (JToken buff in buffs)
                         {
                             EFM_Effect_Buff currentBuff = new EFM_Effect_Buff();
-                            currentBuff.effectType = (EFM_Effect.EffectType)Enum.Parse(typeof(EFM_Effect.EffectType), buff["BuffType"].ToString());
+                            currentBuff.effectType = (Effect.EffectType)Enum.Parse(typeof(Effect.EffectType), buff["BuffType"].ToString());
                             currentBuff.chance = (float)buff["Chance"];
                             currentBuff.delay = (float)buff["Delay"];
                             currentBuff.duration = (float)buff["Duration"];
                             currentBuff.value = (float)buff["Value"];
                             currentBuff.absolute = (bool)buff["AbsoluteValue"];
-                            if (currentBuff.effectType == EFM_Effect.EffectType.SkillRate)
+                            if (currentBuff.effectType == Effect.EffectType.SkillRate)
                             {
                                 currentBuff.skillIndex = Mod.SkillNameToIndex(buff["SkillName"].ToString());
                             }
@@ -1492,13 +1492,13 @@ namespace EFM
             // If necessary, init categ tree root with item ID
             if (itemCategories == null)
             {
-                itemCategories = new EFM_CategoryTreeNode(null, "54009119af1c881c07000029", "Item");
+                itemCategories = new CategoryTreeNode(null, "54009119af1c881c07000029", "Item");
             }
-            EFM_CategoryTreeNode currentParent = itemCategories;
+            CategoryTreeNode currentParent = itemCategories;
             for (int i = parents.Count - 2; i >= 0; i--)
             {
                 string ID = parents[i];
-                EFM_CategoryTreeNode foundChild = currentParent.FindChild(ID);
+                CategoryTreeNode foundChild = currentParent.FindChild(ID);
                 if (foundChild != null)
                 {
                     currentParent = foundChild;
@@ -1506,7 +1506,7 @@ namespace EFM
                 else
                 {
                     string name = localDB["templates"][ID]["Name"].ToString();
-                    EFM_CategoryTreeNode newNode = new EFM_CategoryTreeNode(currentParent, ID, name);
+                    CategoryTreeNode newNode = new CategoryTreeNode(currentParent, ID, name);
                     currentParent.children.Add(newNode);
                     currentParent = newNode;
                 }
@@ -1534,7 +1534,7 @@ namespace EFM
             image.sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
         }
 
-        private void SetFilterListsFor(EFM_CustomItemWrapper customItemWrapper, int index)
+        private void SetFilterListsFor(CustomItemWrapper customItemWrapper, int index)
         {
             customItemWrapper.whiteList = new List<string>();
             customItemWrapper.blackList = new List<string>();
@@ -1602,7 +1602,7 @@ namespace EFM
             traderCategoriesDB = new JArray[8];
             for (int i = 0; i < 8; ++i)
             {
-                string traderID = EFM_TraderStatus.IndexToID(i);
+                string traderID = TraderStatus.IndexToID(i);
                 traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Traders/" + traderID + "/base.json"));
                 traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Traders/" + traderID + "/assort.json"));
 
@@ -1657,167 +1657,167 @@ namespace EFM
         private void LoadSkillVars()
         {
             JToken skillsSettings = globalDB["config"]["SkillsSettings"];
-            EFM_Skill.skillProgressRate = (float)skillsSettings["SkillProgressRate"];
-            EFM_Skill.weaponSkillProgressRate = (float)skillsSettings["WeaponSkillProgressRate"];
+            Skill.skillProgressRate = (float)skillsSettings["SkillProgressRate"];
+            Skill.weaponSkillProgressRate = (float)skillsSettings["WeaponSkillProgressRate"];
 
             // HideoutManagement
-            EFM_Skill.skillPointsPerAreaUpgrade = (float)skillsSettings["HideoutManagement"]["SkillPointsPerAreaUpgrade"];
-            EFM_Skill.skillPointsPerCraft = (float)skillsSettings["HideoutManagement"]["SkillPointsPerCraft"];
-            EFM_Skill.generatorPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["ResourceSpent"];
-            EFM_Skill.AFUPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["ResourceSpent"];
-            EFM_Skill.waterCollectorPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["ResourceSpent"];
-            EFM_Skill.solarPowerPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["ResourceSpent"];
-            EFM_Skill.consumptionReductionPerLevel = (float)skillsSettings["HideoutManagement"]["ConsumptionReductionPerLevel"];
-            EFM_Skill.skillBoostPercent = (float)skillsSettings["HideoutManagement"]["SkillBoostPercent"];
+            Skill.skillPointsPerAreaUpgrade = (float)skillsSettings["HideoutManagement"]["SkillPointsPerAreaUpgrade"];
+            Skill.skillPointsPerCraft = (float)skillsSettings["HideoutManagement"]["SkillPointsPerCraft"];
+            Skill.generatorPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["ResourceSpent"];
+            Skill.AFUPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["ResourceSpent"];
+            Skill.waterCollectorPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["ResourceSpent"];
+            Skill.solarPowerPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["ResourceSpent"];
+            Skill.consumptionReductionPerLevel = (float)skillsSettings["HideoutManagement"]["ConsumptionReductionPerLevel"];
+            Skill.skillBoostPercent = (float)skillsSettings["HideoutManagement"]["SkillBoostPercent"];
 
             // Crafting
-            EFM_Skill.pointsPerHourCrafting = ((float)skillsSettings["Crafting"]["PointsPerCraftingCycle"] + (float)skillsSettings["Crafting"]["PointsPerUniqueCraftCycle"]) / (float)skillsSettings["Crafting"]["CraftingCycleHours"];
-            EFM_Skill.craftTimeReductionPerLevel = (float)skillsSettings["Crafting"]["CraftTimeReductionPerLevel"];
-            EFM_Skill.productionTimeReductionPerLevel = (float)skillsSettings["Crafting"]["ProductionTimeReductionPerLevel"];
-            EFM_Skill.eliteExtraProductions = (float)skillsSettings["Crafting"]["EliteExtraProductions"];
+            Skill.pointsPerHourCrafting = ((float)skillsSettings["Crafting"]["PointsPerCraftingCycle"] + (float)skillsSettings["Crafting"]["PointsPerUniqueCraftCycle"]) / (float)skillsSettings["Crafting"]["CraftingCycleHours"];
+            Skill.craftTimeReductionPerLevel = (float)skillsSettings["Crafting"]["CraftTimeReductionPerLevel"];
+            Skill.productionTimeReductionPerLevel = (float)skillsSettings["Crafting"]["ProductionTimeReductionPerLevel"];
+            Skill.eliteExtraProductions = (float)skillsSettings["Crafting"]["EliteExtraProductions"];
 
             // Metabolism
-            EFM_Skill.hydrationRecoveryRate = (float)skillsSettings["Metabolism"]["HydrationRecoveryRate"];
-            EFM_Skill.energyRecoveryRate = (float)skillsSettings["Metabolism"]["EnergyRecoveryRate"];
-            EFM_Skill.increasePositiveEffectDurationRate = (float)skillsSettings["Metabolism"]["IncreasePositiveEffectDurationRate"];
-            EFM_Skill.decreaseNegativeEffectDurationRate = (float)skillsSettings["Metabolism"]["DecreaseNegativeEffectDurationRate"];
-            EFM_Skill.decreasePoisonDurationRate = (float)skillsSettings["Metabolism"]["DecreasePoisonDurationRate"];
+            Skill.hydrationRecoveryRate = (float)skillsSettings["Metabolism"]["HydrationRecoveryRate"];
+            Skill.energyRecoveryRate = (float)skillsSettings["Metabolism"]["EnergyRecoveryRate"];
+            Skill.increasePositiveEffectDurationRate = (float)skillsSettings["Metabolism"]["IncreasePositiveEffectDurationRate"];
+            Skill.decreaseNegativeEffectDurationRate = (float)skillsSettings["Metabolism"]["DecreaseNegativeEffectDurationRate"];
+            Skill.decreasePoisonDurationRate = (float)skillsSettings["Metabolism"]["DecreasePoisonDurationRate"];
 
             // Immunity
-            EFM_Skill.immunityMiscEffects = (float)skillsSettings["Immunity"]["ImmunityMiscEffects"];
-            EFM_Skill.immunityPoisonBuff = (float)skillsSettings["Immunity"]["ImmunityPoisonBuff"];
-            EFM_Skill.immunityPainKiller = (float)skillsSettings["Immunity"]["ImmunityPainKiller"];
-            EFM_Skill.healthNegativeEffect = (float)skillsSettings["Immunity"]["HealthNegativeEffect"];
-            EFM_Skill.stimulatorNegativeBuff = (float)skillsSettings["Immunity"]["StimulatorNegativeBuff"];
+            Skill.immunityMiscEffects = (float)skillsSettings["Immunity"]["ImmunityMiscEffects"];
+            Skill.immunityPoisonBuff = (float)skillsSettings["Immunity"]["ImmunityPoisonBuff"];
+            Skill.immunityPainKiller = (float)skillsSettings["Immunity"]["ImmunityPainKiller"];
+            Skill.healthNegativeEffect = (float)skillsSettings["Immunity"]["HealthNegativeEffect"];
+            Skill.stimulatorNegativeBuff = (float)skillsSettings["Immunity"]["StimulatorNegativeBuff"];
 
             // Endurance
-            EFM_Skill.movementAction = (float)skillsSettings["Endurance"]["MovementAction"];
-            EFM_Skill.sprintAction = (float)skillsSettings["Endurance"]["SprintAction"];
-            EFM_Skill.gainPerFatigueStack = (float)skillsSettings["Endurance"]["GainPerFatigueStack"];
+            Skill.movementAction = (float)skillsSettings["Endurance"]["MovementAction"];
+            Skill.sprintAction = (float)skillsSettings["Endurance"]["SprintAction"];
+            Skill.gainPerFatigueStack = (float)skillsSettings["Endurance"]["GainPerFatigueStack"];
 
             // Strength
-            EFM_Skill.sprintActionMin = (float)skillsSettings["Strength"]["SprintActionMin"];
-            EFM_Skill.sprintActionMax = (float)skillsSettings["Strength"]["SprintActionMax"];
-            EFM_Skill.movementActionMin = (float)skillsSettings["Strength"]["MovementActionMin"];
-            EFM_Skill.movementActionMax = (float)skillsSettings["Strength"]["MovementActionMax"];
-            EFM_Skill.pushUpMin = (float)skillsSettings["Strength"]["PushUpMin"];
-            EFM_Skill.pushUpMax = (float)skillsSettings["Strength"]["PushUpMax"];
-            EFM_Skill.fistfightAction = (float)skillsSettings["Strength"]["FistfightAction"];
-            EFM_Skill.throwAction = (float)skillsSettings["Strength"]["ThrowAction"];
+            Skill.sprintActionMin = (float)skillsSettings["Strength"]["SprintActionMin"];
+            Skill.sprintActionMax = (float)skillsSettings["Strength"]["SprintActionMax"];
+            Skill.movementActionMin = (float)skillsSettings["Strength"]["MovementActionMin"];
+            Skill.movementActionMax = (float)skillsSettings["Strength"]["MovementActionMax"];
+            Skill.pushUpMin = (float)skillsSettings["Strength"]["PushUpMin"];
+            Skill.pushUpMax = (float)skillsSettings["Strength"]["PushUpMax"];
+            Skill.fistfightAction = (float)skillsSettings["Strength"]["FistfightAction"];
+            Skill.throwAction = (float)skillsSettings["Strength"]["ThrowAction"];
 
             // Vitality
-            EFM_Skill.damageTakenAction = (float)skillsSettings["Vitality"]["DamageTakenAction"];
-            EFM_Skill.vitalityHealthNegativeEffect = (float)skillsSettings["Vitality"]["HealthNegativeEffect"];
+            Skill.damageTakenAction = (float)skillsSettings["Vitality"]["DamageTakenAction"];
+            Skill.vitalityHealthNegativeEffect = (float)skillsSettings["Vitality"]["HealthNegativeEffect"];
 
             // Health
-            EFM_Skill.skillProgress = (float)skillsSettings["Health"]["SkillProgress"];
+            Skill.skillProgress = (float)skillsSettings["Health"]["SkillProgress"];
 
             // StressResistance
-            EFM_Skill.stressResistanceHealthNegativeEffect = (float)skillsSettings["StressResistance"]["HealthNegativeEffect"];
-            EFM_Skill.lowHPDuration = (float)skillsSettings["StressResistance"]["LowHPDuration"];
+            Skill.stressResistanceHealthNegativeEffect = (float)skillsSettings["StressResistance"]["HealthNegativeEffect"];
+            Skill.lowHPDuration = (float)skillsSettings["StressResistance"]["LowHPDuration"];
 
             // Throwing
-            EFM_Skill.throwingThrowAction = (float)skillsSettings["Throwing"]["ThrowAction"];
+            Skill.throwingThrowAction = (float)skillsSettings["Throwing"]["ThrowAction"];
 
             // RecoilControl
-            EFM_Skill.recoilAction = (float)skillsSettings["RecoilControl"]["RecoilAction"];
-            EFM_Skill.recoilBonusPerLevel = (float)skillsSettings["RecoilControl"]["RecoilBonusPerLevel"];
+            Skill.recoilAction = (float)skillsSettings["RecoilControl"]["RecoilAction"];
+            Skill.recoilBonusPerLevel = (float)skillsSettings["RecoilControl"]["RecoilBonusPerLevel"];
 
             // Pistol
-            EFM_Skill.pistolWeaponReloadAction = (float)skillsSettings["Pistol"]["WeaponReloadAction"];
-            EFM_Skill.pistolWeaponShotAction = (float)skillsSettings["Pistol"]["WeaponShotAction"];
-            EFM_Skill.pistolWeaponChamberAction = (float)skillsSettings["Pistol"]["WeaponChamberAction"];
+            Skill.pistolWeaponReloadAction = (float)skillsSettings["Pistol"]["WeaponReloadAction"];
+            Skill.pistolWeaponShotAction = (float)skillsSettings["Pistol"]["WeaponShotAction"];
+            Skill.pistolWeaponChamberAction = (float)skillsSettings["Pistol"]["WeaponChamberAction"];
 
             // Revolver, uses Pistol values
-            EFM_Skill.revolverWeaponReloadAction = (float)skillsSettings["Pistol"]["WeaponReloadAction"];
-            EFM_Skill.revolverWeaponShotAction = (float)skillsSettings["Pistol"]["WeaponShotAction"];
-            EFM_Skill.revolverWeaponChamberAction = (float)skillsSettings["Pistol"]["WeaponChamberAction"];
+            Skill.revolverWeaponReloadAction = (float)skillsSettings["Pistol"]["WeaponReloadAction"];
+            Skill.revolverWeaponShotAction = (float)skillsSettings["Pistol"]["WeaponShotAction"];
+            Skill.revolverWeaponChamberAction = (float)skillsSettings["Pistol"]["WeaponChamberAction"];
 
             // SMG, uses assault values
-            EFM_Skill.SMGWeaponReloadAction = (float)skillsSettings["Assault"]["WeaponReloadAction"];
-            EFM_Skill.SMGWeaponShotAction = (float)skillsSettings["Assault"]["WeaponShotAction"];
-            EFM_Skill.SMGWeaponChamberAction = (float)skillsSettings["Assault"]["WeaponChamberAction"];
+            Skill.SMGWeaponReloadAction = (float)skillsSettings["Assault"]["WeaponReloadAction"];
+            Skill.SMGWeaponShotAction = (float)skillsSettings["Assault"]["WeaponShotAction"];
+            Skill.SMGWeaponChamberAction = (float)skillsSettings["Assault"]["WeaponChamberAction"];
 
             // Assault
-            EFM_Skill.assaultWeaponReloadAction = (float)skillsSettings["Assault"]["WeaponReloadAction"];
-            EFM_Skill.assaultWeaponShotAction = (float)skillsSettings["Assault"]["WeaponShotAction"];
-            EFM_Skill.assaultWeaponChamberAction = (float)skillsSettings["Assault"]["WeaponChamberAction"];
+            Skill.assaultWeaponReloadAction = (float)skillsSettings["Assault"]["WeaponReloadAction"];
+            Skill.assaultWeaponShotAction = (float)skillsSettings["Assault"]["WeaponShotAction"];
+            Skill.assaultWeaponChamberAction = (float)skillsSettings["Assault"]["WeaponChamberAction"];
 
             // Shotgun
-            EFM_Skill.shotgunWeaponReloadAction = (float)skillsSettings["Shotgun"]["WeaponReloadAction"];
-            EFM_Skill.shotgunWeaponShotAction = (float)skillsSettings["Shotgun"]["WeaponShotAction"];
-            EFM_Skill.shotgunWeaponChamberAction = (float)skillsSettings["Shotgun"]["WeaponChamberAction"];
+            Skill.shotgunWeaponReloadAction = (float)skillsSettings["Shotgun"]["WeaponReloadAction"];
+            Skill.shotgunWeaponShotAction = (float)skillsSettings["Shotgun"]["WeaponShotAction"];
+            Skill.shotgunWeaponChamberAction = (float)skillsSettings["Shotgun"]["WeaponChamberAction"];
 
             // Sniper
-            EFM_Skill.sniperWeaponReloadAction = (float)skillsSettings["Sniper"]["WeaponReloadAction"];
-            EFM_Skill.sniperWeaponShotAction = (float)skillsSettings["Sniper"]["WeaponShotAction"];
-            EFM_Skill.sniperWeaponChamberAction = (float)skillsSettings["Sniper"]["WeaponChamberAction"];
+            Skill.sniperWeaponReloadAction = (float)skillsSettings["Sniper"]["WeaponReloadAction"];
+            Skill.sniperWeaponShotAction = (float)skillsSettings["Sniper"]["WeaponShotAction"];
+            Skill.sniperWeaponChamberAction = (float)skillsSettings["Sniper"]["WeaponChamberAction"];
 
             // HMG, uses DMR values
-            EFM_Skill.HMGWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            EFM_Skill.HMGWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            EFM_Skill.HMGWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+            Skill.HMGWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.HMGWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            Skill.HMGWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
 
             // LMG, uses DMR values
-            EFM_Skill.LMGWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            EFM_Skill.LMGWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            EFM_Skill.LMGWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+            Skill.LMGWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.LMGWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            Skill.LMGWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
 
             // Launcher, uses DMR values
-            EFM_Skill.launcherWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            EFM_Skill.launcherWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            EFM_Skill.launcherWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+            Skill.launcherWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.launcherWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            Skill.launcherWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
 
             // AttachedLauncher, uses DMR values
-            EFM_Skill.attachedLauncherWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            EFM_Skill.attachedLauncherWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            EFM_Skill.attachedLauncherWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+            Skill.attachedLauncherWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.attachedLauncherWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            Skill.attachedLauncherWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
 
             // DMR
-            EFM_Skill.DMRWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            EFM_Skill.DMRWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            EFM_Skill.DMRWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
+            Skill.DMRWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.DMRWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
+            Skill.DMRWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
 
             // CovertMovement
-            EFM_Skill.covertMovementAction = (float)skillsSettings["CovertMovement"]["MovementAction"];
+            Skill.covertMovementAction = (float)skillsSettings["CovertMovement"]["MovementAction"];
 
             // Search
-            EFM_Skill.searchAction = (float)skillsSettings["Search"]["SearchAction"];
-            EFM_Skill.findAction = (float)skillsSettings["Search"]["FindAction"];
+            Skill.searchAction = (float)skillsSettings["Search"]["SearchAction"];
+            Skill.findAction = (float)skillsSettings["Search"]["FindAction"];
 
             // MagDrills
-            EFM_Skill.raidLoadedAmmoAction = (float)skillsSettings["MagDrills"]["RaidLoadedAmmoAction"];
-            EFM_Skill.raidUnloadedAmmoAction = (float)skillsSettings["MagDrills"]["RaidUnloadedAmmoAction"];
-            EFM_Skill.magazineCheckAction = (float)skillsSettings["MagDrills"]["MagazineCheckAction"];
+            Skill.raidLoadedAmmoAction = (float)skillsSettings["MagDrills"]["RaidLoadedAmmoAction"];
+            Skill.raidUnloadedAmmoAction = (float)skillsSettings["MagDrills"]["RaidUnloadedAmmoAction"];
+            Skill.magazineCheckAction = (float)skillsSettings["MagDrills"]["MagazineCheckAction"];
 
             // Perception
-            EFM_Skill.onlineAction = (float)skillsSettings["Perception"]["OnlineAction"];
-            EFM_Skill.uniqueLoot = (float)skillsSettings["Perception"]["UniqueLoot"];
+            Skill.onlineAction = (float)skillsSettings["Perception"]["OnlineAction"];
+            Skill.uniqueLoot = (float)skillsSettings["Perception"]["UniqueLoot"];
 
             // Intellect
-            EFM_Skill.examineAction = (float)skillsSettings["Intellect"]["ExamineAction"];
-            EFM_Skill.intellectSkillProgress = (float)skillsSettings["Intellect"]["SkillProgress"];
+            Skill.examineAction = (float)skillsSettings["Intellect"]["ExamineAction"];
+            Skill.intellectSkillProgress = (float)skillsSettings["Intellect"]["SkillProgress"];
 
             // Attention
-            EFM_Skill.examineWithInstruction = (float)skillsSettings["Attention"]["ExamineWithInstruction"];
-            EFM_Skill.findActionFalse = (float)skillsSettings["Attention"]["FindActionFalse"];
-            EFM_Skill.findActionTrue = (float)skillsSettings["Attention"]["FindActionTrue"];
+            Skill.examineWithInstruction = (float)skillsSettings["Attention"]["ExamineWithInstruction"];
+            Skill.findActionFalse = (float)skillsSettings["Attention"]["FindActionFalse"];
+            Skill.findActionTrue = (float)skillsSettings["Attention"]["FindActionTrue"];
 
             // Charisma
-            EFM_Skill.skillProgressInt = (float)skillsSettings["Charisma"]["SkillProgressInt"];
-            EFM_Skill.skillProgressAtn = (float)skillsSettings["Charisma"]["SkillProgressAtn"];
-            EFM_Skill.skillProgressPer = (float)skillsSettings["Charisma"]["SkillProgressPer"];
+            Skill.skillProgressInt = (float)skillsSettings["Charisma"]["SkillProgressInt"];
+            Skill.skillProgressAtn = (float)skillsSettings["Charisma"]["SkillProgressAtn"];
+            Skill.skillProgressPer = (float)skillsSettings["Charisma"]["SkillProgressPer"];
 
             // Memory
-            EFM_Skill.anySkillUp = (float)skillsSettings["Memory"]["AnySkillUp"];
-            EFM_Skill.memorySkillProgress = (float)skillsSettings["Memory"]["SkillProgress"];
+            Skill.anySkillUp = (float)skillsSettings["Memory"]["AnySkillUp"];
+            Skill.memorySkillProgress = (float)skillsSettings["Memory"]["SkillProgress"];
 
             // Surgery
-            EFM_Skill.surgeryAction = (float)skillsSettings["Surgery"]["SurgeryAction"];
-            EFM_Skill.surgerySkillProgress = (float)skillsSettings["Surgery"]["SkillProgress"];
+            Skill.surgeryAction = (float)skillsSettings["Surgery"]["SurgeryAction"];
+            Skill.surgerySkillProgress = (float)skillsSettings["Surgery"]["SkillProgress"];
 
             // AimDrills
-            EFM_Skill.weaponShotAction = (float)skillsSettings["AimDrills"]["WeaponShotAction"];
+            Skill.weaponShotAction = (float)skillsSettings["AimDrills"]["WeaponShotAction"];
         }
 
         private void LoadDefaultAssets()
@@ -1838,7 +1838,7 @@ namespace EFM
             itemIcons.Add("HairsprayCan", assetsBundles[0].LoadAsset<Sprite>("ItemHairsprayCan_Icon"));
             itemIcons.Add("Matchbox", assetsBundles[0].LoadAsset<Sprite>("ItemMatchbox_Icon"));
 
-            vanillaItems = new Dictionary<string, EFM_VanillaItemDescriptor>();
+            vanillaItems = new Dictionary<string, VanillaItemDescriptor>();
             JArray vanillaItemsRaw = (JArray)defaultItemsData["VanillaItems"];
 
             foreach (JToken vanillaItemRaw in vanillaItemsRaw)
@@ -1846,7 +1846,7 @@ namespace EFM
                 string H3ID = vanillaItemRaw["H3ID"].ToString();
                 Mod.instance.LogInfo("Setting vanilla Item: " + H3ID);
                 GameObject itemPrefab = IM.OD[H3ID].GetGameObject();
-                EFM_VanillaItemDescriptor descriptor = itemPrefab.AddComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor descriptor = itemPrefab.AddComponent<VanillaItemDescriptor>();
                 itemWeights.Add(H3ID, (int)(itemPrefab.GetComponent<Rigidbody>().mass * 1000));
                 descriptor.H3ID = vanillaItemRaw["H3ID"].ToString();
                 descriptor.tarkovID = vanillaItemRaw["TarkovID"].ToString();
@@ -2039,7 +2039,7 @@ namespace EFM
         private GameObject MakeItemInteractiveSet(Transform root, FVRPhysicalObject itemPhysicalObject)
         {
             // Make the root interactable
-            EFM_OtherInteractable otherInteractable = root.gameObject.AddComponent<EFM_OtherInteractable>();
+            OtherInteractable otherInteractable = root.gameObject.AddComponent<OtherInteractable>();
             otherInteractable.interactiveObject = itemPhysicalObject;
 
             // Make its children interactable
@@ -2051,7 +2051,7 @@ namespace EFM
             return root.gameObject;
         }
 
-        public static void AddToAll(FVRInteractiveObject interactiveObject, EFM_CustomItemWrapper CIW, EFM_VanillaItemDescriptor VID)
+        public static void AddToAll(FVRInteractiveObject interactiveObject, CustomItemWrapper CIW, VanillaItemDescriptor VID)
         {
             if (CIW != null && !CIW.inAll)
             {
@@ -2069,7 +2069,7 @@ namespace EFM
             }
         }
 
-        public static void RemoveFromAll(FVRInteractiveObject interactiveObject, EFM_CustomItemWrapper CIW, EFM_VanillaItemDescriptor VID)
+        public static void RemoveFromAll(FVRInteractiveObject interactiveObject, CustomItemWrapper CIW, VanillaItemDescriptor VID)
         {
             if (CIW != null && (CIW.inAll || interactiveObject == null))
             {
@@ -2134,7 +2134,7 @@ namespace EFM
             playerInventoryObjects.Clear();
 
             // Check equipment
-            foreach (EFM_EquipmentSlot equipSlot in equipmentSlots)
+            foreach (EquipmentSlot equipSlot in equipmentSlots)
             {
                 if (equipSlot.CurObject != null)
                 {
@@ -2170,8 +2170,8 @@ namespace EFM
 
         public static void AddToPlayerInventory(Transform item, bool updateTypeLists)
         {
-            EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
-            EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
+            CustomItemWrapper customItemWrapper = item.GetComponent<CustomItemWrapper>();
+            VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<VanillaItemDescriptor>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
             if (physObj == null || physObj.ObjectWrapper == null)
             {
@@ -2351,7 +2351,7 @@ namespace EFM
                     // Ammo container
                     if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                     {
-                        EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
+                        VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<VanillaItemDescriptor>();
                         if (ammoContainerVID != null)
                         {
                             AddToPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
@@ -2360,7 +2360,7 @@ namespace EFM
                     }
                     else if (asFireArm.UsesClips && asFireArm.Clip != null)
                     {
-                        EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>();
+                        VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<VanillaItemDescriptor>();
                         if (ammoContainerVID != null)
                         {
                             AddToPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
@@ -2394,8 +2394,8 @@ namespace EFM
 
         public static void RemoveFromPlayerInventory(Transform item, bool updateTypeLists)
         {
-            EFM_CustomItemWrapper customItemWrapper = item.GetComponent<EFM_CustomItemWrapper>();
-            EFM_VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<EFM_VanillaItemDescriptor>();
+            CustomItemWrapper customItemWrapper = item.GetComponent<CustomItemWrapper>();
+            VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<VanillaItemDescriptor>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
             if (physObj == null || physObj.ObjectWrapper == null)
             {
@@ -2577,7 +2577,7 @@ namespace EFM
                     // Ammo container
                     if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                     {
-                        EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
+                        VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<VanillaItemDescriptor>();
                         if (ammoContainerVID != null)
                         {
                             RemoveFromPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
@@ -2586,7 +2586,7 @@ namespace EFM
                     }
                     else if (asFireArm.UsesClips && asFireArm.Clip != null)
                     {
-                        EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>();
+                        VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<VanillaItemDescriptor>();
                         if (ammoContainerVID != null)
                         {
                             RemoveFromPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
@@ -2627,7 +2627,7 @@ namespace EFM
             }
 
             // Add skill and area bonuses
-            xp = (int)(xp * (EFM_Base_Manager.currentExperienceRate + EFM_Base_Manager.currentExperienceRate * (EFM_Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)));
+            xp = (int)(xp * (Base_Manager.currentExperienceRate + Base_Manager.currentExperienceRate * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)));
 
             int preLevel = level;
             experience += xp;
@@ -2653,7 +2653,7 @@ namespace EFM
                 {
                     foreach (TraderTaskCondition condition in taskStartConditionsByType[TraderTaskCondition.ConditionType.Level])
                     {
-                        EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                        TraderStatus.UpdateConditionFulfillment(condition);
                     }
                 }
             }
@@ -2704,7 +2704,7 @@ namespace EFM
         {
             // Globals SkillsSettings
             // Skip if in scav raid
-            EFM_Skill skill = Mod.skills[skillIndex];
+            Skill skill = Mod.skills[skillIndex];
             if (Mod.currentLocationIndex == 1 || Mod.chosenCharIndex == 1 || skill.raidProgress >= 300) // Max 3 levels per raid TODO: should be unique to each skill
             {
                 return;
@@ -2713,8 +2713,8 @@ namespace EFM
             int intPreProgress = (int)skill.progress;
             float preLevel = (int)(skill.progress / 100);
 
-            float actualAmountToAdd = xp * ((skillIndex >= 12 && skillIndex <= 24) ? EFM_Skill.weaponSkillProgressRate : EFM_Skill.skillProgressRate);
-            actualAmountToAdd += actualAmountToAdd * (EFM_Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(skill.skillType) ? EFM_Base_Manager.currentSkillGroupLevelingBoosts[skill.skillType] : 0);
+            float actualAmountToAdd = xp * ((skillIndex >= 12 && skillIndex <= 24) ? Skill.weaponSkillProgressRate : Skill.skillProgressRate);
+            actualAmountToAdd += actualAmountToAdd * (Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(skill.skillType) ? Base_Manager.currentSkillGroupLevelingBoosts[skill.skillType] : 0);
             actualAmountToAdd *= skill.dimishingReturns ? 0.5f : 1;
 
             skill.progress += actualAmountToAdd;
@@ -2731,9 +2731,9 @@ namespace EFM
                 skill.increasing = true;
             }
 
-            if (skill.skillType == EFM_Skill.SkillType.Practical || skill.skillType == EFM_Skill.SkillType.Physical)
+            if (skill.skillType == Skill.SkillType.Practical || skill.skillType == Skill.SkillType.Physical)
             {
-                float memoryAmount = EFM_Skill.memorySkillProgress / EFM_Skill.anySkillUp * actualAmountToAdd;
+                float memoryAmount = Skill.memorySkillProgress / Skill.anySkillUp * actualAmountToAdd;
                 Mod.skills[11].progress += memoryAmount;
                 Mod.skills[11].currentProgress += memoryAmount;
 
@@ -2746,7 +2746,7 @@ namespace EFM
             {
                 foreach (TraderTaskCondition condition in Mod.taskSkillConditionsBySkillIndex[skillIndex])
                 {
-                    EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                    TraderStatus.UpdateConditionFulfillment(condition);
                 }
             }
 
@@ -2755,7 +2755,7 @@ namespace EFM
             {
                 Mod.maxStamina += (postLevel - preLevel);
 
-                float healthAmount = EFM_Skill.skillProgress * actualAmountToAdd;
+                float healthAmount = Skill.skillProgress * actualAmountToAdd;
                 Mod.skills[3].progress += healthAmount;
                 Mod.skills[3].currentProgress += healthAmount;
 
@@ -2780,7 +2780,7 @@ namespace EFM
                 Mod.skillWeightLimitBonus += (postLevel - preLevel);
                 Mod.currentWeightLimit = (int)(Mod.baseWeightLimit + Mod.effectWeightLimitBonus + Mod.skillWeightLimitBonus);
 
-                float healthAmount = EFM_Skill.skillProgress * actualAmountToAdd;
+                float healthAmount = Skill.skillProgress * actualAmountToAdd;
                 Mod.skills[3].progress += healthAmount;
                 Mod.skills[3].currentProgress += healthAmount;
 
@@ -2802,7 +2802,7 @@ namespace EFM
             }
             else if (skillIndex == 2)
             {
-                float healthAmount = EFM_Skill.skillProgress * actualAmountToAdd;
+                float healthAmount = Skill.skillProgress * actualAmountToAdd;
                 Mod.skills[3].progress += healthAmount;
                 Mod.skills[3].currentProgress += healthAmount;
 
@@ -2824,7 +2824,7 @@ namespace EFM
             }
             else if (skillIndex == 7)
             {
-                float charismaAmount = EFM_Skill.skillProgressPer * actualAmountToAdd;
+                float charismaAmount = Skill.skillProgressPer * actualAmountToAdd;
                 Mod.skills[10].progress += charismaAmount;
                 Mod.skills[10].currentProgress += charismaAmount;
 
@@ -2846,7 +2846,7 @@ namespace EFM
             }
             else if (skillIndex == 8)
             {
-                float charismaAmount = EFM_Skill.skillProgressInt * actualAmountToAdd;
+                float charismaAmount = Skill.skillProgressInt * actualAmountToAdd;
                 Mod.skills[10].progress += charismaAmount;
                 Mod.skills[10].currentProgress += charismaAmount;
 
@@ -2868,7 +2868,7 @@ namespace EFM
             }
             else if (skillIndex == 9)
             {
-                float charismaAmount = EFM_Skill.skillProgressAtn * actualAmountToAdd;
+                float charismaAmount = Skill.skillProgressAtn * actualAmountToAdd;
                 Mod.skills[10].progress += charismaAmount;
                 Mod.skills[10].currentProgress += charismaAmount;
 
@@ -3311,7 +3311,7 @@ namespace EFM
             magazinesByType = new Dictionary<FireArmMagazineType, Dictionary<string, int>>();
             clipsByType = new Dictionary<FireArmClipType, Dictionary<string, int>>();
             roundsByType = new Dictionary<FireArmRoundType, Dictionary<string, int>>();
-            activeDescriptionsByItemID = new Dictionary<string, List<EFM_DescriptionManager>>();
+            activeDescriptionsByItemID = new Dictionary<string, List<DescriptionManager>>();
             usedRoundIDs = new List<string>();
             ammoBoxByAmmoID = new Dictionary<string, int>();
             itemsByParents = new Dictionary<string, List<string>>();
@@ -3379,8 +3379,8 @@ namespace EFM
 
                 GameObject baseRoot = GameObject.Find("Hideout");
 
-                EFM_Base_Manager baseManager = baseRoot.AddComponent<EFM_Base_Manager>();
-                baseManager.data = EFM_Manager.loadedData;
+                Base_Manager baseManager = baseRoot.AddComponent<Base_Manager>();
+                baseManager.data = Manager.loadedData;
                 baseManager.Init();
 
                 Transform spawnPoint = baseRoot.transform.GetChild(baseRoot.transform.childCount - 1).GetChild(0);
@@ -3401,7 +3401,7 @@ namespace EFM
 
                 GameObject raidRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
 
-                EFM_Raid_Manager raidManager = raidRoot.AddComponent<EFM_Raid_Manager>();
+                Raid_Manager raidManager = raidRoot.AddComponent<Raid_Manager>();
                 raidManager.Init();
 
                 GM.CurrentMovementManager.TeleportToPoint(raidManager.spawnPoint.position, true, raidManager.spawnPoint.rotation.eulerAngles);
@@ -3410,7 +3410,7 @@ namespace EFM
                 Mod.currentRaidBundleRequest.assetBundle.Unload(false);
 
                 // Call a GC collect
-                raidRoot.GetComponent<EFM_Raid_Manager>().GCManager.gc_collect();
+                raidRoot.GetComponent<Raid_Manager>().GCManager.gc_collect();
             }
             else
             {
@@ -3460,7 +3460,7 @@ namespace EFM
             GM.CurrentPlayerBody.ConfigureQuickbelt(-4);
 
             // Init menu
-            EFM_Menu_Manager menuManager = menuRoot.AddComponent<EFM_Menu_Manager>();
+            Menu_Manager menuManager = menuRoot.AddComponent<Menu_Manager>();
             menuManager.Init();
         }
 
@@ -3493,7 +3493,7 @@ namespace EFM
 
                     if (i == 8) // Rig
                     {
-                        EFM_CustomItemWrapper CIW = Mod.scavRaidReturnItems[i].GetComponent<EFM_CustomItemWrapper>();
+                        CustomItemWrapper CIW = Mod.scavRaidReturnItems[i].GetComponent<CustomItemWrapper>();
                         if (!CIW.open)
                         {
                             CIW.ToggleMode(false);
@@ -4000,8 +4000,8 @@ namespace EFM
             Mod.instance.LogInfo("Securing " + objectToSecure.name);
             Mod.securedObjects.Add(objectToSecure);
             GameObject.DontDestroyOnLoad(objectToSecure);
-            EFM_CustomItemWrapper CIW  = objectToSecure.GetComponent<EFM_CustomItemWrapper>();
-            EFM_VanillaItemDescriptor VID  = objectToSecure.GetComponent<EFM_VanillaItemDescriptor>();
+            CustomItemWrapper CIW  = objectToSecure.GetComponent<CustomItemWrapper>();
+            VanillaItemDescriptor VID  = objectToSecure.GetComponent<VanillaItemDescriptor>();
             if (CIW != null)
             {
                 // Items inside a rig will not be attached to the rig, so much secure them separately
@@ -4076,7 +4076,7 @@ namespace EFM
                 // Secure equipment
                 if (Mod.equipmentSlots != null)
                 {
-                    foreach (EFM_EquipmentSlot equipSlot in Mod.equipmentSlots)
+                    foreach (EquipmentSlot equipSlot in Mod.equipmentSlots)
                     {
                         if (equipSlot != null && equipSlot.CurObject != null)
                         {
@@ -4123,76 +4123,76 @@ namespace EFM
                 }
 
                 // Unequip all equipment
-                if (EFM_EquipmentSlot.wearingBackpack)
+                if (EquipmentSlot.wearingBackpack)
                 {
-                    Mod.scavRaidReturnItems[2] = EFM_EquipmentSlot.currentBackpack.gameObject;
-                    EFM_CustomItemWrapper backpackCIW = EFM_EquipmentSlot.currentBackpack;
+                    Mod.scavRaidReturnItems[2] = EquipmentSlot.currentBackpack.gameObject;
+                    CustomItemWrapper backpackCIW = EquipmentSlot.currentBackpack;
                     FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
                     backpackPhysObj.SetQuickBeltSlot(null);
-                    EFM_EquipmentSlot.TakeOffEquipment(backpackCIW);
+                    EquipmentSlot.TakeOffEquipment(backpackCIW);
                 }
-                if (EFM_EquipmentSlot.wearingBodyArmor)
+                if (EquipmentSlot.wearingBodyArmor)
                 {
-                    Mod.scavRaidReturnItems[3] = EFM_EquipmentSlot.currentArmor.gameObject;
-                    EFM_CustomItemWrapper bodyArmorCIW = EFM_EquipmentSlot.currentArmor;
+                    Mod.scavRaidReturnItems[3] = EquipmentSlot.currentArmor.gameObject;
+                    CustomItemWrapper bodyArmorCIW = EquipmentSlot.currentArmor;
                     FVRPhysicalObject bodyArmorPhysObj = bodyArmorCIW.GetComponent<FVRPhysicalObject>();
                     bodyArmorPhysObj.SetQuickBeltSlot(null);
-                    EFM_EquipmentSlot.TakeOffEquipment(bodyArmorCIW);
+                    EquipmentSlot.TakeOffEquipment(bodyArmorCIW);
                 }
-                if (EFM_EquipmentSlot.wearingEarpiece)
+                if (EquipmentSlot.wearingEarpiece)
                 {
-                    Mod.scavRaidReturnItems[4] = EFM_EquipmentSlot.currentEarpiece.gameObject;
-                    EFM_CustomItemWrapper earPieceCIW = EFM_EquipmentSlot.currentEarpiece;
+                    Mod.scavRaidReturnItems[4] = EquipmentSlot.currentEarpiece.gameObject;
+                    CustomItemWrapper earPieceCIW = EquipmentSlot.currentEarpiece;
                     FVRPhysicalObject earPiecePhysObj = earPieceCIW.GetComponent<FVRPhysicalObject>();
                     earPiecePhysObj.SetQuickBeltSlot(null);
-                    EFM_EquipmentSlot.TakeOffEquipment(earPieceCIW);
+                    EquipmentSlot.TakeOffEquipment(earPieceCIW);
                 }
-                if (EFM_EquipmentSlot.wearingHeadwear)
+                if (EquipmentSlot.wearingHeadwear)
                 {
-                    Mod.scavRaidReturnItems[5] = EFM_EquipmentSlot.currentHeadwear.gameObject;
-                    EFM_CustomItemWrapper headWearCIW = EFM_EquipmentSlot.currentHeadwear;
+                    Mod.scavRaidReturnItems[5] = EquipmentSlot.currentHeadwear.gameObject;
+                    CustomItemWrapper headWearCIW = EquipmentSlot.currentHeadwear;
                     FVRPhysicalObject headWearPhysObj = headWearCIW.GetComponent<FVRPhysicalObject>();
                     headWearPhysObj.SetQuickBeltSlot(null);
-                    EFM_EquipmentSlot.TakeOffEquipment(headWearCIW);
+                    EquipmentSlot.TakeOffEquipment(headWearCIW);
                 }
-                if (EFM_EquipmentSlot.wearingFaceCover)
+                if (EquipmentSlot.wearingFaceCover)
                 {
-                    Mod.scavRaidReturnItems[6] = EFM_EquipmentSlot.currentFaceCover.gameObject;
-                    EFM_CustomItemWrapper faceCoverCIW = EFM_EquipmentSlot.currentFaceCover;
+                    Mod.scavRaidReturnItems[6] = EquipmentSlot.currentFaceCover.gameObject;
+                    CustomItemWrapper faceCoverCIW = EquipmentSlot.currentFaceCover;
                     FVRPhysicalObject faceCoverPhysObj = faceCoverCIW.GetComponent<FVRPhysicalObject>();
                     faceCoverPhysObj.SetQuickBeltSlot(null);
-                    EFM_EquipmentSlot.TakeOffEquipment(faceCoverCIW);
+                    EquipmentSlot.TakeOffEquipment(faceCoverCIW);
                 }
-                if (EFM_EquipmentSlot.wearingEyewear)
+                if (EquipmentSlot.wearingEyewear)
                 {
-                    Mod.scavRaidReturnItems[7] = EFM_EquipmentSlot.currentEyewear.gameObject;
-                    EFM_CustomItemWrapper eyeWearCIW = EFM_EquipmentSlot.currentEyewear;
+                    Mod.scavRaidReturnItems[7] = EquipmentSlot.currentEyewear.gameObject;
+                    CustomItemWrapper eyeWearCIW = EquipmentSlot.currentEyewear;
                     FVRPhysicalObject eyeWearPhysObj = eyeWearCIW.GetComponent<FVRPhysicalObject>();
                     eyeWearPhysObj.SetQuickBeltSlot(null);
-                    EFM_EquipmentSlot.TakeOffEquipment(eyeWearCIW);
+                    EquipmentSlot.TakeOffEquipment(eyeWearCIW);
                 }
-                if (EFM_EquipmentSlot.wearingRig)
+                if (EquipmentSlot.wearingRig)
                 {
-                    Mod.scavRaidReturnItems[8] = EFM_EquipmentSlot.currentRig.gameObject;
-                    EFM_CustomItemWrapper rigCIW = EFM_EquipmentSlot.currentRig;
+                    Mod.scavRaidReturnItems[8] = EquipmentSlot.currentRig.gameObject;
+                    CustomItemWrapper rigCIW = EquipmentSlot.currentRig;
                     FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
                     rigPhysObj.SetQuickBeltSlot(null);
-                    EFM_EquipmentSlot.TakeOffEquipment(rigCIW);
+                    EquipmentSlot.TakeOffEquipment(rigCIW);
                 }
-                if (EFM_EquipmentSlot.wearingPouch)
+                if (EquipmentSlot.wearingPouch)
                 {
-                    Mod.scavRaidReturnItems[9] = EFM_EquipmentSlot.currentPouch.gameObject;
-                    EFM_CustomItemWrapper pouchCIW = EFM_EquipmentSlot.currentPouch;
+                    Mod.scavRaidReturnItems[9] = EquipmentSlot.currentPouch.gameObject;
+                    CustomItemWrapper pouchCIW = EquipmentSlot.currentPouch;
                     FVRPhysicalObject pouchPhysObj = pouchCIW.GetComponent<FVRPhysicalObject>();
                     pouchPhysObj.SetQuickBeltSlot(null);
-                    EFM_EquipmentSlot.TakeOffEquipment(pouchCIW);
+                    EquipmentSlot.TakeOffEquipment(pouchCIW);
                 }
 
                 // Right shoulder object
                 if (Mod.rightShoulderObject != null)
                 {
                     Mod.scavRaidReturnItems[10] = Mod.rightShoulderObject;
-                    EFM_VanillaItemDescriptor rightShoulderVID = Mod.rightShoulderObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    VanillaItemDescriptor rightShoulderVID = Mod.rightShoulderObject.GetComponent<VanillaItemDescriptor>();
                     FVRPhysicalObject rightShoulderPhysObj = rightShoulderVID.GetComponent<FVRPhysicalObject>();
                     rightShoulderPhysObj.SetQuickBeltSlot(null);
                     Mod.rightShoulderObject = null;
@@ -4324,8 +4324,8 @@ namespace EFM
             }
 
             // Just return if we declared the item as destroyed already, it would mean that we already managed the weight and item lists so we dont want this patch to do it
-            EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
-            EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
+            VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
             if(CIW != null)
             {
                 if (CIW.destroyed)
@@ -4351,7 +4351,7 @@ namespace EFM
                 // If the item is harnessed to the quickbelt slot, must scale it appropriately
                 if ((__instance as FVRPhysicalObject).m_isHardnessed)
                 {
-                    if ((__instance as FVRPhysicalObject).QuickbeltSlot is EFM_EquipmentSlot)
+                    if ((__instance as FVRPhysicalObject).QuickbeltSlot is EquipmentSlot)
                     {
                         // Make equipment the size of its QBPoseOverride because by default the game only sets rotation
                         if (__instance.QBPoseOverride != null)
@@ -4367,7 +4367,7 @@ namespace EFM
                 }
 
                 // Check if area slot
-                if ((__instance as FVRPhysicalObject).QuickbeltSlot is EFM_AreaSlot)
+                if ((__instance as FVRPhysicalObject).QuickbeltSlot is AreaSlot)
                 {
                     BeginInteractionPatch.SetItemLocationIndex(3, CIW, VID, true);
 
@@ -4381,7 +4381,7 @@ namespace EFM
                 FVRQuickBeltSlot qbs = physObj.QuickbeltSlot;
                 if (qbs.transform.parent != null && qbs.transform.parent.parent != null && qbs.transform.parent.parent.parent != null)
                 {
-                    EFM_CustomItemWrapper customItemWrapper = qbs.transform.parent.parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                    CustomItemWrapper customItemWrapper = qbs.transform.parent.parent.parent.GetComponent<CustomItemWrapper>();
                     if (customItemWrapper != null)
                     {
                         if (CIW != null)
@@ -4454,8 +4454,8 @@ namespace EFM
                 FVRFireArmAttachment asAttachment = (FVRFireArmAttachment)__instance;
                 if (asAttachment.Sensor.CurHoveredMount != null)
                 {
-                    EFM_CustomItemWrapper attachmentParentCIW = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<EFM_CustomItemWrapper>();
-                    EFM_VanillaItemDescriptor attachmentParentVID = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<EFM_VanillaItemDescriptor>();
+                    CustomItemWrapper attachmentParentCIW = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<CustomItemWrapper>();
+                    VanillaItemDescriptor attachmentParentVID = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<VanillaItemDescriptor>();
 
                     int newLocationIndex = -1;
                     if(attachmentParentCIW != null)
@@ -4515,8 +4515,8 @@ namespace EFM
         private static void DropItem(FVRViveHand hand, FVRPhysicalObject primary)
         {
             Mod.instance.LogInfo("Dropped Item " + primary.name+":\n"+Environment.StackTrace);
-            EFM_CustomItemWrapper collidingContainerWrapper = null;
-            EFM_TradeVolume collidingTradeVolume = null;
+            CustomItemWrapper collidingContainerWrapper = null;
+            TradeVolume collidingTradeVolume = null;
             if (Mod.rightHand != null)
             {
                 if (hand.IsThisTheRightHand)
@@ -4533,8 +4533,8 @@ namespace EFM
                 }
             }
 
-            EFM_CustomItemWrapper heldCustomItemWrapper = primary.GetComponent<EFM_CustomItemWrapper>();
-            EFM_VanillaItemDescriptor heldVanillaItemDescriptor = primary.GetComponent<EFM_VanillaItemDescriptor>();
+            CustomItemWrapper heldCustomItemWrapper = primary.GetComponent<CustomItemWrapper>();
+            VanillaItemDescriptor heldVanillaItemDescriptor = primary.GetComponent<VanillaItemDescriptor>();
 
             // Remove from All if necessary
             if (heldCustomItemWrapper != null)
@@ -4615,12 +4615,12 @@ namespace EFM
             }
         }
 
-        private static void DropItemInWorld(FVRPhysicalObject primary, EFM_CustomItemWrapper heldCustomItemWrapper, EFM_VanillaItemDescriptor heldVanillaItemDescriptor)
+        private static void DropItemInWorld(FVRPhysicalObject primary, CustomItemWrapper heldCustomItemWrapper, VanillaItemDescriptor heldVanillaItemDescriptor)
         {
             // Drop item in world
             GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
-            EFM_Base_Manager baseManager = sceneRoot.GetComponent<EFM_Base_Manager>();
-            EFM_Raid_Manager raidManager = sceneRoot.GetComponent<EFM_Raid_Manager>();
+            Base_Manager baseManager = sceneRoot.GetComponent<Base_Manager>();
+            Raid_Manager raidManager = sceneRoot.GetComponent<Raid_Manager>();
             if (baseManager != null)
             {
                 BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
@@ -4987,7 +4987,7 @@ namespace EFM
                     if (fvrquickBeltSlot.CurObject == null && fvrquickBeltSlot.SizeLimit >= fvrphysicalObject.Size && fvrphysicalObject.QBSlotType == fvrquickBeltSlot.Type)
                     {
                         // Check for equipment compatibility if slot is an equipment slot
-                        EFM_CustomItemWrapper customItemWrapper = fvrphysicalObject.GetComponent<EFM_CustomItemWrapper>();
+                        CustomItemWrapper customItemWrapper = fvrphysicalObject.GetComponent<CustomItemWrapper>();
                         if (equipmentSlotIndex > -1)
                         {
                             if(customItemWrapper != null)
@@ -4998,39 +4998,39 @@ namespace EFM
                                 {
                                     case Mod.ItemType.ArmoredRig:
                                         typeCompatible = Mod.equipmentSlots[equipmentSlotIndex].equipmentType == Mod.ItemType.BodyArmor;
-                                        otherCompatible = !EFM_EquipmentSlot.wearingBodyArmor && !EFM_EquipmentSlot.wearingRig;
+                                        otherCompatible = !EquipmentSlot.wearingBodyArmor && !EquipmentSlot.wearingRig;
                                         break;
                                     case Mod.ItemType.BodyArmor:
-                                        otherCompatible = !EFM_EquipmentSlot.wearingArmoredRig;
+                                        otherCompatible = !EquipmentSlot.wearingArmoredRig;
                                         break;
                                     case Mod.ItemType.Helmet:
                                         typeCompatible = Mod.equipmentSlots[equipmentSlotIndex].equipmentType == Mod.ItemType.Headwear;
-                                        otherCompatible = (!EFM_EquipmentSlot.wearingEarpiece || !EFM_EquipmentSlot.currentEarpiece.blocksHeadwear) &&
-                                                          (!EFM_EquipmentSlot.wearingFaceCover || !EFM_EquipmentSlot.currentFaceCover.blocksHeadwear) &&
-                                                          (!EFM_EquipmentSlot.wearingEyewear || !EFM_EquipmentSlot.currentEyewear.blocksHeadwear);
+                                        otherCompatible = (!EquipmentSlot.wearingEarpiece || !EquipmentSlot.currentEarpiece.blocksHeadwear) &&
+                                                          (!EquipmentSlot.wearingFaceCover || !EquipmentSlot.currentFaceCover.blocksHeadwear) &&
+                                                          (!EquipmentSlot.wearingEyewear || !EquipmentSlot.currentEyewear.blocksHeadwear);
                                         break;
                                     case Mod.ItemType.Earpiece:
-                                        otherCompatible = (!EFM_EquipmentSlot.wearingHeadwear || !EFM_EquipmentSlot.currentHeadwear.blocksEarpiece) &&
-                                                          (!EFM_EquipmentSlot.wearingFaceCover || !EFM_EquipmentSlot.currentFaceCover.blocksEarpiece) &&
-                                                          (!EFM_EquipmentSlot.wearingEyewear || !EFM_EquipmentSlot.currentEyewear.blocksEarpiece);
+                                        otherCompatible = (!EquipmentSlot.wearingHeadwear || !EquipmentSlot.currentHeadwear.blocksEarpiece) &&
+                                                          (!EquipmentSlot.wearingFaceCover || !EquipmentSlot.currentFaceCover.blocksEarpiece) &&
+                                                          (!EquipmentSlot.wearingEyewear || !EquipmentSlot.currentEyewear.blocksEarpiece);
                                         break;
                                     case Mod.ItemType.FaceCover:
-                                        otherCompatible = (!EFM_EquipmentSlot.wearingHeadwear || !EFM_EquipmentSlot.currentHeadwear.blocksFaceCover) &&
-                                                          (!EFM_EquipmentSlot.wearingEarpiece || !EFM_EquipmentSlot.currentEarpiece.blocksFaceCover) &&
-                                                          (!EFM_EquipmentSlot.wearingEyewear || !EFM_EquipmentSlot.currentEyewear.blocksFaceCover);
+                                        otherCompatible = (!EquipmentSlot.wearingHeadwear || !EquipmentSlot.currentHeadwear.blocksFaceCover) &&
+                                                          (!EquipmentSlot.wearingEarpiece || !EquipmentSlot.currentEarpiece.blocksFaceCover) &&
+                                                          (!EquipmentSlot.wearingEyewear || !EquipmentSlot.currentEyewear.blocksFaceCover);
                                         break;
                                     case Mod.ItemType.Eyewear:
-                                        otherCompatible = (!EFM_EquipmentSlot.wearingHeadwear || !EFM_EquipmentSlot.currentHeadwear.blocksEyewear) &&
-                                                          (!EFM_EquipmentSlot.wearingEarpiece || !EFM_EquipmentSlot.currentEarpiece.blocksEyewear) &&
-                                                          (!EFM_EquipmentSlot.wearingFaceCover || !EFM_EquipmentSlot.currentFaceCover.blocksEyewear);
+                                        otherCompatible = (!EquipmentSlot.wearingHeadwear || !EquipmentSlot.currentHeadwear.blocksEyewear) &&
+                                                          (!EquipmentSlot.wearingEarpiece || !EquipmentSlot.currentEarpiece.blocksEyewear) &&
+                                                          (!EquipmentSlot.wearingFaceCover || !EquipmentSlot.currentFaceCover.blocksEyewear);
                                         break;
                                     case Mod.ItemType.Rig:
-                                        otherCompatible = !EFM_EquipmentSlot.wearingArmoredRig;
+                                        otherCompatible = !EquipmentSlot.wearingArmoredRig;
                                         break;
                                     case Mod.ItemType.Headwear:
-                                        otherCompatible = (!EFM_EquipmentSlot.wearingEarpiece || !EFM_EquipmentSlot.currentEarpiece.blocksHeadwear) &&
-                                                          (!EFM_EquipmentSlot.wearingFaceCover || !EFM_EquipmentSlot.currentFaceCover.blocksHeadwear) &&
-                                                          (!EFM_EquipmentSlot.wearingEyewear || !EFM_EquipmentSlot.currentEyewear.blocksHeadwear);
+                                        otherCompatible = (!EquipmentSlot.wearingEarpiece || !EquipmentSlot.currentEarpiece.blocksHeadwear) &&
+                                                          (!EquipmentSlot.wearingFaceCover || !EquipmentSlot.currentFaceCover.blocksHeadwear) &&
+                                                          (!EquipmentSlot.wearingEyewear || !EquipmentSlot.currentEyewear.blocksHeadwear);
                                         break;
                                     default:
                                         break;
@@ -5045,7 +5045,7 @@ namespace EFM
                         {
                             // If left shoulder, make sure item is backpack, and player not already wearing a backpack
                             // If right shoulder, make sure item is a firearm
-                            if (shoulderIndex == 0 && customItemWrapper != null && customItemWrapper.itemType == Mod.ItemType.Backpack && EFM_EquipmentSlot.currentBackpack == null)
+                            if (shoulderIndex == 0 && customItemWrapper != null && customItemWrapper.itemType == Mod.ItemType.Backpack && EquipmentSlot.currentBackpack == null)
                             {
                                 __instance.CurrentHoveredQuickbeltSlot = Mod.equipmentSlots[0];
                             }
@@ -5054,9 +5054,9 @@ namespace EFM
                                 __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                             }
                         }
-                        else if(fvrquickBeltSlot is EFM_AreaSlot)
+                        else if(fvrquickBeltSlot is AreaSlot)
                         {
-                            EFM_AreaSlot asAreaSlot = fvrquickBeltSlot as EFM_AreaSlot;
+                            AreaSlot asAreaSlot = fvrquickBeltSlot as AreaSlot;
                             string IDToUse;
                             if(customItemWrapper != null)
                             {
@@ -5064,7 +5064,7 @@ namespace EFM
                             }
                             else
                             {
-                                IDToUse = fvrphysicalObject.GetComponent<EFM_VanillaItemDescriptor>().H3ID;
+                                IDToUse = fvrphysicalObject.GetComponent<VanillaItemDescriptor>().H3ID;
                             }
                             if (asAreaSlot.filter.Contains(IDToUse))
                             {
@@ -5108,9 +5108,9 @@ namespace EFM
                 if(slot != null)
                 {
                     // Need to make sure that a backpack being put into left shoulder slot gets put into backpack equipment slot instead
-                    if (slot is EFM_ShoulderStorage)
+                    if (slot is ShoulderStorage)
                     {
-                        if (!(slot as EFM_ShoulderStorage).right)
+                        if (!(slot as ShoulderStorage).right)
                         {
                             slot = Mod.equipmentSlots[0]; // Set the slot as the backpack equip slot
                         }
@@ -5131,13 +5131,13 @@ namespace EFM
                 __instance.transform.localScale = Vector3.one;
 
                 // Prefix will be called before the object's current slot is set to null, so we can check if it was taken from an equipment slot or a rig slot
-                EFM_CustomItemWrapper customItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
-                if (__instance.QuickbeltSlot is EFM_EquipmentSlot)
+                CustomItemWrapper customItemWrapper = __instance.GetComponent<CustomItemWrapper>();
+                if (__instance.QuickbeltSlot is EquipmentSlot)
                 {
                     // Have to remove equipment
                     if (customItemWrapper != null)
                     {
-                        EFM_EquipmentSlot.TakeOffEquipment(customItemWrapper);
+                        EquipmentSlot.TakeOffEquipment(customItemWrapper);
                     }
 
                     // Also set left shoulder object to null if this is backpack slot
@@ -5146,9 +5146,9 @@ namespace EFM
                         Mod.leftShoulderObject = null;
                     }
                 }
-                else if(__instance.QuickbeltSlot is EFM_ShoulderStorage)
+                else if(__instance.QuickbeltSlot is ShoulderStorage)
                 {
-                    EFM_ShoulderStorage asShoulderSlot = __instance.QuickbeltSlot as EFM_ShoulderStorage;
+                    ShoulderStorage asShoulderSlot = __instance.QuickbeltSlot as ShoulderStorage;
                     if (asShoulderSlot.right)
                     {
                         Mod.rightShoulderObject = null;
@@ -5160,14 +5160,14 @@ namespace EFM
                     //    EFM_EquipmentSlot.TakeOffEquipment(customItemWrapper);
                     //}
                 }
-                else if(__instance.QuickbeltSlot is EFM_AreaSlot)
+                else if(__instance.QuickbeltSlot is AreaSlot)
                 {
-                    EFM_AreaSlot asAreaSlot = __instance.QuickbeltSlot as EFM_AreaSlot;
+                    AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
                     Mod.currentBaseManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = null;
                     
                     if (Mod.areaSlotShouldUpdate)
                     {
-                        EFM_BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<EFM_BaseAreaManager>();
+                        BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
 
                         areaManager.slotItems[asAreaSlot.slotIndex] = null;
 
@@ -5197,7 +5197,7 @@ namespace EFM
                         Transform rootOwner = slotRootParent.parent;
                         if (rootOwner != null)
                         {
-                            EFM_CustomItemWrapper rigItemWrapper = rootOwner.GetComponent<EFM_CustomItemWrapper>();
+                            CustomItemWrapper rigItemWrapper = rootOwner.GetComponent<CustomItemWrapper>();
                             if (rigItemWrapper != null && (rigItemWrapper.itemType == Mod.ItemType.Rig || rigItemWrapper.itemType == Mod.ItemType.ArmoredRig))
                             {
                                 // This slot is owned by a rig, need to update that rig's content
@@ -5206,7 +5206,7 @@ namespace EFM
                                     if (rigItemWrapper.rigSlots[slotIndex].Equals(__instance.QuickbeltSlot))
                                     {
                                         rigItemWrapper.itemsInSlots[slotIndex] = null;
-                                        rigItemWrapper.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight;
+                                        rigItemWrapper.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
                                         return;
                                     }
                                 }
@@ -5214,20 +5214,20 @@ namespace EFM
                         }
                     }
 
-                    if (EFM_EquipmentSlot.currentRig != null) // Is slot of current rig
+                    if (EquipmentSlot.currentRig != null) // Is slot of current rig
                     {
                         // If we are setting this object's slot to null, it may be because we have begun interacting with
                         // the rig equipment and therefore should not remove it from the rig's itemsInSlots
                         if (!Mod.beginInteractingEquipRig)
                         {
                             // Find item in rig's itemsInSlots and remove it
-                            for (int i = 0; i < EFM_EquipmentSlot.currentRig.itemsInSlots.Length; ++i)
+                            for (int i = 0; i < EquipmentSlot.currentRig.itemsInSlots.Length; ++i)
                             {
-                                if (EFM_EquipmentSlot.currentRig.itemsInSlots[i] == __instance.gameObject)
+                                if (EquipmentSlot.currentRig.itemsInSlots[i] == __instance.gameObject)
                                 {
-                                    EFM_EquipmentSlot.currentRig.itemsInSlots[i] = null;
-                                    EFM_EquipmentSlot.currentRig.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight;
-                                    EFM_EquipmentSlot.currentRig.UpdateRigMode();
+                                    EquipmentSlot.currentRig.itemsInSlots[i] = null;
+                                    EquipmentSlot.currentRig.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
+                                    EquipmentSlot.currentRig.UpdateRigMode();
                                     return;
                                 }
                             }
@@ -5238,17 +5238,17 @@ namespace EFM
             else
             {
                 // Need to make sure that a backpack being put into left shoulder slot gets put into backpack equipment slot instead
-                if(slot is EFM_ShoulderStorage)
+                if(slot is ShoulderStorage)
                 {
-                    if(!(slot as EFM_ShoulderStorage).right)
+                    if(!(slot as ShoulderStorage).right)
                     {
                         slot = Mod.equipmentSlots[0]; // Set the slot as the backpack equip slot
                     }
                 }
 
                 // Add to All if necessary
-                EFM_CustomItemWrapper customItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
-                EFM_VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                CustomItemWrapper customItemWrapper = __instance.GetComponent<CustomItemWrapper>();
+                VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<VanillaItemDescriptor>();
                 if(customItemWrapper != null)
                 {
                     Mod.AddToAll(__instance, customItemWrapper, null);
@@ -5278,10 +5278,10 @@ namespace EFM
                     __instance.SetParentage(null);
 
                     // This is for in case we harnessed backpack to the shoulder slot
-                    if (slot is EFM_EquipmentSlot && __instance.m_hand == null)
+                    if (slot is EquipmentSlot && __instance.m_hand == null)
                     {
                         __instance.gameObject.SetActive(Mod.playerStatusManager.displayed);
-                        __instance.GetComponent<EFM_CustomItemWrapper>().UpdateBackpackMode();
+                        __instance.GetComponent<CustomItemWrapper>().UpdateBackpackMode();
                     }
                 }
 
@@ -5309,9 +5309,9 @@ namespace EFM
             }
 
             // Check if shoulder slot
-            if(slot is EFM_ShoulderStorage)
+            if(slot is ShoulderStorage)
             {
-                EFM_ShoulderStorage asShoulderSlot = slot as EFM_ShoulderStorage;
+                ShoulderStorage asShoulderSlot = slot as ShoulderStorage;
                 if (asShoulderSlot.right)
                 {
                     Mod.rightShoulderObject = __instance.gameObject;
@@ -5326,14 +5326,14 @@ namespace EFM
                 return;
             }
             
-            if (slot is EFM_AreaSlot)
+            if (slot is AreaSlot)
             {
-                EFM_AreaSlot asAreaSlot = __instance.QuickbeltSlot as EFM_AreaSlot;
+                AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
                 Mod.currentBaseManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
 
                 if (Mod.areaSlotShouldUpdate)
                 {
-                    EFM_BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<EFM_BaseAreaManager>();
+                    BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
 
                     areaManager.slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
 
@@ -5347,7 +5347,7 @@ namespace EFM
                 }
             }
 
-            if (slot is EFM_EquipmentSlot)
+            if (slot is EquipmentSlot)
             {
                 // Make equipment the size of its QBPoseOverride because by default the game only sets rotation
                 if (__instance.QBPoseOverride != null)
@@ -5365,11 +5365,11 @@ namespace EFM
                     Mod.leftShoulderObject = __instance.gameObject;
                 }
 
-                EFM_EquipmentSlot.WearEquipment(__instance.GetComponent<EFM_CustomItemWrapper>());
+                EquipmentSlot.WearEquipment(__instance.GetComponent<CustomItemWrapper>());
 
                 __instance.gameObject.SetActive(Mod.playerStatusManager.displayed);
             }
-            else if (EFM_EquipmentSlot.wearingArmoredRig || EFM_EquipmentSlot.wearingRig) // We are wearing custom quick belt, check if slot is in there, update if it is
+            else if (EquipmentSlot.wearingArmoredRig || EquipmentSlot.wearingRig) // We are wearing custom quick belt, check if slot is in there, update if it is
             {
                 // Find slot index in config
                 bool foundSlot = false;
@@ -5377,9 +5377,9 @@ namespace EFM
                 {
                     if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex].Equals(slot))
                     {
-                        EFM_CustomItemWrapper equipmentItemWrapper = EFM_EquipmentSlot.currentRig;
+                        CustomItemWrapper equipmentItemWrapper = EquipmentSlot.currentRig;
                         equipmentItemWrapper.itemsInSlots[slotIndex - 4] = __instance.gameObject;
-                        equipmentItemWrapper.currentWeight += __instance.GetComponent<EFM_CustomItemWrapper>() != null ? __instance.GetComponent<EFM_CustomItemWrapper>().currentWeight : __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight;
+                        equipmentItemWrapper.currentWeight += __instance.GetComponent<CustomItemWrapper>() != null ? __instance.GetComponent<CustomItemWrapper>().currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
                         equipmentItemWrapper.UpdateRigMode();
 
                         foundSlot = true;
@@ -5406,7 +5406,7 @@ namespace EFM
                 Transform rootOwner = slotRootParent.parent;
                 if (rootOwner != null)
                 {
-                    EFM_CustomItemWrapper customItemWrapper = rootOwner.GetComponent<EFM_CustomItemWrapper>();
+                    CustomItemWrapper customItemWrapper = rootOwner.GetComponent<CustomItemWrapper>();
                     if (customItemWrapper != null && (customItemWrapper.itemType == Mod.ItemType.Rig || customItemWrapper.itemType == Mod.ItemType.ArmoredRig))
                     {
                         // This slot is owned by a rig, need to update that rig's content
@@ -5425,7 +5425,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    customItemWrapper.currentWeight += __instance.GetComponent<EFM_CustomItemWrapper>() != null ? __instance.GetComponent<EFM_CustomItemWrapper>().currentWeight : __instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight;
+                                    customItemWrapper.currentWeight += __instance.GetComponent<CustomItemWrapper>() != null ? __instance.GetComponent<CustomItemWrapper>().currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
                                 }
                                 return;
                             }
@@ -5466,8 +5466,8 @@ namespace EFM
                 //}
             }
 
-            EFM_VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-            EFM_CustomItemWrapper customItemWrapper = __instance.GetComponent<EFM_CustomItemWrapper>();
+            VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<VanillaItemDescriptor>();
+            CustomItemWrapper customItemWrapper = __instance.GetComponent<CustomItemWrapper>();
             if (customItemWrapper != null)
             {
                 // Add to All if necessary
@@ -5486,7 +5486,7 @@ namespace EFM
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig) 
                 {
                     // Update whether we are picking the rig up from an equip slot
-                    Mod.beginInteractingEquipRig = __instance.QuickbeltSlot != null && __instance.QuickbeltSlot is EFM_EquipmentSlot;
+                    Mod.beginInteractingEquipRig = __instance.QuickbeltSlot != null && __instance.QuickbeltSlot is EquipmentSlot;
 
                     // Check which PoseOverride to use depending on hand side
                     __instance.PoseOverride = hand.IsThisTheRightHand ? customItemWrapper.rightHandPoseOverride : customItemWrapper.leftHandPoseOverride;
@@ -5563,12 +5563,12 @@ namespace EFM
                                 if (!condition.fulfilled)
                                 {
                                     ++condition.itemCount;
-                                    EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                                    TraderStatus.UpdateConditionFulfillment(condition);
                                 }
                             }
                         }
                     }
-                    Mod.AddSkillExp(EFM_Skill.uniqueLoot, 7);
+                    Mod.AddSkillExp(Skill.uniqueLoot, 7);
                 }
 
                 // Update lists
@@ -5630,12 +5630,12 @@ namespace EFM
                                 if (!condition.fulfilled)
                                 {
                                     ++condition.itemCount;
-                                    EFM_TraderStatus.UpdateConditionFulfillment(condition);
+                                    TraderStatus.UpdateConditionFulfillment(condition);
                                 }
                             }
                         }
                     }
-                    Mod.AddSkillExp(EFM_Skill.uniqueLoot, 7);
+                    Mod.AddSkillExp(Skill.uniqueLoot, 7);
                 }
 
                 if(__instance is FVRFireArm || (__instance is FVRMeleeWeapon && !vanillaItemDescriptor.inAll))
@@ -5690,10 +5690,10 @@ namespace EFM
             }
 
             // Check if in trade volume or container
-            EFM_TradeVolume tradeVolume = null;
+            TradeVolume tradeVolume = null;
             if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
             {
-                tradeVolume = __instance.transform.parent.parent.GetComponent<EFM_TradeVolume>();
+                tradeVolume = __instance.transform.parent.parent.GetComponent<TradeVolume>();
             }
             if (tradeVolume != null)
             {
@@ -5711,11 +5711,11 @@ namespace EFM
                     }
                 }
 
-                tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<EFM_CustomItemWrapper>(), __instance.GetComponent<EFM_VanillaItemDescriptor>());
+                tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<CustomItemWrapper>(), __instance.GetComponent<VanillaItemDescriptor>());
             }
             else if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
             {
-                EFM_CustomItemWrapper containerItemWrapper = __instance.transform.parent.parent.GetComponent<EFM_CustomItemWrapper>();
+                CustomItemWrapper containerItemWrapper = __instance.transform.parent.parent.GetComponent<CustomItemWrapper>();
                 if(containerItemWrapper != null && (containerItemWrapper.itemType == Mod.ItemType.Backpack || 
                                                     containerItemWrapper.itemType == Mod.ItemType.Container || 
                                                     containerItemWrapper.itemType == Mod.ItemType.Pouch))
@@ -5745,7 +5745,7 @@ namespace EFM
             }
         }
 
-        public static void SetItemLocationIndex(int locationIndex, EFM_CustomItemWrapper customItemWrapper, EFM_VanillaItemDescriptor vanillaItemDescriptor, bool updateWeight = true)
+        public static void SetItemLocationIndex(int locationIndex, CustomItemWrapper customItemWrapper, VanillaItemDescriptor vanillaItemDescriptor, bool updateWeight = true)
         {
             if (customItemWrapper != null)
             {
@@ -5771,7 +5771,7 @@ namespace EFM
                     {
                         if (innerItem != null)
                         {
-                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>(), false);
+                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<CustomItemWrapper>(), innerItem.GetComponent<VanillaItemDescriptor>(), false);
                         }
                     }
                 }
@@ -5779,7 +5779,7 @@ namespace EFM
                 {
                     foreach (Transform innerItem in customItemWrapper.containerItemRoot)
                     {
-                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<EFM_CustomItemWrapper>(), innerItem.GetComponent<EFM_VanillaItemDescriptor>(), false);
+                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<CustomItemWrapper>(), innerItem.GetComponent<VanillaItemDescriptor>(), false);
                     }
                 }
             }
@@ -5814,7 +5814,7 @@ namespace EFM
                         // Ammo container
                         if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                         {
-                            EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
+                            VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<VanillaItemDescriptor>();
                             if(ammoContainerVID != null)
                             {
                                 ammoContainerVID.locationIndex = locationIndex;
@@ -5823,7 +5823,7 @@ namespace EFM
                         }
                         else if(asFireArm.UsesClips && asFireArm.Clip != null)
                         {
-                            EFM_VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<EFM_VanillaItemDescriptor>();
+                            VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<VanillaItemDescriptor>();
                             if (ammoContainerVID != null)
                             {
                                 ammoContainerVID.locationIndex = locationIndex;
@@ -5838,7 +5838,7 @@ namespace EFM
                             {
                                 // TODO: Review if we ever update the weight of the firearm dynamically as we attach attachments to it, we will need to pass
                                 // false here instead of updateWeight because the attachment's weight was already included in the firearm's weight
-                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
+                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<VanillaItemDescriptor>(), updateWeight);
                             }
                         }
                     }
@@ -5852,7 +5852,7 @@ namespace EFM
                             {
                                 // TODO: Review if we ever update the weight of the attachment dynamically as we attach attachments to it, we will need to pass
                                 // false here instead of updateWeight because the attachment's weight was already included in the attachment's weight
-                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<EFM_VanillaItemDescriptor>(), updateWeight);
+                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<VanillaItemDescriptor>(), updateWeight);
                             }
                         }
                     }
@@ -5979,12 +5979,12 @@ namespace EFM
                     // Process damage resist from EFM_EquipmentSlot.CurrentHelmet
                     float heavyBleedChance = 0.05f - 0.05f * bleedingChanceModifier;
                     float lightBleedChance = 0.15f - 0.15f * bleedingChanceModifier;
-                    if (EFM_EquipmentSlot.currentHeadwear != null && EFM_EquipmentSlot.currentHeadwear.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentHeadwear.coverage)
+                    if (EquipmentSlot.currentHeadwear != null && EquipmentSlot.currentHeadwear.armor > 0 && UnityEngine.Random.value <= EquipmentSlot.currentHeadwear.coverage)
                     {
                         heavyBleedChance /= 3;
                         lightBleedChance /= 3;
-                        EFM_EquipmentSlot.currentHeadwear.armor -= actualAmount - actualAmount * EFM_EquipmentSlot.currentHeadwear.damageResist;
-                        actualAmount *= EFM_EquipmentSlot.currentHeadwear.damageResist;
+                        EquipmentSlot.currentHeadwear.armor -= actualAmount - actualAmount * EquipmentSlot.currentHeadwear.damageResist;
+                        actualAmount *= EquipmentSlot.currentHeadwear.damageResist;
                     }
 
                     // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
@@ -5993,28 +5993,28 @@ namespace EFM
                     if (chance <= heavyBleedChance)
                     {
                         Mod.instance.LogInfo("\t\tCaused heavy bleed");
-                        EFM_Effect heavyBleedEffect = new EFM_Effect();
-                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        Effect heavyBleedEffect = new Effect();
+                        heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = 0;
                         if (vitalityLevel >= 51) 
                         {
                             heavyBleedEffect.hasTimer = true;
                             heavyBleedEffect.timer = 30;
                         }
-                        EFM_Effect.effects.Add(heavyBleedEffect);
+                        Effect.effects.Add(heavyBleedEffect);
                     }
                     else if (chance <= lightBleedChance)
                     {
                         Mod.instance.LogInfo("\t\tCaused light bleed");
-                        EFM_Effect lightBleedEffect = new EFM_Effect();
-                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        Effect lightBleedEffect = new Effect();
+                        lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = 0;
                         if (vitalityLevel >= 51)
                         {
                             lightBleedEffect.hasTimer = true;
                             lightBleedEffect.timer = 20;
                         }
-                        EFM_Effect.effects.Add(lightBleedEffect);
+                        Effect.effects.Add(lightBleedEffect);
                     }
                 }
                 else if (hitbox.Type == FVRPlayerHitbox.PlayerHitBoxType.Torso)
@@ -6042,12 +6042,12 @@ namespace EFM
                         // Process damage resist from EFM_EquipmentSlot.CurrentArmor
                         float heavyBleedChance = 0.05f - 0.05f * bleedingChanceModifier;
                         float lightBleedChance = 0.15f - 0.15f * bleedingChanceModifier;
-                        if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
+                        if (EquipmentSlot.currentArmor != null && EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EquipmentSlot.currentArmor.coverage)
                         {
                             heavyBleedChance /= 3;
                             lightBleedChance /= 3;
-                            EFM_EquipmentSlot.currentArmor.armor -= actualAmount - actualAmount * EFM_EquipmentSlot.currentArmor.damageResist;
-                            actualAmount *= EFM_EquipmentSlot.currentArmor.damageResist;
+                            EquipmentSlot.currentArmor.armor -= actualAmount - actualAmount * EquipmentSlot.currentArmor.damageResist;
+                            actualAmount *= EquipmentSlot.currentArmor.damageResist;
                         }
 
                         // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
@@ -6056,28 +6056,28 @@ namespace EFM
                         if (bleedValue <= heavyBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused heavy bleed");
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused light bleed");
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
                     }
                     else if (partChance > thoraxChance && partChance <= stomachChance)
@@ -6088,12 +6088,12 @@ namespace EFM
                         // Process damage resist from EFM_EquipmentSlot.CurrentArmor
                         float heavyBleedChance = 0.1f - 0.1f * bleedingChanceModifier;
                         float lightBleedChance = 0.25f - 0.25f * bleedingChanceModifier;
-                        if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
+                        if (EquipmentSlot.currentArmor != null && EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EquipmentSlot.currentArmor.coverage)
                         {
                             heavyBleedChance /= 3;
                             lightBleedChance /= 3;
-                            EFM_EquipmentSlot.currentArmor.armor -= actualAmount - actualAmount * EFM_EquipmentSlot.currentArmor.damageResist;
-                            actualAmount *= EFM_EquipmentSlot.currentArmor.damageResist;
+                            EquipmentSlot.currentArmor.armor -= actualAmount - actualAmount * EquipmentSlot.currentArmor.damageResist;
+                            actualAmount *= EquipmentSlot.currentArmor.damageResist;
                         }
 
                         // TODO: Maybe we can check which ammo the sosig is using, and when we create the Damage object we pass here,
@@ -6102,28 +6102,28 @@ namespace EFM
                         if (bleedValue <= heavyBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused heavy bleed");
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused light bleed");
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
                     }
                     else if (partChance > stomachChance && partChance <= rightArmChance)
@@ -6141,37 +6141,37 @@ namespace EFM
                         if (bleedValue <= heavyBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused heavy bleed");
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused light bleed");
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
 
                         if (UnityEngine.Random.value < fractureChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused fracture");
-                            EFM_Effect fractureEffect = new EFM_Effect();
-                            fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                            Effect fractureEffect = new Effect();
+                            fractureEffect.effectType = Effect.EffectType.Fracture;
                             fractureEffect.partIndex = actualPartIndex;
-                            EFM_Effect.effects.Add(fractureEffect);
+                            Effect.effects.Add(fractureEffect);
                         }
                     }
                     else if (partChance > rightArmChance && partChance <= leftArmChance)
@@ -6189,37 +6189,37 @@ namespace EFM
                         if (bleedValue <= heavyBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused heavy bleed");
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused light bleed");
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
 
                         if (UnityEngine.Random.value < fractureChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused fracture");
-                            EFM_Effect fractureEffect = new EFM_Effect();
-                            fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                            Effect fractureEffect = new Effect();
+                            fractureEffect.effectType = Effect.EffectType.Fracture;
                             fractureEffect.partIndex = actualPartIndex;
-                            EFM_Effect.effects.Add(fractureEffect);
+                            Effect.effects.Add(fractureEffect);
                         }
                     }
                     else if (partChance > leftArmChance && partChance <= rightLegChance)
@@ -6237,37 +6237,37 @@ namespace EFM
                         if (bleedValue <= heavyBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused heavy bleed");
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused light bleed");
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
 
                         if (UnityEngine.Random.value < fractureChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused fracture");
-                            EFM_Effect fractureEffect = new EFM_Effect();
-                            fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                            Effect fractureEffect = new Effect();
+                            fractureEffect.effectType = Effect.EffectType.Fracture;
                             fractureEffect.partIndex = actualPartIndex;
-                            EFM_Effect.effects.Add(fractureEffect);
+                            Effect.effects.Add(fractureEffect);
                         }
                     }
                     else if (partChance > rightLegChance && partChance <= leftLegChance)
@@ -6285,37 +6285,37 @@ namespace EFM
                         if (bleedValue <= heavyBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused heavy bleed");
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused light bleed");
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
 
                         if (UnityEngine.Random.value < fractureChance)
                         {
                             Mod.instance.LogInfo("\t\tCaused fracture");
-                            EFM_Effect fractureEffect = new EFM_Effect();
-                            fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                            Effect fractureEffect = new Effect();
+                            fractureEffect.effectType = Effect.EffectType.Fracture;
                             fractureEffect.partIndex = actualPartIndex;
-                            EFM_Effect.effects.Add(fractureEffect);
+                            Effect.effects.Add(fractureEffect);
                         }
                     }
                 }
@@ -6337,37 +6337,37 @@ namespace EFM
                     if (bleedValue <= heavyBleedChance)
                     {
                         Mod.instance.LogInfo("\t\tCaused heavy bleed");
-                        EFM_Effect heavyBleedEffect = new EFM_Effect();
-                        heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                        Effect heavyBleedEffect = new Effect();
+                        heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                         heavyBleedEffect.partIndex = actualPartIndex;
                         if (vitalityLevel >= 51)
                         {
                             heavyBleedEffect.hasTimer = true;
                             heavyBleedEffect.timer = 30;
                         }
-                        EFM_Effect.effects.Add(heavyBleedEffect);
+                        Effect.effects.Add(heavyBleedEffect);
                     }
                     else if (bleedValue <= lightBleedChance)
                     {
                         Mod.instance.LogInfo("\t\tCaused light bleed");
-                        EFM_Effect lightBleedEffect = new EFM_Effect();
-                        lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                        Effect lightBleedEffect = new Effect();
+                        lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                         lightBleedEffect.partIndex = actualPartIndex;
                         if (vitalityLevel >= 51)
                         {
                             lightBleedEffect.hasTimer = true;
                             lightBleedEffect.timer = 20;
                         }
-                        EFM_Effect.effects.Add(lightBleedEffect);
+                        Effect.effects.Add(lightBleedEffect);
                     }
 
                     if (UnityEngine.Random.value < fractureChance)
                     {
                         Mod.instance.LogInfo("\t\tCaused fracture");
-                        EFM_Effect fractureEffect = new EFM_Effect();
-                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        Effect fractureEffect = new Effect();
+                        fractureEffect.effectType = Effect.EffectType.Fracture;
                         fractureEffect.partIndex = actualPartIndex;
-                        EFM_Effect.effects.Add(fractureEffect);
+                        Effect.effects.Add(fractureEffect);
                     }
                 }
             }
@@ -6384,39 +6384,39 @@ namespace EFM
                         // Process damage resist from EFM_EquipmentSlot.CurrentHelmet
                         float heavyBleedChance0 = 0.05f - 0.05f * bleedingChanceModifier;
                         float lightBleedChance0 = 0.15f - 0.15f * bleedingChanceModifier;
-                        if (EFM_EquipmentSlot.currentHeadwear != null && EFM_EquipmentSlot.currentHeadwear.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentHeadwear.coverage)
+                        if (EquipmentSlot.currentHeadwear != null && EquipmentSlot.currentHeadwear.armor > 0 && UnityEngine.Random.value <= EquipmentSlot.currentHeadwear.coverage)
                         {
                             heavyBleedChance0 /= 3;
                             lightBleedChance0 /= 3;
-                            EFM_EquipmentSlot.currentHeadwear.armor -= actualAmount - actualAmount * EFM_EquipmentSlot.currentHeadwear.damageResist;
-                            actualAmount *= EFM_EquipmentSlot.currentHeadwear.damageResist;
+                            EquipmentSlot.currentHeadwear.armor -= actualAmount - actualAmount * EquipmentSlot.currentHeadwear.damageResist;
+                            actualAmount *= EquipmentSlot.currentHeadwear.damageResist;
                         }
 
                         // Apply possible effects
                         float bleedValue0 = UnityEngine.Random.value;
                         if (bleedValue0 <= heavyBleedChance0)
                         {
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = 0;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue0 <= lightBleedChance0)
                         {
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = 0;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
                         break;
                     case 1: // Thorax
@@ -6428,78 +6428,78 @@ namespace EFM
                         // Process damage resist from EFM_EquipmentSlot.CurrentArmor
                         float heavyBleedChance1 = 0.05f - 0.05f * bleedingChanceModifier;
                         float lightBleedChance1 = 0.15f - 0.15f * bleedingChanceModifier;
-                        if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
+                        if (EquipmentSlot.currentArmor != null && EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EquipmentSlot.currentArmor.coverage)
                         {
                             heavyBleedChance1 /= 3;
                             lightBleedChance1 /= 3;
-                            EFM_EquipmentSlot.currentArmor.armor -= actualAmount - actualAmount * EFM_EquipmentSlot.currentArmor.damageResist;
-                            actualAmount *= EFM_EquipmentSlot.currentArmor.damageResist;
+                            EquipmentSlot.currentArmor.armor -= actualAmount - actualAmount * EquipmentSlot.currentArmor.damageResist;
+                            actualAmount *= EquipmentSlot.currentArmor.damageResist;
                         }
 
                         // Apply possible effects
                         float bleedValue1 = UnityEngine.Random.value;
                         if (bleedValue1 <= heavyBleedChance1)
                         {
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue1 <= lightBleedChance1)
                         {
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
                         break;
                     case 2: // Stomach
                         // Process damage resist from EFM_EquipmentSlot.CurrentArmor
                         float heavyBleedChance2 = 0.1f - 0.1f * bleedingChanceModifier;
                         float lightBleedChance2 = 0.25f - 0.25f * bleedingChanceModifier;
-                        if (EFM_EquipmentSlot.currentArmor != null && EFM_EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EFM_EquipmentSlot.currentArmor.coverage)
+                        if (EquipmentSlot.currentArmor != null && EquipmentSlot.currentArmor.armor > 0 && UnityEngine.Random.value <= EquipmentSlot.currentArmor.coverage)
                         {
                             heavyBleedChance2 /= 3;
                             lightBleedChance2 /= 3;
-                            EFM_EquipmentSlot.currentArmor.armor -= actualAmount - actualAmount * EFM_EquipmentSlot.currentArmor.damageResist;
-                            actualAmount *= EFM_EquipmentSlot.currentArmor.damageResist;
+                            EquipmentSlot.currentArmor.armor -= actualAmount - actualAmount * EquipmentSlot.currentArmor.damageResist;
+                            actualAmount *= EquipmentSlot.currentArmor.damageResist;
                         }
 
                         // Apply possible effects
                         float bleedValue2 = UnityEngine.Random.value;
                         if (bleedValue2 <= heavyBleedChance2)
                         {
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue2 <= lightBleedChance2)
                         {
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
                         break;
                     case 3: // Left arm
@@ -6512,35 +6512,35 @@ namespace EFM
                         float bleedValue3 = UnityEngine.Random.value;
                         if (bleedValue3 <= heavyBleedChanceArm)
                         {
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValue3 <= lightBleedChanceArm)
                         {
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
 
                         if (UnityEngine.Random.value < fractureChanceArm)
                         {
-                            EFM_Effect fractureEffect = new EFM_Effect();
-                            fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                            Effect fractureEffect = new Effect();
+                            fractureEffect.effectType = Effect.EffectType.Fracture;
                             fractureEffect.partIndex = actualPartIndex;
-                            EFM_Effect.effects.Add(fractureEffect);
+                            Effect.effects.Add(fractureEffect);
                             // TODO: Player fracture sound
                         }
                         break;
@@ -6554,35 +6554,35 @@ namespace EFM
                         float bleedValueLeg = UnityEngine.Random.value;
                         if (bleedValueLeg <= heavyBleedChanceLeg)
                         {
-                            EFM_Effect heavyBleedEffect = new EFM_Effect();
-                            heavyBleedEffect.effectType = EFM_Effect.EffectType.HeavyBleeding;
+                            Effect heavyBleedEffect = new Effect();
+                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
                             heavyBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 heavyBleedEffect.hasTimer = true;
                                 heavyBleedEffect.timer = 30;
                             }
-                            EFM_Effect.effects.Add(heavyBleedEffect);
+                            Effect.effects.Add(heavyBleedEffect);
                         }
                         else if (bleedValueLeg <= lightBleedChanceLeg)
                         {
-                            EFM_Effect lightBleedEffect = new EFM_Effect();
-                            lightBleedEffect.effectType = EFM_Effect.EffectType.LightBleeding;
+                            Effect lightBleedEffect = new Effect();
+                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
                             lightBleedEffect.partIndex = actualPartIndex;
                             if (vitalityLevel >= 51)
                             {
                                 lightBleedEffect.hasTimer = true;
                                 lightBleedEffect.timer = 20;
                             }
-                            EFM_Effect.effects.Add(lightBleedEffect);
+                            Effect.effects.Add(lightBleedEffect);
                         }
 
                         if (UnityEngine.Random.value < fractureChanceLeg)
                         {
-                            EFM_Effect fractureEffect = new EFM_Effect();
-                            fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                            Effect fractureEffect = new Effect();
+                            fractureEffect.effectType = Effect.EffectType.Fracture;
                             fractureEffect.partIndex = actualPartIndex;
-                            EFM_Effect.effects.Add(fractureEffect);
+                            Effect.effects.Add(fractureEffect);
                             // TODO: Play fracture sound
                         }
                         break;
@@ -6596,7 +6596,7 @@ namespace EFM
         {
             if (GM.CurrentSceneSettings.DoesDamageGetRegistered && GM.CurrentSceneSettings.DeathResetPoint != null && !GM.IsDead())
             {
-                Mod.AddSkillExp(EFM_Skill.damageTakenAction * totalDamage, 2);
+                Mod.AddSkillExp(Skill.damageTakenAction * totalDamage, 2);
 
                 GM.CurrentPlayerBody.Health -= totalDamage;
 
@@ -6749,7 +6749,7 @@ namespace EFM
             }
 
             FVRInteractiveObject interactiveObject = collider.gameObject.GetComponent<FVRInteractiveObject>();
-            EFM_OtherInteractable otherInteractable = collider.gameObject.GetComponent<EFM_OtherInteractable>();
+            OtherInteractable otherInteractable = collider.gameObject.GetComponent<OtherInteractable>();
 
             FVRInteractiveObject interactiveObjectToUse = otherInteractable != null ? otherInteractable.interactiveObject : interactiveObject;
 
@@ -6825,7 +6825,7 @@ namespace EFM
             }
 
             FVRInteractiveObject interactiveObject = collider.gameObject.GetComponent<FVRInteractiveObject>();
-            EFM_OtherInteractable otherInteractable = collider.gameObject.GetComponent<EFM_OtherInteractable>();
+            OtherInteractable otherInteractable = collider.gameObject.GetComponent<OtherInteractable>();
             FVRInteractiveObject interactiveObjectToUse = otherInteractable != null ? otherInteractable.interactiveObject : interactiveObject;
 
             if (interactiveObjectToUse != null)
@@ -6853,7 +6853,7 @@ namespace EFM
                 return true;
             }
 
-            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.parent.GetComponent<DoorWrapper>();
 
             Vector3 pos = __instance.m_hand.Input.Pos;
             Vector3 vector = pos - __instance.KeyIn.position;
@@ -6920,7 +6920,7 @@ namespace EFM
                 return true;
             }
 
-            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.parent.GetComponent<DoorWrapper>();
 
             GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(int.TryParse(__instance.KeyFO, out int result) ? Mod.itemPrefabs[result] : IM.OD[__instance.KeyFO].GetGameObject(), __instance.transform.position, __instance.transform.rotation);
             LockKey component = gameObject.GetComponent<LockKey>();
@@ -6965,7 +6965,7 @@ namespace EFM
 
             // First check if lock is flipped
             Vector3 dirVecToUse = __instance.Mount.forward;
-            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.GetComponent<DoorWrapper>();
             if(doorWrapper != null && doorWrapper.flipLock)
             {
                 dirVecToUse *= -1; // Negate forward vector
@@ -6995,7 +6995,7 @@ namespace EFM
 
             // First check if lock is flipped
             Vector3 dirVecToUse = __instance.Mount.forward;
-            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.GetComponent<DoorWrapper>();
             if(doorWrapper != null && doorWrapper.flipLock)
             {
                 dirVecToUse *= -1; // Negate forward vector
@@ -7019,7 +7019,7 @@ namespace EFM
 
             // First check if lock is flipped
             float yAngleToUse = 0;
-            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.GetComponent<DoorWrapper>();
             if (doorWrapper != null && doorWrapper.flipLock)
             {
                 yAngleToUse = 180;
@@ -7042,7 +7042,7 @@ namespace EFM
 
             // First check if lock is flipped
             float yAngleToUse = 0;
-            EFM_DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.GetComponent<EFM_DoorWrapper>();
+            DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.GetComponent<DoorWrapper>();
             if(doorWrapper != null && doorWrapper.flipLock)
             {
                 yAngleToUse = 180;
@@ -7341,11 +7341,11 @@ namespace EFM
                     // Because this will also be checked in meatov menu, the patch will run, but they havent been init yet at that point
                     if ((__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange) && Mod.rightDescriptionManager != null)
                     {
-                        EFM_Describable describable = __instance.CurrentInteractable.GetComponent<EFM_Describable>();
+                        Describable describable = __instance.CurrentInteractable.GetComponent<Describable>();
                         if (describable != null)
                         {
                             // Get the description currently on this hand
-                            EFM_DescriptionManager manager = null;
+                            DescriptionManager manager = null;
                             if (__instance.IsThisTheRightHand)
                             {
                                 manager = Mod.rightDescriptionManager;
@@ -7356,7 +7356,7 @@ namespace EFM
                             }
 
                             // Get item and check if the one we are pointing at is already being described
-                            EFM_Describable describableToUse = null;
+                            Describable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
                                 if (manager.descriptionPack.isPhysical)
@@ -7405,7 +7405,7 @@ namespace EFM
                 if (Mod.rightDescriptionManager != null)
                 {
                     // Get the description currently on this hand
-                    EFM_DescriptionManager manager = null;
+                    DescriptionManager manager = null;
                     if (__instance.IsThisTheRightHand)
                     {
                         manager = Mod.rightDescriptionManager;
@@ -7425,7 +7425,7 @@ namespace EFM
             if (fullDescInput && Mod.rightDescriptionManager != null)
             {
                 // Get the description currently on this hand
-                EFM_DescriptionManager manager = null;
+                DescriptionManager manager = null;
                 if (__instance.IsThisTheRightHand)
                 {
                     manager = Mod.rightDescriptionManager;
@@ -7443,13 +7443,13 @@ namespace EFM
                     if (__instance.IsThisTheRightHand)
                     {
                         Mod.rightDescriptionUI = GameObject.Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.RightHand);
-                        Mod.rightDescriptionManager = Mod.rightDescriptionUI.AddComponent<EFM_DescriptionManager>();
+                        Mod.rightDescriptionManager = Mod.rightDescriptionUI.AddComponent<DescriptionManager>();
                         Mod.rightDescriptionManager.Init();
                     }
                     else
                     {
                         Mod.leftDescriptionUI = GameObject.Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
-                        Mod.leftDescriptionManager = Mod.leftDescriptionUI.AddComponent<EFM_DescriptionManager>();
+                        Mod.leftDescriptionManager = Mod.leftDescriptionUI.AddComponent<DescriptionManager>();
                         Mod.leftDescriptionManager.Init();
                     }
                 }
@@ -7467,7 +7467,7 @@ namespace EFM
                     bool flag3 = false;
                     bool pointNonGrabbableDescribable = false;
                     FVRPhysicalObject fvrphysicalObject = null;
-                    EFM_Describable nonGrabbableDescribable = null;
+                    Describable nonGrabbableDescribable = null;
                     if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out ___m_grabHit, 3f, __instance.GrabLaserMask, QueryTriggerInteraction.Collide))
                     {
                         if (___m_grabHit.collider.attachedRigidbody != null && ___m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<FVRPhysicalObject>())
@@ -7478,9 +7478,9 @@ namespace EFM
                                 flag3 = true;
                             }
                         }
-                        else if (___m_grabHit.collider.GetComponent<EFM_Describable>() != null)
+                        else if (___m_grabHit.collider.GetComponent<Describable>() != null)
                         {
-                            nonGrabbableDescribable = ___m_grabHit.collider.GetComponent<EFM_Describable>();
+                            nonGrabbableDescribable = ___m_grabHit.collider.GetComponent<Describable>();
                             pointNonGrabbableDescribable = true;
                         }
                         __instance.GrabLaser.localScale = new Vector3(0.004f, 0.004f, ___m_grabHit.distance) * d;
@@ -7494,11 +7494,11 @@ namespace EFM
                     if (flag3)
                     {
                         // Display summary description of object if describable and if not already displayed
-                        EFM_Describable describable = fvrphysicalObject.GetComponent<EFM_Describable>();
+                        Describable describable = fvrphysicalObject.GetComponent<Describable>();
                         if(describable != null && Mod.rightDescriptionManager != null)
                         {
                             // Get the description currently on this hand
-                            EFM_DescriptionManager manager = null;
+                            DescriptionManager manager = null;
                             if (__instance.IsThisTheRightHand)
                             {
                                 manager = Mod.rightDescriptionManager;
@@ -7509,7 +7509,7 @@ namespace EFM
                             }
 
                             // Get item and check if the one we are pointing at is already being described
-                            EFM_Describable describableToUse = null;
+                            Describable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
                                 if (manager.descriptionPack.isPhysical)
@@ -7574,7 +7574,7 @@ namespace EFM
                         if (nonGrabbableDescribable != null && Mod.rightDescriptionManager != null)
                         {
                             // Get the description currently on this hand
-                            EFM_DescriptionManager manager = null;
+                            DescriptionManager manager = null;
                             if (__instance.IsThisTheRightHand)
                             {
                                 manager = Mod.rightDescriptionManager;
@@ -7585,7 +7585,7 @@ namespace EFM
                             }
 
                             // Get item and check if the one we are pointing at is already being described
-                            EFM_Describable describableToUse = null;
+                            Describable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
                                 if (manager.descriptionPack.isPhysical)
@@ -7641,7 +7641,7 @@ namespace EFM
                         if (Mod.rightDescriptionManager != null)
                         {
                             // Hide summary description of object
-                            EFM_DescriptionManager manager = null;
+                            DescriptionManager manager = null;
                             if (__instance.IsThisTheRightHand)
                             {
                                 manager = Mod.rightDescriptionManager;
@@ -7712,8 +7712,8 @@ namespace EFM
                             flag4 = true;
                         }
                         else if (__instance.CurrentHoveredQuickbeltSlot != null && 
-                                 __instance.CurrentHoveredQuickbeltSlot is EFM_ShoulderStorage &&
-                                 !(__instance.CurrentHoveredQuickbeltSlot as EFM_ShoulderStorage).right &&
+                                 __instance.CurrentHoveredQuickbeltSlot is ShoulderStorage &&
+                                 !(__instance.CurrentHoveredQuickbeltSlot as ShoulderStorage).right &&
                                  Mod.equipmentSlots[0].CurObject != null)
                         {
                             // If we are hovering over left shoulder slot and backpack slot is not empty we want to grab backpack
@@ -7991,7 +7991,7 @@ namespace EFM
 
             if (latestEjectedRound != null)
             {
-                EFM_VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<VanillaItemDescriptor>();
 
                 // Set a default location of 0, we assume the round was ejected from a mag in one of the hands, so should begin with a loc index of 0
                 BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor, false);
@@ -8084,7 +8084,7 @@ namespace EFM
 
             if (latestEjectedRound != null)
             {
-                EFM_VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<VanillaItemDescriptor>();
 
                 // Set a default location of 0, we assume the round was ejected from a clip in one of the hands, so should begin with a loc index of 0
                 BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor, false);
@@ -8171,7 +8171,7 @@ namespace EFM
             Mod.stamina = Mathf.Max(Mod.stamina - (Mod.jumpStaminaDrain - Mod.jumpStaminaDrain * (0.006f * (Mod.skills[0].progress / 100))), 0);
             Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
 
-            Mod.AddSkillExp(UnityEngine.Random.Range(EFM_Skill.pushUpMin, EFM_Skill.pushUpMax), 1);
+            Mod.AddSkillExp(UnityEngine.Random.Range(Skill.pushUpMin, Skill.pushUpMax), 1);
 
             // Reset stamina timer
             Mod.staminaTimer = 2;
@@ -8620,18 +8620,18 @@ namespace EFM
                     float distribution = UnityEngine.Random.value;
                     if (UnityEngine.Random.value < 0.125 * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
                     {
-                        EFM_Effect fractureEffect = new EFM_Effect();
-                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        Effect fractureEffect = new Effect();
+                        fractureEffect.effectType = Effect.EffectType.Fracture;
                         fractureEffect.partIndex = 5;
-                        EFM_Effect.effects.Add(fractureEffect);
+                        Effect.effects.Add(fractureEffect);
                         // TODO: Play fracture sound
                     }
                     if (UnityEngine.Random.value < 0.125 * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
                     {
-                        EFM_Effect fractureEffect = new EFM_Effect();
-                        fractureEffect.effectType = EFM_Effect.EffectType.Fracture;
+                        Effect fractureEffect = new Effect();
+                        fractureEffect.effectType = Effect.EffectType.Fracture;
                         fractureEffect.partIndex = 6;
-                        EFM_Effect.effects.Add(fractureEffect);
+                        Effect.effects.Add(fractureEffect);
                         // TODO: Play fracture sound
                     }
 
@@ -8736,14 +8736,14 @@ namespace EFM
 
             if(__instance.m_hand != null)
             {
-                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
             }
 
 
             // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
             // locationIndex so we know when to add/remove weight from player also
-            EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-            EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+            VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
+            CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
             if (VID != null)
             {
                 //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
@@ -8803,14 +8803,14 @@ namespace EFM
 
             if (__instance.m_hand != null)
             {
-                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
             }
 
 
             // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
             // locationIndex so we know when to add/remove weight from player also
-            EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-            EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+            VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
+            CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
             if (VID != null)
             {
                 //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
@@ -8870,14 +8870,14 @@ namespace EFM
 
             if (__instance.m_hand != null)
             {
-                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
             }
 
 
             // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
             // locationIndex so we know when to add/remove weight from player also
-            EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-            EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+            VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
+            CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
             if (VID != null)
             {
                 //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
@@ -8937,7 +8937,7 @@ namespace EFM
 
             if (__instance.m_hand != null)
             {
-                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
             }
 
 
@@ -8974,7 +8974,7 @@ namespace EFM
 
             if (__instance.m_hand != null)
             {
-                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
             }
 
 
@@ -9010,7 +9010,7 @@ namespace EFM
 
             if (__instance.m_hand != null)
             {
-                Mod.AddSkillExp(EFM_Skill.raidUnloadedAmmoAction, 31);
+                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
             }
 
 
@@ -9043,49 +9043,49 @@ namespace EFM
                 // TODO: Might have to do this for ammo when putting it into a mag?
                 EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the mag when inserting in into a firearm
 
-                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
                 switch (fireArmVID.weaponClass)
                 {
                     case Mod.WeaponClass.Pistol:
-                        Mod.AddSkillExp(EFM_Skill.pistolWeaponReloadAction, 12);
+                        Mod.AddSkillExp(Skill.pistolWeaponReloadAction, 12);
                         break;
                     case Mod.WeaponClass.Revolver:
-                        Mod.AddSkillExp(EFM_Skill.revolverWeaponReloadAction, 13);
+                        Mod.AddSkillExp(Skill.revolverWeaponReloadAction, 13);
                         break;
                     case Mod.WeaponClass.SMG:
-                        Mod.AddSkillExp(EFM_Skill.SMGWeaponReloadAction, 14);
+                        Mod.AddSkillExp(Skill.SMGWeaponReloadAction, 14);
                         break;
                     case Mod.WeaponClass.Assault:
-                        Mod.AddSkillExp(EFM_Skill.assaultWeaponReloadAction, 15);
+                        Mod.AddSkillExp(Skill.assaultWeaponReloadAction, 15);
                         break;
                     case Mod.WeaponClass.Shotgun:
-                        Mod.AddSkillExp(EFM_Skill.shotgunWeaponReloadAction, 16);
+                        Mod.AddSkillExp(Skill.shotgunWeaponReloadAction, 16);
                         break;
                     case Mod.WeaponClass.Sniper:
-                        Mod.AddSkillExp(EFM_Skill.sniperWeaponReloadAction, 17);
+                        Mod.AddSkillExp(Skill.sniperWeaponReloadAction, 17);
                         break;
                     case Mod.WeaponClass.LMG:
-                        Mod.AddSkillExp(EFM_Skill.LMGWeaponReloadAction, 18);
+                        Mod.AddSkillExp(Skill.LMGWeaponReloadAction, 18);
                         break;
                     case Mod.WeaponClass.HMG:
-                        Mod.AddSkillExp(EFM_Skill.HMGWeaponReloadAction, 19);
+                        Mod.AddSkillExp(Skill.HMGWeaponReloadAction, 19);
                         break;
                     case Mod.WeaponClass.Launcher:
-                        Mod.AddSkillExp(EFM_Skill.launcherWeaponReloadAction, 20);
+                        Mod.AddSkillExp(Skill.launcherWeaponReloadAction, 20);
                         break;
                     case Mod.WeaponClass.AttachedLauncher:
-                        Mod.AddSkillExp(EFM_Skill.attachedLauncherWeaponReloadAction, 21);
+                        Mod.AddSkillExp(Skill.attachedLauncherWeaponReloadAction, 21);
                         break;
                     case Mod.WeaponClass.DMR:
-                        Mod.AddSkillExp(EFM_Skill.DMRWeaponReloadAction, 24);
+                        Mod.AddSkillExp(Skill.DMRWeaponReloadAction, 24);
                         break;
                 }
             }
 
             if (__instance.Magazine == null && mag != null)
             {
-                EFM_VanillaItemDescriptor magVID = mag.GetComponent<EFM_VanillaItemDescriptor>();
-                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor magVID = mag.GetComponent<VanillaItemDescriptor>();
+                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
                 fireArmVID.currentWeight += magVID.currentWeight;
 
                 if (magVID.locationIndex == 0) // Player
@@ -9151,7 +9151,7 @@ namespace EFM
     class FireArmEjectMagPatch
     {
         static int preLocationIndex;
-        static EFM_VanillaItemDescriptor preMagVID;
+        static VanillaItemDescriptor preMagVID;
 
         static void Prefix(ref FVRFireArm __instance)
         {
@@ -9162,7 +9162,7 @@ namespace EFM
 
             if (__instance.Magazine != null)
             {
-                EFM_VanillaItemDescriptor magVID = __instance.Magazine.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor magVID = __instance.Magazine.GetComponent<VanillaItemDescriptor>();
 
                 preLocationIndex = magVID.locationIndex;
                 preMagVID = magVID;
@@ -9175,7 +9175,7 @@ namespace EFM
             {
                 return;
             }
-            EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
             fireArmVID.currentWeight -= preMagVID.currentWeight;
 
             int currentLocationIndex = 0;
@@ -9265,49 +9265,49 @@ namespace EFM
             {
                 EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the clip
 
-                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
                 switch (fireArmVID.weaponClass)
                 {
                     case Mod.WeaponClass.Pistol:
-                        Mod.AddSkillExp(EFM_Skill.pistolWeaponReloadAction, 12);
+                        Mod.AddSkillExp(Skill.pistolWeaponReloadAction, 12);
                         break;
                     case Mod.WeaponClass.Revolver:
-                        Mod.AddSkillExp(EFM_Skill.revolverWeaponReloadAction, 13);
+                        Mod.AddSkillExp(Skill.revolverWeaponReloadAction, 13);
                         break;
                     case Mod.WeaponClass.SMG:
-                        Mod.AddSkillExp(EFM_Skill.SMGWeaponReloadAction, 14);
+                        Mod.AddSkillExp(Skill.SMGWeaponReloadAction, 14);
                         break;
                     case Mod.WeaponClass.Assault:
-                        Mod.AddSkillExp(EFM_Skill.assaultWeaponReloadAction, 15);
+                        Mod.AddSkillExp(Skill.assaultWeaponReloadAction, 15);
                         break;
                     case Mod.WeaponClass.Shotgun:
-                        Mod.AddSkillExp(EFM_Skill.shotgunWeaponReloadAction, 16);
+                        Mod.AddSkillExp(Skill.shotgunWeaponReloadAction, 16);
                         break;
                     case Mod.WeaponClass.Sniper:
-                        Mod.AddSkillExp(EFM_Skill.sniperWeaponReloadAction, 17);
+                        Mod.AddSkillExp(Skill.sniperWeaponReloadAction, 17);
                         break;
                     case Mod.WeaponClass.LMG:
-                        Mod.AddSkillExp(EFM_Skill.LMGWeaponReloadAction, 18);
+                        Mod.AddSkillExp(Skill.LMGWeaponReloadAction, 18);
                         break;
                     case Mod.WeaponClass.HMG:
-                        Mod.AddSkillExp(EFM_Skill.HMGWeaponReloadAction, 19);
+                        Mod.AddSkillExp(Skill.HMGWeaponReloadAction, 19);
                         break;
                     case Mod.WeaponClass.Launcher:
-                        Mod.AddSkillExp(EFM_Skill.launcherWeaponReloadAction, 20);
+                        Mod.AddSkillExp(Skill.launcherWeaponReloadAction, 20);
                         break;
                     case Mod.WeaponClass.AttachedLauncher:
-                        Mod.AddSkillExp(EFM_Skill.attachedLauncherWeaponReloadAction, 21);
+                        Mod.AddSkillExp(Skill.attachedLauncherWeaponReloadAction, 21);
                         break;
                     case Mod.WeaponClass.DMR:
-                        Mod.AddSkillExp(EFM_Skill.DMRWeaponReloadAction, 24);
+                        Mod.AddSkillExp(Skill.DMRWeaponReloadAction, 24);
                         break;
                 }
             }
 
             if (__instance.Clip == null && clip != null)
             {
-                EFM_VanillaItemDescriptor clipVID = clip.GetComponent<EFM_VanillaItemDescriptor>();
-                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor clipVID = clip.GetComponent<VanillaItemDescriptor>();
+                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
                 fireArmVID.currentWeight += clipVID.currentWeight;
 
                 if (clipVID.locationIndex == 0) // Player
@@ -9371,7 +9371,7 @@ namespace EFM
     class FireArmEjectClipPatch
     {
         static int preLocationIndex;
-        static EFM_VanillaItemDescriptor preClipVID;
+        static VanillaItemDescriptor preClipVID;
 
         static void Prefix(ref FVRFireArm __instance)
         {
@@ -9382,7 +9382,7 @@ namespace EFM
 
             if (__instance.Clip != null)
             {
-                EFM_VanillaItemDescriptor clipVID = __instance.Clip.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor clipVID = __instance.Clip.GetComponent<VanillaItemDescriptor>();
 
                 preLocationIndex = clipVID.locationIndex;
                 preClipVID = clipVID;
@@ -9396,7 +9396,7 @@ namespace EFM
                 return;
             }
 
-            EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+            VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
             fireArmVID.currentWeight -= preClipVID.currentWeight;
 
             int currentLocationIndex = 0;
@@ -9487,7 +9487,7 @@ namespace EFM
                 return;
             }
 
-            Mod.AddSkillExp(EFM_Skill.raidLoadedAmmoAction, 31);
+            Mod.AddSkillExp(Skill.raidLoadedAmmoAction, 31);
 
             if (addedRound)
             {
@@ -9583,7 +9583,7 @@ namespace EFM
                 return;
             }
 
-            Mod.AddSkillExp(EFM_Skill.raidLoadedAmmoAction, 31);
+            Mod.AddSkillExp(Skill.raidLoadedAmmoAction, 31);
 
             if (addedRound)
             {
@@ -9652,8 +9652,8 @@ namespace EFM
                 }
 
                 // Add weight to parent
-                EFM_VanillaItemDescriptor parentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
-                EFM_VanillaItemDescriptor attachmentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor parentVID = __instance.Parent.GetComponent<VanillaItemDescriptor>();
+                VanillaItemDescriptor attachmentVID = __instance.Parent.GetComponent<VanillaItemDescriptor>();
                 parentVID.currentWeight += attachmentVID.currentWeight;
 
                 BeginInteractionPatch.SetItemLocationIndex(parentVID.locationIndex, null, attachmentVID);
@@ -9679,8 +9679,8 @@ namespace EFM
                 __instance.AttachmentsList.Remove(attachment);
 
                 // Remove weight from parent
-                EFM_VanillaItemDescriptor parentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
-                EFM_VanillaItemDescriptor attachmentVID = __instance.Parent.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor parentVID = __instance.Parent.GetComponent<VanillaItemDescriptor>();
+                VanillaItemDescriptor attachmentVID = __instance.Parent.GetComponent<VanillaItemDescriptor>();
                 parentVID.currentWeight -= attachmentVID.currentWeight;
 
                 BeginInteractionPatch.SetItemLocationIndex(0, null, attachmentVID);
@@ -9706,11 +9706,11 @@ namespace EFM
             {
                 Vector3 pos = e.GetPos();
                 Vector3 forward = e.SensoryFrame.forward;
-                if (EFM_Raid_Manager.entities.Count > 0)
+                if (Raid_Manager.entities.Count > 0)
                 {
-                    for (int i = 0; i < EFM_Raid_Manager.entities.Count; i++)
+                    for (int i = 0; i < Raid_Manager.entities.Count; i++)
                     {
-                        AIEntity component = EFM_Raid_Manager.entities[i];
+                        AIEntity component = Raid_Manager.entities[i];
                         if (!(component == null))
                         {
                             if (!(component == e))
@@ -9776,7 +9776,7 @@ namespace EFM
 
             if (__result != null && !__result.IsSpent)
             {
-                EFM_VanillaItemDescriptor vanillaItemDescriptor = __result.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor vanillaItemDescriptor = __result.GetComponent<VanillaItemDescriptor>();
 
                 // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
                 // locationIndex so we know when to add/remove weight from player also
@@ -9865,7 +9865,7 @@ namespace EFM
                 }
                 else
                 {
-                    EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+                    CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
                     //string[] soundCategories = new string[] { "drop", "pickup", "offline_use", "open", "use", "use_loop" };
                     if (CIW != null && CIW.itemSounds != null && CIW.itemSounds[1] != null) 
                     {
@@ -9901,7 +9901,7 @@ namespace EFM
                 }
                 else
                 {
-                    EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
+                    CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
                     //string[] soundCategories = new string[] { "drop", "pickup", "offline_use", "open", "use", "use_loop" };
                     if (CIW != null && CIW.itemSounds != null && CIW.itemSounds[0] != null) 
                     {
@@ -9929,44 +9929,44 @@ namespace EFM
 
             if(__instance.m_hand != null)
             {
-                Mod.AddSkillExp(EFM_Skill.recoilAction, 25);
-                Mod.AddSkillExp(EFM_Skill.weaponShotAction, 26);
+                Mod.AddSkillExp(Skill.recoilAction, 25);
+                Mod.AddSkillExp(Skill.weaponShotAction, 26);
 
-                EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
                 switch (fireArmVID.weaponClass)
                 {
                     case Mod.WeaponClass.Pistol:
-                        Mod.AddSkillExp(EFM_Skill.pistolWeaponShotAction, 12);
+                        Mod.AddSkillExp(Skill.pistolWeaponShotAction, 12);
                         break;
                     case Mod.WeaponClass.Revolver:
-                        Mod.AddSkillExp(EFM_Skill.revolverWeaponShotAction, 13);
+                        Mod.AddSkillExp(Skill.revolverWeaponShotAction, 13);
                         break;
                     case Mod.WeaponClass.SMG:
-                        Mod.AddSkillExp(EFM_Skill.SMGWeaponShotAction, 14);
+                        Mod.AddSkillExp(Skill.SMGWeaponShotAction, 14);
                         break;
                     case Mod.WeaponClass.Assault:
-                        Mod.AddSkillExp(EFM_Skill.assaultWeaponShotAction, 15);
+                        Mod.AddSkillExp(Skill.assaultWeaponShotAction, 15);
                         break;
                     case Mod.WeaponClass.Shotgun:
-                        Mod.AddSkillExp(EFM_Skill.shotgunWeaponShotAction, 16);
+                        Mod.AddSkillExp(Skill.shotgunWeaponShotAction, 16);
                         break;
                     case Mod.WeaponClass.Sniper:
-                        Mod.AddSkillExp(EFM_Skill.sniperWeaponShotAction, 17);
+                        Mod.AddSkillExp(Skill.sniperWeaponShotAction, 17);
                         break;
                     case Mod.WeaponClass.LMG:
-                        Mod.AddSkillExp(EFM_Skill.LMGWeaponShotAction, 18);
+                        Mod.AddSkillExp(Skill.LMGWeaponShotAction, 18);
                         break;
                     case Mod.WeaponClass.HMG:
-                        Mod.AddSkillExp(EFM_Skill.HMGWeaponShotAction, 19);
+                        Mod.AddSkillExp(Skill.HMGWeaponShotAction, 19);
                         break;
                     case Mod.WeaponClass.Launcher:
-                        Mod.AddSkillExp(EFM_Skill.launcherWeaponShotAction, 20);
+                        Mod.AddSkillExp(Skill.launcherWeaponShotAction, 20);
                         break;
                     case Mod.WeaponClass.AttachedLauncher:
-                        Mod.AddSkillExp(EFM_Skill.attachedLauncherWeaponShotAction, 21);
+                        Mod.AddSkillExp(Skill.attachedLauncherWeaponShotAction, 21);
                         break;
                     case Mod.WeaponClass.DMR:
-                        Mod.AddSkillExp(EFM_Skill.DMRWeaponShotAction, 24);
+                        Mod.AddSkillExp(Skill.DMRWeaponShotAction, 24);
                         break;
                 }
             }
@@ -9993,9 +9993,9 @@ namespace EFM
                 if (__instance.m_hand != null)
                 {
                     float originalRecoilMult = VerticalRecoilMult;
-                    VerticalRecoilMult -= originalRecoilMult * (EFM_Skill.recoilBonusPerLevel * (Mod.skills[25].currentProgress / 100));
+                    VerticalRecoilMult -= originalRecoilMult * (Skill.recoilBonusPerLevel * (Mod.skills[25].currentProgress / 100));
 
-                    EFM_VanillaItemDescriptor fireArmVID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
+                    VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
                     switch (fireArmVID.weaponClass)
                     {
                         case Mod.WeaponClass.Pistol:
@@ -10052,11 +10052,11 @@ namespace EFM
             }
 
             // Keep track of the item's CIW or VID
-            EFM_Hand handToUse = __instance.GetComponent<EFM_Hand>();
+            Hand handToUse = __instance.GetComponent<Hand>();
             if (___m_currentInteractable != null)
             {
-                handToUse.CIW = ___m_currentInteractable.GetComponent<EFM_CustomItemWrapper>();
-                handToUse.VID = ___m_currentInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                handToUse.CIW = ___m_currentInteractable.GetComponent<CustomItemWrapper>();
+                handToUse.VID = ___m_currentInteractable.GetComponent<VanillaItemDescriptor>();
                 handToUse.custom = handToUse.CIW != null;
                 handToUse.hasScript = handToUse.custom || handToUse.VID != null;
 
@@ -10117,7 +10117,7 @@ namespace EFM
 
             if(d.Source_IFF == 0)
             {
-                EFM_AI AIScript = __instance.S.GetComponent<EFM_AI>();
+                AI AIScript = __instance.S.GetComponent<AI>();
                 AISpawn.AISpawnType AIType = AIScript.type;
                 bool AIUsec = AIScript.USEC;
                 switch (__instance.BodyPart)
@@ -10244,7 +10244,7 @@ namespace EFM
                     FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
                     if (rightInteractable != null)
                     {
-                        EFM_VanillaItemDescriptor VID = rightInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                        VanillaItemDescriptor VID = rightInteractable.GetComponent<VanillaItemDescriptor>();
                         if (VID != null)
                         {
                             foreach (string parent in VID.parents)
@@ -10258,7 +10258,7 @@ namespace EFM
                         }
                         if (!isHoldingAllowedWeapon)
                         {
-                            EFM_CustomItemWrapper CIW = rightInteractable.GetComponent<EFM_CustomItemWrapper>();
+                            CustomItemWrapper CIW = rightInteractable.GetComponent<CustomItemWrapper>();
                             if (CIW != null)
                             {
                                 foreach (string parent in CIW.parents)
@@ -10277,7 +10277,7 @@ namespace EFM
                         FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
                         if (leftInteractable != null)
                         {
-                            EFM_VanillaItemDescriptor VID = leftInteractable.GetComponent<EFM_VanillaItemDescriptor>();
+                            VanillaItemDescriptor VID = leftInteractable.GetComponent<VanillaItemDescriptor>();
                             if (VID != null)
                             {
                                 foreach (string parent in VID.parents)
@@ -10291,7 +10291,7 @@ namespace EFM
                             }
                             if (!isHoldingAllowedWeapon)
                             {
-                                EFM_CustomItemWrapper CIW = leftInteractable.GetComponent<EFM_CustomItemWrapper>();
+                                CustomItemWrapper CIW = leftInteractable.GetComponent<CustomItemWrapper>();
                                 if (CIW != null)
                                 {
                                     foreach (string parent in CIW.parents)
@@ -10336,7 +10336,7 @@ namespace EFM
                 bool constrained = false;
                 foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
                 {
-                    if (!EFM_TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+                    if (!TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
                     {
                         constrained = true;
                         break;
@@ -10349,7 +10349,7 @@ namespace EFM
 
                 // Successful shot, increment count and update fulfillment 
                 ++counterCondition.shotCount;
-                EFM_TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+                TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
             }
         }
     }
