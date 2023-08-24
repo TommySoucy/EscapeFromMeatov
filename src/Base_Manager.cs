@@ -4736,7 +4736,7 @@ namespace EFM
                 case 0:
                     loadingRaid = true;
                     Mod.chosenMapName = "Factory";
-                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovFactory.ab");
+                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path+"/EscapeFromMeatovFactory.ab");
                     break;
                 default:
                     loadingRaid = true;
@@ -4745,7 +4745,7 @@ namespace EFM
                     Mod.chosenTimeIndex = 0;
                     Mod.chosenMapName = "Factory";
                     chosenMap.text = "Factory";
-                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovFactory.ab");
+                    Mod.currentRaidBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/EscapeFromMeatovFactory.ab");
                     break;
             }
         }
@@ -5712,7 +5712,7 @@ namespace EFM
 
         private void SaveDataToFile()
         {
-            File.WriteAllText("BepInEx/Plugins/EscapeFromMeatov/" + (Mod.saveSlotIndex == 5 ? "AutoSave" : "Slot" + Mod.saveSlotIndex) + ".sav", data.ToString());
+            File.WriteAllText(Mod.path + "/EscapeFromMeatov/" + (Mod.saveSlotIndex == 5 ? "AutoSave" : "Slot" + Mod.saveSlotIndex) + ".sav", data.ToString());
         }
 
         public void UpdateBasedOnPlayerLevel()

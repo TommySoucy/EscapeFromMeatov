@@ -785,7 +785,7 @@ namespace EFM
             // Load night lightmaps if necessary
             if (time <= 21600 || time >= 64800)
             {
-                AssetBundle lightmapAssetBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatov" + Mod.chosenMapName + "Night.ab");
+                AssetBundle lightmapAssetBundle = AssetBundle.LoadFromFile(Mod.path + "/EscapeFromMeatov" + Mod.chosenMapName + "Night.ab");
                 if(lightmapAssetBundle != null)
                 {
                     foreach(LightmapData lmd in LightmapSettings.lightmaps)
@@ -5055,7 +5055,7 @@ namespace EFM
             BotData botData = new BotData();
 
             // Get inventory data
-            string[] botInventoryFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/"+ name + "/inventory/");
+            string[] botInventoryFiles = Directory.GetFiles(Mod.path + "/DB/Bots/" + name + "/inventory/");
             botData.minInventoryLevels = new int[botInventoryFiles.Length];
             botData.inventoryDB = new JObject[botInventoryFiles.Length];
             for (int i = botInventoryFiles.Length - 1; i >= 0; --i)
@@ -5067,11 +5067,11 @@ namespace EFM
             }
 
             // Get other data
-            botData.chances = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/chances.json"));
-            botData.experience = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/experience.json"));
-            botData.generation = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/generation.json"));
-            botData.health = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/health.json"));
-            botData.names = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Bots/" + name + "/names.json"));
+            botData.chances = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/chances.json"));
+            botData.experience = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/experience.json"));
+            botData.generation = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/generation.json"));
+            botData.health = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/health.json"));
+            botData.names = JArray.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/names.json"));
 
             return botData;
         }

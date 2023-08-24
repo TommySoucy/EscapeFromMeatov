@@ -37,7 +37,7 @@ namespace EFM
             {
                 availableSaveFiles.Clear();
             }
-            string[] allFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov");
+            string[] allFiles = Directory.GetFiles(Mod.path + "/EscapeFromMeatov");
             foreach (string path in allFiles)
             {
                 if (path.EndsWith(".sav")) // If .sav is present as the last part of the path
@@ -64,9 +64,9 @@ namespace EFM
             if (!hideoutLoaded)
             {
                 Mod.LogInfo("base null, loading bundle from file for first time");
-                Mod.baseAssetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovHideoutAssets.ab");
+                Mod.baseAssetsBundle = AssetBundle.LoadFromFile(Mod.path + "/EscapeFromMeatovHideoutAssets.ab");
                 Mod.LogInfo("Loaded hideout bunble from file, loading hideout prefab");
-                Mod.baseBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovHideout.ab");
+                Mod.baseBundle = AssetBundle.LoadFromFile(Mod.path + "/EscapeFromMeatovHideout.ab");
                 Mod.LogInfo("Loaded hideout prefab");
                 hideoutLoaded = true;
             }
@@ -86,7 +86,7 @@ namespace EFM
                     for (int i = 0; i < availableSaveFiles.Count; ++i)
                     {
                         int fileIndex = availableSaveFiles[i];
-                        JObject current = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/" + (fileIndex == 5 ? "AutoSave" : "Slot" + fileIndex) + ".sav"));
+                        JObject current = JObject.Parse(File.ReadAllText(Mod.path + "/EscapeFromMeatov/" + (fileIndex == 5 ? "AutoSave" : "Slot" + fileIndex) + ".sav"));
                         long saveTime = (long)current["time"];
                         if (saveTime > currentLatestTime)
                         {
@@ -100,7 +100,7 @@ namespace EFM
             }
             else
             {
-                loadedData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/" + (slotIndex == 5 ? "AutoSave" : "Slot" + slotIndex) + ".sav"));
+                loadedData = JObject.Parse(File.ReadAllText(Mod.path + "/EscapeFromMeatov/" + (slotIndex == 5 ? "AutoSave" : "Slot" + slotIndex) + ".sav"));
                 Mod.saveSlotIndex = slotIndex;
             }
 

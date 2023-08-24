@@ -712,7 +712,7 @@ namespace EFM
             itemWeights = new Dictionary<string, int>();
             itemVolumes = new Dictionary<string, int>();
             itemIcons = new Dictionary<string, Sprite>();
-            defaultItemsData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/DefaultItemData.json"));
+            defaultItemsData = JObject.Parse(File.ReadAllText(Mod.path + "/DB/DefaultItemData.json"));
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
             quickSlotConstantMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Renderer>().material;
             itemSounds = new Dictionary<string, AudioClip[]>();
@@ -1448,8 +1448,8 @@ namespace EFM
 
         private void LoadDB()
         {
-            areasDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Areas.json"));
-            localDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Locale.json"));
+            areasDB = JArray.Parse(File.ReadAllText(Mod.path + "/DB/Areas.json"));
+            localDB = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Locale.json"));
             ParseItemMap();
             traderBaseDB = new JObject[8];
             traderAssortDB = new JObject[8];
@@ -1457,25 +1457,25 @@ namespace EFM
             for (int i = 0; i < 8; ++i)
             {
                 string traderID = TraderStatus.IndexToID(i);
-                traderBaseDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Traders/" + traderID + "/base.json"));
-                traderAssortDB[i] = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Traders/" + traderID + "/assort.json"));
+                traderBaseDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Traders/" + traderID + "/base.json"));
+                traderAssortDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Traders/" + traderID + "/assort.json"));
 
                 // TODO: Review, we dont currently use the categories right now because I thought these were the categories of items we coudl sell
                 // to the trader but apparently they are jsut UI stuff, IDs only used for UI locale
                 // We need to find actual sell IDs or just keep using the current method we have of deciding whichi tems we can sell, which is
                 // that we can only sell to them items of type of items they sell themselves, unless its fence, to whom we can sell anything at reduced price
-                //traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Traders/" + traderID + "/categories.json"));
+                //traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/DB/Traders/" + traderID + "/categories.json"));
             }
-            globalDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Globals.json"));
+            globalDB = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Globals.json"));
             MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
             MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
-            questDB = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Quests.json"));
+            questDB = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Quests.json"));
             XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
-            mapData = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/EscapeFromMeatovMapData.json"));
+            mapData = JObject.Parse(File.ReadAllText(Mod.path + "/DB/EscapeFromMeatovMapData.json"));
             locationsLootDB = new JObject[12];
             locationsBaseDB = new JObject[12];
-            string[] locationLootFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/DB/Locations/loot");
-            string[] locationBaseFiles = Directory.GetFiles("BepInEx/Plugins/EscapeFromMeatov/DB/Locations/base");
+            string[] locationLootFiles = Directory.GetFiles(Mod.path + "/DB/Locations/loot");
+            string[] locationBaseFiles = Directory.GetFiles(Mod.path + "/DB/Locations/base");
             // TODO: 12.12? loc loot files are missing data for items that spawn with parent
             // Take factory day lootpoint (101)1736994 for example
             for (int i=0; i < 12; ++i)
@@ -1496,9 +1496,9 @@ namespace EFM
                     }
                 }
             }
-            lootContainerDB = JArray.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/LootContainer.json"));
-            dynamicLootTable = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Locations/DynamicLootTable.json"));
-            staticLootTable = JObject.Parse(File.ReadAllText("BepInEx/Plugins/EscapeFromMeatov/DB/Locations/StaticLootTable.json"));
+            lootContainerDB = JArray.Parse(File.ReadAllText(Mod.path + "/DB/LootContainer.json"));
+            dynamicLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Locations/DynamicLootTable.json"));
+            staticLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Locations/StaticLootTable.json"));
             lootContainersByName = new Dictionary<string, JObject>();
             foreach (JToken container in lootContainerDB)
             {
@@ -1676,7 +1676,7 @@ namespace EFM
 
         private void LoadDefaultAssets()
         {
-            defaultAssetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovDefaultAssets.ab");
+            defaultAssetsBundle = AssetBundle.LoadFromFile(Mod.path + "/EscapeFromMeatovDefaultAssets.ab");
 
             sceneDefImage = defaultAssetsBundle.LoadAsset<Sprite>("MeatovThumbnail");
             mainMenuPointable = defaultAssetsBundle.LoadAsset<GameObject>("MeatovPointable");
@@ -1849,7 +1849,7 @@ namespace EFM
         {
             itemMap = new Dictionary<string, ItemMapEntry>();
 
-            Dictionary<string, JObject> itemMapData = JObject.Parse(File.ReadAllText("BepinEx/Plugins/EscapeFromMeatov/DB/ItemMap.json")).ToObject<Dictionary<string, JObject>>();
+            Dictionary<string, JObject> itemMapData = JObject.Parse(File.ReadAllText(Mod.path + "/DB/ItemMap.json")).ToObject<Dictionary<string, JObject>>();
 
             foreach(KeyValuePair<string, JObject> item in itemMapData)
             {
