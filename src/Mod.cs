@@ -32,7 +32,6 @@ namespace EFM
         public static readonly float volumePrecisionMultiplier = 10000; // Volumes are stored as floats but are processed as ints to avoid precision errors, this is how precise we should be when converting, this goes down to 10th of a mililiter
 
         // Live data
-        public static Mod instance;
         public static int currentLocationIndex = -1; // This will be used by custom item wrapper and vanilla item descr. in their Start(). Shoud only ever be 1(base) or 2(raid). If want to spawn an item in player inventory, will have to set it manually
         public static AssetBundle[] assetsBundles;
         public static AssetBundle defaultAssetsBundle;
@@ -228,6 +227,7 @@ namespace EFM
         }
 
         // Assets
+        public static string path;
         public static bool assetLoaded;
         public static Sprite sceneDefImage;
         public static GameObject scenePrefab_Menu;
@@ -287,8 +287,9 @@ namespace EFM
         public static GameObject physicsDoorsToggleCheckmark;
         public static bool physicsDoors;
 
-        // DEBUG
-        public bool debug;
+        // Debug
+        public static bool waitingForDebugCode;
+        public static string debugCode;
         public static bool spawnItems = true;
         public static bool spawnAI = true;
         public static bool spawnOnlyFirstAI = false;
@@ -344,7 +345,9 @@ namespace EFM
 
         public void Start()
         {
-            instance = this;
+            path = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(Mod)).Location);
+            path.Replace('\\', '/');
+            Mod.LogInfo("Meatov path found: " + path, false);
 
             LoadConfig();
 
@@ -359,156 +362,138 @@ namespace EFM
 
         public void Update()
         {
-            if (Input.GetKeyDown(KeyCode.KeypadPeriod))
+#if DEBUG
+            if (waitingForDebugCode)
             {
-                debug = !debug;
-                LogWarning("Debug active: " + debug);
+                if (Input.GetKeyDown(KeyCode.Keypad0))
+                {
+                    debugCode += "0";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
+                else if(Input.GetKeyDown(KeyCode.Keypad1))
+                {
+                    debugCode += "1";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
+                else if(Input.GetKeyDown(KeyCode.Keypad2))
+                {
+                    debugCode += "2";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
+                else if(Input.GetKeyDown(KeyCode.Keypad3))
+                {
+                    debugCode += "3";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
+                else if(Input.GetKeyDown(KeyCode.Keypad4))
+                {
+                    debugCode += "4";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
+                else if(Input.GetKeyDown(KeyCode.Keypad5))
+                {
+                    debugCode += "5";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
+                else if(Input.GetKeyDown(KeyCode.Keypad6))
+                {
+                    debugCode += "6";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
+                else if(Input.GetKeyDown(KeyCode.Keypad7))
+                {
+                    debugCode += "7";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
+                else if(Input.GetKeyDown(KeyCode.Keypad8))
+                {
+                    debugCode += "8";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
+                else if(Input.GetKeyDown(KeyCode.Keypad9))
+                {
+                    debugCode += "9";
+                    Mod.LogInfo("DebugCode: " + debugCode);
+                }
             }
-            if (debug)
+            if(Input.GetKeyDown(KeyCode.F10))
             {
-                if (Input.GetKeyDown(KeyCode.Alpha0))
+                waitingForDebugCode = !waitingForDebugCode;
+                if (waitingForDebugCode)
                 {
-                    spawnAI = !spawnAI;
-                    LogWarning("SpawnAI: " + spawnAI);
+                    debugCode = string.Empty;
                 }
-
-                if (Input.GetKeyDown(KeyCode.Alpha7))
+                else
                 {
-                    LogWarning("Forcing AI Spawn");
-                    currentRaidManager.ForceSpawnNextAI();
-                }
-
-                if (Input.GetKeyDown(KeyCode.Alpha8))
-                {
-                    spawnOnlyFirstAI = !spawnOnlyFirstAI;
-                    LogWarning("spawnOnlyFirstAI: " + spawnOnlyFirstAI);
-                }
-
-                if (Input.GetKeyDown(KeyCode.Alpha9))
-                {
-                    spawnItems = !spawnItems;
-                    LogWarning("spawnItems: " + spawnItems);
-                }
-
-                if (Input.GetKeyDown(KeyCode.L))
-                {
-                    SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
-                }
-
-                if (Input.GetKeyDown(KeyCode.P))
-                {
-                    // Loads new game
-                    Manager.LoadBase();
-                }
-
-                if (Input.GetKeyDown(KeyCode.N))
-                {
-                    SteamVR_LoadLevel.Begin("Grillhouse_2Story", false, 0.5f, 0f, 0f, 0f, 1f);
-                }
-
-                if (Input.GetKeyDown(KeyCode.H))
-                {
-                    FieldInfo genericPoolField = typeof(SM).GetField("m_pool_generic", BindingFlags.NonPublic | BindingFlags.Instance);
-                    Logger.LogInfo("Generic pool null?: " + (genericPoolField.GetValue(ManagerSingleton<SM>.Instance) == null));
-                }
-
-                if (Input.GetKeyDown(KeyCode.O))
-                {
-                    Mod.chosenMapIndex = -1;
-                    GameObject.Find("Hideout").GetComponent<Base_Manager>().OnConfirmRaidClicked();
-                }
-
-                if (Input.GetKeyDown(KeyCode.J))
-                {
-                    Manager.LoadBase(5);
-                }
-
-                if (Input.GetKeyDown(KeyCode.H))
-                {
-                    Manager.LoadBase(-1, true);
-                }
-
-                if (Input.GetKeyDown(KeyCode.K))
-                {
-                    if (GameObject.Find("Hideout") != null)
+                    Mod.LogInfo("Activating DebugCode: " + debugCode);
+                    if (debugCode != string.Empty && int.TryParse(debugCode, out int code))
                     {
-                        GameObject.Find("Hideout").GetComponent<Base_Manager>().OnSaveSlotClicked(0);
-                    }
-                }
-
-                if (Input.GetKeyDown(KeyCode.I))
-                {
-                    Manager.LoadBase(0);
-                }
-
-                if (Input.GetKeyDown(KeyCode.Keypad1))
-                {
-                    currentRaidManager.KillPlayer();
-                }
-
-                if (Input.GetKeyDown(KeyCode.Keypad2))
-                {
-                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach (GameObject root in roots)
-                    {
-                        DestroyLODs(root.transform);
-                    }
-                }
-
-                if (Input.GetKeyDown(KeyCode.Keypad3))
-                {
-                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach (GameObject root in roots)
-                    {
-                        SetProbeSettings(root.transform, UnityEngine.Rendering.LightProbeUsage.Off, UnityEngine.Rendering.ReflectionProbeUsage.Off);
-                    }
-                }
-
-                if (Input.GetKeyDown(KeyCode.Keypad4))
-                {
-                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach (GameObject root in roots)
-                    {
-                        SetProbeSettings(root.transform, UnityEngine.Rendering.LightProbeUsage.BlendProbes, UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes);
-                    }
-                }
-
-                if (Input.GetKeyDown(KeyCode.Keypad5))
-                {
-                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach (GameObject root in roots)
-                    {
-                        DestroyGraphicRayCasters(root.transform);
-                    }
-                }
-
-                if (Input.GetKeyDown(KeyCode.Keypad6))
-                {
-                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach (GameObject root in roots)
-                    {
-                        SetRaycastTarget(root.transform);
-                    }
-                }
-
-                if (Input.GetKeyDown(KeyCode.Keypad7))
-                {
-                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach (GameObject root in roots)
-                    {
-                        SetShadowCastNone(root.transform);
-                    }
-                }
-
-                if (Input.GetKeyDown(KeyCode.Keypad8))
-                {
-                    GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-                    foreach (GameObject root in roots)
-                    {
-                        PrintSharedMaterialName(root.transform);
+                        switch (code)
+                        {
+                            case 0: // Toggle raid AI
+                                spawnAI = !spawnAI;
+                                Mod.LogInfo("\tDebug: Toggle raid AI, enabled: "+ spawnAI);
+                                break;
+                            case 1: // Force next AI spawn
+                                Mod.LogInfo("\tDebug: Force next AI spawn");
+                                currentRaidManager.ForceSpawnNextAI();
+                                break;
+                            case 2: // Toggle raid only first AI
+                                spawnOnlyFirstAI = !spawnOnlyFirstAI;
+                                Mod.LogInfo("\tDebug: Toggle raid only first AI, enabled: "+ spawnOnlyFirstAI);
+                                break;
+                            case 3: // Toggle raid item spawn
+                                spawnItems = !spawnItems;
+                                Mod.LogInfo("\tDebug: Toggle raid item spawn, enabled: "+ spawnItems);
+                                break;
+                            case 4: // Load to meatov menu
+                                Mod.LogInfo("\tDebug: Load to meatov menu");
+                                SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
+                                break;
+                            case 5: // Start new meatov game
+                                Mod.LogInfo("\tDebug: Start new meatov game");
+                                Manager.LoadBase();
+                                break;
+                            case 6: // Start factory raid
+                                Mod.LogInfo("\tDebug: Start factory raid");
+                                Mod.chosenMapIndex = -1;
+                                GameObject.Find("Hideout").GetComponent<Base_Manager>().OnConfirmRaidClicked();
+                                break;
+                            case 7: // Load autosave
+                                Mod.LogInfo("\tDebug: Load autosave");
+                                Manager.LoadBase(5);
+                                break;
+                            case 8: // Load latest save
+                                Mod.LogInfo("\tDebug: Load latest save");
+                                Manager.LoadBase(-1, true);
+                                break;
+                            case 9: // Save on slot 0
+                                Mod.LogInfo("\tDebug: Save on slot 0");
+                                if (GameObject.Find("Hideout") != null)
+                                {
+                                    GameObject.Find("Hideout").GetComponent<Base_Manager>().OnSaveSlotClicked(0);
+                                }
+                                break;
+                            case 10: // Load save 0
+                                Mod.LogInfo("\tDebug: Load save 0");
+                                Manager.LoadBase(0);
+                                break;
+                            case 11: // Kill player
+                                Mod.LogInfo("\tDebug: Kill player");
+                                currentRaidManager.KillPlayer();
+                                break;
+                            case 12: // Write PatchHashes
+                                Mod.LogInfo("\tDebug: Write PatchHashes");
+                                string dest = path + "/PatchHashes" + DateTimeOffset.Now.ToString().Replace("/", ".").Replace(":", ".") + ".json";
+                                File.Copy(path + "/PatchHashes.json", dest);
+                                Mod.LogWarning("Writing new hashes to file!");
+                                File.WriteAllText(path + "/PatchHashes.json", JObject.FromObject(PatchController.hashes).ToString());
+                                break;
+                        }
                     }
                 }
             }
+#endif
         }
 
         private void DestroyGraphicRayCasters(Transform root)
@@ -3944,6 +3929,30 @@ namespace EFM
             // Getting this far would mean that the item's ID nor any of its ancestors are in the whitelist, so doesn't fit
             return false;
         }
+
+        public static void LogInfo(string message, bool debug = true)
+        {
+            if (debug)
+            {
+#if DEBUG
+                modInstance.Logger.LogInfo(message);
+#endif
+            }
+            else
+            {
+                modInstance.Logger.LogInfo(message);
+            }
+        }
+
+        public static void LogWarning(string message)
+        {
+            modInstance.Logger.LogWarning(message);
+        }
+
+        public static void LogError(string message)
+        {
+            modInstance.Logger.LogError(message);
+        }
     }
 
     public class ItemMapEntry
@@ -3955,7 +3964,7 @@ namespace EFM
         public string otherModID;
     }
 
-    #region GamePatches
+#region GamePatches
     // Patches SteamVR_LoadLevel.Begin() So we can keep certain objects from other scenes
     class LoadLevelBeginPatch
     {
@@ -10374,9 +10383,9 @@ namespace EFM
             }
         }
     }
-    #endregion
+#endregion
 
-    #region DebugPatches
+#region DebugPatches
     class EventSystemUpdateDebugPatch
     {
         static void Prefix(ref EventSystem __instance)
@@ -10941,5 +10950,5 @@ namespace EFM
             return false;
         }
     }
-    #endregion
+#endregion
 }
