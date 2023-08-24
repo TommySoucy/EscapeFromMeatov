@@ -27,7 +27,7 @@ namespace EFM
 
         public static void WearEquipment(CustomItemWrapper customItemWrapper)
         {
-            Mod.instance.LogInfo("WearEquipment called on " + customItemWrapper.gameObject.name);
+            Mod.LogInfo("WearEquipment called on " + customItemWrapper.gameObject.name);
             //EFM_CustomItemWrapper customItemWrapper = CurObject.GetComponentInChildren<EFM_CustomItemWrapper>();
             if (customItemWrapper != null)
             {
@@ -106,13 +106,13 @@ namespace EFM
                         }
                         break;
                     default:
-                        Mod.instance.LogError("This object has invalid item type");
+                        Mod.LogError("This object has invalid item type");
                         break;
                 }
             }
             else
             {
-                Mod.instance.LogWarning("Could not find custom item wrapper on current object in equip. slot");
+                Mod.LogWarning("Could not find custom item wrapper on current object in equip. slot");
             }
         }
 
@@ -180,19 +180,19 @@ namespace EFM
                         currentEyewear = null;
                         break;
                     default:
-                        Mod.instance.LogError("This object has invalid item type");
+                        Mod.LogError("This object has invalid item type");
                         break;
                 }
             }
             else
             {
-                Mod.instance.LogWarning("Could not find custom item wrapper on current object in equip. slot");
+                Mod.LogWarning("Could not find custom item wrapper on current object in equip. slot");
             }
         }
 
         private static void EquipRig(CustomItemWrapper customItemWrapper)
         {
-            Mod.instance.LogInfo("Equip rig called on "+customItemWrapper.gameObject.name);
+            Mod.LogInfo("Equip rig called on "+customItemWrapper.gameObject.name);
             // Load the config
             GM.CurrentPlayerBody.ConfigureQuickbelt(customItemWrapper.configurationIndex);
 

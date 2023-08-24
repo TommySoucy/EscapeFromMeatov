@@ -71,13 +71,13 @@ namespace EFM
 
         public static void RemoveEffectAt(int index)
         {
-            Mod.instance.LogInfo("Effect remove at "+index+" called");
+            Mod.LogInfo("Effect remove at "+index+" called");
             Effect effectToRemove = effects[index];
             effects.RemoveAt(index);
             switch (effectToRemove.effectType)
             {
                 case EffectType.LightBleeding:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     foreach (Effect causedEffect in effectToRemove.caused)
                     {
                         if (causedEffect.effectType == Effect.EffectType.HealthRate)
@@ -127,10 +127,10 @@ namespace EFM
                     {
                         Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case EffectType.HeavyBleeding:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     foreach (Effect causedEffect in effectToRemove.caused)
                     {
                         if (causedEffect.effectType == Effect.EffectType.HealthRate)
@@ -180,10 +180,10 @@ namespace EFM
                     {
                         Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case EffectType.Fracture:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     // Remove all effects caused by this fracture
                     foreach (Effect causedEffect in effectToRemove.caused)
                     {
@@ -216,57 +216,57 @@ namespace EFM
                     {
                         Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(3).gameObject.SetActive(true);
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case EffectType.DestroyedPart:
-                    Mod.instance.LogInfo("\t\tRemoving");
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.SkillRate:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     Mod.skills[effectToRemove.skillIndex].currentProgress -= effectToRemove.value;
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.EnergyRate:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     Mod.currentEnergyRate -= effectToRemove.value;
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.HydrationRate:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     Mod.currentHydrationRate -= effectToRemove.value;
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.MaxStamina:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     Mod.currentMaxStamina -= effectToRemove.value;
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.StaminaRate:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     Mod.currentStaminaEffect -= effectToRemove.value;
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.HandsTremor:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     // TODO: Stop tremors if there are not other tremor effects
                     if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                     {
                         Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.QuantumTunnelling:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     // TODO: Stop QuantumTunnelling
                     if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
                     {
                         Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(false);
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.HealthRate:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     float[] arrayToUse = effectToRemove.nonLethal ? Mod.currentNonLethalHealthRates : Mod.currentHealthRates;
                     if (effectToRemove.partIndex == -1)
                     {
@@ -279,16 +279,16 @@ namespace EFM
                     {
                         arrayToUse[effectToRemove.partIndex] -= effectToRemove.value;
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.RemoveAllBloodLosses:
-                    Mod.instance.LogInfo("\t\tRemoving");
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoved");
                     // Reactivate all bleeding 
                     // Not necessary because when we disabled them we used the disable timer
                     break;
                 case Effect.EffectType.Contusion:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     bool otherContusions = false;
                     foreach (Effect contusionEffectCheck in Effect.effects)
                     {
@@ -308,21 +308,21 @@ namespace EFM
                             Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(false);
                         }
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.WeightLimit:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     Mod.effectWeightLimitBonus -= effectToRemove.value * 1000;
                     Mod.currentWeightLimit = (int)(Mod.baseWeightLimit + Mod.effectWeightLimitBonus + Mod.skillWeightLimitBonus);
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.DamageModifier:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     Mod.currentDamageModifier -= effectToRemove.value;
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.Pain:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     // Remove all tremors caused by this pain and disable tremors if no other tremors active
                     foreach (Effect causedEffect in effectToRemove.caused)
                     {
@@ -350,19 +350,19 @@ namespace EFM
                     {
                         Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(false);
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.StomachBloodloss:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     --Mod.stomachBloodLossCount;
                     if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
                     {
                         Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(false);
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.UnknownToxin:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     // Remove all effects caused by this toxin
                     foreach (Effect causedEffect in effectToRemove.caused)
                     {
@@ -410,16 +410,16 @@ namespace EFM
                     {
                         Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(false);
                     }
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.BodyTemperature:
-                    Mod.instance.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoving");
                     Mod.temperatureOffset -= effectToRemove.value;
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.Antidote:
-                    Mod.instance.LogInfo("\t\tRemoving");
-                    Mod.instance.LogInfo("\t\tRemoved");
+                    Mod.LogInfo("\t\tRemoving");
+                    Mod.LogInfo("\t\tRemoved");
                     // Will remove toxin on activation, does nothing after
                     break;
             }
@@ -427,12 +427,12 @@ namespace EFM
 
         public static void RemoveEffects(bool all = true, EffectType effectType = EffectType.LightBleeding, int partIndex = -1)
         {
-            Mod.instance.LogInfo("Remove effects called with all: " + all + ", type: " + effectType + ", partindex: " + partIndex);
+            Mod.LogInfo("Remove effects called with all: " + all + ", type: " + effectType + ", partindex: " + partIndex);
             for (int j = Effect.effects.Count - 1; j >= 0;)
             {
                 if (all || ((partIndex == -1 || Effect.effects[j].partIndex == partIndex) && Effect.effects[j].effectType == effectType) && !Effect.effects[j].hideoutOnly)
                 {
-                    Mod.instance.LogInfo("\tFound matching effect: "+effectType+" on "+partIndex+" at effect index "+j+" while effects has "+ Effect.effects.Count+" elements");
+                    Mod.LogInfo("\tFound matching effect: "+effectType+" on "+partIndex+" at effect index "+j+" while effects has "+ Effect.effects.Count+" elements");
                     RemoveEffectAt(j);
                 }
                 --j;

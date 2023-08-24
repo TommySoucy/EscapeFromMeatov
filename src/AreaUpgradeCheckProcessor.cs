@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace EFM
 {
-    public class EFM_AreaUpgradeCheckProcessor : MonoBehaviour
+    public class AreaUpgradeCheckProcessor : MonoBehaviour
     {
         public static readonly int maxUpCheck = 4;
 
@@ -69,7 +69,7 @@ namespace EFM
 
         public void TriggerEnter(Collider other)
         {
-            Mod.instance.LogInfo("Area upgrade processor, block?: " + block + " on trigger enter called");
+            Mod.LogInfo("Area upgrade processor, block?: " + block + " on trigger enter called");
             Transform currentTransform = other.transform;
             for(int i=0; i< maxUpCheck; ++i)
             {
@@ -309,7 +309,7 @@ namespace EFM
 
     public class ProcessorCollider : MonoBehaviour
     {
-        public EFM_AreaUpgradeCheckProcessor processor;
+        public AreaUpgradeCheckProcessor processor;
 
         public void OnTriggerEnter(Collider other)
         {

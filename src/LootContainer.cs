@@ -25,11 +25,11 @@ namespace EFM
 
 		public void Init(List<string> spawnFilter, int maxSuccessfulAttempts)
 		{
-			Mod.instance.LogInfo("\tInitializing loot container: " + name);
+			Mod.LogInfo("\tInitializing loot container: " + name);
 			// Apply 10% chance of empty container
 			if(UnityEngine.Random.value <= 0.1 || spawnFilter == null || spawnFilter.Count == 0)
 			{
-				Mod.instance.LogInfo("\t\tLoot container empty");
+				Mod.LogInfo("\t\tLoot container empty");
 				m_containsItems = false;
 				return;
             }
@@ -239,14 +239,14 @@ namespace EFM
 				GameObject itemPrefab = IM.OD[vanillaID].GetGameObject();
 				if(itemPrefab == null)
 				{
-					Mod.instance.LogWarning("Attempted to get vanilla prefab for " + vanillaID + ", but the prefab had been destroyed, refreshing cache...");
+					Mod.LogWarning("Attempted to get vanilla prefab for " + vanillaID + ", but the prefab had been destroyed, refreshing cache...");
 
 					IM.OD[vanillaID].RefreshCache();
 					itemPrefab = IM.OD[vanillaID].GetGameObject();
 				}
 				if (itemPrefab == null)
 				{
-					Mod.instance.LogError("Attempted to get vanilla prefab for " + vanillaID + ", but the prefab had been destroyed, refreshing cache did nothing");
+					Mod.LogError("Attempted to get vanilla prefab for " + vanillaID + ", but the prefab had been destroyed, refreshing cache did nothing");
 					continue;
 				}
 				GameObject itemObject = Instantiate(itemPrefab, itemObjectsRoot);

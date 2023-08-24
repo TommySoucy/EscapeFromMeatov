@@ -18,7 +18,7 @@ namespace EFM
                 return;
             }
 
-            Mod.instance.LogInfo("Exploration trigger, on trigger enter: " + other.name);
+            Mod.LogInfo("Exploration trigger, on trigger enter: " + other.name);
             if (!triggered && (other.gameObject.layer == 15 || other.gameObject.layer == 9))
             {
                 // TODO: Find amount for each zone, for now set to give 100 xp each

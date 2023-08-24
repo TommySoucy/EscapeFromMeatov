@@ -4282,7 +4282,7 @@ namespace EFM
     class MagazineUpdateInteractionPatch
     {
         static GameObject latestEjectedRound;
-        static int latestEjectedRoundLocation; // IGNORE WARNING, Will be written by transpiler
+        static int latestEjectedRoundLocation = 0; // IGNORE WARNING, Will be written by transpiler
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
@@ -4373,7 +4373,7 @@ namespace EFM
     class ClipUpdateInteractionPatch
     {
         static GameObject latestEjectedRound;
-        static int latestEjectedRoundLocation; // IGNORE WARNING, Will be written by transpiler
+        static int latestEjectedRoundLocation = 0;
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {

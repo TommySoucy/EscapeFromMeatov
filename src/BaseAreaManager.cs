@@ -43,7 +43,7 @@ namespace EFM
         public List<AreaRequirement> skillRequirements;
         public List<AreaRequirement> traderRequirements;
         public List<AreaBonus> bonuses;
-        public EFM_AreaUpgradeCheckProcessor[,] upgradeCheckProcessors;
+        public AreaUpgradeCheckProcessor[,] upgradeCheckProcessors;
         public GameObject[] upgradeDialogs = new GameObject[3]; // Block, warning, confirm
         public AudioSource[] productionAudioSourceByLevel = new AudioSource[22];
         public AudioSource[] slotAudioSourceByLevel = new AudioSource[22];
@@ -78,16 +78,16 @@ namespace EFM
             {
                 if (lastLevelFound)
                 {
-                    upgradeCheckProcessors[i, 0] = transform.GetChild(i).GetChild(0).GetChild(0).gameObject.AddComponent<EFM_AreaUpgradeCheckProcessor>();
+                    upgradeCheckProcessors[i, 0] = transform.GetChild(i).GetChild(0).GetChild(0).gameObject.AddComponent<AreaUpgradeCheckProcessor>();
                     upgradeCheckProcessors[i, 0].manager = this;
                     upgradeCheckProcessors[i, 0].block = true;
-                    upgradeCheckProcessors[i, 1] = transform.GetChild(i).GetChild(0).GetChild(1).gameObject.AddComponent<EFM_AreaUpgradeCheckProcessor>();
+                    upgradeCheckProcessors[i, 1] = transform.GetChild(i).GetChild(0).GetChild(1).gameObject.AddComponent<AreaUpgradeCheckProcessor>();
                     upgradeCheckProcessors[i, 1].manager = this;
                 }
                 else if (transform.GetChild(i).name.StartsWith("level"))
                 {
                     lastLevelFound = true;
-                    upgradeCheckProcessors = new EFM_AreaUpgradeCheckProcessor[i,2];
+                    upgradeCheckProcessors = new AreaUpgradeCheckProcessor[i,2];
                 }
             }
 
@@ -96,13 +96,13 @@ namespace EFM
             switch (areaIndex)
             {
                 case 2:
-                    Mod.instance.LogInfo("\t2");
+                    Mod.LogInfo("\t2");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     break;
                 case 4:
-                    Mod.instance.LogInfo("\t4");
+                    Mod.LogInfo("\t4");
                     slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(3).GetChild(3).GetComponent<AudioSource>();
                     slotAudioSourceByLevel[2] = transform.GetChild(2).GetChild(3).GetChild(3).GetComponent<AudioSource>();
                     slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(2).GetChild(4).GetComponent<AudioSource>();
@@ -132,12 +132,12 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(19, 23.5f);
                     break;
                 case 6:
-                    Mod.instance.LogInfo("\t6");
+                    Mod.LogInfo("\t6");
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
                     slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     break;
                 case 7:
-                    Mod.instance.LogInfo("\t7");
+                    Mod.LogInfo("\t7");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(0).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
@@ -151,7 +151,7 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(8.5f, 10.8f);
                     break;
                 case 8:
-                    Mod.instance.LogInfo("\t8");
+                    Mod.LogInfo("\t8");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(2).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
@@ -197,7 +197,7 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(18.1f, 22.5f);
                     break;
                 case 9:
-                    Mod.instance.LogInfo("\t9");
+                    Mod.LogInfo("\t9");
                     restSpaceTVAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
                     areaSoundManager = restSpaceTVAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
                     areaSoundManager.clip = Base_Manager.restSpaceTracks[1];
@@ -216,13 +216,13 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(29, 32);
                     break;
                 case 10:
-                    Mod.instance.LogInfo("\t10");
+                    Mod.LogInfo("\t10");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     break;
                 case 11:
-                    Mod.instance.LogInfo("\t11");
+                    Mod.LogInfo("\t11");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(3).GetComponent<AudioSource>();
@@ -244,7 +244,7 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(17.5f, 24);
                     break;
                 case 17:
-                    Mod.instance.LogInfo("\t17");
+                    Mod.LogInfo("\t17");
                     slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     AFUAudioSource = transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<AudioSource>();
                     areaSoundManager = AFUAudioSource.gameObject.AddComponent<AreaSoundManager>();
@@ -254,7 +254,7 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(14.3f, 18.5f);
                     break;
                 case 19:
-                    Mod.instance.LogInfo("\t19");
+                    Mod.LogInfo("\t19");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<AudioSource>();
                     boozeGenAudioSource = transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<AudioSource>();
                     areaSoundManager = boozeGenAudioSource.gameObject.AddComponent<AreaSoundManager>();
@@ -266,7 +266,7 @@ namespace EFM
                     areaSoundManager.endRange = new Vector2(12, 30);
                     break;
                 case 20:
-                    Mod.instance.LogInfo("\t20");
+                    Mod.LogInfo("\t20");
                     productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
                     productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
@@ -945,7 +945,7 @@ namespace EFM
             // Area full Name
             areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetComponent<Text>().text = areaName;
 
-            Mod.instance.LogInfo("UpdateAreaStateCalled on area: " + areaIndex);
+            Mod.LogInfo("UpdateAreaStateCalled on area: " + areaIndex);
 
             // Destroy any existing extra requirement parent in middle
             if(areaRequirementMiddleParents == null)
@@ -980,7 +980,7 @@ namespace EFM
             // Setup
             if (constructing)
             {
-                Mod.instance.LogInfo("\tConstructing");
+                Mod.LogInfo("\tConstructing");
                 // Summary
                 areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaBackgroundNormalSprite; // Icon background color
                 areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(false); // Producing icon background
@@ -999,7 +999,7 @@ namespace EFM
 
                 if (level == 0)
                 {
-                    Mod.instance.LogInfo("\t\tLevel 0");
+                    Mod.LogInfo("\t\tLevel 0");
                     // Summary
                     areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(10).gameObject.SetActive(true); // Constructing icon
                     areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(11).gameObject.SetActive(false); // Upgrading icon
@@ -1031,7 +1031,7 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.instance.LogInfo("\t\tLevel 1+");
+                    Mod.LogInfo("\t\tLevel 1+");
                     // Summary 
                     areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(10).gameObject.SetActive(false); // Constructing icon
                     areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(11).gameObject.SetActive(true); // Upgrading icon
@@ -1083,19 +1083,19 @@ namespace EFM
             }
             else // Not in construction or in upgrade process
             {
-                Mod.instance.LogInfo("\tNot constructing");
+                Mod.LogInfo("\tNot constructing");
 
                 // Summary and Full top
                 if (generatorRunning)
                 {
-                    Mod.instance.LogInfo("\t\tgen running");
+                    Mod.LogInfo("\t\tgen running");
                     areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(8).gameObject.SetActive(false); // Out of fuel icon
                     areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(8).gameObject.SetActive(false); // Out of fuel icon
                     areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Image>().sprite = null; // Status icon
 
                     if (activeProductions != null && activeProductions.Count > 0)
                     {
-                        Mod.instance.LogInfo("\t\t\tGot productions");
+                        Mod.LogInfo("\t\t\tGot productions");
                         areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(true); // Producing icon background
                         areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(12).gameObject.SetActive(true); // Producing icon
                         areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(true); // Producing icon background
@@ -1105,7 +1105,7 @@ namespace EFM
 
                         if (activeProductions.Count > 1)
                         {
-                            Mod.instance.LogInfo("\t\t\t\tGot more");
+                            Mod.LogInfo("\t\t\t\tGot more");
                             areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(12).GetChild(0).gameObject.SetActive(true); // Producing icon
                             areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(12).GetChild(0).GetComponent<Text>().text = activeProductions.Count.ToString(); // Production count
                             areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(12).GetChild(0).gameObject.SetActive(true); // Producing icon
@@ -1114,7 +1114,7 @@ namespace EFM
                     }
                     else if (activeProductions != null && activeProductions.Count > 0)
                     {
-                        Mod.instance.LogInfo("\t\t\tno productions");
+                        Mod.LogInfo("\t\t\tno productions");
                         areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(false); // Producing icon background
                         areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(12).gameObject.SetActive(false); // Producing icon
                         areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(false); // Producing icon background
@@ -1128,10 +1128,10 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.instance.LogInfo("\t\tgen not running");
+                    Mod.LogInfo("\t\tgen not running");
                     if (level > 0 && (bool)Mod.areasDB[areaIndex]["needsFuel"])
                     {
-                        Mod.instance.LogInfo("\t\t\tbut needs fuel");
+                        Mod.LogInfo("\t\t\tbut needs fuel");
                         areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(8).gameObject.SetActive(true); // Out of fuel icon
                         areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(8).gameObject.SetActive(true); // Out of fuel icon
                         areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaStatusIconOutOfFuel; // Status icon
@@ -1142,32 +1142,32 @@ namespace EFM
                     areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(1).gameObject.SetActive(false); // Producing icon background
                     areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(12).gameObject.SetActive(false); // Producing icon
 
-                    Mod.instance.LogInfo("0");
+                    Mod.LogInfo("0");
                     areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(12).GetChild(0).gameObject.SetActive(false); // Producing icon
                     areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(12).GetChild(0).gameObject.SetActive(false); // Producing icon
                 }
 
-                Mod.instance.LogInfo("0");
+                Mod.LogInfo("0");
                 //Summary
                 areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(2).gameObject.SetActive(false); // In construction icon background
                 areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(10).gameObject.SetActive(false); // Constructing icon
                 areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(11).gameObject.SetActive(false); // Upgrading icon
 
-                Mod.instance.LogInfo("0");
+                Mod.LogInfo("0");
                 // Full top
                 areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(2).gameObject.SetActive(false); // In construction icon background
                 areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(10).gameObject.SetActive(false); // Constructing icon
                 areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(11).gameObject.SetActive(false); // Upgrading icon
 
-                Mod.instance.LogInfo("0");
+                Mod.LogInfo("0");
                 bool requirementsFullfilled = GetRequirementsFullfilled(true, true);
                 if (level == 0)
                 {
-                    Mod.instance.LogInfo("\t\t\tlevel 0");
+                    Mod.LogInfo("\t\t\tlevel 0");
                     // Summary and full top
                     if (requirementsFullfilled)
                     {
-                        Mod.instance.LogInfo("\t\t\t\trequs fulfilled");
+                        Mod.LogInfo("\t\t\t\trequs fulfilled");
                         areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaBackgroundAvailableSprite; // Icon background color
                         areaCanvas.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = "Ready to Construct"; // Status text
 
@@ -1177,7 +1177,7 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogInfo("\t\t\t\trequs not fulfilled");
+                        Mod.LogInfo("\t\t\t\trequs not fulfilled");
                         areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaBackgroundLockedSprite; // Icon background color
                         areaCanvas.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = "Locked"; // Status text
 
@@ -1194,12 +1194,12 @@ namespace EFM
 
                     // We want to show level 1 information on middle
                     // Full middle
-                    Mod.instance.LogInfo("\t\t\t0");
+                    Mod.LogInfo("\t\t\t0");
                     areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_1_description"].ToString();
                     SetRequirements(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(2), true, Mod.areasDB[areaIndex]["stages"]["1"]["requirements"]);
                     SetBonuses(areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(3), true, Mod.areasDB[areaIndex]["stages"]["1"]["bonuses"], "FUTURE BONUSES");
                     SetProductions();
-                    Mod.instance.LogWarning("MIDDLEHEIGHT = " + middleHeight);
+                    Mod.LogWarning("MIDDLEHEIGHT = " + middleHeight);
                     if (middleHeight > 360)
                     {
                         areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(2).gameObject.SetActive(true); // Only down should be activated at first
@@ -1207,7 +1207,7 @@ namespace EFM
                         areaCanvas.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(3).GetComponent<HoverScroll>().rate = 350 / (middleHeight - 350);
                     }
 
-                    Mod.instance.LogInfo("\t\t\t0");
+                    Mod.LogInfo("\t\t\t0");
                     // Full middle 2
                     // There is no full middle 2 on a level 0 area which isn't in construction
 
@@ -1228,7 +1228,7 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.instance.LogInfo("\t\t\tlevel 1+");
+                    Mod.LogInfo("\t\t\tlevel 1+");
                     areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaBackgroundNormalSprite; // Icon background color
                     areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaBackgroundNormalSprite; // Icon background color
                     areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(6).gameObject.SetActive(false); // Locked icon
@@ -1243,7 +1243,7 @@ namespace EFM
                     // Summary and full top
                     if (requirementsFullfilled)
                     {
-                        Mod.instance.LogInfo("\t\t\t\treqs fulfilled");
+                        Mod.LogInfo("\t\t\t\treqs fulfilled");
                         areaCanvas.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = "Ready to Upgrade"; // Status text
 
                         areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaStatusIconReadyUpgrade; // Status icon
@@ -1251,27 +1251,27 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogInfo("\t\t\t\treqs not fulfilled");
+                        Mod.LogInfo("\t\t\t\treqs not fulfilled");
                         if ((bool)Mod.areasDB[areaIndex]["needsFuel"] && !generatorRunning)
                         {
-                            Mod.instance.LogInfo("\t\t\t\t\tneed fuel but gen not running");
+                            Mod.LogInfo("\t\t\t\t\tneed fuel but gen not running");
                             areaCanvas.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = "Out of Fuel"; // Status text
                             areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaStatusIconOutOfFuel; // Status icon
                             areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = "Out of Fuel"; // Status text
                         }
                         else
                         {
-                            Mod.instance.LogInfo("\t\t\t\t\tnot need fuel or gen running");
+                            Mod.LogInfo("\t\t\t\t\tnot need fuel or gen running");
                             if (activeProductions != null && activeProductions.Count > 0)
                             {
-                                Mod.instance.LogInfo("\t\t\t\t\t\thas production");
+                                Mod.LogInfo("\t\t\t\t\t\thas production");
                                 areaCanvas.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = "Producing"; // Status text
                                 areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaStatusIconProducing; // Status icon
                                 areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = "Producing"; // Status text
                             }
                             else
                             {
-                                Mod.instance.LogInfo("\t\t\t\t\t\tdoes not have production");
+                                Mod.LogInfo("\t\t\t\t\t\tdoes not have production");
                                 areaCanvas.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = "On standby"; // Status text
                                 areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Image>().sprite = null; // Status icon
                                 areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = "On standby"; // Status text
@@ -1289,7 +1289,7 @@ namespace EFM
                     Dictionary<string, JObject> stages = Mod.areasDB[areaIndex]["stages"].ToObject<Dictionary<string, JObject>>();
                     if (stages.Count >= level) // Check if we have a next level
                     {
-                        Mod.instance.LogInfo("\t\thas a next level");
+                        Mod.LogInfo("\t\thas a next level");
                         areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = Mod.localDB["interface"]["hideout_area_" + areaIndex + "_stage_" + (level + 1) + "_description"].ToString();
                         SetRequirements(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(1), false, Mod.areasDB[areaIndex]["stages"][(level + 1).ToString()]["requirements"]);
                         SetBonuses(areaCanvas.transform.GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetChild(2), false, Mod.areasDB[areaIndex]["stages"][(level + 1).ToString()]["bonuses"], "FUTURE BONUSES");
@@ -1494,7 +1494,7 @@ namespace EFM
 
         public void SetProductions()
         {
-            Mod.instance.LogInfo("SetProductions called on "+areaIndex+" at level "+level);
+            Mod.LogInfo("SetProductions called on "+areaIndex+" at level "+level);
             // Reset productions
             if (this.productionsByItemIDByProdID == null)
             {
@@ -1521,7 +1521,7 @@ namespace EFM
                 farmingViewByItemID.Clear();
                 produceViewByItemID.Clear();
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
 
             // Get all productions for this area including previous levels
             JArray productions = new JArray();
@@ -1533,7 +1533,7 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Init slots if necessary and set items in slotItems to their corresponding slots
             if (!slotsInit) 
             {
@@ -1606,7 +1606,7 @@ namespace EFM
                 }
                 slotsInit = true;
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             if (slotItems != null)
             {
                 for (int slotItemIndex = 0; slotItemIndex < slotItems.Length; ++slotItemIndex)
@@ -1619,7 +1619,7 @@ namespace EFM
                     }
                 }
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
 
             // Farming view can be on bitcoin farm and water collector
             // Bitcoin doesn't use up any resources but it needs GPUs to functions, the amount of which affects the bitcoin mining rate
@@ -1628,26 +1628,26 @@ namespace EFM
             GameObject produceView = productionsParent.GetChild(0).gameObject;
             GameObject farmingView = productionsParent.GetChild(1).gameObject;
             JToken areaData = null;
-            Mod.instance.LogInfo("Loading production data from save");
+            Mod.LogInfo("Loading production data from save");
             if (baseManager.data["areas"] != null)
             {
-                Mod.instance.LogInfo("Data has areas");
+                Mod.LogInfo("Data has areas");
                 areaData = baseManager.data["areas"][areaIndex];
-                Mod.instance.LogInfo("Got specific area");
+                Mod.LogInfo("Got specific area");
             }
             JToken loadedProductions = null;
             if (areaData != null && areaData["productions"] != null)
             {
-                Mod.instance.LogInfo("Area has productions");
+                Mod.LogInfo("Area has productions");
                 loadedProductions = areaData["productions"];
             }
             else
             {
-                Mod.instance.LogInfo("Area does not have productions");
+                Mod.LogInfo("Area does not have productions");
                 loadedProductions = new JArray();
             }
             Dictionary<string, Dictionary<string, JToken>> productionsDictByItemIDByProdID = new Dictionary<string, Dictionary<string, JToken>>();
-            Mod.instance.LogInfo("Loading productions");
+            Mod.LogInfo("Loading productions");
             foreach (JToken loadedProduction in loadedProductions)
             {
                 string[] endProducts = null;
@@ -1679,22 +1679,22 @@ namespace EFM
                     }
                 }
             }
-            Mod.instance.LogInfo("Done loading productions");
+            Mod.LogInfo("Done loading productions");
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             if (productions.Count > 0)
             {
-                Mod.instance.LogInfo("Apparently, area index: " + areaIndex + " have " + productions.Count + " productions as level "+level);
+                Mod.LogInfo("Apparently, area index: " + areaIndex + " have " + productions.Count + " productions as level "+level);
                 productionsParent.parent.gameObject.SetActive(true);
 
                 middleHeight += 106.4f; // scroll view content spacing + production top padding + production bottom padding + header height + container spacing
             }
             bool firstProduction = true;
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             long secondsSinceSave = baseManager.data["time"] != null ? baseManager.GetTimeSeconds() - (long)baseManager.data["time"] : 0;
             foreach (JObject production in productions)
             {
-                Mod.instance.LogInfo("1");
+                Mod.LogInfo("1");
                 AreaProduction productionScript = null;
                 GameObject newFarmingView = null;
                 GameObject newProduceView = null;
@@ -1717,7 +1717,7 @@ namespace EFM
 
                     foreach (string endProduct in endProducts)
                     {
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         newFarmingView = Instantiate(farmingView, productionsParent);
                         middleHeight += 99.8f; // farming view height
                         if (!firstProduction)
@@ -1726,7 +1726,7 @@ namespace EFM
                         }
                         productionScript = newFarmingView.AddComponent<AreaProduction>();
 
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         productionScript.continuous = true;
                         productionScript.ID = production["_id"].ToString();
                         productionScript.productionTime = (float)production["productionTime"];
@@ -1734,7 +1734,7 @@ namespace EFM
                         productionScript.count = (int)production["count"];
                         productionScript.productionLimitCount = (int)production["productionLimitCount"];
 
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         // Init UI
                         if (Mod.itemIcons.ContainsKey(productionScript.endProduct))
                         {
@@ -1757,28 +1757,28 @@ namespace EFM
                         currentItemIconScript.weight = Mod.itemWeights[productionScript.endProduct];
                         currentItemIconScript.volume = Mod.itemVolumes[productionScript.endProduct];
 
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         // Depending on save data
                         // If data about this production has been saved
                         if (productionsDictByItemIDByProdID.ContainsKey(productionScript.ID) && productionsDictByItemIDByProdID[productionScript.ID].ContainsKey(endProduct))
                         {
-                            Mod.instance.LogInfo("3");
+                            Mod.LogInfo("3");
                             activeProductions.Add(productionScript.ID, productionScript);
 
                             productionScript.active = true;
                             productionScript.timeLeft = (float)productionsDictByItemIDByProdID[productionScript.ID][endProduct]["timeLeft"] - secondsSinceSave;
                             productionScript.productionCount = (int)productionsDictByItemIDByProdID[productionScript.ID][endProduct]["productionCount"];
 
-                            Mod.instance.LogInfo("3");
+                            Mod.LogInfo("3");
                             // Set production count
                             newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = productionScript.productionCount.ToString() + "/" + productionScript.productionLimitCount;
 
-                            Mod.instance.LogInfo("3");
+                            Mod.LogInfo("3");
                             // Set installed item count
                             int installedCount = GetFilledSlotCount();
                             newFarmingView.transform.GetChild(1).GetChild(2).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = installedCount.ToString();
 
-                            Mod.instance.LogInfo("3");
+                            Mod.LogInfo("3");
                             // It is possible we have an unclaimed amount of item
                             if (productionScript.productionCount > 0)
                             {
@@ -1786,7 +1786,7 @@ namespace EFM
                                 newFarmingView.transform.GetChild(1).GetChild(5).GetChild(0).gameObject.SetActive(true);
                             }
 
-                            Mod.instance.LogInfo("3");
+                            Mod.LogInfo("3");
                             // If have necessary items to produce and not at production limit yet
                             if (installedCount > 0 && productionScript.productionCount < productionScript.productionLimitCount)
                             {
@@ -1814,10 +1814,10 @@ namespace EFM
                         productionScript.requirements = new List<AreaProductionRequirement>();
                         foreach (JObject requirement in production["requirements"])
                         {
-                            Mod.instance.LogInfo("2");
+                            Mod.LogInfo("2");
                             if (requirement["type"].ToString().Equals("Resource"))
                             {
-                                Mod.instance.LogInfo("3");
+                                Mod.LogInfo("3");
                                 AreaProductionRequirement currentRequirement = new AreaProductionRequirement();
                                 currentRequirement.resource = true;
                                 ItemMapEntry requirementItemMapEntry = Mod.itemMap[requirement["templateId"].ToString()];
@@ -1864,10 +1864,10 @@ namespace EFM
                                 costInstalledItemIconScript.weight = itemWeight;
                                 costInstalledItemIconScript.volume = itemVolume;
 
-                                Mod.instance.LogInfo("3");
+                                Mod.LogInfo("3");
                                 productionScript.requirements.Add(currentRequirement);
 
-                                Mod.instance.LogInfo("3");
+                                Mod.LogInfo("3");
                                 int amountInInventory = 0;
                                 foreach (string possibleReqItem in currentRequirement.IDs)
                                 {
@@ -1884,11 +1884,11 @@ namespace EFM
                                     }
                                 }
                                 newFarmingView.transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = amountInInventory.ToString() + " (STASH)";
-                                Mod.instance.LogInfo("3");
+                                Mod.LogInfo("3");
                             }
                             else if (requirement["type"].ToString().Equals("Item"))
                             {
-                                Mod.instance.LogInfo("4");
+                                Mod.LogInfo("4");
                                 AreaProductionRequirement currentRequirement = new AreaProductionRequirement();
                                 ItemMapEntry requirementItemMapEntry = Mod.itemMap[requirement["templateId"].ToString()];
                                 switch (requirementItemMapEntry.mode)
@@ -1906,17 +1906,17 @@ namespace EFM
                                 currentRequirement.count = (int)requirement["count"];
                                 currentRequirement.isFunctional = (bool)requirement["isFunctional"];
 
-                                Mod.instance.LogInfo("4");
+                                Mod.LogInfo("4");
                                 productionScript.requirements.Add(currentRequirement);
 
-                                Mod.instance.LogInfo("4");
+                                Mod.LogInfo("4");
                                 int amountInInventory = 0;
                                 foreach (string possibleReqItem in currentRequirement.IDs)
                                 {
                                     amountInInventory += (Mod.baseInventory.ContainsKey(possibleReqItem) ? Mod.baseInventory[possibleReqItem] : 0);
                                     amountInInventory += (Mod.playerInventory.ContainsKey(possibleReqItem) ? Mod.playerInventory[possibleReqItem] : 0);
                                 }
-                                Mod.instance.LogInfo("4");
+                                Mod.LogInfo("4");
                                 if (newFarmingView != null)
                                 {
                                     newFarmingView.transform.GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<Text>().text = amountInInventory.ToString() + " (STASH)";
@@ -2003,7 +2003,7 @@ namespace EFM
                                 }
                             }
                         }
-                        Mod.instance.LogInfo("1");
+                        Mod.LogInfo("1");
 
                         // Add the production to the list
                         if (this.productionsByItemIDByProdID.ContainsKey(productionScript.ID))
@@ -2039,7 +2039,7 @@ namespace EFM
 
                     foreach (string endProduct in endProducts)
                     {
-                        Mod.instance.LogInfo("4");
+                        Mod.LogInfo("4");
                         newProduceView = Instantiate(produceView, productionsParent);
                         middleHeight += 141.8f; // produce view height
                         if (!firstProduction)
@@ -2048,14 +2048,14 @@ namespace EFM
                         }
                         productionScript = newProduceView.AddComponent<AreaProduction>();
 
-                        Mod.instance.LogInfo("4");
+                        Mod.LogInfo("4");
                         productionScript.continuous = true;
                         productionScript.ID = production["_id"].ToString();
                         productionScript.productionTime = (float)production["productionTime"];
                         productionScript.endProduct = endProduct;
                         productionScript.count = (int)production["count"];
 
-                        Mod.instance.LogInfo("4");
+                        Mod.LogInfo("4");
                         // Init UI
                         if (Mod.itemIcons.ContainsKey(productionScript.endProduct))
                         {
@@ -2069,22 +2069,22 @@ namespace EFM
                         newProduceView.transform.GetChild(4).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnProduceViewStartClick(productionScript.ID, endProduct); });
                         newProduceView.transform.GetChild(4).GetChild(1).GetComponent<Button>().onClick.AddListener(() => { OnProductionGetItemsClick(productionScript.ID, endProduct); });
 
-                        Mod.instance.LogInfo("4");
+                        Mod.LogInfo("4");
                         // Depending on save data
                         // If data about this production has been saved
                         if (productionsDictByItemIDByProdID.ContainsKey(productionScript.ID) && productionsDictByItemIDByProdID[productionScript.ID].ContainsKey(endProduct))
                         {
-                            Mod.instance.LogInfo("5");
+                            Mod.LogInfo("5");
                             activeProductions.Add(productionScript.ID, productionScript);
 
                             productionScript.active = true;
                             productionScript.timeLeft = (float)productionsDictByItemIDByProdID[productionScript.ID][endProduct]["timeLeft"];
 
-                            Mod.instance.LogInfo("5");
+                            Mod.LogInfo("5");
                             // Deactivate start button because for sure we cant start production if already active
                             newProduceView.transform.GetChild(4).GetChild(0).gameObject.SetActive(false);
 
-                            Mod.instance.LogInfo("5");
+                            Mod.LogInfo("5");
                             // It is possible we have an unclaimed amount of items
                             if (productionScript.timeLeft <= 0)
                             {
@@ -2118,9 +2118,9 @@ namespace EFM
                         }
                     }
                 }
-                Mod.instance.LogInfo("1");
+                Mod.LogInfo("1");
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
 
             // Setup scav case view after because it is not specified in the area's production list
             if (areaIndex == 14)
@@ -2196,7 +2196,7 @@ namespace EFM
                 itemRequirementsByItemID.Clear();
             }
 
-            Mod.instance.LogInfo("set requirements called with list of "+((JArray)requirements).Count+" requirements");
+            Mod.LogInfo("set requirements called with list of "+((JArray)requirements).Count+" requirements");
             if (requirements != null && ((JArray)requirements).Count > 0)
             {
                 List<List<GameObject>> listToUse = middle ? areaRequirementMiddleParents : areaRequirementMiddle2Parents;
@@ -2215,7 +2215,7 @@ namespace EFM
                     switch (requirement["type"].ToString())
                     {
                         case "Area":
-                            Mod.instance.LogInfo("\tarea");
+                            Mod.LogInfo("\tarea");
                             // Make a new area requirements parent is necessary to fit another area requirement
                             Transform areaRequirementParentToUse;
                             if (listToUse[0][listToUse[0].Count - 1].transform.childCount == 2)
@@ -2277,27 +2277,27 @@ namespace EFM
                                 areaRequirementsByAreaIndex.Add(requiredAreaIndex, new List<Transform>() { areaRequirement.transform });
                             }
 
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             // Check if requirement is met
                             if (baseManager.baseAreaManagers[(int)requirement["areaType"]].level >= requiredLevel)
                             {
-                                Mod.instance.LogInfo("\t1");
+                                Mod.LogInfo("\t1");
                                 areaRequirementNameText.color = Color.white;
-                                Mod.instance.LogInfo("\t1");
+                                Mod.LogInfo("\t1");
                                 areaRequirement.transform.GetChild(2).GetComponent<Image>().sprite = Base_Manager.requirementFulfilled;
-                                Mod.instance.LogInfo("\t1");
+                                Mod.LogInfo("\t1");
                             }
                             else
                             {
-                                Mod.instance.LogInfo("\t2");
+                                Mod.LogInfo("\t2");
                                 areaRequirementNameText.color = new Color(1, 0.27f, 0.27f);
-                                Mod.instance.LogInfo("\t2");
+                                Mod.LogInfo("\t2");
                                 areaRequirement.transform.GetChild(2).GetComponent<Image>().sprite = Base_Manager.requirementLocked;
-                                Mod.instance.LogInfo("\t2");
+                                Mod.LogInfo("\t2");
                             }
                             break;
                         case "Item":
-                            Mod.instance.LogInfo("\titem");
+                            Mod.LogInfo("\titem");
                             // Make a new item requirements parent if necessary to fit another item requirement
                             Transform itemRequirementParentToUse;
                             if (listToUse[1][listToUse[1].Count - 1].transform.childCount == 5)
@@ -2331,7 +2331,7 @@ namespace EFM
                             }
                             itemRequirementParentToUse.gameObject.SetActive(true);
 
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             GameObject itemRequirement = Instantiate(Base_Manager.itemRequirementPrefab, itemRequirementParentToUse);
                             AreaRequirement itemRequirementScript = itemRequirement.AddComponent<AreaRequirement>();
                             itemRequirementScript.requirementType = AreaRequirement.RequirementType.Item;
@@ -2342,7 +2342,7 @@ namespace EFM
 
                             if (Mod.itemMap.ContainsKey(itemTemplateID))
                             {
-                                Mod.instance.LogInfo("\t\t0");
+                                Mod.LogInfo("\t\t0");
                                 string[] actualIDs = null;
                                 ItemMapEntry itemMapEntry = Mod.itemMap[itemTemplateID];
                                 switch (itemMapEntry.mode)
@@ -2365,7 +2365,7 @@ namespace EFM
                                 {
                                     AnvilManager.Run(Mod.SetVanillaIcon(actualIDs[0], itemRequirement.transform.GetChild(0).GetChild(2).GetComponent<Image>()));
                                 }
-                                Mod.instance.LogInfo("\t\t0");
+                                Mod.LogInfo("\t\t0");
 
                                 // Setup item req itemIcon
                                 ItemIcon reqItemIconScript = itemRequirement.transform.GetChild(0).GetChild(2).gameObject.AddComponent<ItemIcon>();
@@ -2376,18 +2376,18 @@ namespace EFM
                                 reqItemIconScript.volume = Mod.itemVolumes[actualIDs[0]];
 
                                 int itemAmountInInventory = 0;
-                                Mod.instance.LogInfo("\t\t base manager null?: "+(baseManager == null));
-                                Mod.instance.LogInfo("\t\t base inventory null?: "+(Mod.baseInventory == null));
+                                Mod.LogInfo("\t\t base manager null?: "+(baseManager == null));
+                                Mod.LogInfo("\t\t base inventory null?: "+(Mod.baseInventory == null));
                                 foreach (string itemReqID in actualIDs)
                                 {
                                     if (Mod.baseInventory.ContainsKey(itemReqID))
                                     {
-                                        Mod.instance.LogInfo("\t\t\t0");
+                                        Mod.LogInfo("\t\t\t0");
                                         itemAmountInInventory = Mod.baseInventory[itemReqID];
                                     }
                                     if (Mod.playerInventory.ContainsKey(itemReqID))
                                     {
-                                        Mod.instance.LogInfo("\t\t\t0");
+                                        Mod.LogInfo("\t\t\t0");
                                         itemAmountInInventory += Mod.playerInventory[itemReqID];
                                     }
 
@@ -2410,39 +2410,39 @@ namespace EFM
                                     }
                                 }
 
-                                Mod.instance.LogInfo("\t\t0");
+                                Mod.LogInfo("\t\t0");
                                 itemRequirement.transform.GetChild(1).GetChild(0).GetComponent<Text>().text = Mathf.Min(itemAmountNeeded, itemAmountInInventory).ToString() + "/" + itemAmountNeeded; // Area level
 
-                                Mod.instance.LogInfo("\t\t0");
+                                Mod.LogInfo("\t\t0");
                                 // Check if requirement is met
                                 if (itemAmountInInventory >= itemAmountNeeded)
                                 {
-                                    Mod.instance.LogInfo("\t\t\t0");
-                                    Mod.instance.LogInfo("\t\t\tSetting requirement to fullfilled with sprite null?: "+(Base_Manager.requirementFulfilled == null));
+                                    Mod.LogInfo("\t\t\t0");
+                                    Mod.LogInfo("\t\t\tSetting requirement to fullfilled with sprite null?: "+(Base_Manager.requirementFulfilled == null));
                                     itemRequirement.transform.GetChild(1).GetChild(1).GetComponent<Image>().sprite = Base_Manager.requirementFulfilled;
                                 }
                                 else
                                 {
-                                    Mod.instance.LogInfo("\t\t\t1");
-                                    Mod.instance.LogInfo("\t\t\tSetting requirement to locked with sprite null?: " + (Base_Manager.requirementLocked == null));
+                                    Mod.LogInfo("\t\t\t1");
+                                    Mod.LogInfo("\t\t\tSetting requirement to locked with sprite null?: " + (Base_Manager.requirementLocked == null));
                                     itemRequirement.transform.GetChild(1).GetChild(1).GetComponent<Image>().sprite = Base_Manager.requirementLocked;
-                                    Mod.instance.LogInfo("\t\t\tSprite after setting null?: " + (itemRequirement.transform.GetChild(1).GetChild(1).GetComponent<Image>().sprite == null));
+                                    Mod.LogInfo("\t\t\tSprite after setting null?: " + (itemRequirement.transform.GetChild(1).GetChild(1).GetComponent<Image>().sprite == null));
                                 }
-                                Mod.instance.LogInfo("\t\t0");
+                                Mod.LogInfo("\t\t0");
 
                                 itemRequirements.Add(itemRequirementScript);
                             }
                             else
                             {
                                 Destroy(itemRequirement);
-                                Mod.instance.LogError("Area " + areaIndex + " requires item with ID: " + requirement["templateId"].ToString() + " but this item is not in the item map!");
+                                Mod.LogError("Area " + areaIndex + " requires item with ID: " + requirement["templateId"].ToString() + " but this item is not in the item map!");
                             }
                             break;
                         case "TraderLoyalty":
-                            Mod.instance.LogInfo("\ttrader");
+                            Mod.LogInfo("\ttrader");
                             // Make a new trader requirements parent if necessary to fit another trader requirement
                             Transform traderRequirementParentToUse;
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             if (listToUse[2][listToUse[2].Count - 1].transform.childCount == 2)
                             {
                                 traderRequirementParentToUse = Instantiate(Base_Manager.traderRequirementsPrefab, parentRequirementsPanel).transform;
@@ -2472,10 +2472,10 @@ namespace EFM
                                     }
                                 }
                             }
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             traderRequirementParentToUse.gameObject.SetActive(true);
 
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             GameObject traderRequirement = Instantiate(Base_Manager.traderRequirementPrefab, traderRequirementParentToUse);
                             AreaRequirement traderRequirementScript = traderRequirement.AddComponent<AreaRequirement>();
                             traderRequirements.Add(traderRequirementScript);
@@ -2485,38 +2485,38 @@ namespace EFM
                             traderRequirementScript.level = traderRequiredLevel;
                             traderRequirementScript.index = traderRequirementIndex;
 
-                            Mod.instance.LogInfo("\t0");
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             traderRequirement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[traderRequirementIndex]; // Trader avatar
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             if (traderRequiredLevel == 4)
                             {
-                                Mod.instance.LogInfo("\t\t0");
+                                Mod.LogInfo("\t\t0");
                                 traderRequirement.transform.GetChild(0).GetChild(1).GetChild(0).gameObject.SetActive(true);
                             }
                             else // Use text instead of elite symbol
                             {
-                                Mod.instance.LogInfo("\t\t0");
+                                Mod.LogInfo("\t\t0");
                                 traderRequirement.transform.GetChild(0).GetChild(1).GetChild(1).gameObject.SetActive(true);
                                 traderRequirement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = TraderStatus.LoyaltyLevelToRoman((int)requirement["loyaltyLevel"]);
                             }
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             // Check if requirement is met
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             if (Mod.traderStatuses[traderRequirementIndex].GetLoyaltyLevel() >= traderRequiredLevel)
                             {
-                                Mod.instance.LogInfo("\t\t0");
+                                Mod.LogInfo("\t\t0");
                                 traderRequirement.transform.GetChild(1).GetComponent<Image>().sprite = Base_Manager.requirementFulfilled;
                             }
                             else
                             {
-                                Mod.instance.LogInfo("\t\t0");
+                                Mod.LogInfo("\t\t0");
                                 traderRequirement.transform.GetChild(1).GetComponent<Image>().sprite = Base_Manager.requirementLocked;
                             }
-                            Mod.instance.LogInfo("\t0");
+                            Mod.LogInfo("\t0");
                             break;
                         case "Skill":
-                            Mod.instance.LogInfo("\tskill");
+                            Mod.LogInfo("\tskill");
                             // Make a new skill requirements parent if necessary to fit another skill requirement
                             Transform skillRequirementParentToUse;
                             if (listToUse[3][listToUse[3].Count - 1].transform.childCount == 4)
@@ -2649,7 +2649,7 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogError("Missing bonusicon: " + areaBonusIcon + " for area: " + areaIndex);
+                            Mod.LogError("Missing bonusicon: " + areaBonusIcon + " for area: " + areaIndex);
                         }
                     }
                     else
@@ -2661,7 +2661,7 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogError("Missing bonusicon: " + areaBonusIcon + " for area: " + areaIndex);
+                            Mod.LogError("Missing bonusicon: " + areaBonusIcon + " for area: " + areaIndex);
                         }
                     }
                     bonus.transform.GetChild(0).GetComponent<Image>().sprite = bonusIcon; // Bonus icon
@@ -2733,10 +2733,10 @@ namespace EFM
             switch (requirement["type"].ToString())
             {
                 case "Area":
-                    Mod.instance.LogInfo("\t\t\t\tArea");
+                    Mod.LogInfo("\t\t\t\tArea");
                     return baseManager.baseAreaManagers[(int)requirement["areaType"]].level >= (int)requirement["requiredLevel"];
                 case "Item":
-                    Mod.instance.LogInfo("\t\t\t\tItem: "+requirement["templateId"]+":");
+                    Mod.LogInfo("\t\t\t\tItem: "+requirement["templateId"]+":");
                     if (Mod.itemMap.ContainsKey(requirement["templateId"].ToString()))
                     {
                         string[] itemIDs = null;
@@ -2862,11 +2862,11 @@ namespace EFM
                         return true;
                     }
                 case "TraderLoyalty":
-                    Mod.instance.LogInfo("\t\t\t\tTraderLoyalty");
+                    Mod.LogInfo("\t\t\t\tTraderLoyalty");
                     int traderIndex = TraderStatus.IDToIndex(requirement["traderId"].ToString());
                     return Mod.traderStatuses[traderIndex].GetLoyaltyLevel() >= (int)requirement["loyaltyLevel"];
                 case "Skill":
-                    Mod.instance.LogInfo("\t\t\t\tSkill");
+                    Mod.LogInfo("\t\t\t\tSkill");
                     float skillLevel = Mod.skills[Mod.SkillNameToIndex(requirement["skillName"].ToString())].currentProgress / 100;
                     return skillLevel >= (int)requirement["skillLevel"];
                 default:
@@ -2997,24 +2997,24 @@ namespace EFM
                 return false;
             }
 
-            Mod.instance.LogInfo("Get requs fulfilled called on area: "+areaIndex+" with all: "+all+", nextLevel: "+nextLevel+" ("+(level + 1)+"), and requirementTypeIndex: "+requirementTypeIndex);
+            Mod.LogInfo("Get requs fulfilled called on area: "+areaIndex+" with all: "+all+", nextLevel: "+nextLevel+" ("+(level + 1)+"), and requirementTypeIndex: "+requirementTypeIndex);
             int levelToUse = level + (nextLevel ? 1 : 0);
 
             if(nextLevel || areaRequirements == null)
             {
                 if (all)
                 {
-                    Mod.instance.LogInfo("\tAll");
+                    Mod.LogInfo("\tAll");
                     // Check if there are requirements
                     if (Mod.areasDB[areaIndex]["stages"][levelToUse.ToString()] != null && Mod.areasDB[areaIndex]["stages"][levelToUse.ToString()]["requirements"] != null)
                     {
-                        Mod.instance.LogInfo("\t\tThere are requirements");
+                        Mod.LogInfo("\t\tThere are requirements");
                         foreach (JToken requirement in Mod.areasDB[areaIndex]["stages"][levelToUse.ToString()]["requirements"])
                         {
-                            Mod.instance.LogInfo("\t\t\tChecking requirement of type: " + requirement["type"]);
+                            Mod.LogInfo("\t\t\tChecking requirement of type: " + requirement["type"]);
                             if (!GetRequirementFullfilled(requirement))
                             {
-                                Mod.instance.LogInfo("\t\t\t\t\tRequirement not fulfilled, returning false");
+                                Mod.LogInfo("\t\t\t\t\tRequirement not fulfilled, returning false");
                                 return false;
                             }
                         }
@@ -4734,14 +4734,14 @@ namespace EFM
             GameObject itemPrefab = IM.OD[ID].GetGameObject();
             if (itemPrefab == null)
             {
-                Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
+                Mod.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
 
                 IM.OD[ID].RefreshCache();
                 itemPrefab = IM.OD[ID].GetGameObject();
             }
             if (itemPrefab == null)
             {
-                Mod.instance.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
+                Mod.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
                 yield break;
             }
             VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<VanillaItemDescriptor>();
@@ -4985,7 +4985,7 @@ namespace EFM
 
         public void UpdateBasedOnItem(string itemID, bool amountSpecified = false, int amount = 0)
         {
-            Mod.instance.LogInfo("UpdateBasedOnItem called with item: "+itemID+" amount "+amount);
+            Mod.LogInfo("UpdateBasedOnItem called with item: "+itemID+" amount "+amount);
             // Amount of usable instances of this item left
             int totalAmount = amount;
             if (!amountSpecified)
@@ -5054,7 +5054,7 @@ namespace EFM
                 totalAmount = amountInBaseInventory + amountInPlayerInventory;
             }
 
-            Mod.instance.LogInfo("After amount: "+totalAmount);
+            Mod.LogInfo("After amount: "+totalAmount);
             // Update UI corresponding to this item
             if (farmingViewByItemID != null && farmingViewByItemID.ContainsKey(itemID))
             {
@@ -5303,10 +5303,10 @@ namespace EFM
 
         public void UpdateUpgradableStatus()
         {
-            Mod.instance.LogInfo("Update upgradable status called");
+            Mod.LogInfo("Update upgradable status called");
             if (GetRequirementsFullfilled(true, true))
             {
-                Mod.instance.LogInfo("Update upgradable status FULFILLED");
+                Mod.LogInfo("Update upgradable status FULFILLED");
                 // Also implies !constructing
 
                 areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.areaBackgroundAvailableSprite; // Summary Icon background color
@@ -5595,24 +5595,24 @@ namespace EFM
 
         public void ResumeProductions()
         {
-            Mod.instance.LogInfo("Resume productions called on area: " + areaIndex);
+            Mod.LogInfo("Resume productions called on area: " + areaIndex);
             if(productionsByItemIDByProdID == null)
             {
                 return;
             }
-            Mod.instance.LogInfo("\tHas productions");
+            Mod.LogInfo("\tHas productions");
 
             foreach (KeyValuePair<string, Dictionary<string, AreaProduction>> productionEntry in productionsByItemIDByProdID)
             {
                 foreach (KeyValuePair<string, AreaProduction> production in productionEntry.Value)
                 {
-                    Mod.instance.LogInfo("\t\tProduction: " + production.Key);
+                    Mod.LogInfo("\t\tProduction: " + production.Key);
                     if (production.Value.timeLeft > 0 && !activeProductions.ContainsKey(production.Key))
                     {
-                        Mod.instance.LogInfo("\t\t\tNot active but should be");
+                        Mod.LogInfo("\t\t\tNot active but should be");
                         if (production.Value.continuous)
                         {
-                            Mod.instance.LogInfo("\t\t\t\tContinuous");
+                            Mod.LogInfo("\t\t\t\tContinuous");
                             GameObject farmingView = production.Value.gameObject;
 
                             production.Value.active = true;
@@ -5633,7 +5633,7 @@ namespace EFM
                         }
                         else if (production.Value.timeLeft > 0)
                         {
-                            Mod.instance.LogInfo("\t\t\t\tNon Continuous");
+                            Mod.LogInfo("\t\t\t\tNon Continuous");
                             production.Value.active = true;
                             activeProductions.Add(production.Key, production.Value);
 
@@ -5646,7 +5646,7 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting production UI");
+            Mod.LogInfo("\tSetting production UI");
             // Set Production UI
             int doneCount = 0;
             int totalCount = 0;
@@ -5664,7 +5664,7 @@ namespace EFM
                 }
                 ++totalCount;
             }
-            Mod.instance.LogInfo("\tDoneCount: "+doneCount+", continuousCount: "+continuousCount);
+            Mod.LogInfo("\tDoneCount: "+doneCount+", continuousCount: "+continuousCount);
             if (doneCount > 0)
             {
                 // Summary

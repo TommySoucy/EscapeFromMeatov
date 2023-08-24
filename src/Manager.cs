@@ -56,18 +56,18 @@ namespace EFM
 
         public static void LoadBase(int slotIndex = -1, bool latest = false)
         {
-            Mod.instance.LogInfo("Loadbase called");
+            Mod.LogInfo("Loadbase called");
 
             Mod.currentLocationIndex = 1;
 
             // Load base asset bundle
             if (!hideoutLoaded)
             {
-                Mod.instance.LogInfo("base null, loading bundle from file for first time");
+                Mod.LogInfo("base null, loading bundle from file for first time");
                 Mod.baseAssetsBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovHideoutAssets.ab");
-                Mod.instance.LogInfo("Loaded hideout bunble from file, loading hideout prefab");
+                Mod.LogInfo("Loaded hideout bunble from file, loading hideout prefab");
                 Mod.baseBundle = AssetBundle.LoadFromFile("BepinEx/Plugins/EscapeFromMeatov/Assets/EscapeFromMeatovHideout.ab");
-                Mod.instance.LogInfo("Loaded hideout prefab");
+                Mod.LogInfo("Loaded hideout prefab");
                 hideoutLoaded = true;
             }
 

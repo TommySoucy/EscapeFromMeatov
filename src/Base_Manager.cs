@@ -116,7 +116,7 @@ namespace EFM
         public MarketManager marketManager;
         public static bool marketUI; // whether we are currently in market mode or in area UI mode
         public GCManager GCManager;
-        public EFM_AreaUpgradeCheckProcessor[] activeCheckProcessors = new EFM_AreaUpgradeCheckProcessor[2];
+        public AreaUpgradeCheckProcessor[] activeCheckProcessors = new AreaUpgradeCheckProcessor[2];
 
         public static float currentExperienceRate = 1;
         public static float currentQuestMoneyReward = 0;
@@ -208,7 +208,7 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogError("Could not load raid map bundle, cancelling");
+                        Mod.LogError("Could not load raid map bundle, cancelling");
                         cancelRaidLoad = true;
                     }
                 }
@@ -2535,7 +2535,7 @@ namespace EFM
                     }
                     else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
                     {
-                        Mod.instance.LogInfo("3");
+                        Mod.LogInfo("3");
                         FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
                         if (Mod.clipsByType.ContainsKey(asClip.ClipType))
                         {
@@ -2670,7 +2670,7 @@ namespace EFM
             }
             else
             {
-                Mod.instance.LogError("Attempting to remove " + itemID + " from base inventory but key was not found in it:\n" + Environment.StackTrace);
+                Mod.LogError("Attempting to remove " + itemID + " from base inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
             if (Mod.baseInventory[itemID] == 0)
@@ -2711,12 +2711,12 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Mod.instance.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from base inventory but ammo name was not found in roundsByType:\n" + Environment.StackTrace);
+                                    Mod.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from base inventory but ammo name was not found in roundsByType:\n" + Environment.StackTrace);
                                 }
                             }
                             else
                             {
-                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from base inventory but ammo type was not found in roundsByType:\n" + Environment.StackTrace);
+                                Mod.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from base inventory but ammo type was not found in roundsByType:\n" + Environment.StackTrace);
                             }
                         }
                     }
@@ -2743,12 +2743,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is mag from base inventory but its name was not found in magazinesByType:\n" + Environment.StackTrace);
+                                Mod.LogError("Attempting to remove " + itemID + "  which is mag from base inventory but its name was not found in magazinesByType:\n" + Environment.StackTrace);
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Attempting to remove " + itemID + "  which is mag from base inventory but its type was not found in magazinesByType:\n" + Environment.StackTrace);
+                            Mod.LogError("Attempting to remove " + itemID + "  which is mag from base inventory but its type was not found in magazinesByType:\n" + Environment.StackTrace);
                         }
                     }
                     else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
@@ -2770,12 +2770,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is clip from base inventory but its name was not found in clipsByType:\n" + Environment.StackTrace);
+                                Mod.LogError("Attempting to remove " + itemID + "  which is clip from base inventory but its name was not found in clipsByType:\n" + Environment.StackTrace);
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Attempting to remove " + itemID + "  which is clip from base inventory but its type was not found in clipsByType:\n" + Environment.StackTrace);
+                            Mod.LogError("Attempting to remove " + itemID + "  which is clip from base inventory but its type was not found in clipsByType:\n" + Environment.StackTrace);
                         }
                     }
                     else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
@@ -2797,12 +2797,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is round from base inventory but its name was not found in roundsByType:\n" + Environment.StackTrace);
+                                Mod.LogError("Attempting to remove " + itemID + "  which is round from base inventory but its name was not found in roundsByType:\n" + Environment.StackTrace);
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Attempting to remove " + itemID + "  which is round from base inventory but its type was not found in roundsByType:\n" + Environment.StackTrace);
+                            Mod.LogError("Attempting to remove " + itemID + "  which is round from base inventory but its type was not found in roundsByType:\n" + Environment.StackTrace);
                         }
                     }
                 }
@@ -2833,7 +2833,7 @@ namespace EFM
 
         private GameObject LoadSavedItem(Transform parent, JToken item, int locationIndex = -1, bool inAll = false)
         {
-            Mod.instance.LogInfo("Loading item "+item["PhysicalObject"]["ObjectWrapper"]["ItemID"]);
+            Mod.LogInfo("Loading item "+item["PhysicalObject"]["ObjectWrapper"]["ItemID"]);
             int parsedID = -1;
             GameObject prefabToUse = null;
             if (int.TryParse(item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString(), out parsedID))
@@ -3148,7 +3148,7 @@ namespace EFM
                 // Armor
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.BodyArmor)
                 {
-                    Mod.instance.LogInfo("is armor");
+                    Mod.LogInfo("is armor");
                     customItemWrapper.armor = (float)item["PhysicalObject"]["armor"];
                     customItemWrapper.maxArmor = (float)item["PhysicalObject"]["maxArmor"];
 
@@ -3162,7 +3162,7 @@ namespace EFM
                 // Rig
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
                 {
-                    Mod.instance.LogInfo("is rig");
+                    Mod.LogInfo("is rig");
                     bool equipped = (int)item["PhysicalObject"]["equipSlot"] != -1;
                     if (equipped)
                     {
@@ -3215,7 +3215,7 @@ namespace EFM
                 // Backpack
                 if (customItemWrapper.itemType == Mod.ItemType.Backpack)
                 {
-                    Mod.instance.LogInfo("is backpack");
+                    Mod.LogInfo("is backpack");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
@@ -3238,7 +3238,7 @@ namespace EFM
                 // Container
                 if (customItemWrapper.itemType == Mod.ItemType.Container)
                 {
-                    Mod.instance.LogInfo("is container");
+                    Mod.LogInfo("is container");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
@@ -3259,7 +3259,7 @@ namespace EFM
                 // Pouch
                 if (customItemWrapper.itemType == Mod.ItemType.Pouch)
                 {
-                    Mod.instance.LogInfo("is Pouch");
+                    Mod.LogInfo("is Pouch");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
@@ -3280,13 +3280,13 @@ namespace EFM
                 // AmmoBox
                 //if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
                 //{
-                //    Mod.instance.LogInfo("is ammo box");
+                //    Mod.LogInfo("is ammo box");
                 //}
 
                 // Money
                 if (customItemWrapper.itemType == Mod.ItemType.Money)
                 {
-                    Mod.instance.LogInfo("is money");
+                    Mod.LogInfo("is money");
 
                     customItemWrapper.stack = (int)item["stack"];
                     customItemWrapper.UpdateStackModel();
@@ -3295,19 +3295,19 @@ namespace EFM
                 // Consumable
                 //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
                 //{
-                //    Mod.instance.LogInfo("is Consumable");
+                //    Mod.LogInfo("is Consumable");
                 //}
 
                 // Key
                 //if (customItemWrapper.itemType == Mod.ItemType.Key)
                 //{
-                //    Mod.instance.LogInfo("is Key");
+                //    Mod.LogInfo("is Key");
                 //}
 
                 // Earpiece
                 if (customItemWrapper.itemType == Mod.ItemType.Earpiece)
                 {
-                    Mod.instance.LogInfo("is Earpiece");
+                    Mod.LogInfo("is Earpiece");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
@@ -3319,7 +3319,7 @@ namespace EFM
                 // Face Cover
                 if (customItemWrapper.itemType == Mod.ItemType.FaceCover)
                 {
-                    Mod.instance.LogInfo("is Face Cover");
+                    Mod.LogInfo("is Face Cover");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
@@ -3331,7 +3331,7 @@ namespace EFM
                 // Eyewear
                 if (customItemWrapper.itemType == Mod.ItemType.Eyewear)
                 {
-                    Mod.instance.LogInfo("is Eyewear");
+                    Mod.LogInfo("is Eyewear");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
@@ -3343,7 +3343,7 @@ namespace EFM
                 // Headwear
                 if (customItemWrapper.itemType == Mod.ItemType.Headwear)
                 {
-                    Mod.instance.LogInfo("is Headwear");
+                    Mod.LogInfo("is Headwear");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
@@ -3365,7 +3365,7 @@ namespace EFM
                     customItemWrapper.takeCurrentLocation = false;
 
                     int equipSlotIndex = (int)item["PhysicalObject"]["equipSlot"];
-                    Mod.instance.LogInfo("Item has equip slot: "+ equipSlotIndex);
+                    Mod.LogInfo("Item has equip slot: "+ equipSlotIndex);
                     FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[equipSlotIndex];
                     itemPhysicalObject.SetQuickBeltSlot(equipSlot);
                     itemPhysicalObject.SetParentage(null);
@@ -3383,7 +3383,7 @@ namespace EFM
                 // Put item in pocket if it has pocket index
                 if (item["pocketSlotIndex"] != null)
                 {
-                    Mod.instance.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
+                    Mod.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
                     customItemWrapper.takeCurrentLocation = false;
                     customItemWrapper.locationIndex = 0;
 
@@ -3415,7 +3415,7 @@ namespace EFM
                 // Put item in pocket if it has pocket index
                 if (item["pocketSlotIndex"] != null)
                 {
-                    Mod.instance.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
+                    Mod.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
                     vanillaItemDescriptor.takeCurrentLocation = false;
                     vanillaItemDescriptor.locationIndex = 0;
 
@@ -3680,15 +3680,6 @@ namespace EFM
                 optionPages[i] = optionsPageParent.GetChild(i);
             }
 
-            // Init options UI
-            // Physical doors
-            PointableButton physDoorToggleButton = optionPages[0].GetChild(0).GetChild(0).gameObject.AddComponent<PointableButton>();
-            physDoorToggleButton.SetButton();
-            Mod.physicsDoorsToggleCheckmark = physDoorToggleButton.transform.GetChild(0).GetChild(0).gameObject;
-            physDoorToggleButton.MaxPointingRange = 5;
-            physDoorToggleButton.hoverSound = hoverAudio;
-            physDoorToggleButton.Button.onClick.AddListener(OnPhysDoorToggleClicked);
-
             // Set save buttons activated depending on presence of save files
             if (availableSaveFiles.Count > 0)
             {
@@ -3723,7 +3714,7 @@ namespace EFM
             // Areas
             if (areaCanvasPrefab == null)
             {
-                Mod.instance.LogInfo("Area canvas not initialized, initializing all area UI and prepping...");
+                Mod.LogInfo("Area canvas not initialized, initializing all area UI and prepping...");
 
                 // Load prefabs and assets
                 areaCanvasPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaCanvas");
@@ -3855,7 +3846,7 @@ namespace EFM
                 bitcoinFarmAudio = Mod.baseAssetsBundle.LoadAsset<AudioClip>("bitcoinfarm_generic_on + bitcoinfarm_generic_working + bitcoinfarm_generic_off");
 
                 // Prep prefabs
-                Mod.instance.LogInfo("All area UI loaded, prepping...");
+                Mod.LogInfo("All area UI loaded, prepping...");
 
                 // AreaCanvasPrefab
                 GameObject summaryButtonObject = areaCanvasPrefab.transform.GetChild(0).GetChild(2).gameObject;
@@ -3956,10 +3947,10 @@ namespace EFM
                 scavCaseViewStartPointableButton.MaxPointingRange = 30;
                 scavCaseViewStartPointableButton.hoverSound = areaCanvasPrefab.transform.GetChild(2).GetComponent<AudioSource>();
 
-                Mod.instance.LogInfo("Area UI prepped");
+                Mod.LogInfo("Area UI prepped");
             }
 
-            Mod.instance.LogInfo("Initializing area managers");
+            Mod.LogInfo("Initializing area managers");
             // Init all area managers after UI is prepped
             for (int i = 0; i < 22; ++i)
             {
@@ -4047,7 +4038,7 @@ namespace EFM
                         Mod.AddExperience(600);
                     }
 
-                    Mod.instance.LogInfo("Base init: Just finished raid");
+                    Mod.LogInfo("Base init: Just finished raid");
                     Transform raidReportScreen = transform.GetChild(0).GetChild(0).GetChild(12);
                     medicalScreen = transform.GetChild(0).GetChild(0).GetChild(13);
                     float raidReportListHeight = 141; // Default height not including None kill
@@ -4075,12 +4066,12 @@ namespace EFM
                     Transform listContent = raidReportScreen.GetChild(3).GetChild(0).GetChild(0);
                     int expTotal = 0;
 
-                    Mod.instance.LogInfo("\tSet raid report xp");
+                    Mod.LogInfo("\tSet raid report xp");
                     // Fill kill list
                     int killCount = 0;
                     if (Mod.killList != null && Mod.killList.Count > 0)
                     {
-                        Mod.instance.LogInfo("\tHave kills, adding to list");
+                        Mod.LogInfo("\tHave kills, adding to list");
                         // Disable none
                         listContent.GetChild(0).GetChild(1).gameObject.SetActive(false);
 
@@ -4100,7 +4091,7 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogInfo("\tNo kills");
+                        Mod.LogInfo("\tNo kills");
                         raidReportListHeight += 21; // Add none kill
                     }
 
@@ -4115,15 +4106,15 @@ namespace EFM
                     listContent.GetChild(1).GetChild(4).GetChild(1).GetComponent<Text>().text = raidResultExp.ToString() + " exp";
                     expTotal += raidResultExp;
 
-                    Mod.instance.LogInfo("\tSet other xp");
+                    Mod.LogInfo("\tSet other xp");
                     // Set total
                     listContent.GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = expTotal.ToString() + " exp";
 
-                    Mod.instance.LogInfo("\tSetting hoverscrolls, killcount: " + killCount);
+                    Mod.LogInfo("\tSetting hoverscrolls, killcount: " + killCount);
                     // Set hover scrolls
                     if (killCount >= 8)
                     {
-                        Mod.instance.LogInfo("\t\tkillcount >= 8, activating kill list hover scrolls");
+                        Mod.LogInfo("\t\tkillcount >= 8, activating kill list hover scrolls");
                         HoverScroll raidReportListDownHoverScroll = raidReportScreen.GetChild(3).GetChild(2).gameObject.AddComponent<HoverScroll>();
                         HoverScroll raidReportListUpHoverScroll = raidReportScreen.GetChild(3).GetChild(3).gameObject.AddComponent<HoverScroll>();
                         raidReportListDownHoverScroll.MaxPointingRange = 30;
@@ -4141,7 +4132,7 @@ namespace EFM
                         raidReportListDownHoverScroll.rate = 309 / (raidReportListHeight - 309);
                         raidReportListDownHoverScroll.gameObject.SetActive(true);
                     }
-                    Mod.instance.LogInfo("\tSet hoverscrolls, setting medical");
+                    Mod.LogInfo("\tSet hoverscrolls, setting medical");
 
 
                     // Set medical body
@@ -4185,7 +4176,7 @@ namespace EFM
                             }
                         }
                     }
-                    Mod.instance.LogInfo("\tSet body");
+                    Mod.LogInfo("\tSet body");
 
                     // Process parts
                     medicalScreenPartImagesParent = medicalScreen.GetChild(4).GetChild(0);
@@ -4204,7 +4195,7 @@ namespace EFM
                     int trialLevels = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["TrialLevels"];
                     int trialRaids = (int)Mod.globalDB["config"]["Health"]["HealPrice"]["TrialRaids"];
                     int[] otherConditionCosts = new int[] { lightBleedingPrice, heavyBleedingPrice, fracturePrice };
-                    Mod.instance.LogInfo("\tInit part process");
+                    Mod.LogInfo("\tInit part process");
                     for (int partIndex = 0; partIndex < 7; ++partIndex)
                     {
                         // Set part color
@@ -4322,7 +4313,7 @@ namespace EFM
                             partElement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(partTotalCost);
                         }
                     }
-                    Mod.instance.LogInfo("\tProcessed parts");
+                    Mod.LogInfo("\tProcessed parts");
 
                     // Setup total and put as last sibling
                     totalTreatmentPriceText = medicalListContent.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
@@ -4340,7 +4331,7 @@ namespace EFM
 
                     medicalScreen.GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("203") ? Mod.baseInventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
 
-                    Mod.instance.LogInfo("\tSet total health");
+                    Mod.LogInfo("\tSet total health");
                     // Set hover scrolls
                     if (medicalListHeight >= 377)
                     {
@@ -4361,7 +4352,7 @@ namespace EFM
                         medicalListDownHoverScroll.rate = 377 / (medicalListHeight - 377);
                         medicalListDownHoverScroll.gameObject.SetActive(true);
                     }
-                    Mod.instance.LogInfo("\tSet hoverscrolls");
+                    Mod.LogInfo("\tSet hoverscrolls");
 
                     UpdateTreatmentApply();
 
@@ -4661,14 +4652,6 @@ namespace EFM
             }
         }
 
-        public void OnPhysDoorToggleClicked()
-        {
-            clickAudio.Play();
-            Mod.physicsDoors = !Mod.physicsDoors;
-            Mod.config["PhysicalDoors"] = Mod.physicsDoors;
-            Mod.physicsDoorsToggleCheckmark.SetActive(Mod.physicsDoors);
-        }
-
         public void OnScavBlockOKClicked()
         {
             clickAudio.Play();
@@ -4944,7 +4927,7 @@ namespace EFM
 
         private void SaveBase()
         {
-            Mod.instance.LogInfo("Saving base");
+            Mod.LogInfo("Saving base");
             JToken saveObject = data;
 
             // Write time
@@ -5199,7 +5182,7 @@ namespace EFM
             data = saveObject;
 
             SaveDataToFile();
-            Mod.instance.LogInfo("Saved base");
+            Mod.LogInfo("Saved base");
             UpdateSaveButtonList();
         }
 
@@ -5289,7 +5272,7 @@ namespace EFM
             // Firearm
             if (itemPhysicalObject is FVRFireArm)
             {
-                Mod.instance.LogInfo("Saving firearm: " + itemPhysicalObject.name);
+                Mod.LogInfo("Saving firearm: " + itemPhysicalObject.name);
                 FVRFireArm firearmPhysicalObject = itemPhysicalObject as FVRFireArm;
 
                 // Save flagDict by converting it into two lists of string, one for keys and one for values
@@ -5528,7 +5511,7 @@ namespace EFM
                     JArray saveBPContents = (JArray)savedItem["PhysicalObject"]["backpackContents"];
                     for (int i=0; i < customItemWrapper.containerItemRoot.childCount; ++i)
                     {
-                        Mod.instance.LogInfo("Item in backpack " + i + ": "+ customItemWrapper.containerItemRoot.GetChild(i).name);
+                        Mod.LogInfo("Item in backpack " + i + ": "+ customItemWrapper.containerItemRoot.GetChild(i).name);
                         SaveItem(saveBPContents, customItemWrapper.containerItemRoot.GetChild(i));
                     }
                 }
@@ -5543,7 +5526,7 @@ namespace EFM
                     JArray saveContainerContents = (JArray)savedItem["PhysicalObject"]["containerContents"];
                     for (int i = 0; i < customItemWrapper.containerItemRoot.childCount; ++i)
                     {
-                        Mod.instance.LogInfo("Item in container " + i + ": " + customItemWrapper.containerItemRoot.GetChild(i).name);
+                        Mod.LogInfo("Item in container " + i + ": " + customItemWrapper.containerItemRoot.GetChild(i).name);
                         SaveItem(saveContainerContents, customItemWrapper.containerItemRoot.GetChild(i));
                     }
                 }
@@ -5563,7 +5546,7 @@ namespace EFM
                     JArray savePouchContents = (JArray)savedItem["PhysicalObject"]["containerContents"];
                     for (int i = 0; i < customItemWrapper.containerItemRoot.childCount; ++i)
                     {
-                        Mod.instance.LogInfo("Item in pouch " + i + ": " + customItemWrapper.containerItemRoot.GetChild(i).name);
+                        Mod.LogInfo("Item in pouch " + i + ": " + customItemWrapper.containerItemRoot.GetChild(i).name);
                         SaveItem(savePouchContents, customItemWrapper.containerItemRoot.GetChild(i));
                     }
                 }
@@ -5617,7 +5600,7 @@ namespace EFM
                 // AmmoBox
                 //if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
                 //{
-                //    Mod.instance.LogInfo("Item is ammo box");
+                //    Mod.LogInfo("Item is ammo box");
                 //}
 
                 // Money
@@ -5629,13 +5612,13 @@ namespace EFM
                 // Consumable
                 //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
                 //{
-                //    Mod.instance.LogInfo("Item is Consumable");
+                //    Mod.LogInfo("Item is Consumable");
                 //}
 
                 // Key
                 //if (customItemWrapper.itemType == Mod.ItemType.Key)
                 //{
-                //    Mod.instance.LogInfo("is Key");
+                //    Mod.LogInfo("is Key");
                 //}
 
                 // Dogtag

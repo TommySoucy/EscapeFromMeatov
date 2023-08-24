@@ -33,7 +33,7 @@ namespace EFM
         private float maxRaidTime;
 
         private List<GameObject> extractionCards;
-        private bool extracted;
+        public bool extracted;
         private bool spawning;
 
         // AI
@@ -89,11 +89,11 @@ namespace EFM
             // Manager GC ourselves
             GCManager = gameObject.AddComponent<GCManager>();
 
-            Mod.instance.LogInfo("Raid init called");
+            Mod.LogInfo("Raid init called");
             currentManager = this;
 
             LoadMapData();
-            Mod.instance.LogInfo("Map data read");
+            Mod.LogInfo("Map data read");
 
             // Choose spawnpoints
             Transform spawnRoot = transform.GetChild(transform.childCount - 1).GetChild(0);
@@ -101,7 +101,7 @@ namespace EFM
 
             GM.CurrentSceneSettings.DeathResetPoint = spawnPoint;
 
-            Mod.instance.LogInfo("Got spawn");
+            Mod.LogInfo("Got spawn");
 
             // Find extractions
             Mod.currentTaskLeaveItemConditionsByItemIDByZone = new Dictionary<string, Dictionary<string, List<TraderTaskCondition>>>();
@@ -110,7 +110,7 @@ namespace EFM
             possibleExtractions = new List<Extraction>();
             Extraction bestCandidate = null; // Must be an extraction without appearance times (always available) and no other requirements. This will be the minimum extraction
             float farthestDistance = float.MinValue;
-            Mod.instance.LogInfo("Init raid with map index: " + Mod.chosenMapIndex + ", which has " + extractions.Count + " extractions");
+            Mod.LogInfo("Init raid with map index: " + Mod.chosenMapIndex + ", which has " + extractions.Count + " extractions");
             for (int extractionIndex = 0; extractionIndex < extractions.Count; ++extractionIndex)
             {
                 Extraction currentExtraction = extractions[extractionIndex];
@@ -153,10 +153,10 @@ namespace EFM
                                     (currentExtraction.role == Mod.chosenCharIndex || currentExtraction.role == 2) &&
                                     !currentExtraction.accessRequirement;
                 float currentDistance = Vector3.Distance(spawnPoint.position, currentExtraction.gameObject.transform.position);
-                Mod.instance.LogInfo("\tExtraction at index: " + extractionIndex + " has " + currentExtraction.times.Count + " times and " + currentExtraction.itemRequirements.Count + " items reqs. Its current distance from player is: " + currentDistance);
+                Mod.LogInfo("\tExtraction at index: " + extractionIndex + " has " + currentExtraction.times.Count + " times and " + currentExtraction.itemRequirements.Count + " items reqs. Its current distance from player is: " + currentDistance);
                 if (UnityEngine.Random.value <= ExtractionChanceByDist(currentDistance))
                 {
-                    Mod.instance.LogInfo("\t\tAdding this extraction to list possible extractions");
+                    Mod.LogInfo("\t\tAdding this extraction to list possible extractions");
                     possibleExtractions.Add(currentExtraction);
 
                     //Add an extraction manager
@@ -185,10 +185,10 @@ namespace EFM
             }
             else
             {
-                Mod.instance.LogError("No minimum extraction found");
+                Mod.LogError("No minimum extraction found");
             }
 
-            Mod.instance.LogInfo("Got extractions");
+            Mod.LogInfo("Got extractions");
 
             // Init extraction cards
             Transform extractionParent = Mod.playerStatusUI.transform.GetChild(0).GetChild(9);
@@ -208,7 +208,7 @@ namespace EFM
                 possibleExtractions[i].card = currentExtractionCard;
             }
             extractionParent.gameObject.SetActive(true);
-            Mod.instance.LogInfo("Inited extract cards");
+            Mod.LogInfo("Inited extract cards");
 
             // Initialize doors
             Mod.initDoors = true;
@@ -227,13 +227,13 @@ namespace EFM
             metalMatDef.ImpactEffectType = BallisticImpactEffectType.Sparks;
             metalMatDef.SoundType = MatSoundType.Metal;
 
-            Mod.instance.LogInfo("Initializing doors");
+            Mod.LogInfo("Initializing doors");
             // TODO: Uncomment and delete what comes after once doors aren't as laggy. Will also have to put vanilla doors first in hierarchy in map asset and use the modified map meshes to accomodate doors
             /*
             foreach (JToken doorData in Mod.mapData["maps"][Mod.chosenMapIndex]["doors"])
             {
                 GameObject doorObject = doorRoot.GetChild(doorIndex).gameObject;
-                Mod.instance.LogInfo("\t" + doorObject.name);
+                Mod.LogInfo("\t" + doorObject.name);
                 GameObject doorInstance = null;
                 if (doorData["type"].ToString().Equals("left"))
                 {
@@ -405,7 +405,7 @@ namespace EFM
                 ++doorIndex;
             }
 
-            Mod.instance.LogInfo("Initialized doors, spawning loose loot");
+            Mod.LogInfo("Initialized doors, spawning loose loot");
 
             // Spawn loose loot
             if (Mod.spawnItems)
@@ -413,17 +413,17 @@ namespace EFM
                 JObject locationDB = Mod.locationsLootDB[Mod.chosenMapIndex];
                 Transform itemsRoot = transform.GetChild(1).GetChild(1).GetChild(2);
                 // Forced, always spawns TODO: Unless player has it already? Unless player doesnt have the quest yet?
-                Mod.instance.LogInfo("Spawning forced loot, forced null?: " + (locationDB["forced"] == null));
+                Mod.LogInfo("Spawning forced loot, forced null?: " + (locationDB["forced"] == null));
                 foreach (JToken forced in locationDB["forced"])
                 {
-                    Mod.instance.LogInfo("Forced entry, items null?: " + (forced["Items"] == null));
+                    Mod.LogInfo("Forced entry, items null?: " + (forced["Items"] == null));
                     Dictionary<string, CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, CustomItemWrapper>();
                     Dictionary<string, VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, VanillaItemDescriptor>();
                     List<string> unspawnedParents = new List<string>();
 
                     // Get item from item map
                     string originalID = forced["Items"][0].Type != JTokenType.String ? forced["Items"][0]["_tpl"].ToString() : forced["Items"][0].ToString();
-                    Mod.instance.LogInfo("Got ID");
+                    Mod.LogInfo("Got ID");
                     string itemID = null;
                     if (Mod.itemMap.ContainsKey(originalID))
                     {
@@ -463,7 +463,7 @@ namespace EFM
                 }
 
                 // Dynamic, has chance of spawning
-                Mod.instance.LogInfo("Spawning dynamic loot");
+                Mod.LogInfo("Spawning dynamic loot");
                 foreach (JToken dynamicSpawn in locationDB["dynamic"])
                 {
                     Dictionary<string, CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, CustomItemWrapper>();
@@ -475,7 +475,7 @@ namespace EFM
                     string originalID = null;
                     if (lootTableIDSplit.Length == 1 || Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)] == null || Mod.dynamicLootTable[Mod.LocationIndexToDataName(Mod.chosenMapIndex)][lootTableIDSplit[0]] == null)
                     {
-                        Mod.instance.LogWarning("Failed to get loot table ID from: " + lootTableIDSplit[0] + ", spawning specified item instead");
+                        Mod.LogWarning("Failed to get loot table ID from: " + lootTableIDSplit[0] + ", spawning specified item instead");
                         JArray items = dynamicSpawn["Items"].Value<JArray>();
                         originalID = items[0].Type != JTokenType.String ? items[0]["_tpl"].ToString() : items[0].ToString();
                     }
@@ -523,7 +523,7 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("Done spawning loose loot, initializing container");
+            Mod.LogInfo("Done spawning loose loot, initializing container");
 
             // Init containers
             Transform containersRoot = transform.GetChild(1).GetChild(1).GetChild(1);
@@ -797,7 +797,7 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.instance.LogError("Night time raid selected, but EscapeFromMeatov" + Mod.chosenMapName + "Night.ab could not be loaded");
+                    Mod.LogError("Night time raid selected, but EscapeFromMeatov" + Mod.chosenMapName + "Night.ab could not be loaded");
                 }
             }
 
@@ -847,28 +847,6 @@ namespace EFM
                 if (Mod.playerStatusManager.extractionTimerText.color != Color.red)
                 {
                     Mod.playerStatusManager.extractionTimerText.color = Color.red;
-                }
-            }
-
-            if (Mod.instance.debug)
-            {
-                if (Input.GetKeyDown(KeyCode.U))
-                {
-                    Mod.justFinishedRaid = true;
-                    Mod.raidState = Base_Manager.FinishRaidState.Survived;
-
-                    // Disable extraction list and timer
-                    Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
-                    Mod.playerStatusManager.extractionTimerText.color = Color.black;
-                    Mod.extractionLimitUI.SetActive(false);
-                    Mod.playerStatusManager.SetDisplayed(false);
-                    Mod.extractionUI.SetActive(false);
-
-                    ResetHealthEffectCounterConditions();
-
-                    Manager.LoadBase(5); // Load autosave, which is right before the start of raid
-
-                    extracted = true;
                 }
             }
 
@@ -1234,11 +1212,11 @@ namespace EFM
                 Mod.forceSpawnAI = false;
             }
 
-            Mod.instance.LogInfo("SPAWNAI: SpawnAI called with name "+spawnData.name+" of type: "+spawnData.type);
+            Mod.LogInfo("SPAWNAI: SpawnAI called with name "+spawnData.name+" of type: "+spawnData.type);
             spawning = true;
             yield return IM.OD["SosigBody_Default"].GetGameObjectAsync();
             GameObject sosigPrefab = IM.OD["SosigBody_Default"].GetGameObject();
-            Mod.instance.LogInfo("SPAWNAI " + spawnData.name+": \tGot sosig body prefab, null?: "+(sosigPrefab == null));
+            Mod.LogInfo("SPAWNAI " + spawnData.name+": \tGot sosig body prefab, null?: "+(sosigPrefab == null));
 
             // TODO: Make sure that wherever we spawn a bot, it is far enough from player, and there is no direct line of sight between player and potential spawnpoint
             Transform AISpawnPoint = null;
@@ -1310,11 +1288,11 @@ namespace EFM
                     break;
             }
 
-            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tGot spawnpoint at " + AISpawnPoint.position);
+            Mod.LogInfo("SPAWNAI " + spawnData.name + ": \tGot spawnpoint at " + AISpawnPoint.position);
 
             GameObject sosigObject = Instantiate(sosigPrefab, AISpawnPoint.position, AISpawnPoint.rotation);
             sosigObject.name = spawnData.type.ToString() + " AI ("+spawnData.name+")";
-            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tInstantiated sosig, position: " + sosigObject.transform.position);
+            Mod.LogInfo("SPAWNAI " + spawnData.name + ": \tInstantiated sosig, position: " + sosigObject.transform.position);
             Sosig sosigScript = sosigObject.GetComponentInChildren<Sosig>();
             sosigScript.InitHands();
             // TODO: Here, if needed, is where we add new slots, but new slots need to be initialized, we need to set a target transform to each and there might be more, need to check
@@ -1332,7 +1310,7 @@ namespace EFM
             AIScript.inventory = spawnData.inventory;
             AIScript.USEC = spawnData.USEC;
             AIScript.type = spawnData.type;
-            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tAdded EFM_AI script");
+            Mod.LogInfo("SPAWNAI " + spawnData.name + ": \tAdded EFM_AI script");
 
             entities.Add(sosigScript.E);
             entityRelatedAI.Add(AIScript);
@@ -1349,7 +1327,7 @@ namespace EFM
                     wearableScript.RegisterWearable(link);
                 }
             }
-            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawned outfit items");
+            Mod.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawned outfit items");
 
             // Spawn sosig weapon and grenade
             if (spawnData.sosigWeapon != null)
@@ -1368,7 +1346,7 @@ namespace EFM
             }
             else
             {
-                Mod.instance.LogError(spawnData.type.ToString() + " type AI with name: " + spawnData.name + ", has no weapon");
+                Mod.LogError(spawnData.type.ToString() + " type AI with name: " + spawnData.name + ", has no weapon");
             }
 
             if (spawnData.sosigGrenade != null)
@@ -1380,7 +1358,7 @@ namespace EFM
                 sosigGrenade.SetAutoDestroy(true);
                 sosigScript.ForceEquip(sosigGrenade);
             }
-            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawned weapons");
+            Mod.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawned weapons");
 
             // Configure
             sosigScript.Configure(spawnData.configTemplate);
@@ -1504,7 +1482,7 @@ namespace EFM
                     break;
 
             }
-            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawning with IFF: "+iff);
+            Mod.LogInfo("SPAWNAI " + spawnData.name + ": \tSpawning with IFF: "+iff);
             sosigScript.SetIFF(iff);
             sosigScript.SetOriginalIFFTeam(iff);
 
@@ -1520,7 +1498,7 @@ namespace EFM
             sosigScript.CanBeGrabbed = false;
             sosigScript.CanBeKnockedOut = false;
 
-            Mod.instance.LogInfo("SPAWNAI " + spawnData.name + ": \tConfigured AI");
+            Mod.LogInfo("SPAWNAI " + spawnData.name + ": \tConfigured AI");
 
             spawning = false;
             yield break;
@@ -1528,7 +1506,7 @@ namespace EFM
 
         public void OnBotKill(Sosig sosig)
         {
-            Mod.instance.LogInfo("Sosig " + sosig.name + " killed");
+            Mod.LogInfo("Sosig " + sosig.name + " killed");
 
             // Here we use GetOriginalIFFTeam instead of GetIFF because the actual IFF gets set to -3 on sosig death, original doesn't change
             --spawnedIFFs[sosig.GetOriginalIFFTeam()];
@@ -2129,7 +2107,7 @@ namespace EFM
             CustomItemWrapper rigCIW = null;
             if (inventory.rig != null)
             {
-                Mod.instance.LogInfo("\tSpawning rig: "+inventory.rig);
+                Mod.LogInfo("\tSpawning rig: "+inventory.rig);
                 GameObject rigObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.rig)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -2151,7 +2129,7 @@ namespace EFM
                     }
 
                     string itemID = inventory.rigContents[slotIndex];
-                    Mod.instance.LogInfo("\t\tSpawning rig content "+slotIndex+": " + itemID);
+                    Mod.LogInfo("\t\tSpawning rig content "+slotIndex+": " + itemID);
                     bool custom = false;
                     GameObject itemPrefab = null;
                     int parsedID = -1;
@@ -2284,7 +2262,7 @@ namespace EFM
             // Spawn armor
             if (inventory.armor != null)
             {
-                Mod.instance.LogInfo("\tSpawning armor: " + inventory.armor);
+                Mod.LogInfo("\tSpawning armor: " + inventory.armor);
                 GameObject backpackObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.armor)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -2313,7 +2291,7 @@ namespace EFM
             // Spawn head wear
             if (inventory.headWear != null)
             {
-                Mod.instance.LogInfo("\tSpawning headwear: " + inventory.headWear);
+                Mod.LogInfo("\tSpawning headwear: " + inventory.headWear);
                 GameObject headWearObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.headWear)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -2342,7 +2320,7 @@ namespace EFM
             // Spawn ear piece
             if (inventory.earPiece != null)
             {
-                Mod.instance.LogInfo("\tSpawning earPiece: " + inventory.earPiece);
+                Mod.LogInfo("\tSpawning earPiece: " + inventory.earPiece);
                 GameObject earPieceObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.earPiece)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -2371,7 +2349,7 @@ namespace EFM
             // Spawn face cover
             if (inventory.faceCover != null)
             {
-                Mod.instance.LogInfo("\tSpawning faceCover: " + inventory.faceCover);
+                Mod.LogInfo("\tSpawning faceCover: " + inventory.faceCover);
                 GameObject faceCoverObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.faceCover)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -2400,7 +2378,7 @@ namespace EFM
             // Spawn eye wear
             if (inventory.eyeWear != null)
             {
-                Mod.instance.LogInfo("\tSpawning eyeWear: " + inventory.eyeWear);
+                Mod.LogInfo("\tSpawning eyeWear: " + inventory.eyeWear);
                 GameObject eyeWearObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.eyeWear)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -2429,7 +2407,7 @@ namespace EFM
             // Spawn dogtags
             if (inventory.dogtag != null)
             {
-                Mod.instance.LogInfo("\tSpawning dogtag: " + inventory.dogtag);
+                Mod.LogInfo("\tSpawning dogtag: " + inventory.dogtag);
                 GameObject dogtagObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.dogtag)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 CustomItemWrapper dogtagCIW = dogtagObject.GetComponent<CustomItemWrapper>();
@@ -2447,7 +2425,7 @@ namespace EFM
             CustomItemWrapper backpackCIW = null;
             if (inventory.backpack != null)
             {
-                Mod.instance.LogInfo("\tSpawning backpack: " + inventory.backpack);
+                Mod.LogInfo("\tSpawning backpack: " + inventory.backpack);
                 GameObject backpackObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.backpack)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
                 yield return null;
@@ -2463,7 +2441,7 @@ namespace EFM
 
                 foreach (string backpackItem in inventory.backpackContents)
                 {
-                    Mod.instance.LogInfo("\t\tSpawning backpack content " + backpackItem);
+                    Mod.LogInfo("\t\tSpawning backpack content " + backpackItem);
                     bool custom = false;
                     GameObject itemPrefab = null;
                     int parsedID = -1;
@@ -2623,7 +2601,7 @@ namespace EFM
             // Spawn primary weapon
             if (inventory.primaryWeapon != null)
             {
-                Mod.instance.LogInfo("\tSpawning primaryWeapon: " + inventory.primaryWeapon);
+                Mod.LogInfo("\tSpawning primaryWeapon: " + inventory.primaryWeapon);
                 yield return IM.OD[inventory.primaryWeapon].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[inventory.primaryWeapon].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -2635,7 +2613,7 @@ namespace EFM
                 FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
                 if(weaponFireArm == null)
                 {
-                    Mod.instance.LogWarning("Sosig primary weapon not a firearm");
+                    Mod.LogWarning("Sosig primary weapon not a firearm");
                     yield break;
                 }
 
@@ -2670,7 +2648,7 @@ namespace EFM
                     if (currentParent.children != null && childIndices.Peek() < currentParent.children.Count)
                     {
                         string modID = currentParent.children[childIndices.Peek()].ID;
-                        Mod.instance.LogInfo("\t\tSpawning primaryWeapon mod: " + modID);
+                        Mod.LogInfo("\t\tSpawning primaryWeapon mod: " + modID);
                         // Spawn child at index
                         yield return IM.OD[modID].GetGameObjectAsync();
                         GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
@@ -2804,13 +2782,13 @@ namespace EFM
                             }
                             if (!mountFound)
                             {
-                                Mod.instance.LogWarning("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
+                                Mod.LogWarning("Could not find compatible mount for mod: "+ modID + " on: "+currentParent.ID);
                                 attachmentObject.transform.position = parentPhysObjs.Peek().transform.position + Vector3.up;
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
+                            Mod.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
                         }
 
                         // Make this child the new parent
@@ -2854,7 +2832,7 @@ namespace EFM
             // Spawn secondary weapon
             if (inventory.secondaryWeapon != null)
             {
-                Mod.instance.LogInfo("\tSpawning secondaryWeapon: " + inventory.secondaryWeapon);
+                Mod.LogInfo("\tSpawning secondaryWeapon: " + inventory.secondaryWeapon);
                 yield return IM.OD[inventory.secondaryWeapon].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[inventory.secondaryWeapon].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -2866,7 +2844,7 @@ namespace EFM
                 FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
                 if(weaponFireArm == null)
                 {
-                    Mod.instance.LogWarning("Sosig secondary weapon not a firearm");
+                    Mod.LogWarning("Sosig secondary weapon not a firearm");
                     yield break;
                 }
 
@@ -2901,7 +2879,7 @@ namespace EFM
                     if (currentParent.children != null && childIndices.Peek() < currentParent.children.Count)
                     {
                         string modID = currentParent.children[childIndices.Peek()].ID;
-                        Mod.instance.LogInfo("\t\tSpawning secondaryWeapon mod: " + modID);
+                        Mod.LogInfo("\t\tSpawning secondaryWeapon mod: " + modID);
                         // Spawn child at index
                         yield return IM.OD[modID].GetGameObjectAsync();
                         GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
@@ -3035,13 +3013,13 @@ namespace EFM
                             }
                             if (!mountFound)
                             {
-                                Mod.instance.LogWarning("Could not find compatible mount for mod: " + modID + " on: " + currentParent.ID);
+                                Mod.LogWarning("Could not find compatible mount for mod: " + modID + " on: " + currentParent.ID);
                                 attachmentObject.transform.position = parentPhysObjs.Peek().transform.position + Vector3.up;
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
+                            Mod.LogError("Unhandle weapon mod type for mod with ID: "+ modID);
                         }
 
                         // Make this child the new parent
@@ -3080,7 +3058,7 @@ namespace EFM
             // Spawn holster weapon
             if (inventory.holster != null)
             {
-                Mod.instance.LogInfo("\tSpawning holster: " + inventory.holster);
+                Mod.LogInfo("\tSpawning holster: " + inventory.holster);
                 yield return IM.OD[inventory.holster].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[inventory.holster].GetGameObject(), pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
@@ -3092,7 +3070,7 @@ namespace EFM
                 FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
                 if (weaponFireArm == null)
                 {
-                    Mod.instance.LogWarning("Sosig holster weapon not a firearm");
+                    Mod.LogWarning("Sosig holster weapon not a firearm");
                     yield break;
                 }
 
@@ -3127,7 +3105,7 @@ namespace EFM
                     if (currentParent.children != null && childIndices.Peek() < currentParent.children.Count)
                     {
                         string modID = currentParent.children[childIndices.Peek()].ID;
-                        Mod.instance.LogInfo("\t\tSpawning holster mod: " + modID);
+                        Mod.LogInfo("\t\tSpawning holster mod: " + modID);
                         // Spawn child at index
                         yield return IM.OD[modID].GetGameObjectAsync();
                         GameObject attachmentPrefab = IM.OD[modID].GetGameObject();
@@ -3261,13 +3239,13 @@ namespace EFM
                             }
                             if (!mountFound)
                             {
-                                Mod.instance.LogWarning("Could not find compatible mount for mod: " + modID + " on: " + currentParent.ID);
+                                Mod.LogWarning("Could not find compatible mount for mod: " + modID + " on: " + currentParent.ID);
                                 attachmentObject.transform.position = parentPhysObjs.Peek().transform.position + Vector3.up;
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Unhandle weapon mod type for mod with ID: " + modID);
+                            Mod.LogError("Unhandle weapon mod type for mod with ID: " + modID);
                         }
 
                         // Make this child the new parent
@@ -3307,35 +3285,35 @@ namespace EFM
             }
 
             // Spawn generic items
-            Mod.instance.LogInfo("\tSpawning generic items");
+            Mod.LogInfo("\tSpawning generic items");
             for(int i = 0; i<inventory.generic.Count;++i)
             {
                 string genericItem = inventory.generic[i];
                 bool custom = false;
                 GameObject itemPrefab = null;
                 int parsedID = -1;
-                Mod.instance.LogInfo("\t\t" + genericItem);
+                Mod.LogInfo("\t\t" + genericItem);
                 if (int.TryParse(genericItem, out parsedID))
                 {
-                    Mod.instance.LogInfo("\t\tparsed, is custom");
+                    Mod.LogInfo("\t\tparsed, is custom");
                     itemPrefab = Mod.itemPrefabs[parsedID];
                     custom = true;
                 }
                 else
                 {
-                    Mod.instance.LogInfo("\t\tnot parsed, is vanilla");
+                    Mod.LogInfo("\t\tnot parsed, is vanilla");
                     yield return IM.OD[genericItem].GetGameObjectAsync();
                     itemPrefab = IM.OD[genericItem].GetGameObject();
                     if (itemPrefab == null)
                     {
-                        Mod.instance.LogWarning("Attempted to get vanilla prefab for " + genericItem + ", but the prefab had been destroyed, refreshing cache...");
+                        Mod.LogWarning("Attempted to get vanilla prefab for " + genericItem + ", but the prefab had been destroyed, refreshing cache...");
 
                         IM.OD[genericItem].RefreshCache();
                         itemPrefab = IM.OD[genericItem].GetGameObject();
                     }
                     if (itemPrefab == null)
                     {
-                        Mod.instance.LogError("Attempted to get vanilla prefab for " + genericItem + ", but the prefab had been destroyed, refreshing cache did nothing");
+                        Mod.LogError("Attempted to get vanilla prefab for " + genericItem + ", but the prefab had been destroyed, refreshing cache did nothing");
                         continue;
                     }
                 }
@@ -3343,14 +3321,14 @@ namespace EFM
                 GameObject itemObject = null;
                 if (custom)
                 {
-                    Mod.instance.LogInfo("\t\tis custom");
+                    Mod.LogInfo("\t\tis custom");
                     itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
-                    Mod.instance.LogInfo("\t\tinstantiated");
+                    Mod.LogInfo("\t\tinstantiated");
                     CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
                     itemCIW.foundInRaid = true;
-                    Mod.instance.LogInfo("\t\tgot CIW");
+                    Mod.LogInfo("\t\tgot CIW");
                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
-                    Mod.instance.LogInfo("\t\tgot physobj");
+                    Mod.LogInfo("\t\tgot physobj");
 
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
                     Mod.RemoveFromAll(null, itemCIW, null);
@@ -3358,7 +3336,7 @@ namespace EFM
                     // Get amount
                     if (itemCIW.itemType == Mod.ItemType.Money)
                     {
-                        Mod.instance.LogInfo("\t\t\tis money");
+                        Mod.LogInfo("\t\t\tis money");
                         if (parsedID == 201) // USD
                         {
                             itemCIW.stack = UnityEngine.Random.Range(20, 200);
@@ -3374,7 +3352,7 @@ namespace EFM
                     }
                     else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
                     {
-                        Mod.instance.LogInfo("\t\t\tis ammobox");
+                        Mod.LogInfo("\t\t\tis ammobox");
                         FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                         for (int j = 0; j < itemCIW.maxAmount; ++j)
                         {
@@ -3383,7 +3361,7 @@ namespace EFM
                     }
                     else if (itemCIW.maxAmount > 0)
                     {
-                        Mod.instance.LogInfo("\t\t\thas amount");
+                        Mod.LogInfo("\t\t\thas amount");
                         itemCIW.amount = itemCIW.maxAmount;
                     }
                 }
@@ -3898,7 +3876,7 @@ namespace EFM
                         botDataToUse = marksmanBotData;
                         break;
                     default:
-                        Mod.instance.LogError("Unexpected scav spawn type: " + spawnType);
+                        Mod.LogError("Unexpected scav spawn type: " + spawnType);
                         continue;
                 }
 
@@ -4128,13 +4106,13 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogError("Missing item: " + headEquipID + " for PMC AI spawn " + actualEquipName);
+                            Mod.LogError("Missing item: " + headEquipID + " for PMC AI spawn " + actualEquipName);
                         }
                     }
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting tact vest");
+            Mod.LogInfo("\tSetting tact vest");
             FVRPhysicalObject.FVRPhysicalObjectSize[] rigSlotSizes = null;
             List<string> rigWhitelist = new List<string>();
             List<string> rigBlacklist = new List<string>();
@@ -4161,13 +4139,13 @@ namespace EFM
                                 actualRigID = itemMapEntry.otherModID;
                                 break;
                         }
-                        Mod.instance.LogInfo("\t\tChosen ID: " + actualRigID);
+                        Mod.LogInfo("\t\tChosen ID: " + actualRigID);
                         newAISpawn.inventory.rig = actualRigID;
 
                         // Add sosig outfit item if applicable
                         if (Mod.globalDB["AIItemMap"][actualRigID] != null)
                         {
-                            Mod.instance.LogInfo("\t\t\tGot in AIItemMap");
+                            Mod.LogInfo("\t\t\tGot in AIItemMap");
                             JObject outfitItemData = Mod.globalDB["AIItemMap"][actualRigID] as JObject;
                             int linkIndex = (int)outfitItemData["Link"];
                             List<string> equivalentIDs = outfitItemData["List"].ToObject<List<string>>();
@@ -4179,7 +4157,7 @@ namespace EFM
                             {
                                 newAISpawn.outfitByLink.Add(linkIndex, new List<string> { equivalentIDs[UnityEngine.Random.Range(0, equivalentIDs.Count)] });
                             }
-                            Mod.instance.LogInfo("\t\t\tAdded to outfitByLink");
+                            Mod.LogInfo("\t\t\tAdded to outfitByLink");
                         }
 
                         // Get prefab of the rig to get the sizes and number of slots
@@ -4199,11 +4177,11 @@ namespace EFM
                         rigWhitelist = rigCIW.whiteList;
                         rigBlacklist = rigCIW.blackList;
                         rigArmored = rigCIW.itemType == Mod.ItemType.ArmoredRig;
-                        Mod.instance.LogInfo("\t\tProcessed data from rig CIW");
+                        Mod.LogInfo("\t\tProcessed data from rig CIW");
                     }
                     else
                     {
-                        Mod.instance.LogError("Missing item: " + rigID + " for PMC AI spawn Rig");
+                        Mod.LogError("Missing item: " + rigID + " for PMC AI spawn Rig");
                     }
                 }
             }
@@ -4252,13 +4230,13 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogError("Missing item: " + armorID + " for PMC AI spawn Armor");
+                            Mod.LogError("Missing item: " + armorID + " for PMC AI spawn Armor");
                         }
                     }
                 }
             }
 
-            Mod.instance.LogInfo("\tSetting backpack");
+            Mod.LogInfo("\tSetting backpack");
             List<string> backpackWhitelist = new List<string>();
             List<string> backpackBlacklist = new List<string>();
             float maxBackpackVolume = -1;
@@ -4312,7 +4290,7 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogError("Missing item: " + backpackID + " for PMC AI spawn Rig");
+                        Mod.LogError("Missing item: " + backpackID + " for PMC AI spawn Rig");
                     }
                 }
             }
@@ -4362,12 +4340,12 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogError("AI FirstPrimaryWeapon with ID: "+ actualPWID +" is not a firearm");
+                            Mod.LogError("AI FirstPrimaryWeapon with ID: "+ actualPWID +" is not a firearm");
                         }
                     }
                     else
                     {
-                        Mod.instance.LogError("Missing item: " + PWID + " for PMC AI spawn Primary weapon");
+                        Mod.LogError("Missing item: " + PWID + " for PMC AI spawn Primary weapon");
                     }
                 }
             }
@@ -4414,12 +4392,12 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogError("AI SecondPrimaryWeapon with ID: " + actualSWID + " is not a firearm");
+                            Mod.LogError("AI SecondPrimaryWeapon with ID: " + actualSWID + " is not a firearm");
                         }
                     }
                     else
                     {
-                        Mod.instance.LogError("Missing item: " + SWID + " for PMC AI spawn Secondary weapon");
+                        Mod.LogError("Missing item: " + SWID + " for PMC AI spawn Secondary weapon");
                     }
                 }
             }
@@ -4476,12 +4454,12 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.instance.LogError("AI Holster with ID: " + actualHolsterID + " is not a firearm");
+                            Mod.LogError("AI Holster with ID: " + actualHolsterID + " is not a firearm");
                         }
                     }
                     else
                     {
-                        Mod.instance.LogError("Missing item: " + holsterID + " for PMC AI spawn Holster");
+                        Mod.LogError("Missing item: " + holsterID + " for PMC AI spawn Holster");
                     }
                 }
             }
@@ -4519,14 +4497,14 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogError("Missing item: " + scabbardID + " for PMC AI spawn Scabbard");
+                        Mod.LogError("Missing item: " + scabbardID + " for PMC AI spawn Scabbard");
                     }
                 }
             }
 
             if (!hasSosigWeapon)
             {
-                Mod.instance.LogError(AIType.ToString() + " typr AI with name: " + newAISpawn.name+", has no weapon");
+                Mod.LogError(AIType.ToString() + " typr AI with name: " + newAISpawn.name+", has no weapon");
             }
 
             // Set items depending on generation limits
@@ -4630,14 +4608,14 @@ namespace EFM
                             itemPrefab = IM.OD[actualItemID].GetGameObject();
                             if (itemPrefab == null)
                             {
-                                Mod.instance.LogWarning("Attempted to get vanilla prefab for " + actualItemID + ", but the prefab had been destroyed, refreshing cache...");
+                                Mod.LogWarning("Attempted to get vanilla prefab for " + actualItemID + ", but the prefab had been destroyed, refreshing cache...");
 
                                 IM.OD[actualItemID].RefreshCache();
                                 itemPrefab = IM.OD[actualItemID].GetGameObject();
                             }
                             if (itemPrefab == null)
                             {
-                                Mod.instance.LogError("Attempted to get vanilla prefab for " + actualItemID + ", but the prefab had been destroyed, refreshing cache did nothing");
+                                Mod.LogError("Attempted to get vanilla prefab for " + actualItemID + ", but the prefab had been destroyed, refreshing cache did nothing");
                                 continue;
                             }
                         }
@@ -4650,7 +4628,7 @@ namespace EFM
                             CustomItemWrapper itemCIW = itemPrefab.GetComponent<CustomItemWrapper>();
                             if(itemCIW == null)
                             {
-                                Mod.instance.LogError("Could spawn Item "+itemID+" in "+ newAISpawn.name + "'s "+itemParts[i]+" but is custom and has no CIW");
+                                Mod.LogError("Could spawn Item "+itemID+" in "+ newAISpawn.name + "'s "+itemParts[i]+" but is custom and has no CIW");
                                 continue;
                             }
                             itemParents = itemCIW.parents;
@@ -4662,7 +4640,7 @@ namespace EFM
                             VanillaItemDescriptor itemVID = itemPrefab.GetComponent<VanillaItemDescriptor>();
                             if (itemVID == null)
                             {
-                                Mod.instance.LogError("Could spawn Item " + itemID + " in " + newAISpawn.name + "'s " + itemParts[i] + " but is not custom and has no VID");
+                                Mod.LogError("Could spawn Item " + itemID + " in " + newAISpawn.name + "'s " + itemParts[i] + " but is not custom and has no VID");
                                 continue;
                             }
                             itemParents = itemVID.parents;
@@ -4968,7 +4946,7 @@ namespace EFM
             newAISpawn.configTemplate.CanBeKnockedOut = false;
             newAISpawn.configTemplate.CanBeGrabbed = false;
 
-            Mod.instance.LogInfo("\tDone");
+            Mod.LogInfo("\tDone");
             return newAISpawn;
         }
 
@@ -6217,7 +6195,7 @@ namespace EFM
 
         private GameObject SpawnLootItem(GameObject itemPrefab, Transform itemsRoot, string itemID, JToken spawnData, string originalID, bool useChance)
         {
-            Mod.instance.LogInfo("Spawn loot item called with ID: " + itemID);
+            Mod.LogInfo("Spawn loot item called with ID: " + itemID);
             GameObject itemObject = null;
             if (itemPrefab == null)
             {
@@ -6277,7 +6255,7 @@ namespace EFM
             {
                 if (Mod.usedRoundIDs.Contains(prefabVID.H3ID))
                 {
-                    Mod.instance.LogInfo("\tSpawning round with ID: " + prefabVID.H3ID);
+                    Mod.LogInfo("\tSpawning round with ID: " + prefabVID.H3ID);
                     // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of rounds
                     int amount = UnityEngine.Random.Range(1, 121);
                     FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
@@ -6285,10 +6263,10 @@ namespace EFM
                     roundClass = round.RoundClass;
                     if (amount > 1)
                     {
-                        Mod.instance.LogInfo("\t\tStack > 1");
+                        Mod.LogInfo("\t\tStack > 1");
                         if (Mod.ammoBoxByAmmoID.ContainsKey(prefabVID.H3ID))
                         {
-                            Mod.instance.LogInfo("\t\t\tSpecific box");
+                            Mod.LogInfo("\t\t\tSpecific box");
                             itemObject = GameObject.Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[prefabVID.H3ID]]);
                             itemCIW = itemObject.GetComponent<CustomItemWrapper>();
                             itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
@@ -6305,7 +6283,7 @@ namespace EFM
                         }
                         else // Spawn in generic box
                         {
-                            Mod.instance.LogInfo("\t\t\tGeneric box");
+                            Mod.LogInfo("\t\t\tGeneric box");
                             if (amount > 30)
                             {
                                 itemObject = GameObject.Instantiate(Mod.itemPrefabs[716]);
@@ -6333,7 +6311,7 @@ namespace EFM
                     }
                     else // Single round, spawn as normal
                     {
-                        Mod.instance.LogInfo("\t\tSingle round");
+                        Mod.LogInfo("\t\tSingle round");
                         itemObject = GameObject.Instantiate(itemPrefab);
                         itemVID = itemObject.GetComponent<VanillaItemDescriptor>();
                         itemPhysObj = itemVID.GetComponent<FVRPhysicalObject>();
@@ -6373,7 +6351,7 @@ namespace EFM
 
             if (itemObject != null)
             {
-                Mod.instance.LogInfo("Spawned loose loot: " + itemObject.name);
+                Mod.LogInfo("Spawned loose loot: " + itemObject.name);
             }
 
             return itemObject;
@@ -6462,13 +6440,13 @@ namespace EFM
             {
                 return;
             }
-            Mod.instance.LogInfo("Kill player called:\n "+Environment.StackTrace);
+            Mod.LogInfo("Kill player called:\n "+Environment.StackTrace);
             Mod.dead = true;
 
             // Register insured items that are currently on player
             if (Mod.chosenCharIndex == 0)
             {
-                Mod.instance.LogInfo("\tRegistering insured items");
+                Mod.LogInfo("\tRegistering insured items");
                 if (Mod.insuredItems == null)
                 {
                     Mod.insuredItems = new List<InsuredSet>();
@@ -6482,7 +6460,7 @@ namespace EFM
                     {
                         if (itemObject == null)
                         {
-                            Mod.instance.LogError("ItemObject in player inventory with ID: " + itemObjectList.Key + " is null while building insured set, removing from list");
+                            Mod.LogError("ItemObject in player inventory with ID: " + itemObjectList.Key + " is null while building insured set, removing from list");
                             itemObjectList.Value.Remove(itemObject);
                             break;
                         }
@@ -6518,26 +6496,26 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("\tDropping held items, preweight: "+Mod.weight);
+            Mod.LogInfo("\tDropping held items, preweight: "+Mod.weight);
             // Drop items in hand
             if (GM.CurrentMovementManager.Hands[0].CurrentInteractable != null && !(GM.CurrentMovementManager.Hands[0].CurrentInteractable is FVRPhysicalObject))
             {
-                Mod.instance.LogInfo("\t\tDropping left held item");
+                Mod.LogInfo("\t\tDropping left held item");
                 GM.CurrentMovementManager.Hands[0].CurrentInteractable.ForceBreakInteraction();
             }
             if (GM.CurrentMovementManager.Hands[1].CurrentInteractable != null && !(GM.CurrentMovementManager.Hands[1].CurrentInteractable is FVRPhysicalObject))
             {
-                Mod.instance.LogInfo("\t\tDropping right held item");
+                Mod.LogInfo("\t\tDropping right held item");
                 GM.CurrentMovementManager.Hands[1].CurrentInteractable.ForceBreakInteraction();
             }
-            Mod.instance.LogInfo("\tDropping held items, postweight: " + Mod.weight);
+            Mod.LogInfo("\tDropping held items, postweight: " + Mod.weight);
 
-            Mod.instance.LogInfo("\tDropping equipment, preweight: " + Mod.weight);
+            Mod.LogInfo("\tDropping equipment, preweight: " + Mod.weight);
             // Unequip and destroy all equipment apart from pouch
             if (EquipmentSlot.wearingBackpack)
             {
                 CustomItemWrapper backpackCIW = EquipmentSlot.currentBackpack;
-                Mod.instance.LogInfo("\t\tDropping backpack, weight: "+ backpackCIW.currentWeight);
+                Mod.LogInfo("\t\tDropping backpack, weight: "+ backpackCIW.currentWeight);
                 FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
                 backpackPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= backpackCIW.currentWeight;
@@ -6548,7 +6526,7 @@ namespace EFM
             if (EquipmentSlot.wearingBodyArmor)
             {
                 CustomItemWrapper bodyArmorCIW = EquipmentSlot.currentArmor;
-                Mod.instance.LogInfo("\t\tDropping body armor, weight: " + bodyArmorCIW.currentWeight);
+                Mod.LogInfo("\t\tDropping body armor, weight: " + bodyArmorCIW.currentWeight);
                 FVRPhysicalObject bodyArmorPhysObj = bodyArmorCIW.GetComponent<FVRPhysicalObject>();
                 bodyArmorPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= bodyArmorCIW.currentWeight;
@@ -6559,7 +6537,7 @@ namespace EFM
             if (EquipmentSlot.wearingEarpiece)
             {
                 CustomItemWrapper earPieceCIW = EquipmentSlot.currentEarpiece;
-                Mod.instance.LogInfo("\t\tDropping earpiece, weight: " + earPieceCIW.currentWeight);
+                Mod.LogInfo("\t\tDropping earpiece, weight: " + earPieceCIW.currentWeight);
                 FVRPhysicalObject earPiecePhysObj = earPieceCIW.GetComponent<FVRPhysicalObject>();
                 earPiecePhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= earPieceCIW.currentWeight;
@@ -6570,7 +6548,7 @@ namespace EFM
             if (EquipmentSlot.wearingHeadwear)
             {
                 CustomItemWrapper headWearCIW = EquipmentSlot.currentHeadwear;
-                Mod.instance.LogInfo("\t\tDropping headwear, weight: " + headWearCIW.currentWeight);
+                Mod.LogInfo("\t\tDropping headwear, weight: " + headWearCIW.currentWeight);
                 FVRPhysicalObject headWearPhysObj = headWearCIW.GetComponent<FVRPhysicalObject>();
                 headWearPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= headWearCIW.currentWeight;
@@ -6581,7 +6559,7 @@ namespace EFM
             if (EquipmentSlot.wearingFaceCover)
             {
                 CustomItemWrapper faceCoverCIW = EquipmentSlot.currentFaceCover;
-                Mod.instance.LogInfo("\t\tDropping face cover, weight: " + faceCoverCIW.currentWeight);
+                Mod.LogInfo("\t\tDropping face cover, weight: " + faceCoverCIW.currentWeight);
                 FVRPhysicalObject faceCoverPhysObj = faceCoverCIW.GetComponent<FVRPhysicalObject>();
                 faceCoverPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= faceCoverCIW.currentWeight;
@@ -6592,7 +6570,7 @@ namespace EFM
             if (EquipmentSlot.wearingEyewear)
             {
                 CustomItemWrapper eyeWearCIW = EquipmentSlot.currentEyewear;
-                Mod.instance.LogInfo("\t\tDropping eyewear, weight: " + eyeWearCIW.currentWeight);
+                Mod.LogInfo("\t\tDropping eyewear, weight: " + eyeWearCIW.currentWeight);
                 FVRPhysicalObject eyeWearPhysObj = eyeWearCIW.GetComponent<FVRPhysicalObject>();
                 eyeWearPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= eyeWearCIW.currentWeight;
@@ -6603,7 +6581,7 @@ namespace EFM
             if (EquipmentSlot.wearingRig)
             {
                 CustomItemWrapper rigCIW = EquipmentSlot.currentRig;
-                Mod.instance.LogInfo("\t\tDropping rig, weight: " + rigCIW.currentWeight);
+                Mod.LogInfo("\t\tDropping rig, weight: " + rigCIW.currentWeight);
                 FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
                 rigPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= rigCIW.currentWeight;
@@ -6614,7 +6592,7 @@ namespace EFM
             if (Mod.chosenCharIndex == 1 && EquipmentSlot.wearingPouch)
             {
                 CustomItemWrapper pouchCIW = EquipmentSlot.currentPouch;
-                Mod.instance.LogInfo("\t\tDropping pouch, weight: " + pouchCIW.currentWeight);
+                Mod.LogInfo("\t\tDropping pouch, weight: " + pouchCIW.currentWeight);
                 FVRPhysicalObject pouchPhysObj = pouchCIW.GetComponent<FVRPhysicalObject>();
                 pouchPhysObj.SetQuickBeltSlot(null);
                 Mod.weight -= pouchCIW.currentWeight;
@@ -6622,24 +6600,24 @@ namespace EFM
                 pouchCIW.destroyed = true;
                 Destroy(pouchCIW.gameObject);
             }
-            Mod.instance.LogInfo("\tDropping equipment, postweight: " + Mod.weight);
+            Mod.LogInfo("\tDropping equipment, postweight: " + Mod.weight);
 
-            Mod.instance.LogInfo("\tDestroying right shoulder item, preweight: " + Mod.weight);
+            Mod.LogInfo("\tDestroying right shoulder item, preweight: " + Mod.weight);
             // Destroy right shoulder object
             if (Mod.rightShoulderObject != null)
             {
                 VanillaItemDescriptor rightShoulderVID = Mod.rightShoulderObject.GetComponent<VanillaItemDescriptor>();
                 FVRPhysicalObject rightShoulderPhysObj = rightShoulderVID.GetComponent<FVRPhysicalObject>();
                 rightShoulderPhysObj.SetQuickBeltSlot(null);
-                Mod.instance.LogInfo("\t\tDestroying right shoulder item, weight: " + rightShoulderVID.currentWeight);
+                Mod.LogInfo("\t\tDestroying right shoulder item, weight: " + rightShoulderVID.currentWeight);
                 Mod.weight -= rightShoulderVID.currentWeight;
                 rightShoulderVID.destroyed = true;
                 Mod.rightShoulderObject = null;
                 Destroy(Mod.rightShoulderObject);
             }
-            Mod.instance.LogInfo("\tDestroying right shoulder item, postweight: " + Mod.weight);
+            Mod.LogInfo("\tDestroying right shoulder item, postweight: " + Mod.weight);
 
-            Mod.instance.LogInfo("\tDestroying pocket contents, preweight: " + Mod.weight);
+            Mod.LogInfo("\tDestroying pocket contents, preweight: " + Mod.weight);
             // Destroy pockets' contents, note that the quick belt config went back to pockets only when we unequipped rig
             for (int i=0; i < 4; ++i)
             {
@@ -6649,13 +6627,13 @@ namespace EFM
                     CustomItemWrapper pocketItemCIW = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<CustomItemWrapper>();
                     if(pocketItemCIW != null)
                     {
-                        Mod.instance.LogInfo("\t\tpocket item, weight: " + pocketItemCIW.currentWeight);
+                        Mod.LogInfo("\t\tpocket item, weight: " + pocketItemCIW.currentWeight);
                         Mod.weight -= pocketItemCIW.currentWeight;
                         pocketItemCIW.destroyed = true;
                     }
                     else if(pocketItemVID != null)
                     {
-                        Mod.instance.LogInfo("\t\tpocket item, weight: " + pocketItemVID.currentWeight);
+                        Mod.LogInfo("\t\tpocket item, weight: " + pocketItemVID.currentWeight);
                         Mod.weight -= pocketItemVID.currentWeight;
                         pocketItemVID.destroyed = true;
                     }
@@ -6664,7 +6642,7 @@ namespace EFM
                     Destroy(pocketItemPhysObj.gameObject);
                 }
             }
-            Mod.instance.LogInfo("\tKilled player final weight: " + Mod.weight);
+            Mod.LogInfo("\tKilled player final weight: " + Mod.weight);
 
             // Set raid state
             Mod.justFinishedRaid = true;
@@ -6702,7 +6680,7 @@ namespace EFM
 
         private void Start()
         {
-            Mod.instance.LogInfo("Extraction manager created for extraction: "+extraction.name);
+            Mod.LogInfo("Extraction manager created for extraction: "+extraction.name);
             playerColliders = new List<Collider>();
         }
 

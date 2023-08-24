@@ -287,7 +287,7 @@ namespace EFM
 
             // Set default trader
             SetTrader(0);
-            Mod.instance.LogInfo("initUI post set trader");
+            Mod.LogInfo("initUI post set trader");
             // Setup trader tabs
             Transform tabsParent = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(2);
             for (int i = 0; i < 4;++i)
@@ -322,7 +322,7 @@ namespace EFM
 
             // Setup rag fair
             // Buy
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             Transform categoriesParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject categoryTemplate = categoriesParent.GetChild(0).gameObject;
             PointableButton categoryTemplateMainButton = categoryTemplate.transform.GetChild(0).gameObject.AddComponent<PointableButton>();
@@ -348,7 +348,7 @@ namespace EFM
             ragFairItemBuyViewsByID = new Dictionary<string, List<GameObject>>();
 
             // Setup buy categories hoverscrolls
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             HoverScroll newBuyCategoriesDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<HoverScroll>();
             HoverScroll newBuyCategoriesUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<HoverScroll>();
             newBuyCategoriesDownHoverScroll.MaxPointingRange = 30;
@@ -370,7 +370,7 @@ namespace EFM
             }
 
             // Setup buy items hoverscrolls
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             HoverScroll newBuyItemsDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(2).gameObject.AddComponent<HoverScroll>();
             HoverScroll newBuyItemsUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(1).GetChild(1).GetChild(3).gameObject.AddComponent<HoverScroll>();
             newBuyItemsDownHoverScroll.MaxPointingRange = 30;
@@ -385,7 +385,7 @@ namespace EFM
             newBuyItemsUpHoverScroll.up = true;
 
             // Cart
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             Transform ragfairCartTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2);
             PointableButton ragfairCartAmountButton = ragfairCartTransform.transform.GetChild(1).GetChild(1).gameObject.AddComponent<PointableButton>();
             ragfairCartAmountButton.SetButton();
@@ -402,7 +402,7 @@ namespace EFM
             ragfairCartCancelAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
             ragfairCartCancelAmountButton.Button.onClick.AddListener(() => { OnRagfairBuyCancelClick(); });
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             HoverScroll newWishlistCartDownHoverScroll = ragfairCartTransform.GetChild(1).GetChild(3).GetChild(3).gameObject.AddComponent<HoverScroll>();
             HoverScroll newWishlistCartUpHoverScroll = ragfairCartTransform.GetChild(1).GetChild(3).GetChild(2).gameObject.AddComponent<HoverScroll>();
             newWishlistCartDownHoverScroll.MaxPointingRange = 30;
@@ -417,7 +417,7 @@ namespace EFM
             newWishlistCartUpHoverScroll.up = true;
 
             // Wishlist
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             Transform wishlistParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject wishlistItemViewTemplate = wishlistParent.GetChild(0).gameObject;
             PointableButton wishlistItemViewTemplateWishButton = wishlistItemViewTemplate.transform.GetChild(2).gameObject.AddComponent<PointableButton>();
@@ -454,7 +454,7 @@ namespace EFM
             }
 
             // Setup wishlist hoverscrolls
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             HoverScroll newWishlistDownHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<HoverScroll>();
             HoverScroll newWishlistUpHoverScroll = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<HoverScroll>();
             newWishlistDownHoverScroll.MaxPointingRange = 30;
@@ -476,7 +476,7 @@ namespace EFM
             }
 
             // Setup rag fair tabs
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             Transform ragFaireTabsParent = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(2);
             for (int i = 0; i < 3; ++i)
             {
@@ -505,7 +505,7 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Add background pointable
             FVRPointable ragfairBackgroundPointable = transform.GetChild(0).GetChild(2).gameObject.AddComponent<FVRPointable>();
             ragfairBackgroundPointable.MaxPointingRange = 30;
@@ -556,14 +556,14 @@ namespace EFM
 
         public void SetTrader(int index, string defaultItemID = null)
         {
-            Mod.instance.LogInfo("set trader called with index: " + index);
+            Mod.LogInfo("set trader called with index: " + index);
             currentTraderIndex = index;
             TraderStatus trader = Mod.traderStatuses[index];
             Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
             TraderStatus.TraderLoyaltyDetails loyaltyDetails = trader.GetLoyaltyDetails();
             Transform tradeVolume = transform.GetChild(1);
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Top
             traderDisplay.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[index];
             if(loyaltyDetails.currentLevel < 4)
@@ -593,19 +593,19 @@ namespace EFM
             // TODO: Set total amount of money the trader has, here we just disable the number for now because we dont use it
             traderDisplay.GetChild(0).GetChild(1).GetChild(2).GetChild(1).gameObject.SetActive(false);
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Player level
             traderDisplay.GetChild(0).GetChild(2).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.playerLevelIcons[Mod.level / 5];
             traderDisplay.GetChild(0).GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Other loyalty details
             // Current loyalty
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(2).GetChild(1).GetComponent<Text>().text = Mod.level.ToString();
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetComponent<Text>().text = trader.standing.ToString();
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(4).GetChild(1).GetComponent<Text>().text = TraderStatus.GetMoneyString(trader.salesSum);
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Next loyalty
             if (loyaltyDetails.currentLevel == loyaltyDetails.nextLevel)
             {
@@ -655,13 +655,13 @@ namespace EFM
                 }
             }
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Player money
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("203") ? Mod.baseInventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("202") ? Mod.baseInventory["202"] : 0) + (Mod.playerInventory.ContainsKey("202") ? Mod.playerInventory["202"] : 0));
             traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(2).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("201") ? Mod.baseInventory["201"] : 0) + (Mod.playerInventory.ContainsKey("201") ? Mod.playerInventory["201"] : 0));
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Main
             // Buy
             bool setDefaultBuy = false;
@@ -669,7 +669,7 @@ namespace EFM
             GameObject buyHorizontalCopy = buyHorizontalsParent.GetChild(0).gameObject;
             float buyShowCaseHeight = 27; // Top padding + horizontal
             // Clear previous horizontals
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             while (buyHorizontalsParent.childCount > 1)
             {
                 // Unparent so it is not a child anymore so the while loop isnt infinite because this will only actually be destroyed next frame
@@ -677,7 +677,7 @@ namespace EFM
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             if (trader.standing >= 0)
             {
                 // init price hoverscrolls first because they are needed by default prices
@@ -752,7 +752,7 @@ namespace EFM
                             currentItemIcon.gameObject.SetActive(true);
 
                             // Setup ItemIcon
-                            Mod.instance.LogInfo("Adding item assort " + item.Key);
+                            Mod.LogInfo("Adding item assort " + item.Key);
                             ItemIcon itemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
                             itemIconScript.itemID = item.Key;
                             itemIconScript.itemName = Mod.itemNames[item.Key];
@@ -942,20 +942,20 @@ namespace EFM
                 dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
             }
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Sell
             Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject sellHorizontalCopy = sellHorizontalsParent.GetChild(0).gameObject;
             float sellShowCaseHeight = 3; // Top padding
             // Clear previous horizontals
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             while (sellHorizontalsParent.childCount > 1)
             {
                 Transform currentFirstChild = sellHorizontalsParent.GetChild(1);
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
-            Mod.instance.LogInfo("Adding all item involume to sell showcase");
+            Mod.LogInfo("Adding all item involume to sell showcase");
             // Add all items in trade volume that are sellable at this trader to showcase
             int totalSellingPrice = 0;
             if (sellItemShowcaseElements == null)
@@ -971,7 +971,7 @@ namespace EFM
             traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
             foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
             {
-                Mod.instance.LogInfo("\tAdding item from volume: "+itemTransform.name);
+                Mod.LogInfo("\tAdding item from volume: "+itemTransform.name);
                 CustomItemWrapper CIW = itemTransform.GetComponent<CustomItemWrapper>();
                 VanillaItemDescriptor VID = itemTransform.GetComponent<VanillaItemDescriptor>();
                 List<MarketItemView> itemViewListToUse = null;
@@ -1153,7 +1153,7 @@ namespace EFM
                 traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
                 traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Setup selling price display
             string sellPriceItemID = "203";
             string sellPriceItemName = "Rouble";
@@ -1179,10 +1179,10 @@ namespace EFM
                 traderSellPriceItemIcon.weight = Mod.itemWeights[sellPriceItemID];
                 traderSellPriceItemIcon.volume = Mod.itemVolumes[sellPriceItemID];
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = totalSellingPrice.ToString();
             currentTotalSellingPrice = totalSellingPrice;
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Setup button
             if (!initButtonsSet)
             {
@@ -1220,22 +1220,22 @@ namespace EFM
                 downSellHoverScroll.gameObject.SetActive(false);
                 upSellHoverScroll.gameObject.SetActive(false);
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Tasks
             Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject taskTemplate = tasksParent.GetChild(0).gameObject;
             float taskListHeight = 3; // Top padding
             // Clear previous tasks
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             while (tasksParent.childCount > 1)
             {
                 Transform currentFirstChild = tasksParent.GetChild(1);
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             if (referencedTasks != null)
             {
                 foreach (TraderTask referencedTask in referencedTasks)
@@ -1252,11 +1252,11 @@ namespace EFM
                 referencedTasks = new List<TraderTask>();
                 referencedTaskConditions = new List<TraderTaskCondition>();
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Add all of that trader's available and active tasks to the list
             foreach (TraderTask task in trader.tasks)
             {
-                Mod.instance.LogInfo("Check if can add task "+task.name+" to task list, its state is: "+task.taskState);
+                Mod.LogInfo("Check if can add task "+task.name+" to task list, its state is: "+task.taskState);
                 if(task.taskState == TraderTask.TaskState.Available)
                 {
                     GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
@@ -2106,7 +2106,7 @@ namespace EFM
                     task.marketListElement = null;
                 }
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Setup hoverscrolls
             if (!initButtonsSet)
             {
@@ -2137,13 +2137,13 @@ namespace EFM
                 downTaskHoverScroll.gameObject.SetActive(false);
                 upTaskHoverScroll.gameObject.SetActive(false);
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
 
             // Insure
             Transform insureHorizontalsParent = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject insureHorizontalCopy = insureHorizontalsParent.GetChild(0).gameObject;
             float insureShowCaseHeight = 3; // Top padding
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Clear previous horizontals
             while (insureHorizontalsParent.childCount > 1)
             {
@@ -2151,13 +2151,13 @@ namespace EFM
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Deactivate deal button by default
             traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
             traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
             if ((bool)Mod.traderBaseDB[trader.index]["insurance"]["availability"])
             {
-                Mod.instance.LogInfo("insurance available");
+                Mod.LogInfo("insurance available");
                 // Add all items in trade volume that are insureable at this trader to showcase
                 int totalInsurePrice = 0;
                 if(insureItemShowcaseElements == null)
@@ -2170,7 +2170,7 @@ namespace EFM
                 }
                 foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
                 {
-                    Mod.instance.LogInfo("processing item "+itemTransform.name);
+                    Mod.LogInfo("processing item "+itemTransform.name);
                     CustomItemWrapper CIW = itemTransform.GetComponent<CustomItemWrapper>();
                     VanillaItemDescriptor VID = itemTransform.GetComponent<VanillaItemDescriptor>();
                     List<MarketItemView> itemViewListToUse = null;
@@ -2206,37 +2206,37 @@ namespace EFM
                     }
 
 
-                    Mod.instance.LogInfo("1");
+                    Mod.LogInfo("1");
                     if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
                     {
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         Transform currentItemIcon = insureItemShowcaseElements[itemID].transform;
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         MarketItemView marketItemView = currentItemIcon.GetComponent<MarketItemView>();
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         int actualInsureValue = Mod.traderStatuses[currentTraderIndex].currency == 0 ? itemInsureValue : (int)Mathf.Max(itemInsureValue * 0.008f, 1);
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         marketItemView.insureValue = marketItemView.insureValue + actualInsureValue;
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         if (marketItemView.custom)
                         {
-                            Mod.instance.LogInfo("3");
+                            Mod.LogInfo("3");
                             marketItemView.CIW.Add(CIW);
-                            Mod.instance.LogInfo("3");
+                            Mod.LogInfo("3");
                             currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
-                            Mod.instance.LogInfo("3");
+                            Mod.LogInfo("3");
                         }
                         else
                         {
-                            Mod.instance.LogInfo("4");
+                            Mod.LogInfo("4");
                             marketItemView.VID.Add(VID);
-                            Mod.instance.LogInfo("4");
+                            Mod.LogInfo("4");
                             currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
-                            Mod.instance.LogInfo("4");
+                            Mod.LogInfo("4");
                         }
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
-                        Mod.instance.LogInfo("2");
+                        Mod.LogInfo("2");
                         currentTotalInsurePrice += actualInsureValue;
 
                         // Setup itemIcon
@@ -2250,9 +2250,9 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogInfo("5");
+                        Mod.LogInfo("5");
                         Transform currentHorizontal = insureHorizontalsParent.GetChild(insureHorizontalsParent.childCount - 1);
-                        Mod.instance.LogInfo("5");
+                        Mod.LogInfo("5");
                         if (insureHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
                         {
                             currentHorizontal = GameObject.Instantiate(insureHorizontalCopy, insureHorizontalsParent).transform;
@@ -2264,7 +2264,7 @@ namespace EFM
                             currentHorizontal.gameObject.SetActive(true);
                             insureShowCaseHeight += 24; // horizontal
                         }
-                        Mod.instance.LogInfo("5");
+                        Mod.LogInfo("5");
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
 
@@ -2276,7 +2276,7 @@ namespace EFM
                         currentItemIconScript.VID = VID;
 
                         currentItemIcon.gameObject.SetActive(true);
-                        Mod.instance.LogInfo("5");
+                        Mod.LogInfo("5");
                         insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
                         if (Mod.itemIcons.ContainsKey(itemID))
                         {
@@ -2291,7 +2291,7 @@ namespace EFM
                         marketItemView.CIW = new List<CustomItemWrapper>() { CIW };
                         marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
 
-                        Mod.instance.LogInfo("5");
+                        Mod.LogInfo("5");
                         // Write price to item icon and set correct currency icon
                         Sprite currencySprite = null;
                         if (trader.currency == 0)
@@ -2303,13 +2303,13 @@ namespace EFM
                             currencySprite = Base_Manager.dollarCurrencySprite;
                             itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
                         }
-                        Mod.instance.LogInfo("5");
+                        Mod.LogInfo("5");
                         marketItemView.insureValue = itemInsureValue;
                         totalInsurePrice += itemInsureValue;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemInsureValue.ToString();
 
-                        Mod.instance.LogInfo("5");
+                        Mod.LogInfo("5");
                         //// Setup button
                         //EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
                         //pointableButton.SetButton();
@@ -2326,7 +2326,7 @@ namespace EFM
                         {
                             VID.marketItemViews.Add(marketItemView);
                         }
-                        Mod.instance.LogInfo("5");
+                        Mod.LogInfo("5");
                     }
                 }
                 string currencyItemID = "";
@@ -2350,7 +2350,7 @@ namespace EFM
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
                 }
                 // Setup insure price display
-                Mod.instance.LogInfo("1");
+                Mod.LogInfo("1");
                 string insurePriceItemID = "203";
                 string insurePriceItemName = "Rouble";
                 if (trader.currency == 0)
@@ -2375,10 +2375,10 @@ namespace EFM
                     traderInsurePriceItemIcon.weight = Mod.itemWeights[insurePriceItemID];
                     traderInsurePriceItemIcon.volume = Mod.itemVolumes[insurePriceItemID];
                 }
-                Mod.instance.LogInfo("1");
+                Mod.LogInfo("1");
                 traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = totalInsurePrice.ToString();
                 currentTotalInsurePrice = totalInsurePrice;
-                Mod.instance.LogInfo("1");
+                Mod.LogInfo("1");
                 // Setup button
                 if (!initButtonsSet)
                 {
@@ -2402,7 +2402,7 @@ namespace EFM
                     newInsureUpHoverScroll.other = newInsureDownHoverScroll;
                     newInsureUpHoverScroll.up = true;
                 }
-                Mod.instance.LogInfo("1");
+                Mod.LogInfo("1");
                 HoverScroll downInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
                 HoverScroll upInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
                 if (insureShowCaseHeight > 150)
@@ -2417,14 +2417,14 @@ namespace EFM
                     downInsureHoverScroll.gameObject.SetActive(false);
                     upInsureHoverScroll.gameObject.SetActive(false);
                 }
-                Mod.instance.LogInfo("1");
+                Mod.LogInfo("1");
             }
             else
             {
                 insureItemShowcaseElements = null;
             }
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             initButtonsSet = true;
         }
 
@@ -2445,22 +2445,22 @@ namespace EFM
 
         public void UpdateTaskListHeight()
         {
-            Mod.instance.LogInfo("UpdateTaskListHeight called");
+            Mod.LogInfo("UpdateTaskListHeight called");
             Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
-            Mod.instance.LogInfo("got trader display");
+            Mod.LogInfo("got trader display");
             HoverScroll downTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<HoverScroll>();
             HoverScroll upTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(3).GetComponent<HoverScroll>();
-            Mod.instance.LogInfo("got hoverscrolls");
+            Mod.LogInfo("got hoverscrolls");
             Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-            Mod.instance.LogInfo("got task parents");
+            Mod.LogInfo("got task parents");
             float taskListHeight = 3 + 29 * (tasksParent.childCount - 1);
 
             // Also need to add height of open descriptions
             for(int i = 1; i<tasksParent.childCount; ++i)
             {
-                Mod.instance.LogInfo("\tGetting task " + i);
+                Mod.LogInfo("\tGetting task " + i);
                 GameObject description = tasksParent.GetChild(i).GetChild(1).gameObject;
-                Mod.instance.LogInfo("\tgot description");
+                Mod.LogInfo("\tgot description");
                 if (description.activeSelf) 
                 {
                     // This here is why we update a frame after we need to update
@@ -2470,7 +2470,7 @@ namespace EFM
                     taskListHeight += description.GetComponent<RectTransform>().sizeDelta.y;
                 }
             }
-            Mod.instance.LogInfo("done adding desc heights, total: "+ taskListHeight);
+            Mod.LogInfo("done adding desc heights, total: "+ taskListHeight);
 
             if (taskListHeight > 145)
             {
@@ -2493,14 +2493,14 @@ namespace EFM
             int itemValue = custom ? CIW.GetValue() : VID.GetValue();
             int itemInsureValue = custom ? (int)Mathf.Max(CIW.GetInsuranceValue() * Mod.traderStatuses[currentTraderIndex].insuranceRate, 1) : (int)Mathf.Max(VID.GetInsuranceValue() * Mod.traderStatuses[currentTraderIndex].insuranceRate, 1);
 
-            Mod.instance.LogInfo("UpdateBasedOnItem called");
+            Mod.LogInfo("UpdateBasedOnItem called");
             if (added)
             {
-                Mod.instance.LogInfo("Added");
+                Mod.LogInfo("Added");
                 // Add to trade volume inventory
                 if (custom)
                 {
-                    Mod.instance.LogInfo("custom");
+                    Mod.LogInfo("custom");
                     if (tradeVolumeInventory == null)
                     {
                         tradeVolumeInventory = new Dictionary<string, int>();
@@ -2534,7 +2534,7 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.instance.LogInfo("vanilla");
+                    Mod.LogInfo("vanilla");
                     if (tradeVolumeInventory == null)
                     {
                         tradeVolumeInventory = new Dictionary<string, int>();
@@ -2568,7 +2568,7 @@ namespace EFM
                 }
 
                 // IN BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
-                Mod.instance.LogInfo("trader buy");
+                Mod.LogInfo("trader buy");
                 if (prices != null)
                 {
                     bool foundID = false;
@@ -2594,7 +2594,7 @@ namespace EFM
                     if (foundID && matchesType)
                     {
 
-                        Mod.instance.LogInfo("Updating prices");
+                        Mod.LogInfo("Updating prices");
                         // Go through each price because need to check if all are fulfilled anyway
                         bool canDeal = true;
                         for(int i=0; i<prices.Count;++i)
@@ -2657,7 +2657,7 @@ namespace EFM
                     }
                 }
 
-                Mod.instance.LogInfo("rag buy");
+                Mod.LogInfo("rag buy");
                 // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
                 if (ragfairPrices != null)
                 {
@@ -2684,7 +2684,7 @@ namespace EFM
                     if (foundID && matchesType)
                     {
 
-                        Mod.instance.LogInfo("updating rag buy prices");
+                        Mod.LogInfo("updating rag buy prices");
                         // Go through each price because need to check if all are fulfilled anyway
                         bool canDeal = true;
                         for (int i = 0; i < ragfairPrices.Count; ++i)
@@ -2747,11 +2747,11 @@ namespace EFM
                     }
                 }
 
-                Mod.instance.LogInfo("trader sell");
+                Mod.LogInfo("trader sell");
                 // IN SELL, check if item is already in showcase, if it is, increment count, if not, add a new entry, update price under FOR, make sure deal! button is activated if item is a sellable item
                 if (Mod.traderStatuses[currentTraderIndex].ItemSellable(itemID, Mod.itemAncestors[itemID]))
                 {
-                    Mod.instance.LogInfo("updating sell showcase");
+                    Mod.LogInfo("updating sell showcase");
                     Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
                     if (sellItemShowcaseElements != null && sellItemShowcaseElements.ContainsKey(itemID))
                     {
@@ -2793,12 +2793,12 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogInfo("adding new sell entry");
+                        Mod.LogInfo("adding new sell entry");
                         // Add a new sell item entry
                         Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
                         GameObject sellHorizontalCopy = sellHorizontalsParent.GetChild(0).gameObject;
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         float sellShowCaseHeight = 3 + 24 * sellHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
                         Transform currentHorizontal = sellHorizontalsParent.GetChild(sellHorizontalsParent.childCount - 1);
                         if (sellHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
@@ -2812,7 +2812,7 @@ namespace EFM
                             currentHorizontal.gameObject.SetActive(true);
                             sellShowCaseHeight += 24; // horizontal
                         }
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
 
@@ -2824,7 +2824,7 @@ namespace EFM
                         currentItemIconScript.VID = VID;
 
                         currentItemIcon.gameObject.SetActive(true);
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
                         if (Mod.itemIcons.ContainsKey(itemID))
                         {
@@ -2834,13 +2834,13 @@ namespace EFM
                         {
                             AnvilManager.Run(Mod.SetVanillaIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>()));
                         }
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
                         marketItemView.custom = custom;
                         marketItemView.CIW = new List<CustomItemWrapper>() { CIW };
                         marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         // Write price to item icon and set correct currency icon
                         Sprite currencySprite = null;
                         string currencyItemID = "";
@@ -2871,13 +2871,13 @@ namespace EFM
                             actualValue = (int)Mathf.Max(actualValue * 0.008f, 1); // Adjust item value
                             currencyItemID = "201";
                         }
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         marketItemView.value = actualValue;
                         currentTotalSellingPrice += actualValue;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = actualValue.ToString();
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         // Set count text
                         currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "1";
 
@@ -2888,7 +2888,7 @@ namespace EFM
                         //pointableButton.MaxPointingRange = 20;
                         //pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         // Add the icon object to the list for that item
                         if (CIW != null)
                         {
@@ -2899,7 +2899,7 @@ namespace EFM
                             VID.marketItemViews.Add(marketItemView);
                         }
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         // Update total selling price
                         traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames[currencyItemID];
                         traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currencyItemID];
@@ -2908,7 +2908,7 @@ namespace EFM
                         traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
                         traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         // Update hoverscrolls
                         HoverScroll downSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
                         HoverScroll upSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
@@ -2924,16 +2924,16 @@ namespace EFM
                             downSellHoverScroll.gameObject.SetActive(false);
                             upSellHoverScroll.gameObject.SetActive(false);
                         }
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                     }
                     traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalSellingPrice.ToString();
                 }
 
-                Mod.instance.LogInfo("trader tasks");
+                Mod.LogInfo("trader tasks");
                 // IN TASKS, for each item requirement of each task, activate TURN IN buttons accordingly
                 if (TraderStatus.conditionsByItem.ContainsKey(itemID))
                 {
-                    Mod.instance.LogInfo("updating task conditions with this item");
+                    Mod.LogInfo("updating task conditions with this item");
                     foreach (TraderTaskCondition condition in TraderStatus.conditionsByItem[itemID])
                     {
                         if (!condition.fulfilled && condition.marketListElement != null)
@@ -3009,13 +3009,13 @@ namespace EFM
                     }
                 }
 
-                Mod.instance.LogInfo("trader insure");
+                Mod.LogInfo("trader insure");
                 // IN INSURE, check if item already in showcase, if it is, increment count, if not, add a new entry, update price, make sure deal! button is activated, check if item is price, update accordingly
                 bool itemInsureable = Mod.traderStatuses[currentTraderIndex].ItemInsureable(itemID, Mod.itemAncestors[itemID]);
 
                 if (((custom && !CIW.insured) || (!custom && !VID.insured)) && itemInsureable)
                 {
-                    Mod.instance.LogInfo("update insure showcase");
+                    Mod.LogInfo("update insure showcase");
                     Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
                     if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
                     {
@@ -3069,12 +3069,12 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogInfo("adding new insure entry");
+                        Mod.LogInfo("adding new insure entry");
                         // Add a new insure item entry
                         Transform insureHorizontalsParent = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
                         GameObject insureHorizontalCopy = insureHorizontalsParent.GetChild(0).gameObject;
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         float insureShowCaseHeight = 3 + 24 * insureHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
                         Transform currentHorizontal = insureHorizontalsParent.GetChild(insureHorizontalsParent.childCount - 1);
                         if (insureHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
@@ -3088,7 +3088,7 @@ namespace EFM
                             currentHorizontal.gameObject.SetActive(true);
                             insureShowCaseHeight += 24; // horizontal
                         }
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
 
                         Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
 
@@ -3100,7 +3100,7 @@ namespace EFM
                         currentItemIconScript.VID = VID;
 
                         currentItemIcon.gameObject.SetActive(true);
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
                         if (Mod.itemIcons.ContainsKey(itemID))
                         {
@@ -3110,13 +3110,13 @@ namespace EFM
                         {
                             AnvilManager.Run(Mod.SetVanillaIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>()));
                         }
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
                         marketItemView.custom = custom;
                         marketItemView.CIW = new List<CustomItemWrapper>() { CIW };
                         marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         // Write price to item icon and set correct currency icon
                         Sprite currencySprite = null;
                         string currencyItemID = "";
@@ -3131,7 +3131,7 @@ namespace EFM
                             itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
                             currencyItemID = "201";
                         }
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         marketItemView.insureValue = itemInsureValue;
                         currentTotalInsurePrice += itemInsureValue;
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
@@ -3140,7 +3140,7 @@ namespace EFM
                         // Set count text
                         currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "1";
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         //// Setup button
                         //EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
                         //pointableButton.SetButton();
@@ -3157,7 +3157,7 @@ namespace EFM
                         {
                             VID.marketItemViews.Add(marketItemView);
                         }
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
 
                         // Update total insure price
                         traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames[currencyItemID];
@@ -3175,7 +3175,7 @@ namespace EFM
                             traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
                         }
 
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                         // Update hoverscrolls
                         HoverScroll downInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
                         HoverScroll upInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
@@ -3191,7 +3191,7 @@ namespace EFM
                             downInsureHoverScroll.gameObject.SetActive(false);
                             upInsureHoverScroll.gameObject.SetActive(false);
                         }
-                        Mod.instance.LogInfo("0");
+                        Mod.LogInfo("0");
                     }
                     traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalInsurePrice.ToString();
                 }
@@ -3242,14 +3242,14 @@ namespace EFM
             }
             else
             {
-                Mod.instance.LogInfo("removed");
+                Mod.LogInfo("removed");
                 // Remove from trade volume inventory
                 if (custom)
                 {
-                    Mod.instance.LogInfo("custom, pre amount: "+ tradeVolumeInventory[CIW.ID]);
+                    Mod.LogInfo("custom, pre amount: "+ tradeVolumeInventory[CIW.ID]);
                     tradeVolumeInventory[CIW.ID] -= (CIW.maxStack > 1 ? CIW.stack : 1);
                     tradeVolumeInventoryObjects[CIW.ID].Remove(CIW.gameObject);
-                    Mod.instance.LogInfo("post amount: " + tradeVolumeInventory[CIW.ID]);
+                    Mod.LogInfo("post amount: " + tradeVolumeInventory[CIW.ID]);
                     if (tradeVolumeInventory[CIW.ID] == 0)
                     {
                         tradeVolumeInventory.Remove(CIW.ID);
@@ -3268,7 +3268,7 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.instance.LogInfo("vanilla");
+                    Mod.LogInfo("vanilla");
                     tradeVolumeInventory[VID.H3ID] -= 1;
                     tradeVolumeInventoryObjects[VID.H3ID].Remove(VID.gameObject);
                     if (tradeVolumeInventory[VID.H3ID] == 0)
@@ -3288,7 +3288,7 @@ namespace EFM
                     }
                 }
 
-                Mod.instance.LogInfo("updating trader buy");
+                Mod.LogInfo("updating trader buy");
                 // IN BUY, check if item corresponds to price, update fulfilled icon and deactivate deal! button if necessary
                 if (prices != null)
                 {
@@ -3379,7 +3379,7 @@ namespace EFM
                     }
                 }
 
-                Mod.instance.LogInfo("0");
+                Mod.LogInfo("0");
                 // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icon and deactivate deal! button if necessary
                 if (ragfairPrices != null)
                 {
@@ -3470,7 +3470,7 @@ namespace EFM
                     }
                 }
 
-                Mod.instance.LogInfo("0");
+                Mod.LogInfo("0");
                 // IN SELL, find item in showcase, if there are more its stack, decrement count, if not, remove entry, update price under FOR, make sure deal! button is deactivated if no sellable item in volume (only need to check this if this item was sellable)
                 Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
                 if (sellItemShowcaseElements != null && sellItemShowcaseElements.ContainsKey(itemID))
@@ -3577,7 +3577,7 @@ namespace EFM
                 // else, if we are removing an item and it is not a sellable item (not in sellItemShowcaseElements) we dont need to do anything
                 traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalSellingPrice.ToString();
 
-                Mod.instance.LogInfo("0");
+                Mod.LogInfo("0");
                 // IN TASKS, for each item requirement of each task, deactivate TURN IN buttons accordingly
                 if (TraderStatus.conditionsByItem.ContainsKey(itemID))
                 {
@@ -3594,7 +3594,7 @@ namespace EFM
                     }
                 }
 
-                Mod.instance.LogInfo("0");
+                Mod.LogInfo("0");
                 // IN INSURE, find item in showcase, if there are more its stack, decrement count, if not, remove entry, update price under FOR, make sure deal! button is deactivated if no insureable item in volume (only need to check this if this item was insureable)
                 bool insureable = false;
                 if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
@@ -3713,7 +3713,7 @@ namespace EFM
                 Transform insurePriceFulfilledIcons = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(2);
                 Transform insureDealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
 
-                Mod.instance.LogInfo("0");
+                Mod.LogInfo("0");
                 if (insureable || itemID.Equals("201") || itemID.Equals("203"))
                 {
                     if (Mod.traderStatuses[currentTraderIndex].currency == 0)
@@ -3770,9 +3770,9 @@ namespace EFM
             cartItem = item.ID;
             cartItemCount = 1;
             prices = priceList;
-            Mod.instance.LogInfo("on buy item click called, with ID: " + item.ID);
+            Mod.LogInfo("on buy item click called, with ID: " + item.ID);
             string itemName = Mod.itemNames[item.ID];
-            Mod.instance.LogInfo("Got item name: " + itemName);
+            Mod.LogInfo("Got item name: " + itemName);
 
             Transform cartShowcase = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1);
             cartShowcase.GetChild(0).GetComponent<Text>().text = itemName;
@@ -3788,7 +3788,7 @@ namespace EFM
             itemIconScript.itemID = item.ID;
             itemIconScript.itemName = itemName;
             itemIconScript.description = Mod.itemDescriptions[item.ID];
-            Mod.instance.LogInfo("Got item description");
+            Mod.LogInfo("Got item description");
             itemIconScript.weight = Mod.itemWeights[item.ID];
             itemIconScript.volume = Mod.itemVolumes[item.ID];
 
@@ -3812,7 +3812,7 @@ namespace EFM
             bool canDeal = true;
             foreach(AssortmentPriceData price in priceList)
             {
-                Mod.instance.LogInfo("\tSetting price: "+price.ID);
+                Mod.LogInfo("\tSetting price: "+price.ID);
                 priceHeight += 50;
                 Transform priceElement = Instantiate(priceTemplate, pricesParent).transform;
                 priceElement.gameObject.SetActive(true);
@@ -3827,7 +3827,7 @@ namespace EFM
                 }
                 priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.count.ToString();
                 string priceName = Mod.itemNames[price.ID];
-                Mod.instance.LogInfo("\t\tGot name: " + priceName);
+                Mod.LogInfo("\t\tGot name: " + priceName);
                 priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = priceName;
                 if(price.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                 {
@@ -3841,7 +3841,7 @@ namespace EFM
                 priceIconScript.itemID = price.ID;
                 priceIconScript.itemName = priceName;
                 priceIconScript.description = Mod.itemDescriptions[price.ID];
-                Mod.instance.LogInfo("\t\tGot description");
+                Mod.LogInfo("\t\tGot description");
                 priceIconScript.weight = Mod.itemWeights[price.ID];
                 priceIconScript.volume = Mod.itemVolumes[price.ID];
 
@@ -3904,14 +3904,14 @@ namespace EFM
             GameObject itemPrefab = IM.OD[ID].GetGameObject();
             if (itemPrefab == null)
             {
-                Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
+                Mod.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
 
                 IM.OD[ID].RefreshCache();
                 itemPrefab = IM.OD[ID].GetGameObject();
             }
             if (itemPrefab == null)
             {
-                Mod.instance.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
+                Mod.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
                 yield break;
             }
             VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<VanillaItemDescriptor>();
@@ -5164,7 +5164,7 @@ namespace EFM
             }
             else
             {
-                Mod.instance.LogError("category does not have children, does not exist in Mod.itemsByParents keys");
+                Mod.LogError("category does not have children, does not exist in Mod.itemsByParents keys");
             }
 
             // Open category (set active sub container)
@@ -5459,17 +5459,17 @@ namespace EFM
 
         public void OnRagFairBuyItemBuyClick(int traderIndex, AssortmentItem item, List<AssortmentPriceData> priceList, Sprite itemIcon)
         {
-            Mod.instance.LogInfo("OnRagFairBuyItemBuyClick called on item: "+item.ID);
+            Mod.LogInfo("OnRagFairBuyItemBuyClick called on item: "+item.ID);
             // Set rag fair cart item, icon, amount, name
             ragfairCartItem = item.ID;
             ragfairCartItemCount = 1;
             ragfairPrices = priceList;
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             Transform ragfairCartTransform = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2);
             string itemName = Mod.itemNames[item.ID];
             ragfairCartTransform.GetChild(1).GetChild(0).GetComponent<Text>().text = itemName;
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             if (itemIcon == null)
             {
                 AnvilManager.Run(Mod.SetVanillaIcon(item.ID, ragfairCartTransform.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>()));
@@ -5478,7 +5478,7 @@ namespace EFM
             {
                 ragfairCartTransform.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = itemIcon;
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             ragfairCartTransform.GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "1";
 
             // Setup selected item ItemIcon
@@ -5493,12 +5493,12 @@ namespace EFM
             ragfairCartItemIconScript.weight = Mod.itemWeights[item.ID];
             ragfairCartItemIconScript.volume = Mod.itemVolumes[item.ID];
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             Transform cartShowcase = ragfairCartTransform.GetChild(1);
             Transform pricesParent = cartShowcase.GetChild(3).GetChild(0).GetChild(0);
             GameObject priceTemplate = pricesParent.GetChild(0).gameObject;
             float priceHeight = 0;
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             while (pricesParent.childCount > 1)
             {
                 Transform currentFirstChild = pricesParent.GetChild(1);
@@ -5506,7 +5506,7 @@ namespace EFM
                 Destroy(currentFirstChild.gameObject);
             }
             bool canDeal = true;
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             if (ragfairBuyPriceElements == null)
             {
                 ragfairBuyPriceElements = new List<GameObject>();
@@ -5517,12 +5517,12 @@ namespace EFM
             }
             foreach (AssortmentPriceData price in priceList)
             {
-                Mod.instance.LogInfo("\t0");
+                Mod.LogInfo("\t0");
                 priceHeight += 50;
                 Transform priceElement = Instantiate(priceTemplate, pricesParent).transform;
                 priceElement.gameObject.SetActive(true);
 
-                Mod.instance.LogInfo("\t0");
+                Mod.LogInfo("\t0");
                 if (Mod.itemIcons.ContainsKey(price.ID))
                 {
                     priceElement.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[price.ID];
@@ -5531,11 +5531,11 @@ namespace EFM
                 {
                     AnvilManager.Run(Mod.SetVanillaIcon(price.ID, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
                 }
-                Mod.instance.LogInfo("\t0");
+                Mod.LogInfo("\t0");
                 priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.count.ToString();
                 string priceItemName = Mod.itemNames[price.ID];
                 priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = priceItemName;
-                Mod.instance.LogInfo("\t0");
+                Mod.LogInfo("\t0");
                 if (price.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
                 {
                     priceElement.GetChild(0).GetChild(3).GetChild(7).GetChild(2).gameObject.SetActive(true);
@@ -5543,7 +5543,7 @@ namespace EFM
                 }
                 ragfairBuyPriceElements.Add(priceElement.gameObject);
 
-                Mod.instance.LogInfo("\t0");
+                Mod.LogInfo("\t0");
                 if (tradeVolumeInventory.ContainsKey(price.ID) && tradeVolumeInventory[price.ID] >= price.count)
                 {
                     priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
@@ -5562,10 +5562,10 @@ namespace EFM
                 ragfairCartPriceItemIconScript.weight = Mod.itemWeights[price.ID];
                 ragfairCartPriceItemIconScript.volume = Mod.itemVolumes[price.ID];
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             HoverScroll downHoverScroll = cartShowcase.GetChild(3).GetChild(3).GetComponent<HoverScroll>();
             HoverScroll upHoverScroll = cartShowcase.GetChild(3).GetChild(2).GetComponent<HoverScroll>();
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             if (priceHeight > 100)
             {
                 downHoverScroll.rate = 100 / (priceHeight - 100);
@@ -5578,7 +5578,7 @@ namespace EFM
                 downHoverScroll.gameObject.SetActive(false);
                 upHoverScroll.gameObject.SetActive(false);
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
 
             Transform dealButton = cartShowcase.parent.GetChild(2).GetChild(0).GetChild(0);
             if (canDeal)
@@ -5591,13 +5591,13 @@ namespace EFM
                 dealButton.GetComponent<Collider>().enabled = false;
                 dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
             }
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
 
             // Set ragfair buy deal button 
             PointableButton ragfairCartDealAmountButton = ragfairCartTransform.transform.GetChild(2).GetChild(0).GetChild(0).GetComponent<PointableButton>();
             ragfairCartDealAmountButton.Button.onClick.AddListener(() => { OnRagfairBuyDealClick(traderIndex); });
 
-            Mod.instance.LogInfo("0");
+            Mod.LogInfo("0");
             // Deactivate ragfair buy categories and item list, enable cart
             ragfairCartTransform.gameObject.SetActive(true);
             ragfairCartTransform.parent.GetChild(0).gameObject.SetActive(false);

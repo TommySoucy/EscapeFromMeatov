@@ -637,17 +637,17 @@ namespace EFM
 					validConsumePress = false;
 					hand.GetComponent<Hand>().consuming = false;
 					Mod.consumeUI.SetActive(false);
-					Mod.instance.LogInfo("Valid consume released");
+					Mod.LogInfo("Valid consume released");
 
 					if (amountRate == -1)
 					{
-						Mod.instance.LogInfo("\tAmount rate -1");
+						Mod.LogInfo("\tAmount rate -1");
 						if (maxAmount > 0)
 						{
-							Mod.instance.LogInfo("\t\tConsuming, amountRate == -1, maxAmount > 0, consumableTimer: " + consumableTimer + ", useTime: " + useTime);
+							Mod.LogInfo("\t\tConsuming, amountRate == -1, maxAmount > 0, consumableTimer: " + consumableTimer + ", useTime: " + useTime);
 							// Consume for the fraction timer/useTime of remaining amount. If timer >= useTime, we consume the whole thing
 							int amountToConsume = consumableTimer >= useTime ? amount : (int)(amount * (consumableTimer / useTime));
-							Mod.instance.LogInfo("\t\tAmount to consume: " + amountToConsume);
+							Mod.LogInfo("\t\tAmount to consume: " + amountToConsume);
 							if (amount - amountToConsume <= 0)
 							{
 								// Attempt to apply effects at full effectiveness
@@ -687,11 +687,11 @@ namespace EFM
 					}
 					else if (amountRate == 0)
 					{
-						Mod.instance.LogInfo("\tAmount rate 0");
+						Mod.LogInfo("\tAmount rate 0");
 						// This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
 						if (consumableTimer >= useTime)
 						{
-							Mod.instance.LogInfo("\t\tConsumable timer >= useTime");
+							Mod.LogInfo("\t\tConsumable timer >= useTime");
 							if (ApplyEffects(1, 1))
 							{
 								amount -= 1;
@@ -703,19 +703,19 @@ namespace EFM
 					}
 					else
 					{
-						Mod.instance.LogInfo("\tAmount rate else");
+						Mod.LogInfo("\tAmount rate else");
 						// Consume timer/useTime of to amountRate
 						int amountToConsume = consumableTimer >= useTime ? (int)amountRate : (int)(amountRate * (consumableTimer / useTime));
-						Mod.instance.LogInfo("\tAmount to consume: "+ amountToConsume);
+						Mod.LogInfo("\tAmount to consume: "+ amountToConsume);
 						if (consumableTimer >= useTime)
 						{
-							Mod.instance.LogInfo("\t\tConsumable timer >= useTime");
+							Mod.LogInfo("\t\tConsumable timer >= useTime");
 							// Apply effects at full effectiveness
 							// NOTE: In the case we have an amount rate, here, we only remove the used amount if no other effects  have been applied
 							// so only if ApplyEffects returns false.
 							if (!ApplyEffects(1, amountToConsume))
 							{
-								Mod.instance.LogInfo("\t\t\tNo effects applied, using consumed amount to heal");
+								Mod.LogInfo("\t\t\tNo effects applied, using consumed amount to heal");
 								// Here we also have to apply amount consumed as health to relevant parts
 								// NOTE: This assumes that only items that can heal health have an amountRate != 0 || -1 defined
 								// If this ever changes, we will need to have an additional flag for healing items
@@ -724,11 +724,11 @@ namespace EFM
 								if (targettedPart != -1)
 								{
 									partIndex = targettedPart;
-									Mod.instance.LogInfo("\t\t\t\tPart "+partIndex+" targetted");
+									Mod.LogInfo("\t\t\t\tPart "+partIndex+" targetted");
 								}
 								else // No part targetted, prioritize least health TODO: Make a setting to prioritize by part first instead, and as we go through more important parts first, those will be prioritized if health is equal
 								{
-									Mod.instance.LogInfo("\t\t\t\tNo part targetted, finding best...");
+									Mod.LogInfo("\t\t\t\tNo part targetted, finding best...");
 									int leastIndex = -1;
 									float leastAmount = 1000;
 									for (int i = 0; i < Mod.health.Length; ++i)
@@ -743,15 +743,15 @@ namespace EFM
 									{
 										partIndex = leastIndex;
 									}
-									Mod.instance.LogInfo("\t\t\t\tBest part to apply helth to: "+partIndex);
+									Mod.LogInfo("\t\t\t\tBest part to apply helth to: "+partIndex);
 								}
 
 								if (partIndex != -1)
 								{
-									Mod.instance.LogInfo("\t\t\t\tApplying "+actualAmountConsumed+" to "+partIndex+", which has "+ Mod.health[partIndex]+" health");
+									Mod.LogInfo("\t\t\t\tApplying "+actualAmountConsumed+" to "+partIndex+", which has "+ Mod.health[partIndex]+" health");
 									actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
 									Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
-									Mod.instance.LogInfo("\t\t\t\tAfter healing: "+ Mod.health[partIndex]);
+									Mod.LogInfo("\t\t\t\tAfter healing: "+ Mod.health[partIndex]);
 								}
 								// else, no target part and all parts are at max health
 
@@ -770,7 +770,7 @@ namespace EFM
 						}
 						else
 						{
-							Mod.instance.LogInfo("\t\tConsumable timer < useTime");
+							Mod.LogInfo("\t\tConsumable timer < useTime");
 
 							// Apply effects at effectiveness * amountToConsume / amountRate
 							if (!ApplyEffects(amountToConsume / amountRate, amountToConsume))
@@ -900,7 +900,7 @@ namespace EFM
 
 		private bool ApplyEffects(float effectiveness, int amountToConsume)
         {
-			Mod.instance.LogInfo("Apply effects called, effectiveness: " + effectiveness + ", amount to consume: " + amountToConsume);
+			Mod.LogInfo("Apply effects called, effectiveness: " + effectiveness + ", amount to consume: " + amountToConsume);
 			if(consumeEffects == null)
             {
 				consumeEffects = prefabCIW.consumeEffects;
@@ -924,23 +924,23 @@ namespace EFM
 						Mod.hydration += hydrationAmount;
 						Mod.AddSkillExp(hydrationAmount * (Skill.hydrationRecoveryRate / 100), 5);
 						++appliedEffectCount;
-						Mod.instance.LogInfo("\tApplied hydration");
+						Mod.LogInfo("\tApplied hydration");
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Energy:
 						float energyAmount = consumeEffect.value * effectiveness;
 						Mod.energy += energyAmount;
 						Mod.AddSkillExp(energyAmount * (Skill.energyRecoveryRate / 100), 5);
 						++appliedEffectCount;
-						Mod.instance.LogInfo("\tApplied energy");
+						Mod.LogInfo("\tApplied energy");
 						break;
 
 					// Damage
 					case EFM_Effect_Consumable.EffectConsumable.RadExposure:
-						Mod.instance.LogInfo("\trad exposure");
+						Mod.LogInfo("\trad exposure");
 						bool radExposureApplied = false;
 						if (consumeEffect.duration == 0)
 						{
-							Mod.instance.LogInfo("\t\tNo duration, curing rad exposure if present");
+							Mod.LogInfo("\t\tNo duration, curing rad exposure if present");
 							// Remove all rad exposure effects
 							for (int i = Effect.effects.Count - 1; i >= 0; --i)
                             {
@@ -952,7 +952,7 @@ namespace EFM
 										radExposureApplied = true;
 										++appliedEffectCount;
 										amount -= consumeEffect.cost;
-										Mod.instance.LogInfo("\t\t\tFound valid rad exposure at effect index: "+i);
+										Mod.LogInfo("\t\t\tFound valid rad exposure at effect index: "+i);
 										return true;
 									}
                                 }
@@ -963,7 +963,7 @@ namespace EFM
                             }
                             if (!radExposureApplied)
 							{
-								Mod.instance.LogInfo("\t\t\tNo valid rad exposure");
+								Mod.LogInfo("\t\t\tNo valid rad exposure");
 								if (singleEffect)
                                 {
 									return false;
@@ -985,7 +985,7 @@ namespace EFM
 									Effect.effects[i].inactiveTimer = consumeEffect.duration * effectiveness;
 									radExposureApplied = true;
 									++appliedEffectCount;
-									Mod.instance.LogInfo("RadExposure effect found, disabling for "+ Effect.effects[i].inactiveTimer);
+									Mod.LogInfo("RadExposure effect found, disabling for "+ Effect.effects[i].inactiveTimer);
 								}
 							}
                             if (radExposureApplied)
@@ -999,7 +999,7 @@ namespace EFM
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Pain:
-						Mod.instance.LogInfo("\tPain");
+						Mod.LogInfo("\tPain");
 						if (painExperience == -1)
 						{
 							painExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["Pain"]["HealExperience"];
@@ -1016,7 +1016,7 @@ namespace EFM
 								Mod.AddExperience((int)(painExperience * effectiveness), 2, "Treatment experience - Pain ({0})");
 								painApplied = true;
 								++appliedEffectCount;
-								Mod.instance.LogInfo("\t\tFound pain effect at effect index "+i);
+								Mod.LogInfo("\t\tFound pain effect at effect index "+i);
 							}
 						}
 						if (painApplied)
@@ -1029,7 +1029,7 @@ namespace EFM
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Contusion:
-						Mod.instance.LogInfo("\tContusion");
+						Mod.LogInfo("\tContusion");
 						// Remove all contusion effects
 						bool contusionApplied = false;
 						for (int i = Effect.effects.Count - 1; i >= 0; --i)
@@ -1042,7 +1042,7 @@ namespace EFM
 									contusionApplied = true;
 									++appliedEffectCount;
 									amount -= consumeEffect.cost;
-									Mod.instance.LogInfo("\t\tFound contusion effect at effect index " + i);
+									Mod.LogInfo("\t\tFound contusion effect at effect index " + i);
 									return true;
 								}
                             }
@@ -1053,7 +1053,7 @@ namespace EFM
 						}
                         if (!contusionApplied)
 						{
-							Mod.instance.LogInfo("\t\tNo valid contusion found");
+							Mod.LogInfo("\t\tNo valid contusion found");
 							if (singleEffect)
 							{
 								return false;
@@ -1065,7 +1065,7 @@ namespace EFM
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Intoxication:
-						Mod.instance.LogInfo("\tIntoxication");
+						Mod.LogInfo("\tIntoxication");
 						if (intoxicationExperience == -1)
 						{
 							intoxicationExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["Intoxication"]["HealExperience"];
@@ -1083,7 +1083,7 @@ namespace EFM
 									intoxicationApplied = true;
 									 ++appliedEffectCount;
 									Mod.AddExperience(intoxicationExperience, 2, "Treatment experience - Intoxication ({0})");
-									Mod.instance.LogInfo("\t\tFound contusion effect at effect index " + i);
+									Mod.LogInfo("\t\tFound contusion effect at effect index " + i);
 									return true;
 								}
                             }
@@ -1094,7 +1094,7 @@ namespace EFM
 						}
 						if (!intoxicationApplied)
 						{
-							Mod.instance.LogInfo("\t\tNo valid intoxication found");
+							Mod.LogInfo("\t\tNo valid intoxication found");
 							if (singleEffect)
 							{
 								return false;
@@ -1110,11 +1110,11 @@ namespace EFM
 						{
 							lightBleedExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["HealExperience"];
 						}
-						Mod.instance.LogInfo("\tHas damage light bleeding effect");
+						Mod.LogInfo("\tHas damage light bleeding effect");
 						// Remove priority LightBleeding effect, or one found on targetted part
 						if (targettedPart == -1)
 						{
-							Mod.instance.LogInfo("\t\tNo targetted part, cost: "+consumeEffect.cost+", amount: "+amount+", to consume: "+amountToConsume);
+							Mod.LogInfo("\t\tNo targetted part, cost: "+consumeEffect.cost+", amount: "+amount+", to consume: "+amountToConsume);
 							// Prioritize lowest partIndex
 							int highest = -1;
 							int lowestPartIndex = 7;
@@ -1124,14 +1124,14 @@ namespace EFM
 								{
 									if (Effect.effects[i].effectType == Effect.EffectType.LightBleeding && Effect.effects[i].partIndex < lowestPartIndex)
 									{
-										Mod.instance.LogInfo("\t\t\tFound valid light bleeding");
+										Mod.LogInfo("\t\t\tFound valid light bleeding");
 										highest = i;
 									}
 								}
 							}
 							if(highest == -1) // We did not find light bleeding
 							{
-								Mod.instance.LogInfo("\t\tNo valid light bleeding");
+								Mod.LogInfo("\t\tNo valid light bleeding");
 								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
 								{
 									return false;
@@ -1143,7 +1143,7 @@ namespace EFM
                             }
                             else
 							{
-								Mod.instance.LogInfo("\t\tRemoving valid light bleed");
+								Mod.LogInfo("\t\tRemoving valid light bleed");
 								Effect.RemoveEffectAt(highest);
 								amount -= consumeEffect.cost;
 								++appliedEffectCount;
@@ -1188,7 +1188,7 @@ namespace EFM
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.Fracture:
-						Mod.instance.LogInfo("\tFracture");
+						Mod.LogInfo("\tFracture");
 						if (fractureExperience == -1)
 						{
 							fractureExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["Fracture"]["HealExperience"];
@@ -1211,7 +1211,7 @@ namespace EFM
 							}
 							if(index == -1) // We did not find Fracture
 							{
-								Mod.instance.LogInfo("\t\tNo fracture found");
+								Mod.LogInfo("\t\tNo fracture found");
 								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
 								{
 									return false;
@@ -1227,7 +1227,7 @@ namespace EFM
 								amount -= consumeEffect.cost;
 								++appliedEffectCount;
 								Mod.AddExperience(fractureExperience, 2, "Treatment experience - Fracture ({0})");
-								Mod.instance.LogInfo("\t\tFound Fracture effect at effect index " + index);
+								Mod.LogInfo("\t\tFound Fracture effect at effect index " + index);
 								return true;
 							}
                         }
@@ -1248,7 +1248,7 @@ namespace EFM
 							}
 							if (index == -1) // We did not find Fracture on the part
 							{
-								Mod.instance.LogInfo("\t\tNo fracture found on target part");
+								Mod.LogInfo("\t\tNo fracture found on target part");
 								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
 								{
 									return false;
@@ -1264,13 +1264,13 @@ namespace EFM
 								amount -= consumeEffect.cost;
 								++appliedEffectCount;
 								Mod.AddExperience(fractureExperience, 2, "Treatment experience - Fracture ({0})");
-								Mod.instance.LogInfo("\t\tFound Fracture effect at effect index " + index);
+								Mod.LogInfo("\t\tFound Fracture effect at effect index " + index);
 								return true;
 							}
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.DestroyedPart:
-						Mod.instance.LogInfo("\tDestroyed part");
+						Mod.LogInfo("\tDestroyed part");
 						if (breakPartExperience == -1)
                         {
 							breakPartExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["BreakPart"]["HealExperience"];
@@ -1293,7 +1293,7 @@ namespace EFM
 							}
 							if (highest == -1) // We did not find DestroyedPart
 							{
-								Mod.instance.LogInfo("\t\tNo destroyed part found");
+								Mod.LogInfo("\t\tNo destroyed part found");
 								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
 								{
 									return false;
@@ -1321,7 +1321,7 @@ namespace EFM
 								}
 								Mod.AddExperience(breakPartExperience, 2, "Treatment experience - Destroyed Part ({0})");
 								Mod.AddSkillExp(Skill.surgerySkillProgress/Skill.surgeryAction, 28);
-								Mod.instance.LogInfo("\t\tFound destroyed part effect at effect index " + highest);
+								Mod.LogInfo("\t\tFound destroyed part effect at effect index " + highest);
 								return true;
 							}
 						}
@@ -1342,7 +1342,7 @@ namespace EFM
 							}
 							if (index == -1) // We did not find DestroyedPart on the part
 							{
-								Mod.instance.LogInfo("\t\tNo destroyed part found on target part");
+								Mod.LogInfo("\t\tNo destroyed part found on target part");
 								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
 								{
 									return false;
@@ -1369,13 +1369,13 @@ namespace EFM
 									GM.CurrentPlayerBody.SetHealthThreshold(totalMaxHealth);
 								}
 								Mod.AddExperience(breakPartExperience, 2, "Treatment experience - Destroyed Part ({0})");
-								Mod.instance.LogInfo("\t\tFound destroyed part effect at effect index " + index);
+								Mod.LogInfo("\t\tFound destroyed part effect at effect index " + index);
 								return true;
 							}
 						}
 						break;
 					case EFM_Effect_Consumable.EffectConsumable.HeavyBleeding:
-						Mod.instance.LogInfo("\tHeavy bleed");
+						Mod.LogInfo("\tHeavy bleed");
 						if (heavyBleedExperience == -1)
 						{
 							heavyBleedExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["HeavyBleeding"]["HealExperience"];
@@ -1399,7 +1399,7 @@ namespace EFM
 							}
 							if (highest == -1) // We did not find HeavyBleeding
 							{
-								Mod.instance.LogInfo("\t\tNo heavy bleed found");
+								Mod.LogInfo("\t\tNo heavy bleed found");
 								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
 								{
 									return false;
@@ -1415,7 +1415,7 @@ namespace EFM
 								amount -= consumeEffect.cost;
 								++appliedEffectCount;
 								Mod.AddExperience(heavyBleedExperience, 2, "Treatment experience - Heavy Bleeding ({0})");
-								Mod.instance.LogInfo("\t\tFound heavy bleed effect at effect index " + highest);
+								Mod.LogInfo("\t\tFound heavy bleed effect at effect index " + highest);
 								return true;
 							}
 						}
@@ -1437,7 +1437,7 @@ namespace EFM
 							}
 							if (index == -1) // We did not find HeavyBleeding on the part
 							{
-								Mod.instance.LogInfo("\t\tNo heavy bleed found on targetted part");
+								Mod.LogInfo("\t\tNo heavy bleed found on targetted part");
 								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
 								{
 									return false;
@@ -1453,7 +1453,7 @@ namespace EFM
 								amount -= consumeEffect.cost;
 								++appliedEffectCount;
 								Mod.AddExperience(heavyBleedExperience, 2, "Treatment experience - Heavy Bleeding ({0})");
-								Mod.instance.LogInfo("\t\tFound heavy bleed effect at effect index " + index);
+								Mod.LogInfo("\t\tFound heavy bleed effect at effect index " + index);
 								return true;
 							}
 						}
@@ -1519,7 +1519,7 @@ namespace EFM
 			}
 
 			// Return true if at least one effect was used
-			Mod.instance.LogInfo("\tApplied effect count: "+appliedEffectCount+" returning: "+(appliedEffectCount > 0));
+			Mod.LogInfo("\tApplied effect count: "+appliedEffectCount+" returning: "+(appliedEffectCount > 0));
 			return appliedEffectCount > 0; 
         }
 

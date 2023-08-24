@@ -211,7 +211,7 @@ namespace EFM
             }
             catch (Exception)
             {
-                Mod.instance.LogError("Could not get spawner ID for icon for vanilla item: " + H3ID);
+                Mod.LogError("Could not get spawner ID for icon for vanilla item: " + H3ID);
             }
             descriptionPack.amountRequiredPerArea = new int[22];
 

@@ -246,7 +246,7 @@ namespace EFM
         private void BuildAssortments(JObject assortData)
         {
             // TODO: based on traderData["previousRestockTime"] and current time, decide whether we should load amounts of items from save (If havent restocked yet since last save) or just set default (has restocked since)
-            Mod.instance.LogInfo("BuildAssorts called on trader: " + index);
+            Mod.LogInfo("BuildAssorts called on trader: " + index);
             assortmentByLevel = new Dictionary<int, TraderAssortment>();
             foreach (JToken entry in assortData["items"])
             {
@@ -326,7 +326,7 @@ namespace EFM
                                         {
                                             if ((assortData["barter_scheme"][entryID] as JArray).Count <= 1)
                                             {
-                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
+                                                Mod.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
                                                 missingFallback = true;
                                                 break;
                                             }
@@ -420,13 +420,13 @@ namespace EFM
                                     {
                                         if (useFallback)
                                         {
-                                            Mod.instance.LogError("Trader " + index + " assort entry " + entryID + " fallback ID ("+ priceID + ") missing from item map");
+                                            Mod.LogError("Trader " + index + " assort entry " + entryID + " fallback ID ("+ priceID + ") missing from item map");
                                         }
                                         else
                                         {
                                             if ((assortData["barter_scheme"][entryID] as JArray).Count <= 1)
                                             {
-                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has no item map ID, but is also missing a fallback entirely");
+                                                Mod.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has no item map ID, but is also missing a fallback entirely");
                                                 missingFallback = true;
                                             }
                                             else
@@ -548,7 +548,7 @@ namespace EFM
                                         {
                                             if ((assortData["barter_scheme"][entryID] as JArray).Count <= 1)
                                             {
-                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
+                                                Mod.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
                                                 missingFallback = true;
                                                 break;
                                             }
@@ -643,13 +643,13 @@ namespace EFM
                                     {
                                         if (useFallback)
                                         {
-                                            Mod.instance.LogError("Trader " + index + " assort entry " + entryID + " fallback ID missing from item map");
+                                            Mod.LogError("Trader " + index + " assort entry " + entryID + " fallback ID missing from item map");
                                         }
                                         else
                                         {
                                             if ((assortData["barter_scheme"][entryID] as JArray).Count <= 1)
                                             {
-                                                Mod.instance.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
+                                                Mod.LogError("Trader: " + index + " has an assort entry: " + entryID + " with price: " + priceID + " which has not item map ID, but is also missing a fallback entirely");
                                                 missingFallback = true;
                                             }
                                             else
@@ -730,7 +730,7 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogError("Item ancestors does not contain a list for item: " + item.ID);
+                                Mod.LogError("Item ancestors does not contain a list for item: " + item.ID);
                             }
                         }
                     }
@@ -850,7 +850,7 @@ namespace EFM
                 }
                 if(questLocale == null)
                 {
-                    Mod.instance.LogError("Could not find quest with ID: "+rawTask.Key + " in locale");
+                    Mod.LogError("Could not find quest with ID: "+rawTask.Key + " in locale");
                     continue;
                 }
 
@@ -1043,7 +1043,7 @@ namespace EFM
                                 ItemMapEntry itemMapEntry = Mod.itemMap[originalItemID];
                                 if (itemMapEntry.mode == 0 && (itemMapEntry.ID == null || itemMapEntry.ID.Equals("")))
                                 {
-                                    Mod.instance.LogError("Item reward for task: " + task.ID + " had missing main entry, but fallback " + originalItemID + " is on mode 0 but is also missing H3ID");
+                                    Mod.LogError("Item reward for task: " + task.ID + " had missing main entry, but fallback " + originalItemID + " is on mode 0 but is also missing H3ID");
                                     return;
                                 }
                                 switch (itemMapEntry.mode)
@@ -1064,12 +1064,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogError("Item reward for task: " + task.ID + " had missing main entry, but fallback " + originalItemID + " is also missing");
+                                Mod.LogError("Item reward for task: " + task.ID + " had missing main entry, but fallback " + originalItemID + " is also missing");
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Item reward for task: " + task.ID + " had missing main entry, but fallback data was missing entirely");
+                            Mod.LogError("Item reward for task: " + task.ID + " had missing main entry, but fallback data was missing entirely");
                         }
                     }
                     break;
@@ -1136,13 +1136,13 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Mod.instance.LogError("AssortmentUnlock reward for task: " + task.ID + " had missing main entry, but fallback ID "+ originalAssortUnlockItemID + " was missing from item map");
+                                    Mod.LogError("AssortmentUnlock reward for task: " + task.ID + " had missing main entry, but fallback ID "+ originalAssortUnlockItemID + " was missing from item map");
                                 }
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("AssortmentUnlock reward for task: " + task.ID + " had missing main entry, but fallback data was missing entirely");
+                            Mod.LogError("AssortmentUnlock reward for task: " + task.ID + " had missing main entry, but fallback data was missing entirely");
                         }
                     }
                     break;
@@ -1248,7 +1248,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Mod.instance.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with kill counter with unhandled target type: " + counter["_props"]["target"].ToString());
+                                    Mod.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with kill counter with unhandled target type: " + counter["_props"]["target"].ToString());
                                 }
                                 if (counter["_props"]["weapon"] != null)
                                 {
@@ -1365,7 +1365,7 @@ namespace EFM
                                             newCounter.counterConditionTargetBodyParts.Add(TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightLeg);
                                             break;
                                         default:
-                                            Mod.instance.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with shots counter with unhandled target type: " + counter["_props"]["target"].ToString());
+                                            Mod.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with shots counter with unhandled target type: " + counter["_props"]["target"].ToString());
                                             break;
                                     }
                                 }
@@ -1391,7 +1391,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Mod.instance.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with kill counter with unhandled target type: " + counter["_props"]["target"].ToString());
+                                    Mod.LogError("Task: " + task.ID + " has condition: " + condition.ID + " with kill counter with unhandled target type: " + counter["_props"]["target"].ToString());
                                 }
                                 if (counter["_props"]["weapon"] != null)
                                 {
@@ -1796,7 +1796,7 @@ namespace EFM
                                 }
                                 break;
                             default:
-                                Mod.instance.LogError("Trader " + index + " buildtask: " + task.ID + ", condition: " + condition.ID + ", unhandled counter type: " + counter["_parent"].ToString());
+                                Mod.LogError("Trader " + index + " buildtask: " + task.ID + ", condition: " + condition.ID + ", unhandled counter type: " + counter["_parent"].ToString());
                                 return false;
                         }
                         condition.counters.Add(newCounter);
@@ -1887,7 +1887,7 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalItemID);
+                        Mod.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalItemID);
                         return false;
                     }
                     break;
@@ -1941,7 +1941,7 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalFindItemID);
+                        Mod.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalFindItemID);
                         return false;
                     }
                     break;
@@ -2000,7 +2000,7 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has missing leave condition item: " + originalLeaveItemID);
+                        Mod.LogError("Quest " + task.name + " with ID " + task.ID + " has missing leave condition item: " + originalLeaveItemID);
                         return false;
                     }
                     string zoneLocation = condition.locationID.Split('_')[0];
@@ -2080,12 +2080,12 @@ namespace EFM
                     }
                     else
                     {
-                        Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalTargetWeaponID);
+                        Mod.LogError("Quest " + task.name + " with ID " + task.ID + " has has missing condition item: " + originalTargetWeaponID);
                         return false;
                     }
                     break;
                 default:
-                    Mod.instance.LogError("Quest " + task.name + " with ID " + task.ID + " has unexpected condition type: " + conditionData["_parent"].ToString());
+                    Mod.LogError("Quest " + task.name + " with ID " + task.ID + " has unexpected condition type: " + conditionData["_parent"].ToString());
                     return false;
             }
 

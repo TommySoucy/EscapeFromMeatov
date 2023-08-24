@@ -256,33 +256,33 @@ namespace EFM
                      customItemWrapper.itemType == Mod.ItemType.Container ||
                      customItemWrapper.itemType == Mod.ItemType.Pouch))
                 {
-                    Mod.instance.LogInfo("\tGot container CIW");
+                    Mod.LogInfo("\tGot container CIW");
                     // Clear the previous colliding container if we had one
                     if (collidingContainerWrapper != null)
                     {
-                        Mod.instance.LogInfo("\t\tAlready had a colliding container, clearing");
+                        Mod.LogInfo("\t\tAlready had a colliding container, clearing");
                         hoverValid = false;
                         collidingContainerWrapper.SetContainerHovered(false);
                     }
 
                     newMainContainer = true;
                     collidingContainerWrapper = customItemWrapper;
-                    Mod.instance.LogInfo("\tcollidingContainerWrapper now has ID: "+ collidingContainerWrapper.ID);
+                    Mod.LogInfo("\tcollidingContainerWrapper now has ID: "+ collidingContainerWrapper.ID);
                 }
             }
 
             // Set container hovered if necessary
             if (newMainContainer && collidingContainerWrapper.canInsertItems)
             {
-                Mod.instance.LogInfo("\tCan insert items into it");
+                Mod.LogInfo("\tCan insert items into it");
                 // Verify container mode
                 if (collidingContainerWrapper.mainContainer.activeSelf)
                 {
-                    Mod.instance.LogInfo("\t\tmain container is active");
+                    Mod.LogInfo("\t\tmain container is active");
                     // Set material, if this hand is also holding something that fits in the container, set the material to hovered
                     if (fvrHand.CurrentInteractable != null && fvrHand.CurrentInteractable is FVRPhysicalObject)
                     {
-                        Mod.instance.LogInfo("\t\t\tWe are holding something");
+                        Mod.LogInfo("\t\t\tWe are holding something");
                         int volumeToUse = 0;
                         string IDToUse = "";
                         List<string> parentsToUse = null;
@@ -320,7 +320,7 @@ namespace EFM
                                 // If whitelist includes item and blacklist doesn't
                                 if (Mod.IDDescribedInList(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
                                 {
-                                    Mod.instance.LogInfo("\t\t\t\tIt fits in container, setting valid");
+                                    Mod.LogInfo("\t\t\t\tIt fits in container, setting valid");
                                     hoverValid = true;
                                     collidingContainerWrapper.SetContainerHovered(true);
                                     fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
@@ -412,7 +412,7 @@ namespace EFM
                                 // If whitelist includes item and blacklist doesn't
                                 if (Mod.IDDescribedInList(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
                                 {
-                                    Mod.instance.LogInfo("\t\t\t\tIt fits in container, setting valid");
+                                    Mod.LogInfo("\t\t\t\tIt fits in container, setting valid");
                                     hoverValid = true;
                                     collidingContainerWrapper.SetContainerHovered(true);
                                     fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);

@@ -492,6 +492,24 @@ namespace EFM
                                 Mod.LogInfo("\tDebug: Dump layers");
                                 DumpLayers();
                                 break;
+                            case 14: // Survive raid
+                                Mod.LogInfo("\tDebug: Survive raid");
+                                Mod.justFinishedRaid = true;
+                                Mod.raidState = Base_Manager.FinishRaidState.Survived;
+
+                                // Disable extraction list and timer
+                                Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+                                Mod.playerStatusManager.extractionTimerText.color = Color.black;
+                                Mod.extractionLimitUI.SetActive(false);
+                                Mod.playerStatusManager.SetDisplayed(false);
+                                Mod.extractionUI.SetActive(false);
+
+                                Raid_Manager.currentManager.ResetHealthEffectCounterConditions();
+
+                                Manager.LoadBase(5); // Load autosave, which is right before the start of raid
+
+                                Raid_Manager.currentManager.extracted = true;
+                                break;
                         }
                     }
                 }
@@ -1357,14 +1375,14 @@ namespace EFM
             GameObject itemPrefab = IM.OD[ID].GetGameObject();
             if (itemPrefab == null)
             {
-                Mod.instance.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
+                Mod.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
 
                 IM.OD[ID].RefreshCache();
                 itemPrefab = IM.OD[ID].GetGameObject();
             }
             if (itemPrefab == null)
             {
-                Mod.instance.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
+                Mod.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
             }
             FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
             image.sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
@@ -1680,7 +1698,7 @@ namespace EFM
             foreach (JToken vanillaItemRaw in vanillaItemsRaw)
             {
                 string H3ID = vanillaItemRaw["H3ID"].ToString();
-                Mod.instance.LogInfo("Setting vanilla Item: " + H3ID);
+                Mod.LogInfo("Setting vanilla Item: " + H3ID);
                 GameObject itemPrefab = IM.OD[H3ID].GetGameObject();
                 VanillaItemDescriptor descriptor = itemPrefab.AddComponent<VanillaItemDescriptor>();
                 itemWeights.Add(H3ID, (int)(itemPrefab.GetComponent<Rigidbody>().mass * 1000));
@@ -2245,7 +2263,7 @@ namespace EFM
             }
             else
             {
-                Mod.instance.LogError("Attempting to remove " + itemID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
+                Mod.LogError("Attempting to remove " + itemID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
             if (playerInventory[itemID] == 0)
@@ -2286,12 +2304,12 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Mod.instance.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from player inventory but ammo name was not found in roundsByType:\n" + Environment.StackTrace);
+                                    Mod.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from player inventory but ammo name was not found in roundsByType:\n" + Environment.StackTrace);
                                 }
                             }
                             else
                             {
-                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from player inventory but ammo type was not found in roundsByType:\n" + Environment.StackTrace);
+                                Mod.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from player inventory but ammo type was not found in roundsByType:\n" + Environment.StackTrace);
                             }
                         }
                     }
@@ -2318,12 +2336,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is mag from player inventory but its name was not found in magazinesByType:\n" + Environment.StackTrace);
+                                Mod.LogError("Attempting to remove " + itemID + "  which is mag from player inventory but its name was not found in magazinesByType:\n" + Environment.StackTrace);
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Attempting to remove " + itemID + "  which is mag from player inventory but its type was not found in magazinesByType:\n" + Environment.StackTrace);
+                            Mod.LogError("Attempting to remove " + itemID + "  which is mag from player inventory but its type was not found in magazinesByType:\n" + Environment.StackTrace);
                         }
                     }
                     else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
@@ -2345,12 +2363,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is clip from player inventory but its name was not found in clipsByType:\n" + Environment.StackTrace);
+                                Mod.LogError("Attempting to remove " + itemID + "  which is clip from player inventory but its name was not found in clipsByType:\n" + Environment.StackTrace);
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Attempting to remove " + itemID + "  which is clip from player inventory but its type was not found in clipsByType:\n" + Environment.StackTrace);
+                            Mod.LogError("Attempting to remove " + itemID + "  which is clip from player inventory but its type was not found in clipsByType:\n" + Environment.StackTrace);
                         }
                     }
                     else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
@@ -2372,12 +2390,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.instance.LogError("Attempting to remove " + itemID + "  which is round from player inventory but its name was not found in roundsByType:\n" + Environment.StackTrace);
+                                Mod.LogError("Attempting to remove " + itemID + "  which is round from player inventory but its name was not found in roundsByType:\n" + Environment.StackTrace);
                             }
                         }
                         else
                         {
-                            Mod.instance.LogError("Attempting to remove " + itemID + "  which is round from player inventory but its type was not found in roundsByType:\n" + Environment.StackTrace);
+                            Mod.LogError("Attempting to remove " + itemID + "  which is round from player inventory but its type was not found in roundsByType:\n" + Environment.StackTrace);
                         }
                     }
                 }
@@ -3098,7 +3116,7 @@ namespace EFM
                 case "Tactics":
                     return 63;
                 default:
-                    Mod.instance.LogError("SkillNameToIndex received name: " + name);
+                    Mod.LogError("SkillNameToIndex received name: " + name);
                     return 0;
             }
         }
@@ -3236,7 +3254,7 @@ namespace EFM
                 case 63:
                     return "Tactics";
                 default:
-                    Mod.instance.LogError("SkillIndexToName received index: " + index);
+                    Mod.LogError("SkillIndexToName received index: " + index);
                     return "";
             }
         }

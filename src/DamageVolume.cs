@@ -33,7 +33,7 @@ namespace EFM
             }
             else
             {
-                Mod.instance.LogWarning("Unknown damage volume type, will have no audio");
+                Mod.LogWarning("Unknown damage volume type, will have no audio");
             }
 
             headColliders = new List<Collider>();
@@ -47,7 +47,7 @@ namespace EFM
 
         public void OnTriggerEnter(Collider other)
         {
-            Mod.instance.LogInfo("Damage volume, on trigger enter: " + other.name);
+            Mod.LogInfo("Damage volume, on trigger enter: " + other.name);
             if (other.gameObject.layer == 15) // PlayerHead (includes torso, head, and neck)
             {
                 headColliders.Add(other);
@@ -112,7 +112,7 @@ namespace EFM
 
         public void OnTriggerExit(Collider other)
         {
-            Mod.instance.LogInfo("Damage volume, on trigger exit: " + other.name);
+            Mod.LogInfo("Damage volume, on trigger exit: " + other.name);
             if (other.gameObject.layer == 15)
             {
                 for (int i = 0; i < headColliders.Count; ++i)
