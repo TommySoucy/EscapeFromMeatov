@@ -1,19 +1,16 @@
 ﻿using System;
 using System.IO;
-using HarmonyLib;
 using UnityEngine;
 using System.Reflection;
 using BepInEx;
 using FistVR;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using UnityEngine.Audio;
 using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
-using System.Reflection.Emit;
 using System.Collections;
-using UnityEngine.EventSystems;
+using System.Linq;
 
 namespace EFM
 {
@@ -36,18 +33,16 @@ namespace EFM
         public static int currentLocationIndex = -1; // This will be used by custom item wrapper and vanilla item descr. in their Start(). Shoud only ever be 1(base) or 2(raid). If want to spawn an item in player inventory, will have to set it manually
         public static AssetBundle[] assetsBundles;
         public static AssetBundle defaultAssetsBundle;
-        public static AssetBundle menuBundle;
-        public static AssetBundle baseAssetsBundle;
-        public static AssetBundle baseBundle;
+        public static AssetBundle mainMenuBundle;
+        public static AssetBundle hideoutBundle;
         public static AssetBundleCreateRequest currentRaidBundleRequest;
-        public static MainMenuSceneDef sceneDef;
+        public static List<GameObject> securedMainSceneComponents;
         public static List<GameObject> securedObjects;
         public static FVRInteractiveObject securedLeftHandInteractable;
         public static FVRInteractiveObject securedRightHandInteractable;
         public static int saveSlotIndex = -1;
         public static int currentQuickBeltConfiguration = -1;
         public static int firstCustomConfigIndex = -1;
-        public static List<EquipmentSlot> equipmentSlots;
         public static bool beginInteractingEquipRig;
         public static Hand rightHand;
         public static Hand leftHand;
@@ -56,15 +51,13 @@ namespace EFM
         public static int chosenMapIndex;
         public static int chosenTimeIndex;
         public static string chosenMapName;
-        public static Base_Manager.FinishRaidState raidState;
+        public static HideoutController.FinishRaidState raidState;
         public static bool justFinishedRaid;
         public static Dictionary<string, int> killList;
         public static int lootingExp = 0;
         public static int healingExp = 0;
         public static int explorationExp = 0;
         public static float raidTime = 0;
-        public static bool grillHouseSecure;
-        public static bool isGrillhouse;
         public static bool inMeatovScene;
         public static int pocketsConfigIndex;
         public static float distanceTravelledSprinting;
@@ -76,7 +69,6 @@ namespace EFM
         public static GameObject leftShoulderObject;
         public static GameObject rightShoulderObject;
         public static Dictionary<string, int> baseInventory;
-        public static Base_Manager currentBaseManager;
         public static Raid_Manager currentRaidManager;
         public static Dictionary<string, int>[] requiredPerArea;
         public static List<string> wishList;
@@ -97,7 +89,7 @@ namespace EFM
         public static Dictionary<string, List<string>> itemAncestors;
         public static Dictionary<string, int> lowestBuyValueByItem;
         public static bool amountChoiceUIUp;
-        public static CustomItemWrapper splittingItem;
+        public static MeatovItem splittingItem;
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
         public static List<KeyValuePair<GameObject, object>> attachmentLocalTransform;
         public static int attachmentCheckNeeded;
@@ -128,7 +120,6 @@ namespace EFM
         public static Dictionary<string, List<TraderTaskCounterCondition>> currentUseItemCounterConditionsByItemID;
 
         // Player
-        public static GameObject playerStatusUI;
         public static PlayerStatusManager playerStatusManager;
         public static Dictionary<string, int> playerInventory;
         public static Dictionary<string, List<GameObject>> playerInventoryObjects;
@@ -231,7 +222,6 @@ namespace EFM
         public static string path;
         public static JObject config;
         public static bool assetLoaded;
-        public static Sprite sceneDefImage;
         public static GameObject scenePrefab_Menu;
         public static GameObject mainMenuPointable;
         public static GameObject quickBeltSlotPrefab;
@@ -265,15 +255,15 @@ namespace EFM
 
         // DB
         public static JArray areasDB;
-        public static JObject localDB;
+        public static JObject localeDB;
         public static Dictionary<string, ItemMapEntry> itemMap;
         public static JObject[] traderBaseDB;
         public static JObject[] traderAssortDB;
+        public static JObject[] traderQuestAssortDB;
         public static JArray[] traderCategoriesDB;
         public static JObject globalDB;
         public static JObject questDB;
         public static JArray XPPerLevel;
-        public static JObject mapData;
         public static JObject[] locationsLootDB;
         public static JObject[] locationsBaseDB;
         public static JArray lootContainerDB;
@@ -344,8 +334,7 @@ namespace EFM
         {
             modInstance = this;
 
-            path = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(Mod)).Location);
-            path.Replace('\\', '/');
+            path = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Mod)).Location);
             Mod.LogInfo("Meatov path found: " + path, false);
 
             LoadConfig();
@@ -451,31 +440,31 @@ namespace EFM
                                 break;
                             case 5: // Start new meatov game
                                 Mod.LogInfo("\tDebug: Start new meatov game");
-                                Manager.LoadBase();
+                                UIController.LoadHideout();
                                 break;
                             case 6: // Start factory raid
                                 Mod.LogInfo("\tDebug: Start factory raid");
                                 Mod.chosenMapIndex = -1;
-                                GameObject.Find("Hideout").GetComponent<Base_Manager>().OnConfirmRaidClicked();
+                                GameObject.Find("Hideout").GetComponent<HideoutController>().OnConfirmRaidClicked();
                                 break;
                             case 7: // Load autosave
                                 Mod.LogInfo("\tDebug: Load autosave");
-                                Manager.LoadBase(5);
+                                UIController.LoadHideout(5);
                                 break;
                             case 8: // Load latest save
                                 Mod.LogInfo("\tDebug: Load latest save");
-                                Manager.LoadBase(-1, true);
+                                UIController.LoadHideout(-1, true);
                                 break;
                             case 9: // Save on slot 0
                                 Mod.LogInfo("\tDebug: Save on slot 0");
                                 if (GameObject.Find("Hideout") != null)
                                 {
-                                    GameObject.Find("Hideout").GetComponent<Base_Manager>().OnSaveSlotClicked(0);
+                                    GameObject.Find("Hideout").GetComponent<HideoutController>().OnSaveSlotClicked(0);
                                 }
                                 break;
                             case 10: // Load save 0
                                 Mod.LogInfo("\tDebug: Load save 0");
-                                Manager.LoadBase(0);
+                                UIController.LoadHideout(0);
                                 break;
                             case 11: // Kill player
                                 Mod.LogInfo("\tDebug: Kill player");
@@ -495,18 +484,18 @@ namespace EFM
                             case 14: // Survive raid
                                 Mod.LogInfo("\tDebug: Survive raid");
                                 Mod.justFinishedRaid = true;
-                                Mod.raidState = Base_Manager.FinishRaidState.Survived;
+                                Mod.raidState = HideoutController.FinishRaidState.Survived;
 
                                 // Disable extraction list and timer
-                                Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
-                                Mod.playerStatusManager.extractionTimerText.color = Color.black;
+                                StatusUI.instance.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+                                StatusUI.instance.extractionTimer.color = Color.black;
                                 Mod.extractionLimitUI.SetActive(false);
-                                Mod.playerStatusManager.SetDisplayed(false);
+                                StatusUI.instance.Close();
                                 Mod.extractionUI.SetActive(false);
 
                                 Raid_Manager.currentManager.ResetHealthEffectCounterConditions();
 
-                                Manager.LoadBase(5); // Load autosave, which is right before the start of raid
+                                UIController.LoadHideout(5); // Load autosave, which is right before the start of raid
 
                                 Raid_Manager.currentManager.extracted = true;
                                 break;
@@ -549,18 +538,10 @@ namespace EFM
 
         public void LoadAssets()
         {
-            LogInfo("Loading assets and scene bundles", false);
-            // Load mod's AssetBundle
-            assetsBundles = new AssetBundle[2];
-            assetsBundles[0] = AssetBundle.LoadFromFile(path+"/EscapeFromMeatovAssets0.ab");
-            assetsBundles[1] = AssetBundle.LoadFromFile(path + "/EscapeFromMeatovAssets1.ab");
-            menuBundle = AssetBundle.LoadFromFile(path + "/EscapeFromMeatovMenu.ab");
-
             LogInfo("Loading Main assets", false);
             // Load assets
             quickBeltSlotPrefab = assetsBundles[1].LoadAsset<GameObject>("QuickBeltSlot");
             rectQuickBeltSlotPrefab = assetsBundles[1].LoadAsset<GameObject>("RectQuickBeltSlot");
-            playerStatusUIPrefab = assetsBundles[0].LoadAsset<GameObject>("StatusUI");
             consumeUIPrefab = assetsBundles[0].LoadAsset<GameObject>("ConsumeUI");
             stackSplitUIPrefab = assetsBundles[0].LoadAsset<GameObject>("StackSplitUI");
             extractionUIPrefab = assetsBundles[0].LoadAsset<GameObject>("ExtractionUI");
@@ -647,6 +628,98 @@ namespace EFM
             skillIcons[62] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_negotiations");
             skillIcons[63] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_tactics");
 
+            /*
+            // Load prefabs and assets
+            areaCanvasPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaCanvas");
+            areaCanvasBottomButtonPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaCanvasBottomButton");
+            areaRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaRequirement");
+            itemRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("ItemRequirement");
+            skillRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("SkillRequirement");
+            traderRequirementPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("TraderRequirement");
+            areaRequirementsPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("AreaRequirements");
+            itemRequirementsPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("ItemRequirements");
+            skillRequirementsPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("SkillRequirements");
+            traderRequirementsPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("TraderRequirements");
+            bonusPrefab = Mod.baseAssetsBundle.LoadAsset<GameObject>("Bonus");
+            areaBackgroundNormalSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("area_icon_default_back");
+            areaBackgroundLockedSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("area_icon_locked_back");
+            areaBackgroundAvailableSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("area_icon_default_back_green");
+            areaBackgroundEliteSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("area_icon_elite_back");
+            areaStatusIconUpgrading = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_upgrading");
+            areaStatusIconConstructing = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_constructing");
+            areaStatusIconLocked = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_lock");
+            areaStatusIconUnlocked = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_unlocked");
+            areaStatusIconReadyUpgrade = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_ready_to_upgrade");
+            areaStatusIconProducing = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_status_producing");
+            areaStatusIconOutOfFuel = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_out_of_fuel");
+            requirementFulfilled = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_requirement_fulfilled");
+            requirementLocked = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_requirement_locked");
+            emptyItemSlotIcon = Mod.baseAssetsBundle.LoadAsset<Sprite>("slot_empty_fill");
+            dollarCurrencySprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money_dollars");
+            euroCurrencySprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money_euros");
+            roubleCurrencySprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money_roubles");
+            barterSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_currency_barter");
+            experienceSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_experience_big");
+            standingSprite = Mod.baseAssetsBundle.LoadAsset<Sprite>("standing_icon");
+            traderAvatars = new Sprite[8];
+            traderAvatars[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_russian_small");
+            traderAvatars[1] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_therapist_small");
+            traderAvatars[2] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_fence_small");
+            traderAvatars[3] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_ah_small");
+            traderAvatars[4] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_peacekeeper_small");
+            traderAvatars[5] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_tech_small");
+            traderAvatars[6] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_ragman_small");
+            traderAvatars[7] = Mod.baseAssetsBundle.LoadAsset<Sprite>("avatar_jaeger_small");
+            areaIcons = new Sprite[22];
+            areaIcons[0] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_vents");
+            areaIcons[1] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_security");
+            areaIcons[2] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_watercloset");
+            areaIcons[3] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_stash");
+            areaIcons[4] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_generators");
+            areaIcons[5] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_heating");
+            areaIcons[6] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_rain_collector");
+            areaIcons[7] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_medstation");
+            areaIcons[8] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_kitchen");
+            areaIcons[9] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_restplace");
+            areaIcons[10] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_workbench");
+            areaIcons[11] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_intelligence_center");
+            areaIcons[12] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_shooting_range");
+            areaIcons[13] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_library");
+            areaIcons[14] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_scav_case");
+            areaIcons[15] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_illumination");
+            areaIcons[16] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_placeoffame");
+            areaIcons[17] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_afu");
+            areaIcons[18] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_solarpower");
+            areaIcons[19] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_boozegen");
+            areaIcons[20] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_bitcoinfarm");
+            areaIcons[21] = Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_christmas_illumination");
+            bonusIcons = new Dictionary<string, Sprite>();
+            bonusIcons.Add("ExperienceRate", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_exp_small"));
+            bonusIcons.Add("HealthRegeneration", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_medical"));
+            bonusIcons.Add("/files/Hideout/icon_hideout_createitem_meds.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_createitem_meds"));
+            bonusIcons.Add("/files/Hideout/icon_hideout_videocardslots.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_videocardslots"));
+            bonusIcons.Add("/files/Hideout/icon_hideout_createitem_bitcoin.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_createitem_bitcoin"));
+            bonusIcons.Add("/files/Hideout/icon_hideout_unlocked.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_unlocked"));
+            bonusIcons.Add("FuelConsumption", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_fuelconsumption"));
+            bonusIcons.Add("/files/Hideout/icon_hideout_fuelslots.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_fuelslots"));
+            bonusIcons.Add("EnergyRegeneration", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_energy"));
+            bonusIcons.Add("HydrationRegeneration", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_hydration"));
+            bonusIcons.Add("/files/Hideout/icon_hideout_shootingrangeunlock.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_shootingrangeunlock"));
+            bonusIcons.Add("DebuffEndDelay", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_skillboost"));
+            bonusIcons.Add("UnlockWeaponModification", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_weaponmodunlock"));
+            bonusIcons.Add("SkillGroupLevelingBoost", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_skillboost"));
+            bonusIcons.Add("AdditionalSlots", Mod.baseAssetsBundle.LoadAsset<Sprite>("skills_grid_icon"));
+            bonusIcons.Add("StashSize", Mod.baseAssetsBundle.LoadAsset<Sprite>("skills_grid_icon"));
+            bonusIcons.Add("/files/Hideout/icon_hideout_scavitem.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_scavitem"));
+            bonusIcons.Add("ScavCooldownTimer", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_time"));
+            bonusIcons.Add("InsuranceReturnTime", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_time"));
+            bonusIcons.Add("QuestMoneyReward", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money"));
+            bonusIcons.Add("RagfairCommission", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_info_money"));
+            bonusIcons.Add("/files/Hideout/icon_hideout_createitem_generic.png", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_createitem_generic"));
+            bonusIcons.Add("MaximumEnergyReserve", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_hideout_batterycharge"));
+            bonusIcons.Add("UnlockArmorRepair", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_itemtype_gear_armor"));
+            bonusIcons.Add("UnlockWeaponRepair", Mod.baseAssetsBundle.LoadAsset<Sprite>("icon_itemtype_weapon"));
+            */
             // Load pockets configuration
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
             quickSlotConstantMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Renderer>().material;
@@ -712,7 +785,7 @@ namespace EFM
             itemWeights = new Dictionary<string, int>();
             itemVolumes = new Dictionary<string, int>();
             itemIcons = new Dictionary<string, Sprite>();
-            defaultItemsData = JObject.Parse(File.ReadAllText(Mod.path + "/DB/DefaultItemData.json"));
+            defaultItemsData = JObject.Parse(File.ReadAllText(Mod.path + "/database/DefaultItemData.json"));
             quickSlotHoverMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Renderer>().material;
             quickSlotConstantMaterial = ManagerSingleton<GM>.Instance.QuickbeltConfigurations[0].transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Renderer>().material;
             itemSounds = new Dictionary<string, AudioClip[]>();
@@ -806,7 +879,7 @@ namespace EFM
                 itemObjectWrapper.OSple = (bool)defaultObjectWrapper["OSple"];
 
                 // Add custom item wrapper
-                CustomItemWrapper customItemWrapper = itemPrefab.AddComponent<CustomItemWrapper>();
+                MeatovItem customItemWrapper = itemPrefab.AddComponent<MeatovItem>();
                 customItemWrapper.ID = i.ToString();
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 float[] tempVolumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
@@ -1359,7 +1432,7 @@ namespace EFM
                 }
                 else
                 {
-                    string name = localDB["templates"][ID]["Name"].ToString();
+                    string name = localeDB["templates"][ID]["Name"].ToString();
                     CategoryTreeNode newNode = new CategoryTreeNode(currentParent, ID, name);
                     currentParent.children.Add(newNode);
                     currentParent = newNode;
@@ -1388,7 +1461,7 @@ namespace EFM
             image.sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
         }
 
-        private void SetFilterListsFor(CustomItemWrapper customItemWrapper, int index)
+        private void SetFilterListsFor(MeatovItem customItemWrapper, int index)
         {
             customItemWrapper.whiteList = new List<string>();
             customItemWrapper.blackList = new List<string>();
@@ -1448,64 +1521,55 @@ namespace EFM
 
         private void LoadDB()
         {
-            areasDB = JArray.Parse(File.ReadAllText(Mod.path + "/DB/Areas.json"));
-            localDB = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Locale.json"));
+            areasDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/areas.json"));
+            localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
             ParseItemMap();
-            traderBaseDB = new JObject[8];
-            traderAssortDB = new JObject[8];
-            traderCategoriesDB = new JArray[8];
-            for (int i = 0; i < 8; ++i)
-            {
-                string traderID = TraderStatus.IndexToID(i);
-                traderBaseDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Traders/" + traderID + "/base.json"));
-                traderAssortDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Traders/" + traderID + "/assort.json"));
+            //traderBaseDB = new JObject[8];
+            //traderAssortDB = new JObject[8];
+            //traderQuestAssortDB = new JObject[8];
+            //traderCategoriesDB = new JArray[8];
+            //for (int i = 0; i < 9; ++i)
+            //{
+            //    string traderID = TraderStatus.IndexToID(i);
+            //    traderBaseDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/base.json"));
+            //    if(File.Exists(Mod.path + "/database/traders/" + traderID + "/assort.json"))
+            //    {
+            //        traderAssortDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/assort.json"));
+            //    }
+            //    if(File.Exists(Mod.path + "/database/traders/" + traderID + "/questassort.json"))
+            //    {
+            //        traderQuestAssortDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/questassort.json"));
+            //    }
 
-                // TODO: Review, we dont currently use the categories right now because I thought these were the categories of items we coudl sell
-                // to the trader but apparently they are jsut UI stuff, IDs only used for UI locale
-                // We need to find actual sell IDs or just keep using the current method we have of deciding whichi tems we can sell, which is
-                // that we can only sell to them items of type of items they sell themselves, unless its fence, to whom we can sell anything at reduced price
-                //traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/DB/Traders/" + traderID + "/categories.json"));
-            }
-            globalDB = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Globals.json"));
-            MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
-            MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
-            questDB = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Quests.json"));
-            XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
-            mapData = JObject.Parse(File.ReadAllText(Mod.path + "/DB/EscapeFromMeatovMapData.json"));
-            locationsLootDB = new JObject[12];
-            locationsBaseDB = new JObject[12];
-            string[] locationLootFiles = Directory.GetFiles(Mod.path + "/DB/Locations/loot");
-            string[] locationBaseFiles = Directory.GetFiles(Mod.path + "/DB/Locations/base");
-            // TODO: 12.12? loc loot files are missing data for items that spawn with parent
-            // Take factory day lootpoint (101)1736994 for example
-            for (int i=0; i < 12; ++i)
-            {
-                string fileName = Mod.LocationIndexToDataName(i) + ".json";
-                foreach (string locationLootFile in locationLootFiles)
-                {
-                    if (locationLootFile.EndsWith(fileName))
-                    {
-                        locationsLootDB[i] = JObject.Parse(File.ReadAllText(locationLootFile));
-                    }
-                }
-                foreach (string locationBaseFile in locationBaseFiles)
-                {
-                    if (locationBaseFile.EndsWith(fileName))
-                    {
-                        locationsBaseDB[i] = JObject.Parse(File.ReadAllText(locationBaseFile));
-                    }
-                }
-            }
-            lootContainerDB = JArray.Parse(File.ReadAllText(Mod.path + "/DB/LootContainer.json"));
-            dynamicLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Locations/DynamicLootTable.json"));
-            staticLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Locations/StaticLootTable.json"));
-            lootContainersByName = new Dictionary<string, JObject>();
-            foreach (JToken container in lootContainerDB)
-            {
-                lootContainersByName.Add(container["_name"].ToString(), (JObject)container);
-            }
+            //    // TODO: Review, we dont currently use the categories right now because I thought these were the categories of items we coudl sell
+            //    // to the trader but apparently they are jsut UI stuff, IDs only used for UI locale
+            //    // We need to find actual sell IDs or just keep using the current method we have of deciding whichi tems we can sell, which is
+            //    // that we can only sell to them items of type of items they sell themselves, unless its fence, to whom we can sell anything at reduced price
+            //    //traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/database/Traders/" + traderID + "/categories.json"));
+            //}
+            //globalDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/globals.json"));
+            //MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
+            //MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
+            //questDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/templates/quests.json"));
+            //XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
+            //locationsLootDB = new JObject[12];
+            //locationsBaseDB = new JObject[12];
+            //string[] locationBaseFiles = Directory.GetFiles(Mod.path + "/database/locations/base");
+            //for (int i=0; i < 13; ++i)
+            //{
+            //    locationsLootDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/locations/" + Mod.LocationIndexToDataName(i) + "/looseLoot.json"));
+            //    locationsLootDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/locations/" + Mod.LocationIndexToDataName(i) + "/base.json"));
+            //}
+            //lootContainerDB = JArray.Parse(File.ReadAllText(Mod.path + "/database/loot/staticContainers.json"));
+            ////dynamicLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/database/Locations/DynamicLootTable.json"));
+            //staticLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/database/loot/staticLoot.json"));
+            ////lootContainersByName = new Dictionary<string, JObject>();
+            ////foreach (JToken container in lootContainerDB)
+            ////{
+            ////    lootContainersByName.Add(container["_name"].ToString(), (JObject)container);
+            ////}
 
-            LoadSkillVars();
+            ////LoadSkillVars();
         }
 
         private void LoadSkillVars()
@@ -1676,10 +1740,16 @@ namespace EFM
 
         private void LoadDefaultAssets()
         {
-            defaultAssetsBundle = AssetBundle.LoadFromFile(Mod.path + "/EscapeFromMeatovDefaultAssets.ab");
+            defaultAssetsBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMDefaultAssets.ab");
+            mainMenuPointable = defaultAssetsBundle.LoadAsset<GameObject>("MainMenuPointable");
 
-            sceneDefImage = defaultAssetsBundle.LoadAsset<Sprite>("MeatovThumbnail");
-            mainMenuPointable = defaultAssetsBundle.LoadAsset<GameObject>("MeatovPointable");
+            mainMenuBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMMainMenu.ab");
+            string[] bundledScenes = mainMenuBundle.GetAllScenePaths();
+            Mod.LogInfo("Got " + bundledScenes.Length + " bundled scenes");
+            for(int i=0; i < bundledScenes.Length; ++i)
+            {
+                Mod.LogInfo(i.ToString()+" : " + bundledScenes[i]);
+            }
         }
 
         private void SetVanillaItems()
@@ -1849,7 +1919,7 @@ namespace EFM
         {
             itemMap = new Dictionary<string, ItemMapEntry>();
 
-            Dictionary<string, JObject> itemMapData = JObject.Parse(File.ReadAllText(Mod.path + "/DB/ItemMap.json")).ToObject<Dictionary<string, JObject>>();
+            Dictionary<string, JObject> itemMapData = JObject.Parse(File.ReadAllText(Mod.path + "/database/ItemMap.json")).ToObject<Dictionary<string, JObject>>();
 
             foreach(KeyValuePair<string, JObject> item in itemMapData)
             {
@@ -1905,7 +1975,7 @@ namespace EFM
             return root.gameObject;
         }
 
-        public static void AddToAll(FVRInteractiveObject interactiveObject, CustomItemWrapper CIW, VanillaItemDescriptor VID)
+        public static void AddToAll(FVRInteractiveObject interactiveObject, MeatovItem CIW, VanillaItemDescriptor VID)
         {
             if (CIW != null && !CIW.inAll)
             {
@@ -1923,7 +1993,7 @@ namespace EFM
             }
         }
 
-        public static void RemoveFromAll(FVRInteractiveObject interactiveObject, CustomItemWrapper CIW, VanillaItemDescriptor VID)
+        public static void RemoveFromAll(FVRInteractiveObject interactiveObject, MeatovItem CIW, VanillaItemDescriptor VID)
         {
             if (CIW != null && (CIW.inAll || interactiveObject == null))
             {
@@ -1988,11 +2058,11 @@ namespace EFM
             playerInventoryObjects.Clear();
 
             // Check equipment
-            foreach (EquipmentSlot equipSlot in equipmentSlots)
+            for(int i=0; i < StatusUI.instance.equipmentSlots.Length; ++i)
             {
-                if (equipSlot.CurObject != null)
+                if (StatusUI.instance.equipmentSlots[i].CurObject != null)
                 {
-                    AddToPlayerInventory(equipSlot.CurObject.transform, true);
+                    AddToPlayerInventory(StatusUI.instance.equipmentSlots[i].CurObject.transform, true);
                 }
             }
 
@@ -2024,7 +2094,7 @@ namespace EFM
 
         public static void AddToPlayerInventory(Transform item, bool updateTypeLists)
         {
-            CustomItemWrapper customItemWrapper = item.GetComponent<CustomItemWrapper>();
+            MeatovItem customItemWrapper = item.GetComponent<MeatovItem>();
             VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<VanillaItemDescriptor>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
             if (physObj == null || physObj.ObjectWrapper == null)
@@ -2248,7 +2318,7 @@ namespace EFM
 
         public static void RemoveFromPlayerInventory(Transform item, bool updateTypeLists)
         {
-            CustomItemWrapper customItemWrapper = item.GetComponent<CustomItemWrapper>();
+            MeatovItem customItemWrapper = item.GetComponent<MeatovItem>();
             VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<VanillaItemDescriptor>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
             if (physObj == null || physObj.ObjectWrapper == null)
@@ -2481,7 +2551,7 @@ namespace EFM
             }
 
             // Add skill and area bonuses
-            xp = (int)(xp * (Base_Manager.currentExperienceRate + Base_Manager.currentExperienceRate * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)));
+            xp = (int)(xp * (HideoutController.currentExperienceRate + HideoutController.currentExperienceRate * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)));
 
             int preLevel = level;
             experience += xp;
@@ -2496,10 +2566,10 @@ namespace EFM
             // Update UI if necessary
             if (preLevel != level)
             {
-                playerStatusManager.UpdatePlayerLevel();
+                StatusUI.instance.UpdatePlayerLevel();
                 if (currentLocationIndex == 1) // In hideout
                 {
-                    currentBaseManager.UpdateBasedOnPlayerLevel();
+                    HideoutController.instance.UpdateBasedOnPlayerLevel();
                 }
 
                 // Update level task conditions
@@ -2568,7 +2638,7 @@ namespace EFM
             float preLevel = (int)(skill.progress / 100);
 
             float actualAmountToAdd = xp * ((skillIndex >= 12 && skillIndex <= 24) ? Skill.weaponSkillProgressRate : Skill.skillProgressRate);
-            actualAmountToAdd += actualAmountToAdd * (Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(skill.skillType) ? Base_Manager.currentSkillGroupLevelingBoosts[skill.skillType] : 0);
+            actualAmountToAdd += actualAmountToAdd * (HideoutController.currentSkillGroupLevelingBoosts.ContainsKey(skill.skillType) ? HideoutController.currentSkillGroupLevelingBoosts[skill.skillType] : 0);
             actualAmountToAdd *= skill.dimishingReturns ? 0.5f : 1;
 
             skill.progress += actualAmountToAdd;
@@ -2591,7 +2661,7 @@ namespace EFM
                 Mod.skills[11].progress += memoryAmount;
                 Mod.skills[11].currentProgress += memoryAmount;
 
-                Mod.playerStatusManager.UpdateSkillUI(11);
+                StatusUI.instance.UpdateSkillUI(11);
             }
 
             float postLevel = (int)(skill.progress / 100);
@@ -2627,7 +2697,7 @@ namespace EFM
                     }
                 }
 
-                Mod.playerStatusManager.UpdateSkillUI(3);
+                StatusUI.instance.UpdateSkillUI(3);
             }
             else if (skillIndex == 1)
             {
@@ -2652,7 +2722,7 @@ namespace EFM
                     }
                 }
 
-                Mod.playerStatusManager.UpdateSkillUI(3);
+                StatusUI.instance.UpdateSkillUI(3);
             }
             else if (skillIndex == 2)
             {
@@ -2674,7 +2744,7 @@ namespace EFM
                     }
                 }
 
-                Mod.playerStatusManager.UpdateSkillUI(3);
+                StatusUI.instance.UpdateSkillUI(3);
             }
             else if (skillIndex == 7)
             {
@@ -2696,7 +2766,7 @@ namespace EFM
                     }
                 }
 
-                Mod.playerStatusManager.UpdateSkillUI(10);
+                StatusUI.instance.UpdateSkillUI(10);
             }
             else if (skillIndex == 8)
             {
@@ -2718,7 +2788,7 @@ namespace EFM
                     }
                 }
 
-                Mod.playerStatusManager.UpdateSkillUI(10);
+                StatusUI.instance.UpdateSkillUI(10);
             }
             else if (skillIndex == 9)
             {
@@ -2740,12 +2810,12 @@ namespace EFM
                     }
                 }
 
-                Mod.playerStatusManager.UpdateSkillUI(10);
+                StatusUI.instance.UpdateSkillUI(10);
             }
 
             if (intPreProgress < (int)skill.progress)
             {
-                Mod.playerStatusManager.UpdateSkillUI(skillIndex);
+                StatusUI.instance.UpdateSkillUI(skillIndex);
             }
         }
 
@@ -2767,17 +2837,8 @@ namespace EFM
             itemsByRarity = new Dictionary<ItemRarity, List<string>>();
 
             // Subscribe to events
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            //SceneManager.sceneLoaded += OnSceneLoaded;
             SteamVR_Events.Loading.Listen(OnSceneLoadedVR);
-
-            // Create scene def
-            sceneDef = ScriptableObject.CreateInstance<MainMenuSceneDef>();
-            sceneDef.name = "MeatovSceneScreen";
-            sceneDef.SceneName = "MeatovMenuScene";
-            sceneDef.Name = "Escape from Meatov";
-            sceneDef.Desciption = "Enter Meatov, loot, attempt escape. Upgrade your base, complete quests, trade, and go again. Good luck.";
-            sceneDef.Image = sceneDefImage;
-            sceneDef.Type = "Escape";
 
             // Initially load main menu
             LoadMainMenu();
@@ -2785,86 +2846,137 @@ namespace EFM
 
         public void OnSceneLoadedVR(bool loading)
         {
-            if (!loading && isGrillhouse && grillHouseSecure)
+            if (loading) // Started loading
             {
-                isGrillhouse = false;
-                LoadLevelBeginPatch.SecureObjects();
-                grillHouseSecure = false;
-                SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
+                // Loading into meatov scene
+                if (H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Contains("Meatov"))
+                {
+                    // Secure scene components if haven't already
+                    if(securedMainSceneComponents == null || securedMainSceneComponents.Count == 0)
+                    {
+                        SecureMainSceneComponents();
+                    }
+                }
+                else // Not loading into meatov scene
+                {
+                    // Unsecure scene components
+                    foreach (GameObject go in securedMainSceneComponents)
+                    {
+                        SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
+                    }
+                    securedMainSceneComponents.Clear();
+                }
+            }
+            else // Done loading
+            {
+                inMeatovScene = H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Contains("Meatov");
+
+                switch (H3MP.Patches.LoadLevelBeginPatch.loadingLevel)
+                {
+                    case "MainMenu3":
+                        // Unload hideout bundle
+                        if (hideoutBundle != null)
+                        {
+                            hideoutBundle.Unload(true);
+                            hideoutBundle = null;
+                        }
+
+                        Mod.currentLocationIndex = -1;
+                        inMeatovScene = false;
+                        HideoutController.instance = null;
+                        LoadMainMenu();
+                        Mod.currentLocationIndex = -1;
+                        break;
+                    case "MeatovMainMenu":
+                        //Mod.currentHideoutManager = null;
+                        break;
+                    case "MeatovHideout":
+                        // UnsecureObjects();
+
+                        // Call a GC collect
+                        //baseManager.GCManager.gc_collect();
+                        break;
+                    case "MeatovFactory":
+                        //Mod.currentLocationIndex = 2;
+                        //UnsecureObjects();
+
+                        //GameObject raidRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
+
+                        //Raid_Manager raidManager = raidRoot.AddComponent<Raid_Manager>();
+                        //raidManager.Init();
+
+                        //GM.CurrentMovementManager.TeleportToPoint(currentRaidManager.spawnPoint.position, true, currentRaidManager.spawnPoint.rotation.eulerAngles);
+
+                        // Unload the map's asset bundle
+                        //Mod.currentRaidBundleRequest.assetBundle.Unload(false);
+
+                        // Call a GC collect
+                        //raidRoot.GetComponent<Raid_Manager>().GCManager.gc_collect();
+                        break;
+                    default:
+                        Mod.currentLocationIndex = -1;
+                        break;
+                }
             }
         }
 
-        public void OnSceneLoaded(Scene loadedScene, LoadSceneMode loadedSceneMode)
+        public static void SecureMainSceneComponents()
         {
-            if (loadedScene.name.Equals("MainMenu3"))
+            if (securedMainSceneComponents == null)
             {
-                Mod.currentLocationIndex = -1;
-                inMeatovScene = false;
-                Mod.currentBaseManager = null;
-                LoadMainMenu();
+                securedMainSceneComponents = new List<GameObject>();
             }
-            else if (loadedScene.name.Equals("MeatovMenuScene"))
+            securedMainSceneComponents.Clear();
+
+            // Secure the cameraRig
+            GameObject cameraRig = GameObject.Find("[CameraRig]Fixed");
+            securedMainSceneComponents.Add(cameraRig);
+            GameObject.DontDestroyOnLoad(cameraRig);
+
+            // Secure grabbity spheres
+            FVRViveHand rightViveHand = cameraRig.transform.GetChild(0).gameObject.GetComponent<FVRViveHand>();
+            FVRViveHand leftViveHand = cameraRig.transform.GetChild(1).gameObject.GetComponent<FVRViveHand>();
+            securedMainSceneComponents.Add(rightViveHand.Grabbity_HoverSphere.gameObject);
+            securedMainSceneComponents.Add(rightViveHand.Grabbity_GrabSphere.gameObject);
+            GameObject.DontDestroyOnLoad(rightViveHand.Grabbity_HoverSphere.gameObject);
+            GameObject.DontDestroyOnLoad(rightViveHand.Grabbity_GrabSphere.gameObject);
+            securedMainSceneComponents.Add(leftViveHand.Grabbity_HoverSphere.gameObject);
+            securedMainSceneComponents.Add(leftViveHand.Grabbity_GrabSphere.gameObject);
+            GameObject.DontDestroyOnLoad(leftViveHand.Grabbity_HoverSphere.gameObject);
+            GameObject.DontDestroyOnLoad(leftViveHand.Grabbity_GrabSphere.gameObject);
+
+            // Secure MovementManager objects
+            securedMainSceneComponents.Add(GM.CurrentMovementManager.MovementRig.gameObject);
+            GameObject.DontDestroyOnLoad(GM.CurrentMovementManager.MovementRig.gameObject);
+            // Movement arrows could be attached to movement manager if they are activated when we start loading
+            // So only add them to the list if their parent is null
+            GameObject touchPadArrows = GM.CurrentMovementManager.m_touchpadArrows;
+            if (touchPadArrows.transform.parent == null)
             {
-                inMeatovScene = true;
-                Mod.currentBaseManager = null;
-                UnsecureObjects();
-                LoadMeatov();
+                securedMainSceneComponents.Add(touchPadArrows);
+                GameObject.DontDestroyOnLoad(touchPadArrows);
             }
-            else if (loadedScene.name.Equals("Grillhouse_2Story"))
+            GameObject joystickTPArrows = GM.CurrentMovementManager.m_joystickTPArrows;
+            if (joystickTPArrows.transform.parent == null)
             {
-                inMeatovScene = false;
-                if (grillHouseSecure)
-                {
-                    isGrillhouse = true;
-                }
+                securedMainSceneComponents.Add(joystickTPArrows);
+                GameObject.DontDestroyOnLoad(joystickTPArrows);
             }
-            else if (loadedScene.name.Equals("MeatovHideoutScene"))
+            GameObject twinStickArrowsLeft = GM.CurrentMovementManager.m_twinStickArrowsLeft;
+            if (twinStickArrowsLeft.transform.parent == null)
             {
-                Mod.currentLocationIndex = 1;
-                inMeatovScene = true;
-                UnsecureObjects();
-
-                GameObject baseRoot = GameObject.Find("Hideout");
-
-                Base_Manager baseManager = baseRoot.AddComponent<Base_Manager>();
-                baseManager.data = Manager.loadedData;
-                baseManager.Init();
-
-                Transform spawnPoint = baseRoot.transform.GetChild(baseRoot.transform.childCount - 1).GetChild(0);
-                GM.CurrentMovementManager.TeleportToPoint(spawnPoint.position, true, spawnPoint.rotation.eulerAngles);
-
-                // Also set respawn to spawn point
-                GM.CurrentSceneSettings.DeathResetPoint = spawnPoint;
-
-                // Call a GC collect
-                baseManager.GCManager.gc_collect();
+                securedMainSceneComponents.Add(twinStickArrowsLeft);
+                GameObject.DontDestroyOnLoad(twinStickArrowsLeft);
             }
-            else if (loadedScene.name.Equals("MeatovFactoryScene") /*|| TODO other raid scenes*/)
+            GameObject twinStickArrowsRight = GM.CurrentMovementManager.m_twinStickArrowsRight;
+            if (twinStickArrowsRight.transform.parent == null)
             {
-                Mod.currentLocationIndex = 2;
-                inMeatovScene = true;
-                Mod.currentBaseManager = null;
-                UnsecureObjects();
-
-                GameObject raidRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
-
-                Raid_Manager raidManager = raidRoot.AddComponent<Raid_Manager>();
-                raidManager.Init();
-
-                GM.CurrentMovementManager.TeleportToPoint(raidManager.spawnPoint.position, true, raidManager.spawnPoint.rotation.eulerAngles);
-
-                // Unload the map's asset bundle
-                Mod.currentRaidBundleRequest.assetBundle.Unload(false);
-
-                // Call a GC collect
-                raidRoot.GetComponent<Raid_Manager>().GCManager.gc_collect();
+                securedMainSceneComponents.Add(twinStickArrowsRight);
+                GameObject.DontDestroyOnLoad(twinStickArrowsRight);
             }
-            else
-            {
-                Mod.currentLocationIndex = -1;
-                inMeatovScene = false;
-                Mod.currentBaseManager = null;
-            }
+            GameObject floorHelper = GM.CurrentMovementManager.m_floorHelper;
+            securedMainSceneComponents.Add(floorHelper);
+            GameObject.DontDestroyOnLoad(floorHelper);
         }
 
         private void LoadMainMenu()
@@ -2872,43 +2984,14 @@ namespace EFM
             // Create a MainMenuScenePointable for our level
             GameObject currentPointable = Instantiate<GameObject>(mainMenuPointable);
             currentPointable.name = mainMenuPointable.name;
-            MainMenuScenePointable pointableInstance = currentPointable.AddComponent<MainMenuScenePointable>();
-            pointableInstance.Def = sceneDef;
+            MainMenuScenePointable pointableInstance = currentPointable.GetComponent<MainMenuScenePointable>();
             pointableInstance.Screen = GameObject.Find("LevelLoadScreen").GetComponent<MainMenuScreen>();
-            pointableInstance.MaxPointingRange = 30;
-            currentPointable.transform.position = new Vector3(-12.14f, 9.5f, 4.88f);
-            currentPointable.transform.rotation = Quaternion.Euler(0, 300, 0);
-
-            GM.CurrentSceneSettings.MaxPointingDistance = 30;
+            currentPointable.transform.position = new Vector3(-0.8909f, 1.4746f, 0.8927f);
+            currentPointable.transform.rotation = Quaternion.Euler(21.7584f, 315.6502f, 0);
+            currentPointable.transform.localScale = new Vector3(0.3371f, 0.208f, 1);
 
             // Set LOD bias to default
             QualitySettings.lodBias = 2;
-        }
-
-        private void LoadMeatov()
-        {
-            // Set LOD bias
-            // TODO: This is dependent on which headseat is being used
-            QualitySettings.lodBias = 18;
-
-            GM.Options.SimulationOptions.PlayerGravityMode = SimulationOptions.GravityMode.Realistic;
-
-            // Get root
-            GameObject menuRoot = GameObject.Find("Menu");
-
-            // TP Player
-            Transform spawnPoint = menuRoot.transform.GetChild(menuRoot.transform.childCount - 1).GetChild(0);
-            GM.CurrentMovementManager.TeleportToPoint(spawnPoint.position, true, spawnPoint.rotation.eulerAngles);
-
-            // Also set respawn to spawn point
-            GM.CurrentSceneSettings.DeathResetPoint = spawnPoint;
-
-            // Set quickbelt to no slot while in main menu
-            GM.CurrentPlayerBody.ConfigureQuickbelt(-4);
-
-            // Init menu
-            Menu_Manager menuManager = menuRoot.AddComponent<Menu_Manager>();
-            menuManager.Init();
         }
 
         private void UnsecureObjects()
@@ -2928,7 +3011,7 @@ namespace EFM
             if (Mod.justFinishedRaid && Mod.chosenCharIndex == 1)
             {
                 // Make sure that all scav return items are in their proper return nodes
-                Transform returnNodeParent = Mod.currentBaseManager.transform.GetChild(1).GetChild(25);
+                Transform returnNodeParent = HideoutController.instance.transform.GetChild(1).GetChild(25);
                 for (int i = 0; i < 15; ++i)
                 {
                     FVRPhysicalObject itemPhysObj = Mod.scavRaidReturnItems[i].GetComponent<FVRPhysicalObject>();
@@ -2940,7 +3023,7 @@ namespace EFM
 
                     if (i == 8) // Rig
                     {
-                        CustomItemWrapper CIW = Mod.scavRaidReturnItems[i].GetComponent<CustomItemWrapper>();
+                        MeatovItem CIW = Mod.scavRaidReturnItems[i].GetComponent<MeatovItem>();
                         if (!CIW.open)
                         {
                             CIW.ToggleMode(false);
@@ -3287,29 +3370,31 @@ namespace EFM
             switch (index)
             {
                 case 0:
-                    return "factory4_day";
-                case 1:
                     return "bigmap";
+                case 1:
+                    return "factory4_day";
                 case 2:
-                    return "interchange";
+                    return "factory4_night";
                 case 3:
-                    return "laboratory";
+                    return "interchange";
                 case 4:
-                    return "woods";
+                    return "laboratory";
                 case 5:
-                    return "shoreline";
+                    return "lighthouse";
                 case 6:
                     return "rezervbase";
                 case 7:
-                    return "lighthouse";
+                    return "shoreline";
                 case 8:
-                    return "tarkovstreets";
-                case 9:
                     return "suburbs";
+                case 9:
+                    return "tarkovstreets";
                 case 10:
                     return "terminal";
                 case 11:
                     return "town";
+                case 12:
+                    return "woods";
             }
             return null;
         }

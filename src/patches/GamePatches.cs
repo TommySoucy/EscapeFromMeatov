@@ -14,324 +14,376 @@ namespace EFM
     {
         public static void DoPatching(Harmony harmony)
         {
-            // LoadLevelBeginPatch
-            MethodInfo loadLevelBeginPatchOriginal = typeof(SteamVR_LoadLevel).GetMethod("Begin", BindingFlags.Public | BindingFlags.Static);
-            MethodInfo loadLevelBeginPatchPrefix = typeof(LoadLevelBeginPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// LoadLevelBeginPatch
+            //MethodInfo loadLevelBeginPatchOriginal = typeof(SteamVR_LoadLevel).GetMethod("Begin", BindingFlags.Public | BindingFlags.Static);
+            //MethodInfo loadLevelBeginPatchPrefix = typeof(LoadLevelBeginPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            PatchController.Verify(loadLevelBeginPatchOriginal, harmony, true);
-            harmony.Patch(loadLevelBeginPatchOriginal, new HarmonyMethod(loadLevelBeginPatchPrefix));
+            //PatchController.Verify(loadLevelBeginPatchOriginal, harmony, true);
+            //harmony.Patch(loadLevelBeginPatchOriginal, new HarmonyMethod(loadLevelBeginPatchPrefix));
 
-            // EndInteractionPatch
-            MethodInfo endInteractionPatchOriginal = typeof(FVRInteractiveObject).GetMethod("EndInteraction", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo endInteractionPatchPostfix = typeof(EndInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// EndInteractionPatch
+            //MethodInfo endInteractionPatchOriginal = typeof(FVRInteractiveObject).GetMethod("EndInteraction", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo endInteractionPatchPostfix = typeof(EndInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(endInteractionPatchOriginal, null, new HarmonyMethod(endInteractionPatchPostfix));
+            //PatchController.Verify(endInteractionPatchOriginal, harmony, true);
+            //harmony.Patch(endInteractionPatchOriginal, null, new HarmonyMethod(endInteractionPatchPostfix));
 
             // ConfigureQuickbeltPatch
             MethodInfo configureQuickbeltPatchOriginal = typeof(FVRPlayerBody).GetMethod("ConfigureQuickbelt", BindingFlags.Public | BindingFlags.Instance);
             MethodInfo configureQuickbeltPatchPrefix = typeof(ConfigureQuickbeltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo configureQuickbeltPatchPostfix = typeof(ConfigureQuickbeltPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
+            PatchController.Verify(configureQuickbeltPatchOriginal, harmony, true);
             harmony.Patch(configureQuickbeltPatchOriginal, new HarmonyMethod(configureQuickbeltPatchPrefix), new HarmonyMethod(configureQuickbeltPatchPostfix));
 
-            // TestQuickbeltPatch
-            MethodInfo testQuickbeltPatchOriginal = typeof(FVRViveHand).GetMethod("TestQuickBeltDistances", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo testQuickbeltPatchPrefix = typeof(TestQuickbeltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// TestQuickbeltPatch
+            //MethodInfo testQuickbeltPatchOriginal = typeof(FVRViveHand).GetMethod("TestQuickBeltDistances", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo testQuickbeltPatchPrefix = typeof(TestQuickbeltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(testQuickbeltPatchOriginal, new HarmonyMethod(testQuickbeltPatchPrefix));
+            //PatchController.Verify(testQuickbeltPatchOriginal, harmony, true);
+            //harmony.Patch(testQuickbeltPatchOriginal, new HarmonyMethod(testQuickbeltPatchPrefix));
 
-            // SetQuickBeltSlotPatch
-            MethodInfo setQuickBeltSlotPatchOriginal = typeof(FVRPhysicalObject).GetMethod("SetQuickBeltSlot", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo setQuickBeltSlotPatchPrefix = typeof(SetQuickBeltSlotPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo setQuickBeltSlotPatchPostfix = typeof(SetQuickBeltSlotPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// SetQuickBeltSlotPatch
+            //MethodInfo setQuickBeltSlotPatchOriginal = typeof(FVRPhysicalObject).GetMethod("SetQuickBeltSlot", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo setQuickBeltSlotPatchPrefix = typeof(SetQuickBeltSlotPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo setQuickBeltSlotPatchPostfix = typeof(SetQuickBeltSlotPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(setQuickBeltSlotPatchOriginal, new HarmonyMethod(setQuickBeltSlotPatchPrefix), new HarmonyMethod(setQuickBeltSlotPatchPostfix));
+            //PatchController.Verify(setQuickBeltSlotPatchOriginal, harmony, true);
+            //harmony.Patch(setQuickBeltSlotPatchOriginal, new HarmonyMethod(setQuickBeltSlotPatchPrefix), new HarmonyMethod(setQuickBeltSlotPatchPostfix));
 
-            // BeginInteractionPatch
-            MethodInfo beginInteractionPatchOriginal = typeof(FVRPhysicalObject).GetMethod("BeginInteraction", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo beginInteractionPatchPrefix = typeof(BeginInteractionPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo beginInteractionPatchPostfix = typeof(BeginInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// BeginInteractionPatch
+            //MethodInfo beginInteractionPatchOriginal = typeof(FVRPhysicalObject).GetMethod("BeginInteraction", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo beginInteractionPatchPrefix = typeof(BeginInteractionPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo beginInteractionPatchPostfix = typeof(BeginInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(beginInteractionPatchOriginal, new HarmonyMethod(beginInteractionPatchPrefix), new HarmonyMethod(beginInteractionPatchPostfix));
+            //PatchController.Verify(beginInteractionPatchOriginal, harmony, true);
+            //harmony.Patch(beginInteractionPatchOriginal, new HarmonyMethod(beginInteractionPatchPrefix), new HarmonyMethod(beginInteractionPatchPostfix));
 
-            // DamagePatch
-            MethodInfo damagePatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(Damage) }, null);
-            MethodInfo damagePatchPrefix = typeof(DamagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// DamagePatch
+            //MethodInfo damagePatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(Damage) }, null);
+            //MethodInfo damagePatchPrefix = typeof(DamagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(damagePatchOriginal, new HarmonyMethod(damagePatchPrefix));
+            //PatchController.Verify(damagePatchOriginal, harmony, true);
+            //harmony.Patch(damagePatchOriginal, new HarmonyMethod(damagePatchPrefix));
 
-            // DamageFloatPatch
-            MethodInfo damageFloatPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(float) }, null);
-            MethodInfo damageFloatPatchPrefix = typeof(DamageFloatPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// DamageFloatPatch
+            //MethodInfo damageFloatPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(float) }, null);
+            //MethodInfo damageFloatPatchPrefix = typeof(DamageFloatPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(damageFloatPatchOriginal, new HarmonyMethod(damageFloatPatchPrefix));
+            //PatchController.Verify(damageFloatPatchOriginal, harmony, true);
+            //harmony.Patch(damageFloatPatchOriginal, new HarmonyMethod(damageFloatPatchPrefix));
 
-            // DamageDealtPatch
-            MethodInfo damageDealtPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(DamageDealt) }, null);
-            MethodInfo damageDealtPatchPrefix = typeof(DamageDealtPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// DamageDealtPatch
+            //MethodInfo damageDealtPatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(DamageDealt) }, null);
+            //MethodInfo damageDealtPatchPrefix = typeof(DamageDealtPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(damageDealtPatchOriginal, new HarmonyMethod(damageDealtPatchPrefix));
+            //PatchController.Verify(damageDealtPatchOriginal, harmony, true);
+            //harmony.Patch(damageDealtPatchOriginal, new HarmonyMethod(damageDealtPatchPrefix));
 
-            // HandTestColliderPatch
-            MethodInfo handTestColliderPatchOriginal = typeof(FVRViveHand).GetMethod("TestCollider", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo handTestColliderPatchPrefix = typeof(HandTestColliderPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// HandTestColliderPatch
+            //MethodInfo handTestColliderPatchOriginal = typeof(FVRViveHand).GetMethod("TestCollider", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo handTestColliderPatchPrefix = typeof(HandTestColliderPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(handTestColliderPatchOriginal, new HarmonyMethod(handTestColliderPatchPrefix));
+            //PatchController.Verify(handTestColliderPatchOriginal, harmony, true);
+            //harmony.Patch(handTestColliderPatchOriginal, new HarmonyMethod(handTestColliderPatchPrefix));
 
-            // HandTriggerExitPatch
-            MethodInfo handTriggerExitPatchOriginal = typeof(FVRViveHand).GetMethod("HandTriggerExit", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo handTriggerExitPatchPrefix = typeof(HandTriggerExitPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// HandTriggerExitPatch
+            //MethodInfo handTriggerExitPatchOriginal = typeof(FVRViveHand).GetMethod("HandTriggerExit", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo handTriggerExitPatchPrefix = typeof(HandTriggerExitPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(handTriggerExitPatchOriginal, new HarmonyMethod(handTriggerExitPatchPrefix));
+            //PatchController.Verify(handTriggerExitPatchOriginal, harmony, true);
+            //harmony.Patch(handTriggerExitPatchOriginal, new HarmonyMethod(handTriggerExitPatchPrefix));
 
-            // KeyForwardBackPatch
-            MethodInfo keyForwardBackPatchOriginal = typeof(SideHingedDestructibleDoorDeadBoltKey).GetMethod("KeyForwardBack", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo keyForwardBackPatchPrefix = typeof(KeyForwardBackPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// KeyForwardBackPatch
+            //MethodInfo keyForwardBackPatchOriginal = typeof(SideHingedDestructibleDoorDeadBoltKey).GetMethod("KeyForwardBack", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo keyForwardBackPatchPrefix = typeof(KeyForwardBackPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(keyForwardBackPatchOriginal, new HarmonyMethod(keyForwardBackPatchPrefix));
+            //PatchController.Verify(keyForwardBackPatchOriginal, harmony, true);
+            //harmony.Patch(keyForwardBackPatchOriginal, new HarmonyMethod(keyForwardBackPatchPrefix));
 
-            // UpdateDisplayBasedOnTypePatch
-            MethodInfo updateDisplayBasedOnTypePatchOriginal = typeof(SideHingedDestructibleDoorDeadBoltKey).GetMethod("UpdateDisplayBasedOnType", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo updateDisplayBasedOnTypePatchPrefix = typeof(UpdateDisplayBasedOnTypePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// UpdateDisplayBasedOnTypePatch
+            //MethodInfo updateDisplayBasedOnTypePatchOriginal = typeof(SideHingedDestructibleDoorDeadBoltKey).GetMethod("UpdateDisplayBasedOnType", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo updateDisplayBasedOnTypePatchPrefix = typeof(UpdateDisplayBasedOnTypePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(updateDisplayBasedOnTypePatchOriginal, new HarmonyMethod(updateDisplayBasedOnTypePatchPrefix));
+            //PatchController.Verify(updateDisplayBasedOnTypePatchOriginal, harmony, true);
+            //harmony.Patch(updateDisplayBasedOnTypePatchOriginal, new HarmonyMethod(updateDisplayBasedOnTypePatchPrefix));
 
-            // DoorInitPatch
-            MethodInfo doorInitPatchOriginal = typeof(SideHingedDestructibleDoor).GetMethod("Init", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo doorInitPatchPrefix = typeof(DoorInitPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// DoorInitPatch
+            //MethodInfo doorInitPatchOriginal = typeof(SideHingedDestructibleDoor).GetMethod("Init", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo doorInitPatchPrefix = typeof(DoorInitPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(doorInitPatchOriginal, new HarmonyMethod(doorInitPatchPrefix));
+            //PatchController.Verify(doorInitPatchOriginal, harmony, true);
+            //harmony.Patch(doorInitPatchOriginal, new HarmonyMethod(doorInitPatchPrefix));
 
-            // DeadBoltAwakePatch
-            MethodInfo deadBoltAwakePatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("Awake", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo deadBoltAwakePatchPostfix = typeof(DeadBoltAwakePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// DeadBoltAwakePatch
+            //MethodInfo deadBoltAwakePatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("Awake", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo deadBoltAwakePatchPostfix = typeof(DeadBoltAwakePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(deadBoltAwakePatchOriginal, null, new HarmonyMethod(deadBoltAwakePatchPostfix));
+            //PatchController.Verify(deadBoltAwakePatchOriginal, harmony, true);
+            //harmony.Patch(deadBoltAwakePatchOriginal, null, new HarmonyMethod(deadBoltAwakePatchPostfix));
 
-            // DeadBoltFVRFixedUpdatePatch
-            MethodInfo deadBoltFVRFixedUpdatePatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("FVRFixedUpdate", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo deadBoltFVRFixedUpdatePatchPostfix = typeof(DeadBoltFVRFixedUpdatePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// DeadBoltFVRFixedUpdatePatch
+            //MethodInfo deadBoltFVRFixedUpdatePatchOriginal = typeof(SideHingedDestructibleDoorDeadBolt).GetMethod("FVRFixedUpdate", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo deadBoltFVRFixedUpdatePatchPostfix = typeof(DeadBoltFVRFixedUpdatePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(deadBoltFVRFixedUpdatePatchOriginal, null, new HarmonyMethod(deadBoltFVRFixedUpdatePatchPostfix));
+            //PatchController.Verify(deadBoltFVRFixedUpdatePatchOriginal, harmony, true);
+            //harmony.Patch(deadBoltFVRFixedUpdatePatchOriginal, null, new HarmonyMethod(deadBoltFVRFixedUpdatePatchPostfix));
 
-            // InteractiveSetAllLayersPatch
-            MethodInfo interactiveSetAllLayersPatchOriginal = typeof(FVRInteractiveObject).GetMethod("SetAllCollidersToLayer", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo interactiveSetAllLayersPatchPrefix = typeof(InteractiveSetAllLayersPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// InteractiveSetAllLayersPatch
+            //MethodInfo interactiveSetAllLayersPatchOriginal = typeof(FVRInteractiveObject).GetMethod("SetAllCollidersToLayer", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo interactiveSetAllLayersPatchPrefix = typeof(InteractiveSetAllLayersPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(interactiveSetAllLayersPatchOriginal, new HarmonyMethod(interactiveSetAllLayersPatchPrefix));
+            //PatchController.Verify(interactiveSetAllLayersPatchOriginal, harmony, true);
+            //harmony.Patch(interactiveSetAllLayersPatchOriginal, new HarmonyMethod(interactiveSetAllLayersPatchPrefix));
 
-            // HandUpdatePatch
-            MethodInfo handUpdatePatchOriginal = typeof(FVRViveHand).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo handUpdatePatchPrefix = typeof(HandUpdatePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// HandUpdatePatch
+            //MethodInfo handUpdatePatchOriginal = typeof(FVRViveHand).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo handUpdatePatchPrefix = typeof(HandUpdatePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(handUpdatePatchOriginal, new HarmonyMethod(handUpdatePatchPrefix));
+            //PatchController.Verify(handUpdatePatchOriginal, harmony, true);
+            //harmony.Patch(handUpdatePatchOriginal, new HarmonyMethod(handUpdatePatchPrefix));
 
-            // MagazineUpdateInteractionPatch
-            MethodInfo magazineUpdateInteractionPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("UpdateInteraction", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo magazineUpdateInteractionPatchPostfix = typeof(MagazineUpdateInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo magazineUpdateInteractionPatchTranspiler = typeof(MagazineUpdateInteractionPatch).GetMethod("Transpiler", BindingFlags.NonPublic | BindingFlags.Static);
+            //// MagazineUpdateInteractionPatch
+            //MethodInfo magazineUpdateInteractionPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("UpdateInteraction", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo magazineUpdateInteractionPatchPostfix = typeof(MagazineUpdateInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo magazineUpdateInteractionPatchTranspiler = typeof(MagazineUpdateInteractionPatch).GetMethod("Transpiler", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(magazineUpdateInteractionPatchOriginal, null, new HarmonyMethod(magazineUpdateInteractionPatchPostfix), new HarmonyMethod(magazineUpdateInteractionPatchTranspiler));
+            //PatchController.Verify(magazineUpdateInteractionPatchOriginal, harmony, true);
+            //harmony.Patch(magazineUpdateInteractionPatchOriginal, null, new HarmonyMethod(magazineUpdateInteractionPatchPostfix), new HarmonyMethod(magazineUpdateInteractionPatchTranspiler));
 
-            // ClipUpdateInteractionPatch
-            MethodInfo clipUpdateInteractionPatchOriginal = typeof(FVRFireArmClip).GetMethod("UpdateInteraction", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo clipUpdateInteractionPatchPostfix = typeof(ClipUpdateInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo clipUpdateInteractionPatchTranspiler = typeof(ClipUpdateInteractionPatch).GetMethod("Transpiler", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ClipUpdateInteractionPatch
+            //MethodInfo clipUpdateInteractionPatchOriginal = typeof(FVRFireArmClip).GetMethod("UpdateInteraction", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo clipUpdateInteractionPatchPostfix = typeof(ClipUpdateInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo clipUpdateInteractionPatchTranspiler = typeof(ClipUpdateInteractionPatch).GetMethod("Transpiler", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(clipUpdateInteractionPatchOriginal, null, new HarmonyMethod(clipUpdateInteractionPatchPostfix), new HarmonyMethod(clipUpdateInteractionPatchTranspiler));
+            //PatchController.Verify(clipUpdateInteractionPatchOriginal, harmony, true);
+            //harmony.Patch(clipUpdateInteractionPatchOriginal, null, new HarmonyMethod(clipUpdateInteractionPatchPostfix), new HarmonyMethod(clipUpdateInteractionPatchTranspiler));
 
-            // MovementManagerJumpPatch
-            MethodInfo movementManagerJumpPatchOriginal = typeof(FVRMovementManager).GetMethod("Jump", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo movementManagerJumpPatchPrefix = typeof(MovementManagerJumpPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// MovementManagerJumpPatch
+            //MethodInfo movementManagerJumpPatchOriginal = typeof(FVRMovementManager).GetMethod("Jump", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo movementManagerJumpPatchPrefix = typeof(MovementManagerJumpPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(movementManagerJumpPatchOriginal, new HarmonyMethod(movementManagerJumpPatchPrefix));
+            //PatchController.Verify(movementManagerJumpPatchOriginal, harmony, true);
+            //harmony.Patch(movementManagerJumpPatchOriginal, new HarmonyMethod(movementManagerJumpPatchPrefix));
 
-            // MovementManagerTwinstickPatch
-            MethodInfo movementManagerTwinstickPatchOriginal = typeof(FVRMovementManager).GetMethod("HandUpdateTwinstick", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo movementManagerTwinstickPatchPrefix = typeof(MovementManagerUpdatePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// MovementManagerTwinstickPatch
+            //MethodInfo movementManagerTwinstickPatchOriginal = typeof(FVRMovementManager).GetMethod("HandUpdateTwinstick", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo movementManagerTwinstickPatchPrefix = typeof(MovementManagerUpdatePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(movementManagerTwinstickPatchOriginal, new HarmonyMethod(movementManagerTwinstickPatchPrefix));
+            //PatchController.Verify(movementManagerTwinstickPatchOriginal, harmony, true);
+            //harmony.Patch(movementManagerTwinstickPatchOriginal, new HarmonyMethod(movementManagerTwinstickPatchPrefix));
 
-            // ChamberSetRoundPatch
-            MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool) }, null);
-            MethodInfo chamberSetRoundPatchPrefix = typeof(ChamberSetRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ChamberSetRoundPatch
+            //MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool) }, null);
+            //MethodInfo chamberSetRoundPatchPrefix = typeof(ChamberSetRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
+            //PatchController.Verify(chamberSetRoundPatchOriginal, harmony, true);
+            //harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
 
-            // ChamberSetRoundGivenPatch
-            MethodInfo chamberSetRoundGivenPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(Vector3), typeof(Quaternion) }, null);
-            MethodInfo chamberSetRoundGivenPatchPrefix = typeof(ChamberSetRoundGivenPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ChamberSetRoundGivenPatch
+            //MethodInfo chamberSetRoundGivenPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(Vector3), typeof(Quaternion) }, null);
+            //MethodInfo chamberSetRoundGivenPatchPrefix = typeof(ChamberSetRoundGivenPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(chamberSetRoundGivenPatchOriginal, new HarmonyMethod(chamberSetRoundGivenPatchPrefix));
+            //PatchController.Verify(chamberSetRoundGivenPatchOriginal, harmony, true);
+            //harmony.Patch(chamberSetRoundGivenPatchOriginal, new HarmonyMethod(chamberSetRoundGivenPatchPrefix));
 
-            // MagRemoveRoundPatch
-            MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
-            MethodInfo magRemoveRoundPatchPrefix = typeof(MagRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo magRemoveRoundPatchPostfix = typeof(MagRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// MagRemoveRoundPatch
+            //MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
+            //MethodInfo magRemoveRoundPatchPrefix = typeof(MagRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo magRemoveRoundPatchPostfix = typeof(MagRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(magRemoveRoundPatchOriginal, new HarmonyMethod(magRemoveRoundPatchPrefix), new HarmonyMethod(magRemoveRoundPatchPostfix));
+            //PatchController.Verify(magRemoveRoundPatchOriginal, harmony, true);
+            //harmony.Patch(magRemoveRoundPatchOriginal, new HarmonyMethod(magRemoveRoundPatchPrefix), new HarmonyMethod(magRemoveRoundPatchPostfix));
 
-            // MagRemoveRoundBoolPatch
-            MethodInfo magRemoveRoundBoolPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
-            MethodInfo magRemoveRoundBoolPatchPrefix = typeof(MagRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo magRemoveRoundBoolPatchPostfix = typeof(MagRemoveRoundBoolPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// MagRemoveRoundBoolPatch
+            //MethodInfo magRemoveRoundBoolPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
+            //MethodInfo magRemoveRoundBoolPatchPrefix = typeof(MagRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo magRemoveRoundBoolPatchPostfix = typeof(MagRemoveRoundBoolPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(magRemoveRoundBoolPatchOriginal, new HarmonyMethod(magRemoveRoundBoolPatchPrefix), new HarmonyMethod(magRemoveRoundBoolPatchPostfix));
+            //PatchController.Verify(magRemoveRoundBoolPatchOriginal, harmony, true);
+            //harmony.Patch(magRemoveRoundBoolPatchOriginal, new HarmonyMethod(magRemoveRoundBoolPatchPrefix), new HarmonyMethod(magRemoveRoundBoolPatchPostfix));
 
-            // MagRemoveRoundIntPatch
-            MethodInfo magRemoveRoundIntPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(int) }, null);
-            MethodInfo magRemoveRoundIntPatchPrefix = typeof(MagRemoveRoundIntPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo magRemoveRoundIntPatchPostfix = typeof(MagRemoveRoundIntPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// MagRemoveRoundIntPatch
+            //MethodInfo magRemoveRoundIntPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(int) }, null);
+            //MethodInfo magRemoveRoundIntPatchPrefix = typeof(MagRemoveRoundIntPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo magRemoveRoundIntPatchPostfix = typeof(MagRemoveRoundIntPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(magRemoveRoundIntPatchOriginal, new HarmonyMethod(magRemoveRoundIntPatchPrefix), new HarmonyMethod(magRemoveRoundIntPatchPostfix));
+            //PatchController.Verify(magRemoveRoundIntPatchOriginal, harmony, true);
+            //harmony.Patch(magRemoveRoundIntPatchOriginal, new HarmonyMethod(magRemoveRoundIntPatchPrefix), new HarmonyMethod(magRemoveRoundIntPatchPostfix));
 
-            // ClipRemoveRoundPatch
-            MethodInfo clipRemoveRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
-            MethodInfo clipRemoveRoundPatchPrefix = typeof(ClipRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo clipRemoveRoundPatchPostfix = typeof(ClipRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ClipRemoveRoundPatch
+            //MethodInfo clipRemoveRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
+            //MethodInfo clipRemoveRoundPatchPrefix = typeof(ClipRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo clipRemoveRoundPatchPostfix = typeof(ClipRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(clipRemoveRoundPatchOriginal, new HarmonyMethod(clipRemoveRoundPatchPrefix), new HarmonyMethod(clipRemoveRoundPatchPostfix));
+            //PatchController.Verify(clipRemoveRoundPatchOriginal, harmony, true);
+            //harmony.Patch(clipRemoveRoundPatchOriginal, new HarmonyMethod(clipRemoveRoundPatchPrefix), new HarmonyMethod(clipRemoveRoundPatchPostfix));
 
-            // ClipRemoveRoundBoolPatch
-            MethodInfo clipRemoveRoundBoolPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
-            MethodInfo clipRemoveRoundBoolPatchPrefix = typeof(ClipRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo clipRemoveRoundBoolPatchPostfix = typeof(ClipRemoveRoundBoolPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ClipRemoveRoundBoolPatch
+            //MethodInfo clipRemoveRoundBoolPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
+            //MethodInfo clipRemoveRoundBoolPatchPrefix = typeof(ClipRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo clipRemoveRoundBoolPatchPostfix = typeof(ClipRemoveRoundBoolPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(clipRemoveRoundBoolPatchOriginal, new HarmonyMethod(clipRemoveRoundBoolPatchPrefix), new HarmonyMethod(clipRemoveRoundBoolPatchPostfix));
+            //PatchController.Verify(clipRemoveRoundBoolPatchOriginal, harmony, true);
+            //harmony.Patch(clipRemoveRoundBoolPatchOriginal, new HarmonyMethod(clipRemoveRoundBoolPatchPrefix), new HarmonyMethod(clipRemoveRoundBoolPatchPostfix));
 
-            // ClipRemoveRoundClassPatch
-            MethodInfo clipRemoveRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRoundReturnClass", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo clipRemoveRoundClassPatchPrefix = typeof(ClipRemoveRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo clipRemoveRoundClassPatchPostfix = typeof(ClipRemoveRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ClipRemoveRoundClassPatch
+            //MethodInfo clipRemoveRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRoundReturnClass", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo clipRemoveRoundClassPatchPrefix = typeof(ClipRemoveRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo clipRemoveRoundClassPatchPostfix = typeof(ClipRemoveRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(clipRemoveRoundClassPatchOriginal, new HarmonyMethod(clipRemoveRoundClassPatchPrefix), new HarmonyMethod(clipRemoveRoundClassPatchPostfix));
+            //PatchController.Verify(clipRemoveRoundClassPatchOriginal, harmony, true);
+            //harmony.Patch(clipRemoveRoundClassPatchOriginal, new HarmonyMethod(clipRemoveRoundClassPatchPrefix), new HarmonyMethod(clipRemoveRoundClassPatchPostfix));
 
-            // FireArmLoadMagPatch
-            MethodInfo fireArmLoadMagPatchOriginal = typeof(FVRFireArm).GetMethod("LoadMag", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo fireArmLoadMagPatchPrefix = typeof(FireArmLoadMagPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// FireArmLoadMagPatch
+            //MethodInfo fireArmLoadMagPatchOriginal = typeof(FVRFireArm).GetMethod("LoadMag", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo fireArmLoadMagPatchPrefix = typeof(FireArmLoadMagPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(fireArmLoadMagPatchOriginal, new HarmonyMethod(fireArmLoadMagPatchPrefix));
+            //PatchController.Verify(fireArmLoadMagPatchOriginal, harmony, true);
+            //harmony.Patch(fireArmLoadMagPatchOriginal, new HarmonyMethod(fireArmLoadMagPatchPrefix));
 
-            // FireArmEjectMagPatch
-            MethodInfo fireArmEjectMagPatchOriginal = typeof(FVRFireArm).GetMethod("EjectMag", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo fireArmEjectMagPatchPrefix = typeof(FireArmEjectMagPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo fireArmEjectMagPatchPostfix = typeof(FireArmEjectMagPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// FireArmEjectMagPatch
+            //MethodInfo fireArmEjectMagPatchOriginal = typeof(FVRFireArm).GetMethod("EjectMag", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo fireArmEjectMagPatchPrefix = typeof(FireArmEjectMagPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo fireArmEjectMagPatchPostfix = typeof(FireArmEjectMagPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(fireArmEjectMagPatchOriginal, new HarmonyMethod(fireArmEjectMagPatchPrefix), new HarmonyMethod(fireArmEjectMagPatchPostfix));
+            //PatchController.Verify(fireArmEjectMagPatchOriginal, harmony, true);
+            //harmony.Patch(fireArmEjectMagPatchOriginal, new HarmonyMethod(fireArmEjectMagPatchPrefix), new HarmonyMethod(fireArmEjectMagPatchPostfix));
 
-            // FireArmLoadClipPatch
-            MethodInfo fireArmLoadClipPatchOriginal = typeof(FVRFireArm).GetMethod("LoadClip", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo fireArmLoadClipPatchPrefix = typeof(FireArmLoadClipPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// FireArmLoadClipPatch
+            //MethodInfo fireArmLoadClipPatchOriginal = typeof(FVRFireArm).GetMethod("LoadClip", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo fireArmLoadClipPatchPrefix = typeof(FireArmLoadClipPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(fireArmLoadClipPatchOriginal, new HarmonyMethod(fireArmLoadClipPatchPrefix));
+            //PatchController.Verify(fireArmLoadClipPatchOriginal, harmony, true);
+            //harmony.Patch(fireArmLoadClipPatchOriginal, new HarmonyMethod(fireArmLoadClipPatchPrefix));
 
-            // FireArmEjectClipPatch
-            MethodInfo fireArmEjectClipPatchOriginal = typeof(FVRFireArm).GetMethod("EjectClip", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo fireArmEjectClipPatchPrefix = typeof(FireArmEjectClipPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo fireArmEjectClipPatchPostfix = typeof(FireArmEjectClipPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// FireArmEjectClipPatch
+            //MethodInfo fireArmEjectClipPatchOriginal = typeof(FVRFireArm).GetMethod("EjectClip", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo fireArmEjectClipPatchPrefix = typeof(FireArmEjectClipPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo fireArmEjectClipPatchPostfix = typeof(FireArmEjectClipPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(fireArmEjectClipPatchOriginal, new HarmonyMethod(fireArmEjectClipPatchPrefix), new HarmonyMethod(fireArmEjectClipPatchPostfix));
+            //PatchController.Verify(fireArmEjectClipPatchOriginal, harmony, true);
+            //harmony.Patch(fireArmEjectClipPatchOriginal, new HarmonyMethod(fireArmEjectClipPatchPrefix), new HarmonyMethod(fireArmEjectClipPatchPostfix));
 
-            // MagAddRoundPatch
-            MethodInfo magAddRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool) }, null);
-            MethodInfo magAddRoundPatchPrefix = typeof(MagAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo magAddRoundPatchPostfix = typeof(MagAddRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// MagAddRoundPatch
+            //MethodInfo magAddRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool) }, null);
+            //MethodInfo magAddRoundPatchPrefix = typeof(MagAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo magAddRoundPatchPostfix = typeof(MagAddRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(magAddRoundPatchOriginal, new HarmonyMethod(magAddRoundPatchPrefix), new HarmonyMethod(magAddRoundPatchPostfix));
+            //PatchController.Verify(magAddRoundPatchOriginal, harmony, true);
+            //harmony.Patch(magAddRoundPatchOriginal, new HarmonyMethod(magAddRoundPatchPrefix), new HarmonyMethod(magAddRoundPatchPostfix));
 
-            // MagAddRoundClassPatch
-            MethodInfo magAddRoundClassPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
-            MethodInfo magAddRoundClassPatchPrefix = typeof(MagAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo magAddRoundClassPatchPostfix = typeof(MagAddRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// MagAddRoundClassPatch
+            //MethodInfo magAddRoundClassPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
+            //MethodInfo magAddRoundClassPatchPrefix = typeof(MagAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo magAddRoundClassPatchPostfix = typeof(MagAddRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(magAddRoundClassPatchOriginal, new HarmonyMethod(magAddRoundClassPatchPrefix), new HarmonyMethod(magAddRoundClassPatchPostfix));
+            //PatchController.Verify(magAddRoundClassPatchOriginal, harmony, true);
+            //harmony.Patch(magAddRoundClassPatchOriginal, new HarmonyMethod(magAddRoundClassPatchPrefix), new HarmonyMethod(magAddRoundClassPatchPostfix));
 
-            // ClipAddRoundPatch
-            MethodInfo clipAddRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool) }, null);
-            MethodInfo clipAddRoundPatchPrefix = typeof(ClipAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo clipAddRoundPatchPostfix = typeof(ClipAddRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ClipAddRoundPatch
+            //MethodInfo clipAddRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool) }, null);
+            //MethodInfo clipAddRoundPatchPrefix = typeof(ClipAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo clipAddRoundPatchPostfix = typeof(ClipAddRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(clipAddRoundPatchOriginal, new HarmonyMethod(clipAddRoundPatchPrefix), new HarmonyMethod(clipAddRoundPatchPostfix));
+            //PatchController.Verify(clipAddRoundPatchOriginal, harmony, true);
+            //harmony.Patch(clipAddRoundPatchOriginal, new HarmonyMethod(clipAddRoundPatchPrefix), new HarmonyMethod(clipAddRoundPatchPostfix));
 
-            // ClipAddRoundClassPatch
-            MethodInfo clipAddRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
-            MethodInfo clipAddRoundClassPatchPrefix = typeof(ClipAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo clipAddRoundClassPatchPostfix = typeof(ClipAddRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ClipAddRoundClassPatch
+            //MethodInfo clipAddRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
+            //MethodInfo clipAddRoundClassPatchPrefix = typeof(ClipAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo clipAddRoundClassPatchPostfix = typeof(ClipAddRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(clipAddRoundClassPatchOriginal, new HarmonyMethod(clipAddRoundClassPatchPrefix), new HarmonyMethod(clipAddRoundClassPatchPostfix));
+            //PatchController.Verify(clipAddRoundClassPatchOriginal, harmony, true);
+            //harmony.Patch(clipAddRoundClassPatchOriginal, new HarmonyMethod(clipAddRoundClassPatchPrefix), new HarmonyMethod(clipAddRoundClassPatchPostfix));
 
-            // AttachmentMountRegisterPatch
-            MethodInfo attachmentMountRegisterPatchOriginal = typeof(FVRFireArmAttachmentMount).GetMethod("RegisterAttachment", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo attachmentMountRegisterPatchPrefix = typeof(AttachmentMountRegisterPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// AttachmentMountRegisterPatch
+            //MethodInfo attachmentMountRegisterPatchOriginal = typeof(FVRFireArmAttachmentMount).GetMethod("RegisterAttachment", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo attachmentMountRegisterPatchPrefix = typeof(AttachmentMountRegisterPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(attachmentMountRegisterPatchOriginal, new HarmonyMethod(attachmentMountRegisterPatchPrefix));
+            //PatchController.Verify(attachmentMountRegisterPatchOriginal, harmony, true);
+            //harmony.Patch(attachmentMountRegisterPatchOriginal, new HarmonyMethod(attachmentMountRegisterPatchPrefix));
 
-            // AttachmentMountDeRegisterPatch
-            MethodInfo attachmentMountDeRegisterPatchOriginal = typeof(FVRFireArmAttachmentMount).GetMethod("DeRegisterAttachment", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo attachmentMountDeRegisterPatchPrefix = typeof(AttachmentMountDeRegisterPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// AttachmentMountDeRegisterPatch
+            //MethodInfo attachmentMountDeRegisterPatchOriginal = typeof(FVRFireArmAttachmentMount).GetMethod("DeRegisterAttachment", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo attachmentMountDeRegisterPatchPrefix = typeof(AttachmentMountDeRegisterPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(attachmentMountDeRegisterPatchOriginal, new HarmonyMethod(attachmentMountDeRegisterPatchPrefix));
+            //PatchController.Verify(attachmentMountDeRegisterPatchOriginal, harmony, true);
+            //harmony.Patch(attachmentMountDeRegisterPatchOriginal, new HarmonyMethod(attachmentMountDeRegisterPatchPrefix));
 
-            // EntityCheckPatch
-            MethodInfo entityCheckPatchOriginal = typeof(AIManager).GetMethod("EntityCheck", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo entityCheckPatchPrefix = typeof(EntityCheckPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// EntityCheckPatch
+            //MethodInfo entityCheckPatchOriginal = typeof(AIManager).GetMethod("EntityCheck", BindingFlags.NonPublic | BindingFlags.Instance);
+            //MethodInfo entityCheckPatchPrefix = typeof(EntityCheckPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(entityCheckPatchOriginal, new HarmonyMethod(entityCheckPatchPrefix));
+            //PatchController.Verify(entityCheckPatchOriginal, harmony, true);
+            //harmony.Patch(entityCheckPatchOriginal, new HarmonyMethod(entityCheckPatchPrefix));
 
-            // ChamberEjectRoundPatch
-            MethodInfo chamberEjectRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("EjectRound", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo chamberEjectRoundPatchPostfix = typeof(ChamberEjectRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// ChamberEjectRoundPatch
+            //MethodInfo chamberEjectRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("EjectRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(Vector3), typeof(Vector3), typeof(Vector3), typeof(bool) }, null);
+            //MethodInfo chamberEjectRoundPatchAnimationOriginal = typeof(FVRFireArmChamber).GetMethod("EjectRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(Vector3), typeof(Vector3), typeof(Vector3), typeof(Vector3), typeof(Quaternion), typeof(bool) }, null);
+            //MethodInfo chamberEjectRoundPatchPostfix = typeof(ChamberEjectRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(chamberEjectRoundPatchOriginal, null, new HarmonyMethod(chamberEjectRoundPatchPostfix));
+            //PatchController.Verify(chamberEjectRoundPatchOriginal, harmony, true);
+            //PatchController.Verify(chamberEjectRoundPatchAnimationOriginal, harmony, true);
+            //harmony.Patch(chamberEjectRoundPatchOriginal, null, new HarmonyMethod(chamberEjectRoundPatchPostfix));
+            //harmony.Patch(chamberEjectRoundPatchAnimationOriginal, null, new HarmonyMethod(chamberEjectRoundPatchPostfix));
 
-            // GlobalFixedUpdatePatch
-            MethodInfo globalFixedUpdatePatchOriginal = typeof(FVRInteractiveObject).GetMethod("GlobalFixedUpdate", BindingFlags.Public | BindingFlags.Static);
-            MethodInfo globalFixedUpdatePatchPostfix = typeof(GlobalFixedUpdatePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// GlobalFixedUpdatePatch
+            //MethodInfo globalFixedUpdatePatchOriginal = typeof(FVRInteractiveObject).GetMethod("GlobalFixedUpdate", BindingFlags.Public | BindingFlags.Static);
+            //MethodInfo globalFixedUpdatePatchPostfix = typeof(GlobalFixedUpdatePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(globalFixedUpdatePatchOriginal, null, new HarmonyMethod(globalFixedUpdatePatchPostfix));
+            //PatchController.Verify(globalFixedUpdatePatchOriginal, harmony, true);
+            //harmony.Patch(globalFixedUpdatePatchOriginal, null, new HarmonyMethod(globalFixedUpdatePatchPostfix));
 
-            // PlayGrabSoundPatch
-            MethodInfo playGrabSoundPatchOriginal = typeof(FVRInteractiveObject).GetMethod("PlayGrabSound", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo playGrabSoundPatchPrefix = typeof(PlayGrabSoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// PlayGrabSoundPatch
+            //MethodInfo playGrabSoundPatchOriginal = typeof(FVRInteractiveObject).GetMethod("PlayGrabSound", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo playGrabSoundPatchPrefix = typeof(PlayGrabSoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(playGrabSoundPatchOriginal, new HarmonyMethod(playGrabSoundPatchPrefix));
+            //PatchController.Verify(playGrabSoundPatchOriginal, harmony, true);
+            //harmony.Patch(playGrabSoundPatchOriginal, new HarmonyMethod(playGrabSoundPatchPrefix));
 
-            // PlayReleaseSoundPatch
-            MethodInfo playReleaseSoundPatchOriginal = typeof(FVRInteractiveObject).GetMethod("PlayReleaseSound", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo playReleaseSoundPatchPrefix = typeof(PlayReleaseSoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// PlayReleaseSoundPatch
+            //MethodInfo playReleaseSoundPatchOriginal = typeof(FVRInteractiveObject).GetMethod("PlayReleaseSound", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo playReleaseSoundPatchPrefix = typeof(PlayReleaseSoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(playReleaseSoundPatchOriginal, new HarmonyMethod(playReleaseSoundPatchPrefix));
+            //PatchController.Verify(playReleaseSoundPatchOriginal, harmony, true);
+            //harmony.Patch(playReleaseSoundPatchOriginal, new HarmonyMethod(playReleaseSoundPatchPrefix));
 
-            // FireArmFirePatch
-            MethodInfo fireArmFirePatchOriginal = typeof(FVRFireArm).GetMethod("Fire", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo fireArmFirePatchPrefix = typeof(FireArmFirePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// FireArmFirePatch
+            //MethodInfo fireArmFirePatchOriginal = typeof(FVRFireArm).GetMethod("Fire", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo fireArmFirePatchPrefix = typeof(FireArmFirePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(fireArmFirePatchOriginal, new HarmonyMethod(fireArmFirePatchPrefix));
+            //PatchController.Verify(fireArmFirePatchOriginal, harmony, true);
+            //harmony.Patch(fireArmFirePatchOriginal, new HarmonyMethod(fireArmFirePatchPrefix));
 
-            // FireArmRecoilPatch
-            MethodInfo fireArmRecoilPatchOriginal = typeof(FVRFireArm).GetMethod("Recoil", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo fireArmRecoilPatchPrefix = typeof(FireArmRecoilPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// FireArmRecoilPatch
+            //MethodInfo fireArmRecoilPatchOriginal = typeof(FVRFireArm).GetMethod("Recoil", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo fireArmRecoilPatchPrefix = typeof(FireArmRecoilPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(fireArmRecoilPatchOriginal, new HarmonyMethod(fireArmRecoilPatchPrefix));
+            //PatchController.Verify(fireArmRecoilPatchOriginal, harmony, true);
+            //harmony.Patch(fireArmRecoilPatchOriginal, new HarmonyMethod(fireArmRecoilPatchPrefix));
 
-            // HandCurrentInteractableSetPatch
-            MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo handCurrentInteractableSetPatchPostfix = typeof(HandCurrentInteractableSetPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// HandCurrentInteractableSetPatch
+            //MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo handCurrentInteractableSetPatchPostfix = typeof(HandCurrentInteractableSetPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(handCurrentInteractableSetPatchOriginal, null, new HarmonyMethod(handCurrentInteractableSetPatchPostfix));
+            //PatchController.Verify(handCurrentInteractableSetPatchOriginal, harmony, true);
+            //harmony.Patch(handCurrentInteractableSetPatchOriginal, null, new HarmonyMethod(handCurrentInteractableSetPatchPostfix));
 
-            // SosigLinkDamagePatch
-            MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo sosigLinkDamagePatchPrefix = typeof(SosigLinkDamagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo sosigLinkDamagePatchPostfix = typeof(SosigLinkDamagePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// SosigLinkDamagePatch
+            //MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo sosigLinkDamagePatchPrefix = typeof(SosigLinkDamagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //MethodInfo sosigLinkDamagePatchPostfix = typeof(SosigLinkDamagePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(sosigLinkDamagePatchOriginal, new HarmonyMethod(sosigLinkDamagePatchPrefix), new HarmonyMethod(sosigLinkDamagePatchPostfix));
+            //PatchController.Verify(sosigLinkDamagePatchOriginal, harmony, true);
+            //harmony.Patch(sosigLinkDamagePatchOriginal, new HarmonyMethod(sosigLinkDamagePatchPrefix), new HarmonyMethod(sosigLinkDamagePatchPostfix));
 
-            // PlayerBodyHealPercentPatch
-            MethodInfo playerBodyHealPercentPatchOriginal = typeof(FVRPlayerBody).GetMethod("HealPercent", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo playerBodyHealPercentPatchPrefix = typeof(PlayerBodyHealPercentPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            //// PlayerBodyHealPercentPatch
+            //MethodInfo playerBodyHealPercentPatchOriginal = typeof(FVRPlayerBody).GetMethod("HealPercent", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo playerBodyHealPercentPatchPrefix = typeof(PlayerBodyHealPercentPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            harmony.Patch(playerBodyHealPercentPatchOriginal, new HarmonyMethod(playerBodyHealPercentPatchPrefix));
+            //PatchController.Verify(playerBodyHealPercentPatchOriginal, harmony, true);
+            //harmony.Patch(playerBodyHealPercentPatchOriginal, new HarmonyMethod(playerBodyHealPercentPatchPrefix));
         }
     }
     
@@ -344,7 +396,7 @@ namespace EFM
             Mod.LogInfo("Securing " + objectToSecure.name);
             Mod.securedObjects.Add(objectToSecure);
             GameObject.DontDestroyOnLoad(objectToSecure);
-            CustomItemWrapper CIW = objectToSecure.GetComponent<CustomItemWrapper>();
+            MeatovItem CIW = objectToSecure.GetComponent<MeatovItem>();
             VanillaItemDescriptor VID = objectToSecure.GetComponent<VanillaItemDescriptor>();
             if (CIW != null)
             {
@@ -418,9 +470,9 @@ namespace EFM
                 }
 
                 // Secure equipment
-                if (Mod.equipmentSlots != null)
+                if (StatusUI.instance.equipmentSlots != null)
                 {
-                    foreach (EquipmentSlot equipSlot in Mod.equipmentSlots)
+                    foreach (EquipmentSlot equipSlot in StatusUI.instance.equipmentSlots)
                     {
                         if (equipSlot != null && equipSlot.CurObject != null)
                         {
@@ -470,7 +522,7 @@ namespace EFM
                 if (EquipmentSlot.wearingBackpack)
                 {
                     Mod.scavRaidReturnItems[2] = EquipmentSlot.currentBackpack.gameObject;
-                    CustomItemWrapper backpackCIW = EquipmentSlot.currentBackpack;
+                    MeatovItem backpackCIW = EquipmentSlot.currentBackpack;
                     FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
                     backpackPhysObj.SetQuickBeltSlot(null);
                     EquipmentSlot.TakeOffEquipment(backpackCIW);
@@ -478,7 +530,7 @@ namespace EFM
                 if (EquipmentSlot.wearingBodyArmor)
                 {
                     Mod.scavRaidReturnItems[3] = EquipmentSlot.currentArmor.gameObject;
-                    CustomItemWrapper bodyArmorCIW = EquipmentSlot.currentArmor;
+                    MeatovItem bodyArmorCIW = EquipmentSlot.currentArmor;
                     FVRPhysicalObject bodyArmorPhysObj = bodyArmorCIW.GetComponent<FVRPhysicalObject>();
                     bodyArmorPhysObj.SetQuickBeltSlot(null);
                     EquipmentSlot.TakeOffEquipment(bodyArmorCIW);
@@ -486,7 +538,7 @@ namespace EFM
                 if (EquipmentSlot.wearingEarpiece)
                 {
                     Mod.scavRaidReturnItems[4] = EquipmentSlot.currentEarpiece.gameObject;
-                    CustomItemWrapper earPieceCIW = EquipmentSlot.currentEarpiece;
+                    MeatovItem earPieceCIW = EquipmentSlot.currentEarpiece;
                     FVRPhysicalObject earPiecePhysObj = earPieceCIW.GetComponent<FVRPhysicalObject>();
                     earPiecePhysObj.SetQuickBeltSlot(null);
                     EquipmentSlot.TakeOffEquipment(earPieceCIW);
@@ -494,7 +546,7 @@ namespace EFM
                 if (EquipmentSlot.wearingHeadwear)
                 {
                     Mod.scavRaidReturnItems[5] = EquipmentSlot.currentHeadwear.gameObject;
-                    CustomItemWrapper headWearCIW = EquipmentSlot.currentHeadwear;
+                    MeatovItem headWearCIW = EquipmentSlot.currentHeadwear;
                     FVRPhysicalObject headWearPhysObj = headWearCIW.GetComponent<FVRPhysicalObject>();
                     headWearPhysObj.SetQuickBeltSlot(null);
                     EquipmentSlot.TakeOffEquipment(headWearCIW);
@@ -502,7 +554,7 @@ namespace EFM
                 if (EquipmentSlot.wearingFaceCover)
                 {
                     Mod.scavRaidReturnItems[6] = EquipmentSlot.currentFaceCover.gameObject;
-                    CustomItemWrapper faceCoverCIW = EquipmentSlot.currentFaceCover;
+                    MeatovItem faceCoverCIW = EquipmentSlot.currentFaceCover;
                     FVRPhysicalObject faceCoverPhysObj = faceCoverCIW.GetComponent<FVRPhysicalObject>();
                     faceCoverPhysObj.SetQuickBeltSlot(null);
                     EquipmentSlot.TakeOffEquipment(faceCoverCIW);
@@ -510,7 +562,7 @@ namespace EFM
                 if (EquipmentSlot.wearingEyewear)
                 {
                     Mod.scavRaidReturnItems[7] = EquipmentSlot.currentEyewear.gameObject;
-                    CustomItemWrapper eyeWearCIW = EquipmentSlot.currentEyewear;
+                    MeatovItem eyeWearCIW = EquipmentSlot.currentEyewear;
                     FVRPhysicalObject eyeWearPhysObj = eyeWearCIW.GetComponent<FVRPhysicalObject>();
                     eyeWearPhysObj.SetQuickBeltSlot(null);
                     EquipmentSlot.TakeOffEquipment(eyeWearCIW);
@@ -518,7 +570,7 @@ namespace EFM
                 if (EquipmentSlot.wearingRig)
                 {
                     Mod.scavRaidReturnItems[8] = EquipmentSlot.currentRig.gameObject;
-                    CustomItemWrapper rigCIW = EquipmentSlot.currentRig;
+                    MeatovItem rigCIW = EquipmentSlot.currentRig;
                     FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
                     rigPhysObj.SetQuickBeltSlot(null);
                     EquipmentSlot.TakeOffEquipment(rigCIW);
@@ -526,7 +578,7 @@ namespace EFM
                 if (EquipmentSlot.wearingPouch)
                 {
                     Mod.scavRaidReturnItems[9] = EquipmentSlot.currentPouch.gameObject;
-                    CustomItemWrapper pouchCIW = EquipmentSlot.currentPouch;
+                    MeatovItem pouchCIW = EquipmentSlot.currentPouch;
                     FVRPhysicalObject pouchPhysObj = pouchCIW.GetComponent<FVRPhysicalObject>();
                     pouchPhysObj.SetQuickBeltSlot(null);
                     EquipmentSlot.TakeOffEquipment(pouchCIW);
@@ -668,7 +720,7 @@ namespace EFM
             }
 
             // Just return if we declared the item as destroyed already, it would mean that we already managed the weight and item lists so we dont want this patch to do it
-            CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
+            MeatovItem CIW = __instance.GetComponent<MeatovItem>();
             VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
             if (CIW != null)
             {
@@ -725,7 +777,7 @@ namespace EFM
                 FVRQuickBeltSlot qbs = physObj.QuickbeltSlot;
                 if (qbs.transform.parent != null && qbs.transform.parent.parent != null && qbs.transform.parent.parent.parent != null)
                 {
-                    CustomItemWrapper customItemWrapper = qbs.transform.parent.parent.parent.GetComponent<CustomItemWrapper>();
+                    MeatovItem customItemWrapper = qbs.transform.parent.parent.parent.GetComponent<MeatovItem>();
                     if (customItemWrapper != null)
                     {
                         if (CIW != null)
@@ -739,7 +791,7 @@ namespace EFM
                                 Mod.RemoveFromPlayerInventory(CIW.transform, false);
 
                                 // Now in hideout
-                                Mod.currentBaseManager.AddToBaseInventory(CIW.transform, false);
+                                HideoutController.instance.AddToBaseInventory(CIW.transform, false);
                             }
                             else if (customItemWrapper.locationIndex == 2)
                             {
@@ -758,7 +810,7 @@ namespace EFM
                                 Mod.RemoveFromPlayerInventory(VID.transform, false);
 
                                 // Now in hideout
-                                Mod.currentBaseManager.AddToBaseInventory(VID.transform, false);
+                                HideoutController.instance.AddToBaseInventory(VID.transform, false);
                             }
                             else if (customItemWrapper.locationIndex == 2)
                             {
@@ -798,7 +850,7 @@ namespace EFM
                 FVRFireArmAttachment asAttachment = (FVRFireArmAttachment)__instance;
                 if (asAttachment.Sensor.CurHoveredMount != null)
                 {
-                    CustomItemWrapper attachmentParentCIW = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<CustomItemWrapper>();
+                    MeatovItem attachmentParentCIW = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<MeatovItem>();
                     VanillaItemDescriptor attachmentParentVID = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<VanillaItemDescriptor>();
 
                     int newLocationIndex = -1;
@@ -819,7 +871,7 @@ namespace EFM
 
                         if (newLocationIndex == 1)
                         {
-                            Mod.currentBaseManager.AddToBaseInventory(__instance.transform, false);
+                            HideoutController.instance.AddToBaseInventory(__instance.transform, false);
                         }
                     }
                 }
@@ -859,7 +911,7 @@ namespace EFM
         private static void DropItem(FVRViveHand hand, FVRPhysicalObject primary)
         {
             Mod.LogInfo("Dropped Item " + primary.name + ":\n" + Environment.StackTrace);
-            CustomItemWrapper collidingContainerWrapper = null;
+            MeatovItem collidingContainerWrapper = null;
             TradeVolume collidingTradeVolume = null;
             if (Mod.rightHand != null)
             {
@@ -877,7 +929,7 @@ namespace EFM
                 }
             }
 
-            CustomItemWrapper heldCustomItemWrapper = primary.GetComponent<CustomItemWrapper>();
+            MeatovItem heldCustomItemWrapper = primary.GetComponent<MeatovItem>();
             VanillaItemDescriptor heldVanillaItemDescriptor = primary.GetComponent<VanillaItemDescriptor>();
 
             // Remove from All if necessary
@@ -906,7 +958,7 @@ namespace EFM
                             Mod.RemoveFromPlayerInventory(heldCustomItemWrapper.transform, false);
 
                             // Now in hideout
-                            Mod.currentBaseManager.AddToBaseInventory(heldCustomItemWrapper.transform, false);
+                            HideoutController.instance.AddToBaseInventory(heldCustomItemWrapper.transform, false);
                         }
                         else
                         {
@@ -914,7 +966,7 @@ namespace EFM
                             Mod.RemoveFromPlayerInventory(heldVanillaItemDescriptor.transform, false);
 
                             // Now in hideout
-                            Mod.currentBaseManager.AddToBaseInventory(heldVanillaItemDescriptor.transform, false);
+                            HideoutController.instance.AddToBaseInventory(heldVanillaItemDescriptor.transform, false);
                         }
                     }
                     else if (collidingContainerWrapper.locationIndex == 2)
@@ -951,7 +1003,7 @@ namespace EFM
                 Mod.RemoveFromPlayerInventory(primary.transform, false);
 
                 // Now in hideout
-                Mod.currentBaseManager.AddToBaseInventory(primary.transform, false);
+                HideoutController.instance.AddToBaseInventory(primary.transform, false);
             }
             else
             {
@@ -959,11 +1011,11 @@ namespace EFM
             }
         }
 
-        private static void DropItemInWorld(FVRPhysicalObject primary, CustomItemWrapper heldCustomItemWrapper, VanillaItemDescriptor heldVanillaItemDescriptor)
+        private static void DropItemInWorld(FVRPhysicalObject primary, MeatovItem heldCustomItemWrapper, VanillaItemDescriptor heldVanillaItemDescriptor)
         {
             // Drop item in world
             GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
-            Base_Manager baseManager = sceneRoot.GetComponent<Base_Manager>();
+            HideoutController baseManager = sceneRoot.GetComponent<HideoutController>();
             Raid_Manager raidManager = sceneRoot.GetComponent<Raid_Manager>();
             if (baseManager != null)
             {
@@ -973,7 +1025,7 @@ namespace EFM
                 Mod.RemoveFromPlayerInventory(primary.transform, false);
 
                 // Now in hideout
-                Mod.currentBaseManager.AddToBaseInventory(primary.transform, false);
+                HideoutController.instance.AddToBaseInventory(primary.transform, false);
 
                 primary.SetParentage(sceneRoot.transform.GetChild(2));
             }
@@ -1244,13 +1296,13 @@ namespace EFM
 
             // Check equip slots if status UI is active
             int equipmentSlotIndex = -1;
-            if (Mod.playerStatusManager != null && Mod.playerStatusManager.displayed && fvrquickBeltSlot == null && Mod.equipmentSlots != null)
+            if (StatusUI.instance != null && StatusUI.instance.IsOpen() && fvrquickBeltSlot == null && StatusUI.instance.equipmentSlots != null)
             {
-                for (int i = 0; i < Mod.equipmentSlots.Count; ++i)
+                for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
                 {
-                    if (Mod.equipmentSlots[i].IsPointInsideMe(position))
+                    if (StatusUI.instance.equipmentSlots[i].IsPointInsideMe(position))
                     {
-                        fvrquickBeltSlot = Mod.equipmentSlots[i];
+                        fvrquickBeltSlot = StatusUI.instance.equipmentSlots[i];
                         equipmentSlotIndex = i;
                         break;
                     }
@@ -1292,14 +1344,14 @@ namespace EFM
             // Check area slots
             if (fvrquickBeltSlot == null && Mod.areaSlots != null)
             {
-                foreach (FVRQuickBeltSlot slot in Mod.areaSlots)
-                {
-                    if (slot != null && slot.transform.parent.gameObject.activeSelf && slot.IsPointInsideMe(position))
-                    {
-                        fvrquickBeltSlot = slot;
-                        break;
-                    }
-                }
+                //foreach (FVRQuickBeltSlot slot in Mod.areaSlots)
+                //{
+                //    if (slot != null && slot.transform.parent.gameObject.activeSelf && slot.IsPointInsideMe(position))
+                //    {
+                //        fvrquickBeltSlot = slot;
+                //        break;
+                //    }
+                //}
             }
 
             if (fvrquickBeltSlot == null)
@@ -1319,10 +1371,10 @@ namespace EFM
                     {
                         __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                     }
-                    else if (shoulderIndex == 0 && Mod.equipmentSlots[0].CurObject != null && !Mod.equipmentSlots[0].CurObject.IsHeld && Mod.equipmentSlots[0].CurObject.IsInteractable())
+                    else if (shoulderIndex == 0 && StatusUI.instance.equipmentSlots[0].CurObject != null && !StatusUI.instance.equipmentSlots[0].CurObject.IsHeld && StatusUI.instance.equipmentSlots[0].CurObject.IsInteractable())
                     {
                         // Set hovered QB slot to backpack equip slot if it is left shoulder and backpack slot is not empty
-                        __instance.CurrentHoveredQuickbeltSlot = Mod.equipmentSlots[0];
+                        __instance.CurrentHoveredQuickbeltSlot = StatusUI.instance.equipmentSlots[0];
                     }
                 }
                 else if (___m_state == FVRViveHand.HandState.GripInteracting && ___m_currentInteractable != null && ___m_currentInteractable is FVRPhysicalObject)
@@ -1331,24 +1383,24 @@ namespace EFM
                     if (fvrquickBeltSlot.CurObject == null && fvrquickBeltSlot.SizeLimit >= fvrphysicalObject.Size && fvrphysicalObject.QBSlotType == fvrquickBeltSlot.Type)
                     {
                         // Check for equipment compatibility if slot is an equipment slot
-                        CustomItemWrapper customItemWrapper = fvrphysicalObject.GetComponent<CustomItemWrapper>();
+                        MeatovItem customItemWrapper = fvrphysicalObject.GetComponent<MeatovItem>();
                         if (equipmentSlotIndex > -1)
                         {
                             if (customItemWrapper != null)
                             {
-                                bool typeCompatible = Mod.equipmentSlots[equipmentSlotIndex].equipmentType == customItemWrapper.itemType;
+                                bool typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == customItemWrapper.itemType;
                                 bool otherCompatible = true;
                                 switch (customItemWrapper.itemType)
                                 {
                                     case Mod.ItemType.ArmoredRig:
-                                        typeCompatible = Mod.equipmentSlots[equipmentSlotIndex].equipmentType == Mod.ItemType.BodyArmor;
+                                        typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == Mod.ItemType.BodyArmor;
                                         otherCompatible = !EquipmentSlot.wearingBodyArmor && !EquipmentSlot.wearingRig;
                                         break;
                                     case Mod.ItemType.BodyArmor:
                                         otherCompatible = !EquipmentSlot.wearingArmoredRig;
                                         break;
                                     case Mod.ItemType.Helmet:
-                                        typeCompatible = Mod.equipmentSlots[equipmentSlotIndex].equipmentType == Mod.ItemType.Headwear;
+                                        typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == Mod.ItemType.Headwear;
                                         otherCompatible = (!EquipmentSlot.wearingEarpiece || !EquipmentSlot.currentEarpiece.blocksHeadwear) &&
                                                           (!EquipmentSlot.wearingFaceCover || !EquipmentSlot.currentFaceCover.blocksHeadwear) &&
                                                           (!EquipmentSlot.wearingEyewear || !EquipmentSlot.currentEyewear.blocksHeadwear);
@@ -1391,7 +1443,7 @@ namespace EFM
                             // If right shoulder, make sure item is a firearm
                             if (shoulderIndex == 0 && customItemWrapper != null && customItemWrapper.itemType == Mod.ItemType.Backpack && EquipmentSlot.currentBackpack == null)
                             {
-                                __instance.CurrentHoveredQuickbeltSlot = Mod.equipmentSlots[0];
+                                __instance.CurrentHoveredQuickbeltSlot = StatusUI.instance.equipmentSlots[0];
                             }
                             else if (shoulderIndex == 1 && fvrphysicalObject is FVRFireArm)
                             {
@@ -1400,7 +1452,7 @@ namespace EFM
                         }
                         else if (fvrquickBeltSlot is AreaSlot)
                         {
-                            AreaSlot asAreaSlot = fvrquickBeltSlot as AreaSlot;
+                            //AreaSlot asAreaSlot = fvrquickBeltSlot as AreaSlot;
                             string IDToUse;
                             if (customItemWrapper != null)
                             {
@@ -1410,10 +1462,10 @@ namespace EFM
                             {
                                 IDToUse = fvrphysicalObject.GetComponent<VanillaItemDescriptor>().H3ID;
                             }
-                            if (asAreaSlot.filter.Contains(IDToUse))
-                            {
-                                __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
-                            }
+                            //if (asAreaSlot.filter.Contains(IDToUse))
+                            //{
+                            //    __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
+                            //}
                         }
                         else
                         {
@@ -1456,7 +1508,7 @@ namespace EFM
                     {
                         if (!(slot as ShoulderStorage).right)
                         {
-                            slot = Mod.equipmentSlots[0]; // Set the slot as the backpack equip slot
+                            slot = StatusUI.instance.equipmentSlots[0]; // Set the slot as the backpack equip slot
                         }
                     }
                 }
@@ -1475,7 +1527,7 @@ namespace EFM
                 __instance.transform.localScale = Vector3.one;
 
                 // Prefix will be called before the object's current slot is set to null, so we can check if it was taken from an equipment slot or a rig slot
-                CustomItemWrapper customItemWrapper = __instance.GetComponent<CustomItemWrapper>();
+                MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
                 if (__instance.QuickbeltSlot is EquipmentSlot)
                 {
                     // Have to remove equipment
@@ -1485,7 +1537,7 @@ namespace EFM
                     }
 
                     // Also set left shoulder object to null if this is backpack slot
-                    if (__instance.QuickbeltSlot.Equals(Mod.equipmentSlots[0]))
+                    if (__instance.QuickbeltSlot.Equals(StatusUI.instance.equipmentSlots[0]))
                     {
                         Mod.leftShoulderObject = null;
                     }
@@ -1506,14 +1558,14 @@ namespace EFM
                 }
                 else if (__instance.QuickbeltSlot is AreaSlot)
                 {
-                    AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
-                    Mod.currentBaseManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = null;
+                    //AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
+                    //Mod.currentHideoutManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = null;
 
                     if (Mod.areaSlotShouldUpdate)
                     {
                         BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
 
-                        areaManager.slotItems[asAreaSlot.slotIndex] = null;
+                        //areaManager.slotItems[asAreaSlot.slotIndex] = null;
 
                         areaManager.UpdateBasedOnSlots();
                     }
@@ -1541,7 +1593,7 @@ namespace EFM
                         Transform rootOwner = slotRootParent.parent;
                         if (rootOwner != null)
                         {
-                            CustomItemWrapper rigItemWrapper = rootOwner.GetComponent<CustomItemWrapper>();
+                            MeatovItem rigItemWrapper = rootOwner.GetComponent<MeatovItem>();
                             if (rigItemWrapper != null && (rigItemWrapper.itemType == Mod.ItemType.Rig || rigItemWrapper.itemType == Mod.ItemType.ArmoredRig))
                             {
                                 // This slot is owned by a rig, need to update that rig's content
@@ -1586,12 +1638,12 @@ namespace EFM
                 {
                     if (!(slot as ShoulderStorage).right)
                     {
-                        slot = Mod.equipmentSlots[0]; // Set the slot as the backpack equip slot
+                        slot = StatusUI.instance.equipmentSlots[0]; // Set the slot as the backpack equip slot
                     }
                 }
 
                 // Add to All if necessary
-                CustomItemWrapper customItemWrapper = __instance.GetComponent<CustomItemWrapper>();
+                MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
                 VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<VanillaItemDescriptor>();
                 if (customItemWrapper != null)
                 {
@@ -1624,8 +1676,8 @@ namespace EFM
                     // This is for in case we harnessed backpack to the shoulder slot
                     if (slot is EquipmentSlot && __instance.m_hand == null)
                     {
-                        __instance.gameObject.SetActive(Mod.playerStatusManager.displayed);
-                        __instance.GetComponent<CustomItemWrapper>().UpdateBackpackMode();
+                        __instance.gameObject.SetActive(StatusUI.instance.IsOpen());
+                        __instance.GetComponent<MeatovItem>().UpdateBackpackMode();
                     }
                 }
 
@@ -1672,14 +1724,14 @@ namespace EFM
 
             if (slot is AreaSlot)
             {
-                AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
-                Mod.currentBaseManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
+                //AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
+                //Mod.currentHideoutManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
 
                 if (Mod.areaSlotShouldUpdate)
                 {
                     BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
 
-                    areaManager.slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
+                    //areaManager.slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
 
                     areaManager.UpdateBasedOnSlots();
 
@@ -1704,14 +1756,14 @@ namespace EFM
                 }
 
                 // If this is backpack slot, also set left shoulder to the object
-                if (slot.Equals(Mod.equipmentSlots[0]))
+                if (slot.Equals(StatusUI.instance.equipmentSlots[0]))
                 {
                     Mod.leftShoulderObject = __instance.gameObject;
                 }
 
-                EquipmentSlot.WearEquipment(__instance.GetComponent<CustomItemWrapper>());
+                EquipmentSlot.WearEquipment(__instance.GetComponent<MeatovItem>());
 
-                __instance.gameObject.SetActive(Mod.playerStatusManager.displayed);
+                __instance.gameObject.SetActive(StatusUI.instance.IsOpen());
             }
             else if (EquipmentSlot.wearingArmoredRig || EquipmentSlot.wearingRig) // We are wearing custom quick belt, check if slot is in there, update if it is
             {
@@ -1721,9 +1773,9 @@ namespace EFM
                 {
                     if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex].Equals(slot))
                     {
-                        CustomItemWrapper equipmentItemWrapper = EquipmentSlot.currentRig;
+                        MeatovItem equipmentItemWrapper = EquipmentSlot.currentRig;
                         equipmentItemWrapper.itemsInSlots[slotIndex - 4] = __instance.gameObject;
-                        equipmentItemWrapper.currentWeight += __instance.GetComponent<CustomItemWrapper>() != null ? __instance.GetComponent<CustomItemWrapper>().currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
+                        equipmentItemWrapper.currentWeight += __instance.GetComponent<MeatovItem>() != null ? __instance.GetComponent<MeatovItem>().currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
                         equipmentItemWrapper.UpdateRigMode();
 
                         foundSlot = true;
@@ -1750,7 +1802,7 @@ namespace EFM
                 Transform rootOwner = slotRootParent.parent;
                 if (rootOwner != null)
                 {
-                    CustomItemWrapper customItemWrapper = rootOwner.GetComponent<CustomItemWrapper>();
+                    MeatovItem customItemWrapper = rootOwner.GetComponent<MeatovItem>();
                     if (customItemWrapper != null && (customItemWrapper.itemType == Mod.ItemType.Rig || customItemWrapper.itemType == Mod.ItemType.ArmoredRig))
                     {
                         // This slot is owned by a rig, need to update that rig's content
@@ -1769,7 +1821,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    customItemWrapper.currentWeight += __instance.GetComponent<CustomItemWrapper>() != null ? __instance.GetComponent<CustomItemWrapper>().currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
+                                    customItemWrapper.currentWeight += __instance.GetComponent<MeatovItem>() != null ? __instance.GetComponent<MeatovItem>().currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
                                 }
                                 return;
                             }
@@ -1811,7 +1863,7 @@ namespace EFM
             }
 
             VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<VanillaItemDescriptor>();
-            CustomItemWrapper customItemWrapper = __instance.GetComponent<CustomItemWrapper>();
+            MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
             if (customItemWrapper != null)
             {
                 // Add to All if necessary
@@ -1919,7 +1971,7 @@ namespace EFM
                 if (customItemWrapper.locationIndex == 1)
                 {
                     // Was in hideout
-                    Mod.currentBaseManager.RemoveFromBaseInventory(customItemWrapper.transform, false);
+                    HideoutController.instance.RemoveFromBaseInventory(customItemWrapper.transform, false);
 
                     // Now on player
                     Mod.AddToPlayerInventory(customItemWrapper.transform, false);
@@ -1943,7 +1995,7 @@ namespace EFM
                     // Update locationIndex
                     SetItemLocationIndex(0, customItemWrapper, null, true);
 
-                    //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentBaseManager.baseAreaManagers)
+                    //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentHideoutManager.baseAreaManagers)
                     //{
                     //    baseAreaManager.UpdateBasedOnItem(customItemWrapper.ID);
                     //}
@@ -1993,9 +2045,9 @@ namespace EFM
                 {
                     Mod.LogInfo("\tWas in hideout");
                     // Was in hideout
-                    if (Mod.currentBaseManager != null)
+                    if (HideoutController.instance != null)
                     {
-                        Mod.currentBaseManager.RemoveFromBaseInventory(vanillaItemDescriptor.transform, false);
+                        HideoutController.instance.RemoveFromBaseInventory(vanillaItemDescriptor.transform, false);
                     }
                     else
                     {
@@ -2026,7 +2078,7 @@ namespace EFM
                     // Update locationIndex
                     SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
 
-                    //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentBaseManager.baseAreaManagers)
+                    //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentHideoutManager.baseAreaManagers)
                     //{
                     //    baseAreaManager.UpdateBasedOnItem(vanillaItemDescriptor.H3ID);
                     //}
@@ -2055,11 +2107,11 @@ namespace EFM
                     }
                 }
 
-                tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<CustomItemWrapper>(), __instance.GetComponent<VanillaItemDescriptor>());
+                tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<MeatovItem>(), __instance.GetComponent<VanillaItemDescriptor>());
             }
             else if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
             {
-                CustomItemWrapper containerItemWrapper = __instance.transform.parent.parent.GetComponent<CustomItemWrapper>();
+                MeatovItem containerItemWrapper = __instance.transform.parent.parent.GetComponent<MeatovItem>();
                 if (containerItemWrapper != null && (containerItemWrapper.itemType == Mod.ItemType.Backpack ||
                                                     containerItemWrapper.itemType == Mod.ItemType.Container ||
                                                     containerItemWrapper.itemType == Mod.ItemType.Pouch))
@@ -2089,7 +2141,7 @@ namespace EFM
             }
         }
 
-        public static void SetItemLocationIndex(int locationIndex, CustomItemWrapper customItemWrapper, VanillaItemDescriptor vanillaItemDescriptor, bool updateWeight = true)
+        public static void SetItemLocationIndex(int locationIndex, MeatovItem customItemWrapper, VanillaItemDescriptor vanillaItemDescriptor, bool updateWeight = true)
         {
             if (customItemWrapper != null)
             {
@@ -2115,7 +2167,7 @@ namespace EFM
                     {
                         if (innerItem != null)
                         {
-                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<CustomItemWrapper>(), innerItem.GetComponent<VanillaItemDescriptor>(), false);
+                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<MeatovItem>(), innerItem.GetComponent<VanillaItemDescriptor>(), false);
                         }
                     }
                 }
@@ -2123,7 +2175,7 @@ namespace EFM
                 {
                     foreach (Transform innerItem in customItemWrapper.containerItemRoot)
                     {
-                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<CustomItemWrapper>(), innerItem.GetComponent<VanillaItemDescriptor>(), false);
+                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<MeatovItem>(), innerItem.GetComponent<VanillaItemDescriptor>(), false);
                     }
                 }
             }
@@ -3282,10 +3334,10 @@ namespace EFM
         {
             // If grillhouseSecure, it means we are currently loading into grillhouse but it is not a meatov scene, so need to check also because
             // although this is not a meatov scene, we still dont want to init doors if initDoors == false
-            if (!Mod.inMeatovScene && !Mod.grillHouseSecure)
-            {
-                return true;
-            }
+            //if (!Mod.inMeatovScene && !Mod.grillHouseSecure)
+            //{
+            //    return true;
+            //}
 
             if (!Mod.initDoors)
             {
@@ -3685,7 +3737,7 @@ namespace EFM
                     // Because this will also be checked in meatov menu, the patch will run, but they havent been init yet at that point
                     if ((__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange) && Mod.rightDescriptionManager != null)
                     {
-                        Describable describable = __instance.CurrentInteractable.GetComponent<Describable>();
+                        IDescribable describable = __instance.CurrentInteractable.GetComponent<IDescribable>();
                         if (describable != null)
                         {
                             // Get the description currently on this hand
@@ -3700,7 +3752,7 @@ namespace EFM
                             }
 
                             // Get item and check if the one we are pointing at is already being described
-                            Describable describableToUse = null;
+                            IDescribable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
                                 if (manager.descriptionPack.isPhysical)
@@ -3811,7 +3863,7 @@ namespace EFM
                     bool flag3 = false;
                     bool pointNonGrabbableDescribable = false;
                     FVRPhysicalObject fvrphysicalObject = null;
-                    Describable nonGrabbableDescribable = null;
+                    IDescribable nonGrabbableDescribable = null;
                     if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out ___m_grabHit, 3f, __instance.GrabLaserMask, QueryTriggerInteraction.Collide))
                     {
                         if (___m_grabHit.collider.attachedRigidbody != null && ___m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<FVRPhysicalObject>())
@@ -3822,9 +3874,9 @@ namespace EFM
                                 flag3 = true;
                             }
                         }
-                        else if (___m_grabHit.collider.GetComponent<Describable>() != null)
+                        else if (___m_grabHit.collider.GetComponent<IDescribable>() != null)
                         {
-                            nonGrabbableDescribable = ___m_grabHit.collider.GetComponent<Describable>();
+                            nonGrabbableDescribable = ___m_grabHit.collider.GetComponent<IDescribable>();
                             pointNonGrabbableDescribable = true;
                         }
                         __instance.GrabLaser.localScale = new Vector3(0.004f, 0.004f, ___m_grabHit.distance) * d;
@@ -3838,7 +3890,7 @@ namespace EFM
                     if (flag3)
                     {
                         // Display summary description of object if describable and if not already displayed
-                        Describable describable = fvrphysicalObject.GetComponent<Describable>();
+                        IDescribable describable = fvrphysicalObject.GetComponent<IDescribable>();
                         if (describable != null && Mod.rightDescriptionManager != null)
                         {
                             // Get the description currently on this hand
@@ -3853,7 +3905,7 @@ namespace EFM
                             }
 
                             // Get item and check if the one we are pointing at is already being described
-                            Describable describableToUse = null;
+                            IDescribable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
                                 if (manager.descriptionPack.isPhysical)
@@ -3929,7 +3981,7 @@ namespace EFM
                             }
 
                             // Get item and check if the one we are pointing at is already being described
-                            Describable describableToUse = null;
+                            IDescribable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
                                 if (manager.descriptionPack.isPhysical)
@@ -4058,10 +4110,10 @@ namespace EFM
                         else if (__instance.CurrentHoveredQuickbeltSlot != null &&
                                  __instance.CurrentHoveredQuickbeltSlot is ShoulderStorage &&
                                  !(__instance.CurrentHoveredQuickbeltSlot as ShoulderStorage).right &&
-                                 Mod.equipmentSlots[0].CurObject != null)
+                                 StatusUI.instance.equipmentSlots[0].CurObject != null)
                         {
                             // If we are hovering over left shoulder slot and backpack slot is not empty we want to grab backpack
-                            __instance.CurrentInteractable = Mod.equipmentSlots[0].CurObject;
+                            __instance.CurrentInteractable = StatusUI.instance.equipmentSlots[0].CurObject;
                             ___m_state = FVRViveHand.HandState.GripInteracting;
                             __instance.CurrentInteractable.BeginInteraction(__instance);
                             __instance.Buzz(__instance.Buzzer.Buzz_BeginInteraction);
@@ -4354,7 +4406,7 @@ namespace EFM
                     if (Mod.currentLocationIndex == 1)
                     {
                         // Now in hideout
-                        Mod.currentBaseManager.AddToBaseInventory(vanillaItemDescriptor.transform, true);
+                        HideoutController.instance.AddToBaseInventory(vanillaItemDescriptor.transform, true);
 
                         latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(2);
                     }
@@ -4448,7 +4500,7 @@ namespace EFM
                     if (Mod.currentLocationIndex == 1)
                     {
                         // Now in hideout
-                        Mod.currentBaseManager.AddToBaseInventory(vanillaItemDescriptor.transform, true);
+                        HideoutController.instance.AddToBaseInventory(vanillaItemDescriptor.transform, true);
 
                         latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(2);
                     }
@@ -5087,7 +5139,7 @@ namespace EFM
             // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
             // locationIndex so we know when to add/remove weight from player also
             VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
-            CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
+            MeatovItem CIW = __instance.GetComponent<MeatovItem>();
             if (VID != null)
             {
                 //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
@@ -5154,7 +5206,7 @@ namespace EFM
             // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
             // locationIndex so we know when to add/remove weight from player also
             VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
-            CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
+            MeatovItem CIW = __instance.GetComponent<MeatovItem>();
             if (VID != null)
             {
                 //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
@@ -5221,7 +5273,7 @@ namespace EFM
             // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
             // locationIndex so we know when to add/remove weight from player also
             VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
-            CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
+            MeatovItem CIW = __instance.GetComponent<MeatovItem>();
             if (VID != null)
             {
                 //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
@@ -5462,7 +5514,7 @@ namespace EFM
                         // Transfered from hideout to player, dont want to consider it in player inventory because it is in firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            Mod.currentBaseManager.RemoveFromBaseInventory(magVID.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(magVID.transform, true);
                         }
                     }
                     else if (fireArmVID.locationIndex == 1) // Hideout
@@ -5470,7 +5522,7 @@ namespace EFM
                         // Transfered from hideout to hideout, dont want to consider it in base inventory because it is in firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            Mod.currentBaseManager.RemoveFromBaseInventory(magVID.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(magVID.transform, true);
                         }
                     }
                     else // Raid
@@ -5540,7 +5592,7 @@ namespace EFM
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from player to hideout
-                    Mod.currentBaseManager.AddToBaseInventory(preMagVID.transform, true);
+                    HideoutController.instance.AddToBaseInventory(preMagVID.transform, true);
                 }
                 else
                 {
@@ -5557,7 +5609,7 @@ namespace EFM
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from hideout to hideout
-                    Mod.currentBaseManager.AddToBaseInventory(preMagVID.transform, true);
+                    HideoutController.instance.AddToBaseInventory(preMagVID.transform, true);
                 }
                 else
                 {
@@ -5682,7 +5734,7 @@ namespace EFM
                         // Transfered from hideout to player, dont want to consider it in player inventory because it is in firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            Mod.currentBaseManager.RemoveFromBaseInventory(clipVID.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(clipVID.transform, true);
                         }
                     }
                     else if (fireArmVID.locationIndex == 1) // Hideout
@@ -5690,7 +5742,7 @@ namespace EFM
                         // Transfered from hideout to hideout, dont want to consider it in base inventory because it is in firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            Mod.currentBaseManager.RemoveFromBaseInventory(clipVID.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(clipVID.transform, true);
                         }
                     }
                     else // Raid
@@ -5759,7 +5811,7 @@ namespace EFM
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from player to hideout
-                    Mod.currentBaseManager.AddToBaseInventory(preClipVID.transform, true);
+                    HideoutController.instance.AddToBaseInventory(preClipVID.transform, true);
                 }
                 else
                 {
@@ -5776,7 +5828,7 @@ namespace EFM
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from hideout to hideout
-                    Mod.currentBaseManager.AddToBaseInventory(preClipVID.transform, true);
+                    HideoutController.instance.AddToBaseInventory(preClipVID.transform, true);
                 }
                 else
                 {
@@ -6130,7 +6182,7 @@ namespace EFM
                 if (Mod.currentLocationIndex == 1)
                 {
                     // Now in hideout
-                    Mod.currentBaseManager.AddToBaseInventory(vanillaItemDescriptor.transform, true);
+                    HideoutController.instance.AddToBaseInventory(vanillaItemDescriptor.transform, true);
 
                     __result.transform.parent = sceneRoot.transform.GetChild(2);
                 }
@@ -6209,7 +6261,7 @@ namespace EFM
                 }
                 else
                 {
-                    CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
+                    MeatovItem CIW = __instance.GetComponent<MeatovItem>();
                     //string[] soundCategories = new string[] { "drop", "pickup", "offline_use", "open", "use", "use_loop" };
                     if (CIW != null && CIW.itemSounds != null && CIW.itemSounds[1] != null)
                     {
@@ -6245,7 +6297,7 @@ namespace EFM
                 }
                 else
                 {
-                    CustomItemWrapper CIW = __instance.GetComponent<CustomItemWrapper>();
+                    MeatovItem CIW = __instance.GetComponent<MeatovItem>();
                     //string[] soundCategories = new string[] { "drop", "pickup", "offline_use", "open", "use", "use_loop" };
                     if (CIW != null && CIW.itemSounds != null && CIW.itemSounds[0] != null)
                     {
@@ -6399,7 +6451,7 @@ namespace EFM
             Hand handToUse = __instance.GetComponent<Hand>();
             if (___m_currentInteractable != null)
             {
-                handToUse.CIW = ___m_currentInteractable.GetComponent<CustomItemWrapper>();
+                handToUse.CIW = ___m_currentInteractable.GetComponent<MeatovItem>();
                 handToUse.VID = ___m_currentInteractable.GetComponent<VanillaItemDescriptor>();
                 handToUse.custom = handToUse.CIW != null;
                 handToUse.hasScript = handToUse.custom || handToUse.VID != null;
@@ -6602,7 +6654,7 @@ namespace EFM
                         }
                         if (!isHoldingAllowedWeapon)
                         {
-                            CustomItemWrapper CIW = rightInteractable.GetComponent<CustomItemWrapper>();
+                            MeatovItem CIW = rightInteractable.GetComponent<MeatovItem>();
                             if (CIW != null)
                             {
                                 foreach (string parent in CIW.parents)
@@ -6635,7 +6687,7 @@ namespace EFM
                             }
                             if (!isHoldingAllowedWeapon)
                             {
-                                CustomItemWrapper CIW = leftInteractable.GetComponent<CustomItemWrapper>();
+                                MeatovItem CIW = leftInteractable.GetComponent<MeatovItem>();
                                 if (CIW != null)
                                 {
                                     foreach (string parent in CIW.parents)

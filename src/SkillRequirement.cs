@@ -3,13 +3,12 @@ using UnityEngine.UI;
 
 namespace EFM
 {
-    public class AreaRequirement : MonoBehaviour
+    public class SkillRequirement : MonoBehaviour
     {
-        public Sprite[] areaIcons;
-        public Image areaIcon;
+        public Sprite[] skillIcons;
+        public Image skillIcon;
         public GameObject elite;
-        public Text requiredLevel;
-        public Text areaName;
+        public Text rankText;
         public GameObject unfulfilled;
         public GameObject fulfilled;
     }

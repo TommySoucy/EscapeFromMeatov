@@ -11,7 +11,7 @@ namespace EFM
     {
 		public Renderer mainContainerRenderer;
 		public Transform itemsRoot;
-		public List<CustomItemWrapper.ResetColPair> resetColPairs;
+		public List<MeatovItem.ResetColPair> resetColPairs;
 		public MarketManager market;
 
 		public void SetContainerHovered(bool hovered)
@@ -27,10 +27,10 @@ namespace EFM
 			Mod.LogInfo("got cols");
 			if (resetColPairs == null)
 			{
-				resetColPairs = new List<CustomItemWrapper.ResetColPair>();
+				resetColPairs = new List<MeatovItem.ResetColPair>();
 			}
 			Mod.LogInfo("0");
-			CustomItemWrapper.ResetColPair resetColPair = null;
+			MeatovItem.ResetColPair resetColPair = null;
 			Mod.LogInfo("0");
 			foreach (Collider col in cols)
 			{
@@ -45,7 +45,7 @@ namespace EFM
 					if (resetColPair == null)
 					{
 						Mod.LogInfo("first, making new pair");
-						resetColPair = new CustomItemWrapper.ResetColPair();
+						resetColPair = new MeatovItem.ResetColPair();
 						resetColPair.physObj = item;
 						resetColPair.colliders = new List<Collider>();
 					}

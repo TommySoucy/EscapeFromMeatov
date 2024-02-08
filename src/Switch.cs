@@ -1,89 +1,63 @@
-﻿using System;
+﻿using FistVR;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace EFM
 {
-    public class Switch : MonoBehaviour
+    public class Switch : FVRInteractiveObject
     {
-        public int mode; // 0: Toggle gameObjects, 1: Power, 2: UI, 3: Market toggle, 4: Lights
-        public AudioSource audioSource;
-
-        // 0
-        public List<GameObject> gameObjects;
-
-        // 2
-        private bool active = true;
-
-        // 4
-        public AudioSource level2AudioSource;
-        public AudioSource level3AudioSource;
-
-        public void Activate()
+        public AreaController areaController;
+        [NonSerialized]
+        public bool init;
+        public enum Mode
         {
+            GameObjects,
+            Power
+        }
+        public Mode mode;
+        public AudioSource audioSource;
+        public bool active;
+        public List<GameObject> gameObjects;
+        public List<GameObject> negativeGameObjects;
+
+        public override void Start()
+        {
+            base.Start();
+
+            SimpleInteraction(null);
+
+            init = true;
+        }
+
+        public override void SimpleInteraction(FVRViveHand hand)
+        {
+            if(init && audioSource != null)
+            {
+                audioSource.Play();
+            }
+
             switch (mode)
             {
-                case 0:
-                    foreach(GameObject go in gameObjects)
+                case Mode.GameObjects:
+                    if (init)
                     {
-                        go.SetActive(!go.activeSelf);
+                        active = !active;
                     }
-                    break;
-                case 1:
-                    BaseAreaManager.ToggleGenerator();
-                    break;
-                case 2:
-                    active = !active;
-                    for (int i=0; i < gameObjects.Count; ++i)
-                    {
-                        if(i < gameObjects.Count - 1)
-                        {
-                            gameObjects[i].SetActive(active && !Base_Manager.marketUI);
-                        }
-                        else
-                        {
-                            gameObjects[i].SetActive(active && Base_Manager.marketUI);
-                        }
-                    }
-                    break;
-                case 3:
-                    bool currentlyActive = gameObjects[0].activeSelf || gameObjects[gameObjects.Count - 1].activeSelf;
-                    Base_Manager.marketUI = !Base_Manager.marketUI;
-                    for (int i=0; i < gameObjects.Count; ++i)
-                    {
-                        if(i < gameObjects.Count - 1)
-                        {
-                            gameObjects[i].SetActive(currentlyActive && !Base_Manager.marketUI);
-                        }
-                        else
-                        {
-                            gameObjects[i].SetActive(currentlyActive && Base_Manager.marketUI);
-                        }
-                    }
-                    break;
-                case 4:
                     foreach (GameObject go in gameObjects)
                     {
-                        go.SetActive(!go.activeSelf);
+                        go.SetActive(active);
                     }
-                    if(Mod.currentBaseManager.baseAreaManagers[15].level == 2)
+                    foreach (GameObject go in negativeGameObjects)
                     {
-                        level2AudioSource.Play();
+                        go.SetActive(!active);
                     }
-                    else if(Mod.currentBaseManager.baseAreaManagers[15].level == 3)
-                    {
-                        level3AudioSource.Play();
-                    }
+                    break;
+                case Mode.Power:
+                    areaController.TogglePower();
                     break;
                 default:
                     break;
-            }
-
-            if(audioSource != null)
-            {
-                audioSource.Play();
             }
         }
     }

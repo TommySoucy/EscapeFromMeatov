@@ -9,7 +9,7 @@ namespace EFM
 {
     public class StackTrigger : MonoBehaviour
     {
-        public CustomItemWrapper stackableWrapper;
+        public MeatovItem stackableWrapper;
         public bool stacked;
         public void OnTriggerEnter(Collider collider)
         {
@@ -22,7 +22,7 @@ namespace EFM
             StackTrigger otherStackTrigger = collider.GetComponent<StackTrigger>();
             if (otherStackTrigger != null)
             {
-                CustomItemWrapper otherItemWrapper = otherStackTrigger.stackableWrapper;
+                MeatovItem otherItemWrapper = otherStackTrigger.stackableWrapper;
 
                 // Make sure the items have same ID
                 if (stackableWrapper.ID == otherItemWrapper.ID)
@@ -63,7 +63,7 @@ namespace EFM
 
         private void StackOnThis(StackTrigger otherStackTrigger)
         {
-            CustomItemWrapper otherItemWrapper = otherStackTrigger.stackableWrapper;
+            MeatovItem otherItemWrapper = otherStackTrigger.stackableWrapper;
             int newStack = stackableWrapper.stack + otherItemWrapper.stack;
             if (newStack <= stackableWrapper.maxStack)
             {
@@ -86,7 +86,7 @@ namespace EFM
 
         private void StackOnOther(StackTrigger otherStackTrigger)
         {
-            CustomItemWrapper otherItemWrapper = otherStackTrigger.stackableWrapper;
+            MeatovItem otherItemWrapper = otherStackTrigger.stackableWrapper;
             int newStack = stackableWrapper.stack + otherItemWrapper.stack;
             if (newStack <= otherItemWrapper.maxStack)
             {

@@ -1,23 +1,23 @@
-﻿using FistVR;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
-    public abstract class Manager : MonoBehaviour
+    public abstract class UIController : MonoBehaviour
     {
+        [NonSerialized]
         public bool init;
 
-        public static bool hideoutLoaded;
-        public static int meatovTimeMultiplier = 7;
+        [NonSerialized]
         public static List<int> availableSaveFiles;
 
+        public static int meatovTimeMultiplier = 7;
         public static JObject loadedData;
 
-        public virtual void Init()
+        public virtual void Awake()
         {
             FetchAvailableSaveFiles();
 
@@ -27,7 +27,7 @@ namespace EFM
         }
 
         // This should be called everytime we save because there may be a new save available
-        protected void FetchAvailableSaveFiles()
+        public void FetchAvailableSaveFiles()
         {
             if(availableSaveFiles == null)
             {
@@ -37,7 +37,7 @@ namespace EFM
             {
                 availableSaveFiles.Clear();
             }
-            string[] allFiles = Directory.GetFiles(Mod.path + "/EscapeFromMeatov");
+            string[] allFiles = Directory.GetFiles(Mod.path + "/Saves");
             foreach (string path in allFiles)
             {
                 if (path.EndsWith(".sav")) // If .sav is present as the last part of the path
@@ -54,21 +54,22 @@ namespace EFM
             }
         }
 
-        public static void LoadBase(int slotIndex = -1, bool latest = false)
+        public static void LoadHideout(int slotIndex = -1, bool latest = false)
         {
-            Mod.LogInfo("Loadbase called");
-
-            Mod.currentLocationIndex = 1;
+            Mod.LogInfo("LoadHideout called");
 
             // Load base asset bundle
-            if (!hideoutLoaded)
+            if (Mod.hideoutBundle == null)
             {
-                Mod.LogInfo("base null, loading bundle from file for first time");
-                Mod.baseAssetsBundle = AssetBundle.LoadFromFile(Mod.path + "/EscapeFromMeatovHideoutAssets.ab");
-                Mod.LogInfo("Loaded hideout bunble from file, loading hideout prefab");
-                Mod.baseBundle = AssetBundle.LoadFromFile(Mod.path + "/EscapeFromMeatovHideout.ab");
-                Mod.LogInfo("Loaded hideout prefab");
-                hideoutLoaded = true;
+                Mod.LogInfo("Loading main asset bundles");
+                Mod.assetsBundles = new AssetBundle[2];
+                Mod.assetsBundles[0] = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMAssets0.ab");
+                //Mod.assetsBundles[1] = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMAssets1.ab");
+                Mod.LogInfo("Loading hideout bundle");
+                Mod.hideoutBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMHideout.ab");
+                Mod.LogInfo("Loaded hideout bundles");
+
+                Mod.playerStatusUIPrefab = Mod.assetsBundles[0].LoadAsset<GameObject>("StatusUI");
             }
 
             if (availableSaveFiles == null)
@@ -86,7 +87,7 @@ namespace EFM
                     for (int i = 0; i < availableSaveFiles.Count; ++i)
                     {
                         int fileIndex = availableSaveFiles[i];
-                        JObject current = JObject.Parse(File.ReadAllText(Mod.path + "/EscapeFromMeatov/" + (fileIndex == 5 ? "AutoSave" : "Slot" + fileIndex) + ".sav"));
+                        JObject current = JObject.Parse(File.ReadAllText(Mod.path + "/Saves/" + (fileIndex == 5 ? "AutoSave" : "Slot" + fileIndex) + ".sav"));
                         long saveTime = (long)current["time"];
                         if (saveTime > currentLatestTime)
                         {
@@ -100,11 +101,11 @@ namespace EFM
             }
             else
             {
-                loadedData = JObject.Parse(File.ReadAllText(Mod.path + "/EscapeFromMeatov/" + (slotIndex == 5 ? "AutoSave" : "Slot" + slotIndex) + ".sav"));
+                loadedData = JObject.Parse(File.ReadAllText(Mod.path + "/Saves/" + (slotIndex == 5 ? "AutoSave" : "Slot" + slotIndex) + ".sav"));
                 Mod.saveSlotIndex = slotIndex;
             }
 
-            SteamVR_LoadLevel.Begin("MeatovHideoutScene", false, 0.5f, 0f, 0f, 0f, 1f);
+            SteamVR_LoadLevel.Begin("MeatovHideout", false, 0.5f, 0f, 0f, 0f, 1f);
         }
 
         public abstract void InitUI();

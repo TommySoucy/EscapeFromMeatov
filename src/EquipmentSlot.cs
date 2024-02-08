@@ -8,24 +8,24 @@ namespace EFM
     public class EquipmentSlot : FVRQuickBeltSlot
     {
         public static bool wearingHeadwear;
-        public static CustomItemWrapper currentHeadwear;
+        public static MeatovItem currentHeadwear;
         public static bool wearingBodyArmor;
-        public static CustomItemWrapper currentArmor;
+        public static MeatovItem currentArmor;
         public static bool wearingRig;
-        public static CustomItemWrapper currentRig;
+        public static MeatovItem currentRig;
         public static bool wearingArmoredRig;
         public static bool wearingBackpack;
-        public static CustomItemWrapper currentBackpack;
+        public static MeatovItem currentBackpack;
         public static bool wearingPouch;
-        public static CustomItemWrapper currentPouch;
+        public static MeatovItem currentPouch;
         public static bool wearingEarpiece;
-        public static CustomItemWrapper currentEarpiece;
+        public static MeatovItem currentEarpiece;
         public static bool wearingFaceCover;
-        public static CustomItemWrapper currentFaceCover;
+        public static MeatovItem currentFaceCover;
         public static bool wearingEyewear;
-        public static CustomItemWrapper currentEyewear;
+        public static MeatovItem currentEyewear;
 
-        public static void WearEquipment(CustomItemWrapper customItemWrapper)
+        public static void WearEquipment(MeatovItem customItemWrapper)
         {
             Mod.LogInfo("WearEquipment called on " + customItemWrapper.gameObject.name);
             //EFM_CustomItemWrapper customItemWrapper = CurObject.GetComponentInChildren<EFM_CustomItemWrapper>();
@@ -116,7 +116,7 @@ namespace EFM
             }
         }
 
-        public static void TakeOffEquipment(CustomItemWrapper customItemWrapper)
+        public static void TakeOffEquipment(MeatovItem customItemWrapper)
         {
             //EFM_CustomItemWrapper customItemWrapper = objectLastFrame.GetComponentInChildren<EFM_CustomItemWrapper>();
             if (customItemWrapper != null)
@@ -190,7 +190,7 @@ namespace EFM
             }
         }
 
-        private static void EquipRig(CustomItemWrapper customItemWrapper)
+        private static void EquipRig(MeatovItem customItemWrapper)
         {
             Mod.LogInfo("Equip rig called on "+customItemWrapper.gameObject.name);
             // Load the config

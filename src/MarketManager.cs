@@ -13,7 +13,7 @@ namespace EFM
     {
         public bool init;
 
-        public Base_Manager baseManager;
+        public HideoutController baseManager;
 
         public TradeVolume tradeVolume;
         public AudioSource clickAudio;
@@ -186,7 +186,7 @@ namespace EFM
             }
         }
 
-        public void Init(Base_Manager baseManager)
+        public void Init(HideoutController baseManager)
         {
             this.baseManager = baseManager;
 
@@ -208,7 +208,7 @@ namespace EFM
             // Init trade volume inventory
             foreach (Transform itemTransform in tradeVolume.itemsRoot)
             {
-                CustomItemWrapper CIW = itemTransform.GetComponent<CustomItemWrapper>();
+                MeatovItem CIW = itemTransform.GetComponent<MeatovItem>();
                 VanillaItemDescriptor VID = itemTransform.GetComponent<VanillaItemDescriptor>();
                 if (CIW != null)
                 {
@@ -565,7 +565,7 @@ namespace EFM
 
             Mod.LogInfo("0");
             // Top
-            traderDisplay.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[index];
+            traderDisplay.GetChild(0).GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[index];
             if(loyaltyDetails.currentLevel < 4)
             {
                 // Trader details
@@ -589,7 +589,7 @@ namespace EFM
                 traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(false);
             }
             traderDisplay.GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = string.Format("{0:0.00}", trader.standing);
-            traderDisplay.GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetComponent<Image>().sprite = trader.currency == 0 ? Base_Manager.roubleCurrencySprite : Base_Manager.dollarCurrencySprite;
+            traderDisplay.GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetComponent<Image>().sprite = trader.currency == 0 ? HideoutController.roubleCurrencySprite : HideoutController.dollarCurrencySprite;
             // TODO: Set total amount of money the trader has, here we just disable the number for now because we dont use it
             traderDisplay.GetChild(0).GetChild(1).GetChild(2).GetChild(1).gameObject.SetActive(false);
 
@@ -788,19 +788,19 @@ namespace EFM
                                 {
                                     if (currentPrice.ID.Equals("201"))
                                     {
-                                        currencySprite = Base_Manager.dollarCurrencySprite;
+                                        currencySprite = HideoutController.dollarCurrencySprite;
                                     }
                                     else if (currentPrice.ID.Equals("202"))
                                     {
-                                        currencySprite = Base_Manager.euroCurrencySprite;
+                                        currencySprite = HideoutController.euroCurrencySprite;
                                     }
                                     else if (currentPrice.ID.Equals("203"))
                                     {
-                                        currencySprite = Base_Manager.roubleCurrencySprite;
+                                        currencySprite = HideoutController.roubleCurrencySprite;
                                     }
                                     else
                                     {
-                                        currencySprite = Base_Manager.barterSprite;
+                                        currencySprite = HideoutController.barterSprite;
                                         barterSprite = true;
                                     }
                                 }
@@ -899,7 +899,7 @@ namespace EFM
                     {
                         foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
                         {
-                            CustomItemWrapper priceCIW = priceObject.GetComponent<CustomItemWrapper>();
+                            MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
                             if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
                             {
                                 ++matchingCountInInventory;
@@ -972,7 +972,7 @@ namespace EFM
             foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
             {
                 Mod.LogInfo("\tAdding item from volume: "+itemTransform.name);
-                CustomItemWrapper CIW = itemTransform.GetComponent<CustomItemWrapper>();
+                MeatovItem CIW = itemTransform.GetComponent<MeatovItem>();
                 VanillaItemDescriptor VID = itemTransform.GetComponent<VanillaItemDescriptor>();
                 List<MarketItemView> itemViewListToUse = null;
                 string itemID;
@@ -1091,7 +1091,7 @@ namespace EFM
                     }
                     MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
                     marketItemView.custom = custom;
-                    marketItemView.CIW = new List<CustomItemWrapper>() { CIW };
+                    marketItemView.CIW = new List<MeatovItem>() { CIW };
                     marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
 
                     int actualValue;
@@ -1115,12 +1115,12 @@ namespace EFM
                     //string currencyItemID = "";
                     if (trader.currency == 0)
                     {
-                        currencySprite = Base_Manager.roubleCurrencySprite;
+                        currencySprite = HideoutController.roubleCurrencySprite;
                         //currencyItemID = "203";
                     }
                     else if (trader.currency == 1)
                     {
-                        currencySprite = Base_Manager.dollarCurrencySprite;
+                        currencySprite = HideoutController.dollarCurrencySprite;
                         actualValue = (int)Mathf.Max(actualValue * 0.008f, 1); // Adjust item value
                         //currencyItemID = "201";
                     }
@@ -1393,19 +1393,19 @@ namespace EFM
                                     break;
                                 case TraderTaskReward.TaskRewardType.TraderUnlock:
                                     GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
-                                    currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[reward.traderIndex];
+                                    currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[reward.traderIndex];
                                     currentInitEquipTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
                                     break;
                                 case TraderTaskReward.TaskRewardType.TraderStanding:
                                     GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
-                                    currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.standingSprite;
+                                    currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.standingSprite;
                                     currentInitEquipStandingElement.transform.GetChild(1).gameObject.SetActive(true);
                                     currentInitEquipStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
                                     currentInitEquipStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
                                     break;
                                 case TraderTaskReward.TaskRewardType.Experience:
                                     GameObject currentInitEquipExperienceElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
-                                    currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.experienceSprite;
+                                    currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.experienceSprite;
                                     currentInitEquipExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
                                     break;
                                 case TraderTaskReward.TaskRewardType.AssortmentUnlock:
@@ -1489,13 +1489,13 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.TraderUnlock:
                                 GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
                                 currentRewardTraderUnlockElement.SetActive(true);
-                                currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[reward.traderIndex];
+                                currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[reward.traderIndex];
                                 currentRewardTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
                                 break;
                             case TraderTaskReward.TaskRewardType.TraderStanding:
                                 GameObject currentRewardStandingElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                                 currentRewardStandingElement.SetActive(true);
-                                currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.standingSprite;
+                                currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.standingSprite;
                                 currentRewardStandingElement.transform.GetChild(1).gameObject.SetActive(true);
                                 currentRewardStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
                                 currentRewardStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
@@ -1503,7 +1503,7 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.Experience:
                                 GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                                 currentRewardExperienceElement.SetActive(true);
-                                currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.experienceSprite;
+                                currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.experienceSprite;
                                 currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.experience > 0 ? "+" : "-") + reward.experience;
                                 break;
                             case TraderTaskReward.TaskRewardType.AssortmentUnlock:
@@ -1707,13 +1707,13 @@ namespace EFM
                                 case TraderTaskReward.TaskRewardType.TraderUnlock:
                                     GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipTraderUnlockElement.SetActive(true);
-                                    currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[reward.traderIndex];
+                                    currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[reward.traderIndex];
                                     currentInitEquipTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
                                     break;
                                 case TraderTaskReward.TaskRewardType.TraderStanding:
                                     GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipStandingElement.SetActive(true);
-                                    currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.standingSprite;
+                                    currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.standingSprite;
                                     currentInitEquipStandingElement.transform.GetChild(1).gameObject.SetActive(true);
                                     currentInitEquipStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
                                     currentInitEquipStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
@@ -1721,7 +1721,7 @@ namespace EFM
                                 case TraderTaskReward.TaskRewardType.Experience:
                                     GameObject currentInitEquipExperienceElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipExperienceElement.SetActive(true);
-                                    currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.experienceSprite;
+                                    currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.experienceSprite;
                                     currentInitEquipExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
                                     break;
                                 case TraderTaskReward.TaskRewardType.AssortmentUnlock:
@@ -1791,13 +1791,13 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.TraderUnlock:
                                 GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
                                 currentRewardTraderUnlockElement.SetActive(true);
-                                currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[reward.traderIndex];
+                                currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[reward.traderIndex];
                                 currentRewardTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
                                 break;
                             case TraderTaskReward.TaskRewardType.TraderStanding:
                                 GameObject currentRewardStandingElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                                 currentRewardStandingElement.SetActive(true);
-                                currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.standingSprite;
+                                currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.standingSprite;
                                 currentRewardStandingElement.transform.GetChild(1).gameObject.SetActive(true);
                                 currentRewardStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
                                 currentRewardStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
@@ -1805,7 +1805,7 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.Experience:
                                 GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                                 currentRewardExperienceElement.SetActive(true);
-                                currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.experienceSprite;
+                                currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.experienceSprite;
                                 currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
                                 break;
                             case TraderTaskReward.TaskRewardType.AssortmentUnlock:
@@ -1958,13 +1958,13 @@ namespace EFM
                                 case TraderTaskReward.TaskRewardType.TraderUnlock:
                                     GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipTraderUnlockElement.SetActive(true);
-                                    currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[reward.traderIndex];
+                                    currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[reward.traderIndex];
                                     currentInitEquipTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
                                     break;
                                 case TraderTaskReward.TaskRewardType.TraderStanding:
                                     GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipStandingElement.SetActive(true);
-                                    currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.standingSprite;
+                                    currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.standingSprite;
                                     currentInitEquipStandingElement.transform.GetChild(1).gameObject.SetActive(true);
                                     currentInitEquipStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
                                     currentInitEquipStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
@@ -1972,7 +1972,7 @@ namespace EFM
                                 case TraderTaskReward.TaskRewardType.Experience:
                                     GameObject currentInitEquipExperienceElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
                                     currentInitEquipExperienceElement.SetActive(true);
-                                    currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.experienceSprite;
+                                    currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.experienceSprite;
                                     currentInitEquipExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
                                     break;
                                 case TraderTaskReward.TaskRewardType.AssortmentUnlock:
@@ -2042,13 +2042,13 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.TraderUnlock:
                                 GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
                                 currentRewardTraderUnlockElement.SetActive(true);
-                                currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[reward.traderIndex];
+                                currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[reward.traderIndex];
                                 currentRewardTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
                                 break;
                             case TraderTaskReward.TaskRewardType.TraderStanding:
                                 GameObject currentRewardStandingElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                                 currentRewardStandingElement.SetActive(true);
-                                currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.standingSprite;
+                                currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.standingSprite;
                                 currentRewardStandingElement.transform.GetChild(1).gameObject.SetActive(true);
                                 currentRewardStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
                                 currentRewardStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
@@ -2056,7 +2056,7 @@ namespace EFM
                             case TraderTaskReward.TaskRewardType.Experience:
                                 GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                                 currentRewardExperienceElement.SetActive(true);
-                                currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.experienceSprite;
+                                currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.experienceSprite;
                                 currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
                                 break;
                             case TraderTaskReward.TaskRewardType.AssortmentUnlock:
@@ -2171,7 +2171,7 @@ namespace EFM
                 foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
                 {
                     Mod.LogInfo("processing item "+itemTransform.name);
-                    CustomItemWrapper CIW = itemTransform.GetComponent<CustomItemWrapper>();
+                    MeatovItem CIW = itemTransform.GetComponent<MeatovItem>();
                     VanillaItemDescriptor VID = itemTransform.GetComponent<VanillaItemDescriptor>();
                     List<MarketItemView> itemViewListToUse = null;
                     string itemID;
@@ -2288,7 +2288,7 @@ namespace EFM
                         }
                         MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
                         marketItemView.custom = custom;
-                        marketItemView.CIW = new List<CustomItemWrapper>() { CIW };
+                        marketItemView.CIW = new List<MeatovItem>() { CIW };
                         marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
 
                         Mod.LogInfo("5");
@@ -2296,11 +2296,11 @@ namespace EFM
                         Sprite currencySprite = null;
                         if (trader.currency == 0)
                         {
-                            currencySprite = Base_Manager.roubleCurrencySprite;
+                            currencySprite = HideoutController.roubleCurrencySprite;
                         }
                         else if (trader.currency == 1)
                         {
-                            currencySprite = Base_Manager.dollarCurrencySprite;
+                            currencySprite = HideoutController.dollarCurrencySprite;
                             itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
                         }
                         Mod.LogInfo("5");
@@ -2486,7 +2486,7 @@ namespace EFM
             }
         }
 
-        public void UpdateBasedOnItem(bool added, CustomItemWrapper CIW, VanillaItemDescriptor VID)
+        public void UpdateBasedOnItem(bool added, MeatovItem CIW, VanillaItemDescriptor VID)
         {
             bool custom = CIW != null;
             string itemID = custom ? CIW.ID : VID.H3ID;
@@ -2609,7 +2609,7 @@ namespace EFM
                                 {
                                     foreach(GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
                                     {
-                                        CustomItemWrapper priceCIW = priceObject.GetComponent<CustomItemWrapper>();
+                                        MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
                                         if(priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
                                         {
                                             ++matchingCountInInventory;
@@ -2699,7 +2699,7 @@ namespace EFM
                                 {
                                     foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
                                     {
-                                        CustomItemWrapper priceCIW = priceObject.GetComponent<CustomItemWrapper>();
+                                        MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
                                         if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
                                         {
                                             ++matchingCountInInventory;
@@ -2837,7 +2837,7 @@ namespace EFM
                         Mod.LogInfo("0");
                         MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
                         marketItemView.custom = custom;
-                        marketItemView.CIW = new List<CustomItemWrapper>() { CIW };
+                        marketItemView.CIW = new List<MeatovItem>() { CIW };
                         marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
 
                         Mod.LogInfo("0");
@@ -2862,12 +2862,12 @@ namespace EFM
 
                         if (Mod.traderStatuses[currentTraderIndex].currency == 0)
                         {
-                            currencySprite = Base_Manager.roubleCurrencySprite;
+                            currencySprite = HideoutController.roubleCurrencySprite;
                             currencyItemID = "203";
                         }
                         else if (Mod.traderStatuses[currentTraderIndex].currency == 1)
                         {
-                            currencySprite = Base_Manager.dollarCurrencySprite;
+                            currencySprite = HideoutController.dollarCurrencySprite;
                             actualValue = (int)Mathf.Max(actualValue * 0.008f, 1); // Adjust item value
                             currencyItemID = "201";
                         }
@@ -3113,7 +3113,7 @@ namespace EFM
                         Mod.LogInfo("0");
                         MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
                         marketItemView.custom = custom;
-                        marketItemView.CIW = new List<CustomItemWrapper>() { CIW };
+                        marketItemView.CIW = new List<MeatovItem>() { CIW };
                         marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
 
                         Mod.LogInfo("0");
@@ -3122,12 +3122,12 @@ namespace EFM
                         string currencyItemID = "";
                         if (Mod.traderStatuses[currentTraderIndex].currency == 0)
                         {
-                            currencySprite = Base_Manager.roubleCurrencySprite;
+                            currencySprite = HideoutController.roubleCurrencySprite;
                             currencyItemID = "203";
                         }
                         else if (Mod.traderStatuses[currentTraderIndex].currency == 1)
                         {
-                            currencySprite = Base_Manager.dollarCurrencySprite;
+                            currencySprite = HideoutController.dollarCurrencySprite;
                             itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
                             currencyItemID = "201";
                         }
@@ -3328,7 +3328,7 @@ namespace EFM
                                 {
                                     foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
                                     {
-                                        CustomItemWrapper priceCIW = priceObject.GetComponent<CustomItemWrapper>();
+                                        MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
                                         if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
                                         {
                                             ++matchingCountInInventory;
@@ -3419,7 +3419,7 @@ namespace EFM
                                 {
                                     foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
                                     {
-                                        CustomItemWrapper priceCIW = priceObject.GetComponent<CustomItemWrapper>();
+                                        MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
                                         if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
                                         {
                                             ++matchingCountInInventory;
@@ -3942,7 +3942,7 @@ namespace EFM
                                 tradeVolumeInventory.Add("716", 1);
                                 tradeVolumeInventoryObjects.Add("716", new List<GameObject>() { itemObject });
                             }
-                            Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
+                            HideoutController.instance.AddToBaseInventory(itemObject.transform, true);
 
                             if (countLeft <= 120)
                             {
@@ -3971,7 +3971,7 @@ namespace EFM
                                 tradeVolumeInventory.Add("715", 1);
                                 tradeVolumeInventoryObjects.Add("715", new List<GameObject>() { itemObject });
                             }
-                            Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
+                            HideoutController.instance.AddToBaseInventory(itemObject.transform, true);
 
                             amount = countLeft;
                             countLeft = 0;
@@ -3979,7 +3979,7 @@ namespace EFM
                             spawnedSmallBox = true;
                         }
 
-                        CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                        MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                         FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
                         FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
                         asMagazine.RoundType = round.RoundType;
@@ -4028,7 +4028,7 @@ namespace EFM
                         tradeVolumeInventory.Add(VID.H3ID, 1);
                         tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { itemObject });
                     }
-                    Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
+                    HideoutController.instance.AddToBaseInventory(itemObject.transform, true);
                 }
             }
             else // Not a round, spawn as normal
@@ -4060,7 +4060,7 @@ namespace EFM
                         tradeVolumeInventory.Add(VID.H3ID, 1);
                         tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { itemObject });
                     }
-                    Mod.currentBaseManager.AddToBaseInventory(itemObject.transform, true);
+                    HideoutController.instance.AddToBaseInventory(itemObject.transform, true);
                 }
             }
 
@@ -4137,7 +4137,7 @@ namespace EFM
                     foreach (GameObject itemObject in tradeVolumeInventoryObjects[item.Key])
                     {
                         // Destroy item
-                        Mod.currentBaseManager.RemoveFromBaseInventory(itemObject.transform, true);
+                        HideoutController.instance.RemoveFromBaseInventory(itemObject.transform, true);
                         // Unparent object before destroying so it doesnt get processed by settrader
                         itemObject.transform.parent = null;
                         Destroy(itemObject);
@@ -4146,7 +4146,7 @@ namespace EFM
                 }
 
                 // Update area managers based on item we just removed
-                foreach (BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+                foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
                 {
                     areaManager.UpdateBasedOnItem(item.Key);
                 }
@@ -4163,7 +4163,7 @@ namespace EFM
             int amountToSpawn = currentTotalSellingPrice;
             int currencyID = Mod.traderStatuses[currentTraderIndex].currency == 0 ? 203 : 201; // Roubles, else USD
             GameObject itemPrefab = Mod.itemPrefabs[currencyID];
-            CustomItemWrapper prefabCIW = itemPrefab.GetComponent<CustomItemWrapper>();
+            MeatovItem prefabCIW = itemPrefab.GetComponent<MeatovItem>();
             BoxCollider tradeVolumeCollider = tradeVolume.GetComponentInChildren<BoxCollider>();
             List<GameObject> objectsList = new List<GameObject>();
             while (amountToSpawn > 0)
@@ -4178,14 +4178,14 @@ namespace EFM
                                                                   UnityEngine.Random.Range(-zSize / 2, zSize / 2));
                 spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
 
-                CustomItemWrapper itemCIW = spawnedItem.GetComponent<CustomItemWrapper>();
+                MeatovItem itemCIW = spawnedItem.GetComponent<MeatovItem>();
                 itemCIW.stack = Mathf.Min(amountToSpawn, prefabCIW.maxStack);
                 amountToSpawn -= prefabCIW.maxStack;
 
                 // Add item to tradevolume so it can set its reset cols and kinematic to true
                 tradeVolume.AddItem(itemCIW.physObj);
 
-                Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
+                HideoutController.instance.AddToBaseInventory(spawnedItem.transform, true);
 
                 BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
             }
@@ -4202,7 +4202,7 @@ namespace EFM
             }
 
             // Update area managers based on item we just added
-            foreach (BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+            foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
             {
                 areaManager.UpdateBasedOnItem(stringCurrencyID);
             }
@@ -4227,7 +4227,7 @@ namespace EFM
                 { 
                     foreach(GameObject itemObject in tradeVolumeInventoryObjects[item.Key])
                     {
-                        CustomItemWrapper CIW = itemObject.GetComponent<CustomItemWrapper>();
+                        MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
                         VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
                         if(CIW != null && !CIW.insured)
                         {
@@ -4388,13 +4388,13 @@ namespace EFM
                         case TraderTaskReward.TaskRewardType.TraderUnlock:
                             GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
                             currentInitEquipTraderUnlockElement.SetActive(true);
-                            currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[reward.traderIndex];
+                            currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[reward.traderIndex];
                             currentInitEquipTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
                             break;
                         case TraderTaskReward.TaskRewardType.TraderStanding:
                             GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
                             currentInitEquipStandingElement.SetActive(true);
-                            currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.standingSprite;
+                            currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.standingSprite;
                             currentInitEquipStandingElement.transform.GetChild(1).gameObject.SetActive(true);
                             currentInitEquipStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
                             currentInitEquipStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
@@ -4402,7 +4402,7 @@ namespace EFM
                         case TraderTaskReward.TaskRewardType.Experience:
                             GameObject currentInitEquipExperienceElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
                             currentInitEquipExperienceElement.SetActive(true);
-                            currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.experienceSprite;
+                            currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.experienceSprite;
                             currentInitEquipExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
                             break;
                         case TraderTaskReward.TaskRewardType.AssortmentUnlock:
@@ -4488,13 +4488,13 @@ namespace EFM
                     case TraderTaskReward.TaskRewardType.TraderUnlock:
                         GameObject currentRewardTraderUnlockElement = Instantiate(currentRewardHorizontal.GetChild(3).gameObject, currentRewardHorizontal);
                         currentRewardTraderUnlockElement.SetActive(true);
-                        currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Base_Manager.traderAvatars[reward.traderIndex];
+                        currentRewardTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[reward.traderIndex];
                         currentRewardTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
                         break;
                     case TraderTaskReward.TaskRewardType.TraderStanding:
                         GameObject currentRewardStandingElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                         currentRewardStandingElement.SetActive(true);
-                        currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.standingSprite;
+                        currentRewardStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.standingSprite;
                         currentRewardStandingElement.transform.GetChild(1).gameObject.SetActive(true);
                         currentRewardStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traderStatuses[reward.traderIndex].name;
                         currentRewardStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
@@ -4502,7 +4502,7 @@ namespace EFM
                     case TraderTaskReward.TaskRewardType.Experience:
                         GameObject currentRewardExperienceElement = Instantiate(currentRewardHorizontal.GetChild(1).gameObject, currentRewardHorizontal);
                         currentRewardExperienceElement.SetActive(true);
-                        currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = Base_Manager.experienceSprite;
+                        currentRewardExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.experienceSprite;
                         currentRewardExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
                         break;
                     case TraderTaskReward.TaskRewardType.AssortmentUnlock:
@@ -4570,7 +4570,7 @@ namespace EFM
             task.taskState = TraderTask.TaskState.Active;
 
             // Add task to active task list of player status
-            Mod.playerStatusManager.AddTask(task);
+            StatusUI.instance.AddTask(task);
 
             // Update market task list by making the shortinfo of the referenced task UI element in TraderTask to show that it is active
             task.marketListElement.transform.GetChild(0).GetChild(2).gameObject.SetActive(true);
@@ -4643,7 +4643,7 @@ namespace EFM
             while (amountToRemove > 0)
             {
                 GameObject currentItemObject = objectList[objectList.Count - 1];
-                CustomItemWrapper CIW = currentItemObject.GetComponent<CustomItemWrapper>();
+                MeatovItem CIW = currentItemObject.GetComponent<MeatovItem>();
                 VanillaItemDescriptor VID = currentItemObject.GetComponent<VanillaItemDescriptor>();
                 if (CIW != null)
                 {
@@ -4676,7 +4676,7 @@ namespace EFM
 
                             // Destroy item
                             objectList.RemoveAt(objectList.Count - 1);
-                            Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
                             CIW.destroyed = true;
                             currentItemObject.transform.parent = null;
                             Destroy(currentItemObject);
@@ -4690,7 +4690,7 @@ namespace EFM
 
                             CIW.stack -= amountToRemove;
                             Mod.baseInventory[CIW.ID] -= amountToRemove;
-                            Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
                             amountToRemove = 0;
                         }
                     }
@@ -4712,7 +4712,7 @@ namespace EFM
 
                                 // Destroy item
                                 objectList.RemoveAt(objectList.Count - 1);
-                                Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                                HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
                                 CIW.destroyed = true;
                                 currentItemObject.transform.parent = null;
                                 Destroy(currentItemObject);
@@ -4731,7 +4731,7 @@ namespace EFM
 
                             // Destroy item
                             objectList.RemoveAt(objectList.Count - 1);
-                            Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
                             CIW.destroyed = true;
                             currentItemObject.transform.parent = null;
                             Destroy(currentItemObject);
@@ -4757,7 +4757,7 @@ namespace EFM
 
                     // Destroy item
                     objectList.RemoveAt(objectList.Count - 1);
-                    Mod.currentBaseManager.RemoveFromBaseInventory(currentItemObject.transform, true);
+                    HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
                     currentItemObject.GetComponent<VanillaItemDescriptor>().destroyed = true;
                     currentItemObject.transform.parent = null;
                     Destroy(currentItemObject);
@@ -4775,7 +4775,7 @@ namespace EFM
             }
 
             // Update area managers based on item we just removed
-            foreach (BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+            foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
             {
                 areaManager.UpdateBasedOnItem(itemID);
             }
@@ -4852,7 +4852,7 @@ namespace EFM
                         int actualAmount = reward.amount;
                         if (randomItemRewardID.Equals("201") || randomItemRewardID.Equals("202") || randomItemRewardID.Equals("203"))
                         {
-                            actualAmount += (int)(actualAmount * Base_Manager.currentQuestMoneyReward);
+                            actualAmount += (int)(actualAmount * HideoutController.currentQuestMoneyReward);
                         }
                         SpawnItem(randomItemRewardID, actualAmount);
                         break;
@@ -4873,7 +4873,7 @@ namespace EFM
             if (int.TryParse(itemID, out int parseResult))
             {
                 GameObject itemPrefab = Mod.itemPrefabs[parseResult];
-                CustomItemWrapper prefabCIW = itemPrefab.GetComponent<CustomItemWrapper>();
+                MeatovItem prefabCIW = itemPrefab.GetComponent<MeatovItem>();
                 Transform tradeVolume = this.tradeVolume.transform.GetChild(0);
                 List<GameObject> objectsList = new List<GameObject>();
                 while (amountToSpawn > 0)
@@ -4889,7 +4889,7 @@ namespace EFM
                     spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
 
                     // Setup CIW
-                    CustomItemWrapper itemCIW = spawnedItem.GetComponent<CustomItemWrapper>();
+                    MeatovItem itemCIW = spawnedItem.GetComponent<MeatovItem>();
                     if (itemCIW.maxAmount > 0)
                     {
                         itemCIW.amount = itemCIW.maxAmount;
@@ -4926,7 +4926,7 @@ namespace EFM
                     // Add item to tradevolume so it can set its reset cols and kinematic to true
                     this.tradeVolume.AddItem(itemCIW.physObj);
 
-                    Mod.currentBaseManager.AddToBaseInventory(spawnedItem.transform, true);
+                    HideoutController.instance.AddToBaseInventory(spawnedItem.transform, true);
 
                     BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
                 }
@@ -4945,7 +4945,7 @@ namespace EFM
                 SetTrader(currentTraderIndex, cartItem);
 
                 // Update area managers based on item we just added
-                foreach (BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+                foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
                 {
                     areaManager.UpdateBasedOnItem(cartItem);
                 }
@@ -4981,7 +4981,7 @@ namespace EFM
                 Destroy(task.statusListElement);
                 task.statusListElement = null;
 
-                Mod.playerStatusManager.UpdateTaskListHeight();
+                StatusUI.instance.UpdateTaskListHeight();
             }
 
             // Remove from trader task list if exists
@@ -5090,7 +5090,7 @@ namespace EFM
 
                                 // Set price icon and label
                                 int currencyIndex = -1; // Rouble, Dollar, Euro, Barter
-                                Sprite priceLabelSprite = Base_Manager.roubleCurrencySprite;
+                                Sprite priceLabelSprite = HideoutController.roubleCurrencySprite;
                                 int totalPriceCount = 0;
                                 foreach(AssortmentPriceData price in priceList)
                                 {
@@ -5101,36 +5101,36 @@ namespace EFM
                                             if (currencyIndex == -1)
                                             {
                                                 currencyIndex = 1;
-                                                priceLabelSprite = Base_Manager.dollarCurrencySprite;
+                                                priceLabelSprite = HideoutController.dollarCurrencySprite;
                                             }
                                             else if (currencyIndex != 1)
                                             {
                                                 currencyIndex = 3;
-                                                priceLabelSprite = Base_Manager.barterSprite;
+                                                priceLabelSprite = HideoutController.barterSprite;
                                             }
                                             break;
                                         case "202":
                                             if (currencyIndex == -1)
                                             {
                                                 currencyIndex = 2;
-                                                priceLabelSprite = Base_Manager.euroCurrencySprite;
+                                                priceLabelSprite = HideoutController.euroCurrencySprite;
                                             }
                                             else if (currencyIndex != 2)
                                             {
                                                 currencyIndex = 3;
-                                                priceLabelSprite = Base_Manager.barterSprite;
+                                                priceLabelSprite = HideoutController.barterSprite;
                                             }
                                             break;
                                         case "203":
                                             if (currencyIndex == -1)
                                             {
                                                 currencyIndex = 0;
-                                                priceLabelSprite = Base_Manager.roubleCurrencySprite;
+                                                priceLabelSprite = HideoutController.roubleCurrencySprite;
                                             }
                                             else if (currencyIndex != 0)
                                             {
                                                 currencyIndex = 3;
-                                                priceLabelSprite = Base_Manager.barterSprite;
+                                                priceLabelSprite = HideoutController.barterSprite;
                                             }
                                             break;
                                         default:
@@ -5322,7 +5322,7 @@ namespace EFM
 
                         // Set price icon and label
                         int currencyIndex = -1; // Rouble, Dollar, Euro, Barter
-                        Sprite priceLabelSprite = Base_Manager.roubleCurrencySprite;
+                        Sprite priceLabelSprite = HideoutController.roubleCurrencySprite;
                         int totalPriceCount = 0;
                         foreach (AssortmentPriceData price in priceList)
                         {
@@ -5333,36 +5333,36 @@ namespace EFM
                                     if (currencyIndex == -1)
                                     {
                                         currencyIndex = 1;
-                                        priceLabelSprite = Base_Manager.dollarCurrencySprite;
+                                        priceLabelSprite = HideoutController.dollarCurrencySprite;
                                     }
                                     else if (currencyIndex != 1)
                                     {
                                         currencyIndex = 3;
-                                        priceLabelSprite = Base_Manager.barterSprite;
+                                        priceLabelSprite = HideoutController.barterSprite;
                                     }
                                     break;
                                 case "202":
                                     if (currencyIndex == -1)
                                     {
                                         currencyIndex = 2;
-                                        priceLabelSprite = Base_Manager.euroCurrencySprite;
+                                        priceLabelSprite = HideoutController.euroCurrencySprite;
                                     }
                                     else if (currencyIndex != 2)
                                     {
                                         currencyIndex = 3;
-                                        priceLabelSprite = Base_Manager.barterSprite;
+                                        priceLabelSprite = HideoutController.barterSprite;
                                     }
                                     break;
                                 case "203":
                                     if (currencyIndex == -1)
                                     {
                                         currencyIndex = 0;
-                                        priceLabelSprite = Base_Manager.roubleCurrencySprite;
+                                        priceLabelSprite = HideoutController.roubleCurrencySprite;
                                     }
                                     else if (currencyIndex != 0)
                                     {
                                         currencyIndex = 3;
-                                        priceLabelSprite = Base_Manager.barterSprite;
+                                        priceLabelSprite = HideoutController.barterSprite;
                                     }
                                     break;
                                 default:

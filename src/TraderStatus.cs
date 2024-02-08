@@ -206,6 +206,8 @@ namespace EFM
                     return "5ac3b934156ae10c4430e83c";
                 case 7:
                     return "5c0647fdd443bc2504c2d371";
+                case 8:
+                    return "638f541a29ffd1183d187f57";
                 default:
                     return "";
             }
@@ -826,7 +828,7 @@ namespace EFM
             }
 
             // Get quest locales
-            Dictionary<string, JObject> questLocales = Mod.localDB["quest"].ToObject<Dictionary<string, JObject>>();
+            Dictionary<string, JObject> questLocales = Mod.localeDB["quest"].ToObject<Dictionary<string, JObject>>();
 
             foreach (KeyValuePair<string, JObject> rawTask in rawTasks)
             {
@@ -860,14 +862,14 @@ namespace EFM
                 newTask.ID = rawTask.Key;
                 newTask.ownerTraderIndex = index;
                 newTask.name = questLocale["name"].ToString();
-                newTask.description = Mod.localDB["mail"][questLocale["description"].ToString()].ToString();
-                if (questLocale["failMessageText"] != null && Mod.localDB["mail"][questLocale["failMessageText"].ToString()] != null) // Will be null if quest has no fail conditions
+                newTask.description = Mod.localeDB["mail"][questLocale["description"].ToString()].ToString();
+                if (questLocale["failMessageText"] != null && Mod.localeDB["mail"][questLocale["failMessageText"].ToString()] != null) // Will be null if quest has no fail conditions
                 {
-                    newTask.failMessage = Mod.localDB["mail"][questLocale["failMessageText"].ToString()].ToString();
+                    newTask.failMessage = Mod.localeDB["mail"][questLocale["failMessageText"].ToString()].ToString();
                 }
-                if (questLocale["successMessageText"] != null && Mod.localDB["mail"][questLocale["successMessageText"].ToString()] != null) // Can be null?
+                if (questLocale["successMessageText"] != null && Mod.localeDB["mail"][questLocale["successMessageText"].ToString()] != null) // Can be null?
                 {
-                    newTask.successMessage = Mod.localDB["mail"][questLocale["successMessageText"].ToString()].ToString(); // Unused anyway
+                    newTask.successMessage = Mod.localeDB["mail"][questLocale["successMessageText"].ToString()].ToString(); // Unused anyway
                 }
                 newTask.location = "Any";
                 if (taskSaveData == null)
@@ -2239,7 +2241,7 @@ namespace EFM
                         }
                         if (dependentCondition.statusListElement != null)
                         {
-                            dependentCondition.statusListElement.SetActive(true);
+                            dependentCondition.statusListElement.gameObject.SetActive(true);
                         }
                     }
                 }
@@ -2282,7 +2284,7 @@ namespace EFM
                         GameObject.Destroy(task.marketListElement);
                         task.marketListElement = null;
 
-                        Mod.currentBaseManager.marketManager.UpdateTaskListHeight();
+                        HideoutController.instance.marketManager.UpdateTaskListHeight();
                     }
                     if (task.statusListElement != null)
                     {
@@ -2302,12 +2304,12 @@ namespace EFM
                         GameObject.Destroy(task.statusListElement);
                         task.statusListElement = null;
 
-                        Mod.playerStatusManager.UpdateTaskListHeight();
+                        StatusUI.instance.UpdateTaskListHeight();
                     }
 
                     if(task.failureRewards != null)
                     {
-                        Mod.currentBaseManager.marketManager.GivePlayerRewards(task.failureRewards);
+                        HideoutController.instance.marketManager.GivePlayerRewards(task.failureRewards);
                     }
                 }
                 else // In raid
@@ -2328,7 +2330,7 @@ namespace EFM
                     GameObject.Destroy(task.statusListElement);
                     task.statusListElement = null;
 
-                    Mod.playerStatusManager.UpdateTaskListHeight();
+                    StatusUI.instance.UpdateTaskListHeight();
                 }
             }
             else
@@ -2382,9 +2384,9 @@ namespace EFM
                 task.taskState = TraderTask.TaskState.Available;
 
                 // Add to UI
-                if(Mod.currentLocationIndex == 1 && Mod.currentBaseManager.marketManager.currentTraderIndex == task.ownerTraderIndex)
+                if(Mod.currentLocationIndex == 1 && HideoutController.instance.marketManager.currentTraderIndex == task.ownerTraderIndex)
                 {
-                    Mod.currentBaseManager.marketManager.AddTask(task);
+                    HideoutController.instance.marketManager.AddTask(task);
                 }
             }
         }
@@ -2643,7 +2645,7 @@ namespace EFM
         public bool init;
 
         public GameObject marketListElement;
-        public GameObject statusListElement;
+        public TaskUI statusListElement;
 
         public string ID;
         public int ownerTraderIndex;
@@ -2696,7 +2698,7 @@ namespace EFM
         public TraderTask task;
 
         public GameObject marketListElement;
-        public GameObject statusListElement;
+        public TaskObjectiveUI statusListElement;
 
         public string text;
 

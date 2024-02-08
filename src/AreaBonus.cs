@@ -44,44 +44,44 @@ namespace EFM
                 switch (bonusType) 
                 {
                     case BonusType.ExperienceRate:
-                        Base_Manager.currentExperienceRate += value / 100;
+                        HideoutController.currentExperienceRate += value / 100;
                         break;
                     case BonusType.QuestMoneyReward:
-                        Base_Manager.currentQuestMoneyReward += value / 100;
+                        HideoutController.currentQuestMoneyReward += value / 100;
                         break;
                     case BonusType.MaximumEnergyReserve:
                         Mod.maxEnergy += value;
                         break;
                     case BonusType.FuelConsumption:
-                        Base_Manager.currentFuelConsumption += value / 100;
+                        HideoutController.currentFuelConsumption += value / 100;
                         break;
                     case BonusType.DebuffEndDelay:
-                        Base_Manager.currentDebuffEndDelay += value / 100;
+                        HideoutController.currentDebuffEndDelay += value / 100;
                         break;
                     case BonusType.ScavCooldownTimer:
-                        Base_Manager.currentScavCooldownTimer += value / 100;
+                        HideoutController.currentScavCooldownTimer += value / 100;
                         break;
                     case BonusType.InsuranceReturnTime:
-                        Base_Manager.currentInsuranceReturnTime += value / 100;
+                        HideoutController.currentInsuranceReturnTime += value / 100;
                         break;
                     case BonusType.RagfairCommission:
-                        Base_Manager.currentRagfairCommission += value / 100;
+                        HideoutController.currentRagfairCommission += value / 100;
                         break;
                     case BonusType.AdditionalSlots:
                         // This is handled directly in areasDB, the number of slots of the areas at each level has been set in consequence of these bonuses
                         break;
                     case BonusType.SkillGroupLevelingBoost:
-                        if(Base_Manager.currentSkillGroupLevelingBoosts == null)
+                        if(HideoutController.currentSkillGroupLevelingBoosts == null)
                         {
-                            Base_Manager.currentSkillGroupLevelingBoosts = new Dictionary<Skill.SkillType, float>();
+                            HideoutController.currentSkillGroupLevelingBoosts = new Dictionary<Skill.SkillType, float>();
                         }
-                        if (Base_Manager.currentSkillGroupLevelingBoosts.ContainsKey(skillType))
+                        if (HideoutController.currentSkillGroupLevelingBoosts.ContainsKey(skillType))
                         {
-                            Base_Manager.currentSkillGroupLevelingBoosts[skillType] += value / 100;
+                            HideoutController.currentSkillGroupLevelingBoosts[skillType] += value / 100;
                         }
                         else
                         {
-                            Base_Manager.currentSkillGroupLevelingBoosts.Add(skillType, 1 + value / 100);
+                            HideoutController.currentSkillGroupLevelingBoosts.Add(skillType, 1 + value / 100);
                         }
                         break;
                     case BonusType.StashSize:
@@ -130,34 +130,34 @@ namespace EFM
                 switch (bonusType)
                 {
                     case BonusType.ExperienceRate:
-                        Base_Manager.currentExperienceRate -= value / 100;
+                        HideoutController.currentExperienceRate -= value / 100;
                         break;
                     case BonusType.QuestMoneyReward:
-                        Base_Manager.currentQuestMoneyReward -= value / 100;
+                        HideoutController.currentQuestMoneyReward -= value / 100;
                         break;
                     case BonusType.MaximumEnergyReserve:
                         Mod.maxEnergy -= value;
                         break;
                     case BonusType.FuelConsumption:
-                        Base_Manager.currentFuelConsumption -= value / 100;
+                        HideoutController.currentFuelConsumption -= value / 100;
                         break;
                     case BonusType.DebuffEndDelay:
-                        Base_Manager.currentDebuffEndDelay -= value / 100;
+                        HideoutController.currentDebuffEndDelay -= value / 100;
                         break;
                     case BonusType.ScavCooldownTimer:
-                        Base_Manager.currentScavCooldownTimer -= value / 100;
+                        HideoutController.currentScavCooldownTimer -= value / 100;
                         break;
                     case BonusType.InsuranceReturnTime:
-                        Base_Manager.currentInsuranceReturnTime -= value / 100;
+                        HideoutController.currentInsuranceReturnTime -= value / 100;
                         break;
                     case BonusType.RagfairCommission:
-                        Base_Manager.currentRagfairCommission -= value / 100;
+                        HideoutController.currentRagfairCommission -= value / 100;
                         break;
                     case BonusType.AdditionalSlots:
                         // This is handled directly in areasDB, the number of slots of the areas at each level has been set in consequence of these bonuses
                         break;
                     case BonusType.SkillGroupLevelingBoost:
-                        Base_Manager.currentSkillGroupLevelingBoosts[skillType] -= value / 100;
+                        HideoutController.currentSkillGroupLevelingBoosts[skillType] -= value / 100;
                         break;
                     case BonusType.StashSize:
                         // Does not apply considering the stash is a physical thing

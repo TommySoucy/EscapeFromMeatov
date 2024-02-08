@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace EFM
 {
-    public class VanillaItemDescriptor : MonoBehaviour, Describable
+    public class VanillaItemDescriptor : MonoBehaviour, IDescribable
     {
         public bool destroyed;
 
@@ -310,7 +310,7 @@ namespace EFM
             if (physObj is FVRFireArmMagazine) 
             { 
                 // Checking amount of ammo in mag only counts once per minute for a unique mag
-                long currentTime = Mod.currentLocationIndex == 1 ? Mod.currentBaseManager.GetTimeSeconds() : Mod.currentRaidManager.GetTimeSeconds();
+                long currentTime = Mod.currentLocationIndex == 1 ? HideoutController.instance.GetTimeSeconds() : Mod.currentRaidManager.GetTimeSeconds();
                 if (currentTime - previousDescriptionTime > 60)
                 {
                     Mod.AddSkillExp(Skill.magazineCheckAction, 31);

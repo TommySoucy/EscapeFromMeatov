@@ -460,7 +460,7 @@ namespace EFM
                     GameObject neededForInstance = Instantiate(Mod.neededForPrefab, transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0));
                     neededForInstance.transform.SetSiblingIndex(7);
                     Text neededForInstanceText = neededForInstance.transform.GetChild(0).GetComponent<Text>();
-                    neededForInstanceText.text = "- " + Mod.localDB["interface"]["hideout_area_" + i + "_name"].ToString() + "("+ this.descriptionPack.amount+ "/"+ this.descriptionPack.amountRequiredPerArea[i] + ")";
+                    neededForInstanceText.text = "- " + Mod.localeDB["interface"]["hideout_area_" + i + "_name"].ToString() + "("+ this.descriptionPack.amount+ "/"+ this.descriptionPack.amountRequiredPerArea[i] + ")";
                     if (this.descriptionPack.amount >= this.descriptionPack.amountRequiredPerArea[i])
                     {
                         neededForInstanceText.color = Color.green;
@@ -683,12 +683,12 @@ namespace EFM
             {
                 if (descriptionPack.onWishlist)
                 {
-                    Destroy(Mod.currentBaseManager.marketManager.wishListItemViewsByID[itemID]);
-                    Mod.currentBaseManager.marketManager.wishListItemViewsByID.Remove(itemID);
+                    Destroy(HideoutController.instance.marketManager.wishListItemViewsByID[itemID]);
+                    HideoutController.instance.marketManager.wishListItemViewsByID.Remove(itemID);
 
-                    if (Mod.currentBaseManager.marketManager.ragFairItemBuyViewsByID.ContainsKey(itemID))
+                    if (HideoutController.instance.marketManager.ragFairItemBuyViewsByID.ContainsKey(itemID))
                     {
-                        List<GameObject> itemViewsList = Mod.currentBaseManager.marketManager.ragFairItemBuyViewsByID[itemID];
+                        List<GameObject> itemViewsList = HideoutController.instance.marketManager.ragFairItemBuyViewsByID[itemID];
                         foreach (GameObject itemView in itemViewsList)
                         {
                             itemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = Color.black;
@@ -697,7 +697,7 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.currentBaseManager.marketManager.AddItemToWishlist(itemID);
+                    HideoutController.instance.marketManager.AddItemToWishlist(itemID);
                 }
             }
 

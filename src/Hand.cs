@@ -7,8 +7,8 @@ namespace EFM
     public class Hand : MonoBehaviour
     {
         public Hand otherHand;
-        public CustomItemWrapper collidingContainerWrapper;
-        public CustomItemWrapper collidingTogglableWrapper;
+        public MeatovItem collidingContainerWrapper;
+        public MeatovItem collidingTogglableWrapper;
         private List<Collider> togglableColliders;
         public TradeVolume collidingTradeVolume;
         private Collider tradeVolumeCollider;
@@ -22,7 +22,7 @@ namespace EFM
         // Held item
         public bool hasScript;
         public bool custom;
-        public CustomItemWrapper CIW;
+        public MeatovItem CIW;
         public VanillaItemDescriptor VID;
         public bool updateGrabbity;
 
@@ -127,42 +127,6 @@ namespace EFM
             }
             else if(fvrHand.CurrentInteractable == null && collidingSwitch != null)
             {
-                // TODO: maybe change this to trigger instead of interaction button we use for containers and other custom functional items
-                if (fvrHand.IsInStreamlinedMode)
-                {
-                    if(fvrHand.Input.TriggerDown || fvrHand.Input.IsGrabDown)
-                    {
-                        collidingSwitch.Activate();
-                    }
-                    else if (fvrHand.Input.AXButtonDown)
-                    {
-                        collidingSwitch.Activate();
-                    }
-                }
-                else
-                {
-                    if (fvrHand.Input.TriggerDown || fvrHand.Input.IsGrabDown)
-                    {
-                        collidingSwitch.Activate();
-                    }
-                    else
-                    {
-                        Vector2 touchpadAxes = fvrHand.Input.TouchpadAxes;
-
-                        // If touchpad has started being pressed this frame
-                        if (fvrHand.Input.TouchpadDown)
-                        {
-                            Vector2 TouchpadClickInitiation = touchpadAxes;
-                            if (touchpadAxes.magnitude > 0.2f)
-                            {
-                                if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
-                                {
-                                    collidingSwitch.Activate();
-                                }
-                            }
-                        }
-                    }
-                }
             }
             else if(fvrHand.CurrentInteractable != null && hasScript)
             {
@@ -210,7 +174,7 @@ namespace EFM
             {
                 if (collider.gameObject.name.Equals("Interactive"))
                 {
-                    CustomItemWrapper lootContainerCIW = collider.transform.parent.GetComponent<CustomItemWrapper>();
+                    MeatovItem lootContainerCIW = collider.transform.parent.GetComponent<MeatovItem>();
                     if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
                     {
                         collidingTogglableWrapper = lootContainerCIW;
@@ -220,7 +184,7 @@ namespace EFM
                 }
                 else if (collider.transform.parent.name.Equals("Interactives") && collider.transform.parent.parent != null)
                 {
-                    CustomItemWrapper lootContainerCIW = collider.transform.parent.parent.GetComponent<CustomItemWrapper>();
+                    MeatovItem lootContainerCIW = collider.transform.parent.parent.GetComponent<MeatovItem>();
                     if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
                     {
                         collidingTogglableWrapper = lootContainerCIW;
@@ -232,7 +196,7 @@ namespace EFM
                 {
                     if (collider.transform.parent.parent.name.Equals("Interactives") && collider.transform.parent.parent.parent != null)
                     {
-                        CustomItemWrapper itemCIW = collider.transform.parent.parent.parent.GetComponent<CustomItemWrapper>();
+                        MeatovItem itemCIW = collider.transform.parent.parent.parent.GetComponent<MeatovItem>();
                         if (itemCIW != null && (fvrHand.CurrentInteractable == null || !fvrHand.CurrentInteractable.Equals(itemCIW.physObj)) &&
                             (itemCIW.itemType == Mod.ItemType.Container ||
                              itemCIW.itemType == Mod.ItemType.Backpack ||
@@ -250,7 +214,7 @@ namespace EFM
             bool newMainContainer = false;
             if (mainContainer != null && collidingContainerWrapper != mainContainer.parentCIW)
             {
-                CustomItemWrapper customItemWrapper = mainContainer.parentCIW;
+                MeatovItem customItemWrapper = mainContainer.parentCIW;
                 if ((fvrHand.CurrentInteractable == null || !fvrHand.CurrentInteractable.Equals(customItemWrapper.physObj)) &&
                     (customItemWrapper.itemType == Mod.ItemType.Backpack ||
                      customItemWrapper.itemType == Mod.ItemType.Container ||
@@ -287,7 +251,7 @@ namespace EFM
                         string IDToUse = "";
                         List<string> parentsToUse = null;
                         FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;
-                        CustomItemWrapper heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<CustomItemWrapper>();
+                        MeatovItem heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<MeatovItem>();
                         VanillaItemDescriptor heldVanillaItemDescriptor = fvrHand.CurrentInteractable.GetComponent<VanillaItemDescriptor>();
                         if (heldCustomItemWrapper != null)
                         {
@@ -379,7 +343,7 @@ namespace EFM
                         string IDToUse = "";
                         List<string> parentsToUse = null;
                         FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;
-                        CustomItemWrapper heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<CustomItemWrapper>();
+                        MeatovItem heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<MeatovItem>();
                         VanillaItemDescriptor heldVanillaItemDescriptor = fvrHand.CurrentInteractable.GetComponent<VanillaItemDescriptor>();
                         if (heldCustomItemWrapper != null)
                         {

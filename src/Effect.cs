@@ -118,14 +118,14 @@ namespace EFM
                         Effect.effects.Remove(causedEffect);
                     }
 
-                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
+                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(false);
+                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(false);
                     }
 
-                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
+                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
+                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
                     }
                     Mod.LogInfo("\t\tRemoved");
                     break;
@@ -171,14 +171,14 @@ namespace EFM
                         Effect.effects.Remove(causedEffect);
                     }
 
-                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
+                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(false);
+                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(false);
                     }
 
-                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
+                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
+                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
                     }
                     Mod.LogInfo("\t\tRemoved");
                     break;
@@ -206,15 +206,15 @@ namespace EFM
                     if (!hasFractureTremors)
                     {
                         // TODO: Disable tremors
-                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                         {
-                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                         }
                     }
 
-                    if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(3).gameObject.activeSelf)
+                    if (!StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(3).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(3).gameObject.SetActive(true);
+                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(3).gameObject.SetActive(true);
                     }
                     Mod.LogInfo("\t\tRemoved");
                     break;
@@ -250,18 +250,18 @@ namespace EFM
                 case Effect.EffectType.HandsTremor:
                     Mod.LogInfo("\t\tRemoving");
                     // TODO: Stop tremors if there are not other tremor effects
-                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                    if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                        StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                     }
                     Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.QuantumTunnelling:
                     Mod.LogInfo("\t\tRemoving");
                     // TODO: Stop QuantumTunnelling
-                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
+                    if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(false);
+                        StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(false);
                     }
                     Mod.LogInfo("\t\tRemoved");
                     break;
@@ -303,9 +303,9 @@ namespace EFM
                         // Enable haptic feedback
                         GM.Options.ControlOptions.HapticsState = ControlOptions.HapticsMode.Enabled;
                         // TODO: also set volume to full
-                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.activeSelf)
+                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.activeSelf)
                         {
-                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(false);
+                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(false);
                         }
                     }
                     Mod.LogInfo("\t\tRemoved");
@@ -340,24 +340,24 @@ namespace EFM
                     if (!hasPainTremors)
                     {
                         // TODO: Disable tremors
-                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                         {
-                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                         }
                     }
 
-                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
+                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(false);
+                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(false);
                     }
                     Mod.LogInfo("\t\tRemoved");
                     break;
                 case Effect.EffectType.StomachBloodloss:
                     Mod.LogInfo("\t\tRemoving");
                     --Mod.stomachBloodLossCount;
-                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
+                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(false);
+                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(false);
                     }
                     Mod.LogInfo("\t\tRemoved");
                     break;
@@ -400,15 +400,15 @@ namespace EFM
                     if (!hasToxinTremors)
                     {
                         // TODO: Disable tremors
-                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                         {
-                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                         }
                     }
 
-                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.activeSelf)
+                    if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.activeSelf)
                     {
-                        Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(false);
+                        StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(false);
                     }
                     Mod.LogInfo("\t\tRemoved");
                     break;

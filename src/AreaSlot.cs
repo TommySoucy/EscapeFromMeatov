@@ -1,16 +1,26 @@
-﻿using FistVR;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using UnityEngine;
 
 namespace EFM
 {
-    public class AreaSlot : FVRQuickBeltSlot
+    public class AreaSlot : MonoBehaviour
     {
+        public Area area;
         public List<string> filter;
-        public int areaIndex;
-        public int areaLevel;
-        public int slotIndex;
+        public AreaSlot next;
+        public Transform poseOverride;
+        public PoseOverridePair[] poseOverridePerItem;
+        public GameObject staticVolume;
+        public GameObject activeVolume;
+
+
+
+        [Serializable]
+        public class PoseOverridePair
+        {
+            public string item;
+            public Transform poseOverride;
+        }
     }
 }

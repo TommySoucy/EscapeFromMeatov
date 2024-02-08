@@ -85,17 +85,17 @@ namespace EFM
         // Revolver
         public static float revolverWeaponReloadAction;
         public static float revolverWeaponShotAction;
-        public static float revolverWeaponChamberAction; 
+        public static float revolverWeaponChamberAction;
 
         // SMG
         public static float SMGWeaponReloadAction;
         public static float SMGWeaponShotAction;
-        public static float SMGWeaponChamberAction; 
+        public static float SMGWeaponChamberAction;
 
         // Assault
         public static float assaultWeaponReloadAction;
         public static float assaultWeaponShotAction;
-        public static float assaultWeaponChamberAction; 
+        public static float assaultWeaponChamberAction;
 
         // Shotgun
         public static float shotgunWeaponReloadAction;

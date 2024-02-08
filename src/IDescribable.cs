@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace EFM
 {
-    public interface Describable
+    public interface IDescribable
     {
         DescriptionPack GetDescriptionPack();
 
@@ -17,14 +17,14 @@ namespace EFM
     public class DescriptionPack
     {
         public bool isPhysical;
-        public Describable nonPhysDescribable;
+        public IDescribable nonPhysDescribable;
         public string ID;
         public Mod.ItemType itemType;
         // Dogtag
         public int level;
 
         public bool isCustom;
-        public CustomItemWrapper customItem;
+        public MeatovItem customItem;
         public VanillaItemDescriptor vanillaItem;
         public Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, int>> containedAmmoClassesByType;
         public string name;

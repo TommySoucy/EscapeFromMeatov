@@ -22,7 +22,7 @@ namespace EFM
             {
                 if (collider.transform.parent != null && collider.transform.parent.parent != null && collider.transform.parent.parent.parent != null)
                 {
-                    CustomItemWrapper CIW = collider.transform.parent.parent.parent.GetComponent<CustomItemWrapper>();
+                    MeatovItem CIW = collider.transform.parent.parent.parent.GetComponent<MeatovItem>();
                     if (CIW != null && CIW.ID.Equals(keyID))
                     {
                         transform.localRotation = Quaternion.Euler(openAngleX, openAngleY, openAngleZ);

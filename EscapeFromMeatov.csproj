@@ -39,18 +39,26 @@
   <ItemGroup>
     <Compile Include="src\AI.cs" />
     <Compile Include="src\AreaBonus.cs" />
+    <Compile Include="src\Area.cs" />
+    <Compile Include="src\AreaController.cs" />
     <Compile Include="src\AreaProduction.cs" />
     <Compile Include="src\AreaRequirement.cs" />
-    <Compile Include="src\AreasDB.cs" />
     <Compile Include="src\AreaSlot.cs" />
+    <Compile Include="src\AreaUI.cs" />
     <Compile Include="src\AreaUpgradeCheckProcessor.cs" />
+    <Compile Include="src\AreaVolume.cs" />
     <Compile Include="src\BaseAreaManager.cs" />
-    <Compile Include="src\Base_Manager.cs" />
+    <Compile Include="src\Bonus.cs" />
     <Compile Include="src\BotZone.cs" />
     <Compile Include="src\CategoryTreeNode.cs" />
-    <Compile Include="src\CustomItemWrapper.cs" />
+    <Compile Include="src\ContainerVolume.cs" />
+    <Compile Include="src\ContainmentVolume.cs" />
+    <Compile Include="src\FarmingView.cs" />
+    <Compile Include="src\ItemRewardView.cs" />
+    <Compile Include="src\ItemView.cs" />
+    <Compile Include="src\MeatovItem.cs" />
     <Compile Include="src\DamageVolume.cs" />
-    <Compile Include="src\Describable.cs" />
+    <Compile Include="src\IDescribable.cs" />
     <Compile Include="src\DescriptionManager.cs" />
     <Compile Include="src\DestroyTimer.cs" />
     <Compile Include="src\DoorLockChecker.cs" />
@@ -60,15 +68,31 @@
     <Compile Include="src\ExperienceTrigger.cs" />
     <Compile Include="src\GCManager.cs" />
     <Compile Include="src\Hand.cs" />
+    <Compile Include="src\HideoutController.cs" />
     <Compile Include="src\HoverScroll.cs" />
     <Compile Include="src\ItemIcon.cs" />
     <Compile Include="src\LootContainer.cs" />
     <Compile Include="src\LootContainerCover.cs" />
     <Compile Include="src\LootContainerSlider.cs" />
-    <Compile Include="src\Manager.cs" />
+    <Compile Include="src\MeatovItemData.cs" />
+    <Compile Include="src\ProductionView.cs" />
+    <Compile Include="src\RequirementItemView.cs" />
+    <Compile Include="src\ResultItemView.cs" />
+    <Compile Include="src\ScavCaseView.cs" />
+    <Compile Include="src\SkillRequirement.cs" />
+    <Compile Include="src\SkillUI.cs" />
+    <Compile Include="src\StaminaUI.cs" />
+    <Compile Include="src\StatRewardView.cs" />
+    <Compile Include="src\StatusUI.cs" />
+    <Compile Include="src\TaskObjectiveUI.cs" />
+    <Compile Include="src\TaskUI.cs" />
+    <Compile Include="src\TimePanel.cs" />
+    <Compile Include="src\TraderRequirement.cs" />
+    <Compile Include="src\TraderRewardView.cs" />
+    <Compile Include="src\UIController.cs" />
     <Compile Include="src\MarketItemView.cs" />
     <Compile Include="src\MarketManager.cs" />
-    <Compile Include="src\Menu_Manager.cs" />
+    <Compile Include="src\MenuController.cs" />
     <Compile Include="src\OtherInteractable.cs" />
     <Compile Include="src\patches\DebugPatches.cs" />
     <Compile Include="src\patches\GamePatches.cs" />
@@ -103,6 +127,10 @@
     </Reference>
     <Reference Include="BepInEx, Version=5.4.21.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\BepInEx.BaseLib.5.4.21\lib\net35\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="H3MP, Version=1.9.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>F:\VR\H3VR Modding\H3MP.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.dll</HintPath>

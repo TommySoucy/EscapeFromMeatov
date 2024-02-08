@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace EFM
 {
-    public class ItemIcon : MonoBehaviour, Describable
+    public class ItemIcon : MonoBehaviour, IDescribable
     {
 		DescriptionManager descriptionManager;
 
@@ -18,7 +18,7 @@ namespace EFM
 
 		public bool isPhysical;
 		public bool isCustom;
-		public CustomItemWrapper CIW;
+		public MeatovItem CIW;
 		public VanillaItemDescriptor VID;
 
         public DescriptionPack GetDescriptionPack()

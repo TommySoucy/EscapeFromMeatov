@@ -6,14 +6,14 @@ using UnityEngine.UI;
 
 namespace EFM
 {
-	public class CustomItemWrapper : MonoBehaviour, Describable
+	public class MeatovItem : MonoBehaviour, IDescribable
 	{
 		public FVRPhysicalObject physObj;
 		public bool destroyed;
 
-		public Mod.ItemType itemType;
-		public Collider[] colliders;
-		public CustomItemWrapper prefabCIW;
+		public MeatovItem prefabCIW;
+        public Mod.ItemType itemType;
+        public Collider[] colliders;
 		public List<string> parents;
 		public string ID;
 		public bool looted;
@@ -223,7 +223,7 @@ namespace EFM
 					locationIndex = Mod.currentLocationIndex;
 				}
 
-				prefabCIW = Mod.itemPrefabs[int.Parse(ID)].GetComponent<CustomItemWrapper>();
+				prefabCIW = Mod.itemPrefabs[int.Parse(ID)].GetComponent<MeatovItem>();
 
 				descriptionPack.ID = ID;
 				descriptionPack.isCustom = true;
@@ -238,7 +238,7 @@ namespace EFM
 			}
 		}
 
-		public static int SetCurrentWeight(CustomItemWrapper item)
+		public static int SetCurrentWeight(MeatovItem item)
 		{
 			if (item == null)
 			{
@@ -253,7 +253,7 @@ namespace EFM
 				{
 					if(containedItem != null)
                     {
-						CustomItemWrapper containedItemCIW = containedItem.GetComponent<CustomItemWrapper>();
+						MeatovItem containedItemCIW = containedItem.GetComponent<MeatovItem>();
 						VanillaItemDescriptor containedItemVID = containedItem.GetComponent<VanillaItemDescriptor>();
 						if(containedItemCIW != null)
                         {
@@ -272,7 +272,7 @@ namespace EFM
 				{
 					if (containedItem != null)
 					{
-						CustomItemWrapper containedItemCIW = containedItem.GetComponent<CustomItemWrapper>();
+						MeatovItem containedItemCIW = containedItem.GetComponent<MeatovItem>();
 						VanillaItemDescriptor containedItemVID = containedItem.GetComponent<VanillaItemDescriptor>();
 						if (containedItemCIW != null)
 						{
@@ -355,7 +355,7 @@ namespace EFM
 			int weightToUse = 0;
 			string IDToUse = "";
 			List<string> parentsToUse = null;
-			CustomItemWrapper wrapper = item.GetComponent<CustomItemWrapper>();
+			MeatovItem wrapper = item.GetComponent<MeatovItem>();
 			VanillaItemDescriptor VID = item.GetComponent<VanillaItemDescriptor>();
 			if (wrapper != null)
 			{
@@ -385,7 +385,7 @@ namespace EFM
 				Collider[] cols = item.gameObject.GetComponentsInChildren<Collider>(true);
 				if (resetColPairs == null)
 				{
-					resetColPairs = new List<CustomItemWrapper.ResetColPair>();
+					resetColPairs = new List<MeatovItem.ResetColPair>();
 				}
 				ResetColPair resetColPair = null;
 				foreach (Collider col in cols)
@@ -479,15 +479,15 @@ namespace EFM
 									GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
 									if (Mod.currentLocationIndex == 1) // In hideout
 									{
-										itemObject.transform.parent = Mod.currentBaseManager.transform.GetChild(Mod.currentBaseManager.transform.childCount - 2);
-										CustomItemWrapper CIW = itemObject.GetComponent<CustomItemWrapper>();
+										itemObject.transform.parent = HideoutController.instance.transform.GetChild(HideoutController.instance.transform.childCount - 2);
+										MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
 										CIW.stack = splitAmount;
-										Mod.currentBaseManager.baseInventoryObjects[ID].Add(itemObject);
+										HideoutController.instance.baseInventoryObjects[ID].Add(itemObject);
 									}
 									else // In raid
 									{
 										itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
-										CustomItemWrapper CIW = itemObject.GetComponent<CustomItemWrapper>();
+										MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
 										CIW.stack = splitAmount;
 									}
 								}
@@ -845,7 +845,7 @@ namespace EFM
 
 						if (Mod.currentLocationIndex == 1)
 						{
-							foreach (BaseAreaManager areaManager in Mod.currentBaseManager.baseAreaManagers)
+							foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
 							{
 								areaManager.UpdateBasedOnItem(ID);
 							}
@@ -1507,7 +1507,7 @@ namespace EFM
 						Effect.effects.RemoveAt(Effect.effects.Count - 1);
                     }
 
-					effect.timer += effect.timer * (Base_Manager.currentDebuffEndDelay - Base_Manager.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)) 
+					effect.timer += effect.timer * (HideoutController.currentDebuffEndDelay - HideoutController.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)) 
 								  - effect.timer * (Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100);
 
 					effect.value += effect.value * (Skill.immunityMiscEffects * (Mod.skills[6].currentProgress / 100) / 100);
@@ -1636,7 +1636,7 @@ namespace EFM
 				if (itemsInSlots[i] != null)
 				{
 					FVRPhysicalObject physicalObject = itemsInSlots[i].GetComponent<FVRPhysicalObject>();
-					CustomItemWrapper CIW = itemsInSlots[i].GetComponent<CustomItemWrapper>();
+					MeatovItem CIW = itemsInSlots[i].GetComponent<MeatovItem>();
 					if(CIW != null && !CIW.inAll)
                     {
 						FVRInteractiveObject.All.Add(physicalObject);
@@ -1879,6 +1879,6 @@ namespace EFM
 
 	public class EFM_MainContainer : MonoBehaviour
     {
-		public CustomItemWrapper parentCIW;
+		public MeatovItem parentCIW;
     }
 }

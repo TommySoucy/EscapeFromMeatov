@@ -1,8 +1,4 @@
 ﻿using FistVR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,11 +15,11 @@ namespace EFM
 		{
 			base.BeginHoverDisplay();
 
-			if (hoverGraphics != null)
+			if (hoverGraphics != null && hoverGraphics.Length > 0)
 			{
 				foreach (GameObject hoverGraphic in hoverGraphics)
 				{
-					hoverGraphic.SetActive(!hoverGraphic.activeSelf);
+					hoverGraphic.SetActive(true);
 				}
 			}
 			if(buttonText != null && toggleTextColor)
@@ -38,11 +34,11 @@ namespace EFM
 		{
 			base.EndHoverDisplay();
 
-			if (hoverGraphics != null)
+			if (hoverGraphics != null && hoverGraphics.Length > 0)
 			{
 				foreach (GameObject hoverGraphic in hoverGraphics)
 				{
-					hoverGraphic.SetActive(!hoverGraphic.activeSelf);
+					hoverGraphic.SetActive(false);
 				}
 			}
 			if (buttonText != null && toggleTextColor)

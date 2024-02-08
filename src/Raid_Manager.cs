@@ -3,17 +3,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
-using Valve.VR.InteractionSystem;
 
 namespace EFM
 {
-    public class Raid_Manager : Manager
+    public class Raid_Manager : UIController
     {
         public static readonly float extractionTime = 10;
 
@@ -51,7 +48,7 @@ namespace EFM
         private List<int> availableIFFs;
         private int[] spawnedIFFs;
 
-        public override void Init()
+        public override void Awake()
         {
             Mod.currentRaidManager = this;
             Mod.lootingExp = 0;
@@ -191,7 +188,7 @@ namespace EFM
             Mod.LogInfo("Got extractions");
 
             // Init extraction cards
-            Transform extractionParent = Mod.playerStatusUI.transform.GetChild(0).GetChild(9);
+            Transform extractionParent = StatusUI.instance.transform.GetChild(0).GetChild(9);
             extractionCards = new List<GameObject>();
             for (int i = 0; i < possibleExtractions.Count; ++i)
             {
@@ -384,27 +381,6 @@ namespace EFM
             }
             */
 
-            foreach (JToken doorData in Mod.mapData["maps"][Mod.chosenMapIndex]["doors"])
-            {
-                GameObject doorObject = doorRoot.GetChild(doorIndex).GetChild(0).gameObject;
-
-                // Add a doorWrapper
-                DoorWrapper doorWrapper = doorObject.AddComponent<DoorWrapper>();
-
-                // Set key
-                int keyIndex = (int)doorData["keyIndex"];
-                if (keyIndex > -1)
-                {
-                    doorWrapper.keyID = keyIndex.ToString();
-                    doorWrapper.open = true;
-                    doorWrapper.openAngleX = (float)doorData["openAngleX"];
-                    doorWrapper.openAngleY = (float)doorData["openAngleY"];
-                    doorWrapper.openAngleZ = (float)doorData["openAngleZ"];
-                }
-
-                ++doorIndex;
-            }
-
             Mod.LogInfo("Initialized doors, spawning loose loot");
 
             // Spawn loose loot
@@ -417,7 +393,7 @@ namespace EFM
                 foreach (JToken forced in locationDB["forced"])
                 {
                     Mod.LogInfo("Forced entry, items null?: " + (forced["Items"] == null));
-                    Dictionary<string, CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, CustomItemWrapper>();
+                    Dictionary<string, MeatovItem> spawnedItemCIWs = new Dictionary<string, MeatovItem>();
                     Dictionary<string, VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, VanillaItemDescriptor>();
                     List<string> unspawnedParents = new List<string>();
 
@@ -466,7 +442,7 @@ namespace EFM
                 Mod.LogInfo("Spawning dynamic loot");
                 foreach (JToken dynamicSpawn in locationDB["dynamic"])
                 {
-                    Dictionary<string, CustomItemWrapper> spawnedItemCIWs = new Dictionary<string, CustomItemWrapper>();
+                    Dictionary<string, MeatovItem> spawnedItemCIWs = new Dictionary<string, MeatovItem>();
                     Dictionary<string, VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, VanillaItemDescriptor>();
                     List<string> unspawnedParents = new List<string>();
 
@@ -524,90 +500,6 @@ namespace EFM
             }
 
             Mod.LogInfo("Done spawning loose loot, initializing container");
-
-            // Init containers
-            Transform containersRoot = transform.GetChild(1).GetChild(1).GetChild(1);
-            JArray mapContainerData = (JArray)Mod.mapData["maps"][Mod.chosenMapIndex]["containers"];
-            for (int i = 0; i < containersRoot.childCount; ++i)
-            {
-                Transform container = containersRoot.GetChild(i);
-
-                // Setup the container
-                JObject containerData = Mod.lootContainersByName[container.name];
-                Transform mainContainer = container.GetChild(container.childCount - 1);
-                switch (container.name)
-                {
-                    case "Jacket":
-                    case "scavDead":
-                    case "MedBag":
-                    case "SportBag":
-                        // Static containers that can be toggled open closed by hovering hand overthem and pressing interact button
-                        container.gameObject.SetActive(false); // Disable temporarily so CIW doesnt Awake before we set the itemType
-                        CustomItemWrapper containerCIW = container.gameObject.AddComponent<CustomItemWrapper>();
-                        containerCIW.itemType = Mod.ItemType.LootContainer;
-                        container.gameObject.SetActive(true);
-                        containerCIW.canInsertItems = false;
-                        containerCIW.mainContainer = mainContainer.gameObject;
-                        containerCIW.containerItemRoot = container.GetChild(container.childCount - 2);
-
-                        LootContainer containerScript = container.gameObject.AddComponent<LootContainer>();
-                        containerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
-                        JToken gridProps = containerData["_props"]["Grids"][0]["_props"];
-                        containerScript.Init(Mod.staticLootTable[containerData["_id"].ToString()]["SpawnList"].ToObject<List<string>>(), (int)gridProps["cellsH"] * (int)gridProps["cellsV"]);
-
-                        mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
-                        break;
-                    case "Safe":
-                    case "meds&other":
-                    case "tools&other":
-                    case "GrenadeBox":
-                    case "terraWBoxLongBig":
-                    case "terraWBoxLong":
-                    case "WeaponCrate":
-                    case "ToolBox":
-                        // Containers that must be physically opened (Door, Cover, Cap, Lid...)
-                        LootContainerCover cover = container.GetChild(0).gameObject.AddComponent<LootContainerCover>();
-                        cover.keyID = mapContainerData[i]["keyID"].ToString();
-                        cover.hasKey = !cover.keyID.Equals("");
-                        cover.Root = container.GetChild(container.childCount - 3);
-                        cover.MinRot = -90;
-                        cover.MaxRot = 0;
-
-                        LootContainer openableContainerScript = container.gameObject.AddComponent<LootContainer>();
-                        openableContainerScript.interactable = cover;
-                        openableContainerScript.mainContainerCollider = mainContainer.GetComponent<Collider>();
-                        JToken openableContainergridProps = containerData["_props"]["Grids"][0]["_props"];
-                        openableContainerScript.Init(Mod.staticLootTable[containerData["_id"].ToString()]["SpawnList"].ToObject<List<string>>(), (int)openableContainergridProps["cellsH"] * (int)openableContainergridProps["cellsV"]);
-
-                        mainContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
-                        break;
-                    case "Drawer":
-                        // Containers that must be slid open
-                        for (int drawerIndex = 0; drawerIndex < 4; ++drawerIndex)
-                        {
-                            Transform drawerTransform = container.GetChild(drawerIndex);
-                            LootContainerSlider slider = drawerTransform.gameObject.AddComponent<LootContainerSlider>();
-                            slider.keyID = mapContainerData[i]["keyID"].ToString();
-                            slider.hasKey = !slider.keyID.Equals("");
-                            slider.Root = slider.transform;
-                            slider.MinY = -0.3f;
-                            slider.MaxY = 0.2f;
-                            slider.posZ = container.GetChild(drawerIndex).localPosition.z;
-
-                            LootContainer drawerScript = drawerTransform.gameObject.AddComponent<LootContainer>();
-                            drawerScript.interactable = slider;
-                            drawerScript.mainContainerCollider = drawerTransform.GetChild(drawerTransform.childCount - 1).GetComponent<Collider>();
-                            JToken drawerGridProps = containerData["_props"]["Grids"][0]["_props"];
-                            drawerScript.Init(Mod.staticLootTable[containerData["_id"].ToString()]["SpawnList"].ToObject<List<string>>(), (int)drawerGridProps["cellsH"] * (int)drawerGridProps["cellsV"]);
-
-                            Transform drawerContainer = drawerTransform.GetChild(drawerTransform.childCount - 1);
-                            drawerContainer.GetComponent<MeshRenderer>().material = Mod.quickSlotConstantMaterial;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
 
             // Init damage volumes
             foreach(Transform damageVolTransform in transform.GetChild(1).GetChild(1).GetChild(3).GetChild(3))
@@ -824,7 +716,7 @@ namespace EFM
 
             Mod.raidTime += Time.deltaTime;
             float timeLeft = maxRaidTime - Mod.raidTime;
-            Mod.playerStatusManager.SetExtractionLimitTimer(timeLeft);
+            StatusUI.instance.SetExtractionLimitTimer(timeLeft);
             if(timeLeft <= 600)
             {
                 if (!Mod.extractionLimitUI.activeSelf)
@@ -844,9 +736,9 @@ namespace EFM
                 Mod.extractionLimitUI.transform.rotation = Quaternion.LookRotation(vector2, Vector3.up);
                 Mod.extractionLimitUI.transform.Rotate(Vector3.right, -25);
 
-                if (Mod.playerStatusManager.extractionTimerText.color != Color.red)
+                if (StatusUI.instance.extractionTimer.color != Color.red)
                 {
-                    Mod.playerStatusManager.extractionTimerText.color = Color.red;
+                    StatusUI.instance.extractionTimer.color = Color.red;
                 }
             }
 
@@ -898,24 +790,24 @@ namespace EFM
                         totalExp += Mod.explorationExp;
                         if (totalExp < 400 && Mod.raidTime < 420) // 420 seconds = 7 mins
                         {
-                            Mod.raidState = Base_Manager.FinishRaidState.RunThrough;
+                            Mod.raidState = HideoutController.FinishRaidState.RunThrough;
                         }
                         else
                         {
-                            Mod.raidState = Base_Manager.FinishRaidState.Survived;
+                            Mod.raidState = HideoutController.FinishRaidState.Survived;
                         }
 
                         // Disable extraction list
-                        Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
-                        Mod.playerStatusManager.extractionTimerText.color = Color.black; 
+                        StatusUI.instance.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+                        StatusUI.instance.extractionTimer.color = Color.black; 
                         Mod.extractionLimitUI.SetActive(false);
-                        Mod.playerStatusManager.SetDisplayed(false);
+                        StatusUI.instance.OnCloseClicked();
                         Mod.extractionUI.SetActive(false);
 
                         UpdateExitStatusCounterConditions();
                         ResetHealthEffectCounterConditions();
 
-                        Manager.LoadBase(5); // Load autosave, which is right before the start of raid
+                        UIController.LoadHideout(5); // Load autosave, which is right before the start of raid
 
                         extracted = true;
                     }
@@ -940,7 +832,7 @@ namespace EFM
             // If hit escape time limit
             if(Mod.raidTime >= maxRaidTime)
             {
-                KillPlayer(Base_Manager.FinishRaidState.MIA);
+                KillPlayer(HideoutController.FinishRaidState.MIA);
             }
 
             UpdateEffects();
@@ -975,25 +867,25 @@ namespace EFM
                     bool wrongStatus = false;
                     switch (Mod.raidState)
                     {
-                        case Base_Manager.FinishRaidState.Survived:
+                        case HideoutController.FinishRaidState.Survived:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Survived))
                             {
                                 wrongStatus = true;
                             }
                             break;
-                        case Base_Manager.FinishRaidState.RunThrough:
+                        case HideoutController.FinishRaidState.RunThrough:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Runner))
                             {
                                 wrongStatus = true;
                             }
                             break;
-                        case Base_Manager.FinishRaidState.KIA:
+                        case HideoutController.FinishRaidState.KIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Killed))
                             {
                                 wrongStatus = true;
                             }
                             break;
-                        case Base_Manager.FinishRaidState.MIA:
+                        case HideoutController.FinishRaidState.MIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.MissingInAction))
                             {
                                 wrongStatus = true;
@@ -1040,25 +932,25 @@ namespace EFM
                     bool wrongStatus = false;
                     switch (Mod.raidState)
                     {
-                        case Base_Manager.FinishRaidState.Survived:
+                        case HideoutController.FinishRaidState.Survived:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Survived))
                             {
                                 wrongStatus = true;
                             }
                             break;
-                        case Base_Manager.FinishRaidState.RunThrough:
+                        case HideoutController.FinishRaidState.RunThrough:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Runner))
                             {
                                 wrongStatus = true;
                             }
                             break;
-                        case Base_Manager.FinishRaidState.KIA:
+                        case HideoutController.FinishRaidState.KIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Killed))
                             {
                                 wrongStatus = true;
                             }
                             break;
-                        case Base_Manager.FinishRaidState.MIA:
+                        case HideoutController.FinishRaidState.MIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.MissingInAction))
                             {
                                 wrongStatus = true;
@@ -1105,25 +997,25 @@ namespace EFM
                     bool wrongStatus = false;
                     switch (Mod.raidState)
                     {
-                        case Base_Manager.FinishRaidState.Survived:
+                        case HideoutController.FinishRaidState.Survived:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Survived))
                             {
                                 wrongStatus = true;
                             }
                             break;
-                        case Base_Manager.FinishRaidState.RunThrough:
+                        case HideoutController.FinishRaidState.RunThrough:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Runner))
                             {
                                 wrongStatus = true;
                             }
                             break;
-                        case Base_Manager.FinishRaidState.KIA:
+                        case HideoutController.FinishRaidState.KIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.Killed))
                             {
                                 wrongStatus = true;
                             }
                             break;
-                        case Base_Manager.FinishRaidState.MIA:
+                        case HideoutController.FinishRaidState.MIA:
                             if (!counterCondition.counterConditionTargetExitStatuses.Contains(TraderTaskCounterCondition.CounterConditionTargetExitStatus.MissingInAction))
                             {
                                 wrongStatus = true;
@@ -1599,7 +1491,7 @@ namespace EFM
                             }
                             if (!isHoldingAllowedWeapon)
                             {
-                                CustomItemWrapper CIW = rightInteractable.GetComponent<CustomItemWrapper>();
+                                MeatovItem CIW = rightInteractable.GetComponent<MeatovItem>();
                                 if (CIW != null)
                                 {
                                     foreach (string parent in CIW.parents)
@@ -1632,7 +1524,7 @@ namespace EFM
                                 }
                                 if (!isHoldingAllowedWeapon)
                                 {
-                                    CustomItemWrapper CIW = leftInteractable.GetComponent<CustomItemWrapper>();
+                                    MeatovItem CIW = leftInteractable.GetComponent<MeatovItem>();
                                     if (CIW != null)
                                     {
                                         foreach (string parent in CIW.parents)
@@ -1755,7 +1647,7 @@ namespace EFM
                             }
                             if (!isHoldingAllowedWeapon)
                             {
-                                CustomItemWrapper CIW = rightInteractable.GetComponent<CustomItemWrapper>();
+                                MeatovItem CIW = rightInteractable.GetComponent<MeatovItem>();
                                 if (CIW != null)
                                 {
                                     foreach (string parent in CIW.parents)
@@ -1788,7 +1680,7 @@ namespace EFM
                                 }
                                 if (!isHoldingAllowedWeapon)
                                 {
-                                    CustomItemWrapper CIW = leftInteractable.GetComponent<CustomItemWrapper>();
+                                    MeatovItem CIW = leftInteractable.GetComponent<MeatovItem>();
                                     if (CIW != null)
                                     {
                                         foreach (string parent in CIW.parents)
@@ -1911,7 +1803,7 @@ namespace EFM
                             }
                             if (!isHoldingAllowedWeapon)
                             {
-                                CustomItemWrapper CIW = rightInteractable.GetComponent<CustomItemWrapper>();
+                                MeatovItem CIW = rightInteractable.GetComponent<MeatovItem>();
                                 if (CIW != null)
                                 {
                                     foreach (string parent in CIW.parents)
@@ -1944,7 +1836,7 @@ namespace EFM
                                 }
                                 if (!isHoldingAllowedWeapon)
                                 {
-                                    CustomItemWrapper CIW = leftInteractable.GetComponent<CustomItemWrapper>();
+                                    MeatovItem CIW = leftInteractable.GetComponent<MeatovItem>();
                                     if (CIW != null)
                                     {
                                         foreach (string parent in CIW.parents)
@@ -2051,7 +1943,7 @@ namespace EFM
                 return false;
             }
 
-            CustomItemWrapper CIW = item.GetComponent<CustomItemWrapper>();
+            MeatovItem CIW = item.GetComponent<MeatovItem>();
             VanillaItemDescriptor VID = item.GetComponent<VanillaItemDescriptor>();
             List<string> parents = null;
             if(VID != null)
@@ -2104,7 +1996,7 @@ namespace EFM
         {
             // Spawn rig
             FVRPhysicalObject.FVRPhysicalObjectSize[] rigSlotSizes = null;
-            CustomItemWrapper rigCIW = null;
+            MeatovItem rigCIW = null;
             if (inventory.rig != null)
             {
                 Mod.LogInfo("\tSpawning rig: "+inventory.rig);
@@ -2112,7 +2004,7 @@ namespace EFM
 
                 yield return null;
                 
-                rigCIW = rigObject.GetComponent<CustomItemWrapper>();
+                rigCIW = rigObject.GetComponent<MeatovItem>();
                 rigCIW.foundInRaid = true;
 
                 if (!player)
@@ -2148,7 +2040,7 @@ namespace EFM
                     if (custom)
                     {
                         itemObject = Instantiate(itemPrefab);
-                        CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                        MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                         FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                         itemCIW.foundInRaid = true;
 
@@ -2197,7 +2089,7 @@ namespace EFM
                             if (Mod.ammoBoxByAmmoID.ContainsKey(itemID))
                             {
                                 itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[itemID]]);
-                                CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                 FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                 itemCIW.foundInRaid = true;
 
@@ -2221,7 +2113,7 @@ namespace EFM
                                     itemObject = Instantiate(Mod.itemPrefabs[715]);
                                 }
 
-                                CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                 FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                 itemCIW.foundInRaid = true;
 
@@ -2267,19 +2159,19 @@ namespace EFM
 
                 yield return null;
 
-                CustomItemWrapper armorCIW = backpackObject.GetComponent<CustomItemWrapper>();
+                MeatovItem armorCIW = backpackObject.GetComponent<MeatovItem>();
                 armorCIW.foundInRaid = true;
 
                 if (player)
                 {
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[1];
+                    FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[1];
                     FVRPhysicalObject armorPhysObj = backpackObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(backpackObject.transform, false);
                     BeginInteractionPatch.SetItemLocationIndex(0, armorCIW, null);
                     armorPhysObj.SetQuickBeltSlot(equipSlot);
                     armorPhysObj.SetParentage(null);
 
-                    backpackObject.SetActive(Mod.playerStatusManager.displayed);
+                    backpackObject.SetActive(StatusUI.instance.IsOpen());
                 }
                 else
                 {
@@ -2296,19 +2188,19 @@ namespace EFM
 
                 yield return null;
 
-                CustomItemWrapper headWearCIW = headWearObject.GetComponent<CustomItemWrapper>();
+                MeatovItem headWearCIW = headWearObject.GetComponent<MeatovItem>();
                 headWearCIW.foundInRaid = true;
 
                 if (player)
                 {
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[3];
+                    FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[3];
                     FVRPhysicalObject headWearPhysObj = headWearObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(headWearObject.transform, false);
                     BeginInteractionPatch.SetItemLocationIndex(0, headWearCIW, null);
                     headWearPhysObj.SetQuickBeltSlot(equipSlot);
                     headWearPhysObj.SetParentage(null);
 
-                    headWearObject.SetActive(Mod.playerStatusManager.displayed);
+                    headWearObject.SetActive(StatusUI.instance.IsOpen());
                 }
                 else
                 {
@@ -2325,19 +2217,19 @@ namespace EFM
 
                 yield return null;
 
-                CustomItemWrapper earPieceCIW = earPieceObject.GetComponent<CustomItemWrapper>();
+                MeatovItem earPieceCIW = earPieceObject.GetComponent<MeatovItem>();
                 earPieceCIW.foundInRaid = true;
 
                 if (player)
                 {
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[2];
+                    FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[2];
                     FVRPhysicalObject earPiecePhysObj = earPieceObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(earPieceObject.transform, false);
                     BeginInteractionPatch.SetItemLocationIndex(0, earPieceCIW, null);
                     earPiecePhysObj.SetQuickBeltSlot(equipSlot);
                     earPiecePhysObj.SetParentage(null);
 
-                    earPieceObject.SetActive(Mod.playerStatusManager.displayed);
+                    earPieceObject.SetActive(StatusUI.instance.IsOpen());
                 }
                 else
                 {
@@ -2354,19 +2246,19 @@ namespace EFM
 
                 yield return null;
 
-                CustomItemWrapper faceCoverCIW = faceCoverObject.GetComponent<CustomItemWrapper>();
+                MeatovItem faceCoverCIW = faceCoverObject.GetComponent<MeatovItem>();
                 faceCoverCIW.foundInRaid = true;
 
                 if (player)
                 {
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[4];
+                    FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[4];
                     FVRPhysicalObject faceCoverPhysObj = faceCoverObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(faceCoverObject.transform, false);
                     BeginInteractionPatch.SetItemLocationIndex(0, faceCoverCIW, null);
                     faceCoverPhysObj.SetQuickBeltSlot(equipSlot);
                     faceCoverPhysObj.SetParentage(null);
 
-                    faceCoverObject.SetActive(Mod.playerStatusManager.displayed);
+                    faceCoverObject.SetActive(StatusUI.instance.IsOpen());
                 }
                 else
                 {
@@ -2383,19 +2275,19 @@ namespace EFM
 
                 yield return null;
 
-                CustomItemWrapper eyeWearCIW = eyeWearObject.GetComponent<CustomItemWrapper>();
+                MeatovItem eyeWearCIW = eyeWearObject.GetComponent<MeatovItem>();
                 eyeWearCIW.foundInRaid = true;
 
                 if (player)
                 {
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[5];
+                    FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[5];
                     FVRPhysicalObject eyeWearPhysObj = eyeWearObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(eyeWearObject.transform, false);
                     BeginInteractionPatch.SetItemLocationIndex(0, eyeWearCIW, null);
                     eyeWearPhysObj.SetQuickBeltSlot(equipSlot);
                     eyeWearPhysObj.SetParentage(null);
 
-                    eyeWearObject.SetActive(Mod.playerStatusManager.displayed);
+                    eyeWearObject.SetActive(StatusUI.instance.IsOpen());
                 }
                 else
                 {
@@ -2410,7 +2302,7 @@ namespace EFM
                 Mod.LogInfo("\tSpawning dogtag: " + inventory.dogtag);
                 GameObject dogtagObject = Instantiate(Mod.itemPrefabs[int.Parse(inventory.dogtag)], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
 
-                CustomItemWrapper dogtagCIW = dogtagObject.GetComponent<CustomItemWrapper>();
+                MeatovItem dogtagCIW = dogtagObject.GetComponent<MeatovItem>();
                 dogtagCIW.dogtagLevel = inventory.dogtagLevel;
                 dogtagCIW.dogtagName = inventory.dogtagName;
                 dogtagCIW.foundInRaid = true;
@@ -2422,7 +2314,7 @@ namespace EFM
             }
 
             // Spawn backpack
-            CustomItemWrapper backpackCIW = null;
+            MeatovItem backpackCIW = null;
             if (inventory.backpack != null)
             {
                 Mod.LogInfo("\tSpawning backpack: " + inventory.backpack);
@@ -2430,7 +2322,7 @@ namespace EFM
 
                 yield return null;
 
-                backpackCIW = backpackObject.GetComponent<CustomItemWrapper>();
+                backpackCIW = backpackObject.GetComponent<MeatovItem>();
                 backpackCIW.foundInRaid = true;
 
                 if (!player)
@@ -2461,7 +2353,7 @@ namespace EFM
                     if (custom)
                     {
                         itemObject = Instantiate(itemPrefab);
-                        CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                        MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                         itemPhysObj = itemObject.GetComponent<FVRPhysicalObject>();
                         itemCIW.foundInRaid = true;
 
@@ -2510,7 +2402,7 @@ namespace EFM
                             if (Mod.ammoBoxByAmmoID.ContainsKey(backpackItem))
                             {
                                 itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[backpackItem]]);
-                                CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                 itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                 itemCIW.foundInRaid = true;
 
@@ -2534,7 +2426,7 @@ namespace EFM
                                     itemObject = Instantiate(Mod.itemPrefabs[715]);
                                 }
 
-                                CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                 itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                 itemCIW.foundInRaid = true;
 
@@ -2720,7 +2612,7 @@ namespace EFM
                                 if (Mod.ammoBoxByAmmoID.ContainsKey(modID))
                                 {
                                     GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
-                                    CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                    MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                     itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
@@ -2746,7 +2638,7 @@ namespace EFM
                                         itemObject = Instantiate(Mod.itemPrefabs[715], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                                     }
 
-                                    CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                    MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                     itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
@@ -2951,7 +2843,7 @@ namespace EFM
                                 if (Mod.ammoBoxByAmmoID.ContainsKey(modID))
                                 {
                                     GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
-                                    CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                    MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                     itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
@@ -2977,7 +2869,7 @@ namespace EFM
                                         itemObject = Instantiate(Mod.itemPrefabs[715], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                                     }
 
-                                    CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                    MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                     itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
@@ -3177,7 +3069,7 @@ namespace EFM
                                 if (Mod.ammoBoxByAmmoID.ContainsKey(currentParent.children[childIndices.Peek()].ID))
                                 {
                                     GameObject itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[modID]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
-                                    CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                    MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                     itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
@@ -3203,7 +3095,7 @@ namespace EFM
                                         itemObject = Instantiate(Mod.itemPrefabs[715], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                                     }
 
-                                    CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                                    MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                                     itemCIW.foundInRaid = true;
                                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
                                     attachmentPhysObj = itemPhysObj;
@@ -3324,7 +3216,7 @@ namespace EFM
                     Mod.LogInfo("\t\tis custom");
                     itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                     Mod.LogInfo("\t\tinstantiated");
-                    CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                    MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                     itemCIW.foundInRaid = true;
                     Mod.LogInfo("\t\tgot CIW");
                     FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
@@ -3378,7 +3270,7 @@ namespace EFM
                         if (Mod.ammoBoxByAmmoID.ContainsKey(genericItem))
                         {
                             itemObject = Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[genericItem]], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
-                            CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                            MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                             itemCIW.foundInRaid = true;
                             FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
@@ -3403,7 +3295,7 @@ namespace EFM
                                 itemObject = Instantiate(Mod.itemPrefabs[715], pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
                             }
 
-                            CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                            MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
                             itemCIW.foundInRaid = true;
                             FVRPhysicalObject itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
@@ -3437,7 +3329,7 @@ namespace EFM
                         if(GM.CurrentPlayerBody.QBSlots_Internal[j].CurObject == null)
                         {
                             Mod.AddToPlayerInventory(finalItemPhysObj.transform, false);
-                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<CustomItemWrapper>(), itemObject.GetComponent<VanillaItemDescriptor>());
+                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<MeatovItem>(), itemObject.GetComponent<VanillaItemDescriptor>());
                             finalItemPhysObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[j]);
                             finalItemPhysObj.SetParentage(null);
                             success = true;
@@ -3451,7 +3343,7 @@ namespace EFM
                         if (GM.CurrentPlayerBody.QBSlots_Internal[j].CurObject == null)
                         {
                             Mod.AddToPlayerInventory(finalItemPhysObj.transform, false);
-                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<CustomItemWrapper>(), itemObject.GetComponent<VanillaItemDescriptor>());
+                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<MeatovItem>(), itemObject.GetComponent<VanillaItemDescriptor>());
                             finalItemPhysObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[j]);
                             finalItemPhysObj.SetParentage(null);
                             success = true;
@@ -3486,7 +3378,7 @@ namespace EFM
                             }
                         }
                         Mod.AddToPlayerInventory(finalItemPhysObj.transform, false);
-                        BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<CustomItemWrapper>(), itemObject.GetComponent<VanillaItemDescriptor>());
+                        BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<MeatovItem>(), itemObject.GetComponent<VanillaItemDescriptor>());
                         itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
                         success = true;
                     }
@@ -3512,14 +3404,14 @@ namespace EFM
                 // Equip rig
                 if (rigCIW != null)
                 {
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[6];
+                    FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[6];
                     FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(rigCIW.transform, false);
                     BeginInteractionPatch.SetItemLocationIndex(0, rigCIW, null);
                     rigPhysObj.SetQuickBeltSlot(equipSlot);
                     rigPhysObj.SetParentage(null);
 
-                    rigCIW.gameObject.SetActive(Mod.playerStatusManager.displayed);
+                    rigCIW.gameObject.SetActive(StatusUI.instance.IsOpen());
                 }
 
                 // Equip backpack, this is done after we put items inside because if we put it on player and THEN spawn items inside,
@@ -3527,7 +3419,7 @@ namespace EFM
                 // items will be giant because the whole things gets scaled back up
                 if(backpackCIW != null)
                 {
-                    FVRQuickBeltSlot equipSlot = Mod.equipmentSlots[0];
+                    FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[0];
                     FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(backpackCIW.transform, false);
                     BeginInteractionPatch.SetItemLocationIndex(0, backpackCIW, null);
@@ -3536,7 +3428,7 @@ namespace EFM
 
                     Mod.leftShoulderObject = backpackPhysObj.gameObject;
 
-                    backpackCIW.gameObject.SetActive(Mod.playerStatusManager.displayed);
+                    backpackCIW.gameObject.SetActive(StatusUI.instance.IsOpen());
                 }
             }
 
@@ -4167,7 +4059,7 @@ namespace EFM
                         // also based on whether this is an itemtype 2 (rig) or 3 (armored rig), set a bool to tell whether we can spawn a equipment of type ArmorVest after this
                         int parsedEquipID = int.Parse(actualRigID);
                         GameObject rigPrefab = Mod.itemPrefabs[parsedEquipID];
-                        CustomItemWrapper rigCIW = rigPrefab.GetComponent<CustomItemWrapper>();
+                        MeatovItem rigCIW = rigPrefab.GetComponent<MeatovItem>();
                         rigSlotSizes = new FVRPhysicalObject.FVRPhysicalObjectSize[rigCIW.rigSlots.Count];
                         for (int j = 0; j < rigCIW.rigSlots.Count; ++j)
                         {
@@ -4625,7 +4517,7 @@ namespace EFM
                         FVRPhysicalObject itemPhysObj = null;
                         if (custom)
                         {
-                            CustomItemWrapper itemCIW = itemPrefab.GetComponent<CustomItemWrapper>();
+                            MeatovItem itemCIW = itemPrefab.GetComponent<MeatovItem>();
                             if(itemCIW == null)
                             {
                                 Mod.LogError("Could spawn Item "+itemID+" in "+ newAISpawn.name + "'s "+itemParts[i]+" but is custom and has no CIW");
@@ -4969,7 +4861,7 @@ namespace EFM
             FVRPhysicalObject itemPhysObj = null;
             if (custom)
             {
-                CustomItemWrapper itemCIW = itemPrefab.GetComponentInChildren<CustomItemWrapper>();
+                MeatovItem itemCIW = itemPrefab.GetComponentInChildren<MeatovItem>();
                 itemParents = itemCIW.parents;
                 itemVolume = itemCIW.volumes[0];
                 itemSpawnChance = Mod.GetRaritySpawnChanceMultiplier(itemCIW.rarity);
@@ -5055,7 +4947,7 @@ namespace EFM
             BotData botData = new BotData();
 
             // Get inventory data
-            string[] botInventoryFiles = Directory.GetFiles(Mod.path + "/DB/Bots/" + name + "/inventory/");
+            string[] botInventoryFiles = Directory.GetFiles(Mod.path + "/database/Bots/" + name + "/inventory/");
             botData.minInventoryLevels = new int[botInventoryFiles.Length];
             botData.inventoryDB = new JObject[botInventoryFiles.Length];
             for (int i = botInventoryFiles.Length - 1; i >= 0; --i)
@@ -5067,11 +4959,11 @@ namespace EFM
             }
 
             // Get other data
-            botData.chances = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/chances.json"));
-            botData.experience = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/experience.json"));
-            botData.generation = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/generation.json"));
-            botData.health = JObject.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/health.json"));
-            botData.names = JArray.Parse(File.ReadAllText(Mod.path + "/DB/Bots/" + name + "/names.json"));
+            botData.chances = JObject.Parse(File.ReadAllText(Mod.path + "/database/Bots/" + name + "/chances.json"));
+            botData.experience = JObject.Parse(File.ReadAllText(Mod.path + "/database/Bots/" + name + "/experience.json"));
+            botData.generation = JObject.Parse(File.ReadAllText(Mod.path + "/database/Bots/" + name + "/generation.json"));
+            botData.health = JObject.Parse(File.ReadAllText(Mod.path + "/database/Bots/" + name + "/health.json"));
+            botData.names = JArray.Parse(File.ReadAllText(Mod.path + "/database/Bots/" + name + "/names.json"));
 
             return botData;
         }
@@ -5149,17 +5041,17 @@ namespace EFM
                                     break;
                                 case Effect.EffectType.HandsTremor:
                                     // TODO: Stop tremors if there are no other tremor effects
-                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                    if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                     {
-                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                                        StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                                     }
                                     Mod.AddSkillExp(5, 6);
                                     break;
                                 case Effect.EffectType.QuantumTunnelling:
                                     // TODO: Stop QuantumTunnelling if there are no other tunnelling effects
-                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
+                                    if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
                                     {
-                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(false);
+                                        StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(false);
                                     }
                                     Mod.AddSkillExp(5, 6);
                                     break;
@@ -5200,9 +5092,9 @@ namespace EFM
                                         // Enable haptic feedback
                                         GM.Options.ControlOptions.HapticsState = ControlOptions.HapticsMode.Enabled;
                                         // TODO: also set volume to full
-                                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.activeSelf)
+                                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.activeSelf)
                                         {
-                                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(false);
+                                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(false);
                                         }
                                     }
                                     Mod.AddSkillExp(5, 6);
@@ -5240,23 +5132,23 @@ namespace EFM
                                     if (!hasPainTremors)
                                     {
                                         // TODO: Disable tremors
-                                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                         {
-                                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                                         }
                                     }
 
-                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
+                                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
                                     {
-                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(false);
+                                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(false);
                                     }
                                     Mod.AddSkillExp(5, 6);
                                     break;
                                 case Effect.EffectType.StomachBloodloss:
                                     --Mod.stomachBloodLossCount;
-                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
+                                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
                                     {
-                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(false);
+                                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(false);
                                     }
                                     Mod.AddSkillExp(5, 6);
                                     break;
@@ -5290,15 +5182,15 @@ namespace EFM
                                     if (!hasToxinTremors)
                                     {
                                         // TODO: Disable tremors
-                                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                         {
-                                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                                         }
                                     }
 
-                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.activeSelf)
+                                    if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.activeSelf)
                                     {
-                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(false);
+                                        StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(false);
                                     }
                                     Mod.AddSkillExp(5, 6);
                                     break;
@@ -5334,14 +5226,14 @@ namespace EFM
                                         Effect.effects.Remove(causedEffect);
                                     }
 
-                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
+                                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
                                     {
-                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(false);
+                                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(false);
                                     }
 
-                                    if (Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
+                                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
                                     {
-                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
+                                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
                                     }
                                     Mod.AddSkillExp(5, 6);
                                     break;
@@ -5368,15 +5260,15 @@ namespace EFM
                                     if (!hasFractureTremors)
                                     {
                                         // TODO: Disable tremors
-                                        if (Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                         {
-                                            Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
+                                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
                                         }
                                     }
 
-                                    if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.activeSelf)
+                                    if (!StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.activeSelf)
                                     {
-                                        Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.SetActive(true);
+                                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.SetActive(true);
                                     }
                                     Mod.AddSkillExp(5, 6);
                                     break;
@@ -5432,16 +5324,16 @@ namespace EFM
                                 break;
                             case Effect.EffectType.HandsTremor:
                                 // TODO: Begin tremors if there isnt already another active one
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.QuantumTunnelling:
                                 // TODO: Begin quantumtunneling if there isnt already another active one
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.HealthRate:
@@ -5489,9 +5381,9 @@ namespace EFM
                                 // Disable haptic feedback
                                 GM.Options.ControlOptions.HapticsState = ControlOptions.HapticsMode.Disabled;
                                 // TODO: also set volume to 0.33 * volume
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.WeightLimit:
@@ -5509,24 +5401,24 @@ namespace EFM
                                     newTremor.effectType = Effect.EffectType.HandsTremor;
                                     newTremor.delay = 5;
                                     newTremor.hasTimer = effect.hasTimer;
-                                    newTremor.timer = effect.timer + effect.timer * (Base_Manager.currentDebuffEndDelay - Base_Manager.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                    newTremor.timer = effect.timer + effect.timer * (HideoutController.currentDebuffEndDelay - HideoutController.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
                                                     - effect.timer * (Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100); ;
                                     Effect.effects.Add(newTremor);
                                     effect.caused.Add(newTremor);
                                 }
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(true);
                                 }
 
                                 Mod.AddSkillExp(Skill.stressResistanceHealthNegativeEffect, 4);
                                 break;
                             case Effect.EffectType.StomachBloodloss:
                                 ++Mod.stomachBloodLossCount;
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.UnknownToxin:
@@ -5535,7 +5427,7 @@ namespace EFM
                                 newToxinPain.effectType = Effect.EffectType.Pain;
                                 newToxinPain.delay = 5;
                                 newToxinPain.hasTimer = effect.hasTimer;
-                                newToxinPain.timer = effect.timer + effect.timer * (Base_Manager.currentDebuffEndDelay - Base_Manager.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                newToxinPain.timer = effect.timer + effect.timer * (HideoutController.currentDebuffEndDelay - HideoutController.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
                                                    - effect.timer * (Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100); ;
                                 newToxinPain.partIndex = 0;
                                 Effect.effects.Add(newToxinPain);
@@ -5546,14 +5438,14 @@ namespace EFM
                                 newToxinHealthRate.delay = 5;
                                 newToxinHealthRate.value = -25 + 25 * (Skill.immunityPoisonBuff * (Mod.skills[6].currentProgress / 100) / 100);
                                 newToxinHealthRate.hasTimer = effect.hasTimer;
-                                newToxinHealthRate.timer = effect.timer + effect.timer * (Base_Manager.currentDebuffEndDelay - Base_Manager.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                newToxinHealthRate.timer = effect.timer + effect.timer * (HideoutController.currentDebuffEndDelay - HideoutController.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
                                                          - effect.timer * (Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100); ;
                                 Effect.effects.Add(newToxinHealthRate);
                                 effect.caused.Add(newToxinHealthRate);
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.BodyTemperature:
@@ -5577,7 +5469,7 @@ namespace EFM
                                 newLightBleedingHealthRate.delay = 5;
                                 newLightBleedingHealthRate.value = -8;
                                 newLightBleedingHealthRate.hasTimer = effect.hasTimer;
-                                newLightBleedingHealthRate.timer = effect.timer + effect.timer * (Base_Manager.currentDebuffEndDelay - Base_Manager.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                newLightBleedingHealthRate.timer = effect.timer + effect.timer * (HideoutController.currentDebuffEndDelay - HideoutController.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
                                                                  - effect.timer * (Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100); ;
                                 newLightBleedingHealthRate.nonLethal = true;
                                 Effect.effects.Add(newLightBleedingHealthRate);
@@ -5588,14 +5480,14 @@ namespace EFM
                                 newLightBleedingEnergyRate.delay = 5;
                                 newLightBleedingEnergyRate.value = -5;
                                 newLightBleedingEnergyRate.hasTimer = effect.hasTimer;
-                                newLightBleedingEnergyRate.timer = effect.timer + effect.timer * (Base_Manager.currentDebuffEndDelay - Base_Manager.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                newLightBleedingEnergyRate.timer = effect.timer + effect.timer * (HideoutController.currentDebuffEndDelay - HideoutController.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
                                                                  - effect.timer * (Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100); ;
                                 Effect.effects.Add(newLightBleedingEnergyRate);
                                 effect.caused.Add(newLightBleedingEnergyRate);
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.HeavyBleeding:
@@ -5605,7 +5497,7 @@ namespace EFM
                                 newHeavyBleedingHealthRate.delay = 5;
                                 newHeavyBleedingHealthRate.value = -13.5f; // Note: This damage will be applied to each part every 60 seconds since no part index is specified
                                 newHeavyBleedingHealthRate.hasTimer = effect.hasTimer;
-                                newHeavyBleedingHealthRate.timer = effect.timer + effect.timer * (Base_Manager.currentDebuffEndDelay - Base_Manager.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                newHeavyBleedingHealthRate.timer = effect.timer + effect.timer * (HideoutController.currentDebuffEndDelay - HideoutController.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
                                                                  - effect.timer * (Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100); ;
                                 newHeavyBleedingHealthRate.nonLethal = true;
                                 Effect.effects.Add(newHeavyBleedingHealthRate);
@@ -5616,14 +5508,14 @@ namespace EFM
                                 newHeavyBleedingEnergyRate.delay = 5;
                                 newHeavyBleedingEnergyRate.value = -6;
                                 newHeavyBleedingEnergyRate.hasTimer = effect.hasTimer;
-                                newHeavyBleedingEnergyRate.timer = effect.timer + effect.timer * (Base_Manager.currentDebuffEndDelay - Base_Manager.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                newHeavyBleedingEnergyRate.timer = effect.timer + effect.timer * (HideoutController.currentDebuffEndDelay - HideoutController.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
                                                                  - effect.timer * (Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100); ;
                                 Effect.effects.Add(newHeavyBleedingEnergyRate);
                                 effect.caused.Add(newHeavyBleedingEnergyRate);
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.Fracture:
@@ -5632,14 +5524,14 @@ namespace EFM
                                 newFracturePain.effectType = Effect.EffectType.Pain;
                                 newFracturePain.delay = 5;
                                 newFracturePain.hasTimer = effect.hasTimer;
-                                newFracturePain.timer = effect.timer + effect.timer * (Base_Manager.currentDebuffEndDelay - Base_Manager.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
+                                newFracturePain.timer = effect.timer + effect.timer * (HideoutController.currentDebuffEndDelay - HideoutController.currentDebuffEndDelay * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100))
                                                       - effect.timer * (Skill.decreaseNegativeEffectDurationRate * (Mod.skills[5].currentProgress / 100) / 100); ;
                                 Effect.effects.Add(newFracturePain);
                                 effect.caused.Add(newFracturePain);
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effect.partIndex).GetChild(3).GetChild(4).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.Dehydration:
@@ -5652,9 +5544,9 @@ namespace EFM
                                 Effect.effects.Add(newDehydrationHealthRate);
                                 effect.caused.Add(newDehydrationHealthRate);
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.HeavyDehydration:
@@ -5667,17 +5559,17 @@ namespace EFM
                                 Effect.effects.Add(newHeavyDehydrationHealthRate);
                                 effect.caused.Add(newHeavyDehydrationHealthRate);
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(5).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.Fatigue:
                                 Mod.fatigue = true;
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.HeavyFatigue:
@@ -5690,9 +5582,9 @@ namespace EFM
                                 Effect.effects.Add(newHeavyFatigueHealthRate);
                                 effect.caused.Add(newHeavyFatigueHealthRate);
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(8).gameObject.SetActive(true);
                                 }
                                 break;
                             case Effect.EffectType.OverweightFatigue:
@@ -5705,9 +5597,9 @@ namespace EFM
                                 Effect.effects.Add(newOverweightFatigueEnergyRate);
                                 effect.caused.Add(newOverweightFatigueEnergyRate);
 
-                                if (!Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(9).gameObject.activeSelf)
+                                if (!StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(9).gameObject.activeSelf)
                                 {
-                                    Mod.playerStatusManager.transform.GetChild(0).GetChild(2).GetChild(9).gameObject.SetActive(true);
+                                    StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(9).gameObject.SetActive(true);
                                 }
                                 break;
                         }
@@ -5774,8 +5666,8 @@ namespace EFM
                 {
                     Mod.health[i] = Mathf.Clamp(Mod.health[i] + Mod.currentNonLethalHealthRates[i] * (Time.deltaTime / 60), 0, Mod.currentMaxHealth[i]);
                 }
-                Mod.playerStatusManager.partHealthTexts[i].text = String.Format("{0:0}", Mod.health[i]) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[i]);
-                Mod.playerStatusManager.partHealthImages[i].color = Color.Lerp(Color.red, Color.white, Mod.health[i] / Mod.currentMaxHealth[i]);
+                StatusUI.instance.partHealth[i].text = String.Format("{0:0}", Mod.health[i]) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[i]);
+                StatusUI.instance.partImages[i].color = Color.Lerp(Color.red, Color.white, Mod.health[i] / Mod.currentMaxHealth[i]);
 
                 healthDelta += Mod.currentNonLethalHealthRates[i];
                 health += Mod.health[i];
@@ -5784,25 +5676,25 @@ namespace EFM
             // Set status elements
             if (healthDelta != 0)
             {
-                if (!Mod.playerStatusManager.healthDeltaText.gameObject.activeSelf)
+                if (!StatusUI.instance.healthDelta.gameObject.activeSelf)
                 {
-                    Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(true);
+                    StatusUI.instance.healthDelta.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.healthDeltaText.text = (healthDelta >= 0 ? "+ " : "") + healthDelta + "/min";
+                StatusUI.instance.healthDelta.text = (healthDelta >= 0 ? "+ " : "") + healthDelta + "/min";
                 if (lethal)
                 {
-                    Mod.playerStatusManager.healthDeltaText.color = Color.red;
+                    StatusUI.instance.healthDelta.color = Color.red;
                 }
                 else
                 {
-                    Mod.playerStatusManager.healthDeltaText.color = Color.white;
+                    StatusUI.instance.healthDelta.color = Color.white;
                 }
             }
-            else if (Mod.playerStatusManager.healthDeltaText.gameObject.activeSelf)
+            else if (StatusUI.instance.healthDelta.gameObject.activeSelf)
             {
-                Mod.playerStatusManager.healthDeltaText.gameObject.SetActive(false);
+                StatusUI.instance.healthDelta.gameObject.SetActive(false);
             }
-            Mod.playerStatusManager.healthText.text = String.Format("{0:0}/{1:0}", health, maxHealthTotal);
+            StatusUI.instance.health.text = String.Format("{0:0}/{1:0}", health, maxHealthTotal);
             GM.CurrentPlayerBody.SetHealthThreshold(maxHealthTotal);
             GM.CurrentPlayerBody.Health = health; // This must be done after setting health threshold because setting health threshold also sets health
             if(health < maxHealthTotal / 100 * 20) // Add stress resistance xp if below 20% max health
@@ -5813,17 +5705,17 @@ namespace EFM
             Mod.hydration = Mathf.Clamp(Mod.hydration + (Mod.currentHydrationRate - (Mod.currentHydrationRate * (0.006f * (Mod.skills[3].currentProgress / 100)))) * (Time.deltaTime / 60), 0, Mod.maxHydration);
             if (Mod.currentHydrationRate != 0)
             {
-                if (!Mod.playerStatusManager.hydrationDeltaText.gameObject.activeSelf)
+                if (!StatusUI.instance.hydrationDelta.gameObject.activeSelf)
                 {
-                    Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(true);
+                    StatusUI.instance.hydrationDelta.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.hydrationDeltaText.text = (Mod.currentHydrationRate >= 0 ? "+ " : "") + String.Format("{0:0.#}/min", Mod.currentHydrationRate);
+                StatusUI.instance.hydrationDelta.text = (Mod.currentHydrationRate >= 0 ? "+ " : "") + String.Format("{0:0.#}/min", Mod.currentHydrationRate);
             }
-            else if (Mod.playerStatusManager.hydrationDeltaText.gameObject.activeSelf)
+            else if (StatusUI.instance.hydrationDelta.gameObject.activeSelf)
             {
-                Mod.playerStatusManager.hydrationDeltaText.gameObject.SetActive(false);
+                StatusUI.instance.hydrationDelta.gameObject.SetActive(false);
             }
-            Mod.playerStatusManager.hydrationText.text = String.Format("{0:0}/{1:0}", Mod.hydration, Mod.maxHydration);
+            StatusUI.instance.hydration.text = String.Format("{0:0}/{1:0}", Mod.hydration, Mod.maxHydration);
             if (Mod.hydration == 0)
             {
                 if (Mod.dehydrationEffect == null)
@@ -5912,17 +5804,17 @@ namespace EFM
 
             if (Mod.currentEnergyRate != 0)
             {
-                if (!Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
+                if (!StatusUI.instance.energyDelta.gameObject.activeSelf)
                 {
-                    Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(true);
+                    StatusUI.instance.energyDelta.gameObject.SetActive(true);
                 }
-                Mod.playerStatusManager.energyDeltaText.text = (Mod.currentEnergyRate >= 0 ? "+ " : "") + String.Format("{0:0.#}/min", Mod.currentEnergyRate);
+                StatusUI.instance.energyDelta.text = (Mod.currentEnergyRate >= 0 ? "+ " : "") + String.Format("{0:0.#}/min", Mod.currentEnergyRate);
             }
-            else if (Mod.playerStatusManager.energyDeltaText.gameObject.activeSelf)
+            else if (StatusUI.instance.energyDelta.gameObject.activeSelf)
             {
-                Mod.playerStatusManager.energyDeltaText.gameObject.SetActive(false);
+                StatusUI.instance.energyDelta.gameObject.SetActive(false);
             }
-            Mod.playerStatusManager.energyText.text = String.Format("{0:0}/{1:0}", Mod.energy, Mod.maxEnergy);
+            StatusUI.instance.energy.text = String.Format("{0:0}/{1:0}", Mod.energy, Mod.maxEnergy);
             if (Mod.energy == 0)
             {
                 if (Mod.fatigueEffect == null)
@@ -6081,7 +5973,7 @@ namespace EFM
         {
             long longTime = GetTimeSeconds();
             long clampedTime = longTime % 86400; // Clamp to 24 hours because thats the relevant range
-            int scaledTime = (int)((clampedTime * Manager.meatovTimeMultiplier) % 86400);
+            int scaledTime = (int)((clampedTime * UIController.meatovTimeMultiplier) % 86400);
             time = (scaledTime + Mod.chosenTimeIndex == 0 ? 0 : 43200) % 86400;
         }
 
@@ -6118,7 +6010,7 @@ namespace EFM
 
         private void UpdateTime()
         {
-            time += UnityEngine.Time.deltaTime * Manager.meatovTimeMultiplier;
+            time += UnityEngine.Time.deltaTime * UIController.meatovTimeMultiplier;
 
             time %= 86400;
         }
@@ -6203,18 +6095,18 @@ namespace EFM
             }
 
             // Instantiate in a random slot that fits the item if there is one
-            CustomItemWrapper prefabCIW = itemPrefab.GetComponent<CustomItemWrapper>();
+            MeatovItem prefabCIW = itemPrefab.GetComponent<MeatovItem>();
             VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<VanillaItemDescriptor>();
 
             FVRPhysicalObject itemPhysObj = null;
-            CustomItemWrapper itemCIW = null;
+            MeatovItem itemCIW = null;
             VanillaItemDescriptor itemVID = null;
             FireArmRoundType roundType = FireArmRoundType.a106_25mmR;
             FireArmRoundClass roundClass = FireArmRoundClass.a20AP;
             if (prefabCIW != null)
             {
                 itemObject = GameObject.Instantiate(itemPrefab);
-                itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                itemCIW = itemObject.GetComponent<MeatovItem>();
                 itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                 itemCIW.foundInRaid = true;
@@ -6268,7 +6160,7 @@ namespace EFM
                         {
                             Mod.LogInfo("\t\t\tSpecific box");
                             itemObject = GameObject.Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[prefabVID.H3ID]]);
-                            itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                            itemCIW = itemObject.GetComponent<MeatovItem>();
                             itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
 
@@ -6293,7 +6185,7 @@ namespace EFM
                                 itemObject = GameObject.Instantiate(Mod.itemPrefabs[715]);
                             }
 
-                            itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+                            itemCIW = itemObject.GetComponent<MeatovItem>();
                             itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>(); 
 
                             FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
@@ -6365,57 +6257,6 @@ namespace EFM
         {
             extractions = new List<Extraction>();
             Transform extractionRoot = transform.GetChild(transform.childCount - 2);
-
-            int extractionIndex = 0;
-            foreach(JToken extractionData in Mod.mapData["maps"][Mod.chosenMapIndex]["extractions"])
-            {
-                Extraction extraction = new Extraction();
-                extraction.gameObject = extractionRoot.GetChild(extractionIndex).gameObject;
-                extraction.name = extraction.gameObject.name;
-
-                extraction.raidTimes = new List<TimeInterval>();
-                foreach(JToken raidTimeData in extractionData["raidTimes"])
-                {
-                    TimeInterval raidTime = new TimeInterval();
-                    raidTime.start = (int)raidTimeData["start"];
-                    raidTime.end = (int)raidTimeData["end"];
-                    extraction.raidTimes.Add(raidTime);
-                }
-                extraction.times = new List<TimeInterval>();
-                foreach(JToken timeData in extractionData["times"])
-                {
-                    TimeInterval time = new TimeInterval();
-                    time.start = (int)timeData["start"];
-                    time.end = (int)timeData["end"];
-                    extraction.times.Add(time);
-                }
-                extraction.itemRequirements = new Dictionary<string, int>();
-                foreach (JToken itemRequirement in extractionData["itemRequirements"])
-                {
-                    extraction.itemRequirements.Add(itemRequirement["ID"].ToString(), (int)itemRequirement["amount"]);
-                }
-                extraction.equipmentRequirements = new List<string>();
-                foreach (JToken equipmentRequirement in extractionData["equipmentRequirements"])
-                {
-                    extraction.equipmentRequirements.Add(equipmentRequirement.ToString());
-                }
-                extraction.itemBlacklist = new List<string>();
-                foreach (JToken blacklistItem in extractionData["itemBlacklist"])
-                {
-                    extraction.itemBlacklist.Add(blacklistItem.ToString());
-                }
-                extraction.equipmentBlacklist = new List<string>();
-                foreach (JToken blacklistEquipment in extractionData["equipmentBlacklist"])
-                {
-                    extraction.equipmentBlacklist.Add(blacklistEquipment.ToString());
-                }
-                extraction.role = (int)extractionData["role"];
-                extraction.accessRequirement = (bool)extractionData["accessRequirement"];
-
-                extractions.Add(extraction);
-
-                ++extractionIndex;
-            }
         }
 
         private float ExtractionChanceByDist(float distance)
@@ -6434,7 +6275,7 @@ namespace EFM
             }
         }
 
-        public void KillPlayer(Base_Manager.FinishRaidState raidState = Base_Manager.FinishRaidState.KIA)
+        public void KillPlayer(HideoutController.FinishRaidState raidState = HideoutController.FinishRaidState.KIA)
         {
             if (Mod.dead)
             {
@@ -6452,7 +6293,7 @@ namespace EFM
                     Mod.insuredItems = new List<InsuredSet>();
                 }
                 InsuredSet insuredSet = new InsuredSet();
-                insuredSet.returnTime = GetTimeSeconds() + (long)(86400 * Base_Manager.currentInsuranceReturnTime - Base_Manager.currentInsuranceReturnTime * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)); // Current time + 24 hours, TODO: Should be dependent on who insured it
+                insuredSet.returnTime = GetTimeSeconds() + (long)(86400 * HideoutController.currentInsuranceReturnTime - HideoutController.currentInsuranceReturnTime * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)); // Current time + 24 hours, TODO: Should be dependent on who insured it
                 insuredSet.items = new Dictionary<string, int>();
                 foreach (KeyValuePair<string, List<GameObject>> itemObjectList in Mod.playerInventoryObjects)
                 {
@@ -6464,7 +6305,7 @@ namespace EFM
                             itemObjectList.Value.Remove(itemObject);
                             break;
                         }
-                        CustomItemWrapper CIW = itemObject.GetComponent<CustomItemWrapper>();
+                        MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
                         VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
                         if (CIW != null && CIW.insured && UnityEngine.Random.value <= 0.5) // TODO: Should have a chance depending on who insured the item
                         {
@@ -6514,7 +6355,7 @@ namespace EFM
             // Unequip and destroy all equipment apart from pouch
             if (EquipmentSlot.wearingBackpack)
             {
-                CustomItemWrapper backpackCIW = EquipmentSlot.currentBackpack;
+                MeatovItem backpackCIW = EquipmentSlot.currentBackpack;
                 Mod.LogInfo("\t\tDropping backpack, weight: "+ backpackCIW.currentWeight);
                 FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
                 backpackPhysObj.SetQuickBeltSlot(null);
@@ -6525,7 +6366,7 @@ namespace EFM
             }
             if (EquipmentSlot.wearingBodyArmor)
             {
-                CustomItemWrapper bodyArmorCIW = EquipmentSlot.currentArmor;
+                MeatovItem bodyArmorCIW = EquipmentSlot.currentArmor;
                 Mod.LogInfo("\t\tDropping body armor, weight: " + bodyArmorCIW.currentWeight);
                 FVRPhysicalObject bodyArmorPhysObj = bodyArmorCIW.GetComponent<FVRPhysicalObject>();
                 bodyArmorPhysObj.SetQuickBeltSlot(null);
@@ -6536,7 +6377,7 @@ namespace EFM
             }
             if (EquipmentSlot.wearingEarpiece)
             {
-                CustomItemWrapper earPieceCIW = EquipmentSlot.currentEarpiece;
+                MeatovItem earPieceCIW = EquipmentSlot.currentEarpiece;
                 Mod.LogInfo("\t\tDropping earpiece, weight: " + earPieceCIW.currentWeight);
                 FVRPhysicalObject earPiecePhysObj = earPieceCIW.GetComponent<FVRPhysicalObject>();
                 earPiecePhysObj.SetQuickBeltSlot(null);
@@ -6547,7 +6388,7 @@ namespace EFM
             }
             if (EquipmentSlot.wearingHeadwear)
             {
-                CustomItemWrapper headWearCIW = EquipmentSlot.currentHeadwear;
+                MeatovItem headWearCIW = EquipmentSlot.currentHeadwear;
                 Mod.LogInfo("\t\tDropping headwear, weight: " + headWearCIW.currentWeight);
                 FVRPhysicalObject headWearPhysObj = headWearCIW.GetComponent<FVRPhysicalObject>();
                 headWearPhysObj.SetQuickBeltSlot(null);
@@ -6558,7 +6399,7 @@ namespace EFM
             }
             if (EquipmentSlot.wearingFaceCover)
             {
-                CustomItemWrapper faceCoverCIW = EquipmentSlot.currentFaceCover;
+                MeatovItem faceCoverCIW = EquipmentSlot.currentFaceCover;
                 Mod.LogInfo("\t\tDropping face cover, weight: " + faceCoverCIW.currentWeight);
                 FVRPhysicalObject faceCoverPhysObj = faceCoverCIW.GetComponent<FVRPhysicalObject>();
                 faceCoverPhysObj.SetQuickBeltSlot(null);
@@ -6569,7 +6410,7 @@ namespace EFM
             }
             if (EquipmentSlot.wearingEyewear)
             {
-                CustomItemWrapper eyeWearCIW = EquipmentSlot.currentEyewear;
+                MeatovItem eyeWearCIW = EquipmentSlot.currentEyewear;
                 Mod.LogInfo("\t\tDropping eyewear, weight: " + eyeWearCIW.currentWeight);
                 FVRPhysicalObject eyeWearPhysObj = eyeWearCIW.GetComponent<FVRPhysicalObject>();
                 eyeWearPhysObj.SetQuickBeltSlot(null);
@@ -6580,7 +6421,7 @@ namespace EFM
             }
             if (EquipmentSlot.wearingRig)
             {
-                CustomItemWrapper rigCIW = EquipmentSlot.currentRig;
+                MeatovItem rigCIW = EquipmentSlot.currentRig;
                 Mod.LogInfo("\t\tDropping rig, weight: " + rigCIW.currentWeight);
                 FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
                 rigPhysObj.SetQuickBeltSlot(null);
@@ -6591,7 +6432,7 @@ namespace EFM
             }
             if (Mod.chosenCharIndex == 1 && EquipmentSlot.wearingPouch)
             {
-                CustomItemWrapper pouchCIW = EquipmentSlot.currentPouch;
+                MeatovItem pouchCIW = EquipmentSlot.currentPouch;
                 Mod.LogInfo("\t\tDropping pouch, weight: " + pouchCIW.currentWeight);
                 FVRPhysicalObject pouchPhysObj = pouchCIW.GetComponent<FVRPhysicalObject>();
                 pouchPhysObj.SetQuickBeltSlot(null);
@@ -6624,7 +6465,7 @@ namespace EFM
                 if(GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject != null)
                 {
                     VanillaItemDescriptor pocketItemVID = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<VanillaItemDescriptor>();
-                    CustomItemWrapper pocketItemCIW = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<CustomItemWrapper>();
+                    MeatovItem pocketItemCIW = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<MeatovItem>();
                     if(pocketItemCIW != null)
                     {
                         Mod.LogInfo("\t\tpocket item, weight: " + pocketItemCIW.currentWeight);
@@ -6649,15 +6490,15 @@ namespace EFM
             Mod.raidState = raidState;
 
             // Disable extraction list and timer
-            Mod.playerStatusUI.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
-            Mod.playerStatusManager.extractionTimerText.color = Color.black;
+            StatusUI.instance.transform.GetChild(0).GetChild(9).gameObject.SetActive(false);
+            StatusUI.instance.extractionTimer.color = Color.black;
             Mod.extractionLimitUI.SetActive(false);
             Mod.extractionUI.SetActive(false);
 
             UpdateExitStatusCounterConditions();
             ResetHealthEffectCounterConditions();
 
-            Manager.LoadBase(5); // Load autosave, which is right before the start of raid
+            UIController.LoadHideout(5); // Load autosave, which is right before the start of raid
 
             extracted = true;
         }
@@ -6708,7 +6549,7 @@ namespace EFM
         {
             playerColliders.Add(collider);
             Raid_Manager.currentManager.currentExtraction = this;
-            Mod.playerStatusManager.currentZone = name;
+            //Mod.playerStatusManager.currentZone = name;
         }
 
         private void OnTriggerExit(Collider collider)
@@ -6716,7 +6557,7 @@ namespace EFM
             if (playerColliders.Remove(collider) && playerColliders.Count == 0)
             {
                 Raid_Manager.currentManager.currentExtraction = null;
-                Mod.playerStatusManager.currentZone = null;
+                //Mod.playerStatusManager.currentZone = null;
             }
         }
     }
@@ -6734,7 +6575,7 @@ namespace EFM
             {
                 if (currentTransform != null)
                 {
-                    CustomItemWrapper CIW = currentTransform.GetComponent<CustomItemWrapper>();
+                    MeatovItem CIW = currentTransform.GetComponent<MeatovItem>();
                     VanillaItemDescriptor VID = currentTransform.GetComponent<VanillaItemDescriptor>();
                     if (CIW != null)
                     {
@@ -6773,7 +6614,7 @@ namespace EFM
             {
                 if (currentTransform != null)
                 {
-                    CustomItemWrapper CIW = currentTransform.GetComponent<CustomItemWrapper>();
+                    MeatovItem CIW = currentTransform.GetComponent<MeatovItem>();
                     VanillaItemDescriptor VID = currentTransform.GetComponent<VanillaItemDescriptor>();
                     if (CIW != null)
                     {
@@ -6818,18 +6659,18 @@ namespace EFM
         private void OnTriggerEnter(Collider collider)
         {
             playerColliders.Add(collider);
-            if (Mod.playerStatusManager.currentZone == null)
-            {
-                Mod.playerStatusManager.currentZone = name;
-                UpdateVisitPlaceConditions();
-            }
+            //if (Mod.playerStatusManager.currentZone == null)
+            //{
+            //    Mod.playerStatusManager.currentZone = name;
+            //    UpdateVisitPlaceConditions();
+            //}
         }
 
         private void OnTriggerExit(Collider collider)
         {
             if (playerColliders.Remove(collider) && playerColliders.Count == 0)
             {
-                Mod.playerStatusManager.currentZone = null;
+                //Mod.playerStatusManager.currentZone = null;
             }
         }
 
@@ -6840,65 +6681,65 @@ namespace EFM
                 return;
             }
 
-            if (Mod.currentTaskVisitPlaceCounterConditionsByZone.ContainsKey(Mod.playerStatusManager.currentZone))
-            {
-                List<TraderTaskCounterCondition> visitPlaceCounterConditions = Mod.currentTaskVisitPlaceCounterConditionsByZone[Mod.playerStatusManager.currentZone];
-                foreach (TraderTaskCounterCondition counterCondition in visitPlaceCounterConditions)
-                {
-                    // Check task and condition state validity
-                    if (!counterCondition.parentCondition.visible)
-                    {
-                        continue;
-                    }
+            //if (Mod.currentTaskVisitPlaceCounterConditionsByZone.ContainsKey(Mod.playerStatusManager.currentZone))
+            //{
+            //    List<TraderTaskCounterCondition> visitPlaceCounterConditions = Mod.currentTaskVisitPlaceCounterConditionsByZone[Mod.playerStatusManager.currentZone];
+            //    foreach (TraderTaskCounterCondition counterCondition in visitPlaceCounterConditions)
+            //    {
+            //        // Check task and condition state validity
+            //        if (!counterCondition.parentCondition.visible)
+            //        {
+            //            continue;
+            //        }
 
-                    // Check visited place
-                    if (Mod.playerStatusManager.currentZone == null || !Mod.playerStatusManager.currentZone.Equals(counterCondition.targetPlaceName))
-                    {
-                        continue;
-                    }
+            //        // Check visited place
+            //        if (Mod.playerStatusManager.currentZone == null || !Mod.playerStatusManager.currentZone.Equals(counterCondition.targetPlaceName))
+            //        {
+            //            continue;
+            //        }
 
-                    // Check constraint counters (Location, Equipment, HealthEffect, InZone)
-                    bool constrained = false;
-                    foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
-                    {
-                        if (!TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
-                        {
-                            constrained = true;
-                            break;
-                        }
-                    }
-                    if (constrained)
-                    {
-                        continue;
-                    }
+            //        // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+            //        bool constrained = false;
+            //        foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+            //        {
+            //            if (!TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+            //            {
+            //                constrained = true;
+            //                break;
+            //            }
+            //        }
+            //        if (constrained)
+            //        {
+            //            continue;
+            //        }
 
-                    // Successful visit, increment count and update fulfillment 
-                    counterCondition.completed = true;
-                    TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
-                }
-            }
-            if (Mod.currentTaskVisitPlaceConditionsByZone.ContainsKey(Mod.playerStatusManager.currentZone))
-            {
-                List<TraderTaskCondition> visitPlaceConditions = Mod.currentTaskVisitPlaceConditionsByZone[Mod.playerStatusManager.currentZone];
-                foreach (TraderTaskCondition condition in visitPlaceConditions)
-                {
-                    // Check task and condition state validity
-                    if (!condition.visible)
-                    {
-                        continue;
-                    }
+            //        // Successful visit, increment count and update fulfillment 
+            //        counterCondition.completed = true;
+            //        TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+            //    }
+            //}
+            //if (Mod.currentTaskVisitPlaceConditionsByZone.ContainsKey(Mod.playerStatusManager.currentZone))
+            //{
+            //    List<TraderTaskCondition> visitPlaceConditions = Mod.currentTaskVisitPlaceConditionsByZone[Mod.playerStatusManager.currentZone];
+            //    foreach (TraderTaskCondition condition in visitPlaceConditions)
+            //    {
+            //        // Check task and condition state validity
+            //        if (!condition.visible)
+            //        {
+            //            continue;
+            //        }
 
-                    // Check visited place
-                    if (Mod.playerStatusManager.currentZone == null || !Mod.playerStatusManager.currentZone.Equals(condition.targetPlaceName))
-                    {
-                        continue;
-                    }
+            //        // Check visited place
+            //        if (Mod.playerStatusManager.currentZone == null || !Mod.playerStatusManager.currentZone.Equals(condition.targetPlaceName))
+            //        {
+            //            continue;
+            //        }
 
-                    // Successful visit, increment count and update fulfillment 
-                    condition.fulfilled = true;
-                    TraderStatus.UpdateConditionFulfillment(condition);
-                }
-            }
+            //        // Successful visit, increment count and update fulfillment 
+            //        condition.fulfilled = true;
+            //        TraderStatus.UpdateConditionFulfillment(condition);
+            //    }
+            //}
         }
     }
 
@@ -6978,9 +6819,9 @@ namespace EFM
             foreach(string id in equipmentRequirements)
             {
                 bool found = false;
-                for(int i=0; i < Mod.equipmentSlots.Count; ++i)
+                for(int i=0; i < StatusUI.instance.equipmentSlots.Length; ++i)
                 {
-                    if (Mod.equipmentSlots[i].CurObject.ObjectWrapper.ItemID.Equals(id))
+                    if (StatusUI.instance.equipmentSlots[i].CurObject.ObjectWrapper.ItemID.Equals(id))
                     {
                         found = true;
                         break;
@@ -7002,9 +6843,9 @@ namespace EFM
             // Equipment blacklist
             foreach(string id in equipmentBlacklist)
             {
-                for(int i=0; i < Mod.equipmentSlots.Count; ++i)
+                for(int i=0; i < StatusUI.instance.equipmentSlots.Length; ++i)
                 {
-                    if (Mod.equipmentSlots[i].CurObject.ObjectWrapper.ItemID.Equals(id))
+                    if (StatusUI.instance.equipmentSlots[i].CurObject.ObjectWrapper.ItemID.Equals(id))
                     {
                         if (int.TryParse(id, out int result))
                         {

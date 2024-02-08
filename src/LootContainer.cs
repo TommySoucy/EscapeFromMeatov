@@ -80,7 +80,7 @@ namespace EFM
 
 				if (int.TryParse(itemID, out int result))
                 {
-					CustomItemWrapper prefabCIW = Mod.itemPrefabs[result].GetComponent<CustomItemWrapper>();
+					MeatovItem prefabCIW = Mod.itemPrefabs[result].GetComponent<MeatovItem>();
 
 					if(UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabCIW.rarity))
                     {
@@ -189,7 +189,7 @@ namespace EFM
 						}
 					}
 					itemObject.transform.localRotation = UnityEngine.Random.rotation;
-					CustomItemWrapper itemCIW = itemObject.GetComponent<CustomItemWrapper>();
+					MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
 					itemCIW.foundInRaid = true;
 
 					// When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
