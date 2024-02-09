@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace EFM
 {
@@ -18,8 +14,7 @@ namespace EFM
 
 		public bool isPhysical;
 		public bool isCustom;
-		public MeatovItem CIW;
-		public VanillaItemDescriptor VID;
+		public MeatovItem MI;
 
         public DescriptionPack GetDescriptionPack()
 		{
@@ -58,14 +53,7 @@ namespace EFM
             }
             else
             {
-                if (isCustom)
-                {
-					return CIW.GetDescriptionPack();
-                }
-                else
-                {
-					return VID.GetDescriptionPack();
-                }
+				return MI.GetDescriptionPack();
             }
 		}
 

@@ -107,7 +107,6 @@
     <Compile Include="src\TraderStatus.cs" />
     <Compile Include="src\TraderTab.cs" />
     <Compile Include="src\TradeVolume.cs" />
-    <Compile Include="src\VanillaItemDescriptor.cs" />
     <Compile Include="src\Mod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

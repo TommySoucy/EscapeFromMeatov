@@ -24,8 +24,7 @@ namespace EFM
         public int level;
 
         public bool isCustom;
-        public MeatovItem customItem;
-        public VanillaItemDescriptor vanillaItem;
+        public MeatovItem MI;
         public Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, int>> containedAmmoClassesByType;
         public string name;
         public string description;

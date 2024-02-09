@@ -161,19 +161,9 @@ namespace EFM
                 {
                     if (this.descriptionPack.isPhysical)
                     {
-                        if (this.descriptionPack.isCustom)
+                        if (this.descriptionPack.MI != null)
                         {
-                            if (this.descriptionPack.customItem != null)
-                            {
-                                this.descriptionPack = this.descriptionPack.customItem.GetDescriptionPack();
-                            }
-                        }
-                        else
-                        {
-                            if (this.descriptionPack.vanillaItem != null)
-                            {
-                                this.descriptionPack = this.descriptionPack.vanillaItem.GetDescriptionPack();
-                            }
+                            this.descriptionPack = this.descriptionPack.MI.GetDescriptionPack();
                         }
                     }
                     else
@@ -193,20 +183,7 @@ namespace EFM
 
                 if (this.descriptionPack.isPhysical)
                 {
-                    if (this.descriptionPack.isCustom)
-                    {
-                        if (this.descriptionPack.customItem != null)
-                        {
-                            this.descriptionPack.customItem.descriptionManager = this;
-                        }
-                    }
-                    else
-                    {
-                        if (this.descriptionPack.vanillaItem != null)
-                        {
-                            this.descriptionPack.vanillaItem.descriptionManager = this;
-                        }
-                    }
+                    this.descriptionPack.MI.descriptionManager = this;
                 }
                 else
                 {
@@ -251,12 +228,12 @@ namespace EFM
             }
             else if (this.descriptionPack.isCustom)
             {
-                if (this.descriptionPack.customItem.itemType == Mod.ItemType.Money)
+                if (this.descriptionPack.MI.itemType == Mod.ItemType.Money)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
                     summaryAmountStackText.text = this.descriptionPack.stack.ToString();
                 }
-                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.Consumable)
+                else if (this.descriptionPack.MI.itemType == Mod.ItemType.Consumable)
                 {
                     if (this.descriptionPack.maxStack > 0)
                     {
@@ -268,20 +245,20 @@ namespace EFM
                         summaryAmountStackText.gameObject.SetActive(false);
                     }
                 }
-                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.Backpack || this.descriptionPack.customItem.itemType == Mod.ItemType.Container || this.descriptionPack.customItem.itemType == Mod.ItemType.Pouch)
+                else if (this.descriptionPack.MI.itemType == Mod.ItemType.Backpack || this.descriptionPack.MI.itemType == Mod.ItemType.Container || this.descriptionPack.MI.itemType == Mod.ItemType.Pouch)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
                     summaryAmountStackText.text = (this.descriptionPack.containingVolume / Mod.volumePrecisionMultiplier).ToString() + "/" + (this.descriptionPack.maxVolume / Mod.volumePrecisionMultiplier);
                 }
-                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.AmmoBox)
+                else if (this.descriptionPack.MI.itemType == Mod.ItemType.AmmoBox)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
                     summaryAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
                 }
-                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.customItem.itemType == Mod.ItemType.ArmoredRig)
+                else if (this.descriptionPack.MI.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.MI.itemType == Mod.ItemType.ArmoredRig)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
-                    summaryAmountStackText.text = this.descriptionPack.customItem.armor.ToString() + "/" + this.descriptionPack.customItem.maxArmor;
+                    summaryAmountStackText.text = this.descriptionPack.MI.armor.ToString() + "/" + this.descriptionPack.MI.maxArmor;
                 }
                 else
                 {
@@ -355,12 +332,12 @@ namespace EFM
             }
             else if (this.descriptionPack.isCustom)
             {
-                if (this.descriptionPack.customItem.itemType == Mod.ItemType.Money)
+                if (this.descriptionPack.MI.itemType == Mod.ItemType.Money)
                 {
                     fullAmountStackText.gameObject.SetActive(true);
                     fullAmountStackText.text = this.descriptionPack.stack.ToString();
                 }
-                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.Consumable)
+                else if (this.descriptionPack.MI.itemType == Mod.ItemType.Consumable)
                 {
                     if (this.descriptionPack.maxStack > 0)
                     {
@@ -372,20 +349,20 @@ namespace EFM
                         fullAmountStackText.gameObject.SetActive(false);
                     }
                 }
-                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.Backpack || this.descriptionPack.customItem.itemType == Mod.ItemType.Container || this.descriptionPack.customItem.itemType == Mod.ItemType.Pouch)
+                else if (this.descriptionPack.MI.itemType == Mod.ItemType.Backpack || this.descriptionPack.MI.itemType == Mod.ItemType.Container || this.descriptionPack.MI.itemType == Mod.ItemType.Pouch)
                 {
                     fullAmountStackText.gameObject.SetActive(true);
                     fullAmountStackText.text = this.descriptionPack.containingVolume.ToString() + "/" + this.descriptionPack.maxVolume;
                 }
-                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.AmmoBox)
+                else if (this.descriptionPack.MI.itemType == Mod.ItemType.AmmoBox)
                 {
                     fullAmountStackText.gameObject.SetActive(true);
                     fullAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
                 }
-                else if (this.descriptionPack.customItem.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.customItem.itemType == Mod.ItemType.ArmoredRig)
+                else if (this.descriptionPack.MI.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.MI.itemType == Mod.ItemType.ArmoredRig)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
-                    summaryAmountStackText.text = this.descriptionPack.customItem.armor.ToString() + "/" + this.descriptionPack.customItem.maxArmor;
+                    summaryAmountStackText.text = this.descriptionPack.MI.armor.ToString() + "/" + this.descriptionPack.MI.maxArmor;
                 }
                 else
                 {
@@ -623,14 +600,7 @@ namespace EFM
             string itemID;
             if (descriptionPack.isPhysical)
             {
-                if (descriptionPack.isCustom)
-                {
-                    itemID = descriptionPack.customItem.ID;
-                }
-                else
-                {
-                    itemID = descriptionPack.vanillaItem.H3ID;
-                }
+                itemID = descriptionPack.MI.H3ID;
             }
             else
             {

@@ -96,8 +96,6 @@ namespace EFM
                 }
                 else
 				{
-					VanillaItemDescriptor prefabVID = Mod.vanillaItems[itemID];
-
 					// If loose round stack, spawn generic ammo box instead
 					if (Mod.usedRoundIDs.Contains(itemID))
 					{
@@ -112,26 +110,26 @@ namespace EFM
 							actualItemID = 716;
 						}
 
-						if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity))
-						{
-							++successfulAttempts;
+						//if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity))
+						//{
+						//	++successfulAttempts;
 
-							customIDs.Add(actualItemID);
+						//	customIDs.Add(actualItemID);
 
-							stackSizes.Add(stackSize);
-							FVRFireArmRound roundScript = IM.OD[itemID].GetGameObject().GetComponent<FVRFireArmRound>();
-							roundClasses.Add(roundScript.RoundClass);
-							roundTypes.Add(roundScript.RoundType);
-						}
+						//	stackSizes.Add(stackSize);
+						//	FVRFireArmRound roundScript = IM.OD[itemID].GetGameObject().GetComponent<FVRFireArmRound>();
+						//	roundClasses.Add(roundScript.RoundClass);
+						//	roundTypes.Add(roundScript.RoundType);
+						//}
 					}
                     else
 					{
-						if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity) / 100)
-						{
-							++successfulAttempts;
+						//if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity) / 100)
+						//{
+						//	++successfulAttempts;
 
-							vanillaIDs.Add(itemID);
-						}
+						//	vanillaIDs.Add(itemID);
+						//}
 					}
 				}
 
@@ -193,7 +191,7 @@ namespace EFM
 					itemCIW.foundInRaid = true;
 
 					// When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-					Mod.RemoveFromAll(null, itemCIW, null);
+					Mod.RemoveFromAll(null, itemCIW);
 
 					if (itemCIW.itemType == Mod.ItemType.Money)
 					{
@@ -274,13 +272,13 @@ namespace EFM
 				}
 				itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
 
-				VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
-				VID.foundInRaid = true;
-				if(itemObject.GetComponent<FVRInteractiveObject>() is FVRFireArm)
-				{
-					// When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-					Mod.RemoveFromAll(null, null, VID);
-				}
+				//VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
+				//VID.foundInRaid = true;
+				//if(itemObject.GetComponent<FVRInteractiveObject>() is FVRFireArm)
+				//{
+				//	// When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
+				//	Mod.RemoveFromAll(null, null, VID);
+				//}
 			}
 			yield break;
 		}

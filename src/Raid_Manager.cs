@@ -394,7 +394,6 @@ namespace EFM
                 {
                     Mod.LogInfo("Forced entry, items null?: " + (forced["Items"] == null));
                     Dictionary<string, MeatovItem> spawnedItemCIWs = new Dictionary<string, MeatovItem>();
-                    Dictionary<string, VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, VanillaItemDescriptor>();
                     List<string> unspawnedParents = new List<string>();
 
                     // Get item from item map
@@ -443,7 +442,6 @@ namespace EFM
                 foreach (JToken dynamicSpawn in locationDB["dynamic"])
                 {
                     Dictionary<string, MeatovItem> spawnedItemCIWs = new Dictionary<string, MeatovItem>();
-                    Dictionary<string, VanillaItemDescriptor> spawnedItemVIDs = new Dictionary<string, VanillaItemDescriptor>();
                     List<string> unspawnedParents = new List<string>();
 
                     // Get item from item map
@@ -1193,7 +1191,7 @@ namespace EFM
             // Remove all interactive objects on the sosig from All
             foreach(FVRInteractiveObject io in sosigObject.GetComponentsInChildren<FVRInteractiveObject>())
             {
-                Mod.RemoveFromAll(io, null, null);
+                Mod.RemoveFromAll(io, null);
             }
 
             AI AIScript = sosigObject.AddComponent<AI>();
@@ -1226,7 +1224,7 @@ namespace EFM
             {
                 yield return IM.OD[spawnData.sosigWeapon].GetGameObjectAsync();
                 GameObject weaponObject = Instantiate(IM.OD[spawnData.sosigWeapon].GetGameObject());
-                Mod.RemoveFromAll(null, null, null);
+                Mod.RemoveFromAll(null, null);
                 SosigWeapon sosigWeapon = weaponObject.GetComponent<SosigWeapon>();
                 sosigWeapon.SetAutoDestroy(true);
                 typeof(SosigWeapon).GetField("m_autoDestroyTickDown", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(sosigWeapon, 0);
@@ -1245,7 +1243,7 @@ namespace EFM
             {
                 yield return IM.OD[spawnData.sosigGrenade].GetGameObjectAsync();
                 GameObject grenadeObject = Instantiate(IM.OD[spawnData.sosigGrenade].GetGameObject());
-                Mod.RemoveFromAll(null, null, null);
+                Mod.RemoveFromAll(null, null);
                 SosigWeapon sosigGrenade = grenadeObject.GetComponent<SosigWeapon>();
                 sosigGrenade.SetAutoDestroy(true);
                 sosigScript.ForceEquip(sosigGrenade);
@@ -1477,30 +1475,15 @@ namespace EFM
                         FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
                         if (rightInteractable != null)
                         {
-                            VanillaItemDescriptor VID = rightInteractable.GetComponent<VanillaItemDescriptor>();
-                            if (VID != null)
+                            MeatovItem MI = rightInteractable.GetComponent<MeatovItem>();
+                            if (MI != null)
                             {
-                                foreach (string parent in VID.parents)
+                                foreach (string parent in MI.parents)
                                 {
                                     if (counterCondition.allowedWeaponIDs.Contains(parent))
                                     {
                                         isHoldingAllowedWeapon = true;
                                         break;
-                                    }
-                                }
-                            }
-                            if (!isHoldingAllowedWeapon)
-                            {
-                                MeatovItem CIW = rightInteractable.GetComponent<MeatovItem>();
-                                if (CIW != null)
-                                {
-                                    foreach (string parent in CIW.parents)
-                                    {
-                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                        {
-                                            isHoldingAllowedWeapon = true;
-                                            break;
-                                        }
                                     }
                                 }
                             }
@@ -1510,30 +1493,15 @@ namespace EFM
                             FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
                             if (leftInteractable != null)
                             {
-                                VanillaItemDescriptor VID = leftInteractable.GetComponent<VanillaItemDescriptor>();
-                                if (VID != null)
+                                MeatovItem MI = leftInteractable.GetComponent<MeatovItem>();
+                                if (MI != null)
                                 {
-                                    foreach (string parent in VID.parents)
+                                    foreach (string parent in MI.parents)
                                     {
                                         if (counterCondition.allowedWeaponIDs.Contains(parent))
                                         {
                                             isHoldingAllowedWeapon = true;
                                             break;
-                                        }
-                                    }
-                                }
-                                if (!isHoldingAllowedWeapon)
-                                {
-                                    MeatovItem CIW = leftInteractable.GetComponent<MeatovItem>();
-                                    if (CIW != null)
-                                    {
-                                        foreach (string parent in CIW.parents)
-                                        {
-                                            if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                            {
-                                                isHoldingAllowedWeapon = true;
-                                                break;
-                                            }
                                         }
                                     }
                                 }
@@ -1633,30 +1601,15 @@ namespace EFM
                         FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
                         if (rightInteractable != null)
                         {
-                            VanillaItemDescriptor VID = rightInteractable.GetComponent<VanillaItemDescriptor>();
-                            if (VID != null)
+                            MeatovItem MI = rightInteractable.GetComponent<MeatovItem>();
+                            if (MI != null)
                             {
-                                foreach (string parent in VID.parents)
+                                foreach (string parent in MI.parents)
                                 {
                                     if (counterCondition.allowedWeaponIDs.Contains(parent))
                                     {
                                         isHoldingAllowedWeapon = true;
                                         break;
-                                    }
-                                }
-                            }
-                            if (!isHoldingAllowedWeapon)
-                            {
-                                MeatovItem CIW = rightInteractable.GetComponent<MeatovItem>();
-                                if (CIW != null)
-                                {
-                                    foreach (string parent in CIW.parents)
-                                    {
-                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                        {
-                                            isHoldingAllowedWeapon = true;
-                                            break;
-                                        }
                                     }
                                 }
                             }
@@ -1666,30 +1619,15 @@ namespace EFM
                             FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
                             if (leftInteractable != null)
                             {
-                                VanillaItemDescriptor VID = leftInteractable.GetComponent<VanillaItemDescriptor>();
-                                if (VID != null)
+                                MeatovItem MI = leftInteractable.GetComponent<MeatovItem>();
+                                if (MI != null)
                                 {
-                                    foreach (string parent in VID.parents)
+                                    foreach (string parent in MI.parents)
                                     {
                                         if (counterCondition.allowedWeaponIDs.Contains(parent))
                                         {
                                             isHoldingAllowedWeapon = true;
                                             break;
-                                        }
-                                    }
-                                }
-                                if (!isHoldingAllowedWeapon)
-                                {
-                                    MeatovItem CIW = leftInteractable.GetComponent<MeatovItem>();
-                                    if (CIW != null)
-                                    {
-                                        foreach (string parent in CIW.parents)
-                                        {
-                                            if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                            {
-                                                isHoldingAllowedWeapon = true;
-                                                break;
-                                            }
                                         }
                                     }
                                 }
@@ -1789,30 +1727,15 @@ namespace EFM
                         FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
                         if (rightInteractable != null)
                         {
-                            VanillaItemDescriptor VID = rightInteractable.GetComponent<VanillaItemDescriptor>();
-                            if (VID != null)
+                            MeatovItem MI = rightInteractable.GetComponent<MeatovItem>();
+                            if (MI != null)
                             {
-                                foreach (string parent in VID.parents)
+                                foreach (string parent in MI.parents)
                                 {
                                     if (counterCondition.allowedWeaponIDs.Contains(parent))
                                     {
                                         isHoldingAllowedWeapon = true;
                                         break;
-                                    }
-                                }
-                            }
-                            if (!isHoldingAllowedWeapon)
-                            {
-                                MeatovItem CIW = rightInteractable.GetComponent<MeatovItem>();
-                                if (CIW != null)
-                                {
-                                    foreach (string parent in CIW.parents)
-                                    {
-                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                        {
-                                            isHoldingAllowedWeapon = true;
-                                            break;
-                                        }
                                     }
                                 }
                             }
@@ -1822,30 +1745,15 @@ namespace EFM
                             FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
                             if (leftInteractable != null)
                             {
-                                VanillaItemDescriptor VID = leftInteractable.GetComponent<VanillaItemDescriptor>();
-                                if (VID != null)
+                                MeatovItem MI = leftInteractable.GetComponent<MeatovItem>();
+                                if (MI != null)
                                 {
-                                    foreach (string parent in VID.parents)
+                                    foreach (string parent in MI.parents)
                                     {
                                         if (counterCondition.allowedWeaponIDs.Contains(parent))
                                         {
                                             isHoldingAllowedWeapon = true;
                                             break;
-                                        }
-                                    }
-                                }
-                                if (!isHoldingAllowedWeapon)
-                                {
-                                    MeatovItem CIW = leftInteractable.GetComponent<MeatovItem>();
-                                    if (CIW != null)
-                                    {
-                                        foreach (string parent in CIW.parents)
-                                        {
-                                            if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                            {
-                                                isHoldingAllowedWeapon = true;
-                                                break;
-                                            }
                                         }
                                     }
                                 }
@@ -1944,30 +1852,14 @@ namespace EFM
             }
 
             MeatovItem CIW = item.GetComponent<MeatovItem>();
-            VanillaItemDescriptor VID = item.GetComponent<VanillaItemDescriptor>();
             List<string> parents = null;
-            if(VID != null)
+            if (mods.Remove(CIW.H3ID) && mods.Count == 0)
             {
-                if (mods.Remove(VID.H3ID) && mods.Count == 0)
-                {
-                    return true;
-                }
-                parents = VID.parents;
+                return true;
             }
-            else if (CIW != null)
-            {
-                if (mods.Remove(CIW.ID) && mods.Count == 0)
-                {
-                    return true;
-                }
-                parents = CIW.parents;
-            }
-            else
-            {
-                return false;
-            }
+            parents = CIW.parents;
 
-            foreach (string parent in VID.parents)
+            foreach (string parent in CIW.parents)
             {
                 if (mods.Remove(parent) && mods.Count == 0)
                 {
@@ -2010,7 +1902,7 @@ namespace EFM
                 if (!player)
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(null, rigCIW, null);
+                    Mod.RemoveFromAll(null, rigCIW);
                 }
 
                 for (int slotIndex = 0; slotIndex < inventory.rigContents.Length; ++slotIndex)
@@ -2045,7 +1937,7 @@ namespace EFM
                         itemCIW.foundInRaid = true;
 
                         // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                        Mod.RemoveFromAll(null, itemCIW, null);
+                        Mod.RemoveFromAll(null, itemCIW);
 
                         // Get amount
                         if (itemCIW.itemType == Mod.ItemType.Money)
@@ -2100,7 +1992,7 @@ namespace EFM
                                 }
 
                                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                Mod.RemoveFromAll(null, itemCIW, null);
+                                Mod.RemoveFromAll(null, itemCIW);
                             }
                             else // Spawn in generic box
                             {
@@ -2126,13 +2018,13 @@ namespace EFM
                                 }
 
                                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                Mod.RemoveFromAll(null, itemCIW, null);
+                                Mod.RemoveFromAll(null, itemCIW);
                             }
                         }
                         else // Not a round, spawn as normal
                         {
                             itemObject = Instantiate(itemPrefab);
-                            itemObject.GetComponent<VanillaItemDescriptor>().foundInRaid = true;
+                            itemObject.GetComponent<MeatovItem>().foundInRaid = true;
                         }
                     }
 
@@ -2167,7 +2059,7 @@ namespace EFM
                     FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[1];
                     FVRPhysicalObject armorPhysObj = backpackObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(backpackObject.transform, false);
-                    BeginInteractionPatch.SetItemLocationIndex(0, armorCIW, null);
+                    BeginInteractionPatch.SetItemLocationIndex(0, armorCIW);
                     armorPhysObj.SetQuickBeltSlot(equipSlot);
                     armorPhysObj.SetParentage(null);
 
@@ -2176,7 +2068,7 @@ namespace EFM
                 else
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(null, armorCIW, null);
+                    Mod.RemoveFromAll(null, armorCIW);
                 }
             }
 
@@ -2196,7 +2088,7 @@ namespace EFM
                     FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[3];
                     FVRPhysicalObject headWearPhysObj = headWearObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(headWearObject.transform, false);
-                    BeginInteractionPatch.SetItemLocationIndex(0, headWearCIW, null);
+                    BeginInteractionPatch.SetItemLocationIndex(0, headWearCIW);
                     headWearPhysObj.SetQuickBeltSlot(equipSlot);
                     headWearPhysObj.SetParentage(null);
 
@@ -2205,7 +2097,7 @@ namespace EFM
                 else
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(null, headWearCIW, null);
+                    Mod.RemoveFromAll(null, headWearCIW);
                 }
             }
 
@@ -2225,7 +2117,7 @@ namespace EFM
                     FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[2];
                     FVRPhysicalObject earPiecePhysObj = earPieceObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(earPieceObject.transform, false);
-                    BeginInteractionPatch.SetItemLocationIndex(0, earPieceCIW, null);
+                    BeginInteractionPatch.SetItemLocationIndex(0, earPieceCIW);
                     earPiecePhysObj.SetQuickBeltSlot(equipSlot);
                     earPiecePhysObj.SetParentage(null);
 
@@ -2234,7 +2126,7 @@ namespace EFM
                 else
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(null, earPieceCIW, null);
+                    Mod.RemoveFromAll(null, earPieceCIW);
                 }
             }
 
@@ -2254,7 +2146,7 @@ namespace EFM
                     FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[4];
                     FVRPhysicalObject faceCoverPhysObj = faceCoverObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(faceCoverObject.transform, false);
-                    BeginInteractionPatch.SetItemLocationIndex(0, faceCoverCIW, null);
+                    BeginInteractionPatch.SetItemLocationIndex(0, faceCoverCIW);
                     faceCoverPhysObj.SetQuickBeltSlot(equipSlot);
                     faceCoverPhysObj.SetParentage(null);
 
@@ -2263,7 +2155,7 @@ namespace EFM
                 else
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(null, faceCoverCIW, null);
+                    Mod.RemoveFromAll(null, faceCoverCIW);
                 }
             }
 
@@ -2283,7 +2175,7 @@ namespace EFM
                     FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[5];
                     FVRPhysicalObject eyeWearPhysObj = eyeWearObject.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(eyeWearObject.transform, false);
-                    BeginInteractionPatch.SetItemLocationIndex(0, eyeWearCIW, null);
+                    BeginInteractionPatch.SetItemLocationIndex(0, eyeWearCIW);
                     eyeWearPhysObj.SetQuickBeltSlot(equipSlot);
                     eyeWearPhysObj.SetParentage(null);
 
@@ -2292,7 +2184,7 @@ namespace EFM
                 else
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(null, eyeWearCIW, null);
+                    Mod.RemoveFromAll(null, eyeWearCIW);
                 }
             }
 
@@ -2308,7 +2200,7 @@ namespace EFM
                 dogtagCIW.foundInRaid = true;
 
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                Mod.RemoveFromAll(null, dogtagCIW, null);
+                Mod.RemoveFromAll(null, dogtagCIW);
 
                 yield return null;
             }
@@ -2328,7 +2220,7 @@ namespace EFM
                 if (!player)
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(null, backpackCIW, null);
+                    Mod.RemoveFromAll(null, backpackCIW);
                 }
 
                 foreach (string backpackItem in inventory.backpackContents)
@@ -2358,7 +2250,7 @@ namespace EFM
                         itemCIW.foundInRaid = true;
 
                         // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                        Mod.RemoveFromAll(null, itemCIW, null);
+                        Mod.RemoveFromAll(null, itemCIW);
 
                         // Get amount
                         if (itemCIW.itemType == Mod.ItemType.Money)
@@ -2413,7 +2305,7 @@ namespace EFM
                                 }
 
                                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                Mod.RemoveFromAll(null, itemCIW, null);
+                                Mod.RemoveFromAll(null, itemCIW);
                             }
                             else // Spawn in generic box
                             {
@@ -2439,14 +2331,14 @@ namespace EFM
                                 }
 
                                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                Mod.RemoveFromAll(null, itemCIW, null);
+                                Mod.RemoveFromAll(null, itemCIW);
                             }
                         }
                         else // Not a round, spawn as normal
                         {
                             itemObject = Instantiate(itemPrefab);
                             itemPhysObj = itemObject.GetComponent<FVRPhysicalObject>();
-                            itemObject.GetComponent<VanillaItemDescriptor>().foundInRaid = true;
+                            itemObject.GetComponent<MeatovItem>().foundInRaid = true;
                         }
                     }
 
@@ -2499,7 +2391,7 @@ namespace EFM
 
                 yield return null;
 
-                weaponObject.GetComponent<VanillaItemDescriptor>().foundInRaid = true;
+                weaponObject.GetComponent<MeatovItem>().foundInRaid = true;
 
                 // FireArmAttachment are attached to FVRFireArmAttachmentMount using attachment.AttachToMount
                 FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
@@ -2528,7 +2420,7 @@ namespace EFM
                 // TODO: Might also have to set private fields in OpenBolt, LeverAction, etc
 
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                Mod.RemoveFromAll(weaponFireArm, null, weaponObject.GetComponent<VanillaItemDescriptor>());
+                Mod.RemoveFromAll(weaponFireArm, weaponObject.GetComponent<MeatovItem>());
 
                 AIInventoryWeaponMod currentParent = inventory.primaryWeaponMods;
                 Stack<FVRPhysicalObject> parentPhysObjs = new Stack<FVRPhysicalObject>();
@@ -2554,7 +2446,7 @@ namespace EFM
                         if (attachmentPrefabPhysObj is FVRFireArmMagazine)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
-                            VanillaItemDescriptor magVID = attachmentObject.GetComponent<VanillaItemDescriptor>();
+                            MeatovItem magVID = attachmentObject.GetComponent<MeatovItem>();
                             magVID.foundInRaid = true;
                             magVID.takeCurrentLocation = false;
                             FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
@@ -2566,7 +2458,7 @@ namespace EFM
                         else if (attachmentPrefabPhysObj is FVRFireArmClip)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
-                            VanillaItemDescriptor clipVID = attachmentObject.GetComponent<VanillaItemDescriptor>();
+                            MeatovItem clipVID = attachmentObject.GetComponent<MeatovItem>();
                             clipVID.foundInRaid = true;
                             clipVID.takeCurrentLocation = false;
                             FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
@@ -2624,7 +2516,7 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(null, itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW);
                                 }
                                 else // Spawn in generic box
                                 {
@@ -2652,14 +2544,14 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(null, itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW);
                                 }
                             }
                         }
                         else if(attachmentPrefabPhysObj is FVRFireArmAttachment)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
-                            attachmentObject.GetComponent<VanillaItemDescriptor>().foundInRaid = true;
+                            attachmentObject.GetComponent<MeatovItem>().foundInRaid = true;
                             FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
                             attachmentPhysObj = asAttachment;
                             bool mountFound = false;
@@ -2705,7 +2597,7 @@ namespace EFM
 
                 if (player)
                 {
-                    VanillaItemDescriptor VID = weaponObject.GetComponent<VanillaItemDescriptor>();
+                    MeatovItem VID = weaponObject.GetComponent<MeatovItem>();
 
                     // TODO: Should use main hand here instead of right
                     FVRViveHand hand = Mod.rightHand.fvrHand;
@@ -2730,7 +2622,7 @@ namespace EFM
 
                 yield return null;
 
-                weaponObject.GetComponent<VanillaItemDescriptor>().foundInRaid = true;
+                weaponObject.GetComponent<MeatovItem>().foundInRaid = true;
 
                 // FireArmAttachment are attached to FVRFireArmAttachmentMount using attachment.AttachToMount
                 FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
@@ -2759,7 +2651,7 @@ namespace EFM
                 // TODO: Might also have to set private fields in OpenBolt, LeverAction, etc
 
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                Mod.RemoveFromAll(weaponFireArm, null, weaponObject.GetComponent<VanillaItemDescriptor>());
+                Mod.RemoveFromAll(weaponFireArm, weaponObject.GetComponent<MeatovItem>());
 
                 AIInventoryWeaponMod currentParent = inventory.secondaryWeaponMods;
                 Stack<FVRPhysicalObject> parentPhysObjs = new Stack<FVRPhysicalObject>();
@@ -2785,7 +2677,7 @@ namespace EFM
                         if (attachmentPrefabPhysObj is FVRFireArmMagazine)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
-                            VanillaItemDescriptor magVID = attachmentObject.GetComponent<VanillaItemDescriptor>();
+                            MeatovItem magVID = attachmentObject.GetComponent<MeatovItem>();
                             magVID.foundInRaid = true;
                             magVID.takeCurrentLocation = false;
                             FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
@@ -2797,7 +2689,7 @@ namespace EFM
                         else if (attachmentPrefabPhysObj is FVRFireArmClip)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
-                            VanillaItemDescriptor clipVID = attachmentObject.GetComponent<VanillaItemDescriptor>();
+                            MeatovItem clipVID = attachmentObject.GetComponent<MeatovItem>();
                             clipVID.foundInRaid = true;
                             clipVID.takeCurrentLocation = false;
                             FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
@@ -2855,7 +2747,7 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(null, itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW);
                                 }
                                 else // Spawn in generic box
                                 {
@@ -2883,14 +2775,14 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(null, itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW);
                                 }
                             }
                         }
                         else if(attachmentPrefabPhysObj is FVRFireArmAttachment)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
-                            attachmentObject.GetComponent<VanillaItemDescriptor>().foundInRaid = true;
+                            attachmentObject.GetComponent<MeatovItem>().foundInRaid = true;
                             FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
                             attachmentPhysObj = asAttachment;
                             bool mountFound = false;
@@ -2938,7 +2830,7 @@ namespace EFM
                 {
                     weaponFireArm.SetQuickBeltSlot(Mod.rightShoulderSlot);
 
-                    VanillaItemDescriptor VID = weaponObject.GetComponent<VanillaItemDescriptor>();
+                    MeatovItem VID = weaponObject.GetComponent<MeatovItem>();
                     Mod.AddToPlayerInventory(weaponObject.transform, false);
                     BeginInteractionPatch.SetItemLocationIndex(0, null, VID);
 
@@ -2956,7 +2848,7 @@ namespace EFM
 
                 yield return null;
 
-                weaponObject.GetComponent<VanillaItemDescriptor>().foundInRaid = true;
+                weaponObject.GetComponent<MeatovItem>().foundInRaid = true;
 
                 // FireArmAttachment are attached to FVRFireArmAttachmentMount using attachment.AttachToMount
                 FVRFireArm weaponFireArm = weaponObject.GetComponent<FVRFireArm>();
@@ -2985,7 +2877,7 @@ namespace EFM
                 // TODO: Might also have to set private fields in OpenBolt, LeverAction, etc
 
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                Mod.RemoveFromAll(weaponFireArm, null, weaponObject.GetComponent<VanillaItemDescriptor>());
+                Mod.RemoveFromAll(weaponFireArm, weaponObject.GetComponent<MeatovItem>());
 
                 AIInventoryWeaponMod currentParent = inventory.holsterMods;
                 Stack<FVRPhysicalObject> parentPhysObjs = new Stack<FVRPhysicalObject>();
@@ -3011,7 +2903,7 @@ namespace EFM
                         if (attachmentPrefabPhysObj is FVRFireArmMagazine)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
-                            VanillaItemDescriptor magVID = attachmentObject.GetComponent<VanillaItemDescriptor>();
+                            MeatovItem magVID = attachmentObject.GetComponent<MeatovItem>();
                             magVID.foundInRaid = true;
                             magVID.takeCurrentLocation = false;
                             FVRFireArmMagazine attachmentMagazine = attachmentObject.GetComponent<FVRFireArmMagazine>();
@@ -3023,7 +2915,7 @@ namespace EFM
                         else if (attachmentPrefabPhysObj is FVRFireArmClip)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
-                            VanillaItemDescriptor clipVID = attachmentObject.GetComponent<VanillaItemDescriptor>();
+                            MeatovItem clipVID = attachmentObject.GetComponent<MeatovItem>();
                             clipVID.foundInRaid = true;
                             clipVID.takeCurrentLocation = false;
                             FVRFireArmClip attachmentClip = attachmentObject.GetComponent<FVRFireArmClip>();
@@ -3081,7 +2973,7 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(null, itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW);
                                 }
                                 else // Spawn in generic box
                                 {
@@ -3109,14 +3001,14 @@ namespace EFM
                                     }
 
                                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                                    Mod.RemoveFromAll(null, itemCIW, null);
+                                    Mod.RemoveFromAll(null, itemCIW);
                                 }
                             }
                         }
                         else if (attachmentPrefabPhysObj is FVRFireArmAttachment)
                         {
                             attachmentObject = Instantiate(attachmentPrefab);
-                            attachmentObject.GetComponent<VanillaItemDescriptor>().foundInRaid = true;
+                            attachmentObject.GetComponent<MeatovItem>().foundInRaid = true;
                             FVRFireArmAttachment asAttachment = attachmentObject.GetComponent<FVRFireArmAttachment>();
                             attachmentPhysObj = asAttachment; ;
                             bool mountFound = false;
@@ -3223,7 +3115,7 @@ namespace EFM
                     Mod.LogInfo("\t\tgot physobj");
 
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(null, itemCIW, null);
+                    Mod.RemoveFromAll(null, itemCIW);
 
                     // Get amount
                     if (itemCIW.itemType == Mod.ItemType.Money)
@@ -3281,7 +3173,7 @@ namespace EFM
                             }
 
                             // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                            Mod.RemoveFromAll(null, itemCIW, null);
+                            Mod.RemoveFromAll(null, itemCIW);
                         }
                         else // Spawn in generic box
                         {
@@ -3308,13 +3200,13 @@ namespace EFM
                             }
 
                             // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                            Mod.RemoveFromAll(null, itemCIW, null);
+                            Mod.RemoveFromAll(null, itemCIW);
                         }
                     }
                     else // Not a round, spawn as normal
                     {
                         itemObject = Instantiate(itemPrefab, pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f)), UnityEngine.Random.rotation, transform.GetChild(1).GetChild(1).GetChild(2));
-                        itemObject.GetComponent<VanillaItemDescriptor>().foundInRaid = true;
+                        itemObject.GetComponent<MeatovItem>().foundInRaid = true;
                     }
                 }
 
@@ -3329,7 +3221,7 @@ namespace EFM
                         if(GM.CurrentPlayerBody.QBSlots_Internal[j].CurObject == null)
                         {
                             Mod.AddToPlayerInventory(finalItemPhysObj.transform, false);
-                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<MeatovItem>(), itemObject.GetComponent<VanillaItemDescriptor>());
+                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<MeatovItem>(), itemObject.GetComponent<MeatovItem>());
                             finalItemPhysObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[j]);
                             finalItemPhysObj.SetParentage(null);
                             success = true;
@@ -3343,7 +3235,7 @@ namespace EFM
                         if (GM.CurrentPlayerBody.QBSlots_Internal[j].CurObject == null)
                         {
                             Mod.AddToPlayerInventory(finalItemPhysObj.transform, false);
-                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<MeatovItem>(), itemObject.GetComponent<VanillaItemDescriptor>());
+                            BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<MeatovItem>(), itemObject.GetComponent<MeatovItem>());
                             finalItemPhysObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[j]);
                             finalItemPhysObj.SetParentage(null);
                             success = true;
@@ -3378,7 +3270,7 @@ namespace EFM
                             }
                         }
                         Mod.AddToPlayerInventory(finalItemPhysObj.transform, false);
-                        BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<MeatovItem>(), itemObject.GetComponent<VanillaItemDescriptor>());
+                        BeginInteractionPatch.SetItemLocationIndex(0, itemObject.GetComponent<MeatovItem>(), itemObject.GetComponent<MeatovItem>());
                         itemObject.transform.localEulerAngles = new Vector3(UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f), UnityEngine.Random.Range(0.0f, 180f));
                         success = true;
                     }
@@ -3407,7 +3299,7 @@ namespace EFM
                     FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[6];
                     FVRPhysicalObject rigPhysObj = rigCIW.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(rigCIW.transform, false);
-                    BeginInteractionPatch.SetItemLocationIndex(0, rigCIW, null);
+                    BeginInteractionPatch.SetItemLocationIndex(0, rigCIW);
                     rigPhysObj.SetQuickBeltSlot(equipSlot);
                     rigPhysObj.SetParentage(null);
 
@@ -3422,7 +3314,7 @@ namespace EFM
                     FVRQuickBeltSlot equipSlot = StatusUI.instance.equipmentSlots[0];
                     FVRPhysicalObject backpackPhysObj = backpackCIW.GetComponent<FVRPhysicalObject>();
                     Mod.AddToPlayerInventory(backpackCIW.transform, false);
-                    BeginInteractionPatch.SetItemLocationIndex(0, backpackCIW, null);
+                    BeginInteractionPatch.SetItemLocationIndex(0, backpackCIW);
                     backpackPhysObj.SetQuickBeltSlot(equipSlot);
                     backpackPhysObj.SetParentage(null);
 
@@ -4529,7 +4421,7 @@ namespace EFM
                         }
                         else
                         {
-                            VanillaItemDescriptor itemVID = itemPrefab.GetComponent<VanillaItemDescriptor>();
+                            MeatovItem itemVID = itemPrefab.GetComponent<MeatovItem>();
                             if (itemVID == null)
                             {
                                 Mod.LogError("Could spawn Item " + itemID + " in " + newAISpawn.name + "'s " + itemParts[i] + " but is not custom and has no VID");
@@ -4868,7 +4760,7 @@ namespace EFM
             }
             else
             {
-                VanillaItemDescriptor itemVID = itemPrefab.GetComponentInChildren<VanillaItemDescriptor>();
+                MeatovItem itemVID = itemPrefab.GetComponentInChildren<MeatovItem>();
                 itemParents = itemVID.parents;
                 itemVolume = Mod.itemVolumes[ID];
                 itemSpawnChance = Mod.GetRaritySpawnChanceMultiplier(itemVID.rarity);
@@ -6096,11 +5988,9 @@ namespace EFM
 
             // Instantiate in a random slot that fits the item if there is one
             MeatovItem prefabCIW = itemPrefab.GetComponent<MeatovItem>();
-            VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<VanillaItemDescriptor>();
 
             FVRPhysicalObject itemPhysObj = null;
             MeatovItem itemCIW = null;
-            VanillaItemDescriptor itemVID = null;
             FireArmRoundType roundType = FireArmRoundType.a106_25mmR;
             FireArmRoundClass roundClass = FireArmRoundClass.a20AP;
             if (prefabCIW != null)
@@ -6112,16 +6002,16 @@ namespace EFM
                 itemCIW.foundInRaid = true;
 
                 // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                Mod.RemoveFromAll(null, itemCIW, null);
+                Mod.RemoveFromAll(null, itemCIW);
 
                 // Get amount
                 if (itemCIW.itemType == Mod.ItemType.Money)
                 {
-                    if (itemCIW.ID.Equals("201"))
+                    if (itemCIW.H3ID.Equals("201"))
                     {
                         itemCIW.stack = UnityEngine.Random.Range(20, 121);
                     }
-                    else if (itemCIW.ID.Equals("202"))
+                    else if (itemCIW.H3ID.Equals("202"))
                     {
                         itemCIW.stack = UnityEngine.Random.Range(10, 101);
                     }
@@ -6142,12 +6032,10 @@ namespace EFM
                 {
                     itemCIW.amount = itemCIW.maxAmount;
                 }
-            }
-            else
-            {
-                if (Mod.usedRoundIDs.Contains(prefabVID.H3ID))
+
+                if (Mod.usedRoundIDs.Contains(prefabCIW.H3ID))
                 {
-                    Mod.LogInfo("\tSpawning round with ID: " + prefabVID.H3ID);
+                    Mod.LogInfo("\tSpawning round with ID: " + prefabCIW.H3ID);
                     // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of rounds
                     int amount = UnityEngine.Random.Range(1, 121);
                     FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
@@ -6156,10 +6044,10 @@ namespace EFM
                     if (amount > 1)
                     {
                         Mod.LogInfo("\t\tStack > 1");
-                        if (Mod.ammoBoxByAmmoID.ContainsKey(prefabVID.H3ID))
+                        if (Mod.ammoBoxByAmmoID.ContainsKey(prefabCIW.H3ID))
                         {
                             Mod.LogInfo("\t\t\tSpecific box");
-                            itemObject = GameObject.Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[prefabVID.H3ID]]);
+                            itemObject = GameObject.Instantiate(Mod.itemPrefabs[Mod.ammoBoxByAmmoID[prefabCIW.H3ID]]);
                             itemCIW = itemObject.GetComponent<MeatovItem>();
                             itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
@@ -6171,7 +6059,7 @@ namespace EFM
                             }
 
                             // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                            Mod.RemoveFromAll(null, itemCIW, null);
+                            Mod.RemoveFromAll(null, itemCIW);
                         }
                         else // Spawn in generic box
                         {
@@ -6186,7 +6074,7 @@ namespace EFM
                             }
 
                             itemCIW = itemObject.GetComponent<MeatovItem>();
-                            itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>(); 
+                            itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
                             FVRFireArmMagazine asMagazine = itemPhysObj as FVRFireArmMagazine;
                             asMagazine.RoundType = roundType;
@@ -6197,7 +6085,7 @@ namespace EFM
                             }
 
                             // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                            Mod.RemoveFromAll(null, itemCIW, null);
+                            Mod.RemoveFromAll(null, itemCIW);
                         }
                         itemCIW.foundInRaid = true;
                     }
@@ -6205,22 +6093,22 @@ namespace EFM
                     {
                         Mod.LogInfo("\t\tSingle round");
                         itemObject = GameObject.Instantiate(itemPrefab);
-                        itemVID = itemObject.GetComponent<VanillaItemDescriptor>();
-                        itemPhysObj = itemVID.GetComponent<FVRPhysicalObject>();
-                        itemVID.foundInRaid = true;
+                        itemCIW = itemObject.GetComponent<MeatovItem>();
+                        itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
+                        itemCIW.foundInRaid = true;
                     }
                 }
                 else // Not a round, spawn as normal
                 {
                     itemObject = GameObject.Instantiate(itemPrefab);
-                    itemVID = itemObject.GetComponent<VanillaItemDescriptor>();
-                    itemVID.foundInRaid = true;
-                    itemPhysObj = itemVID.GetComponent<FVRPhysicalObject>();
+                    itemCIW = itemObject.GetComponent<MeatovItem>();
+                    itemCIW.foundInRaid = true;
+                    itemPhysObj = itemCIW.GetComponent<FVRPhysicalObject>();
 
-                    if(itemPhysObj is FVRFireArm)
+                    if (itemPhysObj is FVRFireArm)
                     {
                         // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                        Mod.RemoveFromAll(itemPhysObj, null, itemVID);
+                        Mod.RemoveFromAll(itemPhysObj, itemCIW);
                     }
                 }
             }
@@ -6306,27 +6194,15 @@ namespace EFM
                             break;
                         }
                         MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
-                        VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
                         if (CIW != null && CIW.insured && UnityEngine.Random.value <= 0.5) // TODO: Should have a chance depending on who insured the item
                         {
-                            if (insuredSet.items.ContainsKey(CIW.ID))
+                            if (insuredSet.items.ContainsKey(CIW.H3ID))
                             {
-                                insuredSet.items[CIW.ID] += 1;
+                                insuredSet.items[CIW.H3ID] += 1;
                             }
                             else
                             {
-                                insuredSet.items.Add(CIW.ID, 1);
-                            }
-                        }
-                        else if (VID != null && VID.insured && UnityEngine.Random.value <= 0.5)
-                        {
-                            if (insuredSet.items.ContainsKey(VID.H3ID))
-                            {
-                                insuredSet.items[VID.H3ID] += 1;
-                            }
-                            else
-                            {
-                                insuredSet.items.Add(VID.H3ID, 1);
+                                insuredSet.items.Add(CIW.H3ID, 1);
                             }
                         }
                     }
@@ -6447,7 +6323,7 @@ namespace EFM
             // Destroy right shoulder object
             if (Mod.rightShoulderObject != null)
             {
-                VanillaItemDescriptor rightShoulderVID = Mod.rightShoulderObject.GetComponent<VanillaItemDescriptor>();
+                MeatovItem rightShoulderVID = Mod.rightShoulderObject.GetComponent<MeatovItem>();
                 FVRPhysicalObject rightShoulderPhysObj = rightShoulderVID.GetComponent<FVRPhysicalObject>();
                 rightShoulderPhysObj.SetQuickBeltSlot(null);
                 Mod.LogInfo("\t\tDestroying right shoulder item, weight: " + rightShoulderVID.currentWeight);
@@ -6464,19 +6340,12 @@ namespace EFM
             {
                 if(GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject != null)
                 {
-                    VanillaItemDescriptor pocketItemVID = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<VanillaItemDescriptor>();
                     MeatovItem pocketItemCIW = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.GetComponent<MeatovItem>();
                     if(pocketItemCIW != null)
                     {
                         Mod.LogInfo("\t\tpocket item, weight: " + pocketItemCIW.currentWeight);
                         Mod.weight -= pocketItemCIW.currentWeight;
                         pocketItemCIW.destroyed = true;
-                    }
-                    else if(pocketItemVID != null)
-                    {
-                        Mod.LogInfo("\t\tpocket item, weight: " + pocketItemVID.currentWeight);
-                        Mod.weight -= pocketItemVID.currentWeight;
-                        pocketItemVID.destroyed = true;
                     }
                     FVRPhysicalObject pocketItemPhysObj = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject;
                     pocketItemPhysObj.SetQuickBeltSlot(null);
@@ -6576,22 +6445,12 @@ namespace EFM
                 if (currentTransform != null)
                 {
                     MeatovItem CIW = currentTransform.GetComponent<MeatovItem>();
-                    VanillaItemDescriptor VID = currentTransform.GetComponent<VanillaItemDescriptor>();
                     if (CIW != null)
                     {
-                        if (itemIDs.Contains(CIW.ID))
+                        if (itemIDs.Contains(CIW.H3ID))
                         {
                             CIW.Highlight(Color.green);
                             CIW.leaveItemProcessor = this;
-                        }
-                        break;
-                    }
-                    else if (VID != null)
-                    {
-                        if (itemIDs.Contains(VID.H3ID))
-                        {
-                            VID.Highlight(Color.green);
-                            VID.leaveItemProcessor = this;
                         }
                         break;
                     }
@@ -6615,22 +6474,12 @@ namespace EFM
                 if (currentTransform != null)
                 {
                     MeatovItem CIW = currentTransform.GetComponent<MeatovItem>();
-                    VanillaItemDescriptor VID = currentTransform.GetComponent<VanillaItemDescriptor>();
                     if (CIW != null)
                     {
-                        if (itemIDs.Contains(CIW.ID))
+                        if (itemIDs.Contains(CIW.H3ID))
                         {
                             CIW.RemoveHighlight();
                             CIW.leaveItemProcessor = null;
-                        }
-                        break;
-                    }
-                    else if (VID != null)
-                    {
-                        if (itemIDs.Contains(VID.H3ID))
-                        {
-                            VID.RemoveHighlight();
-                            VID.leaveItemProcessor = null;
                         }
                         break;
                     }

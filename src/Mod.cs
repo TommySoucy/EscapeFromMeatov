@@ -118,6 +118,8 @@ namespace EFM
         public static Dictionary<Effect.EffectType, List<TraderTaskCounterCondition>> currentHealthEffectCounterConditionsByEffectType;
         public static Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>> currentShotsCounterConditionsByBodyPart;
         public static Dictionary<string, List<TraderTaskCounterCondition>> currentUseItemCounterConditionsByItemID;
+        public static GameObject instantiatedItem;
+        public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
 
         // Player
         public static PlayerStatusManager playerStatusManager;
@@ -256,6 +258,7 @@ namespace EFM
         // DB
         public static JArray areasDB;
         public static JObject localeDB;
+        public static JObject vanillaItemData;
         public static Dictionary<string, ItemMapEntry> itemMap;
         public static JObject[] traderBaseDB;
         public static JObject[] traderAssortDB;
@@ -270,7 +273,6 @@ namespace EFM
         public static JObject dynamicLootTable;
         public static JObject staticLootTable;
         public static JObject defaultItemsData;
-        public static Dictionary<string, VanillaItemDescriptor> vanillaItems;
         public static Dictionary<string, JObject> lootContainersByName;
         public static Dictionary<string, AudioClip[]> itemSounds;
 
@@ -336,6 +338,8 @@ namespace EFM
 
             path = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Mod)).Location);
             Mod.LogInfo("Meatov path found: " + path, false);
+
+            H3MP.Mod.OnInstantiationTrack += H3MP_OnInstantiationTrack;
 
             LoadConfig();
 
@@ -880,7 +884,7 @@ namespace EFM
 
                 // Add custom item wrapper
                 MeatovItem customItemWrapper = itemPrefab.AddComponent<MeatovItem>();
-                customItemWrapper.ID = i.ToString();
+                customItemWrapper.H3ID = i.ToString();
                 customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 float[] tempVolumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
                 customItemWrapper.volumes = new int[tempVolumes.Length];
@@ -895,7 +899,7 @@ namespace EFM
                 {
                     itemAncestors = new Dictionary<string, List<string>>();
                 }
-                itemAncestors.Add(customItemWrapper.ID, customItemWrapper.parents);
+                itemAncestors.Add(customItemWrapper.H3ID, customItemWrapper.parents);
                 customItemWrapper.itemName = itemObjectWrapper.DisplayName;
                 customItemWrapper.description = defaultItemsData["ItemDefaults"][i]["description"] != null ? defaultItemsData["ItemDefaults"][i]["description"].ToString() : "";
                 itemDescriptions.Add(i.ToString(), customItemWrapper.description);
@@ -904,11 +908,11 @@ namespace EFM
                 customItemWrapper.rarity = ItemRarityStringToEnum(defaultItemsData["ItemDefaults"][i]["rarity"].ToString());
                 if (itemsByRarity.ContainsKey(customItemWrapper.rarity))
                 {
-                    itemsByRarity[customItemWrapper.rarity].Add(customItemWrapper.ID);
+                    itemsByRarity[customItemWrapper.rarity].Add(customItemWrapper.H3ID);
                 }
                 else
                 {
-                    itemsByRarity.Add(customItemWrapper.rarity, new List<string>() { customItemWrapper.ID });
+                    itemsByRarity.Add(customItemWrapper.rarity, new List<string>() { customItemWrapper.H3ID });
                 }
                 if (defaultItemsData["ItemDefaults"][i]["MaxAmount"] != null)
                 {
@@ -962,21 +966,13 @@ namespace EFM
                 {
                     if (itemsByParents.ContainsKey(parent))
                     {
-                        itemsByParents[parent].Add(customItemWrapper.ID);
+                        itemsByParents[parent].Add(customItemWrapper.H3ID);
                     }
                     else
                     {
-                        itemsByParents.Add(parent, new List<string>() { customItemWrapper.ID });
+                        itemsByParents.Add(parent, new List<string>() { customItemWrapper.H3ID });
                     }
                 }
-
-                // Fill customItemWrapper Colliders
-                List<Collider> colliders = new List<Collider>();
-                foreach (Transform collider in itemPrefab.transform.GetChild(0).GetChild(itemPrefab.transform.GetChild(0).childCount - 1))
-                {
-                    colliders.Add(collider.GetComponent<Collider>());
-                }
-                customItemWrapper.colliders = colliders.ToArray();
 
                 // Add an EFM_OtherInteractable to each child under Interactives recursively and add them to interactiveSets
                 List<GameObject> interactiveSets = new List<GameObject>();
@@ -1523,7 +1519,18 @@ namespace EFM
         {
             areasDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/areas.json"));
             localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
+            vanillaItemData = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
             ParseItemMap();
+
+            //if (Mod.itemsByParents.ContainsKey(parent))
+            //{
+            //    Mod.itemsByParents[parent].Add(H3ID);
+            //}
+            //else
+            //{
+            //    Mod.itemsByParents.Add(parent, new List<string>() { H3ID });
+            //}
+
             //traderBaseDB = new JObject[8];
             //traderAssortDB = new JObject[8];
             //traderQuestAssortDB = new JObject[8];
@@ -1761,141 +1768,6 @@ namespace EFM
             itemIcons.Add("GarageTool_WrenchTwoSided", assetsBundles[0].LoadAsset<Sprite>("ItemGarageTool_WrenchTwoSided_Icon"));
             itemIcons.Add("HairsprayCan", assetsBundles[0].LoadAsset<Sprite>("ItemHairsprayCan_Icon"));
             itemIcons.Add("Matchbox", assetsBundles[0].LoadAsset<Sprite>("ItemMatchbox_Icon"));
-
-            vanillaItems = new Dictionary<string, VanillaItemDescriptor>();
-            JArray vanillaItemsRaw = (JArray)defaultItemsData["VanillaItems"];
-
-            foreach (JToken vanillaItemRaw in vanillaItemsRaw)
-            {
-                string H3ID = vanillaItemRaw["H3ID"].ToString();
-                Mod.LogInfo("Setting vanilla Item: " + H3ID);
-                GameObject itemPrefab = IM.OD[H3ID].GetGameObject();
-                VanillaItemDescriptor descriptor = itemPrefab.AddComponent<VanillaItemDescriptor>();
-                itemWeights.Add(H3ID, (int)(itemPrefab.GetComponent<Rigidbody>().mass * 1000));
-                descriptor.H3ID = vanillaItemRaw["H3ID"].ToString();
-                descriptor.tarkovID = vanillaItemRaw["TarkovID"].ToString();
-                descriptor.description = vanillaItemRaw["Description"].ToString();
-                itemDescriptions.Add(H3ID, descriptor.description);
-                descriptor.lootExperience = (int)vanillaItemRaw["LootExperience"];
-                descriptor.rarity = ItemRarityStringToEnum(vanillaItemRaw["Rarity"].ToString());
-                if (itemsByRarity.ContainsKey(descriptor.rarity))
-                {
-                    itemsByRarity[descriptor.rarity].Add(descriptor.H3ID);
-                }
-                else
-                {
-                    itemsByRarity.Add(descriptor.rarity, new List<string>() { descriptor.H3ID });
-                }
-                descriptor.spawnChance = (float)vanillaItemRaw["SpawnChance"];
-                descriptor.creditCost = (int)vanillaItemRaw["CreditCost"];
-                descriptor.parents = vanillaItemRaw["parents"].ToObject<List<string>>();
-                itemAncestors.Add(descriptor.H3ID, descriptor.parents);
-                descriptor.lootExperience = (int)vanillaItemRaw["LootExperience"];
-
-                foreach (string parent in descriptor.parents)
-                {
-                    if (itemsByParents.ContainsKey(parent))
-                    {
-                        itemsByParents[parent].Add(H3ID);
-                    }
-                    else
-                    {
-                        itemsByParents.Add(parent, new List<string>() { H3ID });
-                    }
-
-                    if (parent.Equals("5447b5cf4bdc2d65278b4567"))
-                    {
-                        descriptor.weaponClass = WeaponClass.Pistol;
-                    }
-                    else if (parent.Equals("617f1ef5e8b54b0998387733"))
-                    {
-                        descriptor.weaponClass = WeaponClass.Revolver;
-                    }
-                    else if (parent.Equals("5447b5e04bdc2d62278b4567"))
-                    {
-                        descriptor.weaponClass = WeaponClass.SMG;
-                    }
-                    else if (parent.Equals("5447b5f14bdc2d61278b4567"))
-                    {
-                        descriptor.weaponClass = WeaponClass.Assault;
-                    }
-                    else if (parent.Equals("5447b6094bdc2dc3278b4567"))
-                    {
-                        descriptor.weaponClass = WeaponClass.Shotgun;
-                    }
-                    else if (parent.Equals("5447b6254bdc2dc3278b4568"))
-                    {
-                        descriptor.weaponClass = WeaponClass.Sniper;
-                    }
-                    else if (parent.Equals("5447b5fc4bdc2d87278b4567"))
-                    {
-                        descriptor.weaponClass = WeaponClass.LMG;
-                    }
-                    else if (parent.Equals("5447bed64bdc2d97278b4568"))
-                    {
-                        descriptor.weaponClass = WeaponClass.HMG;
-                    }
-                    else if (parent.Equals("5447bedf4bdc2d87278b4568"))
-                    {
-                        descriptor.weaponClass = WeaponClass.Launcher;
-                    }
-                    else if (parent.Equals("5447bee84bdc2dc3278b4569"))
-                    {
-                        descriptor.weaponClass = WeaponClass.AttachedLauncher;
-                    }
-                    else if (parent.Equals("5447b6194bdc2d67278b4567"))
-                    {
-                        descriptor.weaponClass = WeaponClass.DMR;
-                    }
-                }
-
-                FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
-                descriptor.itemName = physObj.ObjectWrapper.DisplayName;
-                itemNames.Add(H3ID, descriptor.itemName);
-                descriptor.volume = (int)((float)vanillaItemRaw["Volume"] * Mod.volumePrecisionMultiplier);
-                itemVolumes.Add(H3ID, descriptor.volume);
-                if (physObj is FVRFireArm)
-                {
-                    FVRFireArm asFireArm = physObj as FVRFireArm;
-                    descriptor.compatibilityValue = 3;
-                    if (asFireArm.UsesMagazines)
-                    {
-                        descriptor.usesAmmoContainers = true;
-                        descriptor.usesMags = true;
-                        descriptor.magType = asFireArm.MagazineType;
-                    }
-                    else if (asFireArm.UsesClips)
-                    {
-                        descriptor.usesAmmoContainers = true;
-                        descriptor.usesMags = false;
-                        descriptor.clipType = asFireArm.ClipType;
-                    }
-                    descriptor.roundType = asFireArm.RoundType;
-                }
-                else if (physObj is FVRFireArmMagazine)
-                {
-                    descriptor.compatibilityValue = 1;
-                    descriptor.roundType = (physObj as FVRFireArmMagazine).RoundType;
-                }
-                else if (physObj is FVRFireArmClip)
-                {
-                    descriptor.compatibilityValue = 1;
-                    descriptor.roundType = (physObj as FVRFireArmClip).RoundType;
-                }
-                else if (physObj is Speedloader)
-                {
-                    descriptor.compatibilityValue = 1;
-                    descriptor.roundType = (physObj as Speedloader).Chambers[0].Type;
-                }
-                else if (physObj is FVRFireArmRound)
-                {
-                    usedRoundIDs.Add(H3ID);
-
-                    // TODO: Figure out how to get a round's compatible mags efficiently so we can list them in the round's description
-                }
-
-                vanillaItems.Add(descriptor.H3ID, descriptor);
-            }
         }
 
         private static ItemRarity ItemRarityStringToEnum(string name)
@@ -1975,7 +1847,7 @@ namespace EFM
             return root.gameObject;
         }
 
-        public static void AddToAll(FVRInteractiveObject interactiveObject, MeatovItem CIW, VanillaItemDescriptor VID)
+        public static void AddToAll(FVRInteractiveObject interactiveObject, MeatovItem CIW)
         {
             if (CIW != null && !CIW.inAll)
             {
@@ -1984,18 +1856,11 @@ namespace EFM
 
                 CIW.inAll = true;
             }
-            else if (VID != null && !VID.inAll)
-            {
-                typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(interactiveObject, FVRInteractiveObject.All.Count);
-                FVRInteractiveObject.All.Add(interactiveObject);
-
-                VID.inAll = true;
-            }
         }
 
-        public static void RemoveFromAll(FVRInteractiveObject interactiveObject, MeatovItem CIW, VanillaItemDescriptor VID)
+        public static void RemoveFromAll(FVRInteractiveObject interactiveObject, MeatovItem MI)
         {
-            if (CIW != null && (CIW.inAll || interactiveObject == null))
+            if (MI != null && (MI.inAll || interactiveObject == null))
             {
                 if (interactiveObject == null)
                 {
@@ -2010,26 +1875,9 @@ namespace EFM
 
                 indexField.SetValue(interactiveObject, -1);
 
-                CIW.inAll = false;
+                MI.inAll = false;
             }
-            else if (VID != null && (VID.inAll || interactiveObject == null))
-            {
-                if (interactiveObject == null)
-                {
-                    interactiveObject = FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1];
-                }
-                FieldInfo indexField = typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic);
-                int currentIndex = (int)indexField.GetValue(interactiveObject);
-
-                FVRInteractiveObject.All[currentIndex] = FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1];
-                indexField.SetValue(FVRInteractiveObject.All[currentIndex], currentIndex);
-                FVRInteractiveObject.All.RemoveAt(FVRInteractiveObject.All.Count - 1);
-
-                indexField.SetValue(interactiveObject, -1);
-
-                VID.inAll = false;
-            }
-            else if(CIW == null && VID == null)
+            else if(MI == null)
             {
                 if (interactiveObject == null)
                 {
@@ -2095,7 +1943,6 @@ namespace EFM
         public static void AddToPlayerInventory(Transform item, bool updateTypeLists)
         {
             MeatovItem customItemWrapper = item.GetComponent<MeatovItem>();
-            VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<VanillaItemDescriptor>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
             if (physObj == null || physObj.ObjectWrapper == null)
             {
@@ -2154,13 +2001,9 @@ namespace EFM
                             }
                         }
                     }
-                }
-
-                if (vanillaItemDescriptor != null)
-                {
-                    if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
+                    else if (customItemWrapper.physObj is FVRFireArmMagazine)
                     {
-                        FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
+                        FVRFireArmMagazine asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
                         if (magazinesByType.ContainsKey(asMagazine.MagazineType))
                         {
                             if (magazinesByType[asMagazine.MagazineType] == null)
@@ -2186,9 +2029,9 @@ namespace EFM
                             magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                         }
                     }
-                    else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
+                    else if (customItemWrapper.physObj is FVRFireArmClip)
                     {
-                        FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
+                        FVRFireArmClip asClip = customItemWrapper.physObj as FVRFireArmClip;
                         if (clipsByType.ContainsKey(asClip.ClipType))
                         {
                             if (clipsByType[asClip.ClipType] == null)
@@ -2214,9 +2057,9 @@ namespace EFM
                             clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
                         }
                     }
-                    else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
+                    else if (customItemWrapper.physObj is FVRFireArmRound)
                     {
-                        FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                        FVRFireArmRound asRound = customItemWrapper.physObj as FVRFireArmRound;
                         if (roundsByType.ContainsKey(asRound.RoundType))
                         {
                             if (roundsByType[asRound.RoundType] == null)
@@ -2265,31 +2108,18 @@ namespace EFM
                         }
                     }
                 }
-            }
-            else if (vanillaItemDescriptor != null)
-            {
-                if (physObj is FVRFireArm)
+                else if (physObj is FVRFireArm)
                 {
                     FVRFireArm asFireArm = (FVRFireArm)physObj;
 
                     // Ammo container
                     if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                     {
-                        VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<VanillaItemDescriptor>();
-                        if (ammoContainerVID != null)
-                        {
-                            AddToPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
-                        }
-                        //else Mag could be internal, not interactable, and so, no VID
+                        AddToPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
                     }
                     else if (asFireArm.UsesClips && asFireArm.Clip != null)
                     {
-                        VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<VanillaItemDescriptor>();
-                        if (ammoContainerVID != null)
-                        {
-                            AddToPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
-                        }
-                        //else Clip could be internal, not interactable, and so, no VID
+                        AddToPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
                     }
 
                     // Attachments
@@ -2319,7 +2149,6 @@ namespace EFM
         public static void RemoveFromPlayerInventory(Transform item, bool updateTypeLists)
         {
             MeatovItem customItemWrapper = item.GetComponent<MeatovItem>();
-            VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<VanillaItemDescriptor>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
             if (physObj == null || physObj.ObjectWrapper == null)
             {
@@ -2383,13 +2212,9 @@ namespace EFM
                             }
                         }
                     }
-                }
-
-                if (vanillaItemDescriptor != null)
-                {
-                    if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
+                    else if (physObj is FVRFireArmMagazine)
                     {
-                        FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
+                        FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
                         if (magazinesByType.ContainsKey(asMagazine.MagazineType))
                         {
                             if (magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
@@ -2414,9 +2239,9 @@ namespace EFM
                             Mod.LogError("Attempting to remove " + itemID + "  which is mag from player inventory but its type was not found in magazinesByType:\n" + Environment.StackTrace);
                         }
                     }
-                    else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
+                    else if (physObj is FVRFireArmClip)
                     {
-                        FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
+                        FVRFireArmClip asClip = physObj as FVRFireArmClip;
                         if (clipsByType.ContainsKey(asClip.ClipType))
                         {
                             if (clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
@@ -2441,9 +2266,9 @@ namespace EFM
                             Mod.LogError("Attempting to remove " + itemID + "  which is clip from player inventory but its type was not found in clipsByType:\n" + Environment.StackTrace);
                         }
                     }
-                    else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
+                    else if (physObj is FVRFireArmRound)
                     {
-                        FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                        FVRFireArmRound asRound = physObj as FVRFireArmRound;
                         if (roundsByType.ContainsKey(asRound.RoundType))
                         {
                             if (roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
@@ -2491,31 +2316,18 @@ namespace EFM
                         }
                     }
                 }
-            }
-            else if (vanillaItemDescriptor != null)
-            {
-                if (physObj is FVRFireArm)
+                else if (physObj is FVRFireArm)
                 {
                     FVRFireArm asFireArm = (FVRFireArm)physObj;
 
                     // Ammo container
                     if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                     {
-                        VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<VanillaItemDescriptor>();
-                        if (ammoContainerVID != null)
-                        {
-                            RemoveFromPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
-                        }
-                        //else Mag could be internal, not interactable, and so, no VID
+                        RemoveFromPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
                     }
                     else if (asFireArm.UsesClips && asFireArm.Clip != null)
                     {
-                        VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<VanillaItemDescriptor>();
-                        if (ammoContainerVID != null)
-                        {
-                            RemoveFromPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
-                        }
-                        //else Clip could be internal, not interactable, and so, no VID
+                        RemoveFromPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
                     }
 
                     // Attachments
@@ -3484,6 +3296,33 @@ namespace EFM
         public static void LogError(string message)
         {
             modInstance.Logger.LogError(message);
+        }
+
+        public static void H3MP_OnInstantiationTrack(GameObject go)
+        {
+            // This or one of our instantiation patches will happen first
+            // In this case, we want to make sure that if the item is a MeatovItem, we add the script
+            // before H3MP tracks it
+            if(instantiatedItem == go)
+            {
+                // We already setup this item, no need to do it here
+                // It is ready to be tracked by H3MP
+                return;
+            }
+            else
+            {
+                // This item was caught by H3MP's instantiation patches abd must be setup now
+                FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
+                if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                {
+                    // Must setup the item if it is vanilla
+                    if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
+                    {
+                        MeatovItem.Setup(physicalObject);
+                    }
+                }
+                instantiatedItem = null;
+            }
         }
     }
 

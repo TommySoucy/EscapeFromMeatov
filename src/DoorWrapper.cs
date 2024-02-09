@@ -22,8 +22,8 @@ namespace EFM
             {
                 if (collider.transform.parent != null && collider.transform.parent.parent != null && collider.transform.parent.parent.parent != null)
                 {
-                    MeatovItem CIW = collider.transform.parent.parent.parent.GetComponent<MeatovItem>();
-                    if (CIW != null && CIW.ID.Equals(keyID))
+                    MeatovItem MI = collider.transform.parent.parent.parent.GetComponent<MeatovItem>();
+                    if (MI != null && MI.H3ID.Equals(keyID))
                     {
                         transform.localRotation = Quaternion.Euler(openAngleX, openAngleY, openAngleZ);
                         open = true;

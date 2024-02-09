@@ -1,4 +1,6 @@
 ﻿using FistVR;
+using H3MP.Tracking;
+using H3MP;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -7,6 +9,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using H3MP.Patches;
 
 namespace EFM
 {
@@ -363,12 +366,13 @@ namespace EFM
             //PatchController.Verify(fireArmRecoilPatchOriginal, harmony, true);
             //harmony.Patch(fireArmRecoilPatchOriginal, new HarmonyMethod(fireArmRecoilPatchPrefix));
 
-            //// HandCurrentInteractableSetPatch
-            //MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo handCurrentInteractableSetPatchPostfix = typeof(HandCurrentInteractableSetPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // HandCurrentInteractableSetPatch
+            MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo handCurrentInteractableSetPatchPostfix = typeof(HandCurrentInteractableSetPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo handCurrentInteractableSetPatchPrefix = typeof(HandCurrentInteractableSetPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(handCurrentInteractableSetPatchOriginal, harmony, true);
-            //harmony.Patch(handCurrentInteractableSetPatchOriginal, null, new HarmonyMethod(handCurrentInteractableSetPatchPostfix));
+            PatchController.Verify(handCurrentInteractableSetPatchOriginal, harmony, true);
+            harmony.Patch(handCurrentInteractableSetPatchOriginal, new HarmonyMethod(handCurrentInteractableSetPatchPrefix), new HarmonyMethod(handCurrentInteractableSetPatchPostfix));
 
             //// SosigLinkDamagePatch
             //MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
@@ -397,7 +401,6 @@ namespace EFM
             Mod.securedObjects.Add(objectToSecure);
             GameObject.DontDestroyOnLoad(objectToSecure);
             MeatovItem CIW = objectToSecure.GetComponent<MeatovItem>();
-            VanillaItemDescriptor VID = objectToSecure.GetComponent<VanillaItemDescriptor>();
             if (CIW != null)
             {
                 // Items inside a rig will not be attached to the rig, so much secure them separately
@@ -411,9 +414,7 @@ namespace EFM
                         }
                     }
                 }
-            }
-            else if (VID != null)
-            {
+
                 // Secure any laser pointer hit objects
                 LaserPointer[] laserPointers = objectToSecure.GetComponentsInChildren<LaserPointer>();
                 foreach (LaserPointer laserPointer in laserPointers)
@@ -588,8 +589,8 @@ namespace EFM
                 if (Mod.rightShoulderObject != null)
                 {
                     Mod.scavRaidReturnItems[10] = Mod.rightShoulderObject;
-                    VanillaItemDescriptor rightShoulderVID = Mod.rightShoulderObject.GetComponent<VanillaItemDescriptor>();
-                    FVRPhysicalObject rightShoulderPhysObj = rightShoulderVID.GetComponent<FVRPhysicalObject>();
+                    MeatovItem MI = Mod.rightShoulderObject.GetComponent<MeatovItem>();
+                    FVRPhysicalObject rightShoulderPhysObj = MI.GetComponent<FVRPhysicalObject>();
                     rightShoulderPhysObj.SetQuickBeltSlot(null);
                     Mod.rightShoulderObject = null;
                 }
@@ -720,18 +721,10 @@ namespace EFM
             }
 
             // Just return if we declared the item as destroyed already, it would mean that we already managed the weight and item lists so we dont want this patch to do it
-            MeatovItem CIW = __instance.GetComponent<MeatovItem>();
-            VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
-            if (CIW != null)
+            MeatovItem MI = __instance.GetComponent<MeatovItem>();
+            if (MI != null)
             {
-                if (CIW.destroyed)
-                {
-                    return;
-                }
-            }
-            else if (VID != null)
-            {
-                if (VID.destroyed)
+                if (MI.destroyed)
                 {
                     return;
                 }
@@ -755,9 +748,9 @@ namespace EFM
                             __instance.transform.localScale = __instance.QBPoseOverride.localScale;
                         }
 
-                        if (CIW.open)
+                        if (MI.open)
                         {
-                            CIW.ToggleMode(false);
+                            MI.ToggleMode(false);
                         }
                     }
                 }
@@ -765,7 +758,7 @@ namespace EFM
                 // Check if area slot
                 if ((__instance as FVRPhysicalObject).QuickbeltSlot is AreaSlot)
                 {
-                    BeginInteractionPatch.SetItemLocationIndex(3, CIW, VID, true);
+                    BeginInteractionPatch.SetItemLocationIndex(3, MI, true);
 
                     // Was on player
                     Mod.RemoveFromPlayerInventory(__instance.transform, true);
@@ -780,42 +773,23 @@ namespace EFM
                     MeatovItem customItemWrapper = qbs.transform.parent.parent.parent.GetComponent<MeatovItem>();
                     if (customItemWrapper != null)
                     {
-                        if (CIW != null)
+                        if (MI != null)
                         {
-                            BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, CIW, null);
+                            BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, MI);
 
                             // Update lists
                             if (customItemWrapper.locationIndex == 1)
                             {
                                 // Was on player
-                                Mod.RemoveFromPlayerInventory(CIW.transform, false);
+                                Mod.RemoveFromPlayerInventory(MI.transform, false);
 
                                 // Now in hideout
-                                HideoutController.instance.AddToBaseInventory(CIW.transform, false);
+                                HideoutController.instance.AddToBaseInventory(MI.transform, false);
                             }
                             else if (customItemWrapper.locationIndex == 2)
                             {
                                 // Was on player
-                                Mod.RemoveFromPlayerInventory(CIW.transform, true);
-                            }
-                        }
-                        else if (VID)
-                        {
-                            BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, null, VID);
-
-                            // Update lists
-                            if (customItemWrapper.locationIndex == 1)
-                            {
-                                // Was on player
-                                Mod.RemoveFromPlayerInventory(VID.transform, false);
-
-                                // Now in hideout
-                                HideoutController.instance.AddToBaseInventory(VID.transform, false);
-                            }
-                            else if (customItemWrapper.locationIndex == 2)
-                            {
-                                // Was on player
-                                Mod.RemoveFromPlayerInventory(VID.transform, true);
+                                Mod.RemoveFromPlayerInventory(MI.transform, true);
                             }
                         }
                         return;
@@ -823,10 +797,10 @@ namespace EFM
                 }
 
                 // Play drop sound if custom
-                if (CIW != null && hand.CanMakeGrabReleaseSound && CIW.itemSounds != null && CIW.itemSounds[0] != null)
+                if (MI != null && hand.CanMakeGrabReleaseSound && MI.itemSounds != null && MI.itemSounds[0] != null)
                 {
                     AudioEvent audioEvent = new AudioEvent();
-                    audioEvent.Clips.Add(CIW.itemSounds[0]);
+                    audioEvent.Clips.Add(MI.itemSounds[0]);
                     SM.PlayCoreSound(FVRPooledAudioType.GenericClose, audioEvent, hand.Input.Pos);
                     hand.HandMadeGrabReleaseSound();
                 }
@@ -851,19 +825,14 @@ namespace EFM
                 if (asAttachment.Sensor.CurHoveredMount != null)
                 {
                     MeatovItem attachmentParentCIW = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<MeatovItem>();
-                    VanillaItemDescriptor attachmentParentVID = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<VanillaItemDescriptor>();
 
                     int newLocationIndex = -1;
                     if (attachmentParentCIW != null)
                     {
                         newLocationIndex = attachmentParentCIW.locationIndex;
                     }
-                    else if (attachmentParentVID != null)
-                    {
-                        newLocationIndex = attachmentParentVID.locationIndex;
-                    }
 
-                    BeginInteractionPatch.SetItemLocationIndex(newLocationIndex, CIW, VID, true);
+                    BeginInteractionPatch.SetItemLocationIndex(newLocationIndex, MI, true);
 
                     if (newLocationIndex != 0)
                     {
@@ -929,20 +898,15 @@ namespace EFM
                 }
             }
 
-            MeatovItem heldCustomItemWrapper = primary.GetComponent<MeatovItem>();
-            VanillaItemDescriptor heldVanillaItemDescriptor = primary.GetComponent<VanillaItemDescriptor>();
+            MeatovItem heldMI = primary.GetComponent<MeatovItem>();
 
             // Remove from All if necessary
-            if (heldCustomItemWrapper != null)
+            if (heldMI != null)
             {
-                Mod.RemoveFromAll(primary, heldCustomItemWrapper, null);
-            }
-            else if (heldVanillaItemDescriptor != null && primary is FVRFireArm)
-            {
-                Mod.RemoveFromAll(primary, null, heldVanillaItemDescriptor);
+                Mod.RemoveFromAll(primary, heldMI);
             }
 
-            if (collidingContainerWrapper != null && (hand.IsThisTheRightHand ? Mod.rightHand.hoverValid : Mod.leftHand.hoverValid) && (heldCustomItemWrapper == null || !heldCustomItemWrapper.Equals(collidingContainerWrapper)))
+            if (collidingContainerWrapper != null && (hand.IsThisTheRightHand ? Mod.rightHand.hoverValid : Mod.leftHand.hoverValid) && (heldMI == null || !heldMI.Equals(collidingContainerWrapper)))
             {
                 Mod.LogInfo("\tChecking if item fits in container");
                 // Check if item fits in container
@@ -950,44 +914,25 @@ namespace EFM
                 {
                     if (collidingContainerWrapper.locationIndex == 1)
                     {
-                        BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
+                        BeginInteractionPatch.SetItemLocationIndex(1, heldMI, true);
 
-                        if (heldCustomItemWrapper != null)
-                        {
-                            // Was on player
-                            Mod.RemoveFromPlayerInventory(heldCustomItemWrapper.transform, false);
+                        // Was on player
+                        Mod.RemoveFromPlayerInventory(heldMI.transform, false);
 
-                            // Now in hideout
-                            HideoutController.instance.AddToBaseInventory(heldCustomItemWrapper.transform, false);
-                        }
-                        else
-                        {
-                            // Was on player
-                            Mod.RemoveFromPlayerInventory(heldVanillaItemDescriptor.transform, false);
-
-                            // Now in hideout
-                            HideoutController.instance.AddToBaseInventory(heldVanillaItemDescriptor.transform, false);
-                        }
+                        // Now in hideout
+                        HideoutController.instance.AddToBaseInventory(heldMI.transform, false);
                     }
                     else if (collidingContainerWrapper.locationIndex == 2)
                     {
-                        BeginInteractionPatch.SetItemLocationIndex(2, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
+                        BeginInteractionPatch.SetItemLocationIndex(2, heldMI, true);
 
-                        if (heldCustomItemWrapper != null)
-                        {
-                            // Was on player
-                            Mod.RemoveFromPlayerInventory(heldCustomItemWrapper.transform, true);
-                        }
-                        else
-                        {
-                            // Was on player
-                            Mod.RemoveFromPlayerInventory(heldVanillaItemDescriptor.transform, true);
-                        }
+                        // Was on player
+                        Mod.RemoveFromPlayerInventory(heldMI.transform, true);
                     }
                 }
                 else
                 {
-                    DropItemInWorld(primary, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                    DropItemInWorld(primary, heldMI);
                 }
             }
             else if (collidingTradeVolume != null)
@@ -995,9 +940,9 @@ namespace EFM
                 Mod.LogInfo("\tcolliding trade volume not null, adding to trade volume");
                 collidingTradeVolume.AddItem(primary);
 
-                collidingTradeVolume.market.UpdateBasedOnItem(true, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                collidingTradeVolume.market.UpdateBasedOnItem(true, heldMI);
 
-                BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
+                BeginInteractionPatch.SetItemLocationIndex(1, heldMI, true);
 
                 // Was on player
                 Mod.RemoveFromPlayerInventory(primary.transform, false);
@@ -1007,11 +952,11 @@ namespace EFM
             }
             else
             {
-                DropItemInWorld(primary, heldCustomItemWrapper, heldVanillaItemDescriptor);
+                DropItemInWorld(primary, heldMI);
             }
         }
 
-        private static void DropItemInWorld(FVRPhysicalObject primary, MeatovItem heldCustomItemWrapper, VanillaItemDescriptor heldVanillaItemDescriptor)
+        private static void DropItemInWorld(FVRPhysicalObject primary, MeatovItem heldCustomItemWrapper)
         {
             // Drop item in world
             GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
@@ -1019,7 +964,7 @@ namespace EFM
             Raid_Manager raidManager = sceneRoot.GetComponent<Raid_Manager>();
             if (baseManager != null)
             {
-                BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
+                BeginInteractionPatch.SetItemLocationIndex(1, heldCustomItemWrapper, true);
 
                 // Was on player
                 Mod.RemoveFromPlayerInventory(primary.transform, false);
@@ -1031,7 +976,7 @@ namespace EFM
             }
             else if (raidManager != null)
             {
-                BeginInteractionPatch.SetItemLocationIndex(2, heldCustomItemWrapper, heldVanillaItemDescriptor, true);
+                BeginInteractionPatch.SetItemLocationIndex(2, heldCustomItemWrapper, true);
 
                 // Update lists
                 // Was on player
@@ -1456,11 +1401,7 @@ namespace EFM
                             string IDToUse;
                             if (customItemWrapper != null)
                             {
-                                IDToUse = customItemWrapper.ID;
-                            }
-                            else
-                            {
-                                IDToUse = fvrphysicalObject.GetComponent<VanillaItemDescriptor>().H3ID;
+                                IDToUse = customItemWrapper.H3ID;
                             }
                             //if (asAreaSlot.filter.Contains(IDToUse))
                             //{
@@ -1602,7 +1543,7 @@ namespace EFM
                                     if (rigItemWrapper.rigSlots[slotIndex].Equals(__instance.QuickbeltSlot))
                                     {
                                         rigItemWrapper.itemsInSlots[slotIndex] = null;
-                                        rigItemWrapper.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
+                                        rigItemWrapper.currentWeight -= customItemWrapper.currentWeight;
                                         return;
                                     }
                                 }
@@ -1622,7 +1563,7 @@ namespace EFM
                                 if (EquipmentSlot.currentRig.itemsInSlots[i] == __instance.gameObject)
                                 {
                                     EquipmentSlot.currentRig.itemsInSlots[i] = null;
-                                    EquipmentSlot.currentRig.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
+                                    EquipmentSlot.currentRig.currentWeight -= customItemWrapper.currentWeight;
                                     EquipmentSlot.currentRig.UpdateRigMode();
                                     return;
                                 }
@@ -1644,14 +1585,9 @@ namespace EFM
 
                 // Add to All if necessary
                 MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
-                VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<VanillaItemDescriptor>();
                 if (customItemWrapper != null)
                 {
-                    Mod.AddToAll(__instance, customItemWrapper, null);
-                }
-                else if (vanillaItemDescriptor != null && (__instance is FVRFireArm || (__instance is FVRMeleeWeapon && !vanillaItemDescriptor.inAll)))
-                {
-                    Mod.AddToAll(__instance, null, vanillaItemDescriptor);
+                    Mod.AddToAll(__instance, customItemWrapper);
                 }
             }
         }
@@ -1775,7 +1711,7 @@ namespace EFM
                     {
                         MeatovItem equipmentItemWrapper = EquipmentSlot.currentRig;
                         equipmentItemWrapper.itemsInSlots[slotIndex - 4] = __instance.gameObject;
-                        equipmentItemWrapper.currentWeight += __instance.GetComponent<MeatovItem>() != null ? __instance.GetComponent<MeatovItem>().currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
+                        equipmentItemWrapper.currentWeight += __instance.GetComponent<MeatovItem>().currentWeight;
                         equipmentItemWrapper.UpdateRigMode();
 
                         foundSlot = true;
@@ -1821,7 +1757,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    customItemWrapper.currentWeight += __instance.GetComponent<MeatovItem>() != null ? __instance.GetComponent<MeatovItem>().currentWeight : __instance.GetComponent<VanillaItemDescriptor>().currentWeight;
+                                    customItemWrapper.currentWeight += __instance.GetComponent<MeatovItem>().currentWeight;
                                 }
                                 return;
                             }
@@ -1862,22 +1798,13 @@ namespace EFM
                 //}
             }
 
-            VanillaItemDescriptor vanillaItemDescriptor = __instance.GetComponent<VanillaItemDescriptor>();
             MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
             if (customItemWrapper != null)
             {
                 // Add to All if necessary
-                Mod.AddToAll(__instance, customItemWrapper, null);
+                Mod.AddToAll(__instance, customItemWrapper);
 
-                if (customItemWrapper.hideoutSpawned)
-                {
-                    customItemWrapper.hideoutSpawned = false;
-                    foreach (Collider col in customItemWrapper.colliders)
-                    {
-                        col.enabled = true;
-                    }
-                    // TODO: Check if backpack or rig, we dont want to change the cols with colliding smoke layer or wtv?
-                }
+                customItemWrapper.hideoutSpawned = false;
 
                 if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
                 {
@@ -1947,9 +1874,9 @@ namespace EFM
                             Mod.AddExperience(customItemWrapper.lootExperience, 1);
                         }
 
-                        if (customItemWrapper.foundInRaid && Mod.taskFindItemConditionsByItemID.ContainsKey(customItemWrapper.ID))
+                        if (customItemWrapper.foundInRaid && Mod.taskFindItemConditionsByItemID.ContainsKey(customItemWrapper.H3ID))
                         {
-                            foreach (TraderTaskCondition condition in Mod.taskFindItemConditionsByItemID[customItemWrapper.ID])
+                            foreach (TraderTaskCondition condition in Mod.taskFindItemConditionsByItemID[customItemWrapper.H3ID])
                             {
                                 if (condition.failCondition && condition.task.taskState != TraderTask.TaskState.Active)
                                 {
@@ -1977,7 +1904,7 @@ namespace EFM
                     Mod.AddToPlayerInventory(customItemWrapper.transform, false);
 
                     // Update locationIndex
-                    SetItemLocationIndex(0, customItemWrapper, null, true);
+                    SetItemLocationIndex(0, customItemWrapper, true);
                 }
                 else if (customItemWrapper.locationIndex == 2)
                 {
@@ -1985,7 +1912,7 @@ namespace EFM
                     Mod.AddToPlayerInventory(customItemWrapper.transform, true);
 
                     // Update locationIndex
-                    SetItemLocationIndex(0, customItemWrapper, null, true);
+                    SetItemLocationIndex(0, customItemWrapper, true);
                 }
                 else if (customItemWrapper.locationIndex == 3)
                 {
@@ -1993,7 +1920,7 @@ namespace EFM
                     Mod.AddToPlayerInventory(customItemWrapper.transform, true);
 
                     // Update locationIndex
-                    SetItemLocationIndex(0, customItemWrapper, null, true);
+                    SetItemLocationIndex(0, customItemWrapper, true);
 
                     //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentHideoutManager.baseAreaManagers)
                     //{
@@ -2001,90 +1928,7 @@ namespace EFM
                     //}
                 }
             }
-            else if (vanillaItemDescriptor != null)
-            {
-                if (vanillaItemDescriptor.hideoutSpawned)
-                {
-                    vanillaItemDescriptor.hideoutSpawned = false;
-                    vanillaItemDescriptor.physObj.SetAllCollidersToLayer(false, "Default");
-                }
-
-                if (!vanillaItemDescriptor.looted)
-                {
-                    vanillaItemDescriptor.looted = true;
-                    if (Mod.currentLocationIndex == 2)
-                    {
-                        if (vanillaItemDescriptor.lootExperience > 0)
-                        {
-                            Mod.AddExperience(vanillaItemDescriptor.lootExperience, 1);
-                        }
-
-                        if (vanillaItemDescriptor.foundInRaid && Mod.taskFindItemConditionsByItemID.ContainsKey(vanillaItemDescriptor.H3ID))
-                        {
-                            foreach (TraderTaskCondition condition in Mod.taskFindItemConditionsByItemID[vanillaItemDescriptor.H3ID])
-                            {
-                                if (!condition.fulfilled)
-                                {
-                                    ++condition.itemCount;
-                                    TraderStatus.UpdateConditionFulfillment(condition);
-                                }
-                            }
-                        }
-                    }
-                    Mod.AddSkillExp(Skill.uniqueLoot, 7);
-                }
-
-                if (__instance is FVRFireArm || (__instance is FVRMeleeWeapon && !vanillaItemDescriptor.inAll))
-                {
-                    // Add to All if necessary
-                    Mod.AddToAll(__instance, null, vanillaItemDescriptor);
-                }
-
-                // Update lists
-                if (vanillaItemDescriptor.locationIndex == 1)
-                {
-                    Mod.LogInfo("\tWas in hideout");
-                    // Was in hideout
-                    if (HideoutController.instance != null)
-                    {
-                        HideoutController.instance.RemoveFromBaseInventory(vanillaItemDescriptor.transform, false);
-                    }
-                    else
-                    {
-                        Mod.LogError("Began interacting with " + __instance.name + " but VID's location index indicated that it was in hideout but current base manger is null");
-                    }
-
-                    // Now on player
-                    Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, false);
-
-                    // Update locationIndex
-                    SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
-                }
-                else if (vanillaItemDescriptor.locationIndex == 2)
-                {
-                    Mod.LogInfo("\tWas in raid");
-                    // Now on player
-                    Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
-
-                    // Update locationIndex
-                    SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
-                }
-                else if (vanillaItemDescriptor.locationIndex == 3)
-                {
-                    Mod.LogInfo("\tWas in hideout area slot");
-                    // Now on player
-                    Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
-
-                    // Update locationIndex
-                    SetItemLocationIndex(0, null, vanillaItemDescriptor, true);
-
-                    //foreach (EFM_BaseAreaManager baseAreaManager in Mod.currentHideoutManager.baseAreaManagers)
-                    //{
-                    //    baseAreaManager.UpdateBasedOnItem(vanillaItemDescriptor.H3ID);
-                    //}
-                }
-            }
-
+            
             // Check if in trade volume or container
             TradeVolume tradeVolume = null;
             if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
@@ -2107,7 +1951,7 @@ namespace EFM
                     }
                 }
 
-                tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<MeatovItem>(), __instance.GetComponent<VanillaItemDescriptor>());
+                tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<MeatovItem>());
             }
             else if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
             {
@@ -2116,10 +1960,10 @@ namespace EFM
                                                     containerItemWrapper.itemType == Mod.ItemType.Container ||
                                                     containerItemWrapper.itemType == Mod.ItemType.Pouch))
                 {
-                    containerItemWrapper.currentWeight -= customItemWrapper != null ? customItemWrapper.currentWeight : vanillaItemDescriptor.currentWeight;
+                    containerItemWrapper.currentWeight -= customItemWrapper.currentWeight;
 
                     Mod.LogInfo("Grabbed item from container: " + containerItemWrapper.name + ", prevol: " + containerItemWrapper.containingVolume);
-                    containerItemWrapper.containingVolume -= customItemWrapper != null ? customItemWrapper.volumes[customItemWrapper.mode] : vanillaItemDescriptor.volume;
+                    containerItemWrapper.containingVolume -= customItemWrapper.volumes[customItemWrapper.mode];
                     Mod.LogInfo("Postvol: " + containerItemWrapper.containingVolume);
 
                     // Reset cols of item so that they are non trigger again and can collide with the world and the container
@@ -2141,115 +1985,89 @@ namespace EFM
             }
         }
 
-        public static void SetItemLocationIndex(int locationIndex, MeatovItem customItemWrapper, VanillaItemDescriptor vanillaItemDescriptor, bool updateWeight = true)
+        public static void SetItemLocationIndex(int locationIndex, MeatovItem MI, bool updateWeight = true)
         {
-            if (customItemWrapper != null)
+            if (MI != null)
             {
                 if (updateWeight)
                 {
-                    if (customItemWrapper.locationIndex == 0 && locationIndex != 0)
+                    if (MI.locationIndex == 0 && locationIndex != 0)
                     {
                         // Taken out of player inventory
-                        Mod.weight -= customItemWrapper.currentWeight;
+                        Mod.weight -= MI.currentWeight;
                     }
-                    else if (customItemWrapper.locationIndex != 0 && locationIndex == 0)
+                    else if (MI.locationIndex != 0 && locationIndex == 0)
                     {
                         // Added to player inventory
-                        Mod.weight += customItemWrapper.currentWeight;
+                        Mod.weight += MI.currentWeight;
                     }
                 }
 
-                customItemWrapper.locationIndex = locationIndex;
+                MI.locationIndex = locationIndex;
 
-                if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
+                if (MI.itemType == Mod.ItemType.ArmoredRig || MI.itemType == Mod.ItemType.Rig)
                 {
-                    foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
+                    foreach (GameObject innerItem in MI.itemsInSlots)
                     {
                         if (innerItem != null)
                         {
-                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<MeatovItem>(), innerItem.GetComponent<VanillaItemDescriptor>(), false);
+                            SetItemLocationIndex(locationIndex, innerItem.GetComponent<MeatovItem>(), false);
                         }
                     }
                 }
-                else if (customItemWrapper.itemType == Mod.ItemType.Container || customItemWrapper.itemType == Mod.ItemType.Pouch || customItemWrapper.itemType == Mod.ItemType.Backpack)
+                else if (MI.itemType == Mod.ItemType.Container || MI.itemType == Mod.ItemType.Pouch || MI.itemType == Mod.ItemType.Backpack)
                 {
-                    foreach (Transform innerItem in customItemWrapper.containerItemRoot)
+                    foreach (Transform innerItem in MI.containerItemRoot)
                     {
-                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<MeatovItem>(), innerItem.GetComponent<VanillaItemDescriptor>(), false);
+                        SetItemLocationIndex(locationIndex, innerItem.GetComponent<MeatovItem>(), false);
                     }
                 }
-            }
-            else if (vanillaItemDescriptor != null)
-            {
-                Mod.LogInfo("SetItemLocationIndex called on " + vanillaItemDescriptor.H3ID + " with current location index: " + vanillaItemDescriptor.locationIndex + " setting to " + locationIndex);
-                if (updateWeight)
+                else if (MI.physObj is FVRFireArm)
                 {
-                    Mod.LogInfo("\tUpdate weight");
-                    if (vanillaItemDescriptor.locationIndex == 0 && locationIndex != 0)
+                    FVRFireArm asFireArm = (FVRFireArm)MI.physObj;
+
+                    // Ammo container
+                    if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
                     {
-                        // Taken out of player inventory
-                        Mod.weight -= vanillaItemDescriptor.currentWeight;
+                        MeatovItem ammoContainerMI = asFireArm.Magazine.GetComponent<MeatovItem>();
+                        if (ammoContainerMI != null)
+                        {
+                            ammoContainerMI.locationIndex = locationIndex;
+                        }
+                        //else Mag could be internal, not interactable, and so, no VID
                     }
-                    else if (vanillaItemDescriptor.locationIndex != 0 && locationIndex == 0)
+                    else if (asFireArm.UsesClips && asFireArm.Clip != null)
                     {
-                        Mod.LogInfo("\t\tAdded to player inventory, adding to weight");
-                        // Added to player inventory
-                        Mod.weight += vanillaItemDescriptor.currentWeight;
+                        MeatovItem ammoContainerMI = asFireArm.Clip.GetComponent<MeatovItem>();
+                        if (ammoContainerMI != null)
+                        {
+                            ammoContainerMI.locationIndex = locationIndex;
+                        }
+                        //else Clip could be internal, not interactable, and so, no VID
+                    }
+
+                    // Attachments
+                    if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
+                    {
+                        foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
+                        {
+                            // TODO: Review if we ever update the weight of the firearm dynamically as we attach attachments to it, we will need to pass
+                            // false here instead of updateWeight because the attachment's weight was already included in the firearm's weight
+                            SetItemLocationIndex(locationIndex, attachment.GetComponent<MeatovItem>(), updateWeight);
+                        }
                     }
                 }
-
-                vanillaItemDescriptor.locationIndex = locationIndex;
-
-                FVRPhysicalObject physObj = vanillaItemDescriptor.GetComponent<FVRPhysicalObject>();
-                if (physObj != null)
+                else if (MI.physObj is FVRFireArmAttachment)
                 {
-                    if (physObj is FVRFireArm)
+                    FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)MI.physObj;
+
+                    if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
                     {
-                        FVRFireArm asFireArm = (FVRFireArm)physObj;
-
-                        // Ammo container
-                        if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
+                        foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
                         {
-                            VanillaItemDescriptor ammoContainerVID = asFireArm.Magazine.GetComponent<VanillaItemDescriptor>();
-                            if (ammoContainerVID != null)
-                            {
-                                ammoContainerVID.locationIndex = locationIndex;
-                            }
-                            //else Mag could be internal, not interactable, and so, no VID
-                        }
-                        else if (asFireArm.UsesClips && asFireArm.Clip != null)
-                        {
-                            VanillaItemDescriptor ammoContainerVID = asFireArm.Clip.GetComponent<VanillaItemDescriptor>();
-                            if (ammoContainerVID != null)
-                            {
-                                ammoContainerVID.locationIndex = locationIndex;
-                            }
-                            //else Clip could be internal, not interactable, and so, no VID
-                        }
-
-                        // Attachments
-                        if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
-                        {
-                            foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
-                            {
-                                // TODO: Review if we ever update the weight of the firearm dynamically as we attach attachments to it, we will need to pass
-                                // false here instead of updateWeight because the attachment's weight was already included in the firearm's weight
-                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<VanillaItemDescriptor>(), updateWeight);
-                            }
-                        }
-                    }
-                    else if (physObj is FVRFireArmAttachment)
-                    {
-                        FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)physObj;
-
-                        if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
-                        {
-                            foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
-                            {
-                                // TODO: Review if we ever update the weight of the attachment dynamically as we attach attachments to it, we will need to pass
-                                // false here instead of updateWeight because the attachment's weight was already included in the attachment's weight
-                                SetItemLocationIndex(locationIndex, null, attachment.GetComponent<VanillaItemDescriptor>(), updateWeight);
-                            }
+                            // TODO: Review if we ever update the weight of the attachment dynamically as we attach attachments to it, we will need to pass
+                            // false here instead of updateWeight because the attachment's weight was already included in the attachment's weight
+                            SetItemLocationIndex(locationIndex, attachment.GetComponent<MeatovItem>(), updateWeight);
                         }
                     }
                 }
@@ -3757,14 +3575,7 @@ namespace EFM
                             {
                                 if (manager.descriptionPack.isPhysical)
                                 {
-                                    if (manager.descriptionPack.isCustom)
-                                    {
-                                        describableToUse = manager.descriptionPack.customItem;
-                                    }
-                                    else
-                                    {
-                                        describableToUse = manager.descriptionPack.vanillaItem;
-                                    }
+                                    describableToUse = manager.descriptionPack.MI;
                                 }
                                 else
                                 {
@@ -3910,14 +3721,7 @@ namespace EFM
                             {
                                 if (manager.descriptionPack.isPhysical)
                                 {
-                                    if (manager.descriptionPack.isCustom)
-                                    {
-                                        describableToUse = manager.descriptionPack.customItem;
-                                    }
-                                    else
-                                    {
-                                        describableToUse = manager.descriptionPack.vanillaItem;
-                                    }
+                                    describableToUse = manager.descriptionPack.MI;
                                 }
                                 else
                                 {
@@ -3986,14 +3790,7 @@ namespace EFM
                             {
                                 if (manager.descriptionPack.isPhysical)
                                 {
-                                    if (manager.descriptionPack.isCustom)
-                                    {
-                                        describableToUse = manager.descriptionPack.customItem;
-                                    }
-                                    else
-                                    {
-                                        describableToUse = manager.descriptionPack.vanillaItem;
-                                    }
+                                    describableToUse = manager.descriptionPack.MI;
                                 }
                                 else
                                 {
@@ -4387,26 +4184,26 @@ namespace EFM
 
             if (latestEjectedRound != null)
             {
-                VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<VanillaItemDescriptor>();
+                MeatovItem MI = latestEjectedRound.GetComponent<MeatovItem>();
 
                 // Set a default location of 0, we assume the round was ejected from a mag in one of the hands, so should begin with a loc index of 0
-                BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor, false);
+                BeginInteractionPatch.SetItemLocationIndex(0, MI, false);
 
                 if (latestEjectedRoundLocation == 0)
                 {
-                    BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor);
+                    BeginInteractionPatch.SetItemLocationIndex(0, MI);
 
                     // Now on player
-                    Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
+                    Mod.AddToPlayerInventory(MI.transform, true);
                 }
                 else // Could be in raid or base
                 {
-                    BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor);
+                    BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, MI);
                     GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
                     if (Mod.currentLocationIndex == 1)
                     {
                         // Now in hideout
-                        HideoutController.instance.AddToBaseInventory(vanillaItemDescriptor.transform, true);
+                        HideoutController.instance.AddToBaseInventory(MI.transform, true);
 
                         latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(2);
                     }
@@ -4480,27 +4277,27 @@ namespace EFM
 
             if (latestEjectedRound != null)
             {
-                VanillaItemDescriptor vanillaItemDescriptor = latestEjectedRound.GetComponent<VanillaItemDescriptor>();
+                MeatovItem MI = latestEjectedRound.GetComponent<MeatovItem>();
 
                 // Set a default location of 0, we assume the round was ejected from a clip in one of the hands, so should begin with a loc index of 0
-                BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor, false);
+                BeginInteractionPatch.SetItemLocationIndex(0, MI, false);
 
                 if (latestEjectedRoundLocation == 0)
                 {
-                    BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor);
+                    BeginInteractionPatch.SetItemLocationIndex(0, MI);
 
                     // Now on player
-                    Mod.AddToPlayerInventory(vanillaItemDescriptor.transform, true);
+                    Mod.AddToPlayerInventory(MI.transform, true);
                 }
                 else // Could be in raid or base
                 {
-                    BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor);
+                    BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, MI);
 
                     GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
                     if (Mod.currentLocationIndex == 1)
                     {
                         // Now in hideout
-                        HideoutController.instance.AddToBaseInventory(vanillaItemDescriptor.transform, true);
+                        HideoutController.instance.AddToBaseInventory(MI.transform, true);
 
                         latestEjectedRound.transform.parent = sceneRoot.transform.GetChild(2);
                     }
@@ -5138,31 +4935,26 @@ namespace EFM
 
             // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
             // locationIndex so we know when to add/remove weight from player also
-            VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
-            MeatovItem CIW = __instance.GetComponent<MeatovItem>();
-            if (VID != null)
-            {
-                //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
-            }
-            else if (CIW != null)
+            MeatovItem MI = __instance.GetComponent<MeatovItem>();
+            if (MI != null)
             {
                 if (postNumRounds == 0)
                 {
-                    if (CIW.ID.Equals("715") || CIW.ID.Equals("716"))
+                    if (MI.H3ID.Equals("715") || MI.H3ID.Equals("716"))
                     {
                         __instance.ForceBreakInteraction();
-                        GameObject.Destroy(CIW.gameObject);
+                        GameObject.Destroy(MI.gameObject);
                     }
                     else
                     {
                         //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                        CIW.amount -= (preNumRounds - postNumRounds);
+                        MI.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
                     //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                    CIW.amount -= (preNumRounds - postNumRounds);
+                    MI.amount -= (preNumRounds - postNumRounds);
                 }
             }
             else
@@ -5205,32 +4997,26 @@ namespace EFM
 
             // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
             // locationIndex so we know when to add/remove weight from player also
-            VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
-            MeatovItem CIW = __instance.GetComponent<MeatovItem>();
-            if (VID != null)
-            {
-                //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                //TODO: Set weight of firearm this is attached to if it is
-            }
-            else if (CIW != null)
+            MeatovItem MI = __instance.GetComponent<MeatovItem>();
+            if (MI != null)
             {
                 if (postNumRounds == 0)
                 {
-                    if (CIW.ID.Equals("715") || CIW.ID.Equals("716"))
+                    if (MI.H3ID.Equals("715") || MI.H3ID.Equals("716"))
                     {
                         __instance.ForceBreakInteraction();
-                        GameObject.Destroy(CIW.gameObject);
+                        GameObject.Destroy(MI.gameObject);
                     }
                     else
                     {
                         //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                        CIW.amount -= (preNumRounds - postNumRounds);
+                        MI.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
                     //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                    CIW.amount -= (preNumRounds - postNumRounds);
+                    MI.amount -= (preNumRounds - postNumRounds);
                 }
             }
             else
@@ -5272,32 +5058,26 @@ namespace EFM
 
             // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
             // locationIndex so we know when to add/remove weight from player also
-            VanillaItemDescriptor VID = __instance.GetComponent<VanillaItemDescriptor>();
-            MeatovItem CIW = __instance.GetComponent<MeatovItem>();
-            if (VID != null)
-            {
-                //VID.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                //TODO: Set weight of firearm this is attached to if it is
-            }
-            else if (CIW != null)
+            MeatovItem MI = __instance.GetComponent<MeatovItem>();
+            if (MI != null)
             {
                 if (postNumRounds == 0)
                 {
-                    if (CIW.ID.Equals("715") || CIW.ID.Equals("716"))
+                    if (MI.H3ID.Equals("715") || MI.H3ID.Equals("716"))
                     {
                         __instance.ForceBreakInteraction();
-                        GameObject.Destroy(CIW.gameObject);
+                        GameObject.Destroy(MI.gameObject);
                     }
                     else
                     {
                         //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                        CIW.amount -= (preNumRounds - postNumRounds);
+                        MI.amount -= (preNumRounds - postNumRounds);
                     }
                 }
                 else
                 {
                     //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                    CIW.amount -= (preNumRounds - postNumRounds);
+                    MI.amount -= (preNumRounds - postNumRounds);
                 }
             }
             else
@@ -5439,8 +5219,8 @@ namespace EFM
                 // TODO: Might have to do this for ammo when putting it into a mag?
                 EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the mag when inserting in into a firearm
 
-                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
-                switch (fireArmVID.weaponClass)
+                MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
+                switch (fireArmMI.weaponClass)
                 {
                     case Mod.WeaponClass.Pistol:
                         Mod.AddSkillExp(Skill.pistolWeaponReloadAction, 12);
@@ -5480,19 +5260,19 @@ namespace EFM
 
             if (__instance.Magazine == null && mag != null)
             {
-                VanillaItemDescriptor magVID = mag.GetComponent<VanillaItemDescriptor>();
-                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
-                fireArmVID.currentWeight += magVID.currentWeight;
+                MeatovItem magMI = mag.GetComponent<MeatovItem>();
+                MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
+                fireArmMI.currentWeight += magMI.currentWeight;
 
-                if (magVID.locationIndex == 0) // Player
+                if (magMI.locationIndex == 0) // Player
                 {
                     // Went from player to firearm location index
-                    if (fireArmVID.locationIndex == 0) // Player
+                    if (fireArmMI.locationIndex == 0) // Player
                     {
                         // Even if transfered from player to player, we don't want to consider it in inventory anymore
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            Mod.RemoveFromPlayerInventory(magVID.transform, true);
+                            Mod.RemoveFromPlayerInventory(magMI.transform, true);
                         }
 
                         // No difference to weight
@@ -5502,27 +5282,27 @@ namespace EFM
                         // Transfered from player to hideout or raid but we dont want to consider it in baseinventory because it is inside a firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            Mod.RemoveFromPlayerInventory(magVID.transform, true);
+                            Mod.RemoveFromPlayerInventory(magMI.transform, true);
                         }
                     }
                 }
-                else if (magVID.locationIndex == 1) // Hideout
+                else if (magMI.locationIndex == 1) // Hideout
                 {
                     // Went from hideout to firearm locationIndex
-                    if (fireArmVID.locationIndex == 0) // Player
+                    if (fireArmMI.locationIndex == 0) // Player
                     {
                         // Transfered from hideout to player, dont want to consider it in player inventory because it is in firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            HideoutController.instance.RemoveFromBaseInventory(magVID.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(magMI.transform, true);
                         }
                     }
-                    else if (fireArmVID.locationIndex == 1) // Hideout
+                    else if (fireArmMI.locationIndex == 1) // Hideout
                     {
                         // Transfered from hideout to hideout, dont want to consider it in base inventory because it is in firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            HideoutController.instance.RemoveFromBaseInventory(magVID.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(magMI.transform, true);
                         }
                     }
                     else // Raid
@@ -5532,13 +5312,13 @@ namespace EFM
                 }
                 else // Raid
                 {
-                    if (fireArmVID.locationIndex == 0) // Player
+                    if (fireArmMI.locationIndex == 0) // Player
                     {
                         // Transfered from raid to player, dont want to add to inventory because it is in firearm
                     }
                 }
 
-                BeginInteractionPatch.SetItemLocationIndex(fireArmVID.locationIndex, null, magVID);
+                BeginInteractionPatch.SetItemLocationIndex(fireArmMI.locationIndex, null, magMI);
             }
         }
     }
@@ -5547,7 +5327,7 @@ namespace EFM
     class FireArmEjectMagPatch
     {
         static int preLocationIndex;
-        static VanillaItemDescriptor preMagVID;
+        static MeatovItem preMagMI;
 
         static void Prefix(ref FVRFireArm __instance)
         {
@@ -5558,10 +5338,10 @@ namespace EFM
 
             if (__instance.Magazine != null)
             {
-                VanillaItemDescriptor magVID = __instance.Magazine.GetComponent<VanillaItemDescriptor>();
+                MeatovItem magMI = __instance.Magazine.GetComponent<MeatovItem>();
 
-                preLocationIndex = magVID.locationIndex;
-                preMagVID = magVID;
+                preLocationIndex = magMI.locationIndex;
+                preMagMI = magMI;
             }
         }
 
@@ -5571,11 +5351,11 @@ namespace EFM
             {
                 return;
             }
-            VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
-            fireArmVID.currentWeight -= preMagVID.currentWeight;
+            MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
+            fireArmMI.currentWeight -= preMagMI.currentWeight;
 
             int currentLocationIndex = 0;
-            if (preMagVID.physObj.m_hand == null) // Not in a hand
+            if (preMagMI.physObj.m_hand == null) // Not in a hand
             {
                 currentLocationIndex = Mod.currentLocationIndex;
             }
@@ -5585,14 +5365,14 @@ namespace EFM
                 if (currentLocationIndex == 0)
                 {
                     // Transfered from player to player, from firearm to hand
-                    Mod.AddToPlayerInventory(preMagVID.transform, true);
+                    Mod.AddToPlayerInventory(preMagMI.transform, true);
 
                     // No change to player weight
                 }
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from player to hideout
-                    HideoutController.instance.AddToBaseInventory(preMagVID.transform, true);
+                    HideoutController.instance.AddToBaseInventory(preMagMI.transform, true);
                 }
                 else
                 {
@@ -5604,12 +5384,12 @@ namespace EFM
                 if (currentLocationIndex == 0)
                 {
                     // Transfered from hideout to player, from firearm to hand
-                    Mod.AddToPlayerInventory(preMagVID.transform, true);
+                    Mod.AddToPlayerInventory(preMagMI.transform, true);
                 }
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from hideout to hideout
-                    HideoutController.instance.AddToBaseInventory(preMagVID.transform, true);
+                    HideoutController.instance.AddToBaseInventory(preMagMI.transform, true);
                 }
                 else
                 {
@@ -5622,7 +5402,7 @@ namespace EFM
                 if (currentLocationIndex == 0)
                 {
                     // Transfered from raid to player, from firearm to hand
-                    Mod.AddToPlayerInventory(preMagVID.transform, true);
+                    Mod.AddToPlayerInventory(preMagMI.transform, true);
                 }
                 else if (currentLocationIndex == 1)
                 {
@@ -5635,7 +5415,7 @@ namespace EFM
                 }
             }
 
-            BeginInteractionPatch.SetItemLocationIndex(currentLocationIndex, null, preMagVID);
+            BeginInteractionPatch.SetItemLocationIndex(currentLocationIndex, null, preMagMI);
         }
     }
 
@@ -5661,8 +5441,8 @@ namespace EFM
             {
                 EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the clip
 
-                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
-                switch (fireArmVID.weaponClass)
+                MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
+                switch (fireArmMI.weaponClass)
                 {
                     case Mod.WeaponClass.Pistol:
                         Mod.AddSkillExp(Skill.pistolWeaponReloadAction, 12);
@@ -5702,19 +5482,19 @@ namespace EFM
 
             if (__instance.Clip == null && clip != null)
             {
-                VanillaItemDescriptor clipVID = clip.GetComponent<VanillaItemDescriptor>();
-                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
-                fireArmVID.currentWeight += clipVID.currentWeight;
+                MeatovItem clipMI = clip.GetComponent<MeatovItem>();
+                MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
+                fireArmMI.currentWeight += clipMI.currentWeight;
 
-                if (clipVID.locationIndex == 0) // Player
+                if (clipMI.locationIndex == 0) // Player
                 {
                     // Went from player to firearm location index
-                    if (fireArmVID.locationIndex == 0) // Player
+                    if (fireArmMI.locationIndex == 0) // Player
                     {
                         // Even if transfered from player to player, we don't want to consider it in inventory anymore
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            Mod.RemoveFromPlayerInventory(clipVID.transform, true);
+                            Mod.RemoveFromPlayerInventory(clipMI.transform, true);
                         }
                     }
                     else // Hideout/Raid
@@ -5722,27 +5502,27 @@ namespace EFM
                         // Transfered from player to hideout or raid but we dont want to consider it in baseinventory because it is inside a firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            Mod.RemoveFromPlayerInventory(clipVID.transform, true);
+                            Mod.RemoveFromPlayerInventory(clipMI.transform, true);
                         }
                     }
                 }
-                else if (clipVID.locationIndex == 1) // Hideout
+                else if (clipMI.locationIndex == 1) // Hideout
                 {
                     // Went from hideout to firearm locationIndex
-                    if (fireArmVID.locationIndex == 0) // Player
+                    if (fireArmMI.locationIndex == 0) // Player
                     {
                         // Transfered from hideout to player, dont want to consider it in player inventory because it is in firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            HideoutController.instance.RemoveFromBaseInventory(clipVID.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(clipMI.transform, true);
                         }
                     }
-                    else if (fireArmVID.locationIndex == 1) // Hideout
+                    else if (fireArmMI.locationIndex == 1) // Hideout
                     {
                         // Transfered from hideout to hideout, dont want to consider it in base inventory because it is in firearm
                         if (!Mod.preventLoadMagUpdateLists)
                         {
-                            HideoutController.instance.RemoveFromBaseInventory(clipVID.transform, true);
+                            HideoutController.instance.RemoveFromBaseInventory(clipMI.transform, true);
                         }
                     }
                     else // Raid
@@ -5752,13 +5532,13 @@ namespace EFM
                 }
                 else // Raid
                 {
-                    if (fireArmVID.locationIndex == 0) // Player
+                    if (fireArmMI.locationIndex == 0) // Player
                     {
                         // Transfered from raid to player, dont want to add to inventory because it is in firearm
                     }
                 }
 
-                BeginInteractionPatch.SetItemLocationIndex(fireArmVID.locationIndex, null, clipVID);
+                BeginInteractionPatch.SetItemLocationIndex(fireArmMI.locationIndex, null, clipMI);
             }
         }
     }
@@ -5767,7 +5547,7 @@ namespace EFM
     class FireArmEjectClipPatch
     {
         static int preLocationIndex;
-        static VanillaItemDescriptor preClipVID;
+        static MeatovItem preClipMI;
 
         static void Prefix(ref FVRFireArm __instance)
         {
@@ -5778,10 +5558,10 @@ namespace EFM
 
             if (__instance.Clip != null)
             {
-                VanillaItemDescriptor clipVID = __instance.Clip.GetComponent<VanillaItemDescriptor>();
+                MeatovItem clipMI = __instance.Clip.GetComponent<MeatovItem>();
 
-                preLocationIndex = clipVID.locationIndex;
-                preClipVID = clipVID;
+                preLocationIndex = clipMI.locationIndex;
+                preClipMI = clipMI;
             }
         }
 
@@ -5792,11 +5572,11 @@ namespace EFM
                 return;
             }
 
-            VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
-            fireArmVID.currentWeight -= preClipVID.currentWeight;
+            MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
+            fireArmMI.currentWeight -= preClipMI.currentWeight;
 
             int currentLocationIndex = 0;
-            if (preClipVID.physObj.m_hand == null) // Not in a hand
+            if (preClipMI.physObj.m_hand == null) // Not in a hand
             {
                 currentLocationIndex = Mod.currentLocationIndex;
             }
@@ -5806,12 +5586,12 @@ namespace EFM
                 if (currentLocationIndex == 0)
                 {
                     // Transfered from player to player, from firearm to hand
-                    Mod.AddToPlayerInventory(preClipVID.transform, true);
+                    Mod.AddToPlayerInventory(preClipMI.transform, true);
                 }
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from player to hideout
-                    HideoutController.instance.AddToBaseInventory(preClipVID.transform, true);
+                    HideoutController.instance.AddToBaseInventory(preClipMI.transform, true);
                 }
                 else
                 {
@@ -5823,12 +5603,12 @@ namespace EFM
                 if (currentLocationIndex == 0)
                 {
                     // Transfered from hideout to player, from firearm to hand
-                    Mod.AddToPlayerInventory(preClipVID.transform, true);
+                    Mod.AddToPlayerInventory(preClipMI.transform, true);
                 }
                 else if (currentLocationIndex == 1)
                 {
                     // Transfered from hideout to hideout
-                    HideoutController.instance.AddToBaseInventory(preClipVID.transform, true);
+                    HideoutController.instance.AddToBaseInventory(preClipMI.transform, true);
                 }
                 else
                 {
@@ -5841,7 +5621,7 @@ namespace EFM
                 if (currentLocationIndex == 0)
                 {
                     // Transfered from raid to player, from firearm to hand
-                    Mod.AddToPlayerInventory(preClipVID.transform, true);
+                    Mod.AddToPlayerInventory(preClipMI.transform, true);
                 }
                 else if (currentLocationIndex == 1)
                 {
@@ -5854,7 +5634,7 @@ namespace EFM
                 }
             }
 
-            BeginInteractionPatch.SetItemLocationIndex(currentLocationIndex, null, preClipVID);
+            BeginInteractionPatch.SetItemLocationIndex(currentLocationIndex, null, preClipMI);
         }
     }
 
@@ -6048,11 +5828,11 @@ namespace EFM
                 }
 
                 // Add weight to parent
-                VanillaItemDescriptor parentVID = __instance.Parent.GetComponent<VanillaItemDescriptor>();
-                VanillaItemDescriptor attachmentVID = __instance.Parent.GetComponent<VanillaItemDescriptor>();
-                parentVID.currentWeight += attachmentVID.currentWeight;
+                MeatovItem parentMI = __instance.Parent.GetComponent<MeatovItem>();
+                MeatovItem attachmentMI = __instance.Parent.GetComponent<MeatovItem>();
+                parentMI.currentWeight += attachmentMI.currentWeight;
 
-                BeginInteractionPatch.SetItemLocationIndex(parentVID.locationIndex, null, attachmentVID);
+                BeginInteractionPatch.SetItemLocationIndex(parentMI.locationIndex, null, attachmentMI);
             }
 
             return false;
@@ -6075,11 +5855,11 @@ namespace EFM
                 __instance.AttachmentsList.Remove(attachment);
 
                 // Remove weight from parent
-                VanillaItemDescriptor parentVID = __instance.Parent.GetComponent<VanillaItemDescriptor>();
-                VanillaItemDescriptor attachmentVID = __instance.Parent.GetComponent<VanillaItemDescriptor>();
-                parentVID.currentWeight -= attachmentVID.currentWeight;
+                MeatovItem parentMI = __instance.Parent.GetComponent<MeatovItem>();
+                MeatovItem attachmentMI = __instance.Parent.GetComponent<MeatovItem>();
+                parentMI.currentWeight -= attachmentMI.currentWeight;
 
-                BeginInteractionPatch.SetItemLocationIndex(0, null, attachmentVID);
+                BeginInteractionPatch.SetItemLocationIndex(0, null, attachmentMI);
             }
 
             return false;
@@ -6172,17 +5952,17 @@ namespace EFM
 
             if (__result != null && !__result.IsSpent)
             {
-                VanillaItemDescriptor vanillaItemDescriptor = __result.GetComponent<VanillaItemDescriptor>();
+                MeatovItem MI = __result.GetComponent<MeatovItem>();
 
                 // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
                 // locationIndex so we know when to add/remove weight from player also
-                BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, null, vanillaItemDescriptor, false);
+                BeginInteractionPatch.SetItemLocationIndex(Mod.currentLocationIndex, MI, false);
 
                 GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
                 if (Mod.currentLocationIndex == 1)
                 {
                     // Now in hideout
-                    HideoutController.instance.AddToBaseInventory(vanillaItemDescriptor.transform, true);
+                    HideoutController.instance.AddToBaseInventory(MI.transform, true);
 
                     __result.transform.parent = sceneRoot.transform.GetChild(2);
                 }
@@ -6328,8 +6108,8 @@ namespace EFM
                 Mod.AddSkillExp(Skill.recoilAction, 25);
                 Mod.AddSkillExp(Skill.weaponShotAction, 26);
 
-                VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
-                switch (fireArmVID.weaponClass)
+                MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
+                switch (fireArmMI.weaponClass)
                 {
                     case Mod.WeaponClass.Pistol:
                         Mod.AddSkillExp(Skill.pistolWeaponShotAction, 12);
@@ -6391,8 +6171,8 @@ namespace EFM
                     float originalRecoilMult = VerticalRecoilMult;
                     VerticalRecoilMult -= originalRecoilMult * (Skill.recoilBonusPerLevel * (Mod.skills[25].currentProgress / 100));
 
-                    VanillaItemDescriptor fireArmVID = __instance.GetComponent<VanillaItemDescriptor>();
-                    switch (fireArmVID.weaponClass)
+                    MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
+                    switch (fireArmMI.weaponClass)
                     {
                         case Mod.WeaponClass.Pistol:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[12].currentProgress / 100));
@@ -6440,63 +6220,34 @@ namespace EFM
     // Patches FVRViveHand.CurrentInteractable.set to keep track of item held
     class HandCurrentInteractableSetPatch
     {
+        static FVRInteractiveObject preObject;
+
+        static void Prefix(ref FVRViveHand __instance, ref FVRInteractiveObject ___m_currentInteractable)
+        {
+            preObject = ___m_currentInteractable;
+        }
+
         static void Postfix(ref FVRViveHand __instance, ref FVRInteractiveObject ___m_currentInteractable)
         {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            // Keep track of the item's CIW or VID
-            Hand handToUse = __instance.GetComponent<Hand>();
             if (___m_currentInteractable != null)
             {
-                handToUse.CIW = ___m_currentInteractable.GetComponent<MeatovItem>();
-                handToUse.VID = ___m_currentInteractable.GetComponent<VanillaItemDescriptor>();
-                handToUse.custom = handToUse.CIW != null;
-                handToUse.hasScript = handToUse.custom || handToUse.VID != null;
-
-                // Ensure the Display_InteractionSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
-                // This is only necessary for equipment items because the slots are much smaller than the item itself so we need to know what specific point to put inside the slot
-                if (handToUse.hasScript && handToUse.custom &&
-                    (handToUse.CIW.itemType == Mod.ItemType.Backpack ||
-                     handToUse.CIW.itemType == Mod.ItemType.Container ||
-                     handToUse.CIW.itemType == Mod.ItemType.ArmoredRig ||
-                     handToUse.CIW.itemType == Mod.ItemType.Rig ||
-                     handToUse.CIW.itemType == Mod.ItemType.BodyArmor ||
-                     handToUse.CIW.itemType == Mod.ItemType.Eyewear ||
-                     handToUse.CIW.itemType == Mod.ItemType.Headwear ||
-                     handToUse.CIW.itemType == Mod.ItemType.Helmet ||
-                     handToUse.CIW.itemType == Mod.ItemType.Earpiece ||
-                     handToUse.CIW.itemType == Mod.ItemType.Pouch ||
-                     handToUse.CIW.itemType == Mod.ItemType.FaceCover))
+                if (preObject != ___m_currentInteractable)
                 {
-                    if (!__instance.Grabbity_HoverSphere.gameObject.activeSelf)
+                    if (Mod.meatovItemByInteractive.TryGetValue(___m_currentInteractable, out MeatovItem meatovItem))
                     {
-                        __instance.Grabbity_HoverSphere.gameObject.SetActive(true);
+                        meatovItem.BeginInteraction(__instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
                     }
-                    handToUse.updateGrabbity = true;
-                }
-                else
-                {
-                    if (__instance.Grabbity_HoverSphere.gameObject.activeSelf)
-                    {
-                        __instance.Grabbity_HoverSphere.gameObject.SetActive(false);
-                    }
-                    handToUse.updateGrabbity = false;
                 }
             }
-            else
+            else // ___m_currentInteractable == null
             {
-                handToUse.CIW = null;
-                handToUse.VID = null;
-                handToUse.hasScript = false;
-
-                if (__instance.Grabbity_HoverSphere.gameObject.activeSelf)
+                if (preObject != null) // Dropped preObject
                 {
-                    __instance.Grabbity_HoverSphere.gameObject.SetActive(false);
+                    if (Mod.meatovItemByInteractive.TryGetValue(preObject, out MeatovItem meatovItem))
+                    {
+                        meatovItem.EndInteraction(__instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
+                    }
                 }
-                handToUse.updateGrabbity = false;
             }
         }
     }
@@ -6640,30 +6391,15 @@ namespace EFM
                     FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
                     if (rightInteractable != null)
                     {
-                        VanillaItemDescriptor VID = rightInteractable.GetComponent<VanillaItemDescriptor>();
-                        if (VID != null)
+                        MeatovItem MI = rightInteractable.GetComponent<MeatovItem>();
+                        if (MI != null)
                         {
-                            foreach (string parent in VID.parents)
+                            foreach (string parent in MI.parents)
                             {
                                 if (counterCondition.allowedWeaponIDs.Contains(parent))
                                 {
                                     isHoldingAllowedWeapon = true;
                                     break;
-                                }
-                            }
-                        }
-                        if (!isHoldingAllowedWeapon)
-                        {
-                            MeatovItem CIW = rightInteractable.GetComponent<MeatovItem>();
-                            if (CIW != null)
-                            {
-                                foreach (string parent in CIW.parents)
-                                {
-                                    if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                    {
-                                        isHoldingAllowedWeapon = true;
-                                        break;
-                                    }
                                 }
                             }
                         }
@@ -6673,30 +6409,15 @@ namespace EFM
                         FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
                         if (leftInteractable != null)
                         {
-                            VanillaItemDescriptor VID = leftInteractable.GetComponent<VanillaItemDescriptor>();
-                            if (VID != null)
+                            MeatovItem MI = leftInteractable.GetComponent<MeatovItem>();
+                            if (MI != null)
                             {
-                                foreach (string parent in VID.parents)
+                                foreach (string parent in MI.parents)
                                 {
                                     if (counterCondition.allowedWeaponIDs.Contains(parent))
                                     {
                                         isHoldingAllowedWeapon = true;
                                         break;
-                                    }
-                                }
-                            }
-                            if (!isHoldingAllowedWeapon)
-                            {
-                                MeatovItem CIW = leftInteractable.GetComponent<MeatovItem>();
-                                if (CIW != null)
-                                {
-                                    foreach (string parent in CIW.parents)
-                                    {
-                                        if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                        {
-                                            isHoldingAllowedWeapon = true;
-                                            break;
-                                        }
                                     }
                                 }
                             }
@@ -6766,6 +6487,149 @@ namespace EFM
                 if (Mod.health[i] != 0)
                 {
                     Mod.health[i] = Mathf.Clamp(Mod.health[i] + amountHealed / 7, Mod.health[i], Mod.currentMaxHealth[i]);
+                }
+            }
+        }
+    }
+
+    // Patches Object.Internal_CloneSingle to keep track of this type of instantiation
+    class Internal_CloneSinglePatch
+    {
+        static void Postfix(ref UnityEngine.Object __result)
+        {
+            if (__result == null || Mod.currentLocationIndex == -1)
+            {
+                return;
+            }
+
+            if (__result is GameObject)
+            {
+                GameObject go = __result as GameObject;
+                if(Mod.instantiatedItem == go)
+                {
+                    // This item was already setup in Mod.H3MP_OnInstantiationTrack
+                    Mod.instantiatedItem = null;
+                }
+                else
+                {
+                    // Item not yet setup if possible, continue
+                    FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
+                    if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                    {
+                        // Must setup the item if it is vanilla
+                        if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
+                        {
+                            MeatovItem.Setup(physicalObject);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Patches Object.Internal_CloneSingleWithParent to keep track of this type of instantiation
+    class Internal_CloneSingleWithParentPatch
+    {
+        static void Postfix(ref UnityEngine.Object __result, Transform parent)
+        {
+            if (__result == null || Mod.currentLocationIndex == -1)
+            {
+                return;
+            }
+
+            if (__result is GameObject)
+            {
+                GameObject go = __result as GameObject;
+                if (Mod.instantiatedItem == go)
+                {
+                    // This item was already setup in Mod.H3MP_OnInstantiationTrack
+                    Mod.instantiatedItem = null;
+                }
+                else
+                {
+                    // Item not yet setup if possible, continue
+                    FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
+                    if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                    {
+                        // Must setup the item if it is vanilla
+                        if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
+                        {
+                            MeatovItem.Setup(physicalObject);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Patches Object.Internal_InstantiateSingle to keep track of this type of instantiation
+    class Internal_InstantiateSinglePatch
+    {
+        static void Postfix(ref UnityEngine.Object __result)
+        {
+            if (__result == null || Mod.currentLocationIndex == -1)
+            {
+                return;
+            }
+
+            if (__result is GameObject)
+            {
+                GameObject go = __result as GameObject;
+                if (Mod.instantiatedItem == go)
+                {
+                    // This item was already setup in Mod.H3MP_OnInstantiationTrack
+                    Mod.instantiatedItem = null;
+                }
+                else
+                {
+                    // Item not yet setup if possible, continue
+                    FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
+                    if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                    {
+                        // Must setup the item if it is vanilla
+                        if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
+                        {
+                            MeatovItem.Setup(physicalObject);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Patches Object.Internal_InstantiateSingleWithParent to keep track of this type of instantiation
+    class Internal_InstantiateSingleWithParentPatch
+    {
+        static bool track = false;
+        static TrackedItemData parentData;
+
+        static void Postfix(ref UnityEngine.Object __result, Transform parent)
+        {
+            if (__result == null || Mod.currentLocationIndex == -1)
+            {
+                return;
+            }
+
+            if (__result is GameObject)
+            {
+                GameObject go = __result as GameObject;
+                if (Mod.instantiatedItem == go)
+                {
+                    // This item was already setup in Mod.H3MP_OnInstantiationTrack
+                    Mod.instantiatedItem = null;
+                }
+                else
+                {
+                    // Item not yet setup if possible, continue
+                    FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
+                    if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                    {
+                        // Must setup the item if it is vanilla
+                        if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
+                        {
+                            MeatovItem.Setup(physicalObject);
+                        }
+                    }
                 }
             }
         }

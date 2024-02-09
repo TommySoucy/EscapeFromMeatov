@@ -9,11 +9,11 @@ namespace EFM
         public Hand otherHand;
         public MeatovItem collidingContainerWrapper;
         public MeatovItem collidingTogglableWrapper;
-        private List<Collider> togglableColliders;
+        public List<Collider> togglableColliders;
         public TradeVolume collidingTradeVolume;
         private Collider tradeVolumeCollider;
         public Switch collidingSwitch;
-        private List<Collider> switchColliders;
+        public List<Collider> switchColliders;
         public bool hoverValid;
         public FVRViveHand fvrHand;
         public bool consuming;
@@ -21,10 +21,8 @@ namespace EFM
 
         // Held item
         public bool hasScript;
-        public bool custom;
-        public MeatovItem CIW;
-        public VanillaItemDescriptor VID;
-        public bool updateGrabbity;
+        public MeatovItem MI;
+        public bool updateInteractionSphere;
 
         private void Awake()
         {
@@ -125,22 +123,12 @@ namespace EFM
                     }
                 }
             }
-            else if(fvrHand.CurrentInteractable == null && collidingSwitch != null)
-            {
-            }
             else if(fvrHand.CurrentInteractable != null && hasScript)
             {
-                if (custom)
-                {
-                    CIW.TakeInput(fvrHand, this);
-                }
-                else
-                {
-                    VID.TakeInput(fvrHand, this);
-                }
+                MI.TakeInput(fvrHand, this);
             }
 
-            if (updateGrabbity)
+            if (updateInteractionSphere)
             {
                 if (!fvrHand.Grabbity_HoverSphere.gameObject.activeSelf)
                 {
@@ -231,7 +219,7 @@ namespace EFM
 
                     newMainContainer = true;
                     collidingContainerWrapper = customItemWrapper;
-                    Mod.LogInfo("\tcollidingContainerWrapper now has ID: "+ collidingContainerWrapper.ID);
+                    Mod.LogInfo("\tcollidingContainerWrapper now has ID: "+ collidingContainerWrapper.H3ID);
                 }
             }
 
@@ -252,28 +240,9 @@ namespace EFM
                         List<string> parentsToUse = null;
                         FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;
                         MeatovItem heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<MeatovItem>();
-                        VanillaItemDescriptor heldVanillaItemDescriptor = fvrHand.CurrentInteractable.GetComponent<VanillaItemDescriptor>();
-                        if (heldCustomItemWrapper != null)
-                        {
-                            volumeToUse = heldCustomItemWrapper.volumes[heldCustomItemWrapper.mode];
-
-                            IDToUse = heldCustomItemWrapper.ID;
-                            parentsToUse = heldCustomItemWrapper.parents;
-                        }
-                        else
-                        {
-                            volumeToUse = heldVanillaItemDescriptor.volume;
-
-                            if (heldVanillaItemDescriptor != null)
-                            {
-                                IDToUse = heldVanillaItemDescriptor.H3ID;
-                                parentsToUse = heldVanillaItemDescriptor.parents;
-                            }
-                            else
-                            {
-                                return;
-                            }
-                        }
+                        volumeToUse = heldCustomItemWrapper.volumes[heldCustomItemWrapper.mode];
+                        IDToUse = heldCustomItemWrapper.H3ID;
+                        parentsToUse = heldCustomItemWrapper.parents;
 
                         // Check if volume fits in bag
                         if (collidingContainerWrapper.containingVolume + volumeToUse <= collidingContainerWrapper.maxVolume)
@@ -344,28 +313,9 @@ namespace EFM
                         List<string> parentsToUse = null;
                         FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;
                         MeatovItem heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<MeatovItem>();
-                        VanillaItemDescriptor heldVanillaItemDescriptor = fvrHand.CurrentInteractable.GetComponent<VanillaItemDescriptor>();
-                        if (heldCustomItemWrapper != null)
-                        {
-                            volumeToUse = heldCustomItemWrapper.volumes[heldCustomItemWrapper.mode];
-
-                            IDToUse = heldCustomItemWrapper.ID;
-                            parentsToUse = heldCustomItemWrapper.parents;
-                        }
-                        else
-                        {
-                            volumeToUse = heldVanillaItemDescriptor.volume;
-
-                            if (heldVanillaItemDescriptor != null)
-                            {
-                                IDToUse = heldVanillaItemDescriptor.H3ID;
-                                parentsToUse = heldVanillaItemDescriptor.parents;
-                            }
-                            else
-                            {
-                                return;
-                            }
-                        }
+                        volumeToUse = heldCustomItemWrapper.volumes[heldCustomItemWrapper.mode];
+                        IDToUse = heldCustomItemWrapper.H3ID;
+                        parentsToUse = heldCustomItemWrapper.parents;
 
                         // Check if volume fits in bag
                         if (collidingContainerWrapper.containingVolume + volumeToUse <= collidingContainerWrapper.maxVolume)

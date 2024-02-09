@@ -510,7 +510,7 @@ namespace EFM
 
                                         MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
                                         CIW.foundInRaid = true;
-                                        BeginInteractionPatch.SetItemLocationIndex(1, CIW, null);
+                                        BeginInteractionPatch.SetItemLocationIndex(1, CIW);
                                         if (CIW.maxAmount > 0)
                                         {
                                             CIW.amount = CIW.maxAmount;
@@ -3244,72 +3244,58 @@ namespace EFM
                         {
                             GameObject toCheck = objectList[objectList.Count - 1];
                             MeatovItem CIW = toCheck.GetComponent<MeatovItem>();
-                            VanillaItemDescriptor VID = toCheck.GetComponent<VanillaItemDescriptor>();
-                            if (CIW != null)
+                            if(CIW.stack > 0)
                             {
-                                if(CIW.stack > 0)
+                                if(CIW.stack > amountToRemoveFromBase)
                                 {
-                                    if(CIW.stack > amountToRemoveFromBase)
+                                    CIW.stack = CIW.stack - amountToRemoveFromBase;
+                                    Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - amountToRemoveFromBase;
+                                    amountLeftToRemoveFromBase = 0;
+                                }
+                                else // CIW.stack <= amountToRemoveFromBase
+                                {
+                                    Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - CIW.stack;
+                                    amountLeftToRemoveFromBase -= CIW.stack;
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    CIW.physObj.SetQuickBeltSlot(null);
+                                    CIW.destroyed = true;
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
+                                    Destroy(toCheck);
+                                }
+                            }
+                            else if(CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                            {
+                                bool containsItem = false;
+                                foreach (GameObject itemInSlot in CIW.itemsInSlots)
+                                {
+                                    if (itemInSlot != null)
                                     {
-                                        CIW.stack = CIW.stack - amountToRemoveFromBase;
-                                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - amountToRemoveFromBase;
-                                        amountLeftToRemoveFromBase = 0;
-                                    }
-                                    else // CIW.stack <= amountToRemoveFromBase
-                                    {
-                                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - CIW.stack;
-                                        amountLeftToRemoveFromBase -= CIW.stack;
-                                        objectList.RemoveAt(objectList.Count - 1);
-                                        CIW.physObj.SetQuickBeltSlot(null);
-                                        CIW.destroyed = true;
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
-                                        Destroy(toCheck);
+                                        containsItem = true;
+                                        break;
                                     }
                                 }
-                                else if(CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
-                                {
-                                    bool containsItem = false;
-                                    foreach (GameObject itemInSlot in CIW.itemsInSlots)
-                                    {
-                                        if (itemInSlot != null)
-                                        {
-                                            containsItem = true;
-                                            break;
-                                        }
-                                    }
 
-                                    if (!containsItem)
-                                    {
-                                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
-                                        --amountLeftToRemoveFromBase;
-                                        objectList.RemoveAt(objectList.Count - 1);
-                                        CIW.physObj.SetQuickBeltSlot(null);
-                                        CIW.destroyed = true;
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
-                                        Destroy(toCheck);
-                                    }
-                                }
-                                else if(CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
-                                {
-                                    if (CIW.containerItemRoot.childCount == 0)
-                                    {
-                                        Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
-                                        --amountLeftToRemoveFromBase;
-                                        objectList.RemoveAt(objectList.Count - 1);
-                                        CIW.physObj.SetQuickBeltSlot(null);
-                                        CIW.destroyed = true;
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
-                                        Destroy(toCheck);
-                                    }
-                                }
-                                else
+                                if (!containsItem)
                                 {
                                     Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
                                     --amountLeftToRemoveFromBase;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
                                     CIW.destroyed = true;
-                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
+                                    Destroy(toCheck);
+                                }
+                            }
+                            else if(CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                            {
+                                if (CIW.containerItemRoot.childCount == 0)
+                                {
+                                    Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
+                                    --amountLeftToRemoveFromBase;
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    CIW.physObj.SetQuickBeltSlot(null);
+                                    CIW.destroyed = true;
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                     Destroy(toCheck);
                                 }
                             }
@@ -3318,9 +3304,9 @@ namespace EFM
                                 Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
                                 --amountLeftToRemoveFromBase;
                                 objectList.RemoveAt(objectList.Count - 1);
-                                VID.physObj.SetQuickBeltSlot(null);
-                                VID.destroyed = true;
-                                HideoutController.RemoveFromContainer(toCheck.transform, null, VID);
+                                CIW.physObj.SetQuickBeltSlot(null);
+                                CIW.destroyed = true;
+                                HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                 Destroy(toCheck);
                             }
                         }
@@ -3344,71 +3330,40 @@ namespace EFM
                         {
                             GameObject toCheck = objectList[objectList.Count - 1];
                             MeatovItem CIW = toCheck.GetComponent<MeatovItem>();
-                            VanillaItemDescriptor VID = toCheck.GetComponent<VanillaItemDescriptor>();
-                            if (CIW != null)
+                            if (CIW.stack > 0)
                             {
-                                if (CIW.stack > 0)
+                                if (CIW.stack > amountToRemoveFromPlayer)
                                 {
-                                    if (CIW.stack > amountToRemoveFromPlayer)
+                                    CIW.stack = CIW.stack - amountToRemoveFromPlayer;
+                                    Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - amountToRemoveFromPlayer;
+                                    amountLeftToRemoveFromPlayer = 0;
+                                }
+                                else // CIW.stack <= amountToRemoveFromBase
+                                {
+                                    Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - CIW.stack;
+                                    amountLeftToRemoveFromPlayer -= CIW.stack;
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    CIW.physObj.SetQuickBeltSlot(null);
+                                    CIW.physObj.ForceBreakInteraction();
+                                    CIW.destroyed = true;
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
+                                    Destroy(toCheck);
+                                    Mod.weight -= CIW.currentWeight;
+                                }
+                            }
+                            else if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                            {
+                                bool containsItem = false;
+                                foreach (GameObject itemInSlot in CIW.itemsInSlots)
+                                {
+                                    if (itemInSlot != null)
                                     {
-                                        CIW.stack = CIW.stack - amountToRemoveFromPlayer;
-                                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - amountToRemoveFromPlayer;
-                                        amountLeftToRemoveFromPlayer = 0;
-                                    }
-                                    else // CIW.stack <= amountToRemoveFromBase
-                                    {
-                                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - CIW.stack;
-                                        amountLeftToRemoveFromPlayer -= CIW.stack;
-                                        objectList.RemoveAt(objectList.Count - 1);
-                                        CIW.physObj.SetQuickBeltSlot(null);
-                                        CIW.physObj.ForceBreakInteraction();
-                                        CIW.destroyed = true;
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
-                                        Destroy(toCheck);
-                                        Mod.weight -= CIW.currentWeight;
+                                        containsItem = true;
+                                        break;
                                     }
                                 }
-                                else if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
-                                {
-                                    bool containsItem = false;
-                                    foreach (GameObject itemInSlot in CIW.itemsInSlots)
-                                    {
-                                        if (itemInSlot != null)
-                                        {
-                                            containsItem = true;
-                                            break;
-                                        }
-                                    }
 
-                                    if (!containsItem)
-                                    {
-                                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - 1;
-                                        --amountLeftToRemoveFromPlayer;
-                                        objectList.RemoveAt(objectList.Count - 1);
-                                        CIW.physObj.SetQuickBeltSlot(null);
-                                        CIW.physObj.ForceBreakInteraction();
-                                        CIW.destroyed = true;
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
-                                        Destroy(toCheck);
-                                        Mod.weight -= CIW.currentWeight;
-                                    }
-                                }
-                                else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
-                                {
-                                    if (CIW.containerItemRoot.childCount == 0)
-                                    {
-                                        Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - 1;
-                                        --amountLeftToRemoveFromPlayer;
-                                        objectList.RemoveAt(objectList.Count - 1);
-                                        CIW.physObj.SetQuickBeltSlot(null);
-                                        CIW.physObj.ForceBreakInteraction();
-                                        CIW.destroyed = true;
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
-                                        Destroy(toCheck);
-                                        Mod.weight -= CIW.currentWeight;
-                                    }
-                                }
-                                else
+                                if (!containsItem)
                                 {
                                     Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - 1;
                                     --amountLeftToRemoveFromPlayer;
@@ -3416,29 +3371,38 @@ namespace EFM
                                     CIW.physObj.SetQuickBeltSlot(null);
                                     CIW.physObj.ForceBreakInteraction();
                                     CIW.destroyed = true;
-                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                     Destroy(toCheck);
                                     Mod.weight -= CIW.currentWeight;
                                 }
                             }
-                            else // VID != null
+                            else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                            {
+                                if (CIW.containerItemRoot.childCount == 0)
+                                {
+                                    Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - 1;
+                                    --amountLeftToRemoveFromPlayer;
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    CIW.physObj.SetQuickBeltSlot(null);
+                                    CIW.physObj.ForceBreakInteraction();
+                                    CIW.destroyed = true;
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
+                                    Destroy(toCheck);
+                                    Mod.weight -= CIW.currentWeight;
+                                }
+                            }
+                            else
                             {
                                 Mod.playerInventory[actualID] = Mod.playerInventory[actualID] - 1;
                                 --amountLeftToRemoveFromPlayer;
                                 objectList.RemoveAt(objectList.Count - 1);
-                                VID.physObj.SetQuickBeltSlot(null);
-                                VID.physObj.ForceBreakInteraction();
-                                VID.destroyed = true;
-                                HideoutController.RemoveFromContainer(toCheck.transform, null, VID);
+                                CIW.physObj.SetQuickBeltSlot(null);
+                                CIW.physObj.ForceBreakInteraction();
+                                CIW.destroyed = true;
+                                HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                 Destroy(toCheck);
-                                Mod.weight -= VID.currentWeight;
+                                Mod.weight -= CIW.currentWeight;
                             }
-                            //else // should never happen, every item is supposed to have a CIW or VID
-                            //{
-                            //    --j;
-                            //    objectList.RemoveAt(objectList.Count - 1);
-                            //    Destroy(toCheck);
-                            //}
                         }
                     }
 
@@ -4140,21 +4104,7 @@ namespace EFM
                 itemCIW.physObj.SetQuickBeltSlot(null);
                 itemCIW.physObj.SetParentage(outputVolume);
                 itemCIW.hideoutSpawned = true;
-                foreach (Collider col in itemCIW.colliders)
-                {
-                    col.enabled = false;
-                }
-                BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null);
-            }
-            else
-            {
-                VanillaItemDescriptor itemVID = itemToRemove.GetComponent<VanillaItemDescriptor>();
-                itemID = itemVID.H3ID;
-                itemVID.physObj.SetQuickBeltSlot(null);
-                itemVID.physObj.SetParentage(outputVolume);
-                itemVID.hideoutSpawned = true;
-                itemVID.physObj.SetAllCollidersToLayer(false, "NoCol");
-                BeginInteractionPatch.SetItemLocationIndex(1, null, itemVID);
+                BeginInteractionPatch.SetItemLocationIndex(1, itemCIW);
             }
 
             // Attach to output volume
@@ -4234,7 +4184,7 @@ namespace EFM
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
                     MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
-                    BeginInteractionPatch.SetItemLocationIndex(1, CIW, null);
+                    BeginInteractionPatch.SetItemLocationIndex(1, CIW);
                     if (CIW.maxAmount > 0)
                     {
                         CIW.amount = CIW.maxAmount;
@@ -4459,7 +4409,7 @@ namespace EFM
                                         j -= CIW.stack;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
+                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                         Destroy(toCheck);
                                     }
                                 }
@@ -4480,7 +4430,7 @@ namespace EFM
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
+                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                         Destroy(toCheck);
                                     }
                                 }
@@ -4491,7 +4441,7 @@ namespace EFM
                                         --j;
                                         objectList.RemoveAt(objectList.Count - 1);
                                         CIW.physObj.SetQuickBeltSlot(null);
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
+                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                         Destroy(toCheck);
                                     }
                                 }
@@ -4500,18 +4450,9 @@ namespace EFM
                                     --j;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
-                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                     Destroy(toCheck);
                                 }
-                            }
-                            else
-                            {
-                                --j;
-                                objectList.RemoveAt(objectList.Count - 1);
-                                VanillaItemDescriptor VID = toCheck.GetComponent<VanillaItemDescriptor>();
-                                VID.physObj.SetQuickBeltSlot(null);
-                                HideoutController.RemoveFromContainer(toCheck.transform, null, VID);
-                                Destroy(toCheck);
                             }
                         }
                     }
@@ -4524,77 +4465,64 @@ namespace EFM
                         {
                             GameObject toCheck = objectList[objectList.Count - 1];
                             MeatovItem CIW = toCheck.GetComponent<MeatovItem>();
-                            VanillaItemDescriptor VID = toCheck.GetComponent<VanillaItemDescriptor>();
-                            if (CIW != null)
+                            if (CIW.stack > 0)
                             {
-                                if (CIW.stack > 0)
+                                if (CIW.stack > amountToRemoveFromPlayer)
                                 {
-                                    if (CIW.stack > amountToRemoveFromPlayer)
-                                    {
-                                        CIW.stack = CIW.stack - amountToRemoveFromPlayer;
-                                    }
-                                    else // CIW.stack <= amountToRemoveFromBase
-                                    {
-                                        j -= CIW.stack;
-                                        objectList.RemoveAt(objectList.Count - 1);
-                                        CIW.physObj.SetQuickBeltSlot(null);
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
-                                        Destroy(toCheck);
-                                        Mod.weight -= CIW.currentWeight;
-                                    }
+                                    CIW.stack = CIW.stack - amountToRemoveFromPlayer;
                                 }
-                                else if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                                else // CIW.stack <= amountToRemoveFromBase
                                 {
-                                    bool containsItem = false;
-                                    foreach (GameObject itemInSlot in CIW.itemsInSlots)
-                                    {
-                                        if (itemInSlot != null)
-                                        {
-                                            containsItem = true;
-                                            break;
-                                        }
-                                    }
-
-                                    if (!containsItem)
-                                    {
-                                        --j;
-                                        objectList.RemoveAt(objectList.Count - 1);
-                                        CIW.physObj.SetQuickBeltSlot(null);
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
-                                        Destroy(toCheck);
-                                        Mod.weight -= VID.currentWeight;
-                                    }
-                                }
-                                else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
-                                {
-                                    if (CIW.containerItemRoot.childCount == 0)
-                                    {
-                                        --j;
-                                        objectList.RemoveAt(objectList.Count - 1);
-                                        CIW.physObj.SetQuickBeltSlot(null);
-                                        HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
-                                        Destroy(toCheck);
-                                        Mod.weight -= VID.currentWeight;
-                                    }
-                                }
-                                else
-                                {
-                                    --j;
+                                    j -= CIW.stack;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
-                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW, null);
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                     Destroy(toCheck);
                                     Mod.weight -= CIW.currentWeight;
                                 }
                             }
-                            else // VID != null
+                            else if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                            {
+                                bool containsItem = false;
+                                foreach (GameObject itemInSlot in CIW.itemsInSlots)
+                                {
+                                    if (itemInSlot != null)
+                                    {
+                                        containsItem = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!containsItem)
+                                {
+                                    --j;
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    CIW.physObj.SetQuickBeltSlot(null);
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
+                                    Destroy(toCheck);
+                                    Mod.weight -= CIW.currentWeight;
+                                }
+                            }
+                            else if (CIW.itemType == Mod.ItemType.Backpack || CIW.itemType == Mod.ItemType.Container || CIW.itemType == Mod.ItemType.Pouch)
+                            {
+                                if (CIW.containerItemRoot.childCount == 0)
+                                {
+                                    --j;
+                                    objectList.RemoveAt(objectList.Count - 1);
+                                    CIW.physObj.SetQuickBeltSlot(null);
+                                    HideoutController.RemoveFromContainer(toCheck.transform, CIW);
+                                    Destroy(toCheck);
+                                    Mod.weight -= CIW.currentWeight;
+                                }
+                            }
+                            else
                             {
                                 --j;
                                 objectList.RemoveAt(objectList.Count - 1);
-                                VID.physObj.SetQuickBeltSlot(null);
-                                HideoutController.RemoveFromContainer(toCheck.transform, null, VID);
+                                CIW.physObj.SetQuickBeltSlot(null);
+                                HideoutController.RemoveFromContainer(toCheck.transform, CIW);
                                 Destroy(toCheck);
-                                Mod.weight -= VID.currentWeight;
+                                Mod.weight -= CIW.currentWeight;
                             }
                         }
                     }
@@ -4711,7 +4639,7 @@ namespace EFM
                 Mod.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
                 yield break;
             }
-            VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<VanillaItemDescriptor>();
+            MeatovItem prefabVID = itemPrefab.GetComponent<MeatovItem>();
             GameObject itemObject = null;
             bool spawnedSmallBox = false;
             bool spawnedBigBox = false;
@@ -4771,7 +4699,7 @@ namespace EFM
                                                                          UnityEngine.Random.Range(-outputVolume.size.z / 2, outputVolume.size.z / 2));
                         itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
-                        BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null);
+                        BeginInteractionPatch.SetItemLocationIndex(1, itemCIW);
 
                         boxCountLeft = countLeft / 120;
                     }
@@ -4785,7 +4713,7 @@ namespace EFM
                                                                      UnityEngine.Random.Range(-outputVolume.size.z / 2, outputVolume.size.z / 2));
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
-                    VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
+                    MeatovItem VID = itemObject.GetComponent<MeatovItem>();
                     VID.foundInRaid = true;
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID);
 
@@ -4803,7 +4731,7 @@ namespace EFM
                                                                      UnityEngine.Random.Range(-outputVolume.size.z / 2, outputVolume.size.z / 2));
                     itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
-                    VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
+                    MeatovItem VID = itemObject.GetComponent<MeatovItem>();
                     VID.foundInRaid = true;
                     BeginInteractionPatch.SetItemLocationIndex(1, null, VID);
 

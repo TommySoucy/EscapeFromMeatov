@@ -209,56 +209,29 @@ namespace EFM
             foreach (Transform itemTransform in tradeVolume.itemsRoot)
             {
                 MeatovItem CIW = itemTransform.GetComponent<MeatovItem>();
-                VanillaItemDescriptor VID = itemTransform.GetComponent<VanillaItemDescriptor>();
                 if (CIW != null)
                 {
-                    if (tradeVolumeInventory.ContainsKey(CIW.ID))
+                    if (tradeVolumeInventory.ContainsKey(CIW.H3ID))
                     {
-                        tradeVolumeInventory[CIW.ID] += CIW.maxStack > 1 ? CIW.stack : 1;
-                        tradeVolumeInventoryObjects[CIW.ID].Add(CIW.gameObject);
+                        tradeVolumeInventory[CIW.H3ID] += CIW.maxStack > 1 ? CIW.stack : 1;
+                        tradeVolumeInventoryObjects[CIW.H3ID].Add(CIW.gameObject);
                     }
                     else
                     {
-                        tradeVolumeInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
-                        tradeVolumeInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
+                        tradeVolumeInventory.Add(CIW.H3ID, CIW.maxStack > 1 ? CIW.stack : 1);
+                        tradeVolumeInventoryObjects.Add(CIW.H3ID, new List<GameObject>() { CIW.gameObject });
                     }
                     if (CIW.foundInRaid)
                     {
-                        if (tradeVolumeFIRInventory.ContainsKey(CIW.ID))
+                        if (tradeVolumeFIRInventory.ContainsKey(CIW.H3ID))
                         {
-                            tradeVolumeFIRInventory[CIW.ID] += CIW.maxStack > 1 ? CIW.stack : 1;
-                            tradeVolumeFIRInventoryObjects[CIW.ID].Add(CIW.gameObject);
+                            tradeVolumeFIRInventory[CIW.H3ID] += CIW.maxStack > 1 ? CIW.stack : 1;
+                            tradeVolumeFIRInventoryObjects[CIW.H3ID].Add(CIW.gameObject);
                         }
                         else
                         {
-                            tradeVolumeFIRInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
-                            tradeVolumeFIRInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
-                        }
-                    }
-                }
-                else
-                {
-                    if (tradeVolumeInventory.ContainsKey(VID.H3ID))
-                    {
-                        tradeVolumeInventory[VID.H3ID] += 1;
-                        tradeVolumeInventoryObjects[VID.H3ID].Add(VID.gameObject);
-                    }
-                    else
-                    {
-                        tradeVolumeInventory.Add(VID.H3ID, 1);
-                        tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
-                    }
-                    if (VID.foundInRaid)
-                    {
-                        if (tradeVolumeFIRInventory.ContainsKey(VID.H3ID))
-                        {
-                            tradeVolumeFIRInventory[VID.H3ID] += 1;
-                            tradeVolumeFIRInventoryObjects[VID.H3ID].Add(VID.gameObject);
-                        }
-                        else
-                        {
-                            tradeVolumeFIRInventory.Add(VID.H3ID, 1);
-                            tradeVolumeFIRInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
+                            tradeVolumeFIRInventory.Add(CIW.H3ID, CIW.maxStack > 1 ? CIW.stack : 1);
+                            tradeVolumeFIRInventoryObjects.Add(CIW.H3ID, new List<GameObject>() { CIW.gameObject });
                         }
                     }
                 }
@@ -973,47 +946,25 @@ namespace EFM
             {
                 Mod.LogInfo("\tAdding item from volume: "+itemTransform.name);
                 MeatovItem CIW = itemTransform.GetComponent<MeatovItem>();
-                VanillaItemDescriptor VID = itemTransform.GetComponent<VanillaItemDescriptor>();
                 List<MarketItemView> itemViewListToUse = null;
                 string itemID;
                 int itemValue;
                 bool custom = false;
-                if(CIW != null)
+                if(CIW.marketItemViews == null)
                 {
-                    if(CIW.marketItemViews == null)
-                    {
-                        CIW.marketItemViews = new List<MarketItemView>();
-                    }
-                    CIW.marketItemViews.Clear();
-                    itemViewListToUse = CIW.marketItemViews;
-
-                    itemID = CIW.ID;
-                    custom = true;
-
-                    itemValue = CIW.GetValue();
-
-                    if (!trader.ItemSellable(itemID, CIW.parents))
-                    {
-                        continue;
-                    }
+                    CIW.marketItemViews = new List<MarketItemView>();
                 }
-                else
+                CIW.marketItemViews.Clear();
+                itemViewListToUse = CIW.marketItemViews;
+
+                itemID = CIW.H3ID;
+                custom = true;
+
+                itemValue = CIW.GetValue();
+
+                if (!trader.ItemSellable(itemID, CIW.parents))
                 {
-                    if (VID.marketItemViews == null)
-                    {
-                        VID.marketItemViews = new List<MarketItemView>();
-                    }
-                    VID.marketItemViews.Clear();
-                    itemViewListToUse = VID.marketItemViews;
-
-                    itemID = VID.H3ID;
-
-                    itemValue = VID.GetValue();
-
-                    if (!trader.ItemSellable(itemID, VID.parents))
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 if (sellItemShowcaseElements != null && sellItemShowcaseElements.ContainsKey(itemID))
@@ -1034,13 +985,8 @@ namespace EFM
                     marketItemView.value = marketItemView.value + actualValue;
                     if (marketItemView.custom)
                     {
-                        marketItemView.CIW.Add(CIW);
-                        currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
-                    }
-                    else
-                    {
-                        marketItemView.VID.Add(VID);
-                        currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
+                        marketItemView.MI.Add(CIW);
+                        currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
                     }
                     currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.value.ToString();
                     currentTotalSellingPrice += actualValue;
@@ -1076,8 +1022,7 @@ namespace EFM
                     ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
                     currentItemIconScript.isPhysical = true;
                     currentItemIconScript.isCustom = custom;
-                    currentItemIconScript.CIW = CIW;
-                    currentItemIconScript.VID = VID;
+                    currentItemIconScript.MI = CIW;
 
                     currentItemIcon.gameObject.SetActive(true);
                     sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
@@ -1091,8 +1036,7 @@ namespace EFM
                     }
                     MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
                     marketItemView.custom = custom;
-                    marketItemView.CIW = new List<MeatovItem>() { CIW };
-                    marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
+                    marketItemView.MI = new List<MeatovItem>() { CIW };
 
                     int actualValue;
                     if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
@@ -1139,14 +1083,7 @@ namespace EFM
                     //pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
                     // Add the icon object to the list for that item
-                    if (CIW != null)
-                    {
-                        CIW.marketItemViews.Add(marketItemView);
-                    }
-                    else
-                    {
-                        VID.marketItemViews.Add(marketItemView);
-                    }
+                    CIW.marketItemViews.Add(marketItemView);
                 }
 
                 // Activate deal button
@@ -2172,37 +2109,20 @@ namespace EFM
                 {
                     Mod.LogInfo("processing item "+itemTransform.name);
                     MeatovItem CIW = itemTransform.GetComponent<MeatovItem>();
-                    VanillaItemDescriptor VID = itemTransform.GetComponent<VanillaItemDescriptor>();
                     List<MarketItemView> itemViewListToUse = null;
                     string itemID;
                     int itemInsureValue;
                     bool custom = false;
-                    if (CIW != null)
+                    itemViewListToUse = CIW.marketItemViews;
+
+                    itemID = CIW.H3ID;
+                    custom = true;
+
+                    itemInsureValue = (int)Mathf.Max(CIW.GetInsuranceValue() * trader.insuranceRate, 1);
+
+                    if (CIW.insured || !trader.ItemInsureable(itemID, CIW.parents))
                     {
-                        itemViewListToUse = CIW.marketItemViews;
-
-                        itemID = CIW.ID;
-                        custom = true;
-
-                        itemInsureValue = (int)Mathf.Max(CIW.GetInsuranceValue() * trader.insuranceRate, 1);
-
-                        if (CIW.insured || !trader.ItemInsureable(itemID, CIW.parents))
-                        {
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        itemViewListToUse = VID.marketItemViews;
-
-                        itemID = VID.H3ID;
-
-                        itemInsureValue = (int)Mathf.Max(VID.GetInsuranceValue() * trader.insuranceRate, 1);
-
-                        if (VID.insured || !trader.ItemInsureable(itemID, VID.parents))
-                        {
-                            continue;
-                        }
+                        continue;
                     }
 
 
@@ -2221,18 +2141,10 @@ namespace EFM
                         if (marketItemView.custom)
                         {
                             Mod.LogInfo("3");
-                            marketItemView.CIW.Add(CIW);
+                            marketItemView.MI.Add(CIW);
                             Mod.LogInfo("3");
-                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
+                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
                             Mod.LogInfo("3");
-                        }
-                        else
-                        {
-                            Mod.LogInfo("4");
-                            marketItemView.VID.Add(VID);
-                            Mod.LogInfo("4");
-                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
-                            Mod.LogInfo("4");
                         }
                         Mod.LogInfo("2");
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
@@ -2272,8 +2184,7 @@ namespace EFM
                         ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
                         currentItemIconScript.isPhysical = true;
                         currentItemIconScript.isCustom = custom;
-                        currentItemIconScript.CIW = CIW;
-                        currentItemIconScript.VID = VID;
+                        currentItemIconScript.MI = CIW;
 
                         currentItemIcon.gameObject.SetActive(true);
                         Mod.LogInfo("5");
@@ -2288,8 +2199,7 @@ namespace EFM
                         }
                         MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
                         marketItemView.custom = custom;
-                        marketItemView.CIW = new List<MeatovItem>() { CIW };
-                        marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
+                        marketItemView.MI = new List<MeatovItem>() { CIW };
 
                         Mod.LogInfo("5");
                         // Write price to item icon and set correct currency icon
@@ -2318,14 +2228,7 @@ namespace EFM
                         //pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
                         // Add the icon object to the list for that item
-                        if (CIW != null)
-                        {
-                            CIW.marketItemViews.Add(marketItemView);
-                        }
-                        else
-                        {
-                            VID.marketItemViews.Add(marketItemView);
-                        }
+                        CIW.marketItemViews.Add(marketItemView);
                         Mod.LogInfo("5");
                     }
                 }
@@ -2486,84 +2389,46 @@ namespace EFM
             }
         }
 
-        public void UpdateBasedOnItem(bool added, MeatovItem CIW, VanillaItemDescriptor VID)
+        public void UpdateBasedOnItem(bool added, MeatovItem CIW)
         {
-            bool custom = CIW != null;
-            string itemID = custom ? CIW.ID : VID.H3ID;
-            int itemValue = custom ? CIW.GetValue() : VID.GetValue();
-            int itemInsureValue = custom ? (int)Mathf.Max(CIW.GetInsuranceValue() * Mod.traderStatuses[currentTraderIndex].insuranceRate, 1) : (int)Mathf.Max(VID.GetInsuranceValue() * Mod.traderStatuses[currentTraderIndex].insuranceRate, 1);
+            string itemID = CIW.H3ID;
+            int itemValue = CIW.GetValue();
+            int itemInsureValue = (int)Mathf.Max(CIW.GetInsuranceValue() * Mod.traderStatuses[currentTraderIndex].insuranceRate, 1);
 
             Mod.LogInfo("UpdateBasedOnItem called");
             if (added)
             {
                 Mod.LogInfo("Added");
                 // Add to trade volume inventory
-                if (custom)
+                Mod.LogInfo("custom");
+                if (tradeVolumeInventory == null)
                 {
-                    Mod.LogInfo("custom");
-                    if (tradeVolumeInventory == null)
-                    {
-                        tradeVolumeInventory = new Dictionary<string, int>();
-                        tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
-                        tradeVolumeFIRInventory = new Dictionary<string, int>();
-                        tradeVolumeFIRInventoryObjects = new Dictionary<string, List<GameObject>>();
-                    }
-                    if (tradeVolumeInventory.ContainsKey(CIW.ID))
-                    {
-                        tradeVolumeInventory[CIW.ID] += CIW.maxStack > 1 ? CIW.stack : 1;
-                        tradeVolumeInventoryObjects[CIW.ID].Add(CIW.gameObject);
-                    }
-                    else
-                    {
-                        tradeVolumeInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
-                        tradeVolumeInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
-                    }
-                    if (CIW.foundInRaid)
-                    {
-                        if (tradeVolumeFIRInventory.ContainsKey(CIW.ID))
-                        {
-                            tradeVolumeFIRInventory[CIW.ID] += CIW.maxStack > 1 ? CIW.stack : 1;
-                            tradeVolumeFIRInventoryObjects[CIW.ID].Add(CIW.gameObject);
-                        }
-                        else
-                        {
-                            tradeVolumeFIRInventory.Add(CIW.ID, CIW.maxStack > 1 ? CIW.stack : 1);
-                            tradeVolumeFIRInventoryObjects.Add(CIW.ID, new List<GameObject>() { CIW.gameObject });
-                        }
-                    }
+                    tradeVolumeInventory = new Dictionary<string, int>();
+                    tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
+                    tradeVolumeFIRInventory = new Dictionary<string, int>();
+                    tradeVolumeFIRInventoryObjects = new Dictionary<string, List<GameObject>>();
+                }
+                if (tradeVolumeInventory.ContainsKey(CIW.H3ID))
+                {
+                    tradeVolumeInventory[CIW.H3ID] += CIW.maxStack > 1 ? CIW.stack : 1;
+                    tradeVolumeInventoryObjects[CIW.H3ID].Add(CIW.gameObject);
                 }
                 else
                 {
-                    Mod.LogInfo("vanilla");
-                    if (tradeVolumeInventory == null)
+                    tradeVolumeInventory.Add(CIW.H3ID, CIW.maxStack > 1 ? CIW.stack : 1);
+                    tradeVolumeInventoryObjects.Add(CIW.H3ID, new List<GameObject>() { CIW.gameObject });
+                }
+                if (CIW.foundInRaid)
+                {
+                    if (tradeVolumeFIRInventory.ContainsKey(CIW.H3ID))
                     {
-                        tradeVolumeInventory = new Dictionary<string, int>();
-                        tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
-                        tradeVolumeFIRInventory = new Dictionary<string, int>();
-                        tradeVolumeFIRInventoryObjects = new Dictionary<string, List<GameObject>>();
-                    }
-                    if (tradeVolumeInventory.ContainsKey(VID.H3ID))
-                    {
-                        tradeVolumeInventory[VID.H3ID] += 1;
-                        tradeVolumeInventoryObjects[VID.H3ID].Add(VID.gameObject);
+                        tradeVolumeFIRInventory[CIW.H3ID] += CIW.maxStack > 1 ? CIW.stack : 1;
+                        tradeVolumeFIRInventoryObjects[CIW.H3ID].Add(CIW.gameObject);
                     }
                     else
                     {
-                        tradeVolumeInventory.Add(VID.H3ID, 1);
-                        tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
-                    }
-                    if (VID.foundInRaid)
-                    {
-                        if (tradeVolumeFIRInventory.ContainsKey(VID.H3ID))
-                        {
-                            tradeVolumeFIRInventory[VID.H3ID] += 1;
-                            tradeVolumeFIRInventoryObjects[VID.H3ID].Add(VID.gameObject);
-                        }
-                        else
-                        {
-                            tradeVolumeFIRInventory.Add(VID.H3ID, 1);
-                            tradeVolumeFIRInventoryObjects.Add(VID.H3ID, new List<GameObject>() { VID.gameObject });
-                        }
+                        tradeVolumeFIRInventory.Add(CIW.H3ID, CIW.maxStack > 1 ? CIW.stack : 1);
+                        tradeVolumeFIRInventoryObjects.Add(CIW.H3ID, new List<GameObject>() { CIW.gameObject });
                     }
                 }
 
@@ -2771,13 +2636,8 @@ namespace EFM
                         marketItemView.value = marketItemView.value + actualValue;
                         if (marketItemView.custom)
                         {
-                            marketItemView.CIW.Add(CIW);
-                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
-                        }
-                        else
-                        {
-                            marketItemView.VID.Add(VID);
-                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
+                            marketItemView.MI.Add(CIW);
+                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
                         }
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.value.ToString();
                         currentTotalSellingPrice += actualValue;
@@ -2819,9 +2679,7 @@ namespace EFM
                         // Setup itemIcon
                         ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
                         currentItemIconScript.isPhysical = true;
-                        currentItemIconScript.isCustom = custom;
-                        currentItemIconScript.CIW = CIW;
-                        currentItemIconScript.VID = VID;
+                        currentItemIconScript.MI = CIW;
 
                         currentItemIcon.gameObject.SetActive(true);
                         Mod.LogInfo("0");
@@ -2836,9 +2694,7 @@ namespace EFM
                         }
                         Mod.LogInfo("0");
                         MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
-                        marketItemView.custom = custom;
-                        marketItemView.CIW = new List<MeatovItem>() { CIW };
-                        marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
+                        marketItemView.MI = new List<MeatovItem>() { CIW };
 
                         Mod.LogInfo("0");
                         // Write price to item icon and set correct currency icon
@@ -2890,14 +2746,7 @@ namespace EFM
 
                         Mod.LogInfo("0");
                         // Add the icon object to the list for that item
-                        if (CIW != null)
-                        {
-                            CIW.marketItemViews.Add(marketItemView);
-                        }
-                        else
-                        {
-                            VID.marketItemViews.Add(marketItemView);
-                        }
+                        CIW.marketItemViews.Add(marketItemView);
 
                         Mod.LogInfo("0");
                         // Update total selling price
@@ -2938,7 +2787,7 @@ namespace EFM
                     {
                         if (!condition.fulfilled && condition.marketListElement != null)
                         {
-                            if (((custom && CIW.foundInRaid)||(!custom && VID.foundInRaid)) && condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem)
+                            if ((CIW.foundInRaid) && condition.conditionType == TraderTaskCondition.ConditionType.HandoverItem)
                             {
                                 condition.marketListElement.transform.GetChild(0).GetChild(0).GetChild(5).gameObject.SetActive(true);
                             }
@@ -2947,14 +2796,14 @@ namespace EFM
                                 // Make sure all requirements are fulfilled, set them as fulfilled by default if they werent a requirement to begin with
                                 bool[] typesFulfilled = condition.targetAttachmentTypes.Count == 0 ? new bool[] { true } : new bool[condition.targetAttachmentTypes.Count];
                                 bool[] attachmentsFulfilled = condition.targetAttachments.Count == 0 ? new bool[] { true } : new bool[condition.targetAttachments.Count];
-                                bool supressedFulfilled = !condition.suppressed || (VID.physObj as FVRFireArm).IsSuppressed();
-                                bool brakedFulfilled = !condition.braked || (VID.physObj as FVRFireArm).IsBraked();
+                                bool supressedFulfilled = !condition.suppressed || (CIW.physObj as FVRFireArm).IsSuppressed();
+                                bool brakedFulfilled = !condition.braked || (CIW.physObj as FVRFireArm).IsBraked();
 
                                 // Only care to check everything if braked and supressed are both fulfilled
                                 if (supressedFulfilled && brakedFulfilled)
                                 {
                                     // WeaponAssembly items must be vanilla
-                                    FVRPhysicalObject[] physObjs = VID.GetComponentsInChildren<FVRPhysicalObject>();
+                                    FVRPhysicalObject[] physObjs = CIW.GetComponentsInChildren<FVRPhysicalObject>();
                                     foreach (FVRPhysicalObject physObj in physObjs)
                                     {
                                         string attachmentID = physObj.ObjectWrapper.ItemID;
@@ -3013,7 +2862,7 @@ namespace EFM
                 // IN INSURE, check if item already in showcase, if it is, increment count, if not, add a new entry, update price, make sure deal! button is activated, check if item is price, update accordingly
                 bool itemInsureable = Mod.traderStatuses[currentTraderIndex].ItemInsureable(itemID, Mod.itemAncestors[itemID]);
 
-                if (((custom && !CIW.insured) || (!custom && !VID.insured)) && itemInsureable)
+                if ((!CIW.insured) && itemInsureable)
                 {
                     Mod.LogInfo("update insure showcase");
                     Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
@@ -3035,13 +2884,8 @@ namespace EFM
                         marketItemView.insureValue = marketItemView.insureValue + actualInsureValue;
                         if (marketItemView.custom)
                         {
-                            marketItemView.CIW.Add(CIW);
-                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
-                        }
-                        else
-                        {
-                            marketItemView.VID.Add(VID);
-                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
+                            marketItemView.MI.Add(CIW);
+                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
                         }
                         currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
                         currentTotalInsurePrice += actualInsureValue;
@@ -3095,9 +2939,7 @@ namespace EFM
                         // Setup itemIcon
                         ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
                         currentItemIconScript.isPhysical = true;
-                        currentItemIconScript.isCustom = custom;
-                        currentItemIconScript.CIW = CIW;
-                        currentItemIconScript.VID = VID;
+                        currentItemIconScript.MI = CIW;
 
                         currentItemIcon.gameObject.SetActive(true);
                         Mod.LogInfo("0");
@@ -3112,9 +2954,7 @@ namespace EFM
                         }
                         Mod.LogInfo("0");
                         MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
-                        marketItemView.custom = custom;
-                        marketItemView.CIW = new List<MeatovItem>() { CIW };
-                        marketItemView.VID = new List<VanillaItemDescriptor>() { VID };
+                        marketItemView.MI = new List<MeatovItem>() { CIW };
 
                         Mod.LogInfo("0");
                         // Write price to item icon and set correct currency icon
@@ -3149,14 +2989,7 @@ namespace EFM
                         //pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
                         // Add the icon object to the list for that item
-                        if (CIW != null)
-                        {
-                            CIW.marketItemViews.Add(marketItemView);
-                        }
-                        else
-                        {
-                            VID.marketItemViews.Add(marketItemView);
-                        }
+                        CIW.marketItemViews.Add(marketItemView);
                         Mod.LogInfo("0");
 
                         // Update total insure price
@@ -3244,47 +3077,23 @@ namespace EFM
             {
                 Mod.LogInfo("removed");
                 // Remove from trade volume inventory
-                if (custom)
+                Mod.LogInfo("custom, pre amount: "+ tradeVolumeInventory[CIW.H3ID]);
+                tradeVolumeInventory[CIW.H3ID] -= (CIW.maxStack > 1 ? CIW.stack : 1);
+                tradeVolumeInventoryObjects[CIW.H3ID].Remove(CIW.gameObject);
+                Mod.LogInfo("post amount: " + tradeVolumeInventory[CIW.H3ID]);
+                if (tradeVolumeInventory[CIW.H3ID] == 0)
                 {
-                    Mod.LogInfo("custom, pre amount: "+ tradeVolumeInventory[CIW.ID]);
-                    tradeVolumeInventory[CIW.ID] -= (CIW.maxStack > 1 ? CIW.stack : 1);
-                    tradeVolumeInventoryObjects[CIW.ID].Remove(CIW.gameObject);
-                    Mod.LogInfo("post amount: " + tradeVolumeInventory[CIW.ID]);
-                    if (tradeVolumeInventory[CIW.ID] == 0)
-                    {
-                        tradeVolumeInventory.Remove(CIW.ID);
-                        tradeVolumeInventoryObjects.Remove(CIW.ID);
-                    }
-                    if (CIW.foundInRaid)
-                    {
-                        tradeVolumeFIRInventory[CIW.ID] -= (CIW.maxStack > 1 ? CIW.stack : 1);
-                        tradeVolumeFIRInventoryObjects[CIW.ID].Remove(CIW.gameObject);
-                        if (tradeVolumeFIRInventory[CIW.ID] == 0)
-                        {
-                            tradeVolumeFIRInventory.Remove(CIW.ID);
-                            tradeVolumeFIRInventoryObjects.Remove(CIW.ID);
-                        }
-                    }
+                    tradeVolumeInventory.Remove(CIW.H3ID);
+                    tradeVolumeInventoryObjects.Remove(CIW.H3ID);
                 }
-                else
+                if (CIW.foundInRaid)
                 {
-                    Mod.LogInfo("vanilla");
-                    tradeVolumeInventory[VID.H3ID] -= 1;
-                    tradeVolumeInventoryObjects[VID.H3ID].Remove(VID.gameObject);
-                    if (tradeVolumeInventory[VID.H3ID] == 0)
+                    tradeVolumeFIRInventory[CIW.H3ID] -= (CIW.maxStack > 1 ? CIW.stack : 1);
+                    tradeVolumeFIRInventoryObjects[CIW.H3ID].Remove(CIW.gameObject);
+                    if (tradeVolumeFIRInventory[CIW.H3ID] == 0)
                     {
-                        tradeVolumeInventory.Remove(VID.H3ID);
-                        tradeVolumeInventoryObjects.Remove(VID.H3ID);
-                    }
-                    if (VID.foundInRaid)
-                    {
-                        tradeVolumeFIRInventory[VID.H3ID] -= 1;
-                        tradeVolumeFIRInventoryObjects[VID.H3ID].Remove(VID.gameObject);
-                        if (tradeVolumeFIRInventory[VID.H3ID] == 0)
-                        {
-                            tradeVolumeFIRInventory.Remove(VID.H3ID);
-                            tradeVolumeFIRInventoryObjects.Remove(VID.H3ID);
-                        }
+                        tradeVolumeFIRInventory.Remove(CIW.H3ID);
+                        tradeVolumeFIRInventoryObjects.Remove(CIW.H3ID);
                     }
                 }
 
@@ -3497,20 +3306,10 @@ namespace EFM
                     marketItemView.value = marketItemView.value -= actualValue;
                     bool shouldRemove = false;
                     bool lastOne = false;
-                    if (marketItemView.custom)
-                    {
-                        marketItemView.CIW.Remove(CIW);
-                        currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
-                        shouldRemove = marketItemView.CIW.Count == 0;
-                        lastOne = marketItemView.CIW.Count == 1;
-                    }
-                    else
-                    {
-                        marketItemView.VID.Remove(VID);
-                        currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
-                        shouldRemove = marketItemView.VID.Count == 0;
-                        lastOne = marketItemView.VID.Count == 1;
-                    }
+                    marketItemView.MI.Remove(CIW);
+                    currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
+                    shouldRemove = marketItemView.MI.Count == 0;
+                    lastOne = marketItemView.MI.Count == 1;
                     currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.value.ToString();
                     currentTotalSellingPrice -= actualValue;
 
@@ -3519,9 +3318,7 @@ namespace EFM
                     {
                         ItemIcon currentItemIconScript = currentItemIcon.GetComponent<ItemIcon>();
                         currentItemIconScript.isPhysical = true;
-                        currentItemIconScript.isCustom = custom;
-                        currentItemIconScript.CIW = CIW;
-                        currentItemIconScript.VID = VID;
+                        currentItemIconScript.MI = CIW;
                     }
 
                     // Remove item if necessary and move all other item icons that come after
@@ -3608,20 +3405,10 @@ namespace EFM
                     marketItemView.insureValue = marketItemView.insureValue -= actualInsureValue;
                     bool shouldRemove = false;
                     bool lastOne = false;
-                    if (marketItemView.custom)
-                    {
-                        marketItemView.CIW.Remove(CIW);
-                        currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.CIW.Count.ToString();
-                        shouldRemove = marketItemView.CIW.Count == 0;
-                        lastOne = marketItemView.CIW.Count == 1;
-                    }
-                    else
-                    {
-                        marketItemView.VID.Remove(VID);
-                        currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.VID.Count.ToString();
-                        shouldRemove = marketItemView.VID.Count == 0;
-                        lastOne = marketItemView.VID.Count == 1;
-                    }
+                    marketItemView.MI.Remove(CIW);
+                    currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
+                    shouldRemove = marketItemView.MI.Count == 0;
+                    lastOne = marketItemView.MI.Count == 1;
                     currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
                     currentTotalInsurePrice -= actualInsureValue;
 
@@ -3630,9 +3417,7 @@ namespace EFM
                     {
                         ItemIcon currentItemIconScript = currentItemIcon.GetComponent<ItemIcon>();
                         currentItemIconScript.isPhysical = true;
-                        currentItemIconScript.isCustom = custom;
-                        currentItemIconScript.CIW = CIW;
-                        currentItemIconScript.VID = VID;
+                        currentItemIconScript.MI = CIW;
                     }
 
                     // Remove item if necessary and move all other item icons that come after
@@ -3914,7 +3699,7 @@ namespace EFM
                 Mod.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
                 yield break;
             }
-            VanillaItemDescriptor prefabVID = itemPrefab.GetComponent<VanillaItemDescriptor>();
+            MeatovItem prefabVID = itemPrefab.GetComponent<MeatovItem>();
             Transform tradeVolumeBox = tradeVolume.transform.GetChild(0);
             GameObject itemObject = null;
             bool spawnedSmallBox = false;
@@ -3997,7 +3782,7 @@ namespace EFM
                                                                          UnityEngine.Random.Range(-tradeVolumeBox.localScale.z / 2, tradeVolumeBox.localScale.z / 2));
                         itemObject.transform.localRotation = UnityEngine.Random.rotation;
 
-                        BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
+                        BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, false);
 
                         boxCountLeft = countLeft / 120.0f;
                     }
@@ -4006,12 +3791,12 @@ namespace EFM
                 {
                     itemObject = GameObject.Instantiate(itemPrefab, tradeVolume.itemsRoot);
 
-                    VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
+                    MeatovItem VID = itemObject.GetComponent<MeatovItem>();
 
                     // Add item to tradevolume so it can set its reset cols and kinematic to true
                     tradeVolume.AddItem(VID.physObj);
 
-                    BeginInteractionPatch.SetItemLocationIndex(1, null, VID, false);
+                    BeginInteractionPatch.SetItemLocationIndex(1, VID, false);
 
                     itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeBox.localScale.x / 2, tradeVolumeBox.localScale.x / 2),
                                                                      UnityEngine.Random.Range(-tradeVolumeBox.localScale.y / 2, tradeVolumeBox.localScale.y / 2),
@@ -4037,12 +3822,12 @@ namespace EFM
                 {
                     itemObject = GameObject.Instantiate(itemPrefab, tradeVolume.itemsRoot);
 
-                    VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
+                    MeatovItem VID = itemObject.GetComponent<MeatovItem>();
 
                     // Add item to tradevolume so it can set its reset cols and kinematic to true
                     tradeVolume.AddItem(VID.physObj);
                     
-                    BeginInteractionPatch.SetItemLocationIndex(1, null, VID, false);
+                    BeginInteractionPatch.SetItemLocationIndex(1, VID, false);
 
                     itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeBox.localScale.x / 2, tradeVolumeBox.localScale.x / 2),
                                                                      UnityEngine.Random.Range(-tradeVolumeBox.localScale.y / 2, tradeVolumeBox.localScale.y / 2),
@@ -4187,7 +3972,7 @@ namespace EFM
 
                 HideoutController.instance.AddToBaseInventory(spawnedItem.transform, true);
 
-                BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
+                BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, false);
             }
             string stringCurrencyID = currencyID.ToString();
             if (tradeVolumeInventory.ContainsKey(stringCurrencyID))
@@ -4228,15 +4013,7 @@ namespace EFM
                     foreach(GameObject itemObject in tradeVolumeInventoryObjects[item.Key])
                     {
                         MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
-                        VanillaItemDescriptor VID = itemObject.GetComponent<VanillaItemDescriptor>();
-                        if(CIW != null && !CIW.insured)
-                        {
-                            CIW.insured = true;
-                        }
-                        else if(!VID.insured)
-                        {
-                            VID.insured = true;
-                        }
+                        CIW.insured = true;
                     }
                 }
             }
@@ -4644,7 +4421,6 @@ namespace EFM
             {
                 GameObject currentItemObject = objectList[objectList.Count - 1];
                 MeatovItem CIW = currentItemObject.GetComponent<MeatovItem>();
-                VanillaItemDescriptor VID = currentItemObject.GetComponent<VanillaItemDescriptor>();
                 if (CIW != null)
                 {
                     if(foundInRaid && !CIW.foundInRaid)
@@ -4689,7 +4465,7 @@ namespace EFM
                             }
 
                             CIW.stack -= amountToRemove;
-                            Mod.baseInventory[CIW.ID] -= amountToRemove;
+                            Mod.baseInventory[CIW.H3ID] -= amountToRemove;
                             HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
                             amountToRemove = 0;
                         }
@@ -4737,30 +4513,6 @@ namespace EFM
                             Destroy(currentItemObject);
                         }
                     }
-                }
-                else // Vanilla item cannot have stack
-                {
-                    if (foundInRaid && !VID.foundInRaid)
-                    {
-                        continue;
-                    }
-
-                    --amountToRemove;
-
-                    if (VID.foundInRaid)
-                    {
-                        List<GameObject> FIRObjectList = tradeVolumeFIRInventoryObjects[itemID];
-                        tradeVolumeFIRInventory[itemID] -= 1;
-                        FIRObjectList[FIRObjectList.IndexOf(currentItemObject)] = FIRObjectList[FIRObjectList.Count - 1];
-                        FIRObjectList.RemoveAt(FIRObjectList.Count - 1);
-                    }
-
-                    // Destroy item
-                    objectList.RemoveAt(objectList.Count - 1);
-                    HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
-                    currentItemObject.GetComponent<VanillaItemDescriptor>().destroyed = true;
-                    currentItemObject.transform.parent = null;
-                    Destroy(currentItemObject);
                 }
             }
 
@@ -4928,7 +4680,7 @@ namespace EFM
 
                     HideoutController.instance.AddToBaseInventory(spawnedItem.transform, true);
 
-                    BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, null, false);
+                    BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, false);
                 }
                 if (tradeVolumeInventory.ContainsKey(cartItem))
                 {

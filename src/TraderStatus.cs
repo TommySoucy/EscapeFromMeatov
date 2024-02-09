@@ -2435,14 +2435,14 @@ namespace EFM
                     }
                     break;
                 case TraderTaskCounterCondition.CounterConditionType.Equipment:
-                    if ((!EquipmentSlot.wearingBackpack || !Mod.IDDescribedInList(EquipmentSlot.currentBackpack.ID, EquipmentSlot.currentBackpack.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
-                        (!EquipmentSlot.wearingBodyArmor || !Mod.IDDescribedInList(EquipmentSlot.currentArmor.ID, EquipmentSlot.currentArmor.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
-                        (!EquipmentSlot.wearingEarpiece || !Mod.IDDescribedInList(EquipmentSlot.currentEarpiece.ID, EquipmentSlot.currentEarpiece.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
-                        (!EquipmentSlot.wearingHeadwear || !Mod.IDDescribedInList(EquipmentSlot.currentHeadwear.ID, EquipmentSlot.currentHeadwear.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
-                        (!EquipmentSlot.wearingFaceCover || !Mod.IDDescribedInList(EquipmentSlot.currentFaceCover.ID, EquipmentSlot.currentFaceCover.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
-                        (!EquipmentSlot.wearingEyewear || !Mod.IDDescribedInList(EquipmentSlot.currentEyewear.ID, EquipmentSlot.currentEyewear.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
-                        (!EquipmentSlot.wearingRig || !Mod.IDDescribedInList(EquipmentSlot.currentRig.ID, EquipmentSlot.currentRig.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
-                        (!EquipmentSlot.wearingPouch || !Mod.IDDescribedInList(EquipmentSlot.currentPouch.ID, EquipmentSlot.currentPouch.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive)))
+                    if ((!EquipmentSlot.wearingBackpack || !Mod.IDDescribedInList(EquipmentSlot.currentBackpack.H3ID, EquipmentSlot.currentBackpack.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
+                        (!EquipmentSlot.wearingBodyArmor || !Mod.IDDescribedInList(EquipmentSlot.currentArmor.H3ID, EquipmentSlot.currentArmor.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
+                        (!EquipmentSlot.wearingEarpiece || !Mod.IDDescribedInList(EquipmentSlot.currentEarpiece.H3ID, EquipmentSlot.currentEarpiece.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
+                        (!EquipmentSlot.wearingHeadwear || !Mod.IDDescribedInList(EquipmentSlot.currentHeadwear.H3ID, EquipmentSlot.currentHeadwear.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
+                        (!EquipmentSlot.wearingFaceCover || !Mod.IDDescribedInList(EquipmentSlot.currentFaceCover.H3ID, EquipmentSlot.currentFaceCover.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
+                        (!EquipmentSlot.wearingEyewear || !Mod.IDDescribedInList(EquipmentSlot.currentEyewear.H3ID, EquipmentSlot.currentEyewear.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
+                        (!EquipmentSlot.wearingRig || !Mod.IDDescribedInList(EquipmentSlot.currentRig.H3ID, EquipmentSlot.currentRig.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive))&&
+                        (!EquipmentSlot.wearingPouch || !Mod.IDDescribedInList(EquipmentSlot.currentPouch.H3ID, EquipmentSlot.currentPouch.parents, counterCondition.equipmentInclusive, counterCondition.equipmentExclusive)))
                     {
                         return false;
                     }

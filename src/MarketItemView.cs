@@ -11,7 +11,6 @@ namespace EFM
         public bool custom;
         public int value;
         public int insureValue;
-        public List<MeatovItem> CIW;
-        public List<VanillaItemDescriptor> VID;
+        public List<MeatovItem> MI;
     }
 }

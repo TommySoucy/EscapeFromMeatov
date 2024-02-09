@@ -1220,10 +1220,10 @@ namespace EFM
             //Mod.staminaBarUI.transform.localScale = Vector3.one * 0.0015f;
 
             // Add our own hand component to each hand
-            //Mod.rightHand = GM.CurrentPlayerBody.RightHand.gameObject.AddComponent<Hand>();
-            //Mod.leftHand = GM.CurrentPlayerBody.LeftHand.gameObject.AddComponent<Hand>();
-            //Mod.rightHand.otherHand = Mod.leftHand;
-            //Mod.leftHand.otherHand = Mod.rightHand;
+            Mod.rightHand = GM.CurrentPlayerBody.RightHand.gameObject.AddComponent<Hand>();
+            Mod.leftHand = GM.CurrentPlayerBody.LeftHand.gameObject.AddComponent<Hand>();
+            Mod.rightHand.otherHand = Mod.leftHand;
+            Mod.leftHand.otherHand = Mod.rightHand;
 
             /*
              * GameObject slotObject = equipSlotParent.GetChild(i).GetChild(0).gameObject;
@@ -2424,8 +2424,7 @@ namespace EFM
 
         public void AddToBaseInventory(Transform item, bool updateTypeLists)
         {
-            MeatovItem customItemWrapper = item.GetComponent<MeatovItem>();
-            VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<VanillaItemDescriptor>();
+            MeatovItem MI = item.GetComponent<MeatovItem>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
             if (physObj == null || physObj.ObjectWrapper == null)
             {
@@ -2434,22 +2433,22 @@ namespace EFM
             string itemID = physObj.ObjectWrapper.ItemID;
             if (Mod.baseInventory.ContainsKey(itemID))
             {
-                Mod.baseInventory[itemID] += customItemWrapper != null ? (customItemWrapper.stack > 0 ? customItemWrapper.stack : 1) : 1;
+                Mod.baseInventory[itemID] += MI != null ? (MI.stack > 0 ? MI.stack : 1) : 1;
                 baseInventoryObjects[itemID].Add(item.gameObject);
             }
             else
             {
-                Mod.baseInventory.Add(itemID, customItemWrapper != null ? (customItemWrapper.stack > 0 ? customItemWrapper.stack : 1) : 1);
+                Mod.baseInventory.Add(itemID, MI != null ? (MI.stack > 0 ? MI.stack : 1) : 1);
                 baseInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
             }
 
             if (updateTypeLists)
             {
-                if (customItemWrapper != null)
+                if (MI != null)
                 {
-                    if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                    if (MI.itemType == Mod.ItemType.AmmoBox)
                     {
-                        FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
+                        FVRFireArmMagazine boxMagazine = MI.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                         {
                             if (loadedRound == null)
@@ -2485,13 +2484,9 @@ namespace EFM
                             }
                         }
                     }
-                }
-
-                if (vanillaItemDescriptor != null)
-                {
-                    if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
+                    else if (MI.physObj is FVRFireArmMagazine)
                     {
-                        FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
+                        FVRFireArmMagazine asMagazine = MI.physObj as FVRFireArmMagazine;
                         if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
                         {
                             if (Mod.magazinesByType[asMagazine.MagazineType] == null)
@@ -2517,10 +2512,10 @@ namespace EFM
                             Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                         }
                     }
-                    else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
+                    else if (MI.physObj is FVRFireArmClip)
                     {
                         Mod.LogInfo("3");
-                        FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
+                        FVRFireArmClip asClip = MI.physObj as FVRFireArmClip;
                         if (Mod.clipsByType.ContainsKey(asClip.ClipType))
                         {
                             if (Mod.clipsByType[asClip.ClipType] == null)
@@ -2546,9 +2541,9 @@ namespace EFM
                             Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
                         }
                     }
-                    else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
+                    else if (MI.physObj is FVRFireArmRound)
                     {
-                        FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                        FVRFireArmRound asRound = MI.physObj as FVRFireArmRound;
                         if (Mod.roundsByType.ContainsKey(asRound.RoundType))
                         {
                             if (Mod.roundsByType[asRound.RoundType] == null)
@@ -2578,18 +2573,18 @@ namespace EFM
             }
 
             // Check for more items that may be contained inside this one
-            if (customItemWrapper != null)
+            if (MI != null)
             {
-                if (customItemWrapper.itemType == Mod.ItemType.Backpack || customItemWrapper.itemType == Mod.ItemType.Container || customItemWrapper.itemType == Mod.ItemType.Pouch)
+                if (MI.itemType == Mod.ItemType.Backpack || MI.itemType == Mod.ItemType.Container || MI.itemType == Mod.ItemType.Pouch)
                 {
-                    foreach (Transform innerItem in customItemWrapper.containerItemRoot)
+                    foreach (Transform innerItem in MI.containerItemRoot)
                     {
                         AddToBaseInventory(innerItem, updateTypeLists);
                     }
                 }
-                else if (customItemWrapper.itemType == Mod.ItemType.Rig || customItemWrapper.itemType == Mod.ItemType.ArmoredRig)
+                else if (MI.itemType == Mod.ItemType.Rig || MI.itemType == Mod.ItemType.ArmoredRig)
                 {
-                    foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
+                    foreach (GameObject innerItem in MI.itemsInSlots)
                     {
                         if (innerItem != null)
                         {
@@ -2600,7 +2595,7 @@ namespace EFM
             }
         }
 
-        public static bool RemoveFromContainer(Transform item, MeatovItem CIW, VanillaItemDescriptor VID)
+        public static bool RemoveFromContainer(Transform item, MeatovItem MI)
         {
             if (item.transform.parent != null && item.transform.parent.parent != null)
             {
@@ -2609,9 +2604,9 @@ namespace EFM
                                                     containerItemWrapper.itemType == Mod.ItemType.Container ||
                                                     containerItemWrapper.itemType == Mod.ItemType.Pouch))
                 {
-                    containerItemWrapper.currentWeight -= CIW != null ? CIW.currentWeight : VID.currentWeight;
+                    containerItemWrapper.currentWeight -= MI.currentWeight;
 
-                    containerItemWrapper.containingVolume -= CIW != null ? CIW.volumes[CIW.mode] : VID.volume;
+                    containerItemWrapper.containingVolume -= MI.volumes[MI.mode];
 
                     // Reset cols of item so that they are non trigger again and can collide with the world and the container
                     FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
@@ -2639,8 +2634,7 @@ namespace EFM
 
         public void RemoveFromBaseInventory(Transform item, bool updateTypeLists)
         {
-            MeatovItem customItemWrapper = item.GetComponent<MeatovItem>();
-            VanillaItemDescriptor vanillaItemDescriptor = item.GetComponent<VanillaItemDescriptor>();
+            MeatovItem MI = item.GetComponent<MeatovItem>();
             FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
             if (physObj == null || physObj.ObjectWrapper == null)
             {
@@ -2649,7 +2643,7 @@ namespace EFM
             string itemID = physObj.ObjectWrapper.ItemID;
             if (Mod.baseInventory.ContainsKey(itemID))
             {
-                Mod.baseInventory[itemID] -= customItemWrapper != null ? customItemWrapper.stack : 1;
+                Mod.baseInventory[itemID] -= MI != null ? MI.stack : 1;
                 baseInventoryObjects[itemID].Remove(item.gameObject);
             }
             else
@@ -2665,11 +2659,11 @@ namespace EFM
 
             if (updateTypeLists)
             {
-                if (customItemWrapper != null)
+                if (MI != null)
                 {
-                    if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                    if (MI.itemType == Mod.ItemType.AmmoBox)
                     {
-                        FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
+                        FVRFireArmMagazine boxMagazine = MI.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                         {
                             if (loadedRound == null)
@@ -2704,13 +2698,9 @@ namespace EFM
                             }
                         }
                     }
-                }
-
-                if (vanillaItemDescriptor != null)
-                {
-                    if (vanillaItemDescriptor.physObj is FVRFireArmMagazine)
+                    else if (MI.physObj is FVRFireArmMagazine)
                     {
-                        FVRFireArmMagazine asMagazine = vanillaItemDescriptor.physObj as FVRFireArmMagazine;
+                        FVRFireArmMagazine asMagazine = MI.physObj as FVRFireArmMagazine;
                         if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
                         {
                             if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
@@ -2735,9 +2725,9 @@ namespace EFM
                             Mod.LogError("Attempting to remove " + itemID + "  which is mag from base inventory but its type was not found in magazinesByType:\n" + Environment.StackTrace);
                         }
                     }
-                    else if (vanillaItemDescriptor.physObj is FVRFireArmClip)
+                    else if (MI.physObj is FVRFireArmClip)
                     {
-                        FVRFireArmClip asClip = vanillaItemDescriptor.physObj as FVRFireArmClip;
+                        FVRFireArmClip asClip = MI.physObj as FVRFireArmClip;
                         if (Mod.clipsByType.ContainsKey(asClip.ClipType))
                         {
                             if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
@@ -2762,9 +2752,9 @@ namespace EFM
                             Mod.LogError("Attempting to remove " + itemID + "  which is clip from base inventory but its type was not found in clipsByType:\n" + Environment.StackTrace);
                         }
                     }
-                    else if (vanillaItemDescriptor.physObj is FVRFireArmRound)
+                    else if (MI.physObj is FVRFireArmRound)
                     {
-                        FVRFireArmRound asRound = vanillaItemDescriptor.physObj as FVRFireArmRound;
+                        FVRFireArmRound asRound = MI.physObj as FVRFireArmRound;
                         if (Mod.roundsByType.ContainsKey(asRound.RoundType))
                         {
                             if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
@@ -2793,18 +2783,18 @@ namespace EFM
             }
 
             // Check for more items that may be contained inside this one
-            if (customItemWrapper != null)
+            if (MI != null)
             {
-                if (customItemWrapper.itemType == Mod.ItemType.Backpack || customItemWrapper.itemType == Mod.ItemType.Container || customItemWrapper.itemType == Mod.ItemType.Pouch)
+                if (MI.itemType == Mod.ItemType.Backpack || MI.itemType == Mod.ItemType.Container || MI.itemType == Mod.ItemType.Pouch)
                 {
-                    foreach (Transform innerItem in customItemWrapper.containerItemRoot)
+                    foreach (Transform innerItem in MI.containerItemRoot)
                     {
                         RemoveFromBaseInventory(innerItem, updateTypeLists);
                     }
                 }
-                else if (customItemWrapper.itemType == Mod.ItemType.Rig || customItemWrapper.itemType == Mod.ItemType.ArmoredRig)
+                else if (MI.itemType == Mod.ItemType.Rig || MI.itemType == Mod.ItemType.ArmoredRig)
                 {
-                    foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
+                    foreach (GameObject innerItem in MI.itemsInSlots)
                     {
                         if (innerItem != null)
                         {
@@ -2837,8 +2827,7 @@ namespace EFM
 
             FVRPhysicalObject itemPhysicalObject = itemObject.GetComponentInChildren<FVRPhysicalObject>();
             FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
-            MeatovItem customItemWrapper = itemObject.GetComponent<MeatovItem>();
-            VanillaItemDescriptor vanillaItemDescriptor = itemObject.GetComponent<VanillaItemDescriptor>();
+            MeatovItem MI = itemObject.GetComponent<MeatovItem>();
 
             // Fill data
 
@@ -2856,16 +2845,8 @@ namespace EFM
                 handStateField.SetValue(hand, FVRViveHand.HandState.GripInteracting);
                 // Must set location index before beginning interaction because begin interactionpatch will consider this to be in hideout and will try to remove it from it
                 // but it isnt in there yet
-                if (customItemWrapper != null)
-                {
-                    customItemWrapper.takeCurrentLocation = false;
-                    customItemWrapper.locationIndex = 0;
-                }
-                else
-                {
-                    vanillaItemDescriptor.takeCurrentLocation = false;
-                    vanillaItemDescriptor.locationIndex = 0;
-                }
+                MI.takeCurrentLocation = false;
+                MI.locationIndex = 0;
                 locationIndex = 0;
                 hand.CurrentInteractable.BeginInteraction(hand);
             }
@@ -2946,11 +2927,11 @@ namespace EFM
                         }
 
                         // Make sure the clip doesnt take the current location index once awake
-                        VanillaItemDescriptor clipVID = clipPhysicalObject.GetComponent<VanillaItemDescriptor>();
+                        MeatovItem clipMI = clipPhysicalObject.GetComponent<MeatovItem>();
                         if (locationIndex != -1)
                         {
-                            clipVID.takeCurrentLocation = false;
-                            clipVID.locationIndex = locationIndex;
+                            clipMI.takeCurrentLocation = false;
+                            clipMI.locationIndex = locationIndex;
                         }
 
                         clipPhysicalObject.Load(firearmPhysicalObject);
@@ -2984,11 +2965,11 @@ namespace EFM
                         if (!internalMag)
                         {
                             // Make sure the mag doesnt take the current location index once awake
-                            VanillaItemDescriptor magVID = magPhysicalObject.GetComponent<VanillaItemDescriptor>();
+                            MeatovItem magMI = magPhysicalObject.GetComponent<MeatovItem>();
                             if (locationIndex != -1)
                             {
-                                magVID.takeCurrentLocation = false;
-                                magVID.locationIndex = locationIndex;
+                                magMI.takeCurrentLocation = false;
+                                magMI.locationIndex = locationIndex;
                             }
 
                             magPhysicalObject.Load(firearmPhysicalObject);
@@ -3005,7 +2986,7 @@ namespace EFM
                 {
                     itemPhysicalObject.SetQuickBeltSlot(Mod.rightShoulderSlot);
 
-                    BeginInteractionPatch.SetItemLocationIndex(0, null, vanillaItemDescriptor);
+                    BeginInteractionPatch.SetItemLocationIndex(0, MI);
 
                     Mod.rightShoulderObject = itemObject;
                     itemObject.SetActive(false);
@@ -3107,51 +3088,51 @@ namespace EFM
             }
 
             // Custom item
-            if (customItemWrapper != null)
+            if (MI != null)
             {
                 if (inAll)
                 {
-                    customItemWrapper.inAll = true;
+                    MI.inAll = true;
                 }
                 else
                 {
                     // When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
-                    Mod.RemoveFromAll(itemPhysicalObject, customItemWrapper, null);
+                    Mod.RemoveFromAll(itemPhysicalObject, MI);
                 }
 
-                customItemWrapper.itemType = (Mod.ItemType)(int)item["itemType"];
-                customItemWrapper.amount = (int)item["amount"];
-                customItemWrapper.looted = (bool)item["looted"];
-                customItemWrapper.insured = (bool)item["insured"];
+                MI.itemType = (Mod.ItemType)(int)item["itemType"];
+                MI.amount = (int)item["amount"];
+                MI.looted = (bool)item["looted"];
+                MI.insured = (bool)item["insured"];
                 if (locationIndex != -1)
                 {
-                    customItemWrapper.takeCurrentLocation = false;
-                    customItemWrapper.locationIndex = locationIndex;
+                    MI.takeCurrentLocation = false;
+                    MI.locationIndex = locationIndex;
                 }
 
                 // Armor
-                if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.BodyArmor)
+                if (MI.itemType == Mod.ItemType.ArmoredRig || MI.itemType == Mod.ItemType.BodyArmor)
                 {
                     Mod.LogInfo("is armor");
-                    customItemWrapper.armor = (float)item["PhysicalObject"]["armor"];
-                    customItemWrapper.maxArmor = (float)item["PhysicalObject"]["maxArmor"];
+                    MI.armor = (float)item["PhysicalObject"]["armor"];
+                    MI.maxArmor = (float)item["PhysicalObject"]["maxArmor"];
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
-                        customItemWrapper.takeCurrentLocation = false;
-                        customItemWrapper.locationIndex = 0;
+                        MI.takeCurrentLocation = false;
+                        MI.locationIndex = 0;
                     }
                 }
 
                 // Rig
-                if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
+                if (MI.itemType == Mod.ItemType.ArmoredRig || MI.itemType == Mod.ItemType.Rig)
                 {
                     Mod.LogInfo("is rig");
                     bool equipped = (int)item["PhysicalObject"]["equipSlot"] != -1;
                     if (equipped)
                     {
-                        customItemWrapper.takeCurrentLocation = false;
-                        customItemWrapper.locationIndex = 0;
+                        MI.takeCurrentLocation = false;
+                        MI.locationIndex = 0;
                     }
 
                     if (item["PhysicalObject"]["quickBeltSlotContents"] != null)
@@ -3161,12 +3142,12 @@ namespace EFM
                         {
                             if (loadedQBContents[j] == null || loadedQBContents[j].Type == JTokenType.Null)
                             {
-                                customItemWrapper.itemsInSlots[j] = null;
+                                MI.itemsInSlots[j] = null;
                             }
                             else
                             {
-                                customItemWrapper.itemsInSlots[j] = LoadSavedItem(null, loadedQBContents[j], customItemWrapper.locationIndex, equipped);
-                                customItemWrapper.itemsInSlots[j].SetActive(false); // Inactive by default // TODO: If we ever save the mode of the rig, and therefore could load an open rig, then we should check this mode before setting active or inactive
+                                MI.itemsInSlots[j] = LoadSavedItem(null, loadedQBContents[j], MI.locationIndex, equipped);
+                                MI.itemsInSlots[j].SetActive(false); // Inactive by default // TODO: If we ever save the mode of the rig, and therefore could load an open rig, then we should check this mode before setting active or inactive
                             }
                         }
 
@@ -3190,21 +3171,21 @@ namespace EFM
                         //}
 
                         // Update the current weight of the rig
-                        MeatovItem.SetCurrentWeight(customItemWrapper);
+                        MeatovItem.SetCurrentWeight(MI);
 
-                        customItemWrapper.UpdateRigMode();
+                        MI.UpdateRigMode();
                     }
                 }
 
                 // Backpack
-                if (customItemWrapper.itemType == Mod.ItemType.Backpack)
+                if (MI.itemType == Mod.ItemType.Backpack)
                 {
                     Mod.LogInfo("is backpack");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
-                        customItemWrapper.takeCurrentLocation = false;
-                        customItemWrapper.locationIndex = 0;
+                        MI.takeCurrentLocation = false;
+                        MI.locationIndex = 0;
                     }
 
                     if (item["PhysicalObject"]["backpackContents"] != null)
@@ -3212,22 +3193,22 @@ namespace EFM
                         JArray loadedBPContents = (JArray)item["PhysicalObject"]["backpackContents"];
                         for (int j = 0; j < loadedBPContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedBPContents[j], customItemWrapper.locationIndex, false);
+                            LoadSavedItem(MI.containerItemRoot, loadedBPContents[j], MI.locationIndex, false);
                         }
                     }
 
-                    customItemWrapper.UpdateBackpackMode();
+                    MI.UpdateBackpackMode();
                 }
 
                 // Container
-                if (customItemWrapper.itemType == Mod.ItemType.Container)
+                if (MI.itemType == Mod.ItemType.Container)
                 {
                     Mod.LogInfo("is container");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
-                        customItemWrapper.takeCurrentLocation = false;
-                        customItemWrapper.locationIndex = 0;
+                        MI.takeCurrentLocation = false;
+                        MI.locationIndex = 0;
                     }
 
                     if (item["PhysicalObject"]["containerContents"] != null)
@@ -3235,20 +3216,20 @@ namespace EFM
                         JArray loadedContainerContents = (JArray)item["PhysicalObject"]["containerContents"];
                         for (int j = 0; j < loadedContainerContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedContainerContents[j], customItemWrapper.locationIndex, false);
+                            LoadSavedItem(MI.containerItemRoot, loadedContainerContents[j], MI.locationIndex, false);
                         }
                     }
                 }
 
                 // Pouch
-                if (customItemWrapper.itemType == Mod.ItemType.Pouch)
+                if (MI.itemType == Mod.ItemType.Pouch)
                 {
                     Mod.LogInfo("is Pouch");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
-                        customItemWrapper.takeCurrentLocation = false;
-                        customItemWrapper.locationIndex = 0;
+                        MI.takeCurrentLocation = false;
+                        MI.locationIndex = 0;
                     }
 
                     if (item["PhysicalObject"]["containerContents"] != null)
@@ -3256,7 +3237,7 @@ namespace EFM
                         JArray loadedPouchContents = (JArray)item["PhysicalObject"]["containerContents"];
                         for (int j = 0; j < loadedPouchContents.Count; ++j)
                         {
-                            LoadSavedItem(customItemWrapper.containerItemRoot, loadedPouchContents[j], customItemWrapper.locationIndex, false);
+                            LoadSavedItem(MI.containerItemRoot, loadedPouchContents[j], MI.locationIndex, false);
                         }
                     }
                 }
@@ -3268,12 +3249,12 @@ namespace EFM
                 //}
 
                 // Money
-                if (customItemWrapper.itemType == Mod.ItemType.Money)
+                if (MI.itemType == Mod.ItemType.Money)
                 {
                     Mod.LogInfo("is money");
 
-                    customItemWrapper.stack = (int)item["stack"];
-                    customItemWrapper.UpdateStackModel();
+                    MI.stack = (int)item["stack"];
+                    MI.UpdateStackModel();
                 }
 
                 // Consumable
@@ -3289,64 +3270,64 @@ namespace EFM
                 //}
 
                 // Earpiece
-                if (customItemWrapper.itemType == Mod.ItemType.Earpiece)
+                if (MI.itemType == Mod.ItemType.Earpiece)
                 {
                     Mod.LogInfo("is Earpiece");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
-                        customItemWrapper.takeCurrentLocation = false;
-                        customItemWrapper.locationIndex = 0;
+                        MI.takeCurrentLocation = false;
+                        MI.locationIndex = 0;
                     }
                 }
 
                 // Face Cover
-                if (customItemWrapper.itemType == Mod.ItemType.FaceCover)
+                if (MI.itemType == Mod.ItemType.FaceCover)
                 {
                     Mod.LogInfo("is Face Cover");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
-                        customItemWrapper.takeCurrentLocation = false;
-                        customItemWrapper.locationIndex = 0;
+                        MI.takeCurrentLocation = false;
+                        MI.locationIndex = 0;
                     }
                 }
 
                 // Eyewear
-                if (customItemWrapper.itemType == Mod.ItemType.Eyewear)
+                if (MI.itemType == Mod.ItemType.Eyewear)
                 {
                     Mod.LogInfo("is Eyewear");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
-                        customItemWrapper.takeCurrentLocation = false;
-                        customItemWrapper.locationIndex = 0;
+                        MI.takeCurrentLocation = false;
+                        MI.locationIndex = 0;
                     }
                 }
 
                 // Headwear
-                if (customItemWrapper.itemType == Mod.ItemType.Headwear)
+                if (MI.itemType == Mod.ItemType.Headwear)
                 {
                     Mod.LogInfo("is Headwear");
 
                     if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                     {
-                        customItemWrapper.takeCurrentLocation = false;
-                        customItemWrapper.locationIndex = 0;
+                        MI.takeCurrentLocation = false;
+                        MI.locationIndex = 0;
                     }
                 }
 
                 // Dogtag
-                if (customItemWrapper.itemType == Mod.ItemType.DogTag)
+                if (MI.itemType == Mod.ItemType.DogTag)
                 {
-                    customItemWrapper.dogtagName = item["dogtagName"].ToString();
-                    customItemWrapper.dogtagLevel = (int)item["dogtagLevel"];
+                    MI.dogtagName = item["dogtagName"].ToString();
+                    MI.dogtagLevel = (int)item["dogtagLevel"];
                 }
 
                 // Equip the item if it has an equip slot
                 if ((int)item["PhysicalObject"]["equipSlot"] != -1)
                 {
-                    customItemWrapper.takeCurrentLocation = false;
+                    MI.takeCurrentLocation = false;
 
                     int equipSlotIndex = (int)item["PhysicalObject"]["equipSlot"];
                     Mod.LogInfo("Item has equip slot: " + equipSlotIndex);
@@ -3368,43 +3349,12 @@ namespace EFM
                 if (item["pocketSlotIndex"] != null)
                 {
                     Mod.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
-                    customItemWrapper.takeCurrentLocation = false;
-                    customItemWrapper.locationIndex = 0;
+                    MI.takeCurrentLocation = false;
+                    MI.locationIndex = 0;
 
                     FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
                     itemPhysicalObject.SetQuickBeltSlot(pocketSlot);
                     itemPhysicalObject.SetParentage(null);
-                }
-            }
-
-            if (vanillaItemDescriptor != null)
-            {
-                if (inAll)
-                {
-                    vanillaItemDescriptor.inAll = true;
-                }
-                else if (itemPhysicalObject is FVRFireArm)
-                {
-                    Mod.RemoveFromAll(itemPhysicalObject, null, vanillaItemDescriptor);
-                }
-
-                if (locationIndex != -1)
-                {
-                    vanillaItemDescriptor.takeCurrentLocation = false;
-                    vanillaItemDescriptor.locationIndex = locationIndex;
-                }
-                vanillaItemDescriptor.looted = (bool)item["looted"];
-                vanillaItemDescriptor.insured = (bool)item["insured"];
-
-                // Put item in pocket if it has pocket index
-                if (item["pocketSlotIndex"] != null)
-                {
-                    Mod.LogInfo("Loaded item has pocket index: " + ((int)item["pocketSlotIndex"]));
-                    vanillaItemDescriptor.takeCurrentLocation = false;
-                    vanillaItemDescriptor.locationIndex = 0;
-
-                    FVRQuickBeltSlot pocketSlot = Mod.pocketSlots[(int)item["pocketSlotIndex"]];
-                    itemPhysicalObject.SetQuickBeltSlot(pocketSlot);
                 }
             }
 
@@ -3427,14 +3377,7 @@ namespace EFM
             itemObject.transform.localRotation = Quaternion.Euler(new Vector3((float)item["PhysicalObject"]["rotationX"], (float)item["PhysicalObject"]["rotationY"], (float)item["PhysicalObject"]["rotationZ"]));
 
             // Ensure item and its contents are all in the correct location index
-            if (customItemWrapper != null)
-            {
-                BeginInteractionPatch.SetItemLocationIndex(customItemWrapper.locationIndex, customItemWrapper, null);
-            }
-            else if (vanillaItemDescriptor != null)
-            {
-                BeginInteractionPatch.SetItemLocationIndex(vanillaItemDescriptor.locationIndex, null, vanillaItemDescriptor);
-            }
+            BeginInteractionPatch.SetItemLocationIndex(MI.locationIndex, MI);
 
             return itemObject;
         }
@@ -5098,15 +5041,6 @@ namespace EFM
                     savedItem["dogtagName"] = customItemWrapper.dogtagName;
                     savedItem["dogtagLevel"] = customItemWrapper.dogtagLevel;
                 }
-            }
-
-            // Vanilla items
-            VanillaItemDescriptor vanillaItemDescriptor = itemPhysicalObject.gameObject.GetComponentInChildren<VanillaItemDescriptor>();
-            if (vanillaItemDescriptor != null)
-            {
-                savedItem["looted"] = vanillaItemDescriptor.looted;
-                savedItem["insured"] = vanillaItemDescriptor.insured;
-                savedItem["foundInRaid"] = vanillaItemDescriptor.foundInRaid;
             }
 
             listToAddTo.Add(savedItem);
