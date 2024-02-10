@@ -58,7 +58,7 @@ namespace EFM
         {
             Mod.LogInfo("LoadHideout called");
 
-            // Load base asset bundle
+            // Load necessary assets
             if (Mod.hideoutBundle == null)
             {
                 Mod.LogInfo("Loading main asset bundles");
@@ -70,6 +70,7 @@ namespace EFM
                 Mod.LogInfo("Loaded hideout bundles");
 
                 Mod.playerStatusUIPrefab = Mod.assetsBundles[0].LoadAsset<GameObject>("StatusUI");
+                Mod.staminaBarPrefab = Mod.assetsBundles[0].LoadAsset<GameObject>("StaminaBar");
             }
 
             if (availableSaveFiles == null)

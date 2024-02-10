@@ -83,7 +83,7 @@ namespace EFM
             // Clear other active slots since we shouldn't have any on load
             Mod.otherActiveSlots.Clear();
 
-            // Manager GC ourselves
+            // Manage GC ourselves
             GCManager = gameObject.AddComponent<GCManager>();
 
             Mod.LogInfo("Raid init called");

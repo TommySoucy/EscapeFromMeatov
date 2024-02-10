@@ -2421,7 +2421,7 @@ namespace EFM
                     return counterCondition.counterConditionLocations == null ||
                             (Mod.currentLocationIndex == 2 && counterCondition.counterConditionLocations.Contains((TraderTaskCounterCondition.CounterConditionLocation)Mod.chosenMapIndex));
                 case TraderTaskCounterCondition.CounterConditionType.InZone:
-                    return counterCondition.zoneIDs == null || counterCondition.zoneIDs.Count == 0 || (Mod.playerStatusManager.currentZone != null && counterCondition.zoneIDs.Contains(Mod.playerStatusManager.currentZone));
+                    return counterCondition.zoneIDs == null || counterCondition.zoneIDs.Count == 0 /*|| (Mod.playerStatusManager.currentZone != null && counterCondition.zoneIDs.Contains(Mod.playerStatusManager.currentZone))*/;
                 case TraderTaskCounterCondition.CounterConditionType.HealthEffect:
                     if(Mod.currentLocationIndex == 2)
                     {

@@ -214,9 +214,6 @@ namespace EFM
                 }
             }
 
-            // Manager GC ourselves
-            //GCManager = gameObject.AddComponent<GCManager>();
-
             // Give any existing rewards to player now
             //if (Mod.rewardsToGive != null && Mod.rewardsToGive.Count > 0)
             //{
@@ -1214,10 +1211,10 @@ namespace EFM
             //Mod.rightDescriptionManager = Mod.rightDescriptionUI.AddComponent<DescriptionManager>();
             //Mod.rightDescriptionManager.Init();
             //// Stamina bar
-            //Mod.staminaBarUI = Instantiate(Mod.staminaBarPrefab, GM.CurrentPlayerBody.Head);
-            //Mod.staminaBarUI.transform.localRotation = Quaternion.Euler(-25, 0, 0);
-            //Mod.staminaBarUI.transform.localPosition = new Vector3(0, -0.4f, 0.6f);
-            //Mod.staminaBarUI.transform.localScale = Vector3.one * 0.0015f;
+            Mod.staminaBarUI = Instantiate(Mod.staminaBarPrefab, GM.CurrentPlayerBody.Head);
+            Mod.staminaBarUI.transform.localRotation = Quaternion.Euler(-25, 0, 0);
+            Mod.staminaBarUI.transform.localPosition = new Vector3(0, -0.4f, 0.6f);
+            Mod.staminaBarUI.transform.localScale = Vector3.one * 0.0015f;
 
             // Add our own hand component to each hand
             Mod.rightHand = GM.CurrentPlayerBody.RightHand.gameObject.AddComponent<Hand>();
@@ -1311,6 +1308,7 @@ namespace EFM
             // Check if we have loaded data
             if (loadedData == null)
             {
+                // No loaded data, set defaults
                 loadedData = new JObject();
                 Mod.level = 1;
                 Mod.skills = new Skill[64];

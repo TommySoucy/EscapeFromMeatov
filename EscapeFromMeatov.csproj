@@ -97,7 +97,6 @@
     <Compile Include="src\patches\DebugPatches.cs" />
     <Compile Include="src\patches\GamePatches.cs" />
     <Compile Include="src\patches\PatchController.cs" />
-    <Compile Include="src\PlayerStatusManager.cs" />
     <Compile Include="src\PointableButton.cs" />
     <Compile Include="src\Raid_Manager.cs" />
     <Compile Include="src\ShoulderStorage.cs" />

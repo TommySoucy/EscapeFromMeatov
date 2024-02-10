@@ -11,6 +11,7 @@ using Valve.VR;
 using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
+using H3MP;
 
 namespace EFM
 {
@@ -122,7 +123,6 @@ namespace EFM
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
 
         // Player
-        public static PlayerStatusManager playerStatusManager;
         public static Dictionary<string, int> playerInventory;
         public static Dictionary<string, List<GameObject>> playerInventoryObjects;
         public static List<InsuredSet> insuredItems;
@@ -199,7 +199,7 @@ namespace EFM
             set
             {
                 _weight = value;
-                playerStatusManager.UpdateWeight();
+                StatusUI.instance.UpdateWeight();
             }
             get
             {
@@ -212,7 +212,7 @@ namespace EFM
             set
             {
                 _currentWeightLimit = value;
-                playerStatusManager.UpdateWeight();
+                StatusUI.instance.UpdateWeight();
             }
             get
             {
@@ -440,7 +440,7 @@ namespace EFM
                                 break;
                             case 4: // Load to meatov menu
                                 Mod.LogInfo("\tDebug: Load to meatov menu");
-                                SteamVR_LoadLevel.Begin("MeatovMenuScene", false, 0.5f, 0f, 0f, 0f, 1f);
+                                SteamVR_LoadLevel.Begin("MeatovMainMenu", false, 0.5f, 0f, 0f, 0f, 1f);
                                 break;
                             case 5: // Start new meatov game
                                 Mod.LogInfo("\tDebug: Start new meatov game");
@@ -503,6 +503,20 @@ namespace EFM
 
                                 Raid_Manager.currentManager.extracted = true;
                                 break;
+                            case 15: // GC Collect
+                                Mod.LogInfo("\tDebug: GC Collect");
+                                if(HideoutController.instance != null)
+                                {
+                                    HideoutController.instance.GCManager.gc_collect();
+                                }
+                                break;
+                            case 16: // GC get total memory
+                                Mod.LogInfo("\tDebug: GC get total memory");
+                                if (HideoutController.instance != null)
+                                {
+                                    Mod.LogInfo("\tMemory: "+ HideoutController.instance.GCManager.gc_get_total_memory(false));
+                                }
+                                break;
                         }
                     }
                 }
@@ -554,7 +568,6 @@ namespace EFM
             itemDescriptionUIPrefab = assetsBundles[0].LoadAsset<GameObject>("ItemDescriptionUI");
             neededForPrefab = assetsBundles[0].LoadAsset<GameObject>("NeededForText");
             ammoContainsPrefab = assetsBundles[0].LoadAsset<GameObject>("ContainsText");
-            staminaBarPrefab = assetsBundles[0].LoadAsset<GameObject>("StaminaBar");
             cartridgeIcon = assetsBundles[0].LoadAsset<Sprite>("ItemCartridge_Icon");
             playerLevelIcons = new Sprite[16];
             for (int i = 1; i <= 16; ++i)
@@ -2399,11 +2412,11 @@ namespace EFM
                 Mod.lootingExp += xp;
                 if (notifMsg == null)
                 {
-                    playerStatusManager.AddNotification(string.Format("Gained {0} looting experience.", xp));
+                    StatusUI.instance.AddNotification(string.Format("Gained {0} looting experience.", xp));
                 }
                 else
                 {
-                    playerStatusManager.AddNotification(string.Format(notifMsg, xp));
+                    StatusUI.instance.AddNotification(string.Format(notifMsg, xp));
                 }
             }
             else if (type == 2)
@@ -2411,11 +2424,11 @@ namespace EFM
                 Mod.healingExp += xp;
                 if (notifMsg == null)
                 {
-                    playerStatusManager.AddNotification(string.Format("Gained {0} healing experience.", xp));
+                    StatusUI.instance.AddNotification(string.Format("Gained {0} healing experience.", xp));
                 }
                 else
                 {
-                    playerStatusManager.AddNotification(string.Format(notifMsg, xp));
+                    StatusUI.instance.AddNotification(string.Format(notifMsg, xp));
                 }
             }
             else if (type == 3)
@@ -2423,16 +2436,16 @@ namespace EFM
                 Mod.explorationExp += xp;
                 if (notifMsg == null)
                 {
-                    playerStatusManager.AddNotification(string.Format("Gained {0} exploration experience.", xp));
+                    StatusUI.instance.AddNotification(string.Format("Gained {0} exploration experience.", xp));
                 }
                 else
                 {
-                    playerStatusManager.AddNotification(string.Format(notifMsg, xp));
+                    StatusUI.instance.AddNotification(string.Format(notifMsg, xp));
                 }
             }
             else
             {
-                playerStatusManager.AddNotification(string.Format("Gained {0} experience.", xp));
+                StatusUI.instance.AddNotification(string.Format("Gained {0} experience.", xp));
             }
         }
 
@@ -2691,6 +2704,14 @@ namespace EFM
                         {
                             hideoutBundle.Unload(true);
                             hideoutBundle = null;
+                            for(int i=0; i < assetsBundles.Length; ++i)
+                            {
+                                if (assetsBundles[i] != null)
+                                {
+                                    assetsBundles[i].Unload(true);
+                                }
+                            }
+                            assetsBundles = null;
                         }
 
                         Mod.currentLocationIndex = -1;

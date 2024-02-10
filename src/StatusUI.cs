@@ -111,15 +111,15 @@ namespace EFM
 
             UpdateStamina();
 
-            //if (mustUpdateTaskListHeight == 0)
-            //{
-            //    UpdateTaskListHeight();
-            //    --mustUpdateTaskListHeight;
-            //}
-            //else if (mustUpdateTaskListHeight > 0)
-            //{
-            //    --mustUpdateTaskListHeight;
-            //}
+            if (mustUpdateTaskListHeight == 0)
+            {
+                UpdateTaskListHeight();
+                --mustUpdateTaskListHeight;
+            }
+            else if (mustUpdateTaskListHeight > 0)
+            {
+                --mustUpdateTaskListHeight;
+            }
         }
 
         public void AddTask(TraderTask task)
@@ -462,6 +462,50 @@ namespace EFM
             }
         }
 
+        public void UpdateWeight()
+        {
+            weight.text = String.Format("{0:0.#}", Mod.weight / 1000.0f) + "/ " + String.Format("{0:0.#}", Mod.currentWeightLimit / 1000.0f);
+            if (Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100.0f * 20) // Current weight limit + 20%
+            {
+                weight.color = Color.red;
+
+                // Enable hard overweight icon, disable overweight icon
+                effectIcons[6].SetActive(false);
+                effectIcons[7].SetActive(true);
+            }
+            else if (Mod.weight > Mod.currentWeightLimit)
+            {
+                weight.color = Color.yellow;
+
+                // Enable overweight icon, disable hard overweight icon
+                effectIcons[6].SetActive(true);
+                effectIcons[7].SetActive(false);
+            }
+            else
+            {
+                weight.color = Color.white;
+
+                // Disable overweight icons
+                effectIcons[6].SetActive(false);
+                effectIcons[7].SetActive(false);
+            }
+        }
+
+        public void AddNotification(string text)
+        {
+            notificationAudio.Play();
+            GameObject notification = Instantiate(notificationPrefab, notificationParent.transform);
+            notification.SetActive(true);
+            notification.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = text;
+            notification.AddComponent<DestroyTimer>().timer = 5;
+            if (notificationParent.transform.childCount > 10)
+            {
+                GameObject firstChild = notificationParent.transform.GetChild(1).gameObject;
+                firstChild.SetActive(false);
+                Destroy(firstChild);
+            }
+        }
+
         public void Toggle()
         {
             if (IsOpen())
@@ -500,12 +544,16 @@ namespace EFM
 
         public void OnTaskClicked()
         {
-
+            tasksView.SetActive(!tasksView.activeSelf);
+            tasksClosedIcon.SetActive(!tasksView.activeSelf);
+            tasksOpenIcon.SetActive(tasksView.activeSelf);
         }
 
         public void OnInfoClicked()
         {
-
+            infoView.SetActive(!infoView.activeSelf);
+            infoClosedIcon.SetActive(!infoView.activeSelf);
+            infoOpenIcon.SetActive(infoView.activeSelf);
         }
 
         [Serializable]

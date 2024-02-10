@@ -285,52 +285,59 @@ namespace EFM
                 if (parent.Equals("5447b5cf4bdc2d65278b4567"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.Pistol;
+                    break;
                 }
                 else if (parent.Equals("617f1ef5e8b54b0998387733"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.Revolver;
+                    break;
                 }
                 else if (parent.Equals("5447b5e04bdc2d62278b4567"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.SMG;
+                    break;
                 }
                 else if (parent.Equals("5447b5f14bdc2d61278b4567"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.Assault;
+                    break;
                 }
                 else if (parent.Equals("5447b6094bdc2dc3278b4567"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.Shotgun;
+                    break;
                 }
                 else if (parent.Equals("5447b6254bdc2dc3278b4568"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.Sniper;
+                    break;
                 }
                 else if (parent.Equals("5447b5fc4bdc2d87278b4567"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.LMG;
+                    break;
                 }
                 else if (parent.Equals("5447bed64bdc2d97278b4568"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.HMG;
+                    break;
                 }
                 else if (parent.Equals("5447bedf4bdc2d87278b4568"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.Launcher;
+                    break;
                 }
                 else if (parent.Equals("5447bee84bdc2dc3278b4569"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.AttachedLauncher;
+                    break;
                 }
                 else if (parent.Equals("5447b6194bdc2d67278b4567"))
                 {
                     meatovItem.weaponClass = Mod.WeaponClass.DMR;
+                    break;
                 }
-                else
-                {
-                    continue;
-                }
-                break;
+                continue;
             }
         }
 
