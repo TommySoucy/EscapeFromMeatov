@@ -630,9 +630,9 @@ namespace EFM
 
             Mod.LogInfo("0");
             // Player money
-            traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("203") ? Mod.baseInventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
-            traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("202") ? Mod.baseInventory["202"] : 0) + (Mod.playerInventory.ContainsKey("202") ? Mod.playerInventory["202"] : 0));
-            traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(2).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("201") ? Mod.baseInventory["201"] : 0) + (Mod.playerInventory.ContainsKey("201") ? Mod.playerInventory["201"] : 0));
+            traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((HideoutController.instance.inventory.ContainsKey("203") ? HideoutController.instance.inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
+            traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((HideoutController.instance.inventory.ContainsKey("202") ? HideoutController.instance.inventory["202"] : 0) + (Mod.playerInventory.ContainsKey("202") ? Mod.playerInventory["202"] : 0));
+            traderDisplay.GetChild(0).GetChild(2).GetChild(1).GetChild(2).GetChild(2).GetChild(1).GetComponent<Text>().text = FormatCompleteMoneyString((HideoutController.instance.inventory.ContainsKey("201") ? HideoutController.instance.inventory["201"] : 0) + (Mod.playerInventory.ContainsKey("201") ? Mod.playerInventory["201"] : 0));
 
             Mod.LogInfo("0");
             // Main
@@ -4465,7 +4465,7 @@ namespace EFM
                             }
 
                             CIW.stack -= amountToRemove;
-                            Mod.baseInventory[CIW.H3ID] -= amountToRemove;
+                            HideoutController.instance.inventory[CIW.H3ID] -= amountToRemove;
                             HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
                             amountToRemove = 0;
                         }

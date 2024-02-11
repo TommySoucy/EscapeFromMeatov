@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Valve.Newtonsoft.Json.Linq;
+using static EFM.Requirement;
 
 namespace EFM
 {
@@ -9,9 +11,15 @@ namespace EFM
     {
         // Main
         public AreaController controller;
+        public int index;
         public int startLevel;
         [NonSerialized]
         public int currentLevel;
+
+        // Data
+        public int[] constructionTimePerLevel; // In seconds
+        public Requirement[][] requirementsPerLevel;
+        public Bonus[][] bonusesPerLevel;
 
         // Power
         public bool requiresPower;
@@ -38,6 +46,77 @@ namespace EFM
         public AreaSlots[] areaSlotsPerLevel;
         public AreaVolumes[] areaVolumesPerLevel;
         public bool craftOuputSlot; // False is Volume, output will always be first in slot/vol per level
+
+        public void Awake()
+        {
+            LoadData();
+
+            UI.Init();
+        }
+
+        public void LoadData()
+        {
+            JToken areaData = null;
+            for(int i=0; i < Mod.areasDB.Count; ++i)
+            {
+                if ((int)Mod.areasDB[i]["type"] == index)
+                {
+                    areaData = Mod.areasDB[i];
+                }
+            }
+
+            constructionTimePerLevel = new int[levels.Length];
+            requirementsPerLevel = new Requirement[levels.Length][];
+            for (int i=0; i < levels.Length; ++i)
+            {
+                JToken levelData = areaData["stages"][i.ToString()];
+                constructionTimePerLevel[i] = levelData["constructionTime"] == null ? 0 : (int)levelData["constructionTime"];
+
+                JArray levelRequirements = levelData["requirements"] as JArray;
+                if (levelRequirements == null)
+                {
+                    requirementsPerLevel[i] = null;
+                }
+                else
+                {
+                    requirementsPerLevel[i] = new Requirement[levelRequirements.Count];
+                    for(int j = 0; j < levelRequirements.Count; ++j)
+                    {
+                        Requirement currentRequirement = new Requirement(levelRequirements[j]);
+                        if(currentRequirement.requirementType == Requirement.RequirementType.None)
+                        {
+                            requirementsPerLevel[i][j] = null;
+                        }
+                        else
+                        {
+                            requirementsPerLevel[i][j] = currentRequirement;
+                        }
+                    }
+                }
+
+                JArray levelBonuses = levelData["bonuses"] as JArray;
+                if (levelBonuses == null)
+                {
+                    bonusesPerLevel[i] = null;
+                }
+                else
+                {
+                    bonusesPerLevel[i] = new Bonus[levelBonuses.Count];
+                    for(int j = 0; j < levelBonuses.Count; ++j)
+                    {
+                        Bonus currentBonus = new Bonus(levelBonuses[j]);
+                        if(currentBonus.bonusType == Bonus.BonusType.None)
+                        {
+                            bonusesPerLevel[i][j] = null;
+                        }
+                        else
+                        {
+                            bonusesPerLevel[i][j] = currentBonus;
+                        }
+                    }
+                }
+            }
+        }
 
         public void Start()
         {
@@ -155,6 +234,205 @@ namespace EFM
             newClip.SetData(data, 0);
 
             return newClip;
+        }
+    }
+
+    public class Requirement
+    {
+        public enum RequirementType
+        {
+            None,
+            Item,
+            Area,
+            Skill,
+            Trader
+        }
+        public RequirementType requirementType;
+
+        // Item
+        public string itemTemplateID;
+        public int itemCount;
+
+        // Area
+        public int areaIndex;
+        public int areaLevel;
+
+        // Skill
+        public string skillName;
+        public int skillLevel;
+
+        // Trader
+        public string traderID;
+        public int traderLevel;
+
+        public Requirement(JToken requirementData)
+        {
+            requirementType = RequirementTypeFromName(requirementData["type"].ToString());
+
+            switch (requirementType)
+            {
+                case RequirementType.Item:
+                    itemTemplateID = requirementData["templateId"].ToString();
+                    itemCount = (int)requirementData["count"];
+                    break;
+                case RequirementType.Area:
+                    areaIndex = (int)requirementData["areaType"];
+                    areaLevel = (int)requirementData["requiredLevel"];
+                    break;
+                case RequirementType.Skill:
+                    skillName = requirementData["skillName"].ToString();
+                    skillLevel = (int)requirementData["skillLevel"];
+                    break;
+                case RequirementType.Trader:
+                    traderID = requirementData["traderId"].ToString();
+                    traderLevel = (int)requirementData["loyaltyLevel"];
+                    break;
+            }
+        }
+
+        public static RequirementType RequirementTypeFromName(string name)
+        {
+            switch (name)
+            {
+                case "Item":
+                    return RequirementType.Item;
+                case "Area":
+                    return RequirementType.Area;
+                case "Skill":
+                    return RequirementType.Skill;
+                case "TraderLoyalty":
+                    return RequirementType.Trader;
+                default:
+                    Mod.LogError("DEV: Requirement.RequirementTypeFromName returning None for name: " + name);
+                    return RequirementType.None;
+            }
+        }
+    }
+
+    public class Bonus
+    {
+        public enum BonusType
+        {
+            None,
+            EnergyRegeneration,
+            DebuffEndDelay,
+            AdditionalSlots,
+            UnlockArmorRepair,
+            RepairArmorBonus,
+            StashSize,
+            HydrationRegeneration,
+            HealthRegeneration,
+            TextBonus,
+            MaximumEnergyReserve,
+            ScavCooldownTimer,
+            QuestMoneyReward,
+            InsuranceReturnTime,
+            RagfairCommission,
+            ExperienceRate,
+            SkillGroupLevelingBoost,
+            FuelConsumption,
+            UnlockWeaponModification,
+            UnlockWeaponRepair,
+            RepairWeaponBonus,
+        }
+        public BonusType bonusType;
+
+        public int value;
+        public bool passive;
+        public bool visible;
+        public bool production;
+
+        // AdditionalSlots, TextBonus
+        public string iconPath;
+
+        // TextBonus
+        public string ID;
+
+        // SkillGroupLevelingBoost
+        public Skill.SkillType skillType;
+
+        public Bonus(JToken bonusData)
+        {
+            bonusType = BonusTypeFromName(bonusData["type"].ToString());
+
+            if(bonusData["value"] != null)
+            {
+                value = (int)bonusData["value"];
+            }
+            if (bonusData["passive"] != null)
+            {
+                passive = (bool)bonusData["passive"];
+            }
+            if (bonusData["production"] != null)
+            {
+                production = (bool)bonusData["production"];
+            }
+            if (bonusData["visible"] != null)
+            {
+                visible = (bool)bonusData["visible"];
+            }
+            if (bonusData["icon"] != null)
+            {
+                iconPath = bonusData["icon"].ToString();
+            }
+            if (bonusData["id"] != null)
+            {
+                ID = bonusData["id"].ToString();
+            }
+            if (bonusData["skillType"] != null)
+            {
+                skillType = Skill.SkillTypeFromName(bonusData["skillType"].ToString());
+            }
+        }
+
+        public static BonusType BonusTypeFromName(string name)
+        {
+            switch (name)
+            {
+                case "EnergyRegeneration":
+                    return BonusType.EnergyRegeneration;
+                case "DebuffEndDelay":
+                    return BonusType.DebuffEndDelay;
+                case "AdditionalSlots":
+                    return BonusType.AdditionalSlots;
+                case "UnlockArmorRepair":
+                    return BonusType.UnlockArmorRepair;
+                case "RepairArmorBonus":
+                    return BonusType.RepairArmorBonus;
+                case "StashSize":
+                    return BonusType.StashSize;
+                case "HydrationRegeneration":
+                    return BonusType.HydrationRegeneration;
+                case "HealthRegeneration":
+                    return BonusType.HealthRegeneration;
+                case "TextBonus":
+                    return BonusType.TextBonus;
+                case "MaximumEnergyReserve":
+                    return BonusType.MaximumEnergyReserve;
+                case "ScavCooldownTimer":
+                    return BonusType.ScavCooldownTimer;
+                case "QuestMoneyReward":
+                    return BonusType.QuestMoneyReward;
+                case "InsuranceReturnTime":
+                    return BonusType.InsuranceReturnTime;
+                case "RagfairCommission":
+                    return BonusType.RagfairCommission;
+                case "ExperienceRate":
+                    return BonusType.ExperienceRate;
+                case "SkillGroupLevelingBoost":
+                    return BonusType.SkillGroupLevelingBoost;
+                case "FuelConsumption":
+                    return BonusType.FuelConsumption;
+                case "UnlockWeaponModification":
+                    return BonusType.UnlockWeaponModification;
+                case "UnlockWeaponRepair":
+                    return BonusType.UnlockWeaponRepair;
+                case "RepairWeaponBonus":
+                    return BonusType.RepairWeaponBonus;
+                default:
+                    Mod.LogError("DEV: Bonus.BonusTypeFromName returning None for name: " + name);
+                    return BonusType.None;
+            }
         }
     }
 

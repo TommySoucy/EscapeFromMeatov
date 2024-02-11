@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace EFM
 {
-    public class Bonus : MonoBehaviour
+    public class BonusUI : MonoBehaviour
     {
         public Sprite[] bonusIcons; // Exp, bitcoin, createItemGeneric, createItemMed, fuel slots, scav item, shooting range, unlocked, GPUslots
         public Image bonusIcon;

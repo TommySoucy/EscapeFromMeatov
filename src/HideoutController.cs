@@ -26,6 +26,7 @@ namespace EFM
 
         // Objects
         public Transform spawn;
+        public AreaController areaController;
 
         // UI
         public Button loadButton;
@@ -107,6 +108,10 @@ namespace EFM
         public static AudioClip boozeGenAudio;
         public static AudioClip bitcoinFarmAudio;
 
+        // Live data
+        public static float[] defaultHealthRates;
+        public static float defaultEnergyRate;
+        public static float defaultHydrationRate;
         public float time;
         private bool cancelRaidLoad;
         private bool loadingRaid;
@@ -115,8 +120,9 @@ namespace EFM
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         private int insuredSetIndex = 0;
         private float scavTimer;
+        public Dictionary<string, int> inventory;
         public List<BaseAreaManager> baseAreaManagers;
-        public Dictionary<string, List<GameObject>> baseInventoryObjects;
+        public Dictionary<string, List<GameObject>> inventoryObjects;
         private Dictionary<int, int[]> fullPartConditions;
         private Dictionary<int, GameObject> medicalPartElements;
         private int totalMedicalTreatmentPrice;
@@ -284,8 +290,8 @@ namespace EFM
                         {
                             Mod.health[i] = Mod.defaultMaxHealth[i];
                         }
-                        Mod.energy = Mod.maxEnergy;
-                        Mod.hydration = Mod.maxHydration;
+                        Mod.energy = Mod.defaultMaxEnergy;
+                        Mod.hydration = Mod.defaultMaxHydration;
                         Mod.stamina = Mod.maxStamina;
                         Mod.weight = 0;
                     }
@@ -1311,18 +1317,49 @@ namespace EFM
                 // No loaded data, set defaults
                 loadedData = new JObject();
                 Mod.level = 1;
+
+                Mod.currentMaxHealth = new float[7];
+                for (int i = 0; i < 7; ++i)
+                {
+                    Mod.currentMaxHealth[i] = Mod.defaultMaxHealth[i];
+                }
+                Mod.health = new float[7];
+                for (int i = 0; i < 7; ++i)
+                {
+                    Mod.health[i] = Mod.currentMaxHealth[i];
+                }
+                Mod.currentHealthRates = new float[7];
+                Mod.currentNonLethalHealthRates = new float[7];
+                for (int i = 0; i < 7; ++i)
+                {
+                    Mod.currentNonLethalHealthRates[i] = defaultHealthRates[i];
+                }
+
+                Mod.currentMaxEnergy = Mod.defaultMaxEnergy;
+                Mod.energy = Mod.currentMaxEnergy;
+                Mod.currentEnergyRate = defaultEnergyRate;
+                Mod.currentMaxHydration = Mod.defaultMaxHydration;
+                Mod.hydration = Mod.currentMaxHydration;
+                Mod.currentHydrationRate = defaultHydrationRate;
+                Mod.weight = 0;
+
                 Mod.skills = new Skill[64];
                 for (int i = 0; i < 64; ++i)
                 {
                     Mod.skills[i] = new Skill();
-                    // 0-6 unless 4 physical
-                    // 28-53 unless 52 practical
-                    // 54-63 special
-                    if (i >= 0 && i <= 6 && i != 4)
+                    if (i >= 0 && i <= 6)
                     {
                         Mod.skills[i].skillType = Skill.SkillType.Physical;
                     }
-                    else if (i >= 28 && i <= 53 && i != 52)
+                    else if (i >= 7 && i <= 11)
+                    {
+                        Mod.skills[i].skillType = Skill.SkillType.Mental;
+                    }
+                    else if (i >= 12 && i <= 27)
+                    {
+                        Mod.skills[i].skillType = Skill.SkillType.Combat;
+                    }
+                    else if (i >= 28 && i <= 53)
                     {
                         Mod.skills[i].skillType = Skill.SkillType.Practical;
                     }
@@ -1332,14 +1369,17 @@ namespace EFM
                     }
                 }
 
-                Mod.health = new float[7];
-                for (int i = 0; i < 7; ++i)
+                if (inventory == null)
                 {
-                    Mod.health[i] = Mod.currentMaxHealth[i];
+                    inventory = new Dictionary<string, int>();
+                    inventoryObjects = new Dictionary<string, List<GameObject>>();
                 }
-                Mod.hydration = 100;
-                Mod.energy = 100;
-                Mod.weight = 0;
+
+                if (Mod.playerInventory == null)
+                {
+                    Mod.playerInventory = new Dictionary<string, int>();
+                    Mod.playerInventoryObjects = new Dictionary<string, List<GameObject>>();
+                }
 
                 // Spawn standard edition starting items
                 //Transform itemRoot = transform.GetChild(transform.childCount - 2);
@@ -1654,20 +1694,6 @@ namespace EFM
                 //consumableCIW = consumableObject.GetComponent<MeatovItem>();
                 //consumableCIW.amount = consumableCIW.maxAmount;
 
-                // Instantiate areas
-                //baseAreaManagers = new List<BaseAreaManager>();
-                //for (int i = 0; i < 22; ++i)
-                //{
-                //    BaseAreaManager currentBaseAreaManager = transform.GetChild(1).GetChild(i).gameObject.AddComponent<BaseAreaManager>();
-                //    currentBaseAreaManager.baseManager = this;
-                //    currentBaseAreaManager.areaIndex = i;
-                //    currentBaseAreaManager.level = i == 3 ? 1 : 0; // Stash starts at level 1
-                //    currentBaseAreaManager.constructing = false;
-                //    currentBaseAreaManager.slotItems = new GameObject[0];
-
-                //    baseAreaManagers.Add(currentBaseAreaManager);
-                //}
-
                 //// Instantiate other
                 //if (TraderStatus.waitingQuestConditions == null)
                 //{
@@ -1830,14 +1856,6 @@ namespace EFM
                 //    Mod.triggeredExplorationTriggers.Add(new List<bool>());
                 //}
 
-                // Init lists
-                //UpdateBaseInventory();
-                //if (Mod.playerInventory == null)
-                //{
-                //    Mod.playerInventory = new Dictionary<string, int>();
-                //    Mod.playerInventoryObjects = new Dictionary<string, List<GameObject>>();
-                //}
-
                 // Setup tutorial
                 //SetupTutorial();
 
@@ -1868,10 +1886,10 @@ namespace EFM
                 {
                     Mod.health[i] += Mathf.Min(Mod.currentHealthRates[i] * minutesSinceSave, Mod.currentMaxHealth[i]);
                 }
-                Mod.maxHydration = (float)loadedData["maxHydration"];
-                Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.maxHydration);
-                Mod.maxEnergy = (float)loadedData["maxEnergy"];
-                Mod.energy = Mathf.Min((float)loadedData["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.maxEnergy);
+                Mod.defaultMaxHydration = (float)loadedData["maxHydration"];
+                Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.defaultMaxHydration);
+                Mod.defaultMaxEnergy = (float)loadedData["maxEnergy"];
+                Mod.energy = Mathf.Min((float)loadedData["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.defaultMaxEnergy);
                 Mod.stamina = (float)loadedData["stamina"];
                 Mod.maxStamina = (float)loadedData["maxStamina"];
                 Mod.weight = (int)loadedData["weight"];
@@ -1979,10 +1997,6 @@ namespace EFM
                     Mod.insuredItems.Add(newInsuredSet);
                 }
             }
-
-            // Count each type of item we have
-            UpdateBaseInventory();
-            Mod.UpdatePlayerInventory();
 
             Mod.preventLoadMagUpdateLists = false;
 
@@ -2383,43 +2397,6 @@ namespace EFM
             pointableButton.Button.onClick.AddListener(() => { OnDonateClick(tutorialTransform.GetChild(18).GetChild(5).gameObject); });
         }
 
-        public void UpdateBaseInventory()
-        {
-            if (Mod.baseInventory == null)
-            {
-                Mod.baseInventory = new Dictionary<string, int>();
-            }
-            if (baseInventoryObjects == null)
-            {
-                baseInventoryObjects = new Dictionary<string, List<GameObject>>();
-            }
-
-            Mod.baseInventory.Clear();
-            baseInventoryObjects.Clear();
-
-            Transform itemsRoot = transform.GetChild(2);
-
-            foreach (Transform item in itemsRoot)
-            {
-                AddToBaseInventory(item, true);
-            }
-
-            // Also add items in trade volume
-            foreach (Transform item in transform.GetChild(1).GetChild(24).GetChild(1).GetChild(1))
-            {
-                AddToBaseInventory(item, true);
-            }
-
-            // Also add items from scav raid return nodes
-            foreach (Transform node in transform.GetChild(1).GetChild(25))
-            {
-                if (node.childCount > 0)
-                {
-                    AddToBaseInventory(node.GetChild(0), true);
-                }
-            }
-        }
-
         public void AddToBaseInventory(Transform item, bool updateTypeLists)
         {
             MeatovItem MI = item.GetComponent<MeatovItem>();
@@ -2429,15 +2406,15 @@ namespace EFM
                 return; // Grenade pin for example, has no wrapper
             }
             string itemID = physObj.ObjectWrapper.ItemID;
-            if (Mod.baseInventory.ContainsKey(itemID))
+            if (inventory.ContainsKey(itemID))
             {
-                Mod.baseInventory[itemID] += MI != null ? (MI.stack > 0 ? MI.stack : 1) : 1;
-                baseInventoryObjects[itemID].Add(item.gameObject);
+                inventory[itemID] += MI != null ? (MI.stack > 0 ? MI.stack : 1) : 1;
+                inventoryObjects[itemID].Add(item.gameObject);
             }
             else
             {
-                Mod.baseInventory.Add(itemID, MI != null ? (MI.stack > 0 ? MI.stack : 1) : 1);
-                baseInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
+                inventory.Add(itemID, MI != null ? (MI.stack > 0 ? MI.stack : 1) : 1);
+                inventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
             }
 
             if (updateTypeLists)
@@ -2639,20 +2616,20 @@ namespace EFM
                 return; // Grenade pin for example, has no wrapper
             }
             string itemID = physObj.ObjectWrapper.ItemID;
-            if (Mod.baseInventory.ContainsKey(itemID))
+            if (inventory.ContainsKey(itemID))
             {
-                Mod.baseInventory[itemID] -= MI != null ? MI.stack : 1;
-                baseInventoryObjects[itemID].Remove(item.gameObject);
+                inventory[itemID] -= MI != null ? MI.stack : 1;
+                inventoryObjects[itemID].Remove(item.gameObject);
             }
             else
             {
                 Mod.LogError("Attempting to remove " + itemID + " from base inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
-            if (Mod.baseInventory[itemID] == 0)
+            if (inventory[itemID] == 0)
             {
-                Mod.baseInventory.Remove(itemID);
-                baseInventoryObjects.Remove(itemID);
+                inventory.Remove(itemID);
+                inventoryObjects.Remove(itemID);
             }
 
             if (updateTypeLists)
@@ -3455,8 +3432,8 @@ namespace EFM
                             Mod.health[i] = 0.3f * Mod.currentMaxHealth[i];
                         }
 
-                        Mod.hydration = 0.3f * Mod.maxHydration;
-                        Mod.energy = 0.3f * Mod.maxEnergy;
+                        Mod.hydration = 0.3f * Mod.defaultMaxHydration;
+                        Mod.energy = 0.3f * Mod.defaultMaxEnergy;
 
                         // Remove all effects
                         Effect.RemoveEffects();
@@ -3758,7 +3735,7 @@ namespace EFM
                     medicalScreenTotalHealthText = medicalScreen.GetChild(4).GetChild(2).GetChild(1).GetComponent<Text>();
                     medicalScreenTotalHealthText.text = totalHealth.ToString() + "/440";
 
-                    medicalScreen.GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("203") ? Mod.baseInventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
+                    medicalScreen.GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
 
                     Mod.LogInfo("\tSet total health");
                     // Set hover scrolls
@@ -3825,7 +3802,7 @@ namespace EFM
 
         private void UpdateTreatmentApply()
         {
-            int playerRoubleCount = (Mod.baseInventory.ContainsKey("203") ? Mod.baseInventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0);
+            int playerRoubleCount = (inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0);
             if (playerRoubleCount < totalMedicalTreatmentPrice)
             {
                 transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetComponent<Collider>().enabled = false;
@@ -4254,16 +4231,16 @@ namespace EFM
             // Remove money from player
             int amountToRemoveFromBase = 0;
             int amountToRemoveFromPlayer = 0;
-            if (Mod.baseInventory.ContainsKey("203"))
+            if (inventory.ContainsKey("203"))
             {
-                if (Mod.baseInventory["203"] >= totalMedicalTreatmentPrice)
+                if (inventory["203"] >= totalMedicalTreatmentPrice)
                 {
                     amountToRemoveFromBase = totalMedicalTreatmentPrice;
                 }
                 else
                 {
-                    amountToRemoveFromBase = Mod.baseInventory["203"];
-                    amountToRemoveFromPlayer = totalMedicalTreatmentPrice - Mod.baseInventory["203"];
+                    amountToRemoveFromBase = inventory["203"];
+                    amountToRemoveFromPlayer = totalMedicalTreatmentPrice - inventory["203"];
                 }
             }
             else
@@ -4272,8 +4249,8 @@ namespace EFM
             }
             if (amountToRemoveFromBase > 0)
             {
-                Mod.baseInventory["203"] = Mod.baseInventory["203"] - amountToRemoveFromBase;
-                List<GameObject> objectList = baseInventoryObjects["203"];
+                inventory["203"] = inventory["203"] - amountToRemoveFromBase;
+                List<GameObject> objectList = inventoryObjects["203"];
                 for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i)
                 {
                     GameObject toCheck = objectList[objectList.Count - 1];
@@ -4324,7 +4301,7 @@ namespace EFM
                 baseAreaManager.UpdateBasedOnItem("203");
             }
 
-            transform.GetChild(0).GetChild(0).GetChild(13).GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((Mod.baseInventory.ContainsKey("203") ? Mod.baseInventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
+            transform.GetChild(0).GetChild(0).GetChild(13).GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
         }
 
         private void ResetPlayerRig()
@@ -4351,9 +4328,9 @@ namespace EFM
             // Write player status
             loadedData["health"] = JArray.FromObject(Mod.health);
             loadedData["hydration"] = Mod.hydration;
-            loadedData["maxHydration"] = Mod.maxHydration;
+            loadedData["maxHydration"] = Mod.defaultMaxHydration;
             loadedData["energy"] = Mod.energy;
-            loadedData["maxEnergy"] = Mod.maxEnergy;
+            loadedData["maxEnergy"] = Mod.defaultMaxEnergy;
             loadedData["stamina"] = Mod.stamina;
             loadedData["maxStamina"] = Mod.maxStamina;
             loadedData["weight"] = Mod.weight;

@@ -69,7 +69,6 @@ namespace EFM
         public static ShoulderStorage rightShoulderSlot;
         public static GameObject leftShoulderObject;
         public static GameObject rightShoulderObject;
-        public static Dictionary<string, int> baseInventory;
         public static Raid_Manager currentRaidManager;
         public static Dictionary<string, int>[] requiredPerArea;
         public static List<string> wishList;
@@ -123,41 +122,33 @@ namespace EFM
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
 
         // Player
+        public static int level = 1;
+        public static int experience = 0;
+        public static bool dead;
+        // Parts arrays: 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
+        public static float[] defaultMaxHealth;
+        public static float[] currentMaxHealth;
+        public static float[] health; 
+        public static float[] currentHealthRates;
+        public static float[] currentNonLethalHealthRates;
+        public static float energy;
+        public static float defaultMaxEnergy;
+        public static float currentMaxEnergy;
+        public static float hydration;
+        public static float defaultMaxHydration;
+        public static float currentMaxHydration;
+        public static readonly float raidEnergyRate = -3.2f; // TODO: Move this to RaidController and set it on LoadDB globals>config>Health>Effects>Existence
+        public static readonly float raidHydrationRate = -2.6f; // TODO: Move this to RaidController and set it on LoadDB globals>config>Health>Effects>Existence
+        public static float currentEnergyRate;
+        public static float currentHydrationRate;
         public static Dictionary<string, int> playerInventory;
         public static Dictionary<string, List<GameObject>> playerInventoryObjects;
         public static List<InsuredSet> insuredItems;
-        public static bool dead;
-        public static readonly float[] defaultMaxHealth = { 35, 85, 70, 60, 60, 65, 65 };
-        public static float[] currentMaxHealth = { 35, 85, 70, 60, 60, 65, 65 };
-        public static float[] health; // 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
-        public static float[] hideoutHealthRates = { 0.6125f, 1.4f, 1.225f, 1.05f, 1.05f, 1.1375f, 1.1375f }; // Hideout default healthrates
-        public static float[] currentHealthRates = new float[7]; // Should change depending on whether we are in raid or hideout
-        public static float[] currentNonLethalHealthRates = new float[7]; // Should change depending on whether we are in raid or hideout
-        public static readonly float raidEnergyRate = -3.2f;
-        public static readonly float raidHydrationRate = -2.6f;
-        public static readonly float hideoutEnergyRate = 1;
-        public static readonly float hideoutHydrationRate = 1;
-        public static float currentEnergyRate = 1;
-        public static float currentHydrationRate = 1;
-        public static Text[] partHealthTexts;
-        public static Image[] partHealthImages;
-        public static Text healthText;
-        public static Text healthDeltaText;
-        public static float hydration = 100;
-        public static float maxHydration = 100;
-        public static Text hydrationText;
-        public static Text hydrationDeltaText;
-        public static float energy = 100;
-        public static float maxEnergy = 100;
-        public static Text energyText;
-        public static Text energyDeltaText;
         public static float staminaTimer = 0;
         public static float stamina = 100;
         public static float maxStamina = 100;
         public static float currentMaxStamina = 100;
         public static Skill[] skills;
-        public static int level = 1;
-        public static int experience = 0;
         public static float sprintStaminaDrain = 4.1f;
         public static float overweightStaminaDrain = 4f;
         public static float staminaRestoration = 4.4f;
@@ -1530,6 +1521,197 @@ namespace EFM
 
         private void LoadDB()
         {
+            globalDB = JObject.Parse(File.ReadAllText(path + "/database/globals.json"));
+
+            JToken globalPartsHealth = globalDB["config"]["Health"]["ProfileHealthSettings"]["BodyPartsSettings"];
+            defaultMaxHealth = new float[7];
+            defaultMaxHealth[0] = (float)globalPartsHealth["Head"]["Default"];
+            defaultMaxHealth[1] = (float)globalPartsHealth["Chest"]["Default"];
+            defaultMaxHealth[2] = (float)globalPartsHealth["Stomach"]["Default"];
+            defaultMaxHealth[3] = (float)globalPartsHealth["LeftArm"]["Default"];
+            defaultMaxHealth[4] = (float)globalPartsHealth["RightArm"]["Default"];
+            defaultMaxHealth[5] = (float)globalPartsHealth["LeftLeg"]["Default"];
+            defaultMaxHealth[6] = (float)globalPartsHealth["RightLeg"]["Default"];
+
+            JToken globalRegens = globalDB["config"]["Health"]["Effects"]["Regeneration"];
+            HideoutController.defaultHealthRates = new float[7];
+            HideoutController.defaultHealthRates[0] = (float)globalRegens["BodyHealth"]["Head"]["Value"];
+            HideoutController.defaultHealthRates[1] = (float)globalRegens["BodyHealth"]["Chest"]["Value"];
+            HideoutController.defaultHealthRates[2] = (float)globalRegens["BodyHealth"]["Stomach"]["Value"];
+            HideoutController.defaultHealthRates[3] = (float)globalRegens["BodyHealth"]["LeftArm"]["Value"];
+            HideoutController.defaultHealthRates[4] = (float)globalRegens["BodyHealth"]["RightArm"]["Value"];
+            HideoutController.defaultHealthRates[5] = (float)globalRegens["BodyHealth"]["LeftLeg"]["Value"];
+            HideoutController.defaultHealthRates[6] = (float)globalRegens["BodyHealth"]["RightLeg"]["Value"];
+            HideoutController.defaultEnergyRate = (float)globalRegens["Energy"];
+            HideoutController.defaultHydrationRate = (float)globalRegens["Hydration"];
+
+            JToken globalHealthFactors = globalDB["config"]["Health"]["ProfileHealthSettings"]["HealthFactorsSettings"];
+            defaultMaxEnergy = (float)globalHealthFactors["Energy"]["Default"];
+            defaultMaxHydration = (float)globalHealthFactors["Hydration"]["Default"];
+
+            JToken globalSkillsSettings = globalDB["config"]["SkillsSettings"]; 
+            Skill.skillProgressRate = (float)globalSkillsSettings["SkillProgressRate"];
+            Skill.weaponSkillProgressRate = (float)globalSkillsSettings["WeaponSkillProgressRate"];
+
+            // Endurance
+            Skill.movementAction = (float)globalSkillsSettings["Endurance"]["MovementAction"];
+            Skill.sprintAction = (float)globalSkillsSettings["Endurance"]["SprintAction"];
+            Skill.gainPerFatigueStack = (float)globalSkillsSettings["Endurance"]["GainPerFatigueStack"];
+
+            // HideoutManagement
+            Skill.skillPointsPerAreaUpgrade = (float)globalSkillsSettings["HideoutManagement"]["SkillPointsPerAreaUpgrade"];
+            Skill.skillPointsPerCraft = (float)globalSkillsSettings["HideoutManagement"]["SkillPointsPerCraft"];
+            Skill.generatorPointsPerResourceSpent = (float)globalSkillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["PointsGained"] / (float)globalSkillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["ResourceSpent"];
+            Skill.AFUPointsPerResourceSpent = (float)globalSkillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["PointsGained"] / (float)globalSkillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["ResourceSpent"];
+            Skill.waterCollectorPointsPerResourceSpent = (float)globalSkillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["PointsGained"] / (float)globalSkillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["ResourceSpent"];
+            Skill.solarPowerPointsPerResourceSpent = (float)globalSkillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["PointsGained"] / (float)globalSkillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["ResourceSpent"];
+            Skill.consumptionReductionPerLevel = (float)globalSkillsSettings["HideoutManagement"]["ConsumptionReductionPerLevel"];
+            Skill.skillBoostPercent = (float)globalSkillsSettings["HideoutManagement"]["SkillBoostPercent"];
+
+            // Crafting
+            Skill.pointsPerHourCrafting = ((float)globalSkillsSettings["Crafting"]["PointsPerCraftingCycle"] + (float)globalSkillsSettings["Crafting"]["PointsPerUniqueCraftCycle"]) / (float)globalSkillsSettings["Crafting"]["CraftingCycleHours"];
+            Skill.craftTimeReductionPerLevel = (float)globalSkillsSettings["Crafting"]["CraftTimeReductionPerLevel"];
+            Skill.productionTimeReductionPerLevel = (float)globalSkillsSettings["Crafting"]["ProductionTimeReductionPerLevel"];
+            Skill.eliteExtraProductions = (float)globalSkillsSettings["Crafting"]["EliteExtraProductions"];
+
+            // Metabolism
+            Skill.hydrationRecoveryRate = (float)globalSkillsSettings["Metabolism"]["HydrationRecoveryRate"];
+            Skill.energyRecoveryRate = (float)globalSkillsSettings["Metabolism"]["EnergyRecoveryRate"];
+            Skill.increasePositiveEffectDurationRate = (float)globalSkillsSettings["Metabolism"]["IncreasePositiveEffectDurationRate"];
+            Skill.decreaseNegativeEffectDurationRate = (float)globalSkillsSettings["Metabolism"]["DecreaseNegativeEffectDurationRate"];
+            Skill.decreasePoisonDurationRate = (float)globalSkillsSettings["Metabolism"]["DecreasePoisonDurationRate"];
+
+            // Immunity
+            Skill.immunityMiscEffects = (float)globalSkillsSettings["Immunity"]["ImmunityMiscEffects"];
+            Skill.immunityPoisonBuff = (float)globalSkillsSettings["Immunity"]["ImmunityPoisonBuff"];
+            Skill.immunityPainKiller = (float)globalSkillsSettings["Immunity"]["ImmunityPainKiller"];
+            Skill.healthNegativeEffect = (float)globalSkillsSettings["Immunity"]["HealthNegativeEffect"];
+            Skill.stimulatorNegativeBuff = (float)globalSkillsSettings["Immunity"]["StimulatorNegativeBuff"];
+
+            // Strength
+            Skill.sprintActionMin = (float)globalSkillsSettings["Strength"]["SprintActionMin"];
+            Skill.sprintActionMax = (float)globalSkillsSettings["Strength"]["SprintActionMax"];
+            Skill.movementActionMin = (float)globalSkillsSettings["Strength"]["MovementActionMin"];
+            Skill.movementActionMax = (float)globalSkillsSettings["Strength"]["MovementActionMax"];
+            Skill.pushUpMin = (float)globalSkillsSettings["Strength"]["PushUpMin"];
+            Skill.pushUpMax = (float)globalSkillsSettings["Strength"]["PushUpMax"];
+            Skill.fistfightAction = (float)globalSkillsSettings["Strength"]["FistfightAction"];
+            Skill.throwAction = (float)globalSkillsSettings["Strength"]["ThrowAction"];
+
+            // Vitality
+            Skill.damageTakenAction = (float)globalSkillsSettings["Vitality"]["DamageTakenAction"];
+            Skill.vitalityHealthNegativeEffect = (float)globalSkillsSettings["Vitality"]["HealthNegativeEffect"];
+
+            // Health
+            Skill.skillProgress = (float)globalSkillsSettings["Health"]["SkillProgress"];
+
+            // StressResistance
+            Skill.stressResistanceHealthNegativeEffect = (float)globalSkillsSettings["StressResistance"]["HealthNegativeEffect"];
+            Skill.lowHPDuration = (float)globalSkillsSettings["StressResistance"]["LowHPDuration"];
+
+            // Throwing
+            Skill.throwingThrowAction = (float)globalSkillsSettings["Throwing"]["ThrowAction"];
+
+            // RecoilControl
+            Skill.recoilAction = (float)globalSkillsSettings["RecoilControl"]["RecoilAction"];
+            Skill.recoilBonusPerLevel = (float)globalSkillsSettings["RecoilControl"]["RecoilBonusPerLevel"];
+
+            // Pistol
+            Skill.pistolWeaponReloadAction = (float)globalSkillsSettings["Pistol"]["WeaponReloadAction"];
+            Skill.pistolWeaponShotAction = (float)globalSkillsSettings["Pistol"]["WeaponShotAction"];
+            Skill.pistolWeaponChamberAction = (float)globalSkillsSettings["Pistol"]["WeaponChamberAction"];
+
+            // Revolver, uses Pistol values
+            Skill.revolverWeaponReloadAction = (float)globalSkillsSettings["Pistol"]["WeaponReloadAction"];
+            Skill.revolverWeaponShotAction = (float)globalSkillsSettings["Pistol"]["WeaponShotAction"];
+            Skill.revolverWeaponChamberAction = (float)globalSkillsSettings["Pistol"]["WeaponChamberAction"];
+
+            // SMG, uses assault values
+            Skill.SMGWeaponReloadAction = (float)globalSkillsSettings["Assault"]["WeaponReloadAction"];
+            Skill.SMGWeaponShotAction = (float)globalSkillsSettings["Assault"]["WeaponShotAction"];
+            Skill.SMGWeaponChamberAction = (float)globalSkillsSettings["Assault"]["WeaponChamberAction"];
+
+            // Assault
+            Skill.assaultWeaponReloadAction = (float)globalSkillsSettings["Assault"]["WeaponReloadAction"];
+            Skill.assaultWeaponShotAction = (float)globalSkillsSettings["Assault"]["WeaponShotAction"];
+            Skill.assaultWeaponChamberAction = (float)globalSkillsSettings["Assault"]["WeaponChamberAction"];
+
+            // Shotgun
+            Skill.shotgunWeaponReloadAction = (float)globalSkillsSettings["Shotgun"]["WeaponReloadAction"];
+            Skill.shotgunWeaponShotAction = (float)globalSkillsSettings["Shotgun"]["WeaponShotAction"];
+            Skill.shotgunWeaponChamberAction = (float)globalSkillsSettings["Shotgun"]["WeaponChamberAction"];
+
+            // Sniper
+            Skill.sniperWeaponReloadAction = (float)globalSkillsSettings["Sniper"]["WeaponReloadAction"];
+            Skill.sniperWeaponShotAction = (float)globalSkillsSettings["Sniper"]["WeaponShotAction"];
+            Skill.sniperWeaponChamberAction = (float)globalSkillsSettings["Sniper"]["WeaponChamberAction"];
+
+            // HMG, uses DMR values
+            Skill.HMGWeaponReloadAction = (float)globalSkillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.HMGWeaponShotAction = (float)globalSkillsSettings["DMR"]["WeaponShotAction"];
+            Skill.HMGWeaponChamberAction = (float)globalSkillsSettings["DMR"]["WeaponChamberAction"];
+
+            // LMG, uses DMR values
+            Skill.LMGWeaponReloadAction = (float)globalSkillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.LMGWeaponShotAction = (float)globalSkillsSettings["DMR"]["WeaponShotAction"];
+            Skill.LMGWeaponChamberAction = (float)globalSkillsSettings["DMR"]["WeaponChamberAction"];
+
+            // Launcher, uses DMR values
+            Skill.launcherWeaponReloadAction = (float)globalSkillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.launcherWeaponShotAction = (float)globalSkillsSettings["DMR"]["WeaponShotAction"];
+            Skill.launcherWeaponChamberAction = (float)globalSkillsSettings["DMR"]["WeaponChamberAction"];
+
+            // AttachedLauncher, uses DMR values
+            Skill.attachedLauncherWeaponReloadAction = (float)globalSkillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.attachedLauncherWeaponShotAction = (float)globalSkillsSettings["DMR"]["WeaponShotAction"];
+            Skill.attachedLauncherWeaponChamberAction = (float)globalSkillsSettings["DMR"]["WeaponChamberAction"];
+
+            // DMR
+            Skill.DMRWeaponReloadAction = (float)globalSkillsSettings["DMR"]["WeaponReloadAction"];
+            Skill.DMRWeaponShotAction = (float)globalSkillsSettings["DMR"]["WeaponShotAction"];
+            Skill.DMRWeaponChamberAction = (float)globalSkillsSettings["DMR"]["WeaponChamberAction"];
+
+            // CovertMovement
+            Skill.covertMovementAction = (float)globalSkillsSettings["CovertMovement"]["MovementAction"];
+
+            // Search
+            Skill.searchAction = (float)globalSkillsSettings["Search"]["SearchAction"];
+            Skill.findAction = (float)globalSkillsSettings["Search"]["FindAction"];
+
+            // MagDrills
+            Skill.raidLoadedAmmoAction = (float)globalSkillsSettings["MagDrills"]["RaidLoadedAmmoAction"];
+            Skill.raidUnloadedAmmoAction = (float)globalSkillsSettings["MagDrills"]["RaidUnloadedAmmoAction"];
+            Skill.magazineCheckAction = (float)globalSkillsSettings["MagDrills"]["MagazineCheckAction"];
+
+            // Perception
+            Skill.onlineAction = (float)globalSkillsSettings["Perception"]["OnlineAction"];
+            Skill.uniqueLoot = (float)globalSkillsSettings["Perception"]["UniqueLoot"];
+
+            // Intellect
+            Skill.examineAction = (float)globalSkillsSettings["Intellect"]["ExamineAction"];
+            Skill.intellectSkillProgress = (float)globalSkillsSettings["Intellect"]["SkillProgress"];
+
+            // Attention
+            Skill.examineWithInstruction = (float)globalSkillsSettings["Attention"]["ExamineWithInstruction"];
+            Skill.findActionFalse = (float)globalSkillsSettings["Attention"]["FindActionFalse"];
+            Skill.findActionTrue = (float)globalSkillsSettings["Attention"]["FindActionTrue"];
+
+            // Charisma
+            Skill.skillProgressInt = (float)globalSkillsSettings["Charisma"]["SkillProgressInt"];
+            Skill.skillProgressAtn = (float)globalSkillsSettings["Charisma"]["SkillProgressAtn"];
+            Skill.skillProgressPer = (float)globalSkillsSettings["Charisma"]["SkillProgressPer"];
+
+            // Memory
+            Skill.anySkillUp = (float)globalSkillsSettings["Memory"]["AnySkillUp"];
+            Skill.memorySkillProgress = (float)globalSkillsSettings["Memory"]["SkillProgress"];
+
+            // Surgery
+            Skill.surgeryAction = (float)globalSkillsSettings["Surgery"]["SurgeryAction"];
+            Skill.surgerySkillProgress = (float)globalSkillsSettings["Surgery"]["SkillProgress"];
+
+            // AimDrills
+            Skill.weaponShotAction = (float)globalSkillsSettings["AimDrills"]["WeaponShotAction"];
+
             areasDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/areas.json"));
             localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
             vanillaItemData = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
@@ -1590,172 +1772,6 @@ namespace EFM
             ////}
 
             ////LoadSkillVars();
-        }
-
-        private void LoadSkillVars()
-        {
-            JToken skillsSettings = globalDB["config"]["SkillsSettings"];
-            Skill.skillProgressRate = (float)skillsSettings["SkillProgressRate"];
-            Skill.weaponSkillProgressRate = (float)skillsSettings["WeaponSkillProgressRate"];
-
-            // HideoutManagement
-            Skill.skillPointsPerAreaUpgrade = (float)skillsSettings["HideoutManagement"]["SkillPointsPerAreaUpgrade"];
-            Skill.skillPointsPerCraft = (float)skillsSettings["HideoutManagement"]["SkillPointsPerCraft"];
-            Skill.generatorPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["Generator"]["ResourceSpent"];
-            Skill.AFUPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["AirFilteringUnit"]["ResourceSpent"];
-            Skill.waterCollectorPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["WaterCollector"]["ResourceSpent"];
-            Skill.solarPowerPointsPerResourceSpent = (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["PointsGained"] / (float)skillsSettings["HideoutManagement"]["SkillPointsRate"]["SolarPower"]["ResourceSpent"];
-            Skill.consumptionReductionPerLevel = (float)skillsSettings["HideoutManagement"]["ConsumptionReductionPerLevel"];
-            Skill.skillBoostPercent = (float)skillsSettings["HideoutManagement"]["SkillBoostPercent"];
-
-            // Crafting
-            Skill.pointsPerHourCrafting = ((float)skillsSettings["Crafting"]["PointsPerCraftingCycle"] + (float)skillsSettings["Crafting"]["PointsPerUniqueCraftCycle"]) / (float)skillsSettings["Crafting"]["CraftingCycleHours"];
-            Skill.craftTimeReductionPerLevel = (float)skillsSettings["Crafting"]["CraftTimeReductionPerLevel"];
-            Skill.productionTimeReductionPerLevel = (float)skillsSettings["Crafting"]["ProductionTimeReductionPerLevel"];
-            Skill.eliteExtraProductions = (float)skillsSettings["Crafting"]["EliteExtraProductions"];
-
-            // Metabolism
-            Skill.hydrationRecoveryRate = (float)skillsSettings["Metabolism"]["HydrationRecoveryRate"];
-            Skill.energyRecoveryRate = (float)skillsSettings["Metabolism"]["EnergyRecoveryRate"];
-            Skill.increasePositiveEffectDurationRate = (float)skillsSettings["Metabolism"]["IncreasePositiveEffectDurationRate"];
-            Skill.decreaseNegativeEffectDurationRate = (float)skillsSettings["Metabolism"]["DecreaseNegativeEffectDurationRate"];
-            Skill.decreasePoisonDurationRate = (float)skillsSettings["Metabolism"]["DecreasePoisonDurationRate"];
-
-            // Immunity
-            Skill.immunityMiscEffects = (float)skillsSettings["Immunity"]["ImmunityMiscEffects"];
-            Skill.immunityPoisonBuff = (float)skillsSettings["Immunity"]["ImmunityPoisonBuff"];
-            Skill.immunityPainKiller = (float)skillsSettings["Immunity"]["ImmunityPainKiller"];
-            Skill.healthNegativeEffect = (float)skillsSettings["Immunity"]["HealthNegativeEffect"];
-            Skill.stimulatorNegativeBuff = (float)skillsSettings["Immunity"]["StimulatorNegativeBuff"];
-
-            // Endurance
-            Skill.movementAction = (float)skillsSettings["Endurance"]["MovementAction"];
-            Skill.sprintAction = (float)skillsSettings["Endurance"]["SprintAction"];
-            Skill.gainPerFatigueStack = (float)skillsSettings["Endurance"]["GainPerFatigueStack"];
-
-            // Strength
-            Skill.sprintActionMin = (float)skillsSettings["Strength"]["SprintActionMin"];
-            Skill.sprintActionMax = (float)skillsSettings["Strength"]["SprintActionMax"];
-            Skill.movementActionMin = (float)skillsSettings["Strength"]["MovementActionMin"];
-            Skill.movementActionMax = (float)skillsSettings["Strength"]["MovementActionMax"];
-            Skill.pushUpMin = (float)skillsSettings["Strength"]["PushUpMin"];
-            Skill.pushUpMax = (float)skillsSettings["Strength"]["PushUpMax"];
-            Skill.fistfightAction = (float)skillsSettings["Strength"]["FistfightAction"];
-            Skill.throwAction = (float)skillsSettings["Strength"]["ThrowAction"];
-
-            // Vitality
-            Skill.damageTakenAction = (float)skillsSettings["Vitality"]["DamageTakenAction"];
-            Skill.vitalityHealthNegativeEffect = (float)skillsSettings["Vitality"]["HealthNegativeEffect"];
-
-            // Health
-            Skill.skillProgress = (float)skillsSettings["Health"]["SkillProgress"];
-
-            // StressResistance
-            Skill.stressResistanceHealthNegativeEffect = (float)skillsSettings["StressResistance"]["HealthNegativeEffect"];
-            Skill.lowHPDuration = (float)skillsSettings["StressResistance"]["LowHPDuration"];
-
-            // Throwing
-            Skill.throwingThrowAction = (float)skillsSettings["Throwing"]["ThrowAction"];
-
-            // RecoilControl
-            Skill.recoilAction = (float)skillsSettings["RecoilControl"]["RecoilAction"];
-            Skill.recoilBonusPerLevel = (float)skillsSettings["RecoilControl"]["RecoilBonusPerLevel"];
-
-            // Pistol
-            Skill.pistolWeaponReloadAction = (float)skillsSettings["Pistol"]["WeaponReloadAction"];
-            Skill.pistolWeaponShotAction = (float)skillsSettings["Pistol"]["WeaponShotAction"];
-            Skill.pistolWeaponChamberAction = (float)skillsSettings["Pistol"]["WeaponChamberAction"];
-
-            // Revolver, uses Pistol values
-            Skill.revolverWeaponReloadAction = (float)skillsSettings["Pistol"]["WeaponReloadAction"];
-            Skill.revolverWeaponShotAction = (float)skillsSettings["Pistol"]["WeaponShotAction"];
-            Skill.revolverWeaponChamberAction = (float)skillsSettings["Pistol"]["WeaponChamberAction"];
-
-            // SMG, uses assault values
-            Skill.SMGWeaponReloadAction = (float)skillsSettings["Assault"]["WeaponReloadAction"];
-            Skill.SMGWeaponShotAction = (float)skillsSettings["Assault"]["WeaponShotAction"];
-            Skill.SMGWeaponChamberAction = (float)skillsSettings["Assault"]["WeaponChamberAction"];
-
-            // Assault
-            Skill.assaultWeaponReloadAction = (float)skillsSettings["Assault"]["WeaponReloadAction"];
-            Skill.assaultWeaponShotAction = (float)skillsSettings["Assault"]["WeaponShotAction"];
-            Skill.assaultWeaponChamberAction = (float)skillsSettings["Assault"]["WeaponChamberAction"];
-
-            // Shotgun
-            Skill.shotgunWeaponReloadAction = (float)skillsSettings["Shotgun"]["WeaponReloadAction"];
-            Skill.shotgunWeaponShotAction = (float)skillsSettings["Shotgun"]["WeaponShotAction"];
-            Skill.shotgunWeaponChamberAction = (float)skillsSettings["Shotgun"]["WeaponChamberAction"];
-
-            // Sniper
-            Skill.sniperWeaponReloadAction = (float)skillsSettings["Sniper"]["WeaponReloadAction"];
-            Skill.sniperWeaponShotAction = (float)skillsSettings["Sniper"]["WeaponShotAction"];
-            Skill.sniperWeaponChamberAction = (float)skillsSettings["Sniper"]["WeaponChamberAction"];
-
-            // HMG, uses DMR values
-            Skill.HMGWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            Skill.HMGWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            Skill.HMGWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
-
-            // LMG, uses DMR values
-            Skill.LMGWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            Skill.LMGWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            Skill.LMGWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
-
-            // Launcher, uses DMR values
-            Skill.launcherWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            Skill.launcherWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            Skill.launcherWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
-
-            // AttachedLauncher, uses DMR values
-            Skill.attachedLauncherWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            Skill.attachedLauncherWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            Skill.attachedLauncherWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
-
-            // DMR
-            Skill.DMRWeaponReloadAction = (float)skillsSettings["DMR"]["WeaponReloadAction"];
-            Skill.DMRWeaponShotAction = (float)skillsSettings["DMR"]["WeaponShotAction"];
-            Skill.DMRWeaponChamberAction = (float)skillsSettings["DMR"]["WeaponChamberAction"];
-
-            // CovertMovement
-            Skill.covertMovementAction = (float)skillsSettings["CovertMovement"]["MovementAction"];
-
-            // Search
-            Skill.searchAction = (float)skillsSettings["Search"]["SearchAction"];
-            Skill.findAction = (float)skillsSettings["Search"]["FindAction"];
-
-            // MagDrills
-            Skill.raidLoadedAmmoAction = (float)skillsSettings["MagDrills"]["RaidLoadedAmmoAction"];
-            Skill.raidUnloadedAmmoAction = (float)skillsSettings["MagDrills"]["RaidUnloadedAmmoAction"];
-            Skill.magazineCheckAction = (float)skillsSettings["MagDrills"]["MagazineCheckAction"];
-
-            // Perception
-            Skill.onlineAction = (float)skillsSettings["Perception"]["OnlineAction"];
-            Skill.uniqueLoot = (float)skillsSettings["Perception"]["UniqueLoot"];
-
-            // Intellect
-            Skill.examineAction = (float)skillsSettings["Intellect"]["ExamineAction"];
-            Skill.intellectSkillProgress = (float)skillsSettings["Intellect"]["SkillProgress"];
-
-            // Attention
-            Skill.examineWithInstruction = (float)skillsSettings["Attention"]["ExamineWithInstruction"];
-            Skill.findActionFalse = (float)skillsSettings["Attention"]["FindActionFalse"];
-            Skill.findActionTrue = (float)skillsSettings["Attention"]["FindActionTrue"];
-
-            // Charisma
-            Skill.skillProgressInt = (float)skillsSettings["Charisma"]["SkillProgressInt"];
-            Skill.skillProgressAtn = (float)skillsSettings["Charisma"]["SkillProgressAtn"];
-            Skill.skillProgressPer = (float)skillsSettings["Charisma"]["SkillProgressPer"];
-
-            // Memory
-            Skill.anySkillUp = (float)skillsSettings["Memory"]["AnySkillUp"];
-            Skill.memorySkillProgress = (float)skillsSettings["Memory"]["SkillProgress"];
-
-            // Surgery
-            Skill.surgeryAction = (float)skillsSettings["Surgery"]["SurgeryAction"];
-            Skill.surgerySkillProgress = (float)skillsSettings["Surgery"]["SkillProgress"];
-
-            // AimDrills
-            Skill.weaponShotAction = (float)skillsSettings["AimDrills"]["WeaponShotAction"];
         }
 
         private void LoadDefaultAssets()
@@ -1904,52 +1920,6 @@ namespace EFM
                 FVRInteractiveObject.All.RemoveAt(FVRInteractiveObject.All.Count - 1);
 
                 indexField.SetValue(interactiveObject, -1);
-            }
-        }
-
-        public static void UpdatePlayerInventory()
-        {
-            if (playerInventory == null)
-            {
-                playerInventory = new Dictionary<string, int>();
-                playerInventoryObjects = new Dictionary<string, List<GameObject>>();
-            }
-
-            playerInventory.Clear();
-            playerInventoryObjects.Clear();
-
-            // Check equipment
-            for(int i=0; i < StatusUI.instance.equipmentSlots.Length; ++i)
-            {
-                if (StatusUI.instance.equipmentSlots[i].CurObject != null)
-                {
-                    AddToPlayerInventory(StatusUI.instance.equipmentSlots[i].CurObject.transform, true);
-                }
-            }
-
-            // Check quickbelt slots, only the first 4, the rest will be processed directly from the equipped rig while processing equipment above
-            for (int i = 0; i < 4; ++i)
-            {
-                if (GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject != null)
-                {
-                    AddToPlayerInventory(GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject.transform, true);
-                }
-            }
-
-            // Check right shoulder slot, left not necessary because already processed with backpack while processing equipment above
-            if (rightShoulderObject != null)
-            {
-                AddToPlayerInventory(rightShoulderObject.transform, true);
-            }
-
-            // Check hands
-            if (leftHand.fvrHand.CurrentInteractable != null)
-            {
-                AddToPlayerInventory(leftHand.fvrHand.CurrentInteractable.transform, true);
-            }
-            if (rightHand.fvrHand.CurrentInteractable != null)
-            {
-                AddToPlayerInventory(rightHand.fvrHand.CurrentInteractable.transform, true);
             }
         }
 

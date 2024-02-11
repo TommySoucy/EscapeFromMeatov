@@ -686,7 +686,7 @@ namespace EFM
 										itemObject.transform.parent = HideoutController.instance.transform.GetChild(HideoutController.instance.transform.childCount - 2);
 										MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
 										CIW.stack = splitAmount;
-										HideoutController.instance.baseInventoryObjects[H3ID].Add(itemObject);
+										HideoutController.instance.inventoryObjects[H3ID].Add(itemObject);
 									}
 									else // In raid
 									{
@@ -1964,7 +1964,7 @@ namespace EFM
 				return descriptionPack;
             }
 
-            descriptionPack.amount = (Mod.baseInventory.ContainsKey(H3ID) ? Mod.baseInventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
+            descriptionPack.amount = (HideoutController.instance.inventory.ContainsKey(H3ID) ? HideoutController.instance.inventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
 			descriptionPack.amountRequired = 0;
 			for (int i=0; i < 22; ++i)
 			{

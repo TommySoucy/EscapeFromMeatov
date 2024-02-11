@@ -70,216 +70,6 @@ namespace EFM
 
         public void Init()
         {
-            needsFuel = (bool)Mod.areasDB[areaIndex]["needsFuel"];
-
-            // Init area specific hierarchy stuff
-            AreaSoundManager areaSoundManager;
-            switch (areaIndex)
-            {
-                case 2:
-                    Mod.LogInfo("\t2");
-                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    break;
-                case 4:
-                    Mod.LogInfo("\t4");
-                    slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(3).GetChild(3).GetComponent<AudioSource>();
-                    slotAudioSourceByLevel[2] = transform.GetChild(2).GetChild(3).GetChild(3).GetComponent<AudioSource>();
-                    slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(2).GetChild(4).GetComponent<AudioSource>();
-                    generatorAudioSourceByLevel[1] = transform.GetChild(1).GetChild(3).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = generatorAudioSourceByLevel[1].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.generatorLevel1And2Audio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 1);
-                    areaSoundManager.workingRange = new Vector2(1, 5.5f);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(5.5f, 6.5f);
-                    generatorAudioSourceByLevel[2] = transform.GetChild(2).GetChild(3).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = generatorAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.generatorLevel1And2Audio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 1);
-                    areaSoundManager.workingRange = new Vector2(1, 5.5f);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(5.5f, 6.5f);
-                    generatorAudioSourceByLevel[3] = transform.GetChild(3).GetChild(2).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = generatorAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.generatorLevel3Audio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 5.5f);
-                    areaSoundManager.workingRange = new Vector2(5.5f, 19);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(19, 23.5f);
-                    break;
-                case 6:
-                    Mod.LogInfo("\t6");
-                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
-                    slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    break;
-                case 7:
-                    Mod.LogInfo("\t7");
-                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(0).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
-                    medStationFridgeAudioSource = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    areaSoundManager = medStationFridgeAudioSource.gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.medStationLevel3Audio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 2.5f);
-                    areaSoundManager.workingRange = new Vector2(2.5f, 8.5f);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(8.5f, 10.8f);
-                    break;
-                case 8:
-                    Mod.LogInfo("\t8");
-                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(2).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
-                    kitchenFridgeAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = kitchenFridgeAudioSourceByLevel[1].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.kitchenFridgeAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 1);
-                    areaSoundManager.workingRange = new Vector2(1, 12);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(12, 13.5f);
-                    kitchenFridgeAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = kitchenFridgeAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.kitchenFridgeAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 1);
-                    areaSoundManager.workingRange = new Vector2(1, 12);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(12, 13.5f);
-                    kitchenFridgeAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = kitchenFridgeAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.kitchenFridgeAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 1);
-                    areaSoundManager.workingRange = new Vector2(1, 12);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(12, 13.5f);
-                    kitchenPotAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    areaSoundManager = kitchenPotAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.kitchenPotAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 1);
-                    areaSoundManager.workingRange = new Vector2(1, 18.1f);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(18.1f, 22.5f);
-                    kitchenPotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    areaSoundManager = kitchenPotAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.kitchenPotAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 1);
-                    areaSoundManager.workingRange = new Vector2(1, 18.1f);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(18.1f, 22.5f);
-                    break;
-                case 9:
-                    Mod.LogInfo("\t9");
-                    restSpaceTVAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = restSpaceTVAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.restSpaceTracks[1];
-                    areaSoundManager.workingRange = new Vector2(0, 330);
-                    restSpaceTVAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = restSpaceTVAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.restSpaceTracks[1];
-                    areaSoundManager.workingRange = new Vector2(0, 330);
-                    restSpacePSAudioSource = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    areaSoundManager = restSpacePSAudioSource.gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.restSpacePSAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 13);
-                    areaSoundManager.workingRange = new Vector2(13, 29);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(29, 32);
-                    break;
-                case 10:
-                    Mod.LogInfo("\t10");
-                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    break;
-                case 11:
-                    Mod.LogInfo("\t11");
-                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(3).GetComponent<AudioSource>();
-                    intelCenterPCAudioSource = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = intelCenterPCAudioSource.gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.intelCenterPCAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 23);
-                    areaSoundManager.workingRange = new Vector2(23, 32);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(32, 48);
-                    intelCenterHDDAudioSource = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    areaSoundManager = intelCenterHDDAudioSource.gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.intelCenterHDDAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 9.5f);
-                    areaSoundManager.workingRange = new Vector2(9.5f, 17.5f);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(17.5f, 24);
-                    break;
-                case 17:
-                    Mod.LogInfo("\t17");
-                    slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    AFUAudioSource = transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = AFUAudioSource.gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.AFUAudio;
-                    areaSoundManager.workingRange = new Vector2(0, 14.3f);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(14.3f, 18.5f);
-                    break;
-                case 19:
-                    Mod.LogInfo("\t19");
-                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    boozeGenAudioSource = transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = boozeGenAudioSource.gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.boozeGenAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 3.2f);
-                    areaSoundManager.workingRange = new Vector2(3.2f, 12);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(12, 30);
-                    break;
-                case 20:
-                    Mod.LogInfo("\t20");
-                    productionAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(1).GetComponent<AudioSource>();
-                    productionAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(1).GetComponent<AudioSource>();
-                    slotAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(2).GetComponent<AudioSource>();
-                    slotAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(2).GetComponent<AudioSource>();
-                    slotAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(2).GetComponent<AudioSource>();
-                    bitcoinFarmAudioSourceByLevel[1] = transform.GetChild(1).GetChild(2).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = bitcoinFarmAudioSourceByLevel[1].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.bitcoinFarmAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 6.5f);
-                    areaSoundManager.workingRange = new Vector2(6.5f, 23);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(23, 28);
-                    bitcoinFarmAudioSourceByLevel[2] = transform.GetChild(2).GetChild(2).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = bitcoinFarmAudioSourceByLevel[2].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.bitcoinFarmAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 6.5f);
-                    areaSoundManager.workingRange = new Vector2(6.5f, 23);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(23, 28);
-                    bitcoinFarmAudioSourceByLevel[3] = transform.GetChild(3).GetChild(1).GetChild(0).GetComponent<AudioSource>();
-                    areaSoundManager = bitcoinFarmAudioSourceByLevel[3].gameObject.AddComponent<AreaSoundManager>();
-                    areaSoundManager.clip = HideoutController.bitcoinFarmAudio;
-                    areaSoundManager.hasStart = true;
-                    areaSoundManager.startRange = new Vector2(0, 6.5f);
-                    areaSoundManager.workingRange = new Vector2(6.5f, 23);
-                    areaSoundManager.hasEnd = true;
-                    areaSoundManager.endRange = new Vector2(23, 28);
-                    break;
-            }
 
             InitUI();
 
@@ -878,50 +668,6 @@ namespace EFM
         
         public void UpdateAreaState()
         {
-            // Check for preexisting areaCanvas
-            if(areaCanvas != null)
-            {
-                areaCanvas.transform.parent = null;
-                Destroy(areaCanvas);
-                areaCanvas = null;
-            }
-
-            // Attach an area canvas to the area
-            areaCanvas = Instantiate(HideoutController.areaCanvasPrefab, transform.GetChild(transform.childCount - 2));
-
-            // Set full background pointable
-            FVRPointable backgroundPointable = transform.GetChild(transform.childCount - 2).GetChild(0).GetChild(1).gameObject.AddComponent<FVRPointable>();
-            backgroundPointable.MaxPointingRange = 30;
-
-            // Set button click sound
-            buttonClickSound = areaCanvas.transform.GetChild(3).GetComponent<AudioSource>();
-
-            // Full, Close button
-            areaCanvas.transform.GetChild(1).GetChild(0).GetChild(1).GetComponent<Button>().onClick.AddListener(OnFullCloseClicked);
-
-            // Set area canvas defaults
-            string areaName = Mod.localeDB["interface"]["hideout_area_" + areaIndex + "_name"].ToString();
-
-            // Area summary Icon
-            areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(3).GetComponent<Image>().sprite = HideoutController.areaIcons[areaIndex];
-
-            // Area summary Name
-            areaCanvas.transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<Text>().text = areaName;
-
-            // Area summary elite background
-            if (areaIndex == 13 || areaIndex == 14 || areaIndex == 17 || areaIndex == 18 || areaIndex == 19)
-            {
-                areaCanvas.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).gameObject.SetActive(true);
-            }
-
-            // Area full Icon
-            areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(3).GetComponent<Image>().sprite = HideoutController.areaIcons[areaIndex];
-
-            // Area full Name
-            areaCanvas.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetComponent<Text>().text = areaName;
-
-            Mod.LogInfo("UpdateAreaStateCalled on area: " + areaIndex);
-
             // Destroy any existing extra requirement parent in middle
             if(areaRequirementMiddleParents == null)
             {
@@ -1846,7 +1592,7 @@ namespace EFM
                                 int amountInInventory = 0;
                                 foreach (string possibleReqItem in currentRequirement.IDs)
                                 {
-                                    amountInInventory += (Mod.baseInventory.ContainsKey(possibleReqItem) ? Mod.baseInventory[possibleReqItem] : 0);
+                                    amountInInventory += (HideoutController.instance.inventory.ContainsKey(possibleReqItem) ? HideoutController.instance.inventory[possibleReqItem] : 0);
                                     amountInInventory += (Mod.playerInventory.ContainsKey(possibleReqItem) ? Mod.playerInventory[possibleReqItem] : 0);
 
                                     if (farmingViewByItemID.ContainsKey(possibleReqItem))
@@ -1888,7 +1634,7 @@ namespace EFM
                                 int amountInInventory = 0;
                                 foreach (string possibleReqItem in currentRequirement.IDs)
                                 {
-                                    amountInInventory += (Mod.baseInventory.ContainsKey(possibleReqItem) ? Mod.baseInventory[possibleReqItem] : 0);
+                                    amountInInventory += (HideoutController.instance.inventory.ContainsKey(possibleReqItem) ? HideoutController.instance.inventory[possibleReqItem] : 0);
                                     amountInInventory += (Mod.playerInventory.ContainsKey(possibleReqItem) ? Mod.playerInventory[possibleReqItem] : 0);
                                 }
                                 Mod.LogInfo("4");
@@ -2352,13 +2098,13 @@ namespace EFM
 
                                 int itemAmountInInventory = 0;
                                 Mod.LogInfo("\t\t base manager null?: "+(baseManager == null));
-                                Mod.LogInfo("\t\t base inventory null?: "+(Mod.baseInventory == null));
+                                Mod.LogInfo("\t\t base inventory null?: "+(HideoutController.instance.inventory == null));
                                 foreach (string itemReqID in actualIDs)
                                 {
-                                    if (Mod.baseInventory.ContainsKey(itemReqID))
+                                    if (HideoutController.instance.inventory.ContainsKey(itemReqID))
                                     {
                                         Mod.LogInfo("\t\t\t0");
-                                        itemAmountInInventory = Mod.baseInventory[itemReqID];
+                                        itemAmountInInventory = HideoutController.instance.inventory[itemReqID];
                                     }
                                     if (Mod.playerInventory.ContainsKey(itemReqID))
                                     {
@@ -2736,9 +2482,9 @@ namespace EFM
 
                         foreach (string itemID in itemIDs)
                         {
-                            if (Mod.baseInventory.ContainsKey(itemID) && Mod.baseInventory[itemID] > 0)
+                            if (HideoutController.instance.inventory.ContainsKey(itemID) && HideoutController.instance.inventory[itemID] > 0)
                             {
-                                foreach (GameObject obj in baseManager.baseInventoryObjects[itemID])
+                                foreach (GameObject obj in baseManager.inventoryObjects[itemID])
                                 {
                                     MeatovItem CIW = obj.GetComponent<MeatovItem>();
                                     if (CIW != null)
@@ -2861,7 +2607,7 @@ namespace EFM
 
         //            // Have to check each item object because if it has CIW, if it is container or rig, can only count if it has no contents
         //            int itemAmountInInventory = 0;
-        //            if (Mod.baseInventory.ContainsKey(itemID) && Mod.baseInventory[itemID] > 0)
+        //            if (HideoutController.instance.inventory.ContainsKey(itemID) && HideoutController.instance.inventory[itemID] > 0)
         //            {
         //                foreach(GameObject obj in baseManager.baseInventoryObjects[itemID])
         //                {
@@ -3029,7 +2775,7 @@ namespace EFM
                                 int itemAmountInInventory = 0;
                                 foreach(string itemID in itemIDs)
                                 {
-                                    itemAmountInInventory += Mod.baseInventory.ContainsKey(itemID) ? Mod.baseInventory[itemID] : 0;
+                                    itemAmountInInventory += HideoutController.instance.inventory.ContainsKey(itemID) ? HideoutController.instance.inventory[itemID] : 0;
                                     itemAmountInInventory += Mod.playerInventory.ContainsKey(itemID) ? Mod.playerInventory[itemID] : 0;
                                 }
 
@@ -3211,9 +2957,9 @@ namespace EFM
                     int amountInBaseInventory = 0;
                     foreach(string actualID in actualIDs)
                     {
-                        if (Mod.baseInventory.ContainsKey(actualID))
+                        if (HideoutController.instance.inventory.ContainsKey(actualID))
                         {
-                            amountInBaseInventory += Mod.baseInventory[actualID];
+                            amountInBaseInventory += HideoutController.instance.inventory[actualID];
                         }
                     }
                     if(amountInBaseInventory >= amountToRemove)
@@ -3231,7 +2977,7 @@ namespace EFM
                     while (amountLeftToRemoveFromBase > 0)
                     {
                         string actualID = actualIDs[actualIDIndex++];
-                        if (!Mod.baseInventory.ContainsKey(actualID))
+                        if (!HideoutController.instance.inventory.ContainsKey(actualID))
                         {
                             continue;
                         }
@@ -3239,7 +2985,7 @@ namespace EFM
                         {
                             actualIDsUsed.Add(actualID);
                         }
-                        List<GameObject> objectList = baseManager.baseInventoryObjects[actualID];
+                        List<GameObject> objectList = baseManager.inventoryObjects[actualID];
                         for (int i = objectList.Count - 1; i >= 0 && amountLeftToRemoveFromBase > 0; --i)
                         {
                             GameObject toCheck = objectList[objectList.Count - 1];
@@ -3249,12 +2995,12 @@ namespace EFM
                                 if(CIW.stack > amountToRemoveFromBase)
                                 {
                                     CIW.stack = CIW.stack - amountToRemoveFromBase;
-                                    Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - amountToRemoveFromBase;
+                                    HideoutController.instance.inventory[actualID] = HideoutController.instance.inventory[actualID] - amountToRemoveFromBase;
                                     amountLeftToRemoveFromBase = 0;
                                 }
                                 else // CIW.stack <= amountToRemoveFromBase
                                 {
-                                    Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - CIW.stack;
+                                    HideoutController.instance.inventory[actualID] = HideoutController.instance.inventory[actualID] - CIW.stack;
                                     amountLeftToRemoveFromBase -= CIW.stack;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
@@ -3277,7 +3023,7 @@ namespace EFM
 
                                 if (!containsItem)
                                 {
-                                    Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
+                                    HideoutController.instance.inventory[actualID] = HideoutController.instance.inventory[actualID] - 1;
                                     --amountLeftToRemoveFromBase;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
@@ -3290,7 +3036,7 @@ namespace EFM
                             {
                                 if (CIW.containerItemRoot.childCount == 0)
                                 {
-                                    Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
+                                    HideoutController.instance.inventory[actualID] = HideoutController.instance.inventory[actualID] - 1;
                                     --amountLeftToRemoveFromBase;
                                     objectList.RemoveAt(objectList.Count - 1);
                                     CIW.physObj.SetQuickBeltSlot(null);
@@ -3301,7 +3047,7 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.baseInventory[actualID] = Mod.baseInventory[actualID] - 1;
+                                HideoutController.instance.inventory[actualID] = HideoutController.instance.inventory[actualID] - 1;
                                 --amountLeftToRemoveFromBase;
                                 objectList.RemoveAt(objectList.Count - 1);
                                 CIW.physObj.SetQuickBeltSlot(null);
@@ -3510,9 +3256,9 @@ namespace EFM
             {
                 int amountInPlayerInventory = 0;
                 int amountInBaseInventory = 0;
-                if (Mod.baseInventory.ContainsKey(requiredItemID))
+                if (HideoutController.instance.inventory.ContainsKey(requiredItemID))
                 {
-                    foreach (GameObject itemInstanceObject in baseManager.baseInventoryObjects[requiredItemID])
+                    foreach (GameObject itemInstanceObject in baseManager.inventoryObjects[requiredItemID])
                     {
                         MeatovItem itemCIW = itemInstanceObject.GetComponentInChildren<MeatovItem>();
                         if (itemCIW != null)
@@ -3607,7 +3353,7 @@ namespace EFM
                         // Choose which list of objects to use
                         if (amountInBaseInventory > 0)
                         {
-                            listToUse = baseManager.baseInventoryObjects[requiredItemID];
+                            listToUse = baseManager.inventoryObjects[requiredItemID];
                         }
                         else // Have to take from player inventory
                         {
@@ -3665,7 +3411,7 @@ namespace EFM
                         // Choose which list of objects to use
                         if (amountInBaseInventory > 0)
                         {
-                            listToUse = baseManager.baseInventoryObjects[requiredItemID];
+                            listToUse = baseManager.inventoryObjects[requiredItemID];
                         }
                         else // Have to take from player inventory
                         {
@@ -3794,9 +3540,9 @@ namespace EFM
             {
                 int amountInPlayerInventory = 0;
                 int amountInBaseInventory = 0;
-                if (Mod.baseInventory.ContainsKey(requiredItemID))
+                if (HideoutController.instance.inventory.ContainsKey(requiredItemID))
                 {
-                    foreach (GameObject itemInstanceObject in baseManager.baseInventoryObjects[requiredItemID])
+                    foreach (GameObject itemInstanceObject in baseManager.inventoryObjects[requiredItemID])
                     {
                         MeatovItem itemCIW = itemInstanceObject.GetComponentInChildren<MeatovItem>();
                         if (itemCIW != null)
@@ -3887,7 +3633,7 @@ namespace EFM
                     // Choose which list of objects to use
                     if (amountInBaseInventory > 0)
                     {
-                        listToUse = baseManager.baseInventoryObjects[requiredItemID];
+                        listToUse = baseManager.inventoryObjects[requiredItemID];
                     }
                     else // Have to take from player inventory
                     {
@@ -3942,7 +3688,7 @@ namespace EFM
                     // Choose which list of objects to use
                     if (amountInBaseInventory > 0)
                     {
-                        listToUse = baseManager.baseInventoryObjects[requiredItemID];
+                        listToUse = baseManager.inventoryObjects[requiredItemID];
                     }
                     else // Have to take from player inventory
                     {
@@ -4213,9 +3959,9 @@ namespace EFM
                     int amountInPlayerInventory = 0;
                     int amountInBaseInventory = 0;
                     // Get amount of USABLE instances of this item in inventory. Usable must have amount > 0 left in it if custom
-                    if (Mod.baseInventory.ContainsKey(itemID))
+                    if (HideoutController.instance.inventory.ContainsKey(itemID))
                     {
-                        foreach (GameObject itemInstanceObject in baseManager.baseInventoryObjects[itemID])
+                        foreach (GameObject itemInstanceObject in baseManager.inventoryObjects[itemID])
                         {
                             MeatovItem itemCIW = itemInstanceObject.GetComponentInChildren<MeatovItem>();
                             if (itemCIW != null)
@@ -4318,9 +4064,9 @@ namespace EFM
                     int amountInBaseInventory = 0;
                     int amountToRemoveFromBase = 0;
                     int amountToRemoveFromPlayer = 0;
-                    if (Mod.baseInventory.ContainsKey(requiredItemID))
+                    if (HideoutController.instance.inventory.ContainsKey(requiredItemID))
                     {
-                        foreach (GameObject itemInstanceObject in baseManager.baseInventoryObjects[requiredItemID])
+                        foreach (GameObject itemInstanceObject in baseManager.inventoryObjects[requiredItemID])
                         {
                             MeatovItem itemCIW = itemInstanceObject.GetComponentInChildren<MeatovItem>();
                             if (itemCIW != null)
@@ -4390,8 +4136,8 @@ namespace EFM
                     if (amountToRemoveFromBase > 0)
                     {
                         amountInBaseInventory -= amountToRemoveFromBase;
-                        Mod.baseInventory[requiredItemID] = Mod.baseInventory[requiredItemID] - amountToRemoveFromBase;
-                        List<GameObject> objectList = baseManager.baseInventoryObjects[requiredItemID];
+                        HideoutController.instance.inventory[requiredItemID] = HideoutController.instance.inventory[requiredItemID] - amountToRemoveFromBase;
+                        List<GameObject> objectList = baseManager.inventoryObjects[requiredItemID];
                         for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i)
                         {
                             GameObject toCheck = objectList[objectList.Count - 1];
@@ -4782,9 +4528,9 @@ namespace EFM
                     int amountInPlayerInventory = 0;
                     int amountInBaseInventory = 0;
                     // Get amount of USABLE instances of this item in inventory. Usable must have amount > 0 left in it if custom
-                    if (Mod.baseInventory.ContainsKey(ID))
+                    if (HideoutController.instance.inventory.ContainsKey(ID))
                     {
-                        foreach (GameObject itemInstanceObject in baseManager.baseInventoryObjects[ID])
+                        foreach (GameObject itemInstanceObject in baseManager.inventoryObjects[ID])
                         {
                             MeatovItem itemCIW = itemInstanceObject.GetComponentInChildren<MeatovItem>();
                             if (itemCIW != null)
@@ -4888,9 +4634,9 @@ namespace EFM
                 int amountInPlayerInventory = 0;
                 int amountInBaseInventory = 0;
                 // Get amount of USABLE instances of this item in inventory. Usable must have amount > 0 left in it if custom
-                if (Mod.baseInventory.ContainsKey(itemID))
+                if (HideoutController.instance.inventory.ContainsKey(itemID))
                 {
-                    foreach (GameObject itemInstanceObject in baseManager.baseInventoryObjects[itemID])
+                    foreach (GameObject itemInstanceObject in baseManager.inventoryObjects[itemID])
                     {
                         MeatovItem itemCIW = itemInstanceObject.GetComponentInChildren<MeatovItem>();
                         if (itemCIW != null)

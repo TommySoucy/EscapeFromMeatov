@@ -63,12 +63,10 @@ namespace EFM
             // Set live data
             for (int i = 0; i < 7; ++i)
             {
-                Mod.currentHealthRates[i] -= Mod.hideoutHealthRates[i];
+                Mod.currentHealthRates[i] = 0;
             }
-            Mod.currentEnergyRate -= Mod.hideoutEnergyRate;
-            Mod.currentHydrationRate -= Mod.hideoutHydrationRate;
-            Mod.currentEnergyRate += Mod.raidEnergyRate;
-            Mod.currentHydrationRate += Mod.raidHydrationRate;
+            Mod.currentEnergyRate = Mod.raidEnergyRate;
+            Mod.currentHydrationRate = Mod.raidHydrationRate;
 
             // Manage active descriptions dict
             if (Mod.activeDescriptionsByItemID != null)
@@ -5594,7 +5592,7 @@ namespace EFM
                 Mod.AddSkillExp(Skill.lowHPDuration * Time.deltaTime, 4);
             }
 
-            Mod.hydration = Mathf.Clamp(Mod.hydration + (Mod.currentHydrationRate - (Mod.currentHydrationRate * (0.006f * (Mod.skills[3].currentProgress / 100)))) * (Time.deltaTime / 60), 0, Mod.maxHydration);
+            Mod.hydration = Mathf.Clamp(Mod.hydration + (Mod.currentHydrationRate - (Mod.currentHydrationRate * (0.006f * (Mod.skills[3].currentProgress / 100)))) * (Time.deltaTime / 60), 0, Mod.defaultMaxHydration);
             if (Mod.currentHydrationRate != 0)
             {
                 if (!StatusUI.instance.hydrationDelta.gameObject.activeSelf)
@@ -5607,7 +5605,7 @@ namespace EFM
             {
                 StatusUI.instance.hydrationDelta.gameObject.SetActive(false);
             }
-            StatusUI.instance.hydration.text = String.Format("{0:0}/{1:0}", Mod.hydration, Mod.maxHydration);
+            StatusUI.instance.hydration.text = String.Format("{0:0}/{1:0}", Mod.hydration, Mod.defaultMaxHydration);
             if (Mod.hydration == 0)
             {
                 if (Mod.dehydrationEffect == null)
@@ -5692,7 +5690,7 @@ namespace EFM
                 }
             }
 
-            Mod.energy = Mathf.Clamp(Mod.energy + (Mod.currentEnergyRate - (Mod.currentEnergyRate * (0.006f * (Mod.skills[3].currentProgress / 100)))) * (Time.deltaTime / 60), 0, Mod.maxEnergy);
+            Mod.energy = Mathf.Clamp(Mod.energy + (Mod.currentEnergyRate - (Mod.currentEnergyRate * (0.006f * (Mod.skills[3].currentProgress / 100)))) * (Time.deltaTime / 60), 0, Mod.defaultMaxEnergy);
 
             if (Mod.currentEnergyRate != 0)
             {
@@ -5706,7 +5704,7 @@ namespace EFM
             {
                 StatusUI.instance.energyDelta.gameObject.SetActive(false);
             }
-            StatusUI.instance.energy.text = String.Format("{0:0}/{1:0}", Mod.energy, Mod.maxEnergy);
+            StatusUI.instance.energy.text = String.Format("{0:0}/{1:0}", Mod.energy, Mod.defaultMaxEnergy);
             if (Mod.energy == 0)
             {
                 if (Mod.fatigueEffect == null)

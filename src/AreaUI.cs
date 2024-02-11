@@ -91,9 +91,14 @@ namespace EFM
         public AudioSource genericAudioSource;
         public AudioClip[] genericAudioClips; // AreaSelected, UpgradeBegin, UpgradeComplete, ItemInstalled, ItemStarted, ItemComplete
 
+        public void Init()
+        {
+            cont from ere // init ui based on area data (reqs and bonuses)
+        }
+
         public void OnSummaryClicked()
         {
-            buttonClickSound.Play();
+            genericAudioSource.PlayOneShot(genericAudioClips[0]);
             OpenUI();
         }
 

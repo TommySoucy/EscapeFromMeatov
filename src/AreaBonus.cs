@@ -50,7 +50,7 @@ namespace EFM
                         HideoutController.currentQuestMoneyReward += value / 100;
                         break;
                     case BonusType.MaximumEnergyReserve:
-                        Mod.maxEnergy += value;
+                        Mod.defaultMaxEnergy += value;
                         break;
                     case BonusType.FuelConsumption:
                         HideoutController.currentFuelConsumption += value / 100;
@@ -136,7 +136,7 @@ namespace EFM
                         HideoutController.currentQuestMoneyReward -= value / 100;
                         break;
                     case BonusType.MaximumEnergyReserve:
-                        Mod.maxEnergy -= value;
+                        Mod.defaultMaxEnergy -= value;
                         break;
                     case BonusType.FuelConsumption:
                         HideoutController.currentFuelConsumption -= value / 100;
