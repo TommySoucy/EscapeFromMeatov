@@ -388,6 +388,36 @@ namespace EFM
 
             //PatchController.Verify(playerBodyHealPercentPatchOriginal, harmony, true);
             //harmony.Patch(playerBodyHealPercentPatchOriginal, new HarmonyMethod(playerBodyHealPercentPatchPrefix));
+            
+            // Internal_CloneSinglePatch
+            MethodInfo internal_CloneSinglePatchOriginal = typeof(UnityEngine.Object).GetMethod("Internal_CloneSingle", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo internal_CloneSinglePatchPostfix = typeof(Internal_CloneSinglePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(internal_CloneSinglePatchOriginal, harmony, true);
+            harmony.Patch(internal_CloneSinglePatchOriginal, null, new HarmonyMethod(internal_CloneSinglePatchPostfix));
+
+            // Internal_CloneSingleWithParentPatch
+            MethodInfo internal_CloneSingleWithParentPatchOriginal = typeof(UnityEngine.Object).GetMethod("Internal_CloneSingleWithParent", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo internal_CloneSingleWithParentPatchPrefix = typeof(Internal_CloneSingleWithParentPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo internal_CloneSingleWithParentPatchPostfix = typeof(Internal_CloneSingleWithParentPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(internal_CloneSingleWithParentPatchOriginal, harmony, true);
+            harmony.Patch(internal_CloneSingleWithParentPatchOriginal, new HarmonyMethod(internal_CloneSingleWithParentPatchPrefix), new HarmonyMethod(internal_CloneSingleWithParentPatchPostfix));
+
+            // Internal_InstantiateSinglePatch
+            MethodInfo internal_InstantiateSinglePatchOriginal = typeof(UnityEngine.Object).GetMethod("Internal_InstantiateSingle", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo internal_InstantiateSinglePatchPostfix = typeof(Internal_InstantiateSinglePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(internal_InstantiateSinglePatchOriginal, harmony, true);
+            harmony.Patch(internal_InstantiateSinglePatchOriginal, null, new HarmonyMethod(internal_InstantiateSinglePatchPostfix));
+
+            // Internal_InstantiateSingleWithParentPatch
+            MethodInfo internal_InstantiateSingleWithParentPatchOriginal = typeof(UnityEngine.Object).GetMethod("Internal_InstantiateSingleWithParent", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo internal_InstantiateSingleWithParentPatchPrefix = typeof(Internal_InstantiateSingleWithParentPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo internal_InstantiateSingleWithParentPatchPostfix = typeof(Internal_InstantiateSingleWithParentPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(internal_InstantiateSingleWithParentPatchOriginal, harmony, true);
+            harmony.Patch(internal_InstantiateSingleWithParentPatchOriginal, new HarmonyMethod(internal_InstantiateSingleWithParentPatchPrefix), new HarmonyMethod(internal_InstantiateSingleWithParentPatchPostfix));
         }
     }
     
@@ -6224,11 +6254,21 @@ namespace EFM
 
         static void Prefix(ref FVRViveHand __instance, ref FVRInteractiveObject ___m_currentInteractable)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             preObject = ___m_currentInteractable;
         }
 
         static void Postfix(ref FVRViveHand __instance, ref FVRInteractiveObject ___m_currentInteractable)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             if (___m_currentInteractable != null)
             {
                 if (preObject != ___m_currentInteractable)
@@ -6497,7 +6537,7 @@ namespace EFM
     {
         static void Postfix(ref UnityEngine.Object __result)
         {
-            if (__result == null || Mod.currentLocationIndex == -1)
+            if (__result == null || !Mod.inMeatovScene)
             {
                 return;
             }
@@ -6532,7 +6572,7 @@ namespace EFM
     {
         static void Postfix(ref UnityEngine.Object __result, Transform parent)
         {
-            if (__result == null || Mod.currentLocationIndex == -1)
+            if (__result == null || !Mod.inMeatovScene)
             {
                 return;
             }
@@ -6567,7 +6607,7 @@ namespace EFM
     {
         static void Postfix(ref UnityEngine.Object __result)
         {
-            if (__result == null || Mod.currentLocationIndex == -1)
+            if (__result == null || !Mod.inMeatovScene)
             {
                 return;
             }
@@ -6600,12 +6640,9 @@ namespace EFM
     // Patches Object.Internal_InstantiateSingleWithParent to keep track of this type of instantiation
     class Internal_InstantiateSingleWithParentPatch
     {
-        static bool track = false;
-        static TrackedItemData parentData;
-
         static void Postfix(ref UnityEngine.Object __result, Transform parent)
         {
-            if (__result == null || Mod.currentLocationIndex == -1)
+            if (__result == null || !Mod.inMeatovScene)
             {
                 return;
             }

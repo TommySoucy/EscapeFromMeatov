@@ -2223,14 +2223,18 @@ namespace EFM
 
 		public void EndInteraction(Hand hand)
         {
-            hand.MI = null;
-            hand.hasScript = false;
 
-            if (hand.fvrHand.Grabbity_HoverSphere.gameObject.activeSelf)
+            if (hand != null)
             {
-                hand.fvrHand.Grabbity_HoverSphere.gameObject.SetActive(false);
+                hand.MI = null;
+                hand.hasScript = false;
+
+                if (hand.fvrHand.Grabbity_HoverSphere.gameObject.activeSelf)
+                {
+                    hand.fvrHand.Grabbity_HoverSphere.gameObject.SetActive(false);
+                }
+                hand.updateInteractionSphere = false;
             }
-            hand.updateInteractionSphere = false;
         }
 
         public void OnDestroy()

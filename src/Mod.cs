@@ -2654,12 +2654,15 @@ namespace EFM
                 }
                 else // Not loading into meatov scene
                 {
-                    // Unsecure scene components
-                    foreach (GameObject go in securedMainSceneComponents)
+                    if(securedMainSceneComponents != null)
                     {
-                        SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
+                        // Unsecure scene components
+                        foreach (GameObject go in securedMainSceneComponents)
+                        {
+                            SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
+                        }
+                        securedMainSceneComponents.Clear();
                     }
-                    securedMainSceneComponents.Clear();
                 }
             }
             else // Done loading
@@ -3291,10 +3294,15 @@ namespace EFM
 
         public static void H3MP_OnInstantiationTrack(GameObject go)
         {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
             // This or one of our instantiation patches will happen first
             // In this case, we want to make sure that if the item is a MeatovItem, we add the script
             // before H3MP tracks it
-            if(instantiatedItem == go)
+            if (instantiatedItem == go)
             {
                 // We already setup this item, no need to do it here
                 // It is ready to be tracked by H3MP
