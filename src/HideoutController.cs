@@ -1874,6 +1874,8 @@ namespace EFM
                     // If have data, we should also set slot content
                 }
 
+                TODO: // Initialize Traders' live data and set events for them and their task conditions
+
                 return;
             }
 

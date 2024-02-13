@@ -155,6 +155,10 @@ namespace EFM
                     }
                 }
             }
+
+            TODO: // After setting up static data for areas and for requirements and productions, we need to set their live state here at the end of loaddata
+                  // based on hideoutcontroller's loadeddata
+                  // as we do that, we need remember to setup events theyre are going to need to update themselves
         }
 
         public void Update()

@@ -1746,7 +1746,7 @@ namespace EFM
             Dictionary<string, JToken> allQuests = questDB.ToObject<Dictionary<string, JToken>>();
             foreach (KeyValuePair<string, JToken> questData in allQuests)
             {
-
+                TODO: // Load quests, make instances and store them tasksByTraderID
             }
 
             //globalDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/globals.json"));

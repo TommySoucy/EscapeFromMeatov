@@ -28,6 +28,7 @@ namespace EFM
         public string[] buyBlacklist;
         public LoyaltyLevel[] levels;
         public Dictionary<int, List<Barter>> bartersByLevel;
+        public List<Task> tasks;
 
         // Live data
         public int salesSum;

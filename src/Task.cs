@@ -209,4 +209,30 @@ namespace EFM
         // CompleteCondition
         public string targetCondition;
     }
+
+    public class Reward
+    {
+        public enum RewardType
+        {
+            Experience,
+            TraderStanding,
+            Item,
+            TraderUnlock,
+            AssortmentUnlock
+        }
+        public RewardType rewardType;
+
+        // Experience
+        public int experience;
+
+        // Standing and TraderUnlock
+        public int traderIndex;
+
+        // Standing
+        public float standing;
+
+        // Item
+        public string[] itemIDs;
+        public int amount;
+    }
 }

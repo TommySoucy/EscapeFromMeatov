@@ -106,7 +106,6 @@
     <Compile Include="src\Skill.cs" />
     <Compile Include="src\StackTrigger.cs" />
     <Compile Include="src\Switch.cs" />
-    <Compile Include="src\TraderStatus.cs" />
     <Compile Include="src\TraderTab.cs" />
     <Compile Include="src\TradeVolume.cs" />
     <Compile Include="src\Mod.cs" />
