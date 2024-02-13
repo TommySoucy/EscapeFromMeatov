@@ -203,7 +203,7 @@ namespace EFM
         public SkillType skillType;
 
         public float progress; // Actual, 1 lvl ea. 100, so current level is progress/100
-        public float currentProgress; // Affected by effects, this is the one we should check while playing
+        public float currentProgress; // Affected by effects, this is the one we should check while in raid
 
         public bool increasing;
         public bool dimishingReturns;

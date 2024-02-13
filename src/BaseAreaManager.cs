@@ -1382,7 +1382,7 @@ namespace EFM
                         endProducts = itemMapEntry.modulIDs;
                         break;
                     case 2:
-                        endProducts = new string[] { itemMapEntry.otherModID };
+                        endProducts = new string[] { itemMapEntry.moddedID };
                         break;
                 }
 
@@ -1432,7 +1432,7 @@ namespace EFM
                             endProducts = itemMapEntry.modulIDs;
                             break;
                         case 2:
-                            endProducts = new string[] { itemMapEntry.otherModID };
+                            endProducts = new string[] { itemMapEntry.moddedID };
                             break;
                     }
 
@@ -1551,7 +1551,7 @@ namespace EFM
                                         currentRequirement.IDs = requirementItemMapEntry.modulIDs;
                                         break;
                                     case 2:
-                                        currentRequirement.IDs = new string[] { requirementItemMapEntry.otherModID };
+                                        currentRequirement.IDs = new string[] { requirementItemMapEntry.moddedID };
                                         break;
                                 }
                                 if (Mod.itemIcons.ContainsKey(currentRequirement.IDs[0]))
@@ -1621,7 +1621,7 @@ namespace EFM
                                         currentRequirement.IDs = requirementItemMapEntry.modulIDs;
                                         break;
                                     case 2:
-                                        currentRequirement.IDs = new string[] { requirementItemMapEntry.otherModID };
+                                        currentRequirement.IDs = new string[] { requirementItemMapEntry.moddedID };
                                         break;
                                 }
                                 currentRequirement.count = (int)requirement["count"];
@@ -1754,7 +1754,7 @@ namespace EFM
                             endProducts = itemMapEntry.modulIDs;
                             break;
                         case 2:
-                            endProducts = new string[] { itemMapEntry.otherModID };
+                            endProducts = new string[] { itemMapEntry.moddedID };
                             break;
                     }
 
@@ -2075,7 +2075,7 @@ namespace EFM
                                         actualIDs = itemMapEntry.modulIDs;
                                         break;
                                     case 2:
-                                        actualIDs = new string[] { itemMapEntry.otherModID };
+                                        actualIDs = new string[] { itemMapEntry.moddedID };
                                         break;
                                 }
                                 if (Mod.itemIcons.ContainsKey(actualIDs[0]))
@@ -2471,7 +2471,7 @@ namespace EFM
                                 itemIDs = itemMapEntry.modulIDs;
                                 break;
                             case 2:
-                                itemIDs = new string[] { itemMapEntry.otherModID };
+                                itemIDs = new string[] { itemMapEntry.moddedID };
                                 break;
                         }
 
@@ -2767,7 +2767,7 @@ namespace EFM
                                         itemIDs = itemMapEntry.modulIDs;
                                         break;
                                     case 2:
-                                        itemIDs = new string[] { itemMapEntry.otherModID };
+                                        itemIDs = new string[] { itemMapEntry.moddedID };
                                         break;
                                 }
 
@@ -2948,7 +2948,7 @@ namespace EFM
                             actualIDs = itemMapEntry.modulIDs;
                             break;
                         case 2:
-                            actualIDs = new string[] { itemMapEntry.otherModID };
+                            actualIDs = new string[] { itemMapEntry.moddedID };
                             break;
                     }
                     int amountToRemove = (int)requirement["count"];

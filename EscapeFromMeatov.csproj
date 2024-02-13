@@ -84,11 +84,14 @@
     <Compile Include="src\StaminaUI.cs" />
     <Compile Include="src\StatRewardView.cs" />
     <Compile Include="src\StatusUI.cs" />
+    <Compile Include="src\Task.cs" />
     <Compile Include="src\TaskObjectiveUI.cs" />
     <Compile Include="src\TaskUI.cs" />
     <Compile Include="src\TimePanel.cs" />
+    <Compile Include="src\Trader.cs" />
     <Compile Include="src\TraderRequirement.cs" />
     <Compile Include="src\TraderRewardView.cs" />
+    <Compile Include="src\TraderUI.cs" />
     <Compile Include="src\UIController.cs" />
     <Compile Include="src\MarketItemView.cs" />
     <Compile Include="src\MarketManager.cs" />

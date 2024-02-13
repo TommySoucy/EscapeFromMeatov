@@ -84,7 +84,8 @@ namespace EFM
         public static List<AreaSlot> areaSlots;
         public static bool areaSlotShouldUpdate = true;
         public static List<AreaBonus> activeBonuses;
-        public static TraderStatus[] traderStatuses;
+        public static Trader[] traders;
+        public static Dictionary<int, List<Task>> tasksByTraderID;
         public static CategoryTreeNode itemCategories;
         public static Dictionary<string, List<string>> itemAncestors;
         public static Dictionary<string, int> lowestBuyValueByItem;
@@ -249,12 +250,12 @@ namespace EFM
         // DB
         public static JArray areasDB;
         public static JObject localeDB;
+        public static JObject itemDB;
         public static JObject vanillaItemData;
         public static Dictionary<string, ItemMapEntry> itemMap;
         public static JObject[] traderBaseDB;
         public static JObject[] traderAssortDB;
         public static JObject[] traderQuestAssortDB;
-        public static JArray[] traderCategoriesDB;
         public static JObject globalDB;
         public static JObject questDB;
         public static JArray XPPerLevel;
@@ -1472,17 +1473,13 @@ namespace EFM
                     if (itemMap.ContainsKey(whiteListElement.ToString()))
                     {
                         ItemMapEntry entry = itemMap[whiteListElement.ToString()];
-                        switch (entry.mode)
+                        if (entry.modded)
                         {
-                            case 0:
-                                customItemWrapper.whiteList.Add(entry.ID);
-                                break;
-                            case 1:
-                                customItemWrapper.whiteList.AddRange(entry.modulIDs);
-                                break;
-                            case 2:
-                                customItemWrapper.whiteList.Add(entry.otherModID);
-                                break;
+                            customItemWrapper.whiteList.Add(entry.moddedID);
+                        }
+                        else
+                        {
+                            customItemWrapper.whiteList.Add(entry.ID);
                         }
                     }
                     else
@@ -1498,17 +1495,13 @@ namespace EFM
                     if (itemMap.ContainsKey(blackListElement.ToString()))
                     {
                         ItemMapEntry entry = itemMap[blackListElement.ToString()];
-                        switch (entry.mode)
+                        if (entry.modded)
                         {
-                            case 0:
-                                customItemWrapper.blackList.Add(entry.ID);
-                                break;
-                            case 1:
-                                customItemWrapper.blackList.AddRange(entry.modulIDs);
-                                break;
-                            case 2:
-                                customItemWrapper.blackList.Add(entry.otherModID);
-                                break;
+                            customItemWrapper.blackList.Add(entry.moddedID);
+                        }
+                        else
+                        {
+                            customItemWrapper.blackList.Add(entry.ID);
                         }
                     }
                     else
@@ -1548,6 +1541,12 @@ namespace EFM
             JToken globalHealthFactors = globalDB["config"]["Health"]["ProfileHealthSettings"]["HealthFactorsSettings"];
             defaultMaxEnergy = (float)globalHealthFactors["Energy"]["Default"];
             defaultMaxHydration = (float)globalHealthFactors["Hydration"]["Default"];
+
+            skills = new Skill[64];
+            for(int i=0; i < skills.Length; ++i)
+            {
+                skills[i] = new Skill();
+            }
 
             JToken globalSkillsSettings = globalDB["config"]["SkillsSettings"]; 
             Skill.skillProgressRate = (float)globalSkillsSettings["SkillProgressRate"];
@@ -1714,6 +1713,7 @@ namespace EFM
 
             areasDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/areas.json"));
             localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
+            itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
             vanillaItemData = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
             ParseItemMap();
 
@@ -1726,29 +1726,29 @@ namespace EFM
             //    Mod.itemsByParents.Add(parent, new List<string>() { H3ID });
             //}
 
-            //traderBaseDB = new JObject[8];
-            //traderAssortDB = new JObject[8];
-            //traderQuestAssortDB = new JObject[8];
-            //traderCategoriesDB = new JArray[8];
-            //for (int i = 0; i < 9; ++i)
-            //{
-            //    string traderID = TraderStatus.IndexToID(i);
-            //    traderBaseDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/base.json"));
-            //    if(File.Exists(Mod.path + "/database/traders/" + traderID + "/assort.json"))
-            //    {
-            //        traderAssortDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/assort.json"));
-            //    }
-            //    if(File.Exists(Mod.path + "/database/traders/" + traderID + "/questassort.json"))
-            //    {
-            //        traderQuestAssortDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/questassort.json"));
-            //    }
+            traders = new Trader[9];
+            traderBaseDB = new JObject[9];
+            traderAssortDB = new JObject[9];
+            for (int i = 0; i < 9; ++i)
+            {
+                string traderID = Trader.IndexToID(i);
+                traderBaseDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/base.json"));
+                if (File.Exists(Mod.path + "/database/traders/" + traderID + "/assort.json"))
+                {
+                    traderAssortDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/assort.json"));
+                }
 
-            //    // TODO: Review, we dont currently use the categories right now because I thought these were the categories of items we coudl sell
-            //    // to the trader but apparently they are jsut UI stuff, IDs only used for UI locale
-            //    // We need to find actual sell IDs or just keep using the current method we have of deciding whichi tems we can sell, which is
-            //    // that we can only sell to them items of type of items they sell themselves, unless its fence, to whom we can sell anything at reduced price
-            //    //traderCategoriesDB[i] = JArray.Parse(File.ReadAllText("BepInEx/Plugins/database/Traders/" + traderID + "/categories.json"));
-            //}
+                traders[i] = new Trader(i, traderID);
+            }
+
+            tasksByTraderID = new Dictionary<int, List<Task>>();
+            questDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/templates/quests.json"));
+            Dictionary<string, JToken> allQuests = questDB.ToObject<Dictionary<string, JToken>>();
+            foreach (KeyValuePair<string, JToken> questData in allQuests)
+            {
+
+            }
+
             //globalDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/globals.json"));
             //MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
             //MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
@@ -1826,36 +1826,9 @@ namespace EFM
             {
                 ItemMapEntry newEntry = new ItemMapEntry();
                 newEntry.ID = item.Value["H3ID"].ToString();
-                newEntry.modulIDs = item.Value["Modul"].ToObject<string[]>();
-                newEntry.otherModID = item.Value["OtherMod"].ToString();
+                newEntry.moddedID = item.Value["OtherMod"].ToString();
 
-                bool gotModul = false;
-                if(newEntry.modulIDs.Length > 0)
-                {
-                    bool missing = false;
-                    foreach(string modulID in newEntry.modulIDs)
-                    {
-                        // TODO: Review if this is the correct way of checking if the items are installed
-                        // Will have to check if the gun mods load their items in OD or somewhere else
-                        if (!IM.OD.ContainsKey(modulID))
-                        {
-                            missing = true;
-                            break;
-                        }
-                    }
-                    if (!missing)
-                    {
-                        gotModul = true;
-                        newEntry.mode = 1;
-                    }
-                }
-                if(!gotModul && newEntry.otherModID != null && !newEntry.otherModID.Equals(""))
-                {
-                    if (IM.OD.ContainsKey(newEntry.otherModID))
-                    {
-                        newEntry.mode = 2;
-                    }
-                }
+                newEntry.modded = newEntry.moddedID != null && !newEntry.moddedID.Equals("") && IM.OD.ContainsKey(newEntry.moddedID);
 
                 itemMap.Add(item.Key, newEntry);
             }
@@ -3005,8 +2978,8 @@ namespace EFM
                 case "Tactics":
                     return 63;
                 default:
-                    Mod.LogError("SkillNameToIndex received name: " + name);
-                    return 0;
+                    Mod.LogError("DEV: SkillNameToIndex received name: " + name);
+                    return -1;
             }
         }
 
@@ -3292,6 +3265,41 @@ namespace EFM
             modInstance.Logger.LogError(message);
         }
 
+        public static int ItemIDToCurrencyIndex(string itemID)
+        {
+            switch (itemID)
+            {
+                case "5449016a4bdc2d6f028b456f":
+                    return 0;
+                case "5696686a4bdc2da3298b456a":
+                    return 1;
+                case "569668774bdc2da2298b4568":
+                    return 2;
+                default:
+                    Mod.LogError("DEV: ItemIDToCurrencyIndex could not find index for given ID: " + itemID);
+                    return 0;
+            }
+        }
+
+        public static string TarkovIDtoH3ID(string tarkovID)
+        {
+            if(itemMap.TryGetValue(tarkovID, out ItemMapEntry entry))
+            {
+                if (entry.modded)
+                {
+                    return entry.moddedID;
+                }
+                else
+                {
+                    return entry.ID;
+                }
+            }
+            else
+            {
+                return tarkovID;
+            }
+        }
+
         public static void H3MP_OnInstantiationTrack(GameObject go)
         {
             if (!Mod.inMeatovScene)
@@ -3327,11 +3335,10 @@ namespace EFM
 
     public class ItemMapEntry
     {
-        public int mode = 0; // 0 vanilla, 1 Modul, 2 other mod
+        public bool modded;
 
         public string ID;
-        public string[] modulIDs;
-        public string otherModID;
+        public string moddedID;
     }
 
 }

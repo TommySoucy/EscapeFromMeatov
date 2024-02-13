@@ -1867,6 +1867,13 @@ namespace EFM
 
                 //Mod.preventLoadMagUpdateLists = false;
 
+                for(int i=0; i < areaController.areas.Length; ++i)
+                {
+                    areaController.areas[i].powered = false;
+                    areaController.areas[i].currentLevel = areaController.areas[i].startLevel;
+                    // If have data, we should also set slot content
+                }
+
                 return;
             }
 

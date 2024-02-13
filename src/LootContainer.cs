@@ -67,7 +67,7 @@ namespace EFM
 							itemID = entry.modulIDs[UnityEngine.Random.Range(0, entry.modulIDs.Length)];
 							break;
 						case 2:
-							itemID = entry.otherModID;
+							itemID = entry.moddedID;
 							break;
 					}
                 }

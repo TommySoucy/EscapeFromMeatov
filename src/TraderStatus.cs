@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -10,16 +9,6 @@ namespace EFM
     public class TraderStatus
     {
         public static float fenceRestockTimer = 0;
-
-        public string id;
-        public int index;
-        public string name;
-        public int salesSum;
-        public float standing;
-        public bool unlocked;
-        public int currency; // 0: RUB, 1: USD
-        public bool offersInsurance;
-        public float insuranceRate;
 
         public Dictionary<int, TraderAssortment> assortmentByLevel;
         public List<string> categories; // Categories defined in DB correspond only to a locale string and have no relation to actual items or their ancestors, so this list will be filled based on what categories this trader sells instead of the categoriesData
@@ -38,18 +27,6 @@ namespace EFM
 
         public List<TraderTask> tasksToInit;
         public List<TraderTaskCondition> conditionsToInit;
-
-        public struct TraderLoyaltyDetails
-        {
-            public int currentLevel;
-            public int nextLevel;
-            public int currentMinLevel;
-            public int nextMinLevel;
-            public int currentMinSalesSum;
-            public int nextMinSalesSum;
-            public float currentMinStanding;
-            public float nextMinStanding;
-        }
 
         public TraderStatus(JToken traderData, int index, string name, int salesSum, float standing, bool unlocked, string currency, JObject assortData, JArray categoriesData)
         {
@@ -161,58 +138,6 @@ namespace EFM
             return tld;
         }
 
-        public static int IDToIndex(string ID)
-        {
-            switch (ID)
-            {
-                case "54cb50c76803fa8b248b4571":
-                    return 0;
-                case "54cb57776803fa99248b456e":
-                    return 1;
-                case "579dc571d53a0658a154fbec":
-                    return 2;
-                case "58330581ace78e27b8b10cee":
-                    return 3;
-                case "5935c25fb3acc3127c3d8cd9":
-                    return 4;
-                case "5a7c2eca46aef81a7ca2145d":
-                    return 5;
-                case "5ac3b934156ae10c4430e83c":
-                    return 6;
-                case "5c0647fdd443bc2504c2d371":
-                    return 7;
-                default:
-                    return -1;
-            }
-        }
-
-        public static string IndexToID(int index)
-        {
-            switch (index)
-            {
-                case 0:
-                    return "54cb50c76803fa8b248b4571";
-                case 1:
-                    return "54cb57776803fa99248b456e";
-                case 2:
-                    return "579dc571d53a0658a154fbec";
-                case 3:
-                    return "58330581ace78e27b8b10cee";
-                case 4:
-                    return "5935c25fb3acc3127c3d8cd9";
-                case 5:
-                    return "5a7c2eca46aef81a7ca2145d";
-                case 6:
-                    return "5ac3b934156ae10c4430e83c";
-                case 7:
-                    return "5c0647fdd443bc2504c2d371";
-                case 8:
-                    return "638f541a29ffd1183d187f57";
-                default:
-                    return "";
-            }
-        }
-
         public static string LoyaltyLevelToRoman(int level)
         {
             switch (level)
@@ -272,7 +197,7 @@ namespace EFM
                                 actualItemIDs = itemMapEntry.modulIDs;
                                 break;
                             case 2:
-                                actualItemIDs = new string[] { itemMapEntry.otherModID };
+                                actualItemIDs = new string[] { itemMapEntry.moddedID };
                                 break;
                         }
                     }
@@ -349,7 +274,7 @@ namespace EFM
                                                 priceIDs = itemMapEntry.modulIDs;
                                                 break;
                                             case 2:
-                                                priceIDs = new string[] { itemMapEntry.otherModID };
+                                                priceIDs = new string[] { itemMapEntry.moddedID };
                                                 break;
                                         }
                                         foreach (string newPriceID in priceIDs)
@@ -571,7 +496,7 @@ namespace EFM
                                                 priceIDs = itemMapEntry.modulIDs;
                                                 break;
                                             case 2:
-                                                priceIDs = new string[] { itemMapEntry.otherModID };
+                                                priceIDs = new string[] { itemMapEntry.moddedID };
                                                 break;
                                         }
 
@@ -1017,7 +942,7 @@ namespace EFM
                                     reward.itemIDs = itemMapEntry.modulIDs;
                                     break;
                                 case 2:
-                                    reward.itemIDs = new string[] { itemMapEntry.otherModID };
+                                    reward.itemIDs = new string[] { itemMapEntry.moddedID };
                                     break;
                             }
 
@@ -1057,7 +982,7 @@ namespace EFM
                                         reward.itemIDs = itemMapEntry.modulIDs;
                                         break;
                                     case 2:
-                                        reward.itemIDs = new string[] { itemMapEntry.otherModID };
+                                        reward.itemIDs = new string[] { itemMapEntry.moddedID };
                                         break;
                                 }
 
@@ -1097,7 +1022,7 @@ namespace EFM
                                     reward.itemIDs = itemMapEntry.modulIDs;
                                     break;
                                 case 2:
-                                    reward.itemIDs = new string[] { itemMapEntry.otherModID };
+                                    reward.itemIDs = new string[] { itemMapEntry.moddedID };
                                     break;
                             }
 
@@ -1129,7 +1054,7 @@ namespace EFM
                                             reward.itemIDs = itemMapEntry.modulIDs;
                                             break;
                                         case 2:
-                                            reward.itemIDs = new string[] { itemMapEntry.otherModID };
+                                            reward.itemIDs = new string[] { itemMapEntry.moddedID };
                                             break;
                                     }
 
@@ -1270,7 +1195,7 @@ namespace EFM
                                                     newCounter.allowedWeaponIDs.AddRange(itemMapEntry.modulIDs);
                                                     break;
                                                 case 2:
-                                                    newCounter.allowedWeaponIDs.Add(itemMapEntry.otherModID);
+                                                    newCounter.allowedWeaponIDs.Add(itemMapEntry.moddedID);
                                                     break;
                                             }
                                         }
@@ -1300,7 +1225,7 @@ namespace EFM
                                                     newCounter.weaponModsInclusive.AddRange(itemMapEntry.modulIDs);
                                                     break;
                                                 case 2:
-                                                    newCounter.weaponModsInclusive.Add(itemMapEntry.otherModID);
+                                                    newCounter.weaponModsInclusive.Add(itemMapEntry.moddedID);
                                                     break;
                                             }
                                         }
@@ -1413,7 +1338,7 @@ namespace EFM
                                                     newCounter.allowedWeaponIDs.AddRange(itemMapEntry.modulIDs);
                                                     break;
                                                 case 2:
-                                                    newCounter.allowedWeaponIDs.Add(itemMapEntry.otherModID);
+                                                    newCounter.allowedWeaponIDs.Add(itemMapEntry.moddedID);
                                                     break;
                                             }
                                         }
@@ -1693,7 +1618,7 @@ namespace EFM
                                                     newCounter.equipmentExclusive.AddRange(itemMapEntry.modulIDs);
                                                     break;
                                                 case 2:
-                                                    newCounter.equipmentExclusive.Add(itemMapEntry.otherModID);
+                                                    newCounter.equipmentExclusive.Add(itemMapEntry.moddedID);
                                                     break;
                                             }
                                         }
@@ -1718,7 +1643,7 @@ namespace EFM
                                                     newCounter.equipmentInclusive.AddRange(itemMapEntry.modulIDs);
                                                     break;
                                                 case 2:
-                                                    newCounter.equipmentInclusive.Add(itemMapEntry.otherModID);
+                                                    newCounter.equipmentInclusive.Add(itemMapEntry.moddedID);
                                                     break;
                                             }
                                         }
@@ -1763,7 +1688,7 @@ namespace EFM
                                                 newCounter.itemIDs.AddRange(itemMapEntry.modulIDs);
                                                 break;
                                             case 2:
-                                                newCounter.itemIDs.Add(itemMapEntry.otherModID);
+                                                newCounter.itemIDs.Add(itemMapEntry.moddedID);
                                                 break;
                                         }
                                     }
@@ -1868,7 +1793,7 @@ namespace EFM
                                 condition.items = itemMapEntry.modulIDs;
                                 break;
                             case 2:
-                                condition.items = new string[] { itemMapEntry.otherModID };
+                                condition.items = new string[] { itemMapEntry.moddedID };
                                 break;
                         }
                         foreach (string item in condition.items)
@@ -1910,7 +1835,7 @@ namespace EFM
                                 condition.items = itemMapEntry.modulIDs;
                                 break;
                             case 2:
-                                condition.items = new string[] { itemMapEntry.otherModID };
+                                condition.items = new string[] { itemMapEntry.moddedID };
                                 break;
                         }
                         foreach (string item in condition.items)
@@ -1966,7 +1891,7 @@ namespace EFM
                                 condition.items = itemMapEntry.modulIDs;
                                 break;
                             case 2:
-                                condition.items = new string[] { itemMapEntry.otherModID };
+                                condition.items = new string[] { itemMapEntry.moddedID };
                                 break;
                         }
 
@@ -2064,7 +1989,7 @@ namespace EFM
                                 condition.targetWeapons = itemMapEntry.modulIDs;
                                 break;
                             case 2:
-                                condition.targetWeapons = new string[] { itemMapEntry.otherModID };
+                                condition.targetWeapons = new string[] { itemMapEntry.moddedID };
                                 break;
                         }
 
@@ -2654,16 +2579,6 @@ namespace EFM
         public string failMessage;
         public string successMessage;
         public string location;
-        public enum TaskState
-        {
-            Locked,
-            Available,
-            Active,
-            Complete,
-            Success,
-            Fail
-        }
-        public TaskState taskState;
 
         public List<TraderTaskCondition> startConditions;
         public List<TraderTaskCondition> completionConditions;
@@ -2702,20 +2617,6 @@ namespace EFM
 
         public string text;
 
-        public enum ConditionType
-        {
-            CounterCreator,
-            HandoverItem,
-            Level,
-            FindItem,
-            Quest,
-            LeaveItemAtLocation,
-            TraderLoyalty,
-            Skill,
-            VisitPlace,
-            WeaponAssembly
-        }
-        public ConditionType conditionType;
         public bool fulfilled;
         public string ID;
         public List<TraderTaskCondition> visibilityConditions;
@@ -2800,32 +2701,10 @@ namespace EFM
 
     public class TraderTaskCounterCondition
     {
-        public enum CounterConditionType
-        {
-            Kills,
-            ExitStatus,
-            VisitPlace,
-            Location,
-            HealthEffect,
-            Equipment,
-            InZone,
-            Shots,
-            UseItem
-        }
-        public CounterConditionType counterConditionType;
         public string ID;
         public TraderTaskCondition parentCondition;
 
         // Kills
-        public enum CounterConditionTargetEnemy
-        {
-            Scav, // Savage
-            PMC, // AnyPmc
-            Usec,
-            Bear,
-            Any
-        }
-        public CounterConditionTargetEnemy counterConditionTargetEnemy;
         public List<string> allowedWeaponIDs;
         public List<string> weaponModsInclusive;
         public float distance = -1;
@@ -2834,30 +2713,9 @@ namespace EFM
         public int killCount; // Live data
 
         // Shots
-        public enum CounterConditionTargetBodyPart
-        {
-            Head,
-            Thorax,
-            Stomach,
-            LeftArm,
-            RightArm,
-            LeftLeg,
-            RightLeg
-        }
-        public List<CounterConditionTargetBodyPart> counterConditionTargetBodyParts;
 
         public int shotCount; // Live data
 
-        // ExitStatus
-        public enum CounterConditionTargetExitStatus
-        {
-            Survived,
-            Runner,
-            Killed,
-            Left,
-            MissingInAction
-        }
-        public List<CounterConditionTargetExitStatus> counterConditionTargetExitStatuses;
 
         // VisitPlace
         public string targetPlaceName;

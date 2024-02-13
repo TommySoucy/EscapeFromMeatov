@@ -410,7 +410,7 @@ namespace EFM
                                 itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                itemID = itemMapEntry.otherModID;
+                                itemID = itemMapEntry.moddedID;
                                 break;
                         }
                     }
@@ -469,7 +469,7 @@ namespace EFM
                                 itemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                itemID = itemMapEntry.otherModID;
+                                itemID = itemMapEntry.moddedID;
                                 break;
                         }
                     }
@@ -3838,7 +3838,7 @@ namespace EFM
                                     actualHeadEquipID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                     break;
                                 case 2:
-                                    actualHeadEquipID = itemMapEntry.otherModID;
+                                    actualHeadEquipID = itemMapEntry.moddedID;
                                     break;
                             }
 
@@ -3918,7 +3918,7 @@ namespace EFM
                                 actualRigID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                actualRigID = itemMapEntry.otherModID;
+                                actualRigID = itemMapEntry.moddedID;
                                 break;
                         }
                         Mod.LogInfo("\t\tChosen ID: " + actualRigID);
@@ -3989,7 +3989,7 @@ namespace EFM
                                     actualArmorID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                     break;
                                 case 2:
-                                    actualArmorID = itemMapEntry.otherModID;
+                                    actualArmorID = itemMapEntry.moddedID;
                                     break;
                             }
                             newAISpawn.inventory.armor = actualArmorID;
@@ -4041,7 +4041,7 @@ namespace EFM
                                 actualBackpackID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                actualBackpackID = itemMapEntry.otherModID;
+                                actualBackpackID = itemMapEntry.moddedID;
                                 break;
                         }
                         newAISpawn.inventory.backpack = actualBackpackID;
@@ -4099,7 +4099,7 @@ namespace EFM
                                 actualPWID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                actualPWID = itemMapEntry.otherModID;
+                                actualPWID = itemMapEntry.moddedID;
                                 break;
                         }
                         newAISpawn.inventory.primaryWeapon = actualPWID;
@@ -4151,7 +4151,7 @@ namespace EFM
                                 actualSWID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                actualSWID = itemMapEntry.otherModID;
+                                actualSWID = itemMapEntry.moddedID;
                                 break;
                         }
                         newAISpawn.inventory.secondaryWeapon = actualSWID;
@@ -4203,7 +4203,7 @@ namespace EFM
                                 actualHolsterID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                actualHolsterID = itemMapEntry.otherModID;
+                                actualHolsterID = itemMapEntry.moddedID;
                                 break;
                         }
                         newAISpawn.inventory.holster = actualHolsterID;
@@ -4265,7 +4265,7 @@ namespace EFM
                                 actualScabbardID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                actualScabbardID = itemMapEntry.otherModID;
+                                actualScabbardID = itemMapEntry.moddedID;
                                 break;
                         }
                         newAISpawn.inventory.generic.Add(actualScabbardID);
@@ -4375,7 +4375,7 @@ namespace EFM
                                 actualItemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                actualItemID = itemMapEntry.otherModID;
+                                actualItemID = itemMapEntry.moddedID;
                                 break;
                         }
                         GameObject itemPrefab = null;
@@ -4656,7 +4656,7 @@ namespace EFM
                                 specialItemID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                 break;
                             case 2:
-                                specialItemID = itemMapEntry.otherModID;
+                                specialItemID = itemMapEntry.moddedID;
                                 break;
                         }
                         object[] specialItemData = GetItemData(specialItemID);
@@ -4811,7 +4811,7 @@ namespace EFM
                                     actualModID = itemMapEntry.modulIDs[UnityEngine.Random.Range(0, itemMapEntry.modulIDs.Length)];
                                     break;
                                 case 2:
-                                    actualModID = itemMapEntry.otherModID;
+                                    actualModID = itemMapEntry.moddedID;
                                     break;
                             }
                             if (modEntryToUse.Key.Equals("mod_magazine"))

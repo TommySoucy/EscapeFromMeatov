@@ -398,11 +398,10 @@ namespace EFM
 
             // Internal_CloneSingleWithParentPatch
             MethodInfo internal_CloneSingleWithParentPatchOriginal = typeof(UnityEngine.Object).GetMethod("Internal_CloneSingleWithParent", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo internal_CloneSingleWithParentPatchPrefix = typeof(Internal_CloneSingleWithParentPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo internal_CloneSingleWithParentPatchPostfix = typeof(Internal_CloneSingleWithParentPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
             PatchController.Verify(internal_CloneSingleWithParentPatchOriginal, harmony, true);
-            harmony.Patch(internal_CloneSingleWithParentPatchOriginal, new HarmonyMethod(internal_CloneSingleWithParentPatchPrefix), new HarmonyMethod(internal_CloneSingleWithParentPatchPostfix));
+            harmony.Patch(internal_CloneSingleWithParentPatchOriginal, null, new HarmonyMethod(internal_CloneSingleWithParentPatchPostfix));
 
             // Internal_InstantiateSinglePatch
             MethodInfo internal_InstantiateSinglePatchOriginal = typeof(UnityEngine.Object).GetMethod("Internal_InstantiateSingle", BindingFlags.NonPublic | BindingFlags.Static);
@@ -413,11 +412,10 @@ namespace EFM
 
             // Internal_InstantiateSingleWithParentPatch
             MethodInfo internal_InstantiateSingleWithParentPatchOriginal = typeof(UnityEngine.Object).GetMethod("Internal_InstantiateSingleWithParent", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo internal_InstantiateSingleWithParentPatchPrefix = typeof(Internal_InstantiateSingleWithParentPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo internal_InstantiateSingleWithParentPatchPostfix = typeof(Internal_InstantiateSingleWithParentPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
             PatchController.Verify(internal_InstantiateSingleWithParentPatchOriginal, harmony, true);
-            harmony.Patch(internal_InstantiateSingleWithParentPatchOriginal, new HarmonyMethod(internal_InstantiateSingleWithParentPatchPrefix), new HarmonyMethod(internal_InstantiateSingleWithParentPatchPostfix));
+            harmony.Patch(internal_InstantiateSingleWithParentPatchOriginal, null, new HarmonyMethod(internal_InstantiateSingleWithParentPatchPostfix));
         }
     }
     

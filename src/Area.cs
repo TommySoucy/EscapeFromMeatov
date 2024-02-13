@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
-using static EFM.Requirement;
 
 namespace EFM
 {
@@ -47,79 +44,10 @@ namespace EFM
         public AreaVolumes[] areaVolumesPerLevel;
         public bool craftOuputSlot; // False is Volume, output will always be first in slot/vol per level
 
-        public void Awake()
+        public void Start()
         {
             LoadData();
 
-            UI.Init();
-        }
-
-        public void LoadData()
-        {
-            JToken areaData = null;
-            for(int i=0; i < Mod.areasDB.Count; ++i)
-            {
-                if ((int)Mod.areasDB[i]["type"] == index)
-                {
-                    areaData = Mod.areasDB[i];
-                }
-            }
-
-            constructionTimePerLevel = new int[levels.Length];
-            requirementsPerLevel = new Requirement[levels.Length][];
-            for (int i=0; i < levels.Length; ++i)
-            {
-                JToken levelData = areaData["stages"][i.ToString()];
-                constructionTimePerLevel[i] = levelData["constructionTime"] == null ? 0 : (int)levelData["constructionTime"];
-
-                JArray levelRequirements = levelData["requirements"] as JArray;
-                if (levelRequirements == null)
-                {
-                    requirementsPerLevel[i] = null;
-                }
-                else
-                {
-                    requirementsPerLevel[i] = new Requirement[levelRequirements.Count];
-                    for(int j = 0; j < levelRequirements.Count; ++j)
-                    {
-                        Requirement currentRequirement = new Requirement(levelRequirements[j]);
-                        if(currentRequirement.requirementType == Requirement.RequirementType.None)
-                        {
-                            requirementsPerLevel[i][j] = null;
-                        }
-                        else
-                        {
-                            requirementsPerLevel[i][j] = currentRequirement;
-                        }
-                    }
-                }
-
-                JArray levelBonuses = levelData["bonuses"] as JArray;
-                if (levelBonuses == null)
-                {
-                    bonusesPerLevel[i] = null;
-                }
-                else
-                {
-                    bonusesPerLevel[i] = new Bonus[levelBonuses.Count];
-                    for(int j = 0; j < levelBonuses.Count; ++j)
-                    {
-                        Bonus currentBonus = new Bonus(levelBonuses[j]);
-                        if(currentBonus.bonusType == Bonus.BonusType.None)
-                        {
-                            bonusesPerLevel[i][j] = null;
-                        }
-                        else
-                        {
-                            bonusesPerLevel[i][j] = currentBonus;
-                        }
-                    }
-                }
-            }
-        }
-
-        public void Start()
-        {
             UpdateObjectsPerLevel();
 
             if (mainAudioClips != null)
@@ -144,6 +72,88 @@ namespace EFM
             if(objectsToToggle == null)
             {
                 objectsToToggle = new GameObject[0];
+            }
+
+            // Init UI based on data
+            UI.Init();
+
+            // If powered at start, make sure correct audio is playing
+            if (powered)
+            {
+                for (int i = 0; i < levels.Length; ++i)
+                {
+                    for (int j = 0; j < mainAudioSources[i].Length; ++j)
+                    {
+                        mainAudioSources[i][j].loop = true;
+                        mainAudioSources[i][j].clip = subClips[i][j][1];
+                        mainAudioSources[i][j].Play();
+                    }
+                }
+                previousPowered = true;
+            }
+        }
+
+        public void LoadData()
+        {
+            JToken areaData = null;
+            for (int i = 0; i < Mod.areasDB.Count; ++i)
+            {
+                if ((int)Mod.areasDB[i]["type"] == index)
+                {
+                    areaData = Mod.areasDB[i];
+                }
+            }
+
+            constructionTimePerLevel = new int[levels.Length];
+            requirementsPerLevel = new Requirement[levels.Length][];
+            for (int i = 0; i < levels.Length; ++i)
+            {
+                JToken levelData = areaData["stages"][i.ToString()];
+                constructionTimePerLevel[i] = levelData["constructionTime"] == null ? 0 : (int)levelData["constructionTime"];
+
+                JArray levelRequirements = levelData["requirements"] as JArray;
+                if (levelRequirements == null)
+                {
+                    requirementsPerLevel[i] = null;
+                }
+                else
+                {
+                    requirementsPerLevel[i] = new Requirement[levelRequirements.Count];
+                    for (int j = 0; j < levelRequirements.Count; ++j)
+                    {
+                        Requirement currentRequirement = new Requirement(levelRequirements[j]);
+                        if (currentRequirement.requirementType == Requirement.RequirementType.None)
+                        {
+                            requirementsPerLevel[i][j] = null;
+                        }
+                        else
+                        {
+                            requirementsPerLevel[i][j] = currentRequirement;
+                        }
+                    }
+                }
+
+                JArray levelBonuses = levelData["bonuses"] as JArray;
+                if (levelBonuses == null)
+                {
+                    bonusesPerLevel[i] = null;
+                }
+                else
+                {
+                    bonusesPerLevel[i] = new Bonus[levelBonuses.Count];
+                    for (int j = 0; j < levelBonuses.Count; ++j)
+                    {
+                        Bonus currentBonus = new Bonus(levelBonuses[j]);
+                        if (currentBonus.bonusType == Bonus.BonusType.None)
+                        {
+                            bonusesPerLevel[i][j] = null;
+                        }
+                        else
+                        {
+                            bonusesPerLevel[i][j] = currentBonus;
+                        }
+                    }
+                }
             }
         }
 
@@ -239,6 +249,12 @@ namespace EFM
 
     public class Requirement
     {
+        public Area area;
+        public AreaRequirement areaRequirementUI;
+        public RequirementItemView itemRequirementUI;
+        public SkillRequirement skillRequirementUI;
+        public TraderRequirement traderRequirementUI;
+
         public enum RequirementType
         {
             None,
@@ -250,7 +266,7 @@ namespace EFM
         public RequirementType requirementType;
 
         // Item
-        public string itemTemplateID;
+        public string itemID;
         public int itemCount;
 
         // Area
@@ -258,7 +274,7 @@ namespace EFM
         public int areaLevel;
 
         // Skill
-        public string skillName;
+        public int skillIndex;
         public int skillLevel;
 
         // Trader
@@ -272,21 +288,60 @@ namespace EFM
             switch (requirementType)
             {
                 case RequirementType.Item:
-                    itemTemplateID = requirementData["templateId"].ToString();
-                    itemCount = (int)requirementData["count"];
+                    if(Mod.itemMap.TryGetValue(requirementData["templateId"].ToString(), out ItemMapEntry entry))
+                    {
+                        itemID = entry.mode == 0 ? entry.ID : entry.moddedID;
+                        itemCount = (int)requirementData["count"];
+                    }
+                    else
+                    {
+                        requirementType = RequirementType.None;
+                    }
                     break;
                 case RequirementType.Area:
                     areaIndex = (int)requirementData["areaType"];
                     areaLevel = (int)requirementData["requiredLevel"];
                     break;
                 case RequirementType.Skill:
-                    skillName = requirementData["skillName"].ToString();
-                    skillLevel = (int)requirementData["skillLevel"];
+                    skillIndex = Mod.SkillNameToIndex(requirementData["skillName"].ToString());
+                    if(skillIndex == -1)
+                    {
+                        requirementType = RequirementType.None;
+                    }
+                    else
+                    {
+                        skillLevel = (int)requirementData["skillLevel"];
+                    }
                     break;
                 case RequirementType.Trader:
                     traderID = requirementData["traderId"].ToString();
                     traderLevel = (int)requirementData["loyaltyLevel"];
                     break;
+            }
+        }
+
+        public bool Fulfilled()
+        {
+            switch (requirementType)
+            {
+                case RequirementType.Item:
+                    if(HideoutController.instance.inventory.TryGetValue(itemID, out int stashItemCount))
+                    {
+                        return stashItemCount >= itemCount;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                case RequirementType.Area:
+                    return area.controller.areas[areaIndex].currentLevel >= areaLevel;
+                case RequirementType.Skill:
+                    return Mod.skills[skillIndex].progress / 100 >= skillLevel;
+                case RequirementType.Trader:
+                    return cont from here // Check based on loaded trader data
+                default:
+                    Mod.LogError("DEV: Tried to get Fulfilled on area requirement with None type");
+                    return false;
             }
         }
 
@@ -311,6 +366,9 @@ namespace EFM
 
     public class Bonus
     {
+        public Area area;
+        public BonusUI bonusUI;
+
         public enum BonusType
         {
             None,
@@ -434,6 +492,11 @@ namespace EFM
                     return BonusType.None;
             }
         }
+    }
+
+    public class Production
+    {
+        todo
     }
 
     [Serializable]
