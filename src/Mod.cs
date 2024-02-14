@@ -85,7 +85,7 @@ namespace EFM
         public static bool areaSlotShouldUpdate = true;
         public static List<AreaBonus> activeBonuses;
         public static Trader[] traders;
-        public static Dictionary<int, List<Task>> tasksByTraderID;
+        public static Dictionary<int, List<Task>> tasksByTraderIndex;
         public static CategoryTreeNode itemCategories;
         public static Dictionary<string, List<string>> itemAncestors;
         public static Dictionary<string, int> lowestBuyValueByItem;
@@ -98,27 +98,6 @@ namespace EFM
         public static int physObjColResetNeeded;
         public static List<List<bool>> triggeredExplorationTriggers;
         public static GameObject[] scavRaidReturnItems; // Hands, Equipment, Right shoulder, pockets
-        public static List<List<TraderTaskReward>> rewardsToGive;
-        public static Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>> taskStartConditionsByType = new Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>>();
-        public static Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>> taskStartCounterConditionsByType = new Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>>();
-        public static Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>> taskCompletionConditionsByType = new Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>>();
-        public static Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>> taskCompletionCounterConditionsByType = new Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>>();
-        public static Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>> taskFailConditionsByType = new Dictionary<TraderTaskCondition.ConditionType, List<TraderTaskCondition>>();
-        public static Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>> taskFailCounterConditionsByType = new Dictionary<TraderTaskCounterCondition.CounterConditionType, List<TraderTaskCounterCondition>>();
-        public static Dictionary<string, Dictionary<string, List<TraderTaskCondition>>> taskLeaveItemConditionsByItemIDByZone = new Dictionary<string, Dictionary<string, List<TraderTaskCondition>>>();
-        public static Dictionary<string, List<TraderTaskCondition>> taskVisitPlaceConditionsByZone = new Dictionary<string, List<TraderTaskCondition>>();
-        public static Dictionary<string, List<TraderTaskCounterCondition>> taskVisitPlaceCounterConditionsByZone = new Dictionary<string, List<TraderTaskCounterCondition>>();
-        public static Dictionary<Effect.EffectType, List<TraderTaskCounterCondition>> taskHealthEffectCounterConditionsByEffectType = new Dictionary<Effect.EffectType, List<TraderTaskCounterCondition>>();
-        public static Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>> taskShotsCounterConditionsByBodyPart = new Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>>();
-        public static Dictionary<string, List<TraderTaskCounterCondition>> taskUseItemCounterConditionsByItemID = new Dictionary<string, List<TraderTaskCounterCondition>>();
-        public static Dictionary<string, List<TraderTaskCondition>> taskFindItemConditionsByItemID = new Dictionary<string, List<TraderTaskCondition>>();
-        public static Dictionary<int, List<TraderTaskCondition>> taskSkillConditionsBySkillIndex = new Dictionary<int, List<TraderTaskCondition>>();
-        public static Dictionary<string, Dictionary<string, List<TraderTaskCondition>>> currentTaskLeaveItemConditionsByItemIDByZone;
-        public static Dictionary<string, List<TraderTaskCondition>> currentTaskVisitPlaceConditionsByZone;
-        public static Dictionary<string, List<TraderTaskCounterCondition>> currentTaskVisitPlaceCounterConditionsByZone;
-        public static Dictionary<Effect.EffectType, List<TraderTaskCounterCondition>> currentHealthEffectCounterConditionsByEffectType;
-        public static Dictionary<TraderTaskCounterCondition.CounterConditionTargetBodyPart, List<TraderTaskCounterCondition>> currentShotsCounterConditionsByBodyPart;
-        public static Dictionary<string, List<TraderTaskCounterCondition>> currentUseItemCounterConditionsByItemID;
         public static GameObject instantiatedItem;
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
 
@@ -1741,12 +1720,13 @@ namespace EFM
                 traders[i] = new Trader(i, traderID);
             }
 
-            tasksByTraderID = new Dictionary<int, List<Task>>();
+            tasksByTraderIndex = new Dictionary<int, List<Task>>();
             questDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/templates/quests.json"));
             Dictionary<string, JToken> allQuests = questDB.ToObject<Dictionary<string, JToken>>();
             foreach (KeyValuePair<string, JToken> questData in allQuests)
             {
-                TODO: // Load quests, make instances and store them tasksByTraderID
+                Task newTask = new Task(questData);
+                td
             }
 
             //globalDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/globals.json"));

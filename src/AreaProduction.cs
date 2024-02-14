@@ -34,7 +34,7 @@ namespace EFM
         public bool isFunctional; // This means the item could have contents inside? or is composed of multiple items? firearms for example
     }
 
-    public struct Vector2Int
+    public class Vector2Int
     {
         public Vector2Int(int x, int y)
         {
