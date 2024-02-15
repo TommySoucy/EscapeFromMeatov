@@ -8,7 +8,9 @@ namespace EFM
     {
         public Area area;
         [NonSerialized]
-        public bool inSummary;
+        public bool inSummary = true;
+        [NonSerialized]
+        public bool onNextPage;
         public GameObject summary;
         public GameObject full;
         public AudioSource buttonClickSound;

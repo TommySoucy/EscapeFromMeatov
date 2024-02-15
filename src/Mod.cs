@@ -228,6 +228,7 @@ namespace EFM
 
         // DB
         public static JArray areasDB;
+        public static JArray productionsDB;
         public static JObject localeDB;
         public static JObject itemDB;
         public static JObject vanillaItemData;
@@ -1359,7 +1360,7 @@ namespace EFM
                             currentBuff.absolute = (bool)buff["AbsoluteValue"];
                             if (currentBuff.effectType == Effect.EffectType.SkillRate)
                             {
-                                currentBuff.skillIndex = Mod.SkillNameToIndex(buff["SkillName"].ToString());
+                                currentBuff.skillIndex = Skill.SkillNameToIndex(buff["SkillName"].ToString());
                             }
                             customItemWrapper.effects.Add(currentBuff);
                         }
@@ -1527,7 +1528,75 @@ namespace EFM
                 skills[i] = new Skill();
             }
 
-            JToken globalSkillsSettings = globalDB["config"]["SkillsSettings"]; 
+            LoadSkillVars();
+
+            areasDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/areas.json"));
+            productionsDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/production.json"));
+            localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
+            itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
+            vanillaItemData = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
+            ParseItemMap();
+
+            //if (Mod.itemsByParents.ContainsKey(parent))
+            //{
+            //    Mod.itemsByParents[parent].Add(H3ID);
+            //}
+            //else
+            //{
+            //    Mod.itemsByParents.Add(parent, new List<string>() { H3ID });
+            //}
+
+            traders = new Trader[9];
+            traderBaseDB = new JObject[9];
+            traderAssortDB = new JObject[9];
+            for (int i = 0; i < 9; ++i)
+            {
+                string traderID = Trader.IndexToID(i);
+                traderBaseDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/base.json"));
+                if (File.Exists(Mod.path + "/database/traders/" + traderID + "/assort.json"))
+                {
+                    traderAssortDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/assort.json"));
+                }
+
+                traders[i] = new Trader(i, traderID);
+            }
+
+            tasksByTraderIndex = new Dictionary<int, List<Task>>();
+            questDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/templates/quests.json"));
+            Dictionary<string, JToken> allQuests = questDB.ToObject<Dictionary<string, JToken>>();
+            foreach (KeyValuePair<string, JToken> questData in allQuests)
+            {
+                Task newTask = new Task(questData);
+                newTask.trader.tasks.Add(newTask);
+            }
+
+            //globalDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/globals.json"));
+            //MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
+            //MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
+            //questDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/templates/quests.json"));
+            //XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
+            //locationsLootDB = new JObject[12];
+            //locationsBaseDB = new JObject[12];
+            //string[] locationBaseFiles = Directory.GetFiles(Mod.path + "/database/locations/base");
+            //for (int i=0; i < 13; ++i)
+            //{
+            //    locationsLootDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/locations/" + Mod.LocationIndexToDataName(i) + "/looseLoot.json"));
+            //    locationsLootDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/locations/" + Mod.LocationIndexToDataName(i) + "/base.json"));
+            //}
+            //lootContainerDB = JArray.Parse(File.ReadAllText(Mod.path + "/database/loot/staticContainers.json"));
+            ////dynamicLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/database/Locations/DynamicLootTable.json"));
+            //staticLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/database/loot/staticLoot.json"));
+            ////lootContainersByName = new Dictionary<string, JObject>();
+            ////foreach (JToken container in lootContainerDB)
+            ////{
+            ////    lootContainersByName.Add(container["_name"].ToString(), (JObject)container);
+            ////}
+
+        }
+
+        public void LoadSkillVars()
+        {
+            JToken globalSkillsSettings = globalDB["config"]["SkillsSettings"];
             Skill.skillProgressRate = (float)globalSkillsSettings["SkillProgressRate"];
             Skill.weaponSkillProgressRate = (float)globalSkillsSettings["WeaponSkillProgressRate"];
 
@@ -1689,69 +1758,6 @@ namespace EFM
 
             // AimDrills
             Skill.weaponShotAction = (float)globalSkillsSettings["AimDrills"]["WeaponShotAction"];
-
-            areasDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/areas.json"));
-            localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
-            itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
-            vanillaItemData = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
-            ParseItemMap();
-
-            //if (Mod.itemsByParents.ContainsKey(parent))
-            //{
-            //    Mod.itemsByParents[parent].Add(H3ID);
-            //}
-            //else
-            //{
-            //    Mod.itemsByParents.Add(parent, new List<string>() { H3ID });
-            //}
-
-            traders = new Trader[9];
-            traderBaseDB = new JObject[9];
-            traderAssortDB = new JObject[9];
-            for (int i = 0; i < 9; ++i)
-            {
-                string traderID = Trader.IndexToID(i);
-                traderBaseDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/base.json"));
-                if (File.Exists(Mod.path + "/database/traders/" + traderID + "/assort.json"))
-                {
-                    traderAssortDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/traders/" + traderID + "/assort.json"));
-                }
-
-                traders[i] = new Trader(i, traderID);
-            }
-
-            tasksByTraderIndex = new Dictionary<int, List<Task>>();
-            questDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/templates/quests.json"));
-            Dictionary<string, JToken> allQuests = questDB.ToObject<Dictionary<string, JToken>>();
-            foreach (KeyValuePair<string, JToken> questData in allQuests)
-            {
-                Task newTask = new Task(questData);
-                td
-            }
-
-            //globalDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/globals.json"));
-            //MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
-            //MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
-            //questDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/templates/quests.json"));
-            //XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
-            //locationsLootDB = new JObject[12];
-            //locationsBaseDB = new JObject[12];
-            //string[] locationBaseFiles = Directory.GetFiles(Mod.path + "/database/locations/base");
-            //for (int i=0; i < 13; ++i)
-            //{
-            //    locationsLootDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/locations/" + Mod.LocationIndexToDataName(i) + "/looseLoot.json"));
-            //    locationsLootDB[i] = JObject.Parse(File.ReadAllText(Mod.path + "/database/locations/" + Mod.LocationIndexToDataName(i) + "/base.json"));
-            //}
-            //lootContainerDB = JArray.Parse(File.ReadAllText(Mod.path + "/database/loot/staticContainers.json"));
-            ////dynamicLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/database/Locations/DynamicLootTable.json"));
-            //staticLootTable = JObject.Parse(File.ReadAllText(Mod.path + "/database/loot/staticLoot.json"));
-            ////lootContainersByName = new Dictionary<string, JObject>();
-            ////foreach (JToken container in lootContainerDB)
-            ////{
-            ////    lootContainersByName.Add(container["_name"].ToString(), (JObject)container);
-            ////}
-
-            ////LoadSkillVars();
         }
 
         private void LoadDefaultAssets()
@@ -2321,13 +2327,13 @@ namespace EFM
                 }
 
                 // Update level task conditions
-                if (taskStartConditionsByType.ContainsKey(TraderTaskCondition.ConditionType.Level))
-                {
-                    foreach (TraderTaskCondition condition in taskStartConditionsByType[TraderTaskCondition.ConditionType.Level])
-                    {
-                        TraderStatus.UpdateConditionFulfillment(condition);
-                    }
-                }
+                //if (taskStartConditionsByType.ContainsKey(TraderTaskCondition.ConditionType.Level))
+                //{
+                //    foreach (TraderTaskCondition condition in taskStartConditionsByType[TraderTaskCondition.ConditionType.Level])
+                //    {
+                //        TraderStatus.UpdateConditionFulfillment(condition);
+                //    }
+                //}
             }
 
             if (type == 1)
@@ -2414,13 +2420,13 @@ namespace EFM
 
             float postLevel = (int)(skill.progress / 100);
 
-            if (postLevel != preLevel && Mod.taskSkillConditionsBySkillIndex.ContainsKey(skillIndex))
-            {
-                foreach (TraderTaskCondition condition in Mod.taskSkillConditionsBySkillIndex[skillIndex])
-                {
-                    TraderStatus.UpdateConditionFulfillment(condition);
-                }
-            }
+            //if (postLevel != preLevel && Mod.taskSkillConditionsBySkillIndex.ContainsKey(skillIndex))
+            //{
+            //    foreach (TraderTaskCondition condition in Mod.taskSkillConditionsBySkillIndex[skillIndex])
+            //    {
+            //        TraderStatus.UpdateConditionFulfillment(condition);
+            //    }
+            //}
 
             // Skill specific stuff
             if (skillIndex == 0)
@@ -2822,282 +2828,6 @@ namespace EFM
                     rightHand.fvrHand.ForceSetInteractable(securedRightHandInteractable);
                     securedRightHandInteractable = null;
                 }
-            }
-        }
-
-        public static int SkillNameToIndex(string name)
-        {
-            switch (name)
-            {
-                case "Endurance":
-                    return 0;
-                case "Strength":
-                    return 1;
-                case "Vitality":
-                    return 2;
-                case "Health":
-                    return 3;
-                case "StressResistance":
-                    return 4;
-                case "Metabolism":
-                    return 5;
-                case "Immunity":
-                    return 6;
-                case "Perception":
-                    return 7;
-                case "Intellect":
-                    return 8;
-                case "Attention":
-                    return 9;
-                case "Charisma":
-                    return 10;
-                case "Memory":
-                    return 11;
-                case "Pistols":
-                    return 12;
-                case "Revolvers":
-                    return 13;
-                case "SMG":
-                    return 14;
-                case "Assault":
-                    return 15;
-                case "Shotgun":
-                    return 16;
-                case "Sniper":
-                    return 17;
-                case "LMG":
-                    return 18;
-                case "HMG":
-                    return 19;
-                case "Launcher":
-                    return 20;
-                case "AttachedLauncher":
-                    return 21;
-                case "Throwing":
-                    return 22;
-                case "Melee":
-                    return 23;
-                case "DMR":
-                    return 24;
-                case "RecoilControl":
-                    return 25;
-                case "AimDrills":
-                    return 26;
-                case "Troubleshooting":
-                    return 27;
-                case "Surgery":
-                    return 28;
-                case "CovertMovement":
-                    return 29;
-                case "Search":
-                    return 30;
-                case "MagDrills":
-                    return 31;
-                case "Sniping":
-                    return 32;
-                case "ProneMovement":
-                    return 33;
-                case "FieldMedicine":
-                    return 34;
-                case "FirstAid":
-                    return 35;
-                case "LightVests":
-                    return 36;
-                case "HeavyVests":
-                    return 37;
-                case "WeaponModding":
-                    return 38;
-                case "AdvancedModding":
-                    return 39;
-                case "NightOps":
-                    return 40;
-                case "SilentOps":
-                    return 41;
-                case "Lockpicking":
-                    return 42;
-                case "WeaponTreatment":
-                    return 43;
-                case "FreeTrading":
-                    return 44;
-                case "Auctions":
-                    return 45;
-                case "Cleanoperations":
-                    return 46;
-                case "Barter":
-                    return 47;
-                case "Shadowconnections":
-                    return 48;
-                case "Taskperformance":
-                    return 49;
-                case "Crafting":
-                    return 50;
-                case "HideoutManagement":
-                    return 51;
-                case "WeaponSwitch":
-                    return 52;
-                case "EquipmentManagement":
-                    return 53;
-                case "AKSystems":
-                    return 54;
-                case "AssaultOperations":
-                    return 55;
-                case "Authority":
-                    return 56;
-                case "HeavyCaliber":
-                    return 57;
-                case "RawPower":
-                    return 58;
-                case "ARSystems":
-                    return 59;
-                case "DeepWeaponModding":
-                    return 60;
-                case "LongRangeOptics":
-                    return 61;
-                case "Negotiations":
-                    return 62;
-                case "Tactics":
-                    return 63;
-                default:
-                    Mod.LogError("DEV: SkillNameToIndex received name: " + name);
-                    return -1;
-            }
-        }
-
-        public static string SkillIndexToName(int index)
-        {
-            switch (index)
-            {
-                case 0:
-                    return "Endurance";
-                case 1:
-                    return "Strength";
-                case 2:
-                    return "Vitality";
-                case 3:
-                    return "Health";
-                case 4:
-                    return "StressResistance";
-                case 5:
-                    return "Metabolism";
-                case 6:
-                    return "Immunity";
-                case 7:
-                    return "Perception";
-                case 8:
-                    return "Intellect";
-                case 9:
-                    return "Attention";
-                case 10:
-                    return "Charisma";
-                case 11:
-                    return "Memory";
-                case 12:
-                    return "Pistols";
-                case 13:
-                    return "Revolvers";
-                case 14:
-                    return "SMG";
-                case 15:
-                    return "Assault";
-                case 16:
-                    return "Shotgun";
-                case 17:
-                    return "Sniper";
-                case 18:
-                    return "LMG";
-                case 19:
-                    return "HMG";
-                case 20:
-                    return "Launcher";
-                case 21:
-                    return "AttachedLauncher";
-                case 22:
-                    return "Throwing";
-                case 23:
-                    return "Melee";
-                case 24:
-                    return "DMR";
-                case 25:
-                    return "RecoilControl";
-                case 26:
-                    return "AimDrills";
-                case 27:
-                    return "Troubleshooting";
-                case 28:
-                    return "Surgery";
-                case 29:
-                    return "CovertMovement";
-                case 30:
-                    return "Search";
-                case 31:
-                    return "MagDrills";
-                case 32:
-                    return "Sniping";
-                case 33:
-                    return "ProneMovement";
-                case 34:
-                    return "FieldMedicine";
-                case 35:
-                    return "FirstAid";
-                case 36:
-                    return "LightVests";
-                case 37:
-                    return "HeavyVests";
-                case 38:
-                    return "WeaponModding";
-                case 39:
-                    return "AdvancedModding";
-                case 40:
-                    return "NightOps";
-                case 41:
-                    return "SilentOps";
-                case 42:
-                    return "Lockpicking";
-                case 43:
-                    return "WeaponTreatment";
-                case 44:
-                    return "FreeTrading";
-                case 45:
-                    return "Auctions";
-                case 46:
-                    return "Cleanoperations";
-                case 47:
-                    return "Barter";
-                case 48:
-                    return "Shadowconnections";
-                case 49:
-                    return "Taskperformance";
-                case 50:
-                    return "Crafting";
-                case 51:
-                    return "HideoutManagement";
-                case 52:
-                    return "WeaponSwitch";
-                case 53:
-                    return "EquipmentManagement";
-                case 54:
-                    return "AKSystems";
-                case 55:
-                    return "AssaultOperations";
-                case 56:
-                    return "Authority";
-                case 57:
-                    return "HeavyCaliber";
-                case 58:
-                    return "RawPower";
-                case 59:
-                    return "ARSystems";
-                case 60:
-                    return "DeepWeaponModding";
-                case 61:
-                    return "LongRangeOptics";
-                case 62:
-                    return "Negotiations";
-                case 63:
-                    return "Tactics";
-                default:
-                    Mod.LogError("SkillIndexToName received index: " + index);
-                    return "";
             }
         }
 

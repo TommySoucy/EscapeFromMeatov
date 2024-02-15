@@ -28,11 +28,13 @@ namespace EFM
         public string[] buyBlacklist;
         public LoyaltyLevel[] levels;
         public Dictionary<int, List<Barter>> bartersByLevel;
+        public Dictionary<string, List<Barter>> bartersByItemID;
         public List<Task> tasks;
 
         // Live data
-        public int salesSum;
+        public int level;
         public float standing;
+        public int salesSum;
         public bool unlocked;
         public int balance;
 
@@ -173,6 +175,8 @@ namespace EFM
 
             if(Mod.traderAssortDB != null)
             {
+                bartersByLevel = new Dictionary<int, List<Barter>>();
+                bartersByItemID = new Dictionary<string, List<Barter>>();
                 Dictionary<string, int> barterLevelPerID = Mod.traderAssortDB[index]["loyal_level_items"].ToObject<Dictionary<string, int>>();
                 foreach(KeyValuePair<string, int> barterLevelEntry in barterLevelPerID)
                 {
@@ -204,6 +208,15 @@ namespace EFM
                         else
                         {
                             bartersByLevel.Add(barterLevelEntry.Value, new List<Barter>() { currentBarter });
+                        }
+
+                        if(bartersByItemID.TryGetValue(barterItemID, out List<Barter> currentBarters))
+                        {
+                            currentBarters.Add(currentBarter);
+                        }
+                        else
+                        {
+                            bartersByItemID.Add(barterItemID, new List<Barter> { currentBarter });
                         }
                     }
                 }
@@ -279,9 +292,14 @@ namespace EFM
 
     public class Barter
     {
+        // Static data
         public string itemID;
         public int level;
         public BarterPrice[] prices;
+        public bool needUnlock;
+
+        // Live data
+        public bool locked;
     }
 
     public class BarterPrice

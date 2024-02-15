@@ -1943,7 +1943,7 @@ namespace EFM
                     }
                 }
             }
-            TraderStatus.fenceRestockTimer = (float)loadedData["fenceRestockTimer"] - secondsSinceSave;
+            //TraderStatus.fenceRestockTimer = (float)loadedData["fenceRestockTimer"] - secondsSinceSave;
 
             if (Mod.justFinishedRaid)
             {
@@ -2060,170 +2060,170 @@ namespace EFM
             }
 
             // Load trader statuses if not loading in from a raid
-            if (!Mod.justFinishedRaid)
-            {
-                if (TraderStatus.waitingQuestConditions == null)
-                {
-                    TraderStatus.foundTasks = new Dictionary<string, TraderTask>();
-                    TraderStatus.foundTaskConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                    TraderStatus.waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                    TraderStatus.waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                }
-                else
-                {
-                    TraderStatus.foundTasks.Clear();
-                    TraderStatus.foundTaskConditions.Clear();
-                    TraderStatus.waitingQuestConditions.Clear();
-                    TraderStatus.waitingVisibilityConditions.Clear();
-                }
-                Mod.traderStatuses = new TraderStatus[8];
-                if (loadedData["traderStatuses"] == null)
-                {
-                    for (int i = 0; i < 8; i++)
-                    {
-                        Mod.traderStatuses[i] = new TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
-                    }
-                }
-                else
-                {
-                    JArray loadedTraderStatuses = (JArray)loadedData["traderStatuses"];
-                    for (int i = 0; i < 8; i++)
-                    {
-                        Mod.traderStatuses[i] = new TraderStatus(loadedData["traderStatuses"][i], i, Mod.traderBaseDB[i]["nickname"].ToString(), (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
-                    }
-                }
-                for (int i = 0; i < 8; i++)
-                {
-                    Mod.traderStatuses[i].Init();
-                    if (loadedData["traderStatuses"][i]["itemsToWaitForUnlock"] != null)
-                    {
-                        Mod.traderStatuses[i].itemsToWaitForUnlock = loadedData["traderStatuses"][i]["itemsToWaitForUnlock"].ToObject<List<string>>();
-                    }
-                }
+            //if (!Mod.justFinishedRaid)
+            //{
+            //    if (TraderStatus.waitingQuestConditions == null)
+            //    {
+            //        TraderStatus.foundTasks = new Dictionary<string, TraderTask>();
+            //        TraderStatus.foundTaskConditions = new Dictionary<string, List<TraderTaskCondition>>();
+            //        TraderStatus.waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
+            //        TraderStatus.waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
+            //    }
+            //    else
+            //    {
+            //        TraderStatus.foundTasks.Clear();
+            //        TraderStatus.foundTaskConditions.Clear();
+            //        TraderStatus.waitingQuestConditions.Clear();
+            //        TraderStatus.waitingVisibilityConditions.Clear();
+            //    }
+            //    Mod.traderStatuses = new TraderStatus[8];
+            //    if (loadedData["traderStatuses"] == null)
+            //    {
+            //        for (int i = 0; i < 8; i++)
+            //        {
+            //            Mod.traderStatuses[i] = new TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        JArray loadedTraderStatuses = (JArray)loadedData["traderStatuses"];
+            //        for (int i = 0; i < 8; i++)
+            //        {
+            //            Mod.traderStatuses[i] = new TraderStatus(loadedData["traderStatuses"][i], i, Mod.traderBaseDB[i]["nickname"].ToString(), (int)loadedTraderStatuses[i]["salesSum"], (float)loadedTraderStatuses[i]["standing"], (bool)loadedTraderStatuses[i]["unlocked"], Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
+            //        }
+            //    }
+            //    for (int i = 0; i < 8; i++)
+            //    {
+            //        Mod.traderStatuses[i].Init();
+            //        if (loadedData["traderStatuses"][i]["itemsToWaitForUnlock"] != null)
+            //        {
+            //            Mod.traderStatuses[i].itemsToWaitForUnlock = loadedData["traderStatuses"][i]["itemsToWaitForUnlock"].ToObject<List<string>>();
+            //        }
+            //    }
 
-                // Add active tasks to player status list
-                foreach (KeyValuePair<string, TraderTask> task in TraderStatus.foundTasks)
-                {
-                    if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
-                    {
-                        StatusUI.instance.AddTask(task.Value);
-                    }
-                    else
-                    {
-                        task.Value.statusListElement = null;
-                    }
+            //    // Add active tasks to player status list
+            //    foreach (KeyValuePair<string, TraderTask> task in TraderStatus.foundTasks)
+            //    {
+            //        if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
+            //        {
+            //            StatusUI.instance.AddTask(task.Value);
+            //        }
+            //        else
+            //        {
+            //            task.Value.statusListElement = null;
+            //        }
 
-                    // Check for condition visibility
-                    foreach (TraderTaskCondition condition in task.Value.startConditions)
-                    {
-                        bool visiblityFulfilled = true;
-                        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
-                        {
-                            foreach (TraderTaskCondition visCond in condition.visibilityConditions)
-                            {
-                                if (!visCond.fulfilled)
-                                {
-                                    visiblityFulfilled = false;
-                                    break;
-                                }
-                            }
-                        }
-                        condition.visible = visiblityFulfilled;
-                        if (condition.marketListElement != null)
-                        {
-                            condition.marketListElement.SetActive(visiblityFulfilled);
-                        }
-                        if (condition.statusListElement != null)
-                        {
-                            condition.statusListElement.gameObject.SetActive(visiblityFulfilled);
-                        }
-                    }
+            //        // Check for condition visibility
+            //        foreach (TraderTaskCondition condition in task.Value.startConditions)
+            //        {
+            //            bool visiblityFulfilled = true;
+            //            if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
+            //            {
+            //                foreach (TraderTaskCondition visCond in condition.visibilityConditions)
+            //                {
+            //                    if (!visCond.fulfilled)
+            //                    {
+            //                        visiblityFulfilled = false;
+            //                        break;
+            //                    }
+            //                }
+            //            }
+            //            condition.visible = visiblityFulfilled;
+            //            if (condition.marketListElement != null)
+            //            {
+            //                condition.marketListElement.SetActive(visiblityFulfilled);
+            //            }
+            //            if (condition.statusListElement != null)
+            //            {
+            //                condition.statusListElement.gameObject.SetActive(visiblityFulfilled);
+            //            }
+            //        }
 
-                    foreach (TraderTaskCondition condition in task.Value.completionConditions)
-                    {
-                        bool visiblityFulfilled = true;
-                        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
-                        {
-                            foreach (TraderTaskCondition visCond in condition.visibilityConditions)
-                            {
-                                if (!visCond.fulfilled)
-                                {
-                                    visiblityFulfilled = false;
-                                    break;
-                                }
-                            }
-                        }
-                        condition.visible = visiblityFulfilled;
-                        if (condition.marketListElement != null)
-                        {
-                            condition.marketListElement.SetActive(visiblityFulfilled);
-                        }
-                        if (condition.statusListElement != null)
-                        {
-                            condition.statusListElement.gameObject.SetActive(visiblityFulfilled);
-                        }
+            //        foreach (TraderTaskCondition condition in task.Value.completionConditions)
+            //        {
+            //            bool visiblityFulfilled = true;
+            //            if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
+            //            {
+            //                foreach (TraderTaskCondition visCond in condition.visibilityConditions)
+            //                {
+            //                    if (!visCond.fulfilled)
+            //                    {
+            //                        visiblityFulfilled = false;
+            //                        break;
+            //                    }
+            //                }
+            //            }
+            //            condition.visible = visiblityFulfilled;
+            //            if (condition.marketListElement != null)
+            //            {
+            //                condition.marketListElement.SetActive(visiblityFulfilled);
+            //            }
+            //            if (condition.statusListElement != null)
+            //            {
+            //                condition.statusListElement.gameObject.SetActive(visiblityFulfilled);
+            //            }
 
-                        // Add condition to completion list if necessary
-                        if (condition.visible)
-                        {
-                            if (condition.conditionType == TraderTaskCondition.ConditionType.CounterCreator)
-                            {
-                                foreach (TraderTaskCounterCondition counterCondition in condition.counters)
-                                {
-                                    if (Mod.taskCompletionCounterConditionsByType.ContainsKey(counterCondition.counterConditionType))
-                                    {
-                                        Mod.taskCompletionCounterConditionsByType[counterCondition.counterConditionType].Add(counterCondition);
-                                    }
-                                    else
-                                    {
-                                        List<TraderTaskCounterCondition> newList = new List<TraderTaskCounterCondition>();
-                                        Mod.taskCompletionCounterConditionsByType.Add(counterCondition.counterConditionType, newList);
-                                        newList.Add(counterCondition);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (Mod.taskCompletionConditionsByType.ContainsKey(condition.conditionType))
-                                {
-                                    Mod.taskCompletionConditionsByType[condition.conditionType].Add(condition);
-                                }
-                                else
-                                {
-                                    List<TraderTaskCondition> newList = new List<TraderTaskCondition>();
-                                    Mod.taskCompletionConditionsByType.Add(condition.conditionType, newList);
-                                    newList.Add(condition);
-                                }
-                            }
-                        }
-                    }
+            //            // Add condition to completion list if necessary
+            //            if (condition.visible)
+            //            {
+            //                if (condition.conditionType == TraderTaskCondition.ConditionType.CounterCreator)
+            //                {
+            //                    foreach (TraderTaskCounterCondition counterCondition in condition.counters)
+            //                    {
+            //                        if (Mod.taskCompletionCounterConditionsByType.ContainsKey(counterCondition.counterConditionType))
+            //                        {
+            //                            Mod.taskCompletionCounterConditionsByType[counterCondition.counterConditionType].Add(counterCondition);
+            //                        }
+            //                        else
+            //                        {
+            //                            List<TraderTaskCounterCondition> newList = new List<TraderTaskCounterCondition>();
+            //                            Mod.taskCompletionCounterConditionsByType.Add(counterCondition.counterConditionType, newList);
+            //                            newList.Add(counterCondition);
+            //                        }
+            //                    }
+            //                }
+            //                else
+            //                {
+            //                    if (Mod.taskCompletionConditionsByType.ContainsKey(condition.conditionType))
+            //                    {
+            //                        Mod.taskCompletionConditionsByType[condition.conditionType].Add(condition);
+            //                    }
+            //                    else
+            //                    {
+            //                        List<TraderTaskCondition> newList = new List<TraderTaskCondition>();
+            //                        Mod.taskCompletionConditionsByType.Add(condition.conditionType, newList);
+            //                        newList.Add(condition);
+            //                    }
+            //                }
+            //            }
+            //        }
 
-                    foreach (TraderTaskCondition condition in task.Value.failConditions)
-                    {
-                        bool visiblityFulfilled = true;
-                        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
-                        {
-                            foreach (TraderTaskCondition visCond in condition.visibilityConditions)
-                            {
-                                if (!visCond.fulfilled)
-                                {
-                                    visiblityFulfilled = false;
-                                    break;
-                                }
-                            }
-                        }
-                        condition.visible = visiblityFulfilled;
-                        if (condition.marketListElement != null)
-                        {
-                            condition.marketListElement.SetActive(visiblityFulfilled);
-                        }
-                        if (condition.statusListElement != null)
-                        {
-                            condition.statusListElement.gameObject.SetActive(visiblityFulfilled);
-                        }
-                    }
-                }
-            }
+            //        foreach (TraderTaskCondition condition in task.Value.failConditions)
+            //        {
+            //            bool visiblityFulfilled = true;
+            //            if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
+            //            {
+            //                foreach (TraderTaskCondition visCond in condition.visibilityConditions)
+            //                {
+            //                    if (!visCond.fulfilled)
+            //                    {
+            //                        visiblityFulfilled = false;
+            //                        break;
+            //                    }
+            //                }
+            //            }
+            //            condition.visible = visiblityFulfilled;
+            //            if (condition.marketListElement != null)
+            //            {
+            //                condition.marketListElement.SetActive(visiblityFulfilled);
+            //            }
+            //            if (condition.statusListElement != null)
+            //            {
+            //                condition.statusListElement.gameObject.SetActive(visiblityFulfilled);
+            //            }
+            //        }
+            //    }
+            //}
 
             // Load triggered exploration triggers if not loading in from raid
             if (!Mod.justFinishedRaid)
@@ -4351,7 +4351,7 @@ namespace EFM
             loadedData["MIARaidCount"] = Mod.MIARaidCount;
             loadedData["KIARaidCount"] = Mod.KIARaidCount;
             loadedData["failedRaidCount"] = Mod.failedRaidCount;
-            loadedData["fenceRestockTimer"] = TraderStatus.fenceRestockTimer;
+            //loadedData["fenceRestockTimer"] = TraderStatus.fenceRestockTimer;
             loadedData["scavTimer"] = scavTimer;
 
             // Write skills
@@ -4442,44 +4442,44 @@ namespace EFM
             for (int i = 0; i < 8; ++i)
             {
                 JToken currentSavedTraderStatus = new JObject();
-                currentSavedTraderStatus["id"] = Mod.traderStatuses[i].id;
-                currentSavedTraderStatus["salesSum"] = Mod.traderStatuses[i].salesSum;
-                currentSavedTraderStatus["standing"] = Mod.traderStatuses[i].standing;
-                currentSavedTraderStatus["unlocked"] = Mod.traderStatuses[i].unlocked;
+                //currentSavedTraderStatus["id"] = Mod.traderStatuses[i].id;
+                //currentSavedTraderStatus["salesSum"] = Mod.traderStatuses[i].salesSum;
+                //currentSavedTraderStatus["standing"] = Mod.traderStatuses[i].standing;
+                //currentSavedTraderStatus["unlocked"] = Mod.traderStatuses[i].unlocked;
 
                 // Save tasks
                 // TODO: This saves literally all saveable data for tasks their conditions, and the conditions counters
                 // We could ommit tasks that dont have any data to save, like the ones that are still locked
                 // This makes trader init slower but would save on space. Check if necessary
                 currentSavedTraderStatus["tasks"] = new JObject();
-                foreach (TraderTask traderTask in Mod.traderStatuses[i].tasks)
-                {
-                    JObject taskSaveData = new JObject();
-                    currentSavedTraderStatus["tasks"][traderTask.ID] = taskSaveData;
-                    taskSaveData["state"] = traderTask.taskState.ToString();
-                    taskSaveData["conditions"] = new JObject();
-                    foreach (TraderTaskCondition traderTaskCondition in traderTask.completionConditions)
-                    {
-                        JObject conditionSaveData = new JObject();
-                        taskSaveData["conditions"][traderTaskCondition.ID] = conditionSaveData;
-                        conditionSaveData["fulfilled"] = traderTaskCondition.fulfilled;
-                        conditionSaveData["itemCount"] = traderTaskCondition.itemCount;
-                        if (traderTaskCondition.counters != null)
-                        {
-                            conditionSaveData["counters"] = new JObject();
-                            foreach (TraderTaskCounterCondition traderTaskCounterCondition in traderTaskCondition.counters)
-                            {
-                                JObject counterConditionSaveData = new JObject();
-                                conditionSaveData["counters"][traderTaskCounterCondition.ID] = counterConditionSaveData;
-                                counterConditionSaveData["killCount"] = traderTaskCounterCondition.killCount;
-                                counterConditionSaveData["shotCount"] = traderTaskCounterCondition.shotCount;
-                                counterConditionSaveData["completed"] = traderTaskCounterCondition.completed;
-                            }
-                        }
-                    }
-                }
+                //foreach (TraderTask traderTask in Mod.traderStatuses[i].tasks)
+                //{
+                //    JObject taskSaveData = new JObject();
+                //    currentSavedTraderStatus["tasks"][traderTask.ID] = taskSaveData;
+                //    taskSaveData["state"] = traderTask.taskState.ToString();
+                //    taskSaveData["conditions"] = new JObject();
+                //    foreach (TraderTaskCondition traderTaskCondition in traderTask.completionConditions)
+                //    {
+                //        JObject conditionSaveData = new JObject();
+                //        taskSaveData["conditions"][traderTaskCondition.ID] = conditionSaveData;
+                //        conditionSaveData["fulfilled"] = traderTaskCondition.fulfilled;
+                //        conditionSaveData["itemCount"] = traderTaskCondition.itemCount;
+                //        if (traderTaskCondition.counters != null)
+                //        {
+                //            conditionSaveData["counters"] = new JObject();
+                //            foreach (TraderTaskCounterCondition traderTaskCounterCondition in traderTaskCondition.counters)
+                //            {
+                //                JObject counterConditionSaveData = new JObject();
+                //                conditionSaveData["counters"][traderTaskCounterCondition.ID] = counterConditionSaveData;
+                //                counterConditionSaveData["killCount"] = traderTaskCounterCondition.killCount;
+                //                counterConditionSaveData["shotCount"] = traderTaskCounterCondition.shotCount;
+                //                counterConditionSaveData["completed"] = traderTaskCounterCondition.completed;
+                //            }
+                //        }
+                //    }
+                //}
 
-                currentSavedTraderStatus["itemsToWaitForUnlock"] = JArray.FromObject(Mod.traderStatuses[i].itemsToWaitForUnlock);
+                //currentSavedTraderStatus["itemsToWaitForUnlock"] = JArray.FromObject(Mod.traderStatuses[i].itemsToWaitForUnlock);
 
                 savedTraderStatuses.Add(currentSavedTraderStatus);
             }
