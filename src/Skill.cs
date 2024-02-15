@@ -202,12 +202,28 @@ namespace EFM
         }
         public SkillType skillType;
 
-        public float progress; // Actual, 1 lvl ea. 100, so current level is progress/100
+        private float _progress; // Actual, 1 lvl ea. 100, so current level is progress/100
+        public float progress
+        {
+            get { return _progress; }
+            set
+            {
+                int preLevel = (int)(_progress / 100);
+                _progress = value;
+                if (preLevel != (int)(_progress / 100))
+                {
+                    OnSkillLevelChangedInvoke();
+                }
+            }
+        }
         public float currentProgress; // Affected by effects, this is the one we should check while in raid
 
         public bool increasing;
         public bool dimishingReturns;
         public float raidProgress;
+
+        public delegate void OnSkillLevelChangedDelegate();
+        public event OnSkillLevelChangedDelegate OnSkillLevelChanged;
 
         public static SkillType SkillTypeFromName(string name)
         {
@@ -502,6 +518,14 @@ namespace EFM
                 default:
                     Mod.LogError("SkillIndexToName received index: " + index);
                     return "";
+            }
+        }
+
+        public void OnSkillLevelChangedInvoke()
+        {
+            if(OnSkillLevelChanged != null)
+            {
+                OnSkillLevelChanged();
             }
         }
     }

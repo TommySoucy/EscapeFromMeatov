@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace EFM
 {
@@ -9,5 +7,7 @@ namespace EFM
     {
         public Area area;
         public AreaVolume next;
+        [NonSerialized]
+        public List<MeatovItem> items = new List<MeatovItem>();
     }
 }

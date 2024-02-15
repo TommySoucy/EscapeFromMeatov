@@ -32,14 +32,64 @@ namespace EFM
         public List<Task> tasks;
 
         // Live data
-        public int level;
-        public float standing;
-        public int salesSum;
+        private int _level;
+        public int level
+        {
+            get { return _level; }
+            set
+            {
+                int preLevel = _level;
+                _level = value;
+                if(preLevel != _level)
+                {
+                    OnTraderLevelChangedInvoke();
+                }
+            }
+        }
+        private float _standing;
+        public float standing
+        {
+            get { return _standing; }
+            set
+            {
+                float preStanding = _standing;
+                _standing = value;
+                if(preStanding != _standing)
+                {
+                    UpdateLevel();
+                    OnTraderStandingChangedInvoke();
+                }
+            }
+        }
+        private int _salesSum;
+        public int salesSum
+        {
+            get { return _salesSum; }
+            set
+            {
+                int preSalesSum = _salesSum;
+                _salesSum = value;
+                if(preSalesSum != _salesSum)
+                {
+                    UpdateLevel();
+                    OnTraderSalesSumChangedInvoke();
+                }
+            }
+        }
         public bool unlocked;
         public int balance;
 
         // Objects
         public TraderUI UI;
+
+        public delegate void OnTraderLevelChangedDelegate();
+        public event OnTraderLevelChangedDelegate OnTraderLevelChanged;
+
+        public delegate void OnTraderStandingChangedDelegate();
+        public event OnTraderStandingChangedDelegate OnTraderStandingChanged;
+
+        public delegate void OnTraderSalesSumChangedDelegate();
+        public event OnTraderSalesSumChangedDelegate OnTraderSalesSumChanged;
 
         public Trader(int index, string ID)
         {
@@ -274,6 +324,48 @@ namespace EFM
                     return "638f541a29ffd1183d187f57";
                 default:
                     return "";
+            }
+        }
+
+        public void UpdateLevel()
+        {
+            int currentLevel = _level;
+            for(int i=currentLevel + 1; i < levels.Length; ++i)
+            {
+                if (levels[i].minLevel <= Mod.level
+                    && levels[i].minSaleSum <= _salesSum
+                    && levels[i].minStanding <= _standing)
+                {
+                    currentLevel = i;
+                }
+            }
+            if(currentLevel != _level)
+            {
+                level = currentLevel;
+            }
+        }
+
+        public void OnTraderLevelChangedInvoke()
+        {
+            if(OnTraderLevelChanged != null)
+            {
+                OnTraderLevelChanged();
+            }
+        }
+
+        public void OnTraderStandingChangedInvoke()
+        {
+            if(OnTraderStandingChanged != null)
+            {
+                OnTraderStandingChanged();
+            }
+        }
+
+        public void OnTraderSalesSumChangedInvoke()
+        {
+            if(OnTraderSalesSumChanged != null)
+            {
+                OnTraderSalesSumChanged();
             }
         }
     }

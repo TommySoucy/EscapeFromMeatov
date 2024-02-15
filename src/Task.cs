@@ -35,11 +35,26 @@ namespace EFM
             Success,
             Fail = 5
         }
-        public TaskState taskState;
+        private TaskState _taskState;
+        public TaskState taskState
+        {
+            get { return _taskState; }
+            set
+            {
+                _taskState = value;
+                if(_taskState == TaskState.Complete)
+                {
+                    OnTaskCompletedInvoke();
+                }
+            }
+        }
 
         // Objects
         public TaskUI marketUI;
         public TaskUI playerUI;
+
+        public delegate void OnTaskCompletedDelegate();
+        public event OnTaskCompletedDelegate OnTaskCompleted;
 
         public Task(KeyValuePair<string, JToken> questData)
         {
@@ -101,6 +116,14 @@ namespace EFM
             for (int i = 0; i < rewardData.Count; ++i)
             {
                 rewards.Add(new Reward(this, rewardData[i]));
+            }
+        }
+
+        public void OnTaskCompletedInvoke()
+        {
+            if(OnTaskCompleted != null)
+            {
+                OnTaskCompleted();
             }
         }
     }

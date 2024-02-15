@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Policy;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -14,19 +13,32 @@ namespace EFM
         public int startLevel;
 
         // Data
+        public static float GPUBoostRate;
         [NonSerialized]
         public int[] constructionTimePerLevel; // In seconds
         public Requirement[][] requirementsPerLevel;
         public Bonus[][] bonusesPerLevel;
         public List<List<Production>> productionsPerLevel;
+        public Dictionary<string, Production> productionsByID;
 
         // Live
-        [NonSerialized]
-        public int currentLevel;
+        private int _currentLevel;
+        public int currentLevel
+        {
+            get { return _currentLevel; }
+            set 
+            {
+                int preLevel = _currentLevel;
+                _currentLevel = value;
+                if(preLevel != _currentLevel)
+                {
+                    OnAreaLevelChangedInvoke();
+                }
+            }
+        }
         [NonSerialized]
         public bool upgrading;
         public DateTime upgradeStartTime;
-        public Dictionary<string, List<MeatovItem>> inventory;
 
         // Power
         public bool requiresPower;
@@ -53,6 +65,12 @@ namespace EFM
         public AreaSlots[] areaSlotsPerLevel;
         public AreaVolumes[] areaVolumesPerLevel;
         public bool craftOuputSlot; // False is Volume, output will always be first in slot/vol per level
+
+        public delegate void OnSlotContentChangedDelegate();
+        public event OnSlotContentChangedDelegate OnSlotContentChanged;
+
+        public delegate void OnAreaLevelChangedDelegate();
+        public event OnAreaLevelChangedDelegate OnAreaLevelChanged;
 
         public void Start()
         {
@@ -120,6 +138,7 @@ namespace EFM
             requirementsPerLevel = new Requirement[levels.Length][];
             bonusesPerLevel = new Bonus[levels.Length][];
             productionsPerLevel = new List<List<Production>>();
+            productionsByID = new Dictionary<string, Production>();
             for (int i=0; i < levels.Length; ++i)
             {
                 productionsPerLevel.Add(new List<Production>());
@@ -184,6 +203,15 @@ namespace EFM
                     productionsPerLevel[newProduction.areaLevel].Add(newProduction);
                 }
             }
+
+            // Special case for Bitcoin Farm (20)
+            // Has its bitcoin production but no requirements are listed
+            // So no requirements to control whether it is in production or not
+            // In this case, the production will handle this itself
+            if(index == 20)
+            {
+                OnSlotContentChanged += productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged;
+            }
         }
 
         public void LoadLiveData()
@@ -197,9 +225,28 @@ namespace EFM
                 upgradeStartTime = new DateTime((long)HideoutController.loadedData["hideout"]["areas"][index]["upgradeStartTime"]);
             }
 
-            inventory = new Dictionary<string, List<MeatovItem>>();
-
-            cont from ehre // Need to not load live data for reqs and productions
+            // Production live data has been loaded upon their instantiation
+            // Here, we need to make sure that all requirements are up to date with live data
+            // Note that certain requirements will also update themselves as we initialize other areas
+            // as the corresponding events are raised
+            if(currentLevel < levels.Length - 1)
+            {
+                Requirement[] requirements = requirementsPerLevel[currentLevel + 1];
+                for (int i = 0; i < requirements.Length; ++i)
+                {
+                    requirements[i].UpdateFulfilled();
+                }
+            }
+            for(int i = 0; i < productionsPerLevel.Count; ++i)
+            {
+                for(int j = 0; j< productionsPerLevel[i].Count; ++j)
+                {
+                    for(int k=0; k< productionsPerLevel[i][j].requirements.Count; ++k)
+                    {
+                        productionsPerLevel[i][j].requirements[k].UpdateFulfilled();
+                    }
+                }
+            }
         }
 
         public void Update()
@@ -260,6 +307,14 @@ namespace EFM
                 // Finally update previousPowered
                 previousPowered = powered;
             }
+
+            for (int i = 0; i <= currentLevel; ++i)
+            {
+                for (int j = 0; j < productionsPerLevel[i].Count; ++j)
+                {
+                    productionsPerLevel[i][j].Update();
+                }
+            }
         }
 
         public void UpdateObjectsPerLevel()
@@ -309,6 +364,24 @@ namespace EFM
             }
 
             return true;
+        }
+
+        public void OnSlotContentChangedInvoke()
+        {
+            // Raise event
+            if (OnSlotContentChanged != null)
+            {
+                OnSlotContentChanged();
+            }
+        }
+
+        public void OnAreaLevelChangedInvoke()
+        {
+            // Raise event
+            if (OnAreaLevelChanged != null)
+            {
+                OnAreaLevelChanged();
+            }
         }
     }
 
@@ -369,10 +442,12 @@ namespace EFM
                 case RequirementType.Item:
                     itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
                     itemCount = (int)requirementData["count"];
+                    HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
                     break;
                 case RequirementType.Area:
                     areaIndex = (int)requirementData["areaType"];
                     areaLevel = (int)requirementData["requiredLevel"];
+                    area.controller.areas[areaIndex].OnAreaLevelChanged += OnAreaLevelChanged;
                     break;
                 case RequirementType.Skill:
                     skillIndex = Skill.SkillNameToIndex(requirementData["skillName"].ToString());
@@ -384,22 +459,36 @@ namespace EFM
                     {
                         skillLevel = (int)requirementData["skillLevel"];
                     }
+                    Mod.skills[skillIndex].OnSkillLevelChanged += OnSkillLevelChanged;
                     break;
                 case RequirementType.Trader:
                     trader = Mod.traders[Trader.IDToIndex(requirementData["traderId"].ToString())];
                     traderLevel = (int)requirementData["loyaltyLevel"];
+                    trader.OnTraderLevelChanged += OnTraderLevelChanged;
                     break;
                 case RequirementType.Tool:
                     itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
+                    HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
                     break;
                 case RequirementType.Resource:
                     itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
                     resourceCount = (int)requirementData["resource"];
+                    HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                    area.OnSlotContentChanged += OnAreaSlotContentChanged;
                     break;
                 case RequirementType.QuestComplete:
                     task = Task.allTasks[requirementData["questId"].ToString()];
+                    task.OnTaskCompleted += OnTaskCompleted;
                     break;
             }
+        }
+
+        public Requirement(int areaIndex, int areaLevel)
+        {
+            requirementType = RequirementType.Area;
+            this.areaIndex = areaIndex;
+            this.areaLevel = areaLevel;
+            area.controller.areas[areaIndex].OnAreaLevelChanged += OnAreaLevelChanged;
         }
 
         public static RequirementType RequirementTypeFromName(string name)
@@ -426,13 +515,23 @@ namespace EFM
             }
         }
 
-        public void OnAreaInventoryChanged()
+        public void UpdateFulfilled()
+        {
+            OnHideoutInventoryChanged();
+            OnAreaSlotContentChanged();
+            OnAreaLevelChanged();
+            OnTraderLevelChanged();
+            OnSkillLevelChanged();
+            OnTaskCompleted();
+        }
+
+        public void OnHideoutInventoryChanged()
         {
             switch (requirementType)
             {
                 case RequirementType.Item:
                     int count = 0;
-                    if(area.inventory.TryGetValue(itemID, out List<MeatovItem> currentItems))
+                    if(HideoutController.instance.inventory.TryGetValue(itemID, out List<MeatovItem> currentItems))
                     {
                         fulfilled = currentItems.Count >= itemCount;
                         count = currentItems.Count;
@@ -447,36 +546,14 @@ namespace EFM
                         itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
                         itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
                     }
-                    if (production == null) // Not a production requirement, must be area upgrade requirement
+                    else if (itemResultUI != null)
                     {
-                        if (area.AllRequirementsFulfilled())
-                        {
-                            if (area.currentLevel == area.startLevel) // Area still needs to be constructed, no next page, just enable construct button
-                            {
-                                area.UI.constructButton.SetActive(true);
-                            }
-                            else // Area already constructed, but only display upgrade button if on next page
-                            {
-                                if (area.UI.onNextPage)
-                                {
-                                    area.UI.upgradeButton.SetActive(true);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            area.UI.constructButton.SetActive(false);
-                            area.UI.upgradeButton.SetActive(false);
-                        }
-                    }
-                    else if (production.UI != null && !production.inProduction && !production.continuous)
-                    {
-                        production.UI.startButton.SetActive(fulfilled);
+                        itemResultUI.amount.text = Mathf.Min(count, itemCount).ToString() + "/" + itemCount;
                     }
                     break;
                 case RequirementType.Tool:
                     int toolCount = 0;
-                    if (area.inventory.TryGetValue(itemID, out List<MeatovItem> toolCurrentItems))
+                    if (HideoutController.instance.inventory.TryGetValue(itemID, out List<MeatovItem> toolCurrentItems))
                     {
                         fulfilled = toolCurrentItems.Count >= 1;
                         toolCount = toolCurrentItems.Count;
@@ -491,36 +568,14 @@ namespace EFM
                         itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
                         itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
                     }
-                    if (production == null) // Not a production requirement, must be area upgrade requirement
+                    else if (itemResultUI != null)
                     {
-                        if (area.AllRequirementsFulfilled())
-                        {
-                            if (area.currentLevel == area.startLevel) // Area still needs to be constructed, no next page, just enable construct button
-                            {
-                                area.UI.constructButton.SetActive(true);
-                            }
-                            else // Area already constructed, but only display upgrade button if on next page
-                            {
-                                if (area.UI.onNextPage)
-                                {
-                                    area.UI.upgradeButton.SetActive(true);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            area.UI.constructButton.SetActive(false);
-                            area.UI.upgradeButton.SetActive(false);
-                        }
-                    }
-                    else if (production.UI != null && !production.inProduction && !production.continuous)
-                    {
-                        production.UI.startButton.SetActive(fulfilled);
+                        itemResultUI.amount.text = Mathf.Min(toolCount, 1).ToString() + "/1";
                     }
                     break;
                 case RequirementType.Resource:
                     int totalAmount = 0;
-                    if (area.inventory.TryGetValue(itemID, out List<MeatovItem> resourceCurrentItems))
+                    if (HideoutController.instance.inventory.TryGetValue(itemID, out List<MeatovItem> resourceCurrentItems))
                     {
                         for(int i=0; i < resourceCurrentItems.Count; ++i)
                         {
@@ -538,34 +593,14 @@ namespace EFM
                         itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
                         itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
                     }
-                    if (production == null) // Not a production requirement, must be area upgrade requirement
+                    else if (itemResultUI != null)
                     {
-                        if (area.AllRequirementsFulfilled())
-                        {
-                            if (area.currentLevel == area.startLevel) // Area still needs to be constructed, no next page, just enable construct button
-                            {
-                                area.UI.constructButton.SetActive(true);
-                            }
-                            else // Area already constructed, but only display upgrade button if on next page
-                            {
-                                if (area.UI.onNextPage)
-                                {
-                                    area.UI.upgradeButton.SetActive(true);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            area.UI.constructButton.SetActive(false);
-                            area.UI.upgradeButton.SetActive(false);
-                        }
-                    }
-                    else if (production.UI != null && !production.inProduction && !production.continuous)
-                    {
-                        production.UI.startButton.SetActive(fulfilled);
+                        itemResultUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
                     }
                     break;
             }
+
+            UpdateAreaUI();
         }
 
         public void OnAreaSlotContentChanged()
@@ -574,63 +609,145 @@ namespace EFM
             {
                 case RequirementType.Resource:
                     int totalAmount = 0;
-                    cont from ehre // handle this case specifically for water collector production
-                    if (area.inventory.TryGetValue(itemID, out List<MeatovItem> resourceCurrentItems))
+                    for(int i=0; i < area.areaSlotsPerLevel[area.currentLevel].Length; ++i)
                     {
-                        for (int i = 0; i < resourceCurrentItems.Count; ++i)
+                        if(area.areaSlotsPerLevel[area.currentLevel][i].item != null)
                         {
-                            totalAmount += resourceCurrentItems[i].amount;
+                            totalAmount += area.areaSlotsPerLevel[area.currentLevel][i].item.amount;
                         }
-                        fulfilled = totalAmount >= resourceCount;
                     }
-                    else
-                    {
-                        fulfilled = false;
-                    }
+                    // Note that here we only check greater than 0
+                    // Slot resource requirements are really only used for continuous productions
+                    // These requirements specify an amount to COMPLETE the production
+                    // but the production itself should be in production if we have more than 0 amount
+                    fulfilled = totalAmount >= 0;
                     if (itemRequirementUI != null)
                     {
                         itemRequirementUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
                         itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
                         itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
                     }
-                    if (production == null) // Not a production requirement, must be area upgrade requirement
+                    else if (itemResultUI != null)
                     {
-                        if (area.AllRequirementsFulfilled())
-                        {
-                            if (area.currentLevel == area.startLevel) // Area still needs to be constructed, no next page, just enable construct button
-                            {
-                                area.UI.constructButton.SetActive(true);
-                            }
-                            else // Area already constructed, but only display upgrade button if on next page
-                            {
-                                if (area.UI.onNextPage)
-                                {
-                                    area.UI.upgradeButton.SetActive(true);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            area.UI.constructButton.SetActive(false);
-                            area.UI.upgradeButton.SetActive(false);
-                        }
-                    }
-                    else if (production.UI != null && !production.inProduction && !production.continuous)
-                    {
-                        production.UI.startButton.SetActive(fulfilled);
+                        itemResultUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
                     }
                     break;
             }
+
+            UpdateAreaUI();
         }
 
         public void OnAreaLevelChanged()
         {
+            switch (requirementType)
+            {
+                case RequirementType.Area:
+                    fulfilled = area.controller.areas[areaIndex].currentLevel >= areaLevel;
+                    if (areaRequirementUI != null)
+                    {
+                        areaRequirementUI.fulfilled.SetActive(fulfilled);
+                        areaRequirementUI.unfulfilled.SetActive(!fulfilled);
+                    }
+                    break;
+            }
 
+            UpdateAreaUI();
         }
 
         public void OnTraderLevelChanged()
         {
+            switch (requirementType)
+            {
+                case RequirementType.Trader:
+                    fulfilled = trader.level >= traderLevel;
+                    if (traderRequirementUI)
+                    {
+                        traderRequirementUI.fulfilled.SetActive(fulfilled);
+                        traderRequirementUI.unfulfilled.SetActive(!fulfilled);
+                    }
+                    break;
+            }
 
+            UpdateAreaUI();
+        }
+
+        public void OnSkillLevelChanged()
+        {
+            switch (requirementType)
+            {
+                case RequirementType.Skill:
+                    fulfilled = Mod.skills[skillIndex].progress/100 >= traderLevel;
+                    if (skillRequirementUI != null)
+                    {
+                        skillRequirementUI.fulfilled.SetActive(fulfilled);
+                        skillRequirementUI.unfulfilled.SetActive(!fulfilled);
+                    }
+                    break;
+            }
+
+            UpdateAreaUI();
+        }
+
+        public void OnTaskCompleted()
+        {
+            switch (requirementType)
+            {
+                case RequirementType.QuestComplete:
+                    fulfilled = task.taskState == Task.TaskState.Complete;
+                    break;
+            }
+
+            UpdateAreaUI();
+        }
+
+        public void UpdateAreaUI()
+        {
+            if (production == null) // Not a production requirement, must be area upgrade requirement
+            {
+                UpdateAreaUpgradeUI();
+            }
+            else
+            {
+                production.unlocked = production.AllUnlockRequirementsFulfilled();
+                if (production.UI != null)
+                {
+                    production.UI.gameObject.SetActive(production.unlocked);
+                    if (production.continuous)
+                    {
+                        if (production.unlocked)
+                        {
+                            production.inProduction = production.AllRequirementsFulfilled();
+                        }
+                    }
+                    else if (!production.inProduction && production.limit > production.readyCount)
+                    {
+                        production.UI.startButton.SetActive(production.AllRequirementsFulfilled());
+                    }
+                }
+            }
+        }
+
+        public void UpdateAreaUpgradeUI()
+        {
+            if (area.AllRequirementsFulfilled())
+            {
+                if (area.currentLevel == area.startLevel) // Area still needs to be constructed, no next page, just enable construct button
+                {
+                    area.UI.constructButton.SetActive(true);
+                }
+                else // Area already constructed, but only display upgrade button if on next page
+                {
+                    if (area.UI.onNextPage)
+                    {
+                        area.UI.upgradeButton.SetActive(true);
+                    }
+                }
+            }
+            else
+            {
+                area.UI.constructButton.SetActive(false);
+                area.UI.upgradeButton.SetActive(false);
+            }
         }
     }
 
@@ -768,6 +885,7 @@ namespace EFM
     {
         // Static data
         public Area area;
+        public string ID;
         public ProductionView UI;
         public int areaLevel;
         public int time; // Seconds
@@ -779,13 +897,21 @@ namespace EFM
         public List<Requirement> requirements;
 
         // Live data
+        public bool unlocked;
+        public bool previousInProduction;
         public bool inProduction;
-        public DateTime productionStartTime;
+        public float timeLeft;
+        public bool timeLeftSet;
+        public float progressBaseTime; // The total time we need to base ourselves on when calculating progress
+        public float progress; // Percentage
+        public int readyCount;
 
         public Production(Area area, JToken data)
         {
             this.area = area;
 
+            ID = data["_id"].ToString();
+            area.productionsByID.Add(ID, this);
             time = (int)data["productionTime"];
             needFuelForAllProductionTime = (bool)data["needFuelForAllProductionTime"];
             endProduct = Mod.TarkovIDtoH3ID(data["endProduct"].ToString());
@@ -795,7 +921,8 @@ namespace EFM
 
             requirements = new List<Requirement>();
             JArray requirementsArray = data["requirements"] as JArray;
-            for(int i=0; i < requirementsArray.Count; ++i)
+            bool foundProductionAreaRequirement = false;
+            for (int i=0; i < requirementsArray.Count; ++i)
             {
                 Requirement newRequirement = new Requirement(requirementsArray[i]);
                 newRequirement.production = this;
@@ -804,8 +931,137 @@ namespace EFM
                 if(newRequirement.requirementType == Requirement.RequirementType.Area && newRequirement.areaIndex == area.index)
                 {
                     areaLevel = newRequirement.areaLevel;
+                    foundProductionAreaRequirement = true;
                 }
             }
+            if (!foundProductionAreaRequirement)
+            {
+                // This is to handle cases like bitcoin farm production
+                // If production does not specify the level this production 
+                // should be listed in, we assume it should be listed since startLevel + 1
+                areaLevel = area.startLevel + 1;
+                Requirement newRequirement = new Requirement(area.index, areaLevel);
+                newRequirement.production = this;
+                newRequirement.area = area;
+            }
+
+            // Load live data
+            JToken productionData = HideoutController.loadedData["hideout"]["areas"][area.index]["productions"][ID];
+            inProduction = (bool)productionData["inProduction"];
+            progress = (float)productionData["progress"];
+            readyCount = (int)productionData["readyCount"];
+        }
+
+        public void Update()
+        {
+            if (inProduction)
+            {
+                // Only need to start if progress == 0, otherwise we are resuming
+                if (!previousInProduction && progress == 0)
+                {
+                    // When production is started, we might already have a time set for us
+                    // Like for bitcoin farm for example
+                    // At which point it is just like resuming, so only start of no time is set
+                    if (!timeLeftSet)
+                    {
+                        timeLeft = time;
+                    }
+                }
+
+                timeLeft -= Time.deltaTime;
+                if(timeLeft <= 0)
+                {
+                    TODO: // Instantiate end product(s) and any tools we used
+
+                    if (area.areaVolumesPerLevel[area.currentLevel][0].items.Count == limit)
+                    {
+                        inProduction = false;
+                    }
+                    else
+                    {
+                        if (continuous)
+                        {
+                            if (timeLeftSet)
+                            {
+                                timeLeft = progressBaseTime;
+                            }
+                            else
+                            {
+                                timeLeft = time;
+                            }
+                        }
+                        else
+                        {
+                            inProduction = false;
+                            timeLeft = time;
+                            UI.timePanel.requiredTime.text = Mod.FormatTimeString(timeLeft);
+                            UI.timePanel.percentage.gameObject.SetActive(false);
+                            UI.startButton.SetActive(AllRequirementsFulfilled());
+                        }
+                        progress = 0;
+                    }
+                }
+                else
+                {
+                    UI.timePanel.requiredTime.text = Mod.FormatTimeString(timeLeft);
+                    progress = (1 - timeLeft / progressBaseTime) * 100;
+                    UI.timePanel.percentage.text = ((int)progress).ToString() + "%";
+
+                    if (continuous)
+                    {
+                        TODO: // Have a timer for each resource requirement and consume resource as needed
+                    }
+                }
+            }
+
+            previousInProduction = inProduction;
+        }
+
+        public bool AllRequirementsFulfilled()
+        {
+            for (int i = 0; i < requirements.Count; ++i)
+            {
+                if (!requirements[i].fulfilled)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool AllUnlockRequirementsFulfilled()
+        {
+            for (int i = 0; i < requirements.Count; ++i)
+            {
+                if (requirements[i].requirementType == Requirement.RequirementType.Area 
+                    && requirements[i].requirementType == Requirement.RequirementType.QuestComplete
+                    && !requirements[i].fulfilled)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public void OnBitcoinFarmSlotContentChanged()
+        {
+            // Time per bitcoin (s): productionsPerLevel[currentLevel][0].time/(1+(GC-1)*GPUBoostRate)
+            // Time left if already in progress: (Time per bitcoin) - (Time per bitcoin) * (productionsPerLevel[currentLevel][0].progress / 100)
+            int GPUCount = 0;
+            for (int i = 0; i < area.areaSlotsPerLevel[area.currentLevel].Length; ++i)
+            {
+                if (area.areaSlotsPerLevel[area.currentLevel][i].item != null)
+                {
+                    ++GPUCount;
+                }
+            }
+            timeLeft = time / (1 + (GPUCount - 1) * Area.GPUBoostRate);
+            progressBaseTime = timeLeft;
+            timeLeft = timeLeft - timeLeft * (progress / 100);
+            timeLeftSet = true;
+            inProduction = GPUCount > 0;
         }
     }
 

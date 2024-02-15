@@ -14,7 +14,8 @@ namespace EFM
         public GameObject staticVolume;
         public GameObject activeVolume;
 
-
+        [NonSerialized]
+        public MeatovItem item;
 
         [Serializable]
         public class PoseOverridePair

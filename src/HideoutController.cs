@@ -120,9 +120,8 @@ namespace EFM
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         private int insuredSetIndex = 0;
         private float scavTimer;
-        public Dictionary<string, int> inventory;
         public List<BaseAreaManager> baseAreaManagers;
-        public Dictionary<string, List<GameObject>> inventoryObjects;
+        public Dictionary<string, List<MeatovItem>> inventory;
         private Dictionary<int, int[]> fullPartConditions;
         private Dictionary<int, GameObject> medicalPartElements;
         private int totalMedicalTreatmentPrice;
@@ -138,6 +137,9 @@ namespace EFM
         public static float currentInsuranceReturnTime = 1;
         public static float currentRagfairCommission = 1; // TODO: Implement, dont forget to use EFM_Skill.skillBoostPercent
         public static Dictionary<Skill.SkillType, float> currentSkillGroupLevelingBoosts;
+
+        public delegate void OnHideoutInventoryChangedDelegate();
+        public event OnHideoutInventoryChangedDelegate OnHideoutInventoryChanged;
 
         public override void Awake()
         {
@@ -1371,8 +1373,7 @@ namespace EFM
 
                 if (inventory == null)
                 {
-                    inventory = new Dictionary<string, int>();
-                    inventoryObjects = new Dictionary<string, List<GameObject>>();
+                    inventory = new Dictionary<string, List<MeatovItem>>();
                 }
 
                 if (Mod.playerInventory == null)
@@ -2417,13 +2418,11 @@ namespace EFM
             string itemID = physObj.ObjectWrapper.ItemID;
             if (inventory.ContainsKey(itemID))
             {
-                inventory[itemID] += MI != null ? (MI.stack > 0 ? MI.stack : 1) : 1;
-                inventoryObjects[itemID].Add(item.gameObject);
+                inventory[itemID].Add(MI);
             }
             else
             {
-                inventory.Add(itemID, MI != null ? (MI.stack > 0 ? MI.stack : 1) : 1);
-                inventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
+                inventory.Add(itemID, new List<MeatovItem> { MI });
             }
 
             if (updateTypeLists)
@@ -2627,18 +2626,16 @@ namespace EFM
             string itemID = physObj.ObjectWrapper.ItemID;
             if (inventory.ContainsKey(itemID))
             {
-                inventory[itemID] -= MI != null ? MI.stack : 1;
-                inventoryObjects[itemID].Remove(item.gameObject);
+                inventory[itemID].Remove(MI);
             }
             else
             {
                 Mod.LogError("Attempting to remove " + itemID + " from base inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
-            if (inventory[itemID] == 0)
+            if (inventory[itemID].Count == 0)
             {
                 inventory.Remove(itemID);
-                inventoryObjects.Remove(itemID);
             }
 
             if (updateTypeLists)
@@ -3744,7 +3741,7 @@ namespace EFM
                     medicalScreenTotalHealthText = medicalScreen.GetChild(4).GetChild(2).GetChild(1).GetComponent<Text>();
                     medicalScreenTotalHealthText.text = totalHealth.ToString() + "/440";
 
-                    medicalScreen.GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
+                    //medicalScreen.GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
 
                     Mod.LogInfo("\tSet total health");
                     // Set hover scrolls
@@ -3811,17 +3808,17 @@ namespace EFM
 
         private void UpdateTreatmentApply()
         {
-            int playerRoubleCount = (inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0);
-            if (playerRoubleCount < totalMedicalTreatmentPrice)
-            {
-                transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetComponent<Collider>().enabled = false;
-                transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetChild(2).GetComponent<Text>().color = Color.gray;
-            }
-            else
-            {
-                transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetComponent<Collider>().enabled = true;
-                transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetChild(2).GetComponent<Text>().color = Color.white;
-            }
+            //int playerRoubleCount = (inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0);
+            //if (playerRoubleCount < totalMedicalTreatmentPrice)
+            //{
+            //    transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetComponent<Collider>().enabled = false;
+            //    transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetChild(2).GetComponent<Text>().color = Color.gray;
+            //}
+            //else
+            //{
+            //    transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetComponent<Collider>().enabled = true;
+            //    transform.GetChild(0).GetChild(0).GetChild(13).GetChild(2).GetChild(2).GetComponent<Text>().color = Color.white;
+            //}
         }
 
         public void ToggleMedicalPart(int partIndex)
@@ -4242,14 +4239,14 @@ namespace EFM
             int amountToRemoveFromPlayer = 0;
             if (inventory.ContainsKey("203"))
             {
-                if (inventory["203"] >= totalMedicalTreatmentPrice)
+                if (inventory["203"].Count >= totalMedicalTreatmentPrice)
                 {
                     amountToRemoveFromBase = totalMedicalTreatmentPrice;
                 }
                 else
                 {
-                    amountToRemoveFromBase = inventory["203"];
-                    amountToRemoveFromPlayer = totalMedicalTreatmentPrice - inventory["203"];
+                    amountToRemoveFromBase = inventory["203"].Count;
+                    amountToRemoveFromPlayer = totalMedicalTreatmentPrice - inventory["203"].Count;
                 }
             }
             else
@@ -4258,26 +4255,26 @@ namespace EFM
             }
             if (amountToRemoveFromBase > 0)
             {
-                inventory["203"] = inventory["203"] - amountToRemoveFromBase;
-                List<GameObject> objectList = inventoryObjects["203"];
-                for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i)
-                {
-                    GameObject toCheck = objectList[objectList.Count - 1];
-                    MeatovItem CIW = toCheck.GetComponent<MeatovItem>();
-                    if (CIW.stack > amountToRemoveFromBase)
-                    {
-                        CIW.stack = CIW.stack - amountToRemoveFromBase;
-                        j = 0;
-                    }
-                    else // CIW.stack <= amountToRemoveFromBase
-                    {
-                        j -= CIW.stack;
-                        objectList.RemoveAt(objectList.Count - 1);
-                        CIW.physObj.SetQuickBeltSlot(null);
-                        CIW.destroyed = true;
-                        Destroy(toCheck);
-                    }
-                }
+                //inventory["203"] = inventory["203"].Count - amountToRemoveFromBase;
+                //List<GameObject> objectList = inventory["203"].Count;
+                //for (int i = objectList.Count - 1, j = amountToRemoveFromBase; i >= 0 && j > 0; --i)
+                //{
+                //    GameObject toCheck = objectList[objectList.Count - 1];
+                //    MeatovItem CIW = toCheck.GetComponent<MeatovItem>();
+                //    if (CIW.stack > amountToRemoveFromBase)
+                //    {
+                //        CIW.stack = CIW.stack - amountToRemoveFromBase;
+                //        j = 0;
+                //    }
+                //    else // CIW.stack <= amountToRemoveFromBase
+                //    {
+                //        j -= CIW.stack;
+                //        objectList.RemoveAt(objectList.Count - 1);
+                //        CIW.physObj.SetQuickBeltSlot(null);
+                //        CIW.destroyed = true;
+                //        Destroy(toCheck);
+                //    }
+                //}
             }
             if (amountToRemoveFromPlayer > 0)
             {
@@ -4310,7 +4307,7 @@ namespace EFM
                 baseAreaManager.UpdateBasedOnItem("203");
             }
 
-            transform.GetChild(0).GetChild(0).GetChild(13).GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
+            //transform.GetChild(0).GetChild(0).GetChild(13).GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
         }
 
         private void ResetPlayerRig()
@@ -5107,6 +5104,15 @@ namespace EFM
         public void UpdateBasedOnPlayerLevel()
         {
             marketManager.UpdateBasedOnPlayerLevel();
+        }
+
+        public void OnHideoutInventoryChangedInvoke()
+        {
+            // Raise event
+            if (OnHideoutInventoryChanged != null)
+            {
+                OnHideoutInventoryChanged();
+            }
         }
     }
 
