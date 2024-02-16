@@ -123,7 +123,7 @@ namespace EFM
         public static float currentHydrationRate;
         public static Dictionary<string, int> playerInventory;
         public static Dictionary<string, List<GameObject>> playerInventoryObjects;
-        public static List<InsuredSet> insuredItems;
+        //public static List<InsuredSet> insuredItems;
         public static float staminaTimer = 0;
         public static float stamina = 100;
         public static float maxStamina = 100;
@@ -401,7 +401,7 @@ namespace EFM
                                 break;
                             case 1: // Force next AI spawn
                                 Mod.LogInfo("\tDebug: Force next AI spawn");
-                                currentRaidManager.ForceSpawnNextAI();
+                                //currentRaidManager.ForceSpawnNextAI();
                                 break;
                             case 2: // Toggle raid only first AI
                                 spawnOnlyFirstAI = !spawnOnlyFirstAI;
@@ -445,7 +445,7 @@ namespace EFM
                                 break;
                             case 11: // Kill player
                                 Mod.LogInfo("\tDebug: Kill player");
-                                currentRaidManager.KillPlayer();
+                                //currentRaidManager.KillPlayer();
                                 break;
                             case 12: // Write PatchHashes
                                 Mod.LogInfo("\tDebug: Write PatchHashes");
@@ -470,11 +470,11 @@ namespace EFM
                                 StatusUI.instance.Close();
                                 Mod.extractionUI.SetActive(false);
 
-                                Raid_Manager.currentManager.ResetHealthEffectCounterConditions();
+                                //Raid_Manager.currentManager.ResetHealthEffectCounterConditions();
 
                                 UIController.LoadHideout(5); // Load autosave, which is right before the start of raid
 
-                                Raid_Manager.currentManager.extracted = true;
+                                //Raid_Manager.currentManager.extracted = true;
                                 break;
                             case 15: // GC Collect
                                 Mod.LogInfo("\tDebug: GC Collect");
@@ -890,7 +890,7 @@ namespace EFM
                 customItemWrapper.description = defaultItemsData["ItemDefaults"][i]["description"] != null ? defaultItemsData["ItemDefaults"][i]["description"].ToString() : "";
                 itemDescriptions.Add(i.ToString(), customItemWrapper.description);
                 customItemWrapper.lootExperience = (int)defaultItemsData["ItemDefaults"][i]["lootExperience"];
-                customItemWrapper.spawnChance = (float)defaultItemsData["ItemDefaults"][i]["spawnChance"];
+                //customItemWrapper.spawnChance = (float)defaultItemsData["ItemDefaults"][i]["spawnChance"];
                 customItemWrapper.rarity = ItemRarityStringToEnum(defaultItemsData["ItemDefaults"][i]["rarity"].ToString());
                 if (itemsByRarity.ContainsKey(customItemWrapper.rarity))
                 {
@@ -1823,7 +1823,7 @@ namespace EFM
             }
         }
 
-        private GameObject MakeItemInteractiveSet(Transform root, FVRPhysicalObject itemPhysicalObject)
+        public GameObject MakeItemInteractiveSet(Transform root, FVRPhysicalObject itemPhysicalObject)
         {
             // Make the root interactable
             OtherInteractable otherInteractable = root.gameObject.AddComponent<OtherInteractable>();
@@ -3044,6 +3044,21 @@ namespace EFM
                 instantiatedItem = null;
             }
         }
+
+        public static string FormatCompleteMoneyString(int amount)
+        {
+            string s = amount.ToString();
+            int charCount = 0;
+            for (int i = s.Length - 1; i >= 0; --i)
+            {
+                if (charCount != 0 && charCount % 3 == 0)
+                {
+                    s = s.Insert(i + 1, " ");
+                }
+                ++charCount;
+            }
+            return s;
+        }
     }
 
     public class ItemMapEntry
@@ -3054,4 +3069,15 @@ namespace EFM
         public string moddedID;
     }
 
+    public class Vector2Int
+    {
+        public int x;
+        public int y;
+
+        public Vector2Int(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
 }

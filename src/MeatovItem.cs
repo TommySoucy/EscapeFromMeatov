@@ -11,7 +11,6 @@ namespace EFM
 	public class MeatovItem : MonoBehaviour, IDescribable
 	{
 		public FVRPhysicalObject physObj;
-		public bool destroyed;
 
         public string H3ID;
         public string tarkovID;
@@ -19,21 +18,10 @@ namespace EFM
         public Mod.ItemType itemType;
 		public List<string> parents;
         public int weight;
-        public bool looted;
-		public bool foundInRaid;
-		public bool hideoutSpawned;
 		public int lootExperience;
-		public float spawnChance;
 		public Mod.ItemRarity rarity;
 		public string itemName;
 		public string description;
-		private DescriptionPack descriptionPack;
-        private long previousDescriptionTime;
-        public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
-		public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid, 3: Area slot. This is to keep track of where an item is in general
-		public DescriptionManager descriptionManager; // The current description manager displaying this item's description
-		public List<MarketItemView> marketItemViews;
-		public LeaveItemProcessor leaveItemProcessor;
 		public AudioClip[] itemSounds;
 		public int upgradeCheckBlockedIndex = -1;
 		public int upgradeCheckWarnedIndex = -1;
@@ -69,11 +57,22 @@ namespace EFM
 					descriptionManager.SetDescriptionPack();
 				}
 			}
-		}
+        }
+        public bool destroyed;
+        public bool looted;
+        public bool foundInRaid;
+        public bool hideoutSpawned;
+        private DescriptionPack descriptionPack;
+        private long previousDescriptionTime;
+        public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
+        public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid, 3: Area slot. This is to keep track of where an item is in general
+        public DescriptionManager descriptionManager; // The current description manager displaying this item's description
+        public List<MarketItemView> marketItemViews;
+        //public LeaveItemProcessor leaveItemProcessor;
 
-		// Equipment
-		// 0: Open (Model should be as orginal in tarkov), 1: ClosedFull (Closed but only folded to the point that any container/armor is not folded), 2: ClosedEmpty (Folded and flattened as much as is realistic)
-		public bool modeInitialized;
+        // Equipment
+        // 0: Open (Model should be as orginal in tarkov), 1: ClosedFull (Closed but only folded to the point that any container/armor is not folded), 2: ClosedEmpty (Folded and flattened as much as is realistic)
+        public bool modeInitialized;
 		private int _mode = 2;
 		public int mode
 		{
@@ -660,176 +659,176 @@ namespace EFM
 			// If A has started being pressed this frame
 			if (usageButtonDown)
 			{
-				if (leaveItemProcessor == null)
-				{
-					switch (itemType)
-					{
-						case Mod.ItemType.ArmoredRig:
-						case Mod.ItemType.Rig:
-						case Mod.ItemType.Backpack:
-						case Mod.ItemType.BodyArmor:
-						case Mod.ItemType.Container:
-						case Mod.ItemType.Pouch:
-							ToggleMode(true, hand.IsThisTheRightHand);
-							break;
-						case Mod.ItemType.Money:
-							if (splittingStack)
-							{
-								// End splitting
-								if (splitAmount != stack || splitAmount == 0)
-								{
-									stack -= splitAmount;
+				//if (leaveItemProcessor == null)
+				//{
+				//	switch (itemType)
+				//	{
+				//		case Mod.ItemType.ArmoredRig:
+				//		case Mod.ItemType.Rig:
+				//		case Mod.ItemType.Backpack:
+				//		case Mod.ItemType.BodyArmor:
+				//		case Mod.ItemType.Container:
+				//		case Mod.ItemType.Pouch:
+				//			ToggleMode(true, hand.IsThisTheRightHand);
+				//			break;
+				//		case Mod.ItemType.Money:
+				//			if (splittingStack)
+				//			{
+				//				// End splitting
+				//				if (splitAmount != stack || splitAmount == 0)
+				//				{
+				//					stack -= splitAmount;
 
-									GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(H3ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
-									if (Mod.currentLocationIndex == 1) // In hideout
-									{
-										itemObject.transform.parent = HideoutController.instance.transform.GetChild(HideoutController.instance.transform.childCount - 2);
-										MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
-										CIW.stack = splitAmount;
-										HideoutController.instance.inventoryObjects[H3ID].Add(itemObject);
-									}
-									else // In raid
-									{
-										itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
-										MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
-										CIW.stack = splitAmount;
-									}
-								}
-								// else the chosen amount is 0 or max, meaning cancel the split
-								CancelSplit();
-							}
-							else
-							{
-								// Start splitting
-								Mod.stackSplitUI.SetActive(true);
-								Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
-								Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
-								stackSplitStartPosition = hand.transform.position;
-								stackSplitRightVector = hand.transform.right;
-								stackSplitRightVector.y = 0;
+				//					GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(H3ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
+				//					if (Mod.currentLocationIndex == 1) // In hideout
+				//					{
+				//						itemObject.transform.parent = HideoutController.instance.transform.GetChild(HideoutController.instance.transform.childCount - 2);
+				//						MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
+				//						CIW.stack = splitAmount;
+				//						HideoutController.instance.inventoryObjects[H3ID].Add(itemObject);
+				//					}
+				//					else // In raid
+				//					{
+				//						itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
+				//						MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
+				//						CIW.stack = splitAmount;
+				//					}
+				//				}
+				//				// else the chosen amount is 0 or max, meaning cancel the split
+				//				CancelSplit();
+				//			}
+				//			else
+				//			{
+				//				// Start splitting
+				//				Mod.stackSplitUI.SetActive(true);
+				//				Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
+				//				Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
+				//				stackSplitStartPosition = hand.transform.position;
+				//				stackSplitRightVector = hand.transform.right;
+				//				stackSplitRightVector.y = 0;
 
-								splittingStack = true;
-								Mod.amountChoiceUIUp = true;
-								Mod.splittingItem = this;
-							}
-							break;
-						default:
-							break;
-					}
-                }
+				//				splittingStack = true;
+				//				Mod.amountChoiceUIUp = true;
+				//				Mod.splittingItem = this;
+				//			}
+				//			break;
+				//		default:
+				//			break;
+				//	}
+    //            }
 			}
 
 			// If A is being pressed this frame
 			if (usageButtonPressed)
 			{
-				if (leaveItemProcessor == null || validConsumePress)
-				{
-					leavingTimer = 0;
-					switch (itemType)
-					{
-						case Mod.ItemType.Consumable:
-							bool otherHandConsuming = false;
-							if (!validConsumePress)
-							{
-								otherHandConsuming = EFMHand.otherHand.consuming;
-							}
-							if (!otherHandConsuming)
-							{
-								EFMHand.consuming = true;
+				//if (leaveItemProcessor == null || validConsumePress)
+				//{
+				//	leavingTimer = 0;
+				//	switch (itemType)
+				//	{
+				//		case Mod.ItemType.Consumable:
+				//			bool otherHandConsuming = false;
+				//			if (!validConsumePress)
+				//			{
+				//				otherHandConsuming = EFMHand.otherHand.consuming;
+				//			}
+				//			if (!otherHandConsuming)
+				//			{
+				//				EFMHand.consuming = true;
 
-								// Increment timer
-								consumableTimer += Time.deltaTime;
+				//				// Increment timer
+				//				consumableTimer += Time.deltaTime;
 
-								float use = Mathf.Clamp01(consumableTimer / useTime);
-								Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
-								if (amountRate == 0)
-								{
-									// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
-									if (consumableTimer >= useTime)
-									{
-										Mod.consumeUIText.color = Color.green;
-									}
-									else
-									{
-										Mod.consumeUIText.color = Color.red;
-									}
-								}
-								else
-								{
-									Mod.consumeUIText.color = Color.white;
-								}
-								Mod.consumeUI.transform.parent = hand.transform;
-								Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
-								Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
-								Mod.consumeUI.SetActive(true);
-								validConsumePress = true;
-							}
-							break;
-						default:
-							break;
-					}
-                }
-                else if(leaveItemProcessor != null)
-                {
-					bool otherHandLeaving = false;
-					if (!validLeaveItemPress)
-					{
-						otherHandLeaving = EFMHand.otherHand.leaving;
-					}
-					if (!otherHandLeaving)
-					{
-						EFMHand.leaving = true;
+				//				float use = Mathf.Clamp01(consumableTimer / useTime);
+				//				Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
+				//				if (amountRate == 0)
+				//				{
+				//					// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
+				//					if (consumableTimer >= useTime)
+				//					{
+				//						Mod.consumeUIText.color = Color.green;
+				//					}
+				//					else
+				//					{
+				//						Mod.consumeUIText.color = Color.red;
+				//					}
+				//				}
+				//				else
+				//				{
+				//					Mod.consumeUIText.color = Color.white;
+				//				}
+				//				Mod.consumeUI.transform.parent = hand.transform;
+				//				Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+				//				Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+				//				Mod.consumeUI.SetActive(true);
+				//				validConsumePress = true;
+				//			}
+				//			break;
+				//		default:
+				//			break;
+				//	}
+    //            }
+    //            else if(leaveItemProcessor != null)
+    //            {
+				//	bool otherHandLeaving = false;
+				//	if (!validLeaveItemPress)
+				//	{
+				//		otherHandLeaving = EFMHand.otherHand.leaving;
+				//	}
+				//	if (!otherHandLeaving)
+				//	{
+				//		EFMHand.leaving = true;
 
-						// Increment timer
-						leavingTimer += Time.deltaTime;
+				//		// Increment timer
+				//		leavingTimer += Time.deltaTime;
 
-						if(leaveItemTime == -1)
-						{
-							List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[H3ID];
-							leaveItemTime = conditions[conditions.Count - 1].plantTime;
-						}
+				//		if(leaveItemTime == -1)
+				//		{
+				//			List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[H3ID];
+				//			leaveItemTime = conditions[conditions.Count - 1].plantTime;
+				//		}
 
-						Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", leavingTimer, leaveItemTime);
-						Mod.consumeUIText.color = Color.white;
-						Mod.consumeUI.transform.parent = hand.transform;
-						Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
-						Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
-						Mod.consumeUI.SetActive(true);
-						validLeaveItemPress = true;
+				//		Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", leavingTimer, leaveItemTime);
+				//		Mod.consumeUIText.color = Color.white;
+				//		Mod.consumeUI.transform.parent = hand.transform;
+				//		Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+				//		Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+				//		Mod.consumeUI.SetActive(true);
+				//		validLeaveItemPress = true;
 
-						if (leavingTimer >= leaveItemTime)
-						{
-							EFMHand.leaving = false;
-							validLeaveItemPress = false;
-							leavingTimer = 0;
-							leaveItemTime = -1;
+				//		if (leavingTimer >= leaveItemTime)
+				//		{
+				//			EFMHand.leaving = false;
+				//			validLeaveItemPress = false;
+				//			leavingTimer = 0;
+				//			leaveItemTime = -1;
 
-							List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[H3ID];
-							if(conditions.Count > 0)
-							{
-								TraderTaskCondition condition = conditions[conditions.Count - 1];
-								++condition.itemCount;
-								TraderStatus.UpdateConditionFulfillment(condition);
-								if (condition.fulfilled)
-								{
-									conditions.RemoveAt(conditions.Count - 1);
-								}
-							}
-							if (conditions.Count == 0)
-							{
-								leaveItemProcessor.conditionsByItemID.Remove(H3ID);
-								leaveItemProcessor.itemIDs.Remove(H3ID);
-							}
+				//			List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[H3ID];
+				//			if(conditions.Count > 0)
+				//			{
+				//				TraderTaskCondition condition = conditions[conditions.Count - 1];
+				//				++condition.itemCount;
+				//				TraderStatus.UpdateConditionFulfillment(condition);
+				//				if (condition.fulfilled)
+				//				{
+				//					conditions.RemoveAt(conditions.Count - 1);
+				//				}
+				//			}
+				//			if (conditions.Count == 0)
+				//			{
+				//				leaveItemProcessor.conditionsByItemID.Remove(H3ID);
+				//				leaveItemProcessor.itemIDs.Remove(H3ID);
+				//			}
 
-							// Update player inventory and weight
-							Mod.RemoveFromPlayerInventory(transform, true);
-							Mod.weight -= currentWeight;
-							destroyed = true;
-							physObj.ForceBreakInteraction();
-							Destroy(gameObject);
-						}
-					}
-				}
+				//			// Update player inventory and weight
+				//			Mod.RemoveFromPlayerInventory(transform, true);
+				//			Mod.weight -= currentWeight;
+				//			destroyed = true;
+				//			physObj.ForceBreakInteraction();
+				//			Destroy(gameObject);
+				//		}
+				//	}
+				//}
 			}
 
 			// If A has been released this frame
@@ -1049,10 +1048,10 @@ namespace EFM
 
 						if (Mod.currentLocationIndex == 1)
 						{
-							foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
-							{
-								areaManager.UpdateBasedOnItem(H3ID);
-							}
+							//foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
+							//{
+							//	areaManager.UpdateBasedOnItem(H3ID);
+							//}
 						}
 					}
 				}
@@ -1061,37 +1060,37 @@ namespace EFM
 
 		private void UpdateUseItemCounterConditions()
         {
-            if (Mod.currentUseItemCounterConditionsByItemID.ContainsKey(H3ID))
-            {
-				List<TraderTaskCounterCondition> useItemCounterConditions = Mod.currentUseItemCounterConditionsByItemID[H3ID];
-				foreach (TraderTaskCounterCondition counterCondition in useItemCounterConditions)
-				{
-					// Check task and condition state validity
-					if (!counterCondition.parentCondition.visible)
-					{
-						continue;
-					}
+   //         if (Mod.currentUseItemCounterConditionsByItemID.ContainsKey(H3ID))
+   //         {
+			//	List<TraderTaskCounterCondition> useItemCounterConditions = Mod.currentUseItemCounterConditionsByItemID[H3ID];
+			//	foreach (TraderTaskCounterCondition counterCondition in useItemCounterConditions)
+			//	{
+			//		// Check task and condition state validity
+			//		if (!counterCondition.parentCondition.visible)
+			//		{
+			//			continue;
+			//		}
 
-					// Check constraint counters (Location, Equipment, HealthEffect, InZone)
-					bool constrained = false;
-					foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
-					{
-						if (!TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
-						{
-							constrained = true;
-							break;
-						}
-					}
-					if (constrained)
-					{
-						continue;
-					}
+			//		// Check constraint counters (Location, Equipment, HealthEffect, InZone)
+			//		bool constrained = false;
+			//		foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+			//		{
+			//			if (!TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+			//			{
+			//				constrained = true;
+			//				break;
+			//			}
+			//		}
+			//		if (constrained)
+			//		{
+			//			continue;
+			//		}
 
-					// Successful use, increment count and update fulfillment 
-					++counterCondition.useCount;
-					TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
-				}
-			}
+			//		// Successful use, increment count and update fulfillment 
+			//		++counterCondition.useCount;
+			//		TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+			//	}
+			//}
         }
 
 		public void CancelSplit()
@@ -1964,7 +1963,7 @@ namespace EFM
 				return descriptionPack;
             }
 
-            descriptionPack.amount = (HideoutController.instance.inventory.ContainsKey(H3ID) ? HideoutController.instance.inventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
+            //descriptionPack.amount = (HideoutController.instance.inventory.ContainsKey(H3ID) ? HideoutController.instance.inventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
 			descriptionPack.amountRequired = 0;
 			for (int i=0; i < 22; ++i)
 			{
@@ -2081,7 +2080,7 @@ namespace EFM
                     descriptionPack.containedAmmoClassesByType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, int>>();
 
                     // Checking amount of ammo in mag only counts once per minute for a unique mag
-                    long currentTime = Mod.currentLocationIndex == 1 ? HideoutController.instance.GetTimeSeconds() : Mod.currentRaidManager.GetTimeSeconds();
+                    long currentTime = 0/*Mod.currentLocationIndex == 1 ? HideoutController.instance.GetTimeSeconds() : Mod.currentRaidManager.GetTimeSeconds();*/;
                     if (currentTime - previousDescriptionTime > 60)
                     {
                         Mod.AddSkillExp(Skill.magazineCheckAction, 31);

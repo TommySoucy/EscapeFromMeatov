@@ -95,7 +95,7 @@ namespace EFM
 
         public void Init()
         {
-            cont from ere // init ui based on area data (reqs and bonuses)
+            //cont from ere // init ui based on area data (reqs and bonuses)
         }
 
         public void OnSummaryClicked()

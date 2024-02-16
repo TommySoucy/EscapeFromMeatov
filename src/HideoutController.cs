@@ -120,7 +120,6 @@ namespace EFM
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         private int insuredSetIndex = 0;
         private float scavTimer;
-        public List<BaseAreaManager> baseAreaManagers;
         public Dictionary<string, List<MeatovItem>> inventory;
         private Dictionary<int, int[]> fullPartConditions;
         private Dictionary<int, GameObject> medicalPartElements;
@@ -1991,74 +1990,74 @@ namespace EFM
             }
 
             // Check for insuredSets
-            if (Mod.insuredItems == null)
-            {
-                Mod.insuredItems = new List<InsuredSet>();
-            }
-            if (loadedData["insuredSets"] != null)
-            {
-                JArray loadedInsuredSets = (JArray)loadedData["insuredSets"];
+            //if (Mod.insuredItems == null)
+            //{
+            //    Mod.insuredItems = new List<InsuredSet>();
+            //}
+            //if (loadedData["insuredSets"] != null)
+            //{
+            //    JArray loadedInsuredSets = (JArray)loadedData["insuredSets"];
 
-                for (int i = 0; i < loadedInsuredSets.Count; ++i)
-                {
-                    InsuredSet newInsuredSet = new InsuredSet();
-                    newInsuredSet.returnTime = (long)loadedInsuredSets[i]["returnTime"];
-                    newInsuredSet.items = loadedInsuredSets[i]["items"].ToObject<Dictionary<string, int>>();
-                    Mod.insuredItems.Add(newInsuredSet);
-                }
-            }
+            //    for (int i = 0; i < loadedInsuredSets.Count; ++i)
+            //    {
+            //        InsuredSet newInsuredSet = new InsuredSet();
+            //        newInsuredSet.returnTime = (long)loadedInsuredSets[i]["returnTime"];
+            //        newInsuredSet.items = loadedInsuredSets[i]["items"].ToObject<Dictionary<string, int>>();
+            //        Mod.insuredItems.Add(newInsuredSet);
+            //    }
+            //}
 
             Mod.preventLoadMagUpdateLists = false;
 
             // Instantiate areas
-            baseAreaManagers = new List<BaseAreaManager>();
-            for (int i = 0; i < 22; ++i)
-            {
-                BaseAreaManager currentBaseAreaManager = transform.GetChild(1).GetChild(i).gameObject.AddComponent<BaseAreaManager>();
-                Transform slotsParent = currentBaseAreaManager.transform.GetChild(currentBaseAreaManager.transform.childCount - 1);
-                currentBaseAreaManager.baseManager = this;
-                currentBaseAreaManager.areaIndex = i;
-                if (loadedData["areas"] != null)
-                {
-                    JArray loadedAreas = (JArray)loadedData["areas"];
-                    currentBaseAreaManager.level = (int)loadedAreas[i]["level"];
-                    currentBaseAreaManager.constructing = (bool)loadedAreas[i]["constructing"];
-                    currentBaseAreaManager.constructionTimer = (float)loadedAreas[i]["constructTimer"] - secondsSinceSave;
-                    if (slotsParent.childCount > 0)
-                    {
-                        currentBaseAreaManager.slotItems = new GameObject[slotsParent.GetChild(currentBaseAreaManager.level).childCount];
-                    }
-                    else
-                    {
-                        currentBaseAreaManager.slotItems = new GameObject[0];
-                    }
-                    if (loadedAreas[i]["slots"] != null)
-                    {
-                        JArray loadedAreaSlot = (JArray)loadedAreas[i]["slots"];
-                        int slotIndex = 0;
-                        foreach (JToken item in loadedAreaSlot)
-                        {
-                            if (item == null || item.Type == JTokenType.Null)
-                            {
-                                currentBaseAreaManager.slotItems[slotIndex] = null;
-                            }
-                            else
-                            {
-                                currentBaseAreaManager.slotItems[slotIndex] = LoadSavedItem(null, item);
-                            }
-                            ++slotIndex;
-                        }
-                    }
-                }
-                else
-                {
-                    currentBaseAreaManager.level = 0;
-                    currentBaseAreaManager.constructing = false;
-                    currentBaseAreaManager.slotItems = new GameObject[0];
-                }
+            //baseAreaManagers = new List<BaseAreaManager>();
+            //for (int i = 0; i < 22; ++i)
+            //{
+            //    BaseAreaManager currentBaseAreaManager = transform.GetChild(1).GetChild(i).gameObject.AddComponent<BaseAreaManager>();
+            //    Transform slotsParent = currentBaseAreaManager.transform.GetChild(currentBaseAreaManager.transform.childCount - 1);
+            //    currentBaseAreaManager.baseManager = this;
+            //    currentBaseAreaManager.areaIndex = i;
+            //    if (loadedData["areas"] != null)
+            //    {
+            //        JArray loadedAreas = (JArray)loadedData["areas"];
+            //        currentBaseAreaManager.level = (int)loadedAreas[i]["level"];
+            //        currentBaseAreaManager.constructing = (bool)loadedAreas[i]["constructing"];
+            //        currentBaseAreaManager.constructionTimer = (float)loadedAreas[i]["constructTimer"] - secondsSinceSave;
+            //        if (slotsParent.childCount > 0)
+            //        {
+            //            currentBaseAreaManager.slotItems = new GameObject[slotsParent.GetChild(currentBaseAreaManager.level).childCount];
+            //        }
+            //        else
+            //        {
+            //            currentBaseAreaManager.slotItems = new GameObject[0];
+            //        }
+            //        if (loadedAreas[i]["slots"] != null)
+            //        {
+            //            JArray loadedAreaSlot = (JArray)loadedAreas[i]["slots"];
+            //            int slotIndex = 0;
+            //            foreach (JToken item in loadedAreaSlot)
+            //            {
+            //                if (item == null || item.Type == JTokenType.Null)
+            //                {
+            //                    currentBaseAreaManager.slotItems[slotIndex] = null;
+            //                }
+            //                else
+            //                {
+            //                    currentBaseAreaManager.slotItems[slotIndex] = LoadSavedItem(null, item);
+            //                }
+            //                ++slotIndex;
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        currentBaseAreaManager.level = 0;
+            //        currentBaseAreaManager.constructing = false;
+            //        currentBaseAreaManager.slotItems = new GameObject[0];
+            //    }
 
-                baseAreaManagers.Add(currentBaseAreaManager);
-            }
+            //    baseAreaManagers.Add(currentBaseAreaManager);
+            //}
 
             // Load trader statuses if not loading in from a raid
             //if (!Mod.justFinishedRaid)
@@ -3665,7 +3664,7 @@ namespace EFM
                                     partTotalCost += cost;
 
                                     partElement.transform.GetChild(5).gameObject.SetActive(true);
-                                    partElement.transform.GetChild(5).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
+                                    //partElement.transform.GetChild(5).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
 
                                     PointableButton destroyedPartButton = partElement.transform.GetChild(5).gameObject.AddComponent<PointableButton>();
                                     destroyedPartButton.SetButton();
@@ -3682,7 +3681,7 @@ namespace EFM
                                     partTotalCost += cost;
 
                                     partElement.transform.GetChild(1).gameObject.SetActive(true);
-                                    partElement.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
+                                    //partElement.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
                                     partElement.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "Health (" + hpToHeal + ")";
 
                                     PointableButton destroyedPartButton = partElement.transform.GetChild(1).gameObject.AddComponent<PointableButton>();
@@ -3708,7 +3707,7 @@ namespace EFM
                                         partTotalCost += cost;
 
                                         partElement.transform.GetChild(i + 2).gameObject.SetActive(true);
-                                        partElement.transform.GetChild(i + 2).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
+                                        //partElement.transform.GetChild(i + 2).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
 
                                         PointableButton destroyedPartButton = partElement.transform.GetChild(i + 2).gameObject.AddComponent<PointableButton>();
                                         destroyedPartButton.SetButton();
@@ -3722,14 +3721,14 @@ namespace EFM
                             }
 
                             // Set part total cost
-                            partElement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(partTotalCost);
+                            //partElement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(partTotalCost);
                         }
                     }
                     Mod.LogInfo("\tProcessed parts");
 
                     // Setup total and put as last sibling
                     totalTreatmentPriceText = medicalListContent.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
-                    totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
+                    //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
                     medicalListContent.GetChild(1).SetAsLastSibling();
 
                     // Set total health
@@ -3834,7 +3833,7 @@ namespace EFM
                         totalMedicalTreatmentPrice -= fullPartConditions[partIndex][i];
                     }
                 }
-                totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
+                //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
             }
             else
             {
@@ -3847,7 +3846,7 @@ namespace EFM
                         totalMedicalTreatmentPrice += fullPartConditions[partIndex][i];
                     }
                 }
-                totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
+                //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
             }
 
             UpdateTreatmentApply();
@@ -3862,7 +3861,7 @@ namespace EFM
                 if (medicalPartElements[partIndex].transform.GetChild(0).GetChild(0).GetChild(0).gameObject.activeSelf)
                 {
                     totalMedicalTreatmentPrice -= fullPartConditions[partIndex][conditionIndex];
-                    totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
+                    //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
                 }
             }
             else
@@ -3872,7 +3871,7 @@ namespace EFM
                 if (medicalPartElements[partIndex].transform.GetChild(0).GetChild(0).GetChild(0).gameObject.activeSelf)
                 {
                     totalMedicalTreatmentPrice += fullPartConditions[partIndex][conditionIndex];
-                    totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
+                    //totalTreatmentPriceText.text = MarketManager.FormatCompleteMoneyString(totalMedicalTreatmentPrice);
                 }
             }
 
@@ -4302,10 +4301,10 @@ namespace EFM
                 }
             }
 
-            foreach (BaseAreaManager baseAreaManager in baseAreaManagers)
-            {
-                baseAreaManager.UpdateBasedOnItem("203");
-            }
+            //foreach (BaseAreaManager baseAreaManager in baseAreaManagers)
+            //{
+            //    baseAreaManager.UpdateBasedOnItem("203");
+            //}
 
             //transform.GetChild(0).GetChild(0).GetChild(13).GetChild(5).GetChild(0).GetComponent<Text>().text = "Stash: " + MarketManager.FormatCompleteMoneyString((inventory.ContainsKey("203") ? inventory["203"] : 0) + (Mod.playerInventory.ContainsKey("203") ? Mod.playerInventory["203"] : 0));
         }
@@ -4363,75 +4362,75 @@ namespace EFM
             // Write areas
             JArray savedAreas = new JArray();
             loadedData["areas"] = savedAreas;
-            for (int i = 0; i < baseAreaManagers.Count; ++i)
-            {
-                JToken currentSavedArea = new JObject();
-                currentSavedArea["level"] = baseAreaManagers[i].level;
-                currentSavedArea["constructing"] = baseAreaManagers[i].constructing;
-                currentSavedArea["constructTimer"] = baseAreaManagers[i].constructionTimer;
-                if (baseAreaManagers[i].slotItems != null)
-                {
-                    JArray slots = new JArray();
-                    currentSavedArea["slots"] = slots;
-                    foreach (GameObject slotItem in baseAreaManagers[i].slotItems)
-                    {
-                        if (slotItem == null)
-                        {
-                            slots.Add(null);
-                        }
-                        else
-                        {
-                            SaveItem(slots, slotItem.transform);
-                        }
-                    }
-                }
-                if (baseAreaManagers[i].activeProductions != null)
-                {
-                    currentSavedArea["productions"] = new JObject();
+            //for (int i = 0; i < baseAreaManagers.Count; ++i)
+            //{
+            //    JToken currentSavedArea = new JObject();
+            //    currentSavedArea["level"] = baseAreaManagers[i].level;
+            //    currentSavedArea["constructing"] = baseAreaManagers[i].constructing;
+            //    currentSavedArea["constructTimer"] = baseAreaManagers[i].constructionTimer;
+            //    if (baseAreaManagers[i].slotItems != null)
+            //    {
+            //        JArray slots = new JArray();
+            //        currentSavedArea["slots"] = slots;
+            //        foreach (GameObject slotItem in baseAreaManagers[i].slotItems)
+            //        {
+            //            if (slotItem == null)
+            //            {
+            //                slots.Add(null);
+            //            }
+            //            else
+            //            {
+            //                SaveItem(slots, slotItem.transform);
+            //            }
+            //        }
+            //    }
+            //    if (baseAreaManagers[i].activeProductions != null)
+            //    {
+            //        currentSavedArea["productions"] = new JObject();
 
-                    foreach (KeyValuePair<string, AreaProduction> production in baseAreaManagers[i].activeProductions)
-                    {
-                        JObject currentProduction = new JObject();
-                        currentProduction["timeLeft"] = production.Value.timeLeft;
-                        currentProduction["productionCount"] = production.Value.productionCount;
-                        currentProduction["count"] = production.Value.count;
+            //        foreach (KeyValuePair<string, AreaProduction> production in baseAreaManagers[i].activeProductions)
+            //        {
+            //            JObject currentProduction = new JObject();
+            //            currentProduction["timeLeft"] = production.Value.timeLeft;
+            //            currentProduction["productionCount"] = production.Value.productionCount;
+            //            currentProduction["count"] = production.Value.count;
 
-                        currentSavedArea["productions"][production.Value.ID] = currentProduction;
-                    }
-                }
-                else if (baseAreaManagers[i].activeScavCaseProductions != null)
-                {
-                    currentSavedArea["productions"] = new JArray();
+            //            currentSavedArea["productions"][production.Value.ID] = currentProduction;
+            //        }
+            //    }
+            //    else if (baseAreaManagers[i].activeScavCaseProductions != null)
+            //    {
+            //        currentSavedArea["productions"] = new JArray();
 
-                    foreach (EFM_ScavCaseProduction production in baseAreaManagers[i].activeScavCaseProductions)
-                    {
-                        JObject currentProduction = new JObject();
-                        currentProduction["timeLeft"] = production.timeLeft;
-                        currentProduction["products"] = new JObject();
-                        if (production.products.ContainsKey(Mod.ItemRarity.Common))
-                        {
-                            currentProduction["products"]["common"] = new JObject();
-                            currentProduction["products"]["common"]["min"] = production.products[Mod.ItemRarity.Common].x;
-                            currentProduction["products"]["common"]["max"] = production.products[Mod.ItemRarity.Common].y;
-                        }
-                        if (production.products.ContainsKey(Mod.ItemRarity.Rare))
-                        {
-                            currentProduction["products"]["rare"] = new JObject();
-                            currentProduction["products"]["rare"]["min"] = production.products[Mod.ItemRarity.Rare].x;
-                            currentProduction["products"]["rare"]["max"] = production.products[Mod.ItemRarity.Rare].y;
-                        }
-                        if (production.products.ContainsKey(Mod.ItemRarity.Superrare))
-                        {
-                            currentProduction["products"]["superrare"] = new JObject();
-                            currentProduction["products"]["superrare"]["min"] = production.products[Mod.ItemRarity.Superrare].x;
-                            currentProduction["products"]["superrare"]["max"] = production.products[Mod.ItemRarity.Superrare].y;
-                        }
+            //        foreach (EFM_ScavCaseProduction production in baseAreaManagers[i].activeScavCaseProductions)
+            //        {
+            //            JObject currentProduction = new JObject();
+            //            currentProduction["timeLeft"] = production.timeLeft;
+            //            currentProduction["products"] = new JObject();
+            //            if (production.products.ContainsKey(Mod.ItemRarity.Common))
+            //            {
+            //                currentProduction["products"]["common"] = new JObject();
+            //                currentProduction["products"]["common"]["min"] = production.products[Mod.ItemRarity.Common].x;
+            //                currentProduction["products"]["common"]["max"] = production.products[Mod.ItemRarity.Common].y;
+            //            }
+            //            if (production.products.ContainsKey(Mod.ItemRarity.Rare))
+            //            {
+            //                currentProduction["products"]["rare"] = new JObject();
+            //                currentProduction["products"]["rare"]["min"] = production.products[Mod.ItemRarity.Rare].x;
+            //                currentProduction["products"]["rare"]["max"] = production.products[Mod.ItemRarity.Rare].y;
+            //            }
+            //            if (production.products.ContainsKey(Mod.ItemRarity.Superrare))
+            //            {
+            //                currentProduction["products"]["superrare"] = new JObject();
+            //                currentProduction["products"]["superrare"]["min"] = production.products[Mod.ItemRarity.Superrare].x;
+            //                currentProduction["products"]["superrare"]["max"] = production.products[Mod.ItemRarity.Superrare].y;
+            //            }
 
-                        (currentSavedArea["productions"] as JArray).Add(currentProduction);
-                    }
-                }
-                savedAreas.Add(currentSavedArea);
-            }
+            //            (currentSavedArea["productions"] as JArray).Add(currentProduction);
+            //        }
+            //    }
+            //    savedAreas.Add(currentSavedArea);
+            //}
 
             // Save trader statuses
             JArray savedTraderStatuses = new JArray();
@@ -4497,10 +4496,10 @@ namespace EFM
             }
 
             // Save trade volume items
-            for (int i = 0; i < marketManager.tradeVolume.itemsRoot.childCount; ++i)
-            {
-                SaveItem(saveItems, marketManager.tradeVolume.itemsRoot.GetChild(i));
-            }
+            //for (int i = 0; i < marketManager.tradeVolume.itemsRoot.childCount; ++i)
+            //{
+            //    SaveItem(saveItems, marketManager.tradeVolume.itemsRoot.GetChild(i));
+            //}
 
             // Save items in hands
             FVRViveHand rightHand = GM.CurrentPlayerBody.RightHand.GetComponentInChildren<FVRViveHand>();
@@ -4553,20 +4552,20 @@ namespace EFM
             }
 
             // Save insuredSets
-            Mod.insuredItems = new List<InsuredSet>();
-            if (Mod.insuredItems != null)
-            {
-                JArray savedInsuredSets = new JArray();
-                loadedData["insuredSets"] = savedInsuredSets;
+            //Mod.insuredItems = new List<InsuredSet>();
+            //if (Mod.insuredItems != null)
+            //{
+            //    JArray savedInsuredSets = new JArray();
+            //    loadedData["insuredSets"] = savedInsuredSets;
 
-                for (int i = 0; i < Mod.insuredItems.Count; ++i)
-                {
-                    JObject newSavedInsuredSet = new JObject();
-                    newSavedInsuredSet["returnTime"] = Mod.insuredItems[i].returnTime;
-                    newSavedInsuredSet["items"] = JObject.FromObject(Mod.insuredItems[i].items);
-                    savedInsuredSets.Add(newSavedInsuredSet);
-                }
-            }
+            //    for (int i = 0; i < Mod.insuredItems.Count; ++i)
+            //    {
+            //        JObject newSavedInsuredSet = new JObject();
+            //        newSavedInsuredSet["returnTime"] = Mod.insuredItems[i].returnTime;
+            //        newSavedInsuredSet["items"] = JObject.FromObject(Mod.insuredItems[i].items);
+            //        savedInsuredSets.Add(newSavedInsuredSet);
+            //    }
+            //}
 
             // Save triggered exploration triggers
             JArray savedExperiencetriggers = new JArray();
@@ -5103,7 +5102,7 @@ namespace EFM
 
         public void UpdateBasedOnPlayerLevel()
         {
-            marketManager.UpdateBasedOnPlayerLevel();
+            //marketManager.UpdateBasedOnPlayerLevel();
         }
 
         public void OnHideoutInventoryChangedInvoke()

@@ -57,19 +57,7 @@ namespace EFM
                 }
                 else if(Mod.itemMap.ContainsKey(randomFilterID))
                 {
-					ItemMapEntry entry = Mod.itemMap[randomFilterID];
-					switch (entry.mode)
-					{
-						case 0:
-							itemID = entry.ID;
-							break;
-						case 1:
-							itemID = entry.modulIDs[UnityEngine.Random.Range(0, entry.modulIDs.Length)];
-							break;
-						case 2:
-							itemID = entry.moddedID;
-							break;
-					}
+                    itemID = Mod.TarkovIDtoH3ID(randomFilterID);
                 }
                 else
                 {

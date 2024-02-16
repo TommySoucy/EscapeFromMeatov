@@ -41,13 +41,11 @@
     <Compile Include="src\AreaBonus.cs" />
     <Compile Include="src\Area.cs" />
     <Compile Include="src\AreaController.cs" />
-    <Compile Include="src\AreaProduction.cs" />
     <Compile Include="src\AreaRequirement.cs" />
     <Compile Include="src\AreaSlot.cs" />
     <Compile Include="src\AreaUI.cs" />
     <Compile Include="src\AreaUpgradeCheckProcessor.cs" />
     <Compile Include="src\AreaVolume.cs" />
-    <Compile Include="src\BaseAreaManager.cs" />
     <Compile Include="src\Bonus.cs" />
     <Compile Include="src\BotZone.cs" />
     <Compile Include="src\CategoryTreeNode.cs" />

@@ -651,24 +651,24 @@ namespace EFM
             // If currently in hideout, otherwise we are in raid, and we dont need to modify the market because it doesnt exist
             if(Mod.currentLocationIndex == 1)
             {
-                if (descriptionPack.onWishlist)
-                {
-                    Destroy(HideoutController.instance.marketManager.wishListItemViewsByID[itemID]);
-                    HideoutController.instance.marketManager.wishListItemViewsByID.Remove(itemID);
+                //if (descriptionPack.onWishlist)
+                //{
+                //    Destroy(HideoutController.instance.marketManager.wishListItemViewsByID[itemID]);
+                //    HideoutController.instance.marketManager.wishListItemViewsByID.Remove(itemID);
 
-                    if (HideoutController.instance.marketManager.ragFairItemBuyViewsByID.ContainsKey(itemID))
-                    {
-                        List<GameObject> itemViewsList = HideoutController.instance.marketManager.ragFairItemBuyViewsByID[itemID];
-                        foreach (GameObject itemView in itemViewsList)
-                        {
-                            itemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = Color.black;
-                        }
-                    }
-                }
-                else
-                {
-                    HideoutController.instance.marketManager.AddItemToWishlist(itemID);
-                }
+                //    if (HideoutController.instance.marketManager.ragFairItemBuyViewsByID.ContainsKey(itemID))
+                //    {
+                //        List<GameObject> itemViewsList = HideoutController.instance.marketManager.ragFairItemBuyViewsByID[itemID];
+                //        foreach (GameObject itemView in itemViewsList)
+                //        {
+                //            itemView.transform.GetChild(3).GetChild(0).GetComponent<Image>().color = Color.black;
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                //    HideoutController.instance.marketManager.AddItemToWishlist(itemID);
+                //}
             }
 
             descriptionPack.onWishlist = !descriptionPack.onWishlist;

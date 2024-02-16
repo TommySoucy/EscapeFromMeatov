@@ -7,6 +7,6 @@ namespace EFM
 {
     public class TraderUI
     {
-        td
+        //td
     }
 }

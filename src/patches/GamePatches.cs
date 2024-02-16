@@ -968,7 +968,7 @@ namespace EFM
                 Mod.LogInfo("\tcolliding trade volume not null, adding to trade volume");
                 collidingTradeVolume.AddItem(primary);
 
-                collidingTradeVolume.market.UpdateBasedOnItem(true, heldMI);
+                //collidingTradeVolume.market.UpdateBasedOnItem(true, heldMI);
 
                 BeginInteractionPatch.SetItemLocationIndex(1, heldMI, true);
 
@@ -1532,11 +1532,11 @@ namespace EFM
 
                     if (Mod.areaSlotShouldUpdate)
                     {
-                        BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
+                        //BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
 
                         //areaManager.slotItems[asAreaSlot.slotIndex] = null;
 
-                        areaManager.UpdateBasedOnSlots();
+                        //areaManager.UpdateBasedOnSlots();
                     }
                     else
                     {
@@ -1693,13 +1693,13 @@ namespace EFM
 
                 if (Mod.areaSlotShouldUpdate)
                 {
-                    BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
+                    //BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
 
-                    //areaManager.slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
+                    ////areaManager.slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
 
-                    areaManager.UpdateBasedOnSlots();
+                    //areaManager.UpdateBasedOnSlots();
 
-                    areaManager.PlaySlotInputSound();
+                    //areaManager.PlaySlotInputSound();
                 }
                 else
                 {
@@ -1902,22 +1902,22 @@ namespace EFM
                             Mod.AddExperience(customItemWrapper.lootExperience, 1);
                         }
 
-                        if (customItemWrapper.foundInRaid && Mod.taskFindItemConditionsByItemID.ContainsKey(customItemWrapper.H3ID))
-                        {
-                            foreach (TraderTaskCondition condition in Mod.taskFindItemConditionsByItemID[customItemWrapper.H3ID])
-                            {
-                                if (condition.failCondition && condition.task.taskState != TraderTask.TaskState.Active)
-                                {
-                                    continue;
-                                }
+                        //if (customItemWrapper.foundInRaid && Mod.taskFindItemConditionsByItemID.ContainsKey(customItemWrapper.H3ID))
+                        //{
+                        //    foreach (TraderTaskCondition condition in Mod.taskFindItemConditionsByItemID[customItemWrapper.H3ID])
+                        //    {
+                        //        if (condition.failCondition && condition.task.taskState != TraderTask.TaskState.Active)
+                        //        {
+                        //            continue;
+                        //        }
 
-                                if (!condition.fulfilled)
-                                {
-                                    ++condition.itemCount;
-                                    TraderStatus.UpdateConditionFulfillment(condition);
-                                }
-                            }
-                        }
+                        //        if (!condition.fulfilled)
+                        //        {
+                        //            ++condition.itemCount;
+                        //            TraderStatus.UpdateConditionFulfillment(condition);
+                        //        }
+                        //    }
+                        //}
                     }
                     Mod.AddSkillExp(Skill.uniqueLoot, 7);
                 }
@@ -1979,7 +1979,7 @@ namespace EFM
                     }
                 }
 
-                tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<MeatovItem>());
+                //tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<MeatovItem>());
             }
             else if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
             {
@@ -2208,7 +2208,7 @@ namespace EFM
                     if (Mod.health[0] <= 0)
                     {
                         Mod.LogInfo("\t\tHealth 0, killing player");
-                        Mod.currentRaidManager.KillPlayer();
+                        //Mod.currentRaidManager.KillPlayer();
                     }
 
                     actualPartIndex = 0;
@@ -2276,7 +2276,7 @@ namespace EFM
                         if (Mod.health[1] <= 0)
                         {
                             Mod.LogInfo("\t\tHealth 0, killing player");
-                            Mod.currentRaidManager.KillPlayer();
+                            //Mod.currentRaidManager.KillPlayer();
                         }
 
                         actualPartIndex = 1;
@@ -2620,7 +2620,7 @@ namespace EFM
                     case 0: // Head
                         if (Mod.health[0] <= 0)
                         {
-                            Mod.currentRaidManager.KillPlayer();
+                            //Mod.currentRaidManager.KillPlayer();
                         }
 
                         // Process damage resist from EFM_EquipmentSlot.CurrentHelmet
@@ -2664,7 +2664,7 @@ namespace EFM
                     case 1: // Thorax
                         if (Mod.health[1] <= 0)
                         {
-                            Mod.currentRaidManager.KillPlayer();
+                            //Mod.currentRaidManager.KillPlayer();
                         }
 
                         // Process damage resist from EFM_EquipmentSlot.CurrentArmor
@@ -2845,7 +2845,7 @@ namespace EFM
                 GM.CurrentPlayerBody.HitEffect();
                 if (GM.CurrentPlayerBody.Health <= 0f)
                 {
-                    Mod.currentRaidManager.KillPlayer();
+                    //Mod.currentRaidManager.KillPlayer();
                     return true;
                 }
 
@@ -2868,7 +2868,7 @@ namespace EFM
                                 {
                                     if (Mod.health[0] <= 0 || Mod.health[1] <= 0)
                                     {
-                                        Mod.currentRaidManager.KillPlayer();
+                                        //Mod.currentRaidManager.KillPlayer();
                                         return true;
                                     }
                                 }
@@ -2883,7 +2883,7 @@ namespace EFM
                 }
                 else if (Mod.health[partIndex] <= 0) // Part is head or thorax, destroyed
                 {
-                    Mod.currentRaidManager.KillPlayer();
+                    //Mod.currentRaidManager.KillPlayer();
                     return true;
                 }
                 else // Part is head or thorax, not yet destroyed
@@ -5910,58 +5910,58 @@ namespace EFM
             {
                 Vector3 pos = e.GetPos();
                 Vector3 forward = e.SensoryFrame.forward;
-                if (Raid_Manager.entities.Count > 0)
-                {
-                    for (int i = 0; i < Raid_Manager.entities.Count; i++)
-                    {
-                        AIEntity component = Raid_Manager.entities[i];
-                        if (!(component == null))
-                        {
-                            if (!(component == e))
-                            {
-                                if (component.IFFCode >= -1)
-                                {
-                                    if (!component.IsPassiveEntity || e.PerceivesPassiveEntities)
-                                    {
-                                        Vector3 pos2 = component.GetPos();
-                                        Vector3 to = pos2 - pos;
-                                        float num = to.magnitude;
-                                        float dist = num;
-                                        float num2 = e.MaximumSightRange;
-                                        if (num <= component.MaxDistanceVisibleFrom)
-                                        {
-                                            if (component.VisibilityMultiplier <= 2f)
-                                            {
-                                                if (component.VisibilityMultiplier > 1f)
-                                                {
-                                                    num = Mathf.Lerp(num, num2, component.VisibilityMultiplier - 1f);
-                                                }
-                                                else
-                                                {
-                                                    num = Mathf.Lerp(0f, num, component.VisibilityMultiplier);
-                                                }
-                                                if (!e.IsVisualCheckOmni)
-                                                {
-                                                    float num3 = Vector3.Angle(forward, to);
-                                                    num2 = e.MaximumSightRange * e.SightDistanceByFOVMultiplier.Evaluate(num3 / e.MaximumSightFOV);
-                                                }
-                                                if (num <= num2)
-                                                {
-                                                    if (!Physics.Linecast(pos, pos2, e.LM_VisualOcclusionCheck, QueryTriggerInteraction.Collide))
-                                                    {
-                                                        float v = num / e.MaximumSightRange * component.DangerMultiplier;
-                                                        AIEvent e2 = new AIEvent(component, AIEvent.AIEType.Visual, v, dist);
-                                                        e.OnAIEventReceive(e2);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                //if (Raid_Manager.entities.Count > 0)
+                //{
+                //    for (int i = 0; i < Raid_Manager.entities.Count; i++)
+                //    {
+                //        AIEntity component = Raid_Manager.entities[i];
+                //        if (!(component == null))
+                //        {
+                //            if (!(component == e))
+                //            {
+                //                if (component.IFFCode >= -1)
+                //                {
+                //                    if (!component.IsPassiveEntity || e.PerceivesPassiveEntities)
+                //                    {
+                //                        Vector3 pos2 = component.GetPos();
+                //                        Vector3 to = pos2 - pos;
+                //                        float num = to.magnitude;
+                //                        float dist = num;
+                //                        float num2 = e.MaximumSightRange;
+                //                        if (num <= component.MaxDistanceVisibleFrom)
+                //                        {
+                //                            if (component.VisibilityMultiplier <= 2f)
+                //                            {
+                //                                if (component.VisibilityMultiplier > 1f)
+                //                                {
+                //                                    num = Mathf.Lerp(num, num2, component.VisibilityMultiplier - 1f);
+                //                                }
+                //                                else
+                //                                {
+                //                                    num = Mathf.Lerp(0f, num, component.VisibilityMultiplier);
+                //                                }
+                //                                if (!e.IsVisualCheckOmni)
+                //                                {
+                //                                    float num3 = Vector3.Angle(forward, to);
+                //                                    num2 = e.MaximumSightRange * e.SightDistanceByFOVMultiplier.Evaluate(num3 / e.MaximumSightFOV);
+                //                                }
+                //                                if (num <= num2)
+                //                                {
+                //                                    if (!Physics.Linecast(pos, pos2, e.LM_VisualOcclusionCheck, QueryTriggerInteraction.Collide))
+                //                                    {
+                //                                        float v = num / e.MaximumSightRange * component.DangerMultiplier;
+                //                                        AIEvent e2 = new AIEvent(component, AIEvent.AIEType.Visual, v, dist);
+                //                                        e.OnAIEventReceive(e2);
+                //                                    }
+                //                                }
+                //                            }
+                //                        }
+                //                    }
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
             }
 
             return false;
@@ -6303,84 +6303,84 @@ namespace EFM
             if (d.Source_IFF == 0)
             {
                 AI AIScript = __instance.S.GetComponent<AI>();
-                AISpawn.AISpawnType AIType = AIScript.type;
+                //AISpawn.AISpawnType AIType = AIScript.type;
                 bool AIUsec = AIScript.USEC;
-                switch (__instance.BodyPart)
-                {
-                    case SosigLink.SosigBodyPart.Head:
-                        UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart.Head, d.point, AIType, AIUsec);
-                        break;
-                    case SosigLink.SosigBodyPart.Torso:
-                        float thoraxChance = 0.5f; // 50%
-                        float leftArmChance = 0.65f; // 15%
-                        float rightArmChance = 0.8f; // 15%
-                        // float stomachChance = 1f; // 20%
-                        TraderTaskCounterCondition.CounterConditionTargetBodyPart chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
-                        float rand = UnityEngine.Random.value;
-                        if (rand <= thoraxChance)
-                        {
-                            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
-                        }
-                        else if (rand <= leftArmChance)
-                        {
-                            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftArm;
-                        }
-                        else if (rand <= rightArmChance)
-                        {
-                            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightArm;
-                        }
-                        else
-                        {
-                            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
-                        }
-                        UpdateShotsCounterConditions(chosenBodyPart, d.point, AIType, AIUsec);
-                        break;
-                    case SosigLink.SosigBodyPart.UpperLink:
-                        float stomachChance = 0.5f; // 50%
-                        float upperLeftLegChance = 0.65f; // 15%
-                        float upperRightLegChance = 0.8f; // 15%
-                        // float thoraxChance = 1f; // 20%
-                        TraderTaskCounterCondition.CounterConditionTargetBodyPart upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
-                        float upperRand = UnityEngine.Random.value;
-                        if (upperRand <= stomachChance)
-                        {
-                            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
-                        }
-                        else if (upperRand <= upperLeftLegChance)
-                        {
-                            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftLeg;
-                        }
-                        else if (upperRand <= upperRightLegChance)
-                        {
-                            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightLeg;
-                        }
-                        else
-                        {
-                            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
-                        }
-                        UpdateShotsCounterConditions(upperChosenBodyPart, d.point, AIType, AIUsec);
-                        break;
-                    case SosigLink.SosigBodyPart.LowerLink:
-                        float lowerStomachChance = 0.20f; // 20%
-                        float leftLegChance = 0.6f; // 40%
-                        // float rightLegChance = 1f; // 40%
-                        TraderTaskCounterCondition.CounterConditionTargetBodyPart lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
-                        float lowerRand = UnityEngine.Random.value;
-                        if (lowerRand <= lowerStomachChance)
-                        {
-                            lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
-                        }
-                        else if (lowerRand <= leftLegChance)
-                        {
-                            lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftLeg;
-                        }
-                        else
-                        {
-                            lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightLeg;
-                        }
-                        UpdateShotsCounterConditions(lowerChosenBodyPart, d.point, AIType, AIUsec);
-                        break;
-                }
+                //switch (__instance.BodyPart)
+                //{
+                //    case SosigLink.SosigBodyPart.Head:
+                //        UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart.Head, d.point, AIType, AIUsec);
+                //        break;
+                //    case SosigLink.SosigBodyPart.Torso:
+                //        float thoraxChance = 0.5f; // 50%
+                //        float leftArmChance = 0.65f; // 15%
+                //        float rightArmChance = 0.8f; // 15%
+                //        // float stomachChance = 1f; // 20%
+                //        TraderTaskCounterCondition.CounterConditionTargetBodyPart chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                //        float rand = UnityEngine.Random.value;
+                //        if (rand <= thoraxChance)
+                //        {
+                //            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                //        }
+                //        else if (rand <= leftArmChance)
+                //        {
+                //            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftArm;
+                //        }
+                //        else if (rand <= rightArmChance)
+                //        {
+                //            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightArm;
+                //        }
+                //        else
+                //        {
+                //            chosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
+                //        }
+                //        UpdateShotsCounterConditions(chosenBodyPart, d.point, AIType, AIUsec);
+                //        break;
+                //    case SosigLink.SosigBodyPart.UpperLink:
+                //        float stomachChance = 0.5f; // 50%
+                //        float upperLeftLegChance = 0.65f; // 15%
+                //        float upperRightLegChance = 0.8f; // 15%
+                //        // float thoraxChance = 1f; // 20%
+                //        TraderTaskCounterCondition.CounterConditionTargetBodyPart upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                //        float upperRand = UnityEngine.Random.value;
+                //        if (upperRand <= stomachChance)
+                //        {
+                //            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
+                //        }
+                //        else if (upperRand <= upperLeftLegChance)
+                //        {
+                //            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftLeg;
+                //        }
+                //        else if (upperRand <= upperRightLegChance)
+                //        {
+                //            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightLeg;
+                //        }
+                //        else
+                //        {
+                //            upperChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                //        }
+                //        UpdateShotsCounterConditions(upperChosenBodyPart, d.point, AIType, AIUsec);
+                //        break;
+                //    case SosigLink.SosigBodyPart.LowerLink:
+                //        float lowerStomachChance = 0.20f; // 20%
+                //        float leftLegChance = 0.6f; // 40%
+                //        // float rightLegChance = 1f; // 40%
+                //        TraderTaskCounterCondition.CounterConditionTargetBodyPart lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Thorax;
+                //        float lowerRand = UnityEngine.Random.value;
+                //        if (lowerRand <= lowerStomachChance)
+                //        {
+                //            lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.Stomach;
+                //        }
+                //        else if (lowerRand <= leftLegChance)
+                //        {
+                //            lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.LeftLeg;
+                //        }
+                //        else
+                //        {
+                //            lowerChosenBodyPart = TraderTaskCounterCondition.CounterConditionTargetBodyPart.RightLeg;
+                //        }
+                //        UpdateShotsCounterConditions(lowerChosenBodyPart, d.point, AIType, AIUsec);
+                //        break;
+                //}
             }
         }
 
@@ -6397,116 +6397,116 @@ namespace EFM
             }
         }
 
-        static void UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart bodyPart, Vector3 hitPoint, AISpawn.AISpawnType AIType, bool USEC)
-        {
-            if (!Mod.currentShotsCounterConditionsByBodyPart.ContainsKey(bodyPart))
-            {
-                return;
-            }
+        //static void UpdateShotsCounterConditions(TraderTaskCounterCondition.CounterConditionTargetBodyPart bodyPart, Vector3 hitPoint, AISpawn.AISpawnType AIType, bool USEC)
+        //{
+        //    if (!Mod.currentShotsCounterConditionsByBodyPart.ContainsKey(bodyPart))
+        //    {
+        //        return;
+        //    }
 
-            foreach (TraderTaskCounterCondition counterCondition in Mod.currentShotsCounterConditionsByBodyPart[bodyPart])
-            {
-                // Check condition state validity
-                if (!counterCondition.parentCondition.visible)
-                {
-                    continue;
-                }
+        //    foreach (TraderTaskCounterCondition counterCondition in Mod.currentShotsCounterConditionsByBodyPart[bodyPart])
+        //    {
+        //        // Check condition state validity
+        //        if (!counterCondition.parentCondition.visible)
+        //        {
+        //            continue;
+        //        }
 
-                // Check enemy type
-                if (!((counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Any) ||
-                      (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav && AIType == AISpawn.AISpawnType.Scav) ||
-                      (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Usec && AIType == AISpawn.AISpawnType.PMC && USEC) ||
-                      (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIType == AISpawn.AISpawnType.PMC && !USEC) ||
-                      (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIType == AISpawn.AISpawnType.PMC)))
-                {
-                    continue;
-                }
+        //        // Check enemy type
+        //        if (!((counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Any) ||
+        //              (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Scav && AIType == AISpawn.AISpawnType.Scav) ||
+        //              (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Usec && AIType == AISpawn.AISpawnType.PMC && USEC) ||
+        //              (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.Bear && AIType == AISpawn.AISpawnType.PMC && !USEC) ||
+        //              (counterCondition.counterConditionTargetEnemy == TraderTaskCounterCondition.CounterConditionTargetEnemy.PMC && AIType == AISpawn.AISpawnType.PMC)))
+        //        {
+        //            continue;
+        //        }
 
-                // Check weapon
-                if (counterCondition.allowedWeaponIDs != null && counterCondition.allowedWeaponIDs.Count > 0)
-                {
-                    bool isHoldingAllowedWeapon = false;
-                    FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
-                    if (rightInteractable != null)
-                    {
-                        MeatovItem MI = rightInteractable.GetComponent<MeatovItem>();
-                        if (MI != null)
-                        {
-                            foreach (string parent in MI.parents)
-                            {
-                                if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                {
-                                    isHoldingAllowedWeapon = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (!isHoldingAllowedWeapon)
-                    {
-                        FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
-                        if (leftInteractable != null)
-                        {
-                            MeatovItem MI = leftInteractable.GetComponent<MeatovItem>();
-                            if (MI != null)
-                            {
-                                foreach (string parent in MI.parents)
-                                {
-                                    if (counterCondition.allowedWeaponIDs.Contains(parent))
-                                    {
-                                        isHoldingAllowedWeapon = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
+        //        // Check weapon
+        //        if (counterCondition.allowedWeaponIDs != null && counterCondition.allowedWeaponIDs.Count > 0)
+        //        {
+        //            bool isHoldingAllowedWeapon = false;
+        //            FVRInteractiveObject rightInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
+        //            if (rightInteractable != null)
+        //            {
+        //                MeatovItem MI = rightInteractable.GetComponent<MeatovItem>();
+        //                if (MI != null)
+        //                {
+        //                    foreach (string parent in MI.parents)
+        //                    {
+        //                        if (counterCondition.allowedWeaponIDs.Contains(parent))
+        //                        {
+        //                            isHoldingAllowedWeapon = true;
+        //                            break;
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //            if (!isHoldingAllowedWeapon)
+        //            {
+        //                FVRInteractiveObject leftInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
+        //                if (leftInteractable != null)
+        //                {
+        //                    MeatovItem MI = leftInteractable.GetComponent<MeatovItem>();
+        //                    if (MI != null)
+        //                    {
+        //                        foreach (string parent in MI.parents)
+        //                        {
+        //                            if (counterCondition.allowedWeaponIDs.Contains(parent))
+        //                            {
+        //                                isHoldingAllowedWeapon = true;
+        //                                break;
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //            }
 
-                    if (!isHoldingAllowedWeapon)
-                    {
-                        continue;
-                    }
-                }
+        //            if (!isHoldingAllowedWeapon)
+        //            {
+        //                continue;
+        //            }
+        //        }
 
-                // Check distance
-                if (counterCondition.distance != -1)
-                {
-                    if (counterCondition.distanceCompareMode == 0)
-                    {
-                        if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, hitPoint) < counterCondition.distance)
-                        {
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, hitPoint) > counterCondition.distance)
-                        {
-                            continue;
-                        }
-                    }
-                }
+        //        // Check distance
+        //        if (counterCondition.distance != -1)
+        //        {
+        //            if (counterCondition.distanceCompareMode == 0)
+        //            {
+        //                if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, hitPoint) < counterCondition.distance)
+        //                {
+        //                    continue;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                if (Vector3.Distance(GM.CurrentPlayerBody.transform.position, hitPoint) > counterCondition.distance)
+        //                {
+        //                    continue;
+        //                }
+        //            }
+        //        }
 
-                // Check constraint counters (Location, Equipment, HealthEffect, InZone)
-                bool constrained = false;
-                foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
-                {
-                    if (!TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
-                    {
-                        constrained = true;
-                        break;
-                    }
-                }
-                if (constrained)
-                {
-                    continue;
-                }
+        //        // Check constraint counters (Location, Equipment, HealthEffect, InZone)
+        //        bool constrained = false;
+        //        foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
+        //        {
+        //            if (!TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
+        //            {
+        //                constrained = true;
+        //                break;
+        //            }
+        //        }
+        //        if (constrained)
+        //        {
+        //            continue;
+        //        }
 
-                // Successful shot, increment count and update fulfillment 
-                ++counterCondition.shotCount;
-                TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
-            }
-        }
+        //        // Successful shot, increment count and update fulfillment 
+        //        ++counterCondition.shotCount;
+        //        TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
+        //    }
+        //}
     }
 
     // Patches FVRPlayerBody.HealPercent to keep track of player's healing from H3 sources like dings and other powerups

@@ -709,9 +709,9 @@ namespace EFM
             else
             {
                 production.unlocked = production.AllUnlockRequirementsFulfilled();
-                if (production.UI != null)
+                if (production.productionUI != null)
                 {
-                    production.UI.gameObject.SetActive(production.unlocked);
+                    production.productionUI.gameObject.SetActive(production.unlocked);
                     if (production.continuous)
                     {
                         if (production.unlocked)
@@ -721,7 +721,7 @@ namespace EFM
                     }
                     else if (!production.inProduction && production.limit > production.readyCount)
                     {
-                        production.UI.startButton.SetActive(production.AllRequirementsFulfilled());
+                        production.productionUI.startButton.SetActive(production.AllRequirementsFulfilled());
                     }
                 }
             }
@@ -886,7 +886,8 @@ namespace EFM
         // Static data
         public Area area;
         public string ID;
-        public ProductionView UI;
+        public ProductionView productionUI;
+        public FarmingView farmingUI;
         public int areaLevel;
         public int time; // Seconds
         public bool needFuelForAllProductionTime;
@@ -902,7 +903,7 @@ namespace EFM
         public bool inProduction;
         public float timeLeft;
         public bool timeLeftSet;
-        public float progressBaseTime; // The total time we need to base ourselves on when calculating progress
+        public float progressBaseTime; // The total time we need to base ourselves on when calculating progress, may be different than time, like in the case of bitcoin farm, total time depends on number of GPUs
         public float progress; // Percentage
         public int readyCount;
 
@@ -994,22 +995,22 @@ namespace EFM
                         {
                             inProduction = false;
                             timeLeft = time;
-                            UI.timePanel.requiredTime.text = Mod.FormatTimeString(timeLeft);
-                            UI.timePanel.percentage.gameObject.SetActive(false);
-                            UI.startButton.SetActive(AllRequirementsFulfilled());
+                            productionUI.timePanel.requiredTime.text = Mod.FormatTimeString(timeLeft);
+                            productionUI.timePanel.percentage.gameObject.SetActive(false);
+                            productionUI.startButton.SetActive(AllRequirementsFulfilled());
                         }
                         progress = 0;
                     }
                 }
                 else
                 {
-                    UI.timePanel.requiredTime.text = Mod.FormatTimeString(timeLeft);
+                    productionUI.timePanel.requiredTime.text = Mod.FormatTimeString(timeLeft);
                     progress = (1 - timeLeft / progressBaseTime) * 100;
-                    UI.timePanel.percentage.text = ((int)progress).ToString() + "%";
+                    productionUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
 
                     if (continuous)
                     {
-                        TODO: // Have a timer for each resource requirement and consume resource as needed
+                        //TODO: // Have a timer for each resource requirement and consume resource as needed
                     }
                 }
             }
