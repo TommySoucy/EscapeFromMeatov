@@ -442,7 +442,7 @@ namespace EFM
     }
 
     [System.Serializable]
-    public class EFM_Effect_Buff
+    public class BuffEffect
     {
         public Effect.EffectType effectType;
         public float chance = 1;
@@ -454,9 +454,9 @@ namespace EFM
     }
 
     [System.Serializable]
-    public class EFM_Effect_Consumable
+    public class ConsumableEffect
     {
-        public enum EffectConsumable
+        public enum ConsumableEffectType
         {
             // Health
             Hydration,
@@ -472,7 +472,7 @@ namespace EFM
             DestroyedPart,
             HeavyBleeding
         }
-        public EffectConsumable effectType;
+        public ConsumableEffectType effectType;
 
         // Damage
         public int cost;

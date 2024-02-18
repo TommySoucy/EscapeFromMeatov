@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace EFM
 {
-    class OtherInteractable : MonoBehaviour
+    public class OtherInteractable : MonoBehaviour
     {
         public FVRInteractiveObject interactiveObject;
     }

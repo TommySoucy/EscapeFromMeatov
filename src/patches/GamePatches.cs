@@ -432,7 +432,7 @@ namespace EFM
             if (CIW != null)
             {
                 // Items inside a rig will not be attached to the rig, so much secure them separately
-                if (CIW.itemType == Mod.ItemType.Rig || CIW.itemType == Mod.ItemType.ArmoredRig)
+                if (CIW.itemType == MeatovItem.ItemType.Rig || CIW.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
                     foreach (GameObject innerItem in CIW.itemsInSlots)
                     {
@@ -1365,38 +1365,38 @@ namespace EFM
                                 bool otherCompatible = true;
                                 switch (customItemWrapper.itemType)
                                 {
-                                    case Mod.ItemType.ArmoredRig:
-                                        typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == Mod.ItemType.BodyArmor;
+                                    case MeatovItem.ItemType.ArmoredRig:
+                                        typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == MeatovItem.ItemType.BodyArmor;
                                         otherCompatible = !EquipmentSlot.wearingBodyArmor && !EquipmentSlot.wearingRig;
                                         break;
-                                    case Mod.ItemType.BodyArmor:
+                                    case MeatovItem.ItemType.BodyArmor:
                                         otherCompatible = !EquipmentSlot.wearingArmoredRig;
                                         break;
-                                    case Mod.ItemType.Helmet:
-                                        typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == Mod.ItemType.Headwear;
+                                    case MeatovItem.ItemType.Helmet:
+                                        typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == MeatovItem.ItemType.Headwear;
                                         otherCompatible = (!EquipmentSlot.wearingEarpiece || !EquipmentSlot.currentEarpiece.blocksHeadwear) &&
                                                           (!EquipmentSlot.wearingFaceCover || !EquipmentSlot.currentFaceCover.blocksHeadwear) &&
                                                           (!EquipmentSlot.wearingEyewear || !EquipmentSlot.currentEyewear.blocksHeadwear);
                                         break;
-                                    case Mod.ItemType.Earpiece:
+                                    case MeatovItem.ItemType.Earpiece:
                                         otherCompatible = (!EquipmentSlot.wearingHeadwear || !EquipmentSlot.currentHeadwear.blocksEarpiece) &&
                                                           (!EquipmentSlot.wearingFaceCover || !EquipmentSlot.currentFaceCover.blocksEarpiece) &&
                                                           (!EquipmentSlot.wearingEyewear || !EquipmentSlot.currentEyewear.blocksEarpiece);
                                         break;
-                                    case Mod.ItemType.FaceCover:
+                                    case MeatovItem.ItemType.FaceCover:
                                         otherCompatible = (!EquipmentSlot.wearingHeadwear || !EquipmentSlot.currentHeadwear.blocksFaceCover) &&
                                                           (!EquipmentSlot.wearingEarpiece || !EquipmentSlot.currentEarpiece.blocksFaceCover) &&
                                                           (!EquipmentSlot.wearingEyewear || !EquipmentSlot.currentEyewear.blocksFaceCover);
                                         break;
-                                    case Mod.ItemType.Eyewear:
+                                    case MeatovItem.ItemType.Eyewear:
                                         otherCompatible = (!EquipmentSlot.wearingHeadwear || !EquipmentSlot.currentHeadwear.blocksEyewear) &&
                                                           (!EquipmentSlot.wearingEarpiece || !EquipmentSlot.currentEarpiece.blocksEyewear) &&
                                                           (!EquipmentSlot.wearingFaceCover || !EquipmentSlot.currentFaceCover.blocksEyewear);
                                         break;
-                                    case Mod.ItemType.Rig:
+                                    case MeatovItem.ItemType.Rig:
                                         otherCompatible = !EquipmentSlot.wearingArmoredRig;
                                         break;
-                                    case Mod.ItemType.Headwear:
+                                    case MeatovItem.ItemType.Headwear:
                                         otherCompatible = (!EquipmentSlot.wearingEarpiece || !EquipmentSlot.currentEarpiece.blocksHeadwear) &&
                                                           (!EquipmentSlot.wearingFaceCover || !EquipmentSlot.currentFaceCover.blocksHeadwear) &&
                                                           (!EquipmentSlot.wearingEyewear || !EquipmentSlot.currentEyewear.blocksHeadwear);
@@ -1414,7 +1414,7 @@ namespace EFM
                         {
                             // If left shoulder, make sure item is backpack, and player not already wearing a backpack
                             // If right shoulder, make sure item is a firearm
-                            if (shoulderIndex == 0 && customItemWrapper != null && customItemWrapper.itemType == Mod.ItemType.Backpack && EquipmentSlot.currentBackpack == null)
+                            if (shoulderIndex == 0 && customItemWrapper != null && customItemWrapper.itemType == MeatovItem.ItemType.Backpack && EquipmentSlot.currentBackpack == null)
                             {
                                 __instance.CurrentHoveredQuickbeltSlot = StatusUI.instance.equipmentSlots[0];
                             }
@@ -1563,7 +1563,7 @@ namespace EFM
                         if (rootOwner != null)
                         {
                             MeatovItem rigItemWrapper = rootOwner.GetComponent<MeatovItem>();
-                            if (rigItemWrapper != null && (rigItemWrapper.itemType == Mod.ItemType.Rig || rigItemWrapper.itemType == Mod.ItemType.ArmoredRig))
+                            if (rigItemWrapper != null && (rigItemWrapper.itemType == MeatovItem.ItemType.Rig || rigItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig))
                             {
                                 // This slot is owned by a rig, need to update that rig's content
                                 for (int slotIndex = 0; slotIndex < rigItemWrapper.rigSlots.Count; ++slotIndex)
@@ -1767,7 +1767,7 @@ namespace EFM
                 if (rootOwner != null)
                 {
                     MeatovItem customItemWrapper = rootOwner.GetComponent<MeatovItem>();
-                    if (customItemWrapper != null && (customItemWrapper.itemType == Mod.ItemType.Rig || customItemWrapper.itemType == Mod.ItemType.ArmoredRig))
+                    if (customItemWrapper != null && (customItemWrapper.itemType == MeatovItem.ItemType.Rig || customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig))
                     {
                         // This slot is owned by a rig, need to update that rig's content
                         // Upadte rig content
@@ -1834,7 +1834,7 @@ namespace EFM
 
                 customItemWrapper.hideoutSpawned = false;
 
-                if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig || customItemWrapper.itemType == Mod.ItemType.Rig)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig || customItemWrapper.itemType == MeatovItem.ItemType.Rig)
                 {
                     // Update whether we are picking the rig up from an equip slot
                     Mod.beginInteractingEquipRig = __instance.QuickbeltSlot != null && __instance.QuickbeltSlot is EquipmentSlot;
@@ -1842,7 +1842,7 @@ namespace EFM
                     // Check which PoseOverride to use depending on hand side
                     __instance.PoseOverride = hand.IsThisTheRightHand ? customItemWrapper.rightHandPoseOverride : customItemWrapper.leftHandPoseOverride;
                 }
-                else if (customItemWrapper.itemType == Mod.ItemType.Backpack)
+                else if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack)
                 {
                     // Check which PoseOverride to use depending on hand side
                     __instance.PoseOverride = hand.IsThisTheRightHand ? customItemWrapper.rightHandPoseOverride : customItemWrapper.leftHandPoseOverride;
@@ -1857,9 +1857,9 @@ namespace EFM
                 }
 
                 // Check if this item is a container, if so need to check if we were colliding with its container volume and make sure we are not
-                if (customItemWrapper.itemType == Mod.ItemType.Pouch ||
-                    customItemWrapper.itemType == Mod.ItemType.Backpack ||
-                    customItemWrapper.itemType == Mod.ItemType.Container)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Pouch ||
+                    customItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
+                    customItemWrapper.itemType == MeatovItem.ItemType.Container)
                 {
                     if (hand.IsThisTheRightHand && Mod.rightHand.collidingContainerWrapper != null && Mod.rightHand.collidingContainerWrapper.Equals(customItemWrapper))
                     {
@@ -1876,11 +1876,11 @@ namespace EFM
                 }
 
                 // Check if this item is a togglable, if so need to check if we were colliding with it and make sure we are not
-                if (customItemWrapper.itemType == Mod.ItemType.Pouch ||
-                    customItemWrapper.itemType == Mod.ItemType.Backpack ||
-                    customItemWrapper.itemType == Mod.ItemType.Container ||
-                    customItemWrapper.itemType == Mod.ItemType.ArmoredRig ||
-                    customItemWrapper.itemType == Mod.ItemType.Rig)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Pouch ||
+                    customItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
+                    customItemWrapper.itemType == MeatovItem.ItemType.Container ||
+                    customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig ||
+                    customItemWrapper.itemType == MeatovItem.ItemType.Rig)
                 {
                     if (hand.IsThisTheRightHand && Mod.rightHand.collidingTogglableWrapper != null && Mod.rightHand.collidingTogglableWrapper == customItemWrapper)
                     {
@@ -1984,9 +1984,9 @@ namespace EFM
             else if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
             {
                 MeatovItem containerItemWrapper = __instance.transform.parent.parent.GetComponent<MeatovItem>();
-                if (containerItemWrapper != null && (containerItemWrapper.itemType == Mod.ItemType.Backpack ||
-                                                    containerItemWrapper.itemType == Mod.ItemType.Container ||
-                                                    containerItemWrapper.itemType == Mod.ItemType.Pouch))
+                if (containerItemWrapper != null && (containerItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
+                                                    containerItemWrapper.itemType == MeatovItem.ItemType.Container ||
+                                                    containerItemWrapper.itemType == MeatovItem.ItemType.Pouch))
                 {
                     containerItemWrapper.currentWeight -= customItemWrapper.currentWeight;
 
@@ -2033,7 +2033,7 @@ namespace EFM
 
                 MI.locationIndex = locationIndex;
 
-                if (MI.itemType == Mod.ItemType.ArmoredRig || MI.itemType == Mod.ItemType.Rig)
+                if (MI.itemType == MeatovItem.ItemType.ArmoredRig || MI.itemType == MeatovItem.ItemType.Rig)
                 {
                     foreach (GameObject innerItem in MI.itemsInSlots)
                     {
@@ -2043,7 +2043,7 @@ namespace EFM
                         }
                     }
                 }
-                else if (MI.itemType == Mod.ItemType.Container || MI.itemType == Mod.ItemType.Pouch || MI.itemType == Mod.ItemType.Backpack)
+                else if (MI.itemType == MeatovItem.ItemType.Container || MI.itemType == MeatovItem.ItemType.Pouch || MI.itemType == MeatovItem.ItemType.Backpack)
                 {
                     foreach (Transform innerItem in MI.containerItemRoot)
                     {
@@ -3623,7 +3623,7 @@ namespace EFM
                                 manager.SetDescriptionPack(describable.GetDescriptionPack());
                             }
 
-                            if (manager.descriptionPack.itemType == Mod.ItemType.LootContainer)
+                            if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
                             {
                                 manager.gameObject.SetActive(false);
                             }
@@ -3769,7 +3769,7 @@ namespace EFM
                                 manager.SetDescriptionPack(describable.GetDescriptionPack());
                             }
 
-                            if (manager.descriptionPack.itemType == Mod.ItemType.LootContainer)
+                            if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
                             {
                                 manager.gameObject.SetActive(false);
                             }
@@ -3838,7 +3838,7 @@ namespace EFM
                                 manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
                             }
 
-                            if (manager.descriptionPack.itemType == Mod.ItemType.LootContainer)
+                            if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
                             {
                                 manager.gameObject.SetActive(false);
                             }
@@ -5250,37 +5250,37 @@ namespace EFM
                 MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
                 switch (fireArmMI.weaponClass)
                 {
-                    case Mod.WeaponClass.Pistol:
+                    case MeatovItem.WeaponClass.Pistol:
                         Mod.AddSkillExp(Skill.pistolWeaponReloadAction, 12);
                         break;
-                    case Mod.WeaponClass.Revolver:
+                    case MeatovItem.WeaponClass.Revolver:
                         Mod.AddSkillExp(Skill.revolverWeaponReloadAction, 13);
                         break;
-                    case Mod.WeaponClass.SMG:
+                    case MeatovItem.WeaponClass.SMG:
                         Mod.AddSkillExp(Skill.SMGWeaponReloadAction, 14);
                         break;
-                    case Mod.WeaponClass.Assault:
+                    case MeatovItem.WeaponClass.Assault:
                         Mod.AddSkillExp(Skill.assaultWeaponReloadAction, 15);
                         break;
-                    case Mod.WeaponClass.Shotgun:
+                    case MeatovItem.WeaponClass.Shotgun:
                         Mod.AddSkillExp(Skill.shotgunWeaponReloadAction, 16);
                         break;
-                    case Mod.WeaponClass.Sniper:
+                    case MeatovItem.WeaponClass.Sniper:
                         Mod.AddSkillExp(Skill.sniperWeaponReloadAction, 17);
                         break;
-                    case Mod.WeaponClass.LMG:
+                    case MeatovItem.WeaponClass.LMG:
                         Mod.AddSkillExp(Skill.LMGWeaponReloadAction, 18);
                         break;
-                    case Mod.WeaponClass.HMG:
+                    case MeatovItem.WeaponClass.HMG:
                         Mod.AddSkillExp(Skill.HMGWeaponReloadAction, 19);
                         break;
-                    case Mod.WeaponClass.Launcher:
+                    case MeatovItem.WeaponClass.Launcher:
                         Mod.AddSkillExp(Skill.launcherWeaponReloadAction, 20);
                         break;
-                    case Mod.WeaponClass.AttachedLauncher:
+                    case MeatovItem.WeaponClass.AttachedLauncher:
                         Mod.AddSkillExp(Skill.attachedLauncherWeaponReloadAction, 21);
                         break;
-                    case Mod.WeaponClass.DMR:
+                    case MeatovItem.WeaponClass.DMR:
                         Mod.AddSkillExp(Skill.DMRWeaponReloadAction, 24);
                         break;
                 }
@@ -5472,37 +5472,37 @@ namespace EFM
                 MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
                 switch (fireArmMI.weaponClass)
                 {
-                    case Mod.WeaponClass.Pistol:
+                    case MeatovItem.WeaponClass.Pistol:
                         Mod.AddSkillExp(Skill.pistolWeaponReloadAction, 12);
                         break;
-                    case Mod.WeaponClass.Revolver:
+                    case MeatovItem.WeaponClass.Revolver:
                         Mod.AddSkillExp(Skill.revolverWeaponReloadAction, 13);
                         break;
-                    case Mod.WeaponClass.SMG:
+                    case MeatovItem.WeaponClass.SMG:
                         Mod.AddSkillExp(Skill.SMGWeaponReloadAction, 14);
                         break;
-                    case Mod.WeaponClass.Assault:
+                    case MeatovItem.WeaponClass.Assault:
                         Mod.AddSkillExp(Skill.assaultWeaponReloadAction, 15);
                         break;
-                    case Mod.WeaponClass.Shotgun:
+                    case MeatovItem.WeaponClass.Shotgun:
                         Mod.AddSkillExp(Skill.shotgunWeaponReloadAction, 16);
                         break;
-                    case Mod.WeaponClass.Sniper:
+                    case MeatovItem.WeaponClass.Sniper:
                         Mod.AddSkillExp(Skill.sniperWeaponReloadAction, 17);
                         break;
-                    case Mod.WeaponClass.LMG:
+                    case MeatovItem.WeaponClass.LMG:
                         Mod.AddSkillExp(Skill.LMGWeaponReloadAction, 18);
                         break;
-                    case Mod.WeaponClass.HMG:
+                    case MeatovItem.WeaponClass.HMG:
                         Mod.AddSkillExp(Skill.HMGWeaponReloadAction, 19);
                         break;
-                    case Mod.WeaponClass.Launcher:
+                    case MeatovItem.WeaponClass.Launcher:
                         Mod.AddSkillExp(Skill.launcherWeaponReloadAction, 20);
                         break;
-                    case Mod.WeaponClass.AttachedLauncher:
+                    case MeatovItem.WeaponClass.AttachedLauncher:
                         Mod.AddSkillExp(Skill.attachedLauncherWeaponReloadAction, 21);
                         break;
-                    case Mod.WeaponClass.DMR:
+                    case MeatovItem.WeaponClass.DMR:
                         Mod.AddSkillExp(Skill.DMRWeaponReloadAction, 24);
                         break;
                 }
@@ -6139,37 +6139,37 @@ namespace EFM
                 MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
                 switch (fireArmMI.weaponClass)
                 {
-                    case Mod.WeaponClass.Pistol:
+                    case MeatovItem.WeaponClass.Pistol:
                         Mod.AddSkillExp(Skill.pistolWeaponShotAction, 12);
                         break;
-                    case Mod.WeaponClass.Revolver:
+                    case MeatovItem.WeaponClass.Revolver:
                         Mod.AddSkillExp(Skill.revolverWeaponShotAction, 13);
                         break;
-                    case Mod.WeaponClass.SMG:
+                    case MeatovItem.WeaponClass.SMG:
                         Mod.AddSkillExp(Skill.SMGWeaponShotAction, 14);
                         break;
-                    case Mod.WeaponClass.Assault:
+                    case MeatovItem.WeaponClass.Assault:
                         Mod.AddSkillExp(Skill.assaultWeaponShotAction, 15);
                         break;
-                    case Mod.WeaponClass.Shotgun:
+                    case MeatovItem.WeaponClass.Shotgun:
                         Mod.AddSkillExp(Skill.shotgunWeaponShotAction, 16);
                         break;
-                    case Mod.WeaponClass.Sniper:
+                    case MeatovItem.WeaponClass.Sniper:
                         Mod.AddSkillExp(Skill.sniperWeaponShotAction, 17);
                         break;
-                    case Mod.WeaponClass.LMG:
+                    case MeatovItem.WeaponClass.LMG:
                         Mod.AddSkillExp(Skill.LMGWeaponShotAction, 18);
                         break;
-                    case Mod.WeaponClass.HMG:
+                    case MeatovItem.WeaponClass.HMG:
                         Mod.AddSkillExp(Skill.HMGWeaponShotAction, 19);
                         break;
-                    case Mod.WeaponClass.Launcher:
+                    case MeatovItem.WeaponClass.Launcher:
                         Mod.AddSkillExp(Skill.launcherWeaponShotAction, 20);
                         break;
-                    case Mod.WeaponClass.AttachedLauncher:
+                    case MeatovItem.WeaponClass.AttachedLauncher:
                         Mod.AddSkillExp(Skill.attachedLauncherWeaponShotAction, 21);
                         break;
-                    case Mod.WeaponClass.DMR:
+                    case MeatovItem.WeaponClass.DMR:
                         Mod.AddSkillExp(Skill.DMRWeaponShotAction, 24);
                         break;
                 }
@@ -6202,37 +6202,37 @@ namespace EFM
                     MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
                     switch (fireArmMI.weaponClass)
                     {
-                        case Mod.WeaponClass.Pistol:
+                        case MeatovItem.WeaponClass.Pistol:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[12].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.Revolver:
+                        case MeatovItem.WeaponClass.Revolver:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[13].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.SMG:
+                        case MeatovItem.WeaponClass.SMG:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[14].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.Assault:
+                        case MeatovItem.WeaponClass.Assault:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[15].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.Shotgun:
+                        case MeatovItem.WeaponClass.Shotgun:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[16].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.Sniper:
+                        case MeatovItem.WeaponClass.Sniper:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[17].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.LMG:
+                        case MeatovItem.WeaponClass.LMG:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[18].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.HMG:
+                        case MeatovItem.WeaponClass.HMG:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[19].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.Launcher:
+                        case MeatovItem.WeaponClass.Launcher:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[20].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.AttachedLauncher:
+                        case MeatovItem.WeaponClass.AttachedLauncher:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[21].currentProgress / 100));
                             break;
-                        case Mod.WeaponClass.DMR:
+                        case MeatovItem.WeaponClass.DMR:
                             VerticalRecoilMult -= originalRecoilMult * (0.003f * (Mod.skills[24].currentProgress / 100));
                             break;
                     }

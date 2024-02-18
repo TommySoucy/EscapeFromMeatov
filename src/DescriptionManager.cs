@@ -176,7 +176,7 @@ namespace EFM
             {
                 this.descriptionPack = descriptionPack;
 
-                if(this.descriptionPack.itemType == Mod.ItemType.LootContainer)
+                if(this.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
                 {
                     return;
                 }
@@ -216,7 +216,7 @@ namespace EFM
             if (!this.descriptionPack.isPhysical)
             {
                 // TODO: Implement specific item types with specific details, like dogtags that need to have a level field
-                //if (this.descriptionPack.itemType == Mod.ItemType.DogTag)
+                //if (this.descriptionPack.itemType == MeatovItem.ItemType.DogTag)
                 //{
                 //    summaryAmountStackText.gameObject.SetActive(true);
                 //    summaryAmountStackText.text = this.descriptionPack.level.ToString();
@@ -228,12 +228,12 @@ namespace EFM
             }
             else if (this.descriptionPack.isCustom)
             {
-                if (this.descriptionPack.MI.itemType == Mod.ItemType.Money)
+                if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.Money)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
                     summaryAmountStackText.text = this.descriptionPack.stack.ToString();
                 }
-                else if (this.descriptionPack.MI.itemType == Mod.ItemType.Consumable)
+                else if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.Consumable)
                 {
                     if (this.descriptionPack.maxStack > 0)
                     {
@@ -245,17 +245,17 @@ namespace EFM
                         summaryAmountStackText.gameObject.SetActive(false);
                     }
                 }
-                else if (this.descriptionPack.MI.itemType == Mod.ItemType.Backpack || this.descriptionPack.MI.itemType == Mod.ItemType.Container || this.descriptionPack.MI.itemType == Mod.ItemType.Pouch)
+                else if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.Backpack || this.descriptionPack.MI.itemType == MeatovItem.ItemType.Container || this.descriptionPack.MI.itemType == MeatovItem.ItemType.Pouch)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
                     summaryAmountStackText.text = (this.descriptionPack.containingVolume / Mod.volumePrecisionMultiplier).ToString() + "/" + (this.descriptionPack.maxVolume / Mod.volumePrecisionMultiplier);
                 }
-                else if (this.descriptionPack.MI.itemType == Mod.ItemType.AmmoBox)
+                else if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.AmmoBox)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
                     summaryAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
                 }
-                else if (this.descriptionPack.MI.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.MI.itemType == Mod.ItemType.ArmoredRig)
+                else if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.BodyArmor || this.descriptionPack.MI.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
                     summaryAmountStackText.text = this.descriptionPack.MI.armor.ToString() + "/" + this.descriptionPack.MI.maxArmor;
@@ -324,7 +324,7 @@ namespace EFM
             if (!this.descriptionPack.isPhysical)
             {
                 // TODO: Implement specific item types with specific details, like dogtags that need to have a level field
-                //if (this.descriptionPack.itemType == Mod.ItemType.DogTag)
+                //if (this.descriptionPack.itemType == MeatovItem.ItemType.DogTag)
                 //{
                 //    summaryAmountStackText.gameObject.SetActive(true);
                 //    summaryAmountStackText.text = this.descriptionPack.level.ToString();
@@ -332,12 +332,12 @@ namespace EFM
             }
             else if (this.descriptionPack.isCustom)
             {
-                if (this.descriptionPack.MI.itemType == Mod.ItemType.Money)
+                if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.Money)
                 {
                     fullAmountStackText.gameObject.SetActive(true);
                     fullAmountStackText.text = this.descriptionPack.stack.ToString();
                 }
-                else if (this.descriptionPack.MI.itemType == Mod.ItemType.Consumable)
+                else if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.Consumable)
                 {
                     if (this.descriptionPack.maxStack > 0)
                     {
@@ -349,17 +349,17 @@ namespace EFM
                         fullAmountStackText.gameObject.SetActive(false);
                     }
                 }
-                else if (this.descriptionPack.MI.itemType == Mod.ItemType.Backpack || this.descriptionPack.MI.itemType == Mod.ItemType.Container || this.descriptionPack.MI.itemType == Mod.ItemType.Pouch)
+                else if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.Backpack || this.descriptionPack.MI.itemType == MeatovItem.ItemType.Container || this.descriptionPack.MI.itemType == MeatovItem.ItemType.Pouch)
                 {
                     fullAmountStackText.gameObject.SetActive(true);
                     fullAmountStackText.text = this.descriptionPack.containingVolume.ToString() + "/" + this.descriptionPack.maxVolume;
                 }
-                else if (this.descriptionPack.MI.itemType == Mod.ItemType.AmmoBox)
+                else if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.AmmoBox)
                 {
                     fullAmountStackText.gameObject.SetActive(true);
                     fullAmountStackText.text = this.descriptionPack.stack.ToString() + "/" + this.descriptionPack.maxStack;
                 }
-                else if (this.descriptionPack.MI.itemType == Mod.ItemType.BodyArmor || this.descriptionPack.MI.itemType == Mod.ItemType.ArmoredRig)
+                else if (this.descriptionPack.MI.itemType == MeatovItem.ItemType.BodyArmor || this.descriptionPack.MI.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
                     summaryAmountStackText.gameObject.SetActive(true);
                     summaryAmountStackText.text = this.descriptionPack.MI.armor.ToString() + "/" + this.descriptionPack.MI.maxArmor;

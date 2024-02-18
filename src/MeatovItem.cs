@@ -1,4 +1,6 @@
 ﻿using FistVR;
+using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,26 +14,85 @@ namespace EFM
 	{
 		public FVRPhysicalObject physObj;
 
+        public enum ItemType
+        {
+            Generic = 0,
+            BodyArmor = 1,
+            Rig = 2,
+            ArmoredRig = 3,
+            Helmet = 4,
+            Backpack = 5,
+            Container = 6,
+            Pouch = 7,
+            AmmoBox = 8,
+            Money = 9,
+            Consumable = 10,
+            Key = 11,
+            Earpiece = 12,
+            FaceCover = 13,
+            Eyewear = 14,
+            Headwear = 15,
+
+            LootContainer = 16,
+
+            DogTag = 17
+        }
+
+        public enum WeaponClass
+        {
+            Pistol = 0,
+            Revolver = 1,
+            SMG = 2,
+            Assault = 3,
+            Shotgun = 4,
+            Sniper = 5,
+            LMG = 6,
+            HMG = 7,
+            Launcher = 8,
+            AttachedLauncher = 9,
+            DMR = 10
+        }
+
+        public enum ItemRarity
+        {
+            Common,
+            Rare,
+            Superrare,
+            Not_exist
+        }
+
+        [Header("General")]
         public string H3ID;
         public string tarkovID;
+        [NonSerialized]
         public bool vanilla;
-        public Mod.ItemType itemType;
+        public ItemType itemType;
 		public List<string> parents;
         public int weight;
 		public int lootExperience;
-		public Mod.ItemRarity rarity;
+		public ItemRarity rarity;
 		public string itemName;
 		public string description;
 		public AudioClip[] itemSounds;
+        [NonSerialized]
 		public int upgradeCheckBlockedIndex = -1;
-		public int upgradeCheckWarnedIndex = -1;
+        [NonSerialized]
+        public int upgradeCheckWarnedIndex = -1;
+        [NonSerialized]
         public int compatibilityValue; // 0: Does not need mag or round, 1: Needs mag, 2: Needs round, 3: Needs both
+        [NonSerialized]
         public bool usesMags; // Could be clip
+        [NonSerialized]
         public bool usesAmmoContainers; // Could be internal mag or revolver
+        [NonSerialized]
         public FireArmMagazineType magType;
+        [NonSerialized]
         public FireArmClipType clipType;
+        [NonSerialized]
         public FireArmRoundType roundType;
+        [NonSerialized]
         public bool inAll;
+        [NonSerialized]
         public int creditCost; // Value of item in rubles
         private bool _insured;
 		public bool insured 
@@ -58,20 +119,31 @@ namespace EFM
 				}
 			}
         }
+        [NonSerialized]
         public bool destroyed;
+        [NonSerialized]
         public bool looted;
+        [NonSerialized]
         public bool foundInRaid;
+        [NonSerialized]
         public bool hideoutSpawned;
         private DescriptionPack descriptionPack;
+        [NonSerialized]
         private long previousDescriptionTime;
+        [NonSerialized]
         public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
+        [NonSerialized]
         public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid, 3: Area slot. This is to keep track of where an item is in general
+        [NonSerialized]
         public DescriptionManager descriptionManager; // The current description manager displaying this item's description
+        [NonSerialized]
         public List<MarketItemView> marketItemViews;
         //public LeaveItemProcessor leaveItemProcessor;
 
         // Equipment
+        [Header("Equipment")]
         // 0: Open (Model should be as orginal in tarkov), 1: ClosedFull (Closed but only folded to the point that any container/armor is not folded), 2: ClosedEmpty (Folded and flattened as much as is realistic)
+        [NonSerialized]
         public bool modeInitialized;
 		private int _mode = 2;
 		public int mode
@@ -94,32 +166,43 @@ namespace EFM
 		public int[] volumes;
 
         // Helmet
+        [Header("Helmet")]
         public bool blocksEarpiece;
 		public bool blocksEyewear;
 		public bool blocksFaceCover;
 		public bool blocksHeadwear;
 
-		// Armor
+        // Armor
+        [Header("Armor")]
+        [NonSerialized]
 		public bool broken;
 		public float coverage;
 		public float damageResist;
 		public float maxArmor;
+        [NonSerialized]
 		public float armor;
 
-		// Rig and Backpacks
+        // Rig and Backpacks
+        [Header("Rig and Backpack")]
+        [NonSerialized]
 		public bool open;
 		public Transform rightHandPoseOverride;
 		public Transform leftHandPoseOverride;
 
-		// Rig
+        // Rig
+        [Header("Rig")]
+        [NonSerialized]
 		public int configurationIndex;
+        [NonSerialized]
 		public GameObject[] itemsInSlots;
 		public Transform configurationRoot;
 		public List<FVRQuickBeltSlot> rigSlots;
+        [NonSerialized]
 		private int activeSlotsSetIndex;
 
-		// Backpacks, Containers, Pouches
-		public Transform containerItemRoot;
+        // Backpacks, Containers, Pouches
+        [Header("Containers")]
+        public Transform containerItemRoot;
 		public GameObject mainContainer;
 		public Renderer[] mainContainerRenderers;
 		public bool canInsertItems = true;
@@ -139,6 +222,7 @@ namespace EFM
 				volumeIndicatorText.text = (_containingVolume / Mod.volumePrecisionMultiplier).ToString() +"/"+(maxVolume / Mod.volumePrecisionMultiplier);
 			}
 		}
+        [Serializable]
 		public class ResetColPair
 		{
 			public FVRPhysicalObject physObj;
@@ -148,12 +232,14 @@ namespace EFM
 		public List<string> whiteList;
 		public List<string> blackList;
 
-		// AmmoBox
-		public string cartridge;
+        // AmmoBox
+        [Header("Ammo box")]
+        public string cartridge;
 		public FireArmRoundClass roundClass;
 
-		// Stack
-		private int _stack = 1;
+        // Stack
+        [Header("Stack data")]
+        private int _stack = 1;
 		public int stack
 		{
 			get { return _stack; }
@@ -168,13 +254,18 @@ namespace EFM
 		}
 		public int maxStack;
 		public GameObject[] stackTriggers;
+        [NonSerialized]
 		private bool splittingStack;
-		private int splitAmount;
-		private Vector3 stackSplitStartPosition;
-		private Vector3 stackSplitRightVector;
+        [NonSerialized]
+        private int splitAmount;
+        [NonSerialized]
+        private Vector3 stackSplitStartPosition;
+        [NonSerialized]
+        private Vector3 stackSplitRightVector;
 
-		// Amount
-		public int _amount;
+        // Amount
+        [Header("Amount data")]
+        public int _amount;
 		public int amount 
 		{ 
 			get { return _amount; } 
@@ -189,16 +280,23 @@ namespace EFM
 		}
 		public int maxAmount;
 
-		// Consumable
-		public float useTime = 0; // Amount of time it takes to use amountRate
+        // Consumable
+        [Header("Consumable")]
+        public float useTime = 0; // Amount of time it takes to use amountRate
 		public float amountRate = -1; // Maximum amount that can be used from the consumable in single use ex.: grizzly can only be used to heal up to 175 hp per use. 0 a single unit of multiple, -1 means no limit up to maxAmount
-		public List<EFM_Effect_Buff> effects; // Gives new effects
-		public List<EFM_Effect_Consumable> consumeEffects; // Immediate effects or effects that modify/override/give new effects 
-		private float consumableTimer;
-		private bool validConsumePress;
-		private bool validLeaveItemPress;
-		private float leaveItemTime = -1;
-		private float leavingTimer;
+		public List<BuffEffect> effects; // Gives new effects
+		public List<ConsumableEffect> consumeEffects; // Immediate effects or effects that modify/override/give new effects 
+        [NonSerialized]
+        private float consumableTimer;
+        [NonSerialized]
+        private bool validConsumePress;
+        [NonSerialized]
+        private bool validLeaveItemPress;
+        [NonSerialized]
+        private float leaveItemTime = -1;
+        [NonSerialized]
+        private float leavingTimer;
+        [NonSerialized]
         public int targettedPart = -1; // TODO: Implement
 		private static int breakPartExperience = -1;
 		private static int painExperience = -1;
@@ -207,13 +305,17 @@ namespace EFM
 		private static int fractureExperience = -1;
 		private static int heavyBleedExperience = -1;
 
-		// DogTag
-		public bool USEC;
-		public int dogtagLevel = 1;
-		public string dogtagName;
+        // DogTag
+        [Header("Dogtag")]
+        public bool USEC;
+        [NonSerialized]
+        public int dogtagLevel = 1;
+        [NonSerialized]
+        public string dogtagName;
 
         // Weapon
-        public Mod.WeaponClass weaponClass;
+        [NonSerialized]
+        public WeaponClass weaponClass;
 
         public static void Setup(FVRPhysicalObject physicalObject)
         {
@@ -283,57 +385,57 @@ namespace EFM
             {
                 if (parent.Equals("5447b5cf4bdc2d65278b4567"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.Pistol;
+                    meatovItem.weaponClass = WeaponClass.Pistol;
                     break;
                 }
                 else if (parent.Equals("617f1ef5e8b54b0998387733"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.Revolver;
+                    meatovItem.weaponClass = WeaponClass.Revolver;
                     break;
                 }
                 else if (parent.Equals("5447b5e04bdc2d62278b4567"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.SMG;
+                    meatovItem.weaponClass = WeaponClass.SMG;
                     break;
                 }
                 else if (parent.Equals("5447b5f14bdc2d61278b4567"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.Assault;
+                    meatovItem.weaponClass = WeaponClass.Assault;
                     break;
                 }
                 else if (parent.Equals("5447b6094bdc2dc3278b4567"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.Shotgun;
+                    meatovItem.weaponClass = WeaponClass.Shotgun;
                     break;
                 }
                 else if (parent.Equals("5447b6254bdc2dc3278b4568"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.Sniper;
+                    meatovItem.weaponClass = WeaponClass.Sniper;
                     break;
                 }
                 else if (parent.Equals("5447b5fc4bdc2d87278b4567"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.LMG;
+                    meatovItem.weaponClass = WeaponClass.LMG;
                     break;
                 }
                 else if (parent.Equals("5447bed64bdc2d97278b4568"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.HMG;
+                    meatovItem.weaponClass = WeaponClass.HMG;
                     break;
                 }
                 else if (parent.Equals("5447bedf4bdc2d87278b4568"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.Launcher;
+                    meatovItem.weaponClass = WeaponClass.Launcher;
                     break;
                 }
                 else if (parent.Equals("5447bee84bdc2dc3278b4569"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.AttachedLauncher;
+                    meatovItem.weaponClass = WeaponClass.AttachedLauncher;
                     break;
                 }
                 else if (parent.Equals("5447b6194bdc2d67278b4567"))
                 {
-                    meatovItem.weaponClass = Mod.WeaponClass.DMR;
+                    meatovItem.weaponClass = WeaponClass.DMR;
                     break;
                 }
                 continue;
@@ -359,16 +461,16 @@ namespace EFM
                 weight = (int)(physObj.RootRigidbody.mass * 1000);
             }
 
-            if (itemType != Mod.ItemType.LootContainer)
+            if (itemType != ItemType.LootContainer)
 			{
 				_mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
 			}
 			modeInitialized = true;
 
 			descriptionPack = new DescriptionPack();
-			if (itemType == Mod.ItemType.LootContainer)
+			if (itemType == ItemType.LootContainer)
 			{
-				descriptionPack.itemType = Mod.ItemType.LootContainer;
+				descriptionPack.itemType = ItemType.LootContainer;
 			}
 			else
 			{
@@ -407,7 +509,7 @@ namespace EFM
 
 			item.currentWeight = item.weight;
 
-			if (item.itemType == Mod.ItemType.Rig || item.itemType == Mod.ItemType.ArmoredRig)
+			if (item.itemType == ItemType.Rig || item.itemType == ItemType.ArmoredRig)
 			{
 				foreach (GameObject containedItem in item.itemsInSlots) 
 				{
@@ -417,7 +519,7 @@ namespace EFM
                     }
 				}
 			}
-			else if(item.itemType == Mod.ItemType.Backpack || item.itemType == Mod.ItemType.Container || item.itemType == Mod.ItemType.Pouch)
+			else if(item.itemType == ItemType.Backpack || item.itemType == ItemType.Container || item.itemType == ItemType.Pouch)
 			{
 				foreach (Transform containedItem in item.containerItemRoot)
 				{
@@ -427,7 +529,7 @@ namespace EFM
 					}
 				}
 			}
-			else if(item.itemType == Mod.ItemType.AmmoBox)
+			else if(item.itemType == ItemType.AmmoBox)
 			{
 				// TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
 				// locationIndex so we know when to add/remove weight from player also
@@ -554,9 +656,9 @@ namespace EFM
 
 		public bool AddItemToContainer(FVRPhysicalObject item)
 		{
-			if (itemType != Mod.ItemType.Backpack &&
-			   itemType != Mod.ItemType.Container &&
-			   itemType != Mod.ItemType.Pouch)
+			if (itemType != ItemType.Backpack &&
+			   itemType != ItemType.Container &&
+			   itemType != ItemType.Pouch)
 			{
 				return false;
 			}
@@ -663,15 +765,15 @@ namespace EFM
 				//{
 				//	switch (itemType)
 				//	{
-				//		case Mod.ItemType.ArmoredRig:
-				//		case Mod.ItemType.Rig:
-				//		case Mod.ItemType.Backpack:
-				//		case Mod.ItemType.BodyArmor:
-				//		case Mod.ItemType.Container:
-				//		case Mod.ItemType.Pouch:
+				//		case ItemType.ArmoredRig:
+				//		case ItemType.Rig:
+				//		case ItemType.Backpack:
+				//		case ItemType.BodyArmor:
+				//		case ItemType.Container:
+				//		case ItemType.Pouch:
 				//			ToggleMode(true, hand.IsThisTheRightHand);
 				//			break;
-				//		case Mod.ItemType.Money:
+				//		case ItemType.Money:
 				//			if (splittingStack)
 				//			{
 				//				// End splitting
@@ -726,7 +828,7 @@ namespace EFM
 				//	leavingTimer = 0;
 				//	switch (itemType)
 				//	{
-				//		case Mod.ItemType.Consumable:
+				//		case ItemType.Consumable:
 				//			bool otherHandConsuming = false;
 				//			if (!validConsumePress)
 				//			{
@@ -1106,8 +1208,8 @@ namespace EFM
 			Mod.LogInfo("Apply effects called, effectiveness: " + effectiveness + ", amount to consume: " + amountToConsume);
 			if(consumeEffects == null)
             {
-				consumeEffects = new List<EFM_Effect_Consumable>();
-				effects = new List<EFM_Effect_Buff>();
+				consumeEffects = new List<ConsumableEffect>();
+				effects = new List<BuffEffect>();
             }
 
 			// TODO: Set targetted part if hovering over a part
@@ -1117,19 +1219,19 @@ namespace EFM
 			int unusedEffectCount = 0;
 
 			// Apply consume effects
-			foreach (EFM_Effect_Consumable consumeEffect in consumeEffects)
+			foreach (ConsumableEffect consumeEffect in consumeEffects)
 			{
 				switch (consumeEffect.effectType)
                 {
 					// Health
-					case EFM_Effect_Consumable.EffectConsumable.Hydration:
+					case ConsumableEffect.ConsumableEffectType.Hydration:
 						float hydrationAmount = consumeEffect.value * effectiveness;
 						Mod.hydration += hydrationAmount;
 						Mod.AddSkillExp(hydrationAmount * (Skill.hydrationRecoveryRate / 100), 5);
 						++appliedEffectCount;
 						Mod.LogInfo("\tApplied hydration");
 						break;
-					case EFM_Effect_Consumable.EffectConsumable.Energy:
+					case ConsumableEffect.ConsumableEffectType.Energy:
 						float energyAmount = consumeEffect.value * effectiveness;
 						Mod.energy += energyAmount;
 						Mod.AddSkillExp(energyAmount * (Skill.energyRecoveryRate / 100), 5);
@@ -1138,7 +1240,7 @@ namespace EFM
 						break;
 
 					// Damage
-					case EFM_Effect_Consumable.EffectConsumable.RadExposure:
+					case ConsumableEffect.ConsumableEffectType.RadExposure:
 						Mod.LogInfo("\trad exposure");
 						bool radExposureApplied = false;
 						if (consumeEffect.duration == 0)
@@ -1201,7 +1303,7 @@ namespace EFM
                             }
 						}
 						break;
-					case EFM_Effect_Consumable.EffectConsumable.Pain:
+					case ConsumableEffect.ConsumableEffectType.Pain:
 						Mod.LogInfo("\tPain");
 						if (painExperience == -1)
 						{
@@ -1231,7 +1333,7 @@ namespace EFM
 							++unusedEffectCount;
 						}
 						break;
-					case EFM_Effect_Consumable.EffectConsumable.Contusion:
+					case ConsumableEffect.ConsumableEffectType.Contusion:
 						Mod.LogInfo("\tContusion");
 						// Remove all contusion effects
 						bool contusionApplied = false;
@@ -1267,7 +1369,7 @@ namespace EFM
 							}
 						}
 						break;
-					case EFM_Effect_Consumable.EffectConsumable.Intoxication:
+					case ConsumableEffect.ConsumableEffectType.Intoxication:
 						Mod.LogInfo("\tIntoxication");
 						if (intoxicationExperience == -1)
 						{
@@ -1308,7 +1410,7 @@ namespace EFM
 							}
 						}
 						break;
-					case EFM_Effect_Consumable.EffectConsumable.LightBleeding:
+					case ConsumableEffect.ConsumableEffectType.LightBleeding:
 						if (lightBleedExperience == -1)
 						{
 							lightBleedExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["HealExperience"];
@@ -1390,7 +1492,7 @@ namespace EFM
 							}
 						}
 						break;
-					case EFM_Effect_Consumable.EffectConsumable.Fracture:
+					case ConsumableEffect.ConsumableEffectType.Fracture:
 						Mod.LogInfo("\tFracture");
 						if (fractureExperience == -1)
 						{
@@ -1472,7 +1574,7 @@ namespace EFM
 							}
 						}
 						break;
-					case EFM_Effect_Consumable.EffectConsumable.DestroyedPart:
+					case ConsumableEffect.ConsumableEffectType.DestroyedPart:
 						Mod.LogInfo("\tDestroyed part");
 						if (breakPartExperience == -1)
                         {
@@ -1577,7 +1679,7 @@ namespace EFM
 							}
 						}
 						break;
-					case EFM_Effect_Consumable.EffectConsumable.HeavyBleeding:
+					case ConsumableEffect.ConsumableEffectType.HeavyBleeding:
 						Mod.LogInfo("\tHeavy bleed");
 						if (heavyBleedExperience == -1)
 						{
@@ -1665,9 +1767,9 @@ namespace EFM
             }
 
 			// Apply buffs
-			foreach (EFM_Effect_Buff buff in effects)
+			foreach (BuffEffect buff in effects)
 			{
-				if (buff.chance != 1 && Random.value > buff.chance)
+				if (buff.chance != 1 && UnityEngine.Random.value > buff.chance)
 				{
 					continue;
 				}
@@ -1731,26 +1833,26 @@ namespace EFM
 			open = !open;
 			if (open)
 			{
-				if (itemType == Mod.ItemType.ArmoredRig || itemType == Mod.ItemType.Rig)
+				if (itemType == ItemType.ArmoredRig || itemType == ItemType.Rig)
 				{
 					// Set active the open model and interactive set, and set all others inactive
 					SetMode(0);
 					OpenRig(inHand, isRightHand);
 				}
-				else if (itemType == Mod.ItemType.Backpack)
+				else if (itemType == ItemType.Backpack)
 				{
 					SetMode(0);
 					SetContainerOpen(true, isRightHand);
 					volumeIndicator.SetActive(true);
 					volumeIndicatorText.text = (containingVolume / Mod.volumePrecisionMultiplier).ToString() + "/" + (maxVolume / Mod.volumePrecisionMultiplier);
 				}
-				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
+				else if (itemType == ItemType.Container || itemType == ItemType.Pouch)
 				{
 					SetContainerOpen(true, isRightHand);
 					volumeIndicator.SetActive(true);
 					volumeIndicatorText.text = (containingVolume / Mod.volumePrecisionMultiplier).ToString() + "/" + (maxVolume / Mod.volumePrecisionMultiplier);
 				}
-				else if(itemType == Mod.ItemType.LootContainer)
+				else if(itemType == ItemType.LootContainer)
 				{
 					SetContainerOpen(true, isRightHand);
 					gameObject.GetComponent<LootContainer>().shouldSpawnItems = true;
@@ -1760,7 +1862,7 @@ namespace EFM
 			}
 			else
 			{
-				if (itemType == Mod.ItemType.ArmoredRig || itemType == Mod.ItemType.Rig)
+				if (itemType == ItemType.ArmoredRig || itemType == ItemType.Rig)
 				{
 					if (itemsInSlots != null)
 					{
@@ -1780,17 +1882,17 @@ namespace EFM
 					}
 					// else should never happen in case we have a rig
 				}
-				else if (itemType == Mod.ItemType.Backpack)
+				else if (itemType == ItemType.Backpack)
 				{
 					SetMode(containingVolume > 0 ? 1 : 2);
 					SetContainerOpen(false, isRightHand);
 					volumeIndicator.SetActive(false);
 				}
-				else if (itemType == Mod.ItemType.BodyArmor)
+				else if (itemType == ItemType.BodyArmor)
 				{
 					SetMode(1);
 				}
-				else if (itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
+				else if (itemType == ItemType.Container || itemType == ItemType.Pouch)
 				{
 					SetContainerOpen(false, isRightHand);
 					volumeIndicator.SetActive(false);
@@ -1801,7 +1903,7 @@ namespace EFM
 		private void SetMode(int index)
 		{
 			mode = index;
-			if (itemType == Mod.ItemType.Money)
+			if (itemType == ItemType.Money)
 			{
 				for (int i = 0; i < models.Length; ++i)
 				{
@@ -1877,7 +1979,7 @@ namespace EFM
 		public void UpdateRigMode()
 		{
 			// Return right away if not a rig or if open
-			if (!(itemType == Mod.ItemType.Rig || itemType == Mod.ItemType.ArmoredRig) || mode == 0)
+			if (!(itemType == ItemType.Rig || itemType == ItemType.ArmoredRig) || mode == 0)
 			{
 				return;
             }
@@ -1898,7 +2000,7 @@ namespace EFM
 		public void UpdateBackpackMode()
 		{
 			// Return right away if not a backpack or if open
-			if (itemType != Mod.ItemType.Backpack || mode == 0)
+			if (itemType != ItemType.Backpack || mode == 0)
 			{
 				return;
             }
@@ -1958,7 +2060,7 @@ namespace EFM
 	
 		public DescriptionPack GetDescriptionPack()
         {
-			if(itemType == Mod.ItemType.LootContainer)
+			if(itemType == ItemType.LootContainer)
             {
 				return descriptionPack;
             }
@@ -1980,11 +2082,11 @@ namespace EFM
 			descriptionPack.onWishlist = Mod.wishList.Contains(H3ID);
 			descriptionPack.insured = insured;
 
-			if (itemType == Mod.ItemType.Money)
+			if (itemType == ItemType.Money)
 			{
 				descriptionPack.stack = stack;
 			}
-			else if(itemType == Mod.ItemType.Consumable)
+			else if(itemType == ItemType.Consumable)
 			{
 				if (maxAmount > 0)
 				{
@@ -1992,12 +2094,12 @@ namespace EFM
 					descriptionPack.maxStack = maxAmount;
                 }
 			}
-			else if(itemType == Mod.ItemType.Backpack || itemType == Mod.ItemType.Container || itemType == Mod.ItemType.Pouch)
+			else if(itemType == ItemType.Backpack || itemType == ItemType.Container || itemType == ItemType.Pouch)
 			{
 				descriptionPack.containingVolume = containingVolume;
 				descriptionPack.maxVolume = maxVolume;
 			}
-			else if(itemType == Mod.ItemType.AmmoBox)
+			else if(itemType == ItemType.AmmoBox)
 			{
 				FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
 				descriptionPack.stack = asMagazine.m_numRounds;
@@ -2027,7 +2129,7 @@ namespace EFM
 					}
 				}
             }
-			else if(itemType == Mod.ItemType.DogTag)
+			else if(itemType == ItemType.DogTag)
 			{
 				descriptionPack.stack = dogtagLevel;
 				descriptionPack.name = itemName + " ("+dogtagName+")";
@@ -2200,17 +2302,17 @@ namespace EFM
 
             // Ensure the Display_InteractionSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
             // This is only necessary for equipment items because the slots are much smaller than the item itself so we need to know what specific point to put inside the slot
-            if(hand.MI.itemType == Mod.ItemType.Backpack ||
-			   hand.MI.itemType == Mod.ItemType.Container ||
-			   hand.MI.itemType == Mod.ItemType.ArmoredRig ||
-			   hand.MI.itemType == Mod.ItemType.Rig ||
-			   hand.MI.itemType == Mod.ItemType.BodyArmor ||
-		       hand.MI.itemType == Mod.ItemType.Eyewear ||
-			   hand.MI.itemType == Mod.ItemType.Headwear ||
-			   hand.MI.itemType == Mod.ItemType.Helmet ||
-			   hand.MI.itemType == Mod.ItemType.Earpiece ||
-			   hand.MI.itemType == Mod.ItemType.Pouch ||
-			   hand.MI.itemType == Mod.ItemType.FaceCover)
+            if(hand.MI.itemType == ItemType.Backpack ||
+			   hand.MI.itemType == ItemType.Container ||
+			   hand.MI.itemType == ItemType.ArmoredRig ||
+			   hand.MI.itemType == ItemType.Rig ||
+			   hand.MI.itemType == ItemType.BodyArmor ||
+		       hand.MI.itemType == ItemType.Eyewear ||
+			   hand.MI.itemType == ItemType.Headwear ||
+			   hand.MI.itemType == ItemType.Helmet ||
+			   hand.MI.itemType == ItemType.Earpiece ||
+			   hand.MI.itemType == ItemType.Pouch ||
+			   hand.MI.itemType == ItemType.FaceCover)
             {
                 if (!hand.fvrHand.Grabbity_HoverSphere.gameObject.activeSelf)
                 {
@@ -2241,9 +2343,4 @@ namespace EFM
             Mod.meatovItemByInteractive.Remove(physObj);
         }
 	}
-
-	public class EFM_MainContainer : MonoBehaviour
-    {
-		public MeatovItem parentCIW;
-    }
 }

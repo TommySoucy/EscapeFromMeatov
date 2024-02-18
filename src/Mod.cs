@@ -27,7 +27,7 @@ namespace EFM
         public static readonly float headshotDamageMultiplier = 1.2f;
         public static readonly float handDamageResist = 0.5f;
         //public static readonly float[] sizeVolumes = { 1, 2, 5, 30, 0, 50}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
-        public static readonly float volumePrecisionMultiplier = 10000; // Volumes are stored as floats but are processed as ints to avoid precision errors, this is how precise we should be when converting, this goes down to 10th of a mililiter
+        public static readonly float volumePrecisionMultiplier = 1000; // Volumes are stored as floats but are processed as ints to avoid precision errors, this is how precise we should be when converting, this goes down to 10th of a mililiter
 
         // Live data
         public static Mod modInstance;
@@ -75,7 +75,7 @@ namespace EFM
         public static Dictionary<FireArmMagazineType, Dictionary<string, int>> magazinesByType;
         public static Dictionary<FireArmClipType, Dictionary<string, int>> clipsByType;
         public static Dictionary<FireArmRoundType, Dictionary<string, int>> roundsByType; // TODO: should use the ID of the round, not the name
-        public static Dictionary<ItemRarity, List<string>> itemsByRarity;
+        public static Dictionary<MeatovItem.ItemRarity, List<string>> itemsByRarity;
         public static Dictionary<string, List<string>> itemsByParents;
         public static List<string> usedRoundIDs;
         public static Dictionary<string, int> ammoBoxByAmmoID;
@@ -257,53 +257,6 @@ namespace EFM
         public static bool spawnOnlyFirstAI = false;
         public static bool spawnedFirstAI = false;
         public static bool forceSpawnAI = false;
-
-        public enum ItemType
-        {
-            Generic = 0,
-            BodyArmor = 1,
-            Rig = 2,
-            ArmoredRig = 3,
-            Helmet = 4,
-            Backpack = 5,
-            Container = 6,
-            Pouch = 7,
-            AmmoBox = 8,
-            Money = 9,
-            Consumable = 10,
-            Key = 11,
-            Earpiece = 12,
-            FaceCover = 13,
-            Eyewear = 14,
-            Headwear = 15,
-
-            LootContainer = 16,
-
-            DogTag = 17
-        }
-
-        public enum WeaponClass
-        {
-            Pistol = 0,
-            Revolver = 1,
-            SMG = 2,
-            Assault = 3,
-            Shotgun = 4,
-            Sniper = 5,
-            LMG = 6,
-            HMG = 7,
-            Launcher = 8,
-            AttachedLauncher = 9,
-            DMR = 10
-        }
-
-        public enum ItemRarity
-        {
-            Common,
-            Rare,
-            Superrare,
-            Not_exist
-        }
 
         public void Start()
         {
@@ -497,7 +450,7 @@ namespace EFM
 #endif
         }
 
-        private void DumpLayers()
+        public void DumpLayers()
         {
             Dictionary<int, int> _masksByLayer;
             _masksByLayer = new Dictionary<int, int>();
@@ -871,7 +824,7 @@ namespace EFM
                 // Add custom item wrapper
                 MeatovItem customItemWrapper = itemPrefab.AddComponent<MeatovItem>();
                 customItemWrapper.H3ID = i.ToString();
-                customItemWrapper.itemType = (ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
+                customItemWrapper.itemType = (MeatovItem.ItemType)(int)defaultItemsData["ItemDefaults"][i]["ItemType"];
                 float[] tempVolumes = defaultItemsData["ItemDefaults"][i]["Volumes"].ToObject<float[]>();
                 customItemWrapper.volumes = new int[tempVolumes.Length];
                 for (int volIndex = 0; volIndex < tempVolumes.Length; ++volIndex)
@@ -1103,8 +1056,8 @@ namespace EFM
                     // Set MainContainer renderers and their material
                     GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
                     customItemWrapper.mainContainer = mainContainer;
-                    EFM_MainContainer mainContainerScript = customItemWrapper.mainContainer.AddComponent<EFM_MainContainer>();
-                    mainContainerScript.parentCIW = customItemWrapper;
+                    ContainerVolume mainContainerScript = customItemWrapper.mainContainer.AddComponent<ContainerVolume>();
+                    mainContainerScript.ownerItem = customItemWrapper;
                     List<Renderer> mainContainerRenderers = new List<Renderer>();
                     mainContainerRenderers.Add(mainContainer.GetComponent<Renderer>());
                     mainContainerRenderers[mainContainerRenderers.Count - 1].material = quickSlotConstantMaterial;
@@ -1149,8 +1102,8 @@ namespace EFM
                     // Set MainContainer renderers and their material
                     GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
                     customItemWrapper.mainContainer = mainContainer;
-                    EFM_MainContainer mainContainerScript = customItemWrapper.mainContainer.AddComponent<EFM_MainContainer>();
-                    mainContainerScript.parentCIW = customItemWrapper;
+                    ContainerVolume mainContainerScript = customItemWrapper.mainContainer.AddComponent<ContainerVolume>();
+                    mainContainerScript.ownerItem = customItemWrapper;
                     Renderer[] mainContainerRenderer = new Renderer[1];
                     mainContainerRenderer[0] = mainContainer.GetComponent<Renderer>();
                     mainContainerRenderer[0].material = quickSlotConstantMaterial;
@@ -1172,8 +1125,8 @@ namespace EFM
                     // Set MainContainer renderers and their material
                     GameObject mainContainer = itemPrefab.transform.GetChild(itemPrefab.transform.childCount - 2).gameObject;
                     customItemWrapper.mainContainer = mainContainer;
-                    EFM_MainContainer mainContainerScript = customItemWrapper.mainContainer.AddComponent<EFM_MainContainer>();
-                    mainContainerScript.parentCIW = customItemWrapper;
+                    ContainerVolume mainContainerScript = customItemWrapper.mainContainer.AddComponent<ContainerVolume>();
+                    mainContainerScript.ownerItem = customItemWrapper;
                     Renderer[] mainContainerRenderer = new Renderer[1];
                     mainContainerRenderer[0] = mainContainer.GetComponent<Renderer>();
                     mainContainerRenderer[0].material = quickSlotConstantMaterial;
@@ -1272,14 +1225,14 @@ namespace EFM
                     }
 
                     // Set effects
-                    customItemWrapper.consumeEffects = new List<EFM_Effect_Consumable>();
+                    customItemWrapper.consumeEffects = new List<ConsumableEffect>();
                     if (defaultItemsData["ItemDefaults"][i]["effectsDamage"] != null)
                     {
                         // Damage effects
                         Dictionary<string, JToken> damageEffects = defaultItemsData["ItemDefaults"][i]["effectsDamage"].ToObject<Dictionary<string, JToken>>();
                         foreach (KeyValuePair<string, JToken> damageEntry in damageEffects)
                         {
-                            EFM_Effect_Consumable consumableEffect = new EFM_Effect_Consumable();
+                            ConsumableEffect consumableEffect = new ConsumableEffect();
                             customItemWrapper.consumeEffects.Add(consumableEffect);
                             consumableEffect.delay = (float)damageEntry.Value["delay"];
                             consumableEffect.duration = (float)damageEntry.Value["duration"];
@@ -1290,34 +1243,34 @@ namespace EFM
                             switch (damageEntry.Key)
                             {
                                 case "RadExposure":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.RadExposure;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.RadExposure;
                                     break;
                                 case "Pain":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Pain;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Pain;
                                     break;
                                 case "Contusion":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Contusion;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Contusion;
                                     consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
                                     break;
                                 case "Intoxication":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Intoxication;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Intoxication;
                                     consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
                                     break;
                                 case "LightBleeding":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.LightBleeding;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.LightBleeding;
                                     consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
                                     break;
                                 case "Fracture":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Fracture;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Fracture;
                                     consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
                                     break;
                                 case "DestroyedPart":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.DestroyedPart;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.DestroyedPart;
                                     consumableEffect.healthPenaltyMax = (float)damageEntry.Value["healthPenaltyMax"] / 100;
                                     consumableEffect.healthPenaltyMin = (float)damageEntry.Value["healthPenaltyMin"] / 100;
                                     break;
                                 case "HeavyBleeding":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.HeavyBleeding;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.HeavyBleeding;
                                     consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
                                     break;
                             }
@@ -1330,29 +1283,29 @@ namespace EFM
                         Dictionary<string, JToken> healthEffects = defaultItemsData["ItemDefaults"][i]["effects_health"].ToObject<Dictionary<string, JToken>>();
                         foreach (KeyValuePair<string, JToken> healthEntry in healthEffects)
                         {
-                            EFM_Effect_Consumable consumableEffect = new EFM_Effect_Consumable();
+                            ConsumableEffect consumableEffect = new ConsumableEffect();
                             customItemWrapper.consumeEffects.Add(consumableEffect);
                             consumableEffect.value = (float)healthEntry.Value["value"];
                             switch (healthEntry.Key)
                             {
                                 case "Hydration":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Hydration;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Hydration;
                                     break;
                                 case "Energy":
-                                    consumableEffect.effectType = EFM_Effect_Consumable.EffectConsumable.Energy;
+                                    consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Energy;
                                     break;
                             }
                         }
                     }
 
                     // Set buffs
-                    customItemWrapper.effects = new List<EFM_Effect_Buff>();
+                    customItemWrapper.effects = new List<BuffEffect>();
                     if (defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"] != null)
                     {
                         JArray buffs = (JArray)globalDB["config"]["Health"]["Effects"]["Stimulator"]["Buffs"][defaultItemsData["ItemDefaults"][i]["stimulatorBuffs"].ToString()];
                         foreach (JToken buff in buffs)
                         {
-                            EFM_Effect_Buff currentBuff = new EFM_Effect_Buff();
+                            BuffEffect currentBuff = new BuffEffect();
                             currentBuff.effectType = (Effect.EffectType)Enum.Parse(typeof(Effect.EffectType), buff["BuffType"].ToString());
                             currentBuff.chance = (float)buff["Chance"];
                             currentBuff.delay = (float)buff["Delay"];
@@ -1788,20 +1741,20 @@ namespace EFM
             itemIcons.Add("Matchbox", assetsBundles[0].LoadAsset<Sprite>("ItemMatchbox_Icon"));
         }
 
-        private static ItemRarity ItemRarityStringToEnum(string name)
+        private static MeatovItem.ItemRarity ItemRarityStringToEnum(string name)
         {
             switch (name)
             {
                 case "Common":
-                    return ItemRarity.Common;
+                    return MeatovItem.ItemRarity.Common;
                 case "Rare":
-                    return ItemRarity.Rare;
+                    return MeatovItem.ItemRarity.Rare;
                 case "Superrare":
-                    return ItemRarity.Superrare;
+                    return MeatovItem.ItemRarity.Superrare;
                 case "Not_exist":
-                    return ItemRarity.Not_exist;
+                    return MeatovItem.ItemRarity.Not_exist;
                 default:
-                    return ItemRarity.Not_exist;
+                    return MeatovItem.ItemRarity.Not_exist;
             }
         }
 
@@ -1909,7 +1862,7 @@ namespace EFM
             {
                 if (customItemWrapper != null)
                 {
-                    if (customItemWrapper.itemType == ItemType.AmmoBox)
+                    if (customItemWrapper.itemType == MeatovItem.ItemType.AmmoBox)
                     {
                         FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
@@ -2036,14 +1989,14 @@ namespace EFM
             // Check for more items that may be contained inside this one
             if (customItemWrapper != null)
             {
-                if (customItemWrapper.itemType == ItemType.Backpack || customItemWrapper.itemType == ItemType.Container || customItemWrapper.itemType == ItemType.Pouch)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack || customItemWrapper.itemType == MeatovItem.ItemType.Container || customItemWrapper.itemType == MeatovItem.ItemType.Pouch)
                 {
                     foreach (Transform innerItem in customItemWrapper.containerItemRoot)
                     {
                         AddToPlayerInventory(innerItem, updateTypeLists);
                     }
                 }
-                else if (customItemWrapper.itemType == ItemType.Rig || customItemWrapper.itemType == ItemType.ArmoredRig)
+                else if (customItemWrapper.itemType == MeatovItem.ItemType.Rig || customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
                     foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
                     {
@@ -2120,7 +2073,7 @@ namespace EFM
             {
                 if (customItemWrapper != null)
                 {
-                    if (customItemWrapper.itemType == ItemType.AmmoBox)
+                    if (customItemWrapper.itemType == MeatovItem.ItemType.AmmoBox)
                     {
                         FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
@@ -2244,14 +2197,14 @@ namespace EFM
             // Check for more items that may be contained inside this one
             if (customItemWrapper != null)
             {
-                if (customItemWrapper.itemType == ItemType.Backpack || customItemWrapper.itemType == ItemType.Container || customItemWrapper.itemType == ItemType.Pouch)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack || customItemWrapper.itemType == MeatovItem.ItemType.Container || customItemWrapper.itemType == MeatovItem.ItemType.Pouch)
                 {
                     foreach (Transform innerItem in customItemWrapper.containerItemRoot)
                     {
                         RemoveFromPlayerInventory(innerItem, updateTypeLists);
                     }
                 }
-                else if (customItemWrapper.itemType == ItemType.Rig || customItemWrapper.itemType == ItemType.ArmoredRig)
+                else if (customItemWrapper.itemType == MeatovItem.ItemType.Rig || customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
                     foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
                     {
@@ -2591,7 +2544,7 @@ namespace EFM
             itemsByParents = new Dictionary<string, List<string>>();
             requiredForQuest = new Dictionary<string, int>();
             wishList = new List<string>();
-            itemsByRarity = new Dictionary<ItemRarity, List<string>>();
+            itemsByRarity = new Dictionary<MeatovItem.ItemRarity, List<string>>();
 
             // Subscribe to events
             //SceneManager.sceneLoaded += OnSceneLoaded;
@@ -2899,17 +2852,17 @@ namespace EFM
             return String.Format("{0:00}:{1:00}:{2:00}", hours, minutes, seconds);
         }
 
-        public static float GetRaritySpawnChanceMultiplier(Mod.ItemRarity rarity)
+        public static float GetRaritySpawnChanceMultiplier(MeatovItem.ItemRarity rarity)
         {
             switch (rarity)
             {
-                case Mod.ItemRarity.Common:
+                case MeatovItem.ItemRarity.Common:
                     return 0.85f;
-                case Mod.ItemRarity.Rare:
+                case MeatovItem.ItemRarity.Rare:
                     return 0.3f;
-                case Mod.ItemRarity.Superrare:
+                case MeatovItem.ItemRarity.Superrare:
                     return 0.05f;
-                case Mod.ItemRarity.Not_exist:
+                case MeatovItem.ItemRarity.Not_exist:
                     return 0;
                 default:
                     return 1;

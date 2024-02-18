@@ -7,8 +7,10 @@ namespace EFM
     {
         public bool hasMaxVolume;
         public float maxVolume;
-        public List<string> filter;
+        public List<string> whitelist;
+        public List<string> blacklist;
         public GameObject staticVolume;
         public GameObject activeVolume;
+        public GameObject itemRoot;
     }
 }

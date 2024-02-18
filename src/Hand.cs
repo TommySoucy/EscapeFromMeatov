@@ -41,13 +41,13 @@ namespace EFM
                     {
                         switch (collidingTogglableWrapper.itemType)
                         {
-                            case Mod.ItemType.ArmoredRig:
-                            case Mod.ItemType.Rig:
-                            case Mod.ItemType.Backpack:
-                            case Mod.ItemType.BodyArmor:
-                            case Mod.ItemType.Container:
-                            case Mod.ItemType.Pouch:
-                            case Mod.ItemType.LootContainer:
+                            case MeatovItem.ItemType.ArmoredRig:
+                            case MeatovItem.ItemType.Rig:
+                            case MeatovItem.ItemType.Backpack:
+                            case MeatovItem.ItemType.BodyArmor:
+                            case MeatovItem.ItemType.Container:
+                            case MeatovItem.ItemType.Pouch:
+                            case MeatovItem.ItemType.LootContainer:
                                 collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
                                 break;
                             default:
@@ -58,13 +58,13 @@ namespace EFM
                     {
                         switch (collidingTogglableWrapper.itemType)
                         {
-                            case Mod.ItemType.ArmoredRig:
-                            case Mod.ItemType.Rig:
-                            case Mod.ItemType.Backpack:
-                            case Mod.ItemType.BodyArmor:
-                            case Mod.ItemType.Container:
-                            case Mod.ItemType.Pouch:
-                            case Mod.ItemType.LootContainer:
+                            case MeatovItem.ItemType.ArmoredRig:
+                            case MeatovItem.ItemType.Rig:
+                            case MeatovItem.ItemType.Backpack:
+                            case MeatovItem.ItemType.BodyArmor:
+                            case MeatovItem.ItemType.Container:
+                            case MeatovItem.ItemType.Pouch:
+                            case MeatovItem.ItemType.LootContainer:
                                 collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
                                 break;
                             default:
@@ -78,13 +78,13 @@ namespace EFM
                     {
                         switch (collidingTogglableWrapper.itemType)
                         {
-                            case Mod.ItemType.ArmoredRig:
-                            case Mod.ItemType.Rig:
-                            case Mod.ItemType.Backpack:
-                            case Mod.ItemType.BodyArmor:
-                            case Mod.ItemType.Container:
-                            case Mod.ItemType.Pouch:
-                            case Mod.ItemType.LootContainer:
+                            case MeatovItem.ItemType.ArmoredRig:
+                            case MeatovItem.ItemType.Rig:
+                            case MeatovItem.ItemType.Backpack:
+                            case MeatovItem.ItemType.BodyArmor:
+                            case MeatovItem.ItemType.Container:
+                            case MeatovItem.ItemType.Pouch:
+                            case MeatovItem.ItemType.LootContainer:
                                 collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
                                 break;
                             default:
@@ -105,13 +105,13 @@ namespace EFM
                                 {
                                     switch (collidingTogglableWrapper.itemType)
                                     {
-                                        case Mod.ItemType.ArmoredRig:
-                                        case Mod.ItemType.Rig:
-                                        case Mod.ItemType.Backpack:
-                                        case Mod.ItemType.BodyArmor:
-                                        case Mod.ItemType.Container:
-                                        case Mod.ItemType.Pouch:
-                                        case Mod.ItemType.LootContainer:
+                                        case MeatovItem.ItemType.ArmoredRig:
+                                        case MeatovItem.ItemType.Rig:
+                                        case MeatovItem.ItemType.Backpack:
+                                        case MeatovItem.ItemType.BodyArmor:
+                                        case MeatovItem.ItemType.Container:
+                                        case MeatovItem.ItemType.Pouch:
+                                        case MeatovItem.ItemType.LootContainer:
                                             collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
                                             break;
                                         default:
@@ -163,7 +163,7 @@ namespace EFM
                 if (collider.gameObject.name.Equals("Interactive"))
                 {
                     MeatovItem lootContainerCIW = collider.transform.parent.GetComponent<MeatovItem>();
-                    if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
+                    if (lootContainerCIW != null && lootContainerCIW.itemType == MeatovItem.ItemType.LootContainer)
                     {
                         collidingTogglableWrapper = lootContainerCIW;
                         togglableColliders.Add(collider);
@@ -173,7 +173,7 @@ namespace EFM
                 else if (collider.transform.parent.name.Equals("Interactives") && collider.transform.parent.parent != null)
                 {
                     MeatovItem lootContainerCIW = collider.transform.parent.parent.GetComponent<MeatovItem>();
-                    if (lootContainerCIW != null && lootContainerCIW.itemType == Mod.ItemType.LootContainer)
+                    if (lootContainerCIW != null && lootContainerCIW.itemType == MeatovItem.ItemType.LootContainer)
                     {
                         collidingTogglableWrapper = lootContainerCIW;
                         togglableColliders.Add(collider);
@@ -186,9 +186,9 @@ namespace EFM
                     {
                         MeatovItem itemCIW = collider.transform.parent.parent.parent.GetComponent<MeatovItem>();
                         if (itemCIW != null && (fvrHand.CurrentInteractable == null || !fvrHand.CurrentInteractable.Equals(itemCIW.physObj)) &&
-                            (itemCIW.itemType == Mod.ItemType.Container ||
-                             itemCIW.itemType == Mod.ItemType.Backpack ||
-                             itemCIW.itemType == Mod.ItemType.Pouch))
+                            (itemCIW.itemType == MeatovItem.ItemType.Container ||
+                             itemCIW.itemType == MeatovItem.ItemType.Backpack ||
+                             itemCIW.itemType == MeatovItem.ItemType.Pouch))
                         {
                             collidingTogglableWrapper = itemCIW;
                             togglableColliders.Add(collider);
@@ -198,15 +198,15 @@ namespace EFM
                 }
             }
 
-            EFM_MainContainer mainContainer = collider.GetComponent<EFM_MainContainer>();
+            ContainerVolume mainContainer = collider.GetComponent<ContainerVolume>();
             bool newMainContainer = false;
-            if (mainContainer != null && collidingContainerWrapper != mainContainer.parentCIW)
+            if (mainContainer != null && collidingContainerWrapper != mainContainer.ownerItem)
             {
-                MeatovItem customItemWrapper = mainContainer.parentCIW;
+                MeatovItem customItemWrapper = mainContainer.ownerItem;
                 if ((fvrHand.CurrentInteractable == null || !fvrHand.CurrentInteractable.Equals(customItemWrapper.physObj)) &&
-                    (customItemWrapper.itemType == Mod.ItemType.Backpack ||
-                     customItemWrapper.itemType == Mod.ItemType.Container ||
-                     customItemWrapper.itemType == Mod.ItemType.Pouch))
+                    (customItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
+                     customItemWrapper.itemType == MeatovItem.ItemType.Container ||
+                     customItemWrapper.itemType == MeatovItem.ItemType.Pouch))
                 {
                     Mod.LogInfo("\tGot container CIW");
                     // Clear the previous colliding container if we had one
@@ -370,8 +370,8 @@ namespace EFM
 
         private void OnTriggerExit(Collider collider)
         {
-            EFM_MainContainer mainContainer = collider.GetComponent<EFM_MainContainer>();
-            if (mainContainer != null && collidingContainerWrapper == mainContainer.parentCIW)
+            ContainerVolume mainContainer = collider.GetComponent<ContainerVolume>();
+            if (mainContainer != null && collidingContainerWrapper == mainContainer.ownerItem)
             {
                 if (!otherHand.hoverValid || otherHand.collidingContainerWrapper != collidingContainerWrapper)
                 {

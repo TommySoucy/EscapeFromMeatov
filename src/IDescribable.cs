@@ -19,7 +19,7 @@ namespace EFM
         public bool isPhysical;
         public IDescribable nonPhysDescribable;
         public string ID;
-        public Mod.ItemType itemType;
+        public MeatovItem.ItemType itemType;
         // Dogtag
         public int level;
 

@@ -76,7 +76,7 @@ namespace EFM
 
 						customIDs.Add(result);
 
-						if (prefabCIW.itemType == Mod.ItemType.AmmoBox)
+						if (prefabCIW.itemType == MeatovItem.ItemType.AmmoBox)
                         {
 							stackSizes.Add(-1); // -1 indicates maxAmount, actual ammo boxes should always spawn with max amount in them
                         }
@@ -181,11 +181,11 @@ namespace EFM
 					// When instantiated, the interactive object awoke and got added to All, we need to remove it because we want to handle that ourselves
 					Mod.RemoveFromAll(null, itemCIW);
 
-					if (itemCIW.itemType == Mod.ItemType.Money)
+					if (itemCIW.itemType == MeatovItem.ItemType.Money)
 					{
 						itemCIW.stack = UnityEngine.Random.Range(120, 2500);
 					}
-					else if (itemCIW.itemType == Mod.ItemType.AmmoBox)
+					else if (itemCIW.itemType == MeatovItem.ItemType.AmmoBox)
 					{
 						int stackSize = stackSizes[stackSizes.Count - 1];
 						stackSizes.RemoveAt(stackSizes.Count - 1);

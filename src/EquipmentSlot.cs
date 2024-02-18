@@ -39,29 +39,29 @@ namespace EFM
 
                 switch (customItemWrapper.itemType)
                 {
-                    case Mod.ItemType.Helmet:
-                    case Mod.ItemType.Headwear:
+                    case MeatovItem.ItemType.Helmet:
+                    case MeatovItem.ItemType.Headwear:
                         if (!wearingHeadwear)
                         {
                             wearingHeadwear = true;
                             currentHeadwear = customItemWrapper;
                         }
                         break;
-                    case Mod.ItemType.Rig:
+                    case MeatovItem.ItemType.Rig:
                         if (!wearingRig && !wearingArmoredRig)
                         {
                             EquipRig(customItemWrapper);
                             wearingRig = true;
                         }
                         break;
-                    case Mod.ItemType.BodyArmor:
+                    case MeatovItem.ItemType.BodyArmor:
                         if (!wearingBodyArmor)
                         {
                             wearingBodyArmor = true;
                             currentArmor = customItemWrapper;
                         }
                         break;
-                    case Mod.ItemType.ArmoredRig:
+                    case MeatovItem.ItemType.ArmoredRig:
                         if (!wearingArmoredRig && !wearingRig)
                         {
                             EquipRig(customItemWrapper);
@@ -70,35 +70,35 @@ namespace EFM
                             currentRig = customItemWrapper;
                         }
                         break;
-                    case Mod.ItemType.Backpack:
+                    case MeatovItem.ItemType.Backpack:
                         if (!wearingBackpack)
                         {
                             wearingBackpack = true;
                             currentBackpack = customItemWrapper;
                         }
                         break;
-                    case Mod.ItemType.Pouch:
+                    case MeatovItem.ItemType.Pouch:
                         if (!wearingPouch)
                         {
                             wearingPouch = true;
                             currentPouch = customItemWrapper;
                         }
                         break;
-                    case Mod.ItemType.Earpiece:
+                    case MeatovItem.ItemType.Earpiece:
                         if (!wearingEarpiece)
                         {
                             wearingEarpiece = true;
                             currentEarpiece = customItemWrapper;
                         }
                         break;
-                    case Mod.ItemType.FaceCover:
+                    case MeatovItem.ItemType.FaceCover:
                         if (!wearingFaceCover)
                         {
                             wearingFaceCover = true;
                             currentFaceCover = customItemWrapper;
                         }
                         break;
-                    case Mod.ItemType.Eyewear:
+                    case MeatovItem.ItemType.Eyewear:
                         if (!wearingEyewear)
                         {
                             wearingEyewear = true;
@@ -123,12 +123,12 @@ namespace EFM
             {
                 switch (customItemWrapper.itemType)
                 {
-                    case Mod.ItemType.Helmet:
-                    case Mod.ItemType.Headwear:
+                    case MeatovItem.ItemType.Helmet:
+                    case MeatovItem.ItemType.Headwear:
                         wearingHeadwear = false;
                         currentHeadwear = null;
                         break;
-                    case Mod.ItemType.Rig:
+                    case MeatovItem.ItemType.Rig:
                         // Transfer item objects from config to the rig object
                         for (int i=0; i < customItemWrapper.itemsInSlots.Length; ++i)
                         {
@@ -141,11 +141,11 @@ namespace EFM
                         wearingRig = false;
                         currentRig = null; // This needs to be done after ConfigureQuickbelt(-1) because it is used in it
                         break;
-                    case Mod.ItemType.BodyArmor:
+                    case MeatovItem.ItemType.BodyArmor:
                         wearingBodyArmor = false;
                         currentArmor = null;
                         break;
-                    case Mod.ItemType.ArmoredRig:
+                    case MeatovItem.ItemType.ArmoredRig:
                         // Transfer item objects from config to the rig object
                         for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
                         {
@@ -159,23 +159,23 @@ namespace EFM
                         currentRig = null; // This needs to be done after ConfigureQuickbelt(-1) because it is used in it
                         currentArmor = null;
                         break;
-                    case Mod.ItemType.Backpack:
+                    case MeatovItem.ItemType.Backpack:
                         wearingBackpack = false;
                         currentBackpack = null;
                         break;
-                    case Mod.ItemType.Pouch:
+                    case MeatovItem.ItemType.Pouch:
                         wearingPouch = false;
                         currentPouch = null;
                         break;
-                    case Mod.ItemType.Earpiece:
+                    case MeatovItem.ItemType.Earpiece:
                         wearingEarpiece = false;
                         currentEarpiece = null;
                         break;
-                    case Mod.ItemType.FaceCover:
+                    case MeatovItem.ItemType.FaceCover:
                         wearingFaceCover = false;
                         currentFaceCover = null;
                         break;
-                    case Mod.ItemType.Eyewear:
+                    case MeatovItem.ItemType.Eyewear:
                         wearingEyewear = false;
                         currentEyewear = null;
                         break;
@@ -245,6 +245,6 @@ namespace EFM
             currentPouch = null;
         }
 
-        public Mod.ItemType equipmentType;
+        public MeatovItem.ItemType equipmentType;
     }
 }

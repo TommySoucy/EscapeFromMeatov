@@ -2428,7 +2428,7 @@ namespace EFM
             {
                 if (MI != null)
                 {
-                    if (MI.itemType == Mod.ItemType.AmmoBox)
+                    if (MI.itemType == MeatovItem.ItemType.AmmoBox)
                     {
                         FVRFireArmMagazine boxMagazine = MI.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
@@ -2557,14 +2557,14 @@ namespace EFM
             // Check for more items that may be contained inside this one
             if (MI != null)
             {
-                if (MI.itemType == Mod.ItemType.Backpack || MI.itemType == Mod.ItemType.Container || MI.itemType == Mod.ItemType.Pouch)
+                if (MI.itemType == MeatovItem.ItemType.Backpack || MI.itemType == MeatovItem.ItemType.Container || MI.itemType == MeatovItem.ItemType.Pouch)
                 {
                     foreach (Transform innerItem in MI.containerItemRoot)
                     {
                         AddToBaseInventory(innerItem, updateTypeLists);
                     }
                 }
-                else if (MI.itemType == Mod.ItemType.Rig || MI.itemType == Mod.ItemType.ArmoredRig)
+                else if (MI.itemType == MeatovItem.ItemType.Rig || MI.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
                     foreach (GameObject innerItem in MI.itemsInSlots)
                     {
@@ -2582,9 +2582,9 @@ namespace EFM
             if (item.transform.parent != null && item.transform.parent.parent != null)
             {
                 MeatovItem containerItemWrapper = item.transform.parent.parent.GetComponent<MeatovItem>();
-                if (containerItemWrapper != null && (containerItemWrapper.itemType == Mod.ItemType.Backpack ||
-                                                    containerItemWrapper.itemType == Mod.ItemType.Container ||
-                                                    containerItemWrapper.itemType == Mod.ItemType.Pouch))
+                if (containerItemWrapper != null && (containerItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
+                                                    containerItemWrapper.itemType == MeatovItem.ItemType.Container ||
+                                                    containerItemWrapper.itemType == MeatovItem.ItemType.Pouch))
                 {
                     containerItemWrapper.currentWeight -= MI.currentWeight;
 
@@ -2641,7 +2641,7 @@ namespace EFM
             {
                 if (MI != null)
                 {
-                    if (MI.itemType == Mod.ItemType.AmmoBox)
+                    if (MI.itemType == MeatovItem.ItemType.AmmoBox)
                     {
                         FVRFireArmMagazine boxMagazine = MI.GetComponent<FVRFireArmMagazine>();
                         foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
@@ -2765,14 +2765,14 @@ namespace EFM
             // Check for more items that may be contained inside this one
             if (MI != null)
             {
-                if (MI.itemType == Mod.ItemType.Backpack || MI.itemType == Mod.ItemType.Container || MI.itemType == Mod.ItemType.Pouch)
+                if (MI.itemType == MeatovItem.ItemType.Backpack || MI.itemType == MeatovItem.ItemType.Container || MI.itemType == MeatovItem.ItemType.Pouch)
                 {
                     foreach (Transform innerItem in MI.containerItemRoot)
                     {
                         RemoveFromBaseInventory(innerItem, updateTypeLists);
                     }
                 }
-                else if (MI.itemType == Mod.ItemType.Rig || MI.itemType == Mod.ItemType.ArmoredRig)
+                else if (MI.itemType == MeatovItem.ItemType.Rig || MI.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
                     foreach (GameObject innerItem in MI.itemsInSlots)
                     {
@@ -3080,7 +3080,7 @@ namespace EFM
                     Mod.RemoveFromAll(itemPhysicalObject, MI);
                 }
 
-                MI.itemType = (Mod.ItemType)(int)item["itemType"];
+                MI.itemType = (MeatovItem.ItemType)(int)item["itemType"];
                 MI.amount = (int)item["amount"];
                 MI.looted = (bool)item["looted"];
                 MI.insured = (bool)item["insured"];
@@ -3091,7 +3091,7 @@ namespace EFM
                 }
 
                 // Armor
-                if (MI.itemType == Mod.ItemType.ArmoredRig || MI.itemType == Mod.ItemType.BodyArmor)
+                if (MI.itemType == MeatovItem.ItemType.ArmoredRig || MI.itemType == MeatovItem.ItemType.BodyArmor)
                 {
                     Mod.LogInfo("is armor");
                     MI.armor = (float)item["PhysicalObject"]["armor"];
@@ -3105,7 +3105,7 @@ namespace EFM
                 }
 
                 // Rig
-                if (MI.itemType == Mod.ItemType.ArmoredRig || MI.itemType == Mod.ItemType.Rig)
+                if (MI.itemType == MeatovItem.ItemType.ArmoredRig || MI.itemType == MeatovItem.ItemType.Rig)
                 {
                     Mod.LogInfo("is rig");
                     bool equipped = (int)item["PhysicalObject"]["equipSlot"] != -1;
@@ -3158,7 +3158,7 @@ namespace EFM
                 }
 
                 // Backpack
-                if (MI.itemType == Mod.ItemType.Backpack)
+                if (MI.itemType == MeatovItem.ItemType.Backpack)
                 {
                     Mod.LogInfo("is backpack");
 
@@ -3181,7 +3181,7 @@ namespace EFM
                 }
 
                 // Container
-                if (MI.itemType == Mod.ItemType.Container)
+                if (MI.itemType == MeatovItem.ItemType.Container)
                 {
                     Mod.LogInfo("is container");
 
@@ -3202,7 +3202,7 @@ namespace EFM
                 }
 
                 // Pouch
-                if (MI.itemType == Mod.ItemType.Pouch)
+                if (MI.itemType == MeatovItem.ItemType.Pouch)
                 {
                     Mod.LogInfo("is Pouch");
 
@@ -3223,13 +3223,13 @@ namespace EFM
                 }
 
                 // AmmoBox
-                //if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                //if (customItemWrapper.itemType == MeatovItem.ItemType.AmmoBox)
                 //{
                 //    Mod.LogInfo("is ammo box");
                 //}
 
                 // Money
-                if (MI.itemType == Mod.ItemType.Money)
+                if (MI.itemType == MeatovItem.ItemType.Money)
                 {
                     Mod.LogInfo("is money");
 
@@ -3238,19 +3238,19 @@ namespace EFM
                 }
 
                 // Consumable
-                //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
+                //if (customItemWrapper.itemType == MeatovItem.ItemType.Consumable)
                 //{
                 //    Mod.LogInfo("is Consumable");
                 //}
 
                 // Key
-                //if (customItemWrapper.itemType == Mod.ItemType.Key)
+                //if (customItemWrapper.itemType == MeatovItem.ItemType.Key)
                 //{
                 //    Mod.LogInfo("is Key");
                 //}
 
                 // Earpiece
-                if (MI.itemType == Mod.ItemType.Earpiece)
+                if (MI.itemType == MeatovItem.ItemType.Earpiece)
                 {
                     Mod.LogInfo("is Earpiece");
 
@@ -3262,7 +3262,7 @@ namespace EFM
                 }
 
                 // Face Cover
-                if (MI.itemType == Mod.ItemType.FaceCover)
+                if (MI.itemType == MeatovItem.ItemType.FaceCover)
                 {
                     Mod.LogInfo("is Face Cover");
 
@@ -3274,7 +3274,7 @@ namespace EFM
                 }
 
                 // Eyewear
-                if (MI.itemType == Mod.ItemType.Eyewear)
+                if (MI.itemType == MeatovItem.ItemType.Eyewear)
                 {
                     Mod.LogInfo("is Eyewear");
 
@@ -3286,7 +3286,7 @@ namespace EFM
                 }
 
                 // Headwear
-                if (MI.itemType == Mod.ItemType.Headwear)
+                if (MI.itemType == MeatovItem.ItemType.Headwear)
                 {
                     Mod.LogInfo("is Headwear");
 
@@ -3298,7 +3298,7 @@ namespace EFM
                 }
 
                 // Dogtag
-                if (MI.itemType == Mod.ItemType.DogTag)
+                if (MI.itemType == MeatovItem.ItemType.DogTag)
                 {
                     MI.dogtagName = item["dogtagName"].ToString();
                     MI.dogtagLevel = (int)item["dogtagLevel"];
@@ -4824,7 +4824,7 @@ namespace EFM
                 savedItem["foundInRaid"] = customItemWrapper.foundInRaid;
 
                 // Armor
-                if (customItemWrapper.itemType == Mod.ItemType.BodyArmor)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.BodyArmor)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EquipmentSlot.currentArmor != null && EquipmentSlot.currentArmor.Equals(customItemWrapper))
@@ -4837,7 +4837,7 @@ namespace EFM
                 }
 
                 // Rig
-                if (customItemWrapper.itemType == Mod.ItemType.Rig)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Rig)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EquipmentSlot.currentRig != null && EquipmentSlot.currentRig.Equals(customItemWrapper))
@@ -4863,7 +4863,7 @@ namespace EFM
                 }
 
                 // ArmoredRig
-                if (customItemWrapper.itemType == Mod.ItemType.ArmoredRig)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EquipmentSlot.currentArmor != null && EquipmentSlot.currentArmor.Equals(customItemWrapper))
@@ -4891,7 +4891,7 @@ namespace EFM
                 }
 
                 // Backpack
-                if (customItemWrapper.itemType == Mod.ItemType.Backpack)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EquipmentSlot.currentBackpack != null && EquipmentSlot.currentBackpack.Equals(customItemWrapper))
@@ -4911,7 +4911,7 @@ namespace EFM
                 }
 
                 // Container
-                if (customItemWrapper.itemType == Mod.ItemType.Container)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Container)
                 {
                     if (savedItem["PhysicalObject"]["containerContents"] == null)
                     {
@@ -4926,7 +4926,7 @@ namespace EFM
                 }
 
                 // Pouch
-                if (customItemWrapper.itemType == Mod.ItemType.Pouch)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Pouch)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EquipmentSlot.currentPouch != null && EquipmentSlot.currentPouch.Equals(customItemWrapper))
@@ -4946,7 +4946,7 @@ namespace EFM
                 }
 
                 // Helmet
-                if (customItemWrapper.itemType == Mod.ItemType.Helmet)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Helmet)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EquipmentSlot.currentHeadwear != null && EquipmentSlot.currentHeadwear.Equals(customItemWrapper))
@@ -4959,7 +4959,7 @@ namespace EFM
                 }
 
                 // Earpiece
-                if (customItemWrapper.itemType == Mod.ItemType.Earpiece)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Earpiece)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EquipmentSlot.currentEarpiece != null && EquipmentSlot.currentEarpiece.Equals(customItemWrapper))
@@ -4970,7 +4970,7 @@ namespace EFM
                 }
 
                 // FaceCover
-                if (customItemWrapper.itemType == Mod.ItemType.FaceCover)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.FaceCover)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EquipmentSlot.currentFaceCover != null && EquipmentSlot.currentFaceCover.Equals(customItemWrapper))
@@ -4981,7 +4981,7 @@ namespace EFM
                 }
 
                 // Eyewear
-                if (customItemWrapper.itemType == Mod.ItemType.Eyewear)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Eyewear)
                 {
                     // If this is an equipment piece we are currently wearing
                     if (EquipmentSlot.currentEyewear != null && EquipmentSlot.currentEyewear.Equals(customItemWrapper))
@@ -4992,31 +4992,31 @@ namespace EFM
                 }
 
                 // AmmoBox
-                //if (customItemWrapper.itemType == Mod.ItemType.AmmoBox)
+                //if (customItemWrapper.itemType == MeatovItem.ItemType.AmmoBox)
                 //{
                 //    Mod.LogInfo("Item is ammo box");
                 //}
 
                 // Money
-                if (customItemWrapper.itemType == Mod.ItemType.Money)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.Money)
                 {
                     savedItem["stack"] = customItemWrapper.stack;
                 }
 
                 // Consumable
-                //if (customItemWrapper.itemType == Mod.ItemType.Consumable)
+                //if (customItemWrapper.itemType == MeatovItem.ItemType.Consumable)
                 //{
                 //    Mod.LogInfo("Item is Consumable");
                 //}
 
                 // Key
-                //if (customItemWrapper.itemType == Mod.ItemType.Key)
+                //if (customItemWrapper.itemType == MeatovItem.ItemType.Key)
                 //{
                 //    Mod.LogInfo("is Key");
                 //}
 
                 // Dogtag
-                if (customItemWrapper.itemType == Mod.ItemType.DogTag)
+                if (customItemWrapper.itemType == MeatovItem.ItemType.DogTag)
                 {
                     savedItem["dogtagName"] = customItemWrapper.dogtagName;
                     savedItem["dogtagLevel"] = customItemWrapper.dogtagLevel;
