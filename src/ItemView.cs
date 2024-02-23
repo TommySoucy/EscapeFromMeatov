@@ -8,7 +8,6 @@ namespace EFM
     {
         [NonSerialized]
         public MeatovItem MIW;
-        [NonSerialized]
         public Image itemIcon;
         public GameObject infoMod;
         public Sprite[] modTypes; // Auxilary, Barrel, Bipod, Charge, Light/Laser, GasBlock, Handguard, IronSight, Launcher, Mag, Rail, Muzzle, Grip, RailCover, Receiver Sight, Stock Tactical

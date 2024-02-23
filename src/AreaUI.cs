@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +16,8 @@ namespace EFM
         public GameObject full;
         public AudioSource buttonClickSound;
         public Sprite[] statusSprites; // Locked, Unlocked, Constructing, Producing, ReadyToUpgrade, Upgrading, OutofFuel
+        public Sprite[] borderSprites; // White, Green, Red
+        public Image summaryIconBorder;
         public GameObject summaryIconEliteBackground;
         public GameObject summaryIconProductionBackground;
         public GameObject summaryIconProgressBackground;
@@ -30,6 +33,7 @@ namespace EFM
         public GameObject summaryIconProducingPanelImage;
         public Text summaryIconProducingPanelText;
         public Text summaryStatusText;
+        public Image fullIconBorder;
         public GameObject fullIconEliteBackground;
         public GameObject fullIconProductionBackground;
         public GameObject fullIconProgressBackground;
@@ -63,6 +67,7 @@ namespace EFM
         public GameObject skillRequirementPanel;
         public GameObject skillRequirementPrefab;
         public GameObject bonusPanel;
+        public Text bonusTitle;
         public GameObject bonusPrefab;
         public Text fullFutureDescription;
         public GameObject futureRequirementPanel;
@@ -95,7 +100,642 @@ namespace EFM
 
         public void Init()
         {
-            //cont from ere // init ui based on area data (reqs and bonuses)
+            UpdateStatusTexts();
+            UpdateStatusIcons();
+            UpdateDescriptions();
+            UpdateRequirements();
+            UpdateBonuses();
+        }
+
+        public void UpdateStatusTexts()
+        {
+            if (area.upgrading)
+            {
+                if (area.currentLevel == area.startLevel)
+                {
+                    summaryStatusText.text = "Contructing...";
+                    fullStatusText.text = "Contructing...";
+                    fullStatusImage.sprite = statusSprites[2];
+                }
+                else
+                {
+                    summaryStatusText.text = "Upgrading...";
+                    fullStatusText.text = "Upgrading...";
+                    fullStatusImage.sprite = statusSprites[5];
+                }
+            }
+            else
+            {
+                if (area.AllRequirementsFulfilled())
+                {
+                    if (area.currentLevel == area.startLevel)
+                    {
+                        summaryStatusText.text = "Ready to Construct";
+                        fullStatusText.text = "Ready to Construct";
+                        fullStatusImage.sprite = statusSprites[1];
+                    }
+                    else
+                    {
+                        summaryStatusText.text = "Ready to Upgrade";
+                        fullStatusText.text = "Ready to Upgrade";
+                        fullStatusImage.sprite = statusSprites[4];
+                    }
+                }
+                else
+                {
+                    if (area.powered)
+                    {
+                        if (area.activeProductions.Count > 0)
+                        {
+                            summaryStatusText.text = "Crafting (" + area.activeProductions.Count + ")";
+                            fullStatusText.text = "Crafting (" + area.activeProductions.Count + ")";
+                            fullStatusImage.sprite = statusSprites[3];
+                        }
+                        else
+                        {
+                            summaryStatusText.text = "Stand By";
+                            fullStatusText.text = "Stand By";
+                            fullStatusImage.sprite = null;
+                        }
+                    }
+                    else
+                    {
+                        if (area.requiresPower)
+                        {
+                            summaryStatusText.text = "Out of Fuel";
+                            fullStatusText.text = "Out of Fuel";
+                            fullStatusImage.sprite = statusSprites[6];
+                        }
+                        else
+                        {
+                            summaryStatusText.text = "Stand By";
+                            fullStatusText.text = "Stand By";
+                            fullStatusImage.sprite = null;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void UpdateStatusIcons()
+        {
+            // Border
+            if(area.currentLevel > area.startLevel)
+            {
+                summaryIconBorder.sprite = borderSprites[0];
+                fullIconBorder.sprite = borderSprites[0];
+            }
+            else
+            {
+                if (area.AllRequirementsFulfilled())
+                {
+                    summaryIconBorder.sprite = borderSprites[1];
+                    fullIconBorder.sprite = borderSprites[1];
+                }
+                else
+                {
+                    summaryIconBorder.sprite = borderSprites[2];
+                    fullIconBorder.sprite = borderSprites[2];
+                }
+            }
+
+            // Bottom right, current level stuff
+            if (area.currentLevel == area.startLevel)
+            {
+                summaryIconCurentLevel.gameObject.SetActive(false);
+                fullIconCurentLevel.gameObject.SetActive(false);
+                if (area.AllRequirementsFulfilled())
+                {
+                    summaryIconUnlocked.SetActive(true);
+                    summaryIconLocked.SetActive(false);
+                    fullIconUnlocked.SetActive(true);
+                    fullIconLocked.SetActive(false);
+                }
+                else
+                {
+                    summaryIconUnlocked.SetActive(false);
+                    summaryIconLocked.SetActive(true);
+                    fullIconUnlocked.SetActive(false);
+                    fullIconLocked.SetActive(true);
+                }
+            }
+            else
+            {
+                summaryIconCurentLevel.gameObject.SetActive(true);
+                summaryIconCurentLevel.text = area.currentLevel.ToString("00");
+                fullIconCurentLevel.gameObject.SetActive(true);
+                fullIconCurentLevel.text = area.currentLevel.ToString("00");
+                summaryIconLocked.SetActive(false);
+                fullIconLocked.SetActive(false);
+                summaryIconUnlocked.SetActive(false);
+                fullIconUnlocked.SetActive(false);
+            }
+
+            // Top right, status
+            summaryIconConstructing.SetActive(false);
+            summaryIconReadyToUpgrade.SetActive(false);
+            summaryIconUpgrading.SetActive(false);
+            summaryIconProducingPanel.SetActive(false);
+            fullIconConstructing.SetActive(false);
+            fullIconReadyToUpgrade.SetActive(false);
+            fullIconUpgrading.SetActive(false);
+            fullIconProducingPanel.SetActive(false);
+            if (area.upgrading)
+            {
+                if (area.currentLevel > area.startLevel)
+                {
+                    summaryIconConstructing.SetActive(true);
+                    fullIconConstructing.SetActive(true);
+                }
+                else
+                {
+                    summaryIconUpgrading.SetActive(true);
+                    fullIconUpgrading.SetActive(true);
+                }
+            }
+            else
+            {
+                if (area.AllRequirementsFulfilled() && area.currentLevel > area.startLevel)
+                {
+                    summaryIconReadyToUpgrade.SetActive(true);
+                    fullIconReadyToUpgrade.SetActive(true);
+                }
+                else if (area.activeProductions.Count > 0)
+                {
+                    summaryIconProducingPanel.SetActive(true);
+                    fullIconProducingPanel.SetActive(true);
+                }
+            }
+
+            // Top left, power
+            summaryIconConstructing.SetActive(false);
+            summaryIconReadyToUpgrade.SetActive(false);
+            summaryIconUpgrading.SetActive(false);
+            summaryIconProducingPanel.SetActive(false);
+            fullIconConstructing.SetActive(false);
+            fullIconReadyToUpgrade.SetActive(false);
+            fullIconUpgrading.SetActive(false);
+            fullIconProducingPanel.SetActive(false);
+            if (area.requiresPower)
+            {
+                if (area.powered)
+                {
+                    summaryIconOutOfFuel.SetActive(false);
+                    fullIconOutOfFuel.SetActive(false);
+                }
+                else
+                {
+                    summaryIconOutOfFuel.SetActive(true);
+                    fullIconOutOfFuel.SetActive(true);
+                }
+            }
+            else
+            {
+                summaryIconOutOfFuel.SetActive(false);
+                fullIconOutOfFuel.SetActive(false);
+            }
+        }
+
+        public void UpdateDescriptions()
+        {
+            string currentDescription = null;
+            string futureDescription = null;
+            if(Mod.localeDB["hideout_area_" + area.index + "_stage_"+area.currentLevel+"_description"] == null)
+            {
+                currentDescription = Mod.localeDB["hideout_area_" + area.index + "_stage_" + area.currentLevel + "_description"].ToString();
+            }
+            if(Mod.localeDB["hideout_area_" + area.index + "_stage_"+(area.currentLevel+1).ToString()+"_description"] == null)
+            {
+                futureDescription = Mod.localeDB["hideout_area_" + area.index + "_stage_" + (area.currentLevel + 1).ToString() + "_description"].ToString();
+            }
+            if (area.currentLevel == area.startLevel)
+            {
+                if(futureDescription == null)
+                {
+                    fullDescription.gameObject.SetActive(false);
+                }
+                else
+                {
+                    fullDescription.gameObject.SetActive(true);
+                    fullDescription.text = futureDescription;
+                }
+            }
+            else if(area.currentLevel > area.startLevel)
+            {
+                if(currentDescription == null)
+                {
+                    fullDescription.gameObject.SetActive(false);
+                }
+                else
+                {
+                    fullDescription.gameObject.SetActive(true);
+                    fullDescription.text = currentDescription;
+                }
+                if(futureDescription == null)
+                {
+                    fullFutureDescription.gameObject.SetActive(false);
+                }
+                else
+                {
+                    fullFutureDescription.gameObject.SetActive(true);
+                    fullFutureDescription.text = futureDescription;
+                }
+            }
+        }
+
+        public void UpdateRequirements()
+        {
+            if(area.currentLevel == area.startLevel)
+            {
+                requirementPanel.SetActive(true);
+                futureRequirementPanel.SetActive(false);
+            }
+            else
+            {
+                requirementPanel.SetActive(false);
+                futureRequirementPanel.SetActive(area.currentLevel < area.levels.Length - 1);
+            }
+            UpdateCurrentRequirements();
+            UpdateFutureRequirements();
+        }
+
+        public void UpdateBonuses()
+        {
+            if(area.currentLevel == area.startLevel)
+            {
+                bonusPanel.SetActive(true);
+                bonusTitle.text = "FUTURE BONUSES";
+                futureBonusPanel.SetActive(false);
+                UpdateCurrentBonuses(area.currentLevel + 1);
+            }
+            else
+            {
+                bonusPanel.SetActive(true);
+                bonusTitle.text = "CURRENT BONUSES";
+                futureBonusPanel.SetActive(area.currentLevel < area.levels.Length - 1);
+                UpdateCurrentBonuses(area.currentLevel);
+            }
+            UpdateFutureBonuses();
+        }
+
+        public void UpdateCurrentBonuses(int level)
+        {
+            // Destroy any existing bonuses
+            while(bonusPanel.transform.childCount > 2)
+            {
+                Transform currentChild = bonusPanel.transform.GetChild(2);
+                currentChild.parent = null;
+                Destroy(currentChild.gameObject);
+            }
+
+            if (bonusPanel.activeSelf)
+            {
+                Bonus[] bonuses = area.bonusesPerLevel[level];
+
+                for(int i=0; i < bonuses.Length; ++i)
+                {
+                    BonusUI bonus = Instantiate(bonusPrefab, bonusPanel.transform).GetComponent<BonusUI>();
+                    bonus.
+                }
+            }
+        }
+
+        public void UpdateCurrentRequirements()
+        {
+            // Destroy any existing requirements
+            while(requirementPanel.transform.childCount > 5) // 5: title + 4 requirement panels
+            {
+                Transform currentChild = requirementPanel.transform.GetChild(5);
+                currentChild.parent = null;
+                Destroy(currentChild.gameObject);
+            }
+
+            if (requirementPanel.activeSelf)
+            {
+                Dictionary<Requirement.RequirementType, List<Requirement>> requirements = area.requirementsByTypePerLevel[area.currentLevel + 1];
+
+                // Area requirements
+                if(requirements.TryGetValue(Requirement.RequirementType.Area, out List<Requirement> areaRequirements))
+                {
+                    Transform currentAreaRequirementParent = null;
+                    for(int i=0; i< areaRequirements.Count; ++i)
+                    {
+                        if (areaRequirements[i].areaIndex == area.index)
+                        {
+                            // Area requirements may list our own area's previous level, skip in that case
+                            continue;
+                        }
+                        else
+                        {
+                            // Make new parent if current is full or non existent
+                            if(currentAreaRequirementParent == null || currentAreaRequirementParent.childCount >= 2)
+                            {
+                                currentAreaRequirementParent = Instantiate(areaRequirementPanel, requirementPanel.transform).transform;
+                                currentAreaRequirementParent.gameObject.SetActive(true);
+                            }
+
+                            // Add new requirement
+                            AreaRequirement areaRequirement = Instantiate(areaRequirementPrefab, currentAreaRequirementParent).GetComponent<AreaRequirement>();
+                            areaRequirement.areaIcon.sprite = areaRequirement.areaIcons[areaRequirements[i].areaIndex];
+                            areaRequirement.requiredLevel.text = areaRequirements[i].areaLevel.ToString("00");
+                            if(Mod.localeDB["hideout_area_" + area.index + "_name"] == null)
+                            {
+                                areaRequirement.areaName.text = "UNKNOWN";
+                            }
+                            else
+                            {
+                                areaRequirement.areaName.text = Mod.localeDB["hideout_area_" + area.index + "_name"].ToString();
+                            }
+                            areaRequirement.fulfilled.SetActive(areaRequirements[i].fulfilled);
+                            areaRequirement.unfulfilled.SetActive(!areaRequirements[i].fulfilled);
+                            areaRequirements[i].areaRequirementUI = areaRequirement;
+                            areaRequirement.gameObject.SetActive(true);
+                        }
+                    }
+                }
+
+                // Item requirements
+                if(requirements.TryGetValue(Requirement.RequirementType.Item, out List<Requirement> itemRequirements))
+                {
+                    Transform currentItemRequirementParent = null;
+                    for(int i=0; i< itemRequirements.Count; ++i)
+                    {
+                        // Make new parent if current is full or non existent
+                        if(currentItemRequirementParent == null || currentItemRequirementParent.childCount >= 5)
+                        {
+                            currentItemRequirementParent = Instantiate(itemRequirementPanel, requirementPanel.transform).transform;
+                            currentItemRequirementParent.gameObject.SetActive(true);
+                        }
+
+                        // Add new requirement
+                        RequirementItemView itemRequirement = Instantiate(itemRequirementPrefab, currentItemRequirementParent).GetComponent<RequirementItemView>();
+
+                        int parsedID = -1;
+                        if(int.TryParse(itemRequirements[i].itemID, out parsedID))
+                        {
+                            itemRequirement.itemView.itemIcon.sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
+                        }
+                        else
+                        {
+                            // TODO: // Get vanilla Icon without loading vanilla item
+                        }
+                        if(HideoutController.instance.inventoryAmount.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
+                        {
+                            itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
+                        }
+                        else
+                        {
+                            itemRequirement.amount.text = "0/" + itemRequirements[i].itemCount;
+                        }
+                        itemRequirement.fulfilledIcon.SetActive(itemRequirements[i].fulfilled);
+                        itemRequirement.unfulfilledIcon.SetActive(!itemRequirements[i].fulfilled);
+
+                        itemRequirements[i].itemRequirementUI = itemRequirement;
+                        itemRequirement.gameObject.SetActive(true);
+                    }
+                }
+
+                // Trader requirements
+                if(requirements.TryGetValue(Requirement.RequirementType.Trader, out List<Requirement> traderRequirements))
+                {
+                    Transform currentTraderRequirementParent = null;
+                    for(int i=0; i< traderRequirements.Count; ++i)
+                    {
+                        // Make new parent if current is full or non existent
+                        if(currentTraderRequirementParent == null || currentTraderRequirementParent.childCount >= 3)
+                        {
+                            currentTraderRequirementParent = Instantiate(traderRequirementPanel, requirementPanel.transform).transform;
+                            currentTraderRequirementParent.gameObject.SetActive(true);
+                        }
+
+                        // Add new requirement
+                        TraderRequirement traderRequirement = Instantiate(traderRequirementPrefab, currentTraderRequirementParent).GetComponent<TraderRequirement>();
+
+                        traderRequirement.traderIcon.sprite = traderRequirement.traderIcons[traderRequirements[i].trader.index];
+                        if(traderRequirements[i].traderLevel == traderRequirements[i].trader.levels.Length - 1)
+                        {
+                            traderRequirement.elite.SetActive(true);
+                            traderRequirement.rankText.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            traderRequirement.elite.SetActive(false);
+                            traderRequirement.rankText.gameObject.SetActive(true);
+                            traderRequirement.rankText.text = Trader.LevelToRoman(traderRequirements[i].traderLevel);
+                        }
+                        traderRequirement.fulfilled.SetActive(traderRequirements[i].fulfilled);
+                        traderRequirement.unfulfilled.SetActive(!traderRequirements[i].fulfilled);
+
+                        traderRequirements[i].traderRequirementUI = traderRequirement;
+                        traderRequirement.gameObject.SetActive(true);
+                    }
+                }
+
+                // Skill requirements
+                if(requirements.TryGetValue(Requirement.RequirementType.Skill, out List<Requirement> skillRequirements))
+                {
+                    Transform currentSkillRequirementParent = null;
+                    for(int i=0; i< skillRequirements.Count; ++i)
+                    {
+                        // Make new parent if current is full or non existent
+                        if(currentSkillRequirementParent == null || currentSkillRequirementParent.childCount >= 3)
+                        {
+                            currentSkillRequirementParent = Instantiate(skillRequirementPanel, requirementPanel.transform).transform;
+                            currentSkillRequirementParent.gameObject.SetActive(true);
+                        }
+
+                        // Add new requirement
+                        SkillRequirement skillRequirement = Instantiate(skillRequirementPrefab, currentSkillRequirementParent).GetComponent<SkillRequirement>();
+
+                        skillRequirement.skillIcon.sprite = skillRequirement.skillIcons[skillRequirements[i].skillIndex];
+                        if(skillRequirements[i].skillLevel == 51)
+                        {
+                            skillRequirement.elite.SetActive(true);
+                            skillRequirement.rankText.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            skillRequirement.elite.SetActive(false);
+                            skillRequirement.rankText.gameObject.SetActive(true);
+                            skillRequirement.rankText.text = skillRequirements[i].skillLevel.ToString("00");
+                        }
+                        skillRequirement.fulfilled.SetActive(skillRequirements[i].fulfilled);
+                        skillRequirement.unfulfilled.SetActive(!skillRequirements[i].fulfilled);
+
+                        skillRequirements[i].skillRequirementUI = skillRequirement;
+                        skillRequirement.gameObject.SetActive(true);
+                    }
+                }
+            }
+        }
+
+        public void UpdateFutureRequirements()
+        {
+            // Destroy any existing requirements
+            while (futureRequirementPanel.transform.childCount > 5) // 5: title + 4 requirement panels
+            {
+                Transform currentChild = futureRequirementPanel.transform.GetChild(5);
+                currentChild.parent = null;
+                Destroy(currentChild.gameObject);
+            }
+
+            if (futureRequirementPanel.activeSelf)
+            {
+                Dictionary<Requirement.RequirementType, List<Requirement>> requirements = area.requirementsByTypePerLevel[area.currentLevel + 1];
+
+                // Area requirements
+                if (requirements.TryGetValue(Requirement.RequirementType.Area, out List<Requirement> areaRequirements))
+                {
+                    Transform currentAreaRequirementParent = null;
+                    for (int i = 0; i < areaRequirements.Count; ++i)
+                    {
+                        if (areaRequirements[i].areaIndex == area.index)
+                        {
+                            // Area requirements may list our own area's previous level, skip in that case
+                            continue;
+                        }
+                        else
+                        {
+                            // Make new parent if current is full or non existent
+                            if (currentAreaRequirementParent == null || currentAreaRequirementParent.childCount >= 2)
+                            {
+                                currentAreaRequirementParent = Instantiate(futureAreaRequirementPanel, futureRequirementPanel.transform).transform;
+                                currentAreaRequirementParent.gameObject.SetActive(true);
+                            }
+
+                            // Add new requirement
+                            AreaRequirement areaRequirement = Instantiate(futureAreaRequirementPrefab, currentAreaRequirementParent).GetComponent<AreaRequirement>();
+                            areaRequirement.areaIcon.sprite = areaRequirement.areaIcons[areaRequirements[i].areaIndex];
+                            areaRequirement.requiredLevel.text = areaRequirements[i].areaLevel.ToString("00");
+                            if (Mod.localeDB["hideout_area_" + area.index + "_name"] == null)
+                            {
+                                areaRequirement.areaName.text = "UNKNOWN";
+                            }
+                            else
+                            {
+                                areaRequirement.areaName.text = Mod.localeDB["hideout_area_" + area.index + "_name"].ToString();
+                            }
+                            areaRequirement.fulfilled.SetActive(areaRequirements[i].fulfilled);
+                            areaRequirement.unfulfilled.SetActive(!areaRequirements[i].fulfilled);
+                            areaRequirements[i].areaRequirementUI = areaRequirement;
+                            areaRequirement.gameObject.SetActive(true);
+                        }
+                    }
+                }
+
+                // Item requirements
+                if (requirements.TryGetValue(Requirement.RequirementType.Item, out List<Requirement> itemRequirements))
+                {
+                    Transform currentItemRequirementParent = null;
+                    for (int i = 0; i < itemRequirements.Count; ++i)
+                    {
+                        // Make new parent if current is full or non existent
+                        if (currentItemRequirementParent == null || currentItemRequirementParent.childCount >= 5)
+                        {
+                            currentItemRequirementParent = Instantiate(futureItemRequirementPanel, futureRequirementPanel.transform).transform;
+                            currentItemRequirementParent.gameObject.SetActive(true);
+                        }
+
+                        // Add new requirement
+                        RequirementItemView itemRequirement = Instantiate(futureItemRequirementPrefab, currentItemRequirementParent).GetComponent<RequirementItemView>();
+
+                        int parsedID = -1;
+                        if (int.TryParse(itemRequirements[i].itemID, out parsedID))
+                        {
+                            itemRequirement.itemView.itemIcon.sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
+                        }
+                        else
+                        {
+                            // TODO: // Get vanilla Icon without loading vanilla item
+                        }
+                        if (HideoutController.instance.inventoryAmount.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
+                        {
+                            itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
+                        }
+                        else
+                        {
+                            itemRequirement.amount.text = "0/" + itemRequirements[i].itemCount;
+                        }
+                        itemRequirement.fulfilledIcon.SetActive(itemRequirements[i].fulfilled);
+                        itemRequirement.unfulfilledIcon.SetActive(!itemRequirements[i].fulfilled);
+
+                        itemRequirements[i].itemRequirementUI = itemRequirement;
+                        itemRequirement.gameObject.SetActive(true);
+                    }
+                }
+
+                // Trader requirements
+                if (requirements.TryGetValue(Requirement.RequirementType.Trader, out List<Requirement> traderRequirements))
+                {
+                    Transform currentTraderRequirementParent = null;
+                    for (int i = 0; i < traderRequirements.Count; ++i)
+                    {
+                        // Make new parent if current is full or non existent
+                        if (currentTraderRequirementParent == null || currentTraderRequirementParent.childCount >= 3)
+                        {
+                            currentTraderRequirementParent = Instantiate(futureTraderRequirementPanel, futureRequirementPanel.transform).transform;
+                            currentTraderRequirementParent.gameObject.SetActive(true);
+                        }
+
+                        // Add new requirement
+                        TraderRequirement traderRequirement = Instantiate(futureTraderRequirementPrefab, currentTraderRequirementParent).GetComponent<TraderRequirement>();
+
+                        traderRequirement.traderIcon.sprite = traderRequirement.traderIcons[traderRequirements[i].trader.index];
+                        if (traderRequirements[i].traderLevel == traderRequirements[i].trader.levels.Length - 1)
+                        {
+                            traderRequirement.elite.SetActive(true);
+                            traderRequirement.rankText.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            traderRequirement.elite.SetActive(false);
+                            traderRequirement.rankText.gameObject.SetActive(true);
+                            traderRequirement.rankText.text = Trader.LevelToRoman(traderRequirements[i].traderLevel);
+                        }
+                        traderRequirement.fulfilled.SetActive(traderRequirements[i].fulfilled);
+                        traderRequirement.unfulfilled.SetActive(!traderRequirements[i].fulfilled);
+
+                        traderRequirements[i].traderRequirementUI = traderRequirement;
+                        traderRequirement.gameObject.SetActive(true);
+                    }
+                }
+
+                // Skill requirements
+                if (requirements.TryGetValue(Requirement.RequirementType.Skill, out List<Requirement> skillRequirements))
+                {
+                    Transform currentSkillRequirementParent = null;
+                    for (int i = 0; i < skillRequirements.Count; ++i)
+                    {
+                        // Make new parent if current is full or non existent
+                        if (currentSkillRequirementParent == null || currentSkillRequirementParent.childCount >= 3)
+                        {
+                            currentSkillRequirementParent = Instantiate(futureSkillRequirementPanel, futureRequirementPanel.transform).transform;
+                            currentSkillRequirementParent.gameObject.SetActive(true);
+                        }
+
+                        // Add new requirement
+                        SkillRequirement skillRequirement = Instantiate(futureSkillRequirementPrefab, currentSkillRequirementParent).GetComponent<SkillRequirement>();
+
+                        skillRequirement.skillIcon.sprite = skillRequirement.skillIcons[skillRequirements[i].skillIndex];
+                        if (skillRequirements[i].skillLevel == 51)
+                        {
+                            skillRequirement.elite.SetActive(true);
+                            skillRequirement.rankText.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            skillRequirement.elite.SetActive(false);
+                            skillRequirement.rankText.gameObject.SetActive(true);
+                            skillRequirement.rankText.text = skillRequirements[i].skillLevel.ToString("00");
+                        }
+                        skillRequirement.fulfilled.SetActive(skillRequirements[i].fulfilled);
+                        skillRequirement.unfulfilled.SetActive(!skillRequirements[i].fulfilled);
+
+                        skillRequirements[i].skillRequirementUI = skillRequirement;
+                        skillRequirement.gameObject.SetActive(true);
+                    }
+                }
+            }
         }
 
         public void OnSummaryClicked()

@@ -16,7 +16,7 @@ namespace EFM
         public static float GPUBoostRate;
         [NonSerialized]
         public int[] constructionTimePerLevel; // In seconds
-        public Requirement[][] requirementsPerLevel;
+        public Dictionary<Requirement.RequirementType, List<Requirement>>[] requirementsByTypePerLevel;
         public Bonus[][] bonusesPerLevel;
         public List<List<Production>> productionsPerLevel;
         public Dictionary<string, Production> productionsByID;
@@ -39,6 +39,8 @@ namespace EFM
         [NonSerialized]
         public bool upgrading;
         public DateTime upgradeStartTime;
+        [NonSerialized]
+        public List<Production> activeProductions = new List<Production>();
 
         // Power
         public bool requiresPower;
@@ -135,7 +137,7 @@ namespace EFM
             }
 
             constructionTimePerLevel = new int[levels.Length];
-            requirementsPerLevel = new Requirement[levels.Length][];
+            requirementsByTypePerLevel = new Dictionary<Requirement.RequirementType, List<Requirement>>[levels.Length];
             bonusesPerLevel = new Bonus[levels.Length][];
             productionsPerLevel = new List<List<Production>>();
             productionsByID = new Dictionary<string, Production>();
@@ -151,21 +153,21 @@ namespace EFM
                 JArray levelRequirements = levelData["requirements"] as JArray;
                 if (levelRequirements == null)
                 {
-                    requirementsPerLevel[i] = null;
+                    requirementsByTypePerLevel[i] = null;
                 }
                 else
                 {
-                    requirementsPerLevel[i] = new Requirement[levelRequirements.Count];
+                    requirementsByTypePerLevel[i] = new Dictionary<Requirement.RequirementType, List<Requirement>>();
                     for (int j = 0; j < levelRequirements.Count; ++j)
                     {
                         Requirement currentRequirement = new Requirement(levelRequirements[j]);
-                        if (currentRequirement.requirementType == Requirement.RequirementType.None)
+                        if (requirementsByTypePerLevel[i].TryGetValue(currentRequirement.requirementType, out List<Requirement> currentRequirements))
                         {
-                            requirementsPerLevel[i][j] = null;
+                            currentRequirements.Add(currentRequirement);
                         }
                         else
                         {
-                            requirementsPerLevel[i][j] = currentRequirement;
+                            requirementsByTypePerLevel[i].Add(currentRequirement.requirementType, new List<Requirement>() { currentRequirement });
                         }
                     }
                 }
@@ -231,10 +233,13 @@ namespace EFM
             // as the corresponding events are raised
             if(currentLevel < levels.Length - 1)
             {
-                Requirement[] requirements = requirementsPerLevel[currentLevel + 1];
-                for (int i = 0; i < requirements.Length; ++i)
+                Dictionary<Requirement.RequirementType, List<Requirement>> requirements = requirementsByTypePerLevel[currentLevel + 1];
+                foreach(KeyValuePair<Requirement.RequirementType, List<Requirement>> requirementEntry in requirements)
                 {
-                    requirements[i].UpdateFulfilled();
+                    for (int i = 0; i < requirementEntry.Value.Count; ++i)
+                    {
+                        requirementEntry.Value[i].UpdateFulfilled();
+                    }
                 }
             }
             for(int i = 0; i < productionsPerLevel.Count; ++i)
@@ -354,12 +359,15 @@ namespace EFM
                 return false;
             }
 
-
-            for(int i=0; i < requirementsPerLevel[currentLevel + 1].Length; ++i)
+            Dictionary<Requirement.RequirementType, List<Requirement>> requirements = requirementsByTypePerLevel[currentLevel + 1];
+            foreach (KeyValuePair<Requirement.RequirementType, List<Requirement>> requirementEntry in requirements)
             {
-                if(!requirementsPerLevel[currentLevel + 1][i].fulfilled)
+                for (int i = 0; i < requirementEntry.Value.Count; ++i)
                 {
-                    return false;
+                    if (!requirementEntry.Value[i].fulfilled)
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -382,6 +390,35 @@ namespace EFM
             {
                 OnAreaLevelChanged();
             }
+        }
+
+        public void OnBeginProduction(Production production)
+        {
+            activeProductions.Add(production);
+        }
+
+        public void OnStopProduction(Production production)
+        {
+            activeProductions.Remove(production);
+        }
+
+        public List<Production> GetActiveProductions()
+        {
+            List<Production> productions = new List<Production>();
+            for(int i=startLevel; i <= currentLevel; ++i)
+            {
+                if(productionsPerLevel[currentLevel] != null)
+                {
+                    for (int j = 0; j < productionsPerLevel[currentLevel].Count; ++j)
+                    {
+                        if (productionsPerLevel[currentLevel][j].inProduction)
+                        {
+                            productions.Add(productionsPerLevel[currentLevel][j]);
+                        }
+                    }
+                }
+            }
+            return productions;
         }
     }
 
@@ -531,10 +568,10 @@ namespace EFM
             {
                 case RequirementType.Item:
                     int count = 0;
-                    if(HideoutController.instance.inventory.TryGetValue(itemID, out List<MeatovItem> currentItems))
+                    if(HideoutController.instance.inventoryAmount.TryGetValue(itemID, out int currentItemCount))
                     {
-                        fulfilled = currentItems.Count >= itemCount;
-                        count = currentItems.Count;
+                        fulfilled = currentItemCount >= itemCount;
+                        count = currentItemCount;
                     }
                     else
                     {
@@ -553,10 +590,10 @@ namespace EFM
                     break;
                 case RequirementType.Tool:
                     int toolCount = 0;
-                    if (HideoutController.instance.inventory.TryGetValue(itemID, out List<MeatovItem> toolCurrentItems))
+                    if (HideoutController.instance.inventoryAmount.TryGetValue(itemID, out int toolCurrentItemCount))
                     {
-                        fulfilled = toolCurrentItems.Count >= 1;
-                        toolCount = toolCurrentItems.Count;
+                        fulfilled = toolCurrentItemCount >= 1;
+                        toolCount = toolCurrentItemCount;
                     }
                     else
                     {
@@ -575,12 +612,8 @@ namespace EFM
                     break;
                 case RequirementType.Resource:
                     int totalAmount = 0;
-                    if (HideoutController.instance.inventory.TryGetValue(itemID, out List<MeatovItem> resourceCurrentItems))
+                    if (HideoutController.instance.inventoryAmount.TryGetValue(itemID, out totalAmount))
                     {
-                        for(int i=0; i < resourceCurrentItems.Count; ++i)
-                        {
-                            totalAmount += resourceCurrentItems[i].amount;
-                        }
                         fulfilled = totalAmount >= resourceCount;
                     }
                     else
@@ -900,16 +933,40 @@ namespace EFM
         // Live data
         public bool unlocked;
         public bool previousInProduction;
-        public bool inProduction;
+        private bool _inProduction;
+        public bool inProduction
+        {
+            get{ return _inProduction; }
+            set
+            {
+                if (value && !inProduction)
+                {
+                    OnBeginProductionInvoke();
+                }
+                else if (!value && inProduction)
+                {
+                    OnStopProductionInvoke();
+                }
+                _inProduction = value;
+            }
+        }
         public float timeLeft;
         public bool timeLeftSet;
         public float progressBaseTime; // The total time we need to base ourselves on when calculating progress, may be different than time, like in the case of bitcoin farm, total time depends on number of GPUs
         public float progress; // Percentage
         public int readyCount;
 
+        public delegate void OnBeginProductionDelegate(Production production);
+        public event OnBeginProductionDelegate OnBeginProduction;
+
+        public delegate void OnStopProductionDelegate(Production production);
+        public event OnStopProductionDelegate OnStopProduction;
+
         public Production(Area area, JToken data)
         {
             this.area = area;
+            OnBeginProduction += area.OnBeginProduction;
+            OnStopProduction += area.OnStopProduction;
 
             ID = data["_id"].ToString();
             area.productionsByID.Add(ID, this);
@@ -1063,6 +1120,22 @@ namespace EFM
             timeLeft = timeLeft - timeLeft * (progress / 100);
             timeLeftSet = true;
             inProduction = GPUCount > 0;
+        }
+
+        public void OnBeginProductionInvoke()
+        {
+            if(OnBeginProduction != null)
+            {
+                OnBeginProduction(this);
+            }
+        }
+
+        public void OnStopProductionInvoke()
+        {
+            if(OnStopProduction != null)
+            {
+                OnStopProduction(this);
+            }
         }
     }
 

@@ -62,15 +62,19 @@ namespace EFM
             if (Mod.hideoutBundle == null)
             {
                 Mod.LogInfo("Loading main asset bundles");
-                Mod.assetsBundles = new AssetBundle[2];
-                Mod.assetsBundles[0] = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMAssets0.ab");
+                Mod.playerBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMPlayer.ab");
                 //Mod.assetsBundles[1] = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMAssets1.ab");
                 Mod.LogInfo("Loading hideout bundle");
                 Mod.hideoutBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMHideout.ab");
                 Mod.LogInfo("Loaded hideout bundles");
 
-                Mod.playerStatusUIPrefab = Mod.assetsBundles[0].LoadAsset<GameObject>("StatusUI");
-                Mod.staminaBarPrefab = Mod.assetsBundles[0].LoadAsset<GameObject>("StaminaBar");
+                Mod.playerStatusUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("StatusUI");
+                Mod.staminaBarPrefab = Mod.playerBundle.LoadAsset<GameObject>("StaminaBar");
+                Mod.consumeUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ConsumeUI");
+                Mod.stackSplitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("StackSplitUI");
+                Mod.extractionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionUI");
+                Mod.extractionLimitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionLimitUI");
+                Mod.itemDescriptionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ItemDescriptionUI");
             }
 
             if (availableSaveFiles == null)

@@ -37,6 +37,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src\ConsumeUI.cs" />
     <Compile Include="src\AI.cs" />
     <Compile Include="src\AreaBonus.cs" />
     <Compile Include="src\Area.cs" />
@@ -51,7 +52,12 @@
     <Compile Include="src\CategoryTreeNode.cs" />
     <Compile Include="src\ContainerVolume.cs" />
     <Compile Include="src\ContainmentVolume.cs" />
+    <Compile Include="src\ExtractionCardUI.cs" />
+    <Compile Include="src\ExtractionLimitUI.cs" />
+    <Compile Include="src\ExtractionUI.cs" />
     <Compile Include="src\FarmingView.cs" />
+    <Compile Include="src\ItemDescriptionListEntryUI.cs" />
+    <Compile Include="src\ItemDescriptionUI.cs" />
     <Compile Include="src\ItemRewardView.cs" />
     <Compile Include="src\ItemView.cs" />
     <Compile Include="src\MeatovItem.cs" />
@@ -79,6 +85,7 @@
     <Compile Include="src\ScavCaseView.cs" />
     <Compile Include="src\SkillRequirement.cs" />
     <Compile Include="src\SkillUI.cs" />
+    <Compile Include="src\StackSplitUI.cs" />
     <Compile Include="src\StaminaUI.cs" />
     <Compile Include="src\StatRewardView.cs" />
     <Compile Include="src\StatusUI.cs" />

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
@@ -324,6 +325,22 @@ namespace EFM
                     return "638f541a29ffd1183d187f57";
                 default:
                     return "";
+            }
+        }
+
+        public static string LevelToRoman(int level)
+        {
+            switch (level)
+            {
+                case 1:
+                    return "I";
+                case 2:
+                    return "II";
+                case 3:
+                    return "III";
+                default:
+                    Mod.LogError("DEV: Trader.LevelToRoman was given invalid level: "+level+":\n"+Environment.StackTrace);
+                    return level.ToString();
             }
         }
 

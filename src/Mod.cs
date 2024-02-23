@@ -32,10 +32,13 @@ namespace EFM
         // Live data
         public static Mod modInstance;
         public static int currentLocationIndex = -1; // This will be used by custom item wrapper and vanilla item descr. in their Start(). Shoud only ever be 1(base) or 2(raid). If want to spawn an item in player inventory, will have to set it manually
-        public static AssetBundle[] assetsBundles;
-        public static AssetBundle defaultAssetsBundle;
+        public static AssetBundle defaultBundle;
         public static AssetBundle mainMenuBundle;
         public static AssetBundle hideoutBundle;
+        public static AssetBundle itemIconsBundle;
+        public static AssetBundle itemsBundle;
+        public static AssetBundle itemSoundsBundle;
+        public static AssetBundle playerBundle;
         public static AssetBundleCreateRequest currentRaidBundleRequest;
         public static List<GameObject> securedMainSceneComponents;
         public static List<GameObject> securedObjects;
@@ -484,92 +487,71 @@ namespace EFM
         {
             LogInfo("Loading Main assets", false);
             // Load assets
-            quickBeltSlotPrefab = assetsBundles[1].LoadAsset<GameObject>("QuickBeltSlot");
-            rectQuickBeltSlotPrefab = assetsBundles[1].LoadAsset<GameObject>("RectQuickBeltSlot");
-            consumeUIPrefab = assetsBundles[0].LoadAsset<GameObject>("ConsumeUI");
-            stackSplitUIPrefab = assetsBundles[0].LoadAsset<GameObject>("StackSplitUI");
-            extractionUIPrefab = assetsBundles[0].LoadAsset<GameObject>("ExtractionUI");
-            extractionLimitUIPrefab = assetsBundles[0].LoadAsset<GameObject>("ExtractionLimitUI");
-            extractionCardPrefab = assetsBundles[0].LoadAsset<GameObject>("ExtractionCard");
-            itemDescriptionUIPrefab = assetsBundles[0].LoadAsset<GameObject>("ItemDescriptionUI");
-            neededForPrefab = assetsBundles[0].LoadAsset<GameObject>("NeededForText");
-            ammoContainsPrefab = assetsBundles[0].LoadAsset<GameObject>("ContainsText");
-            cartridgeIcon = assetsBundles[0].LoadAsset<Sprite>("ItemCartridge_Icon");
-            playerLevelIcons = new Sprite[16];
-            for (int i = 1; i <= 16; ++i)
-            {
-                playerLevelIcons[i - 1] = assetsBundles[0].LoadAsset<Sprite>("rank" + (i * 5));
-            }
-            barbedWireClips = new AudioClip[3];
-            for (int i = 0; i < 3; ++i)
-            {
-                barbedWireClips[i] = assetsBundles[0].LoadAsset<AudioClip>("barbwire" + (i + 1));
-            }
             skillIcons = new Sprite[64];
-            skillIcons[0] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_endurance");
-            skillIcons[1] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_strength");
-            skillIcons[2] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_vitality");
-            skillIcons[3] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_health");
-            skillIcons[4] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_stressresistance");
-            skillIcons[5] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_metabolism");
-            skillIcons[6] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_immunity");
-            skillIcons[7] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_perception");
-            skillIcons[8] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_intellect");
-            skillIcons[9] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_attention");
-            skillIcons[10] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_charisma");
-            skillIcons[11] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_memory");
-            skillIcons[12] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_pistols");
-            skillIcons[13] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_revolvers");
-            skillIcons[14] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_smgs");
-            skillIcons[15] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_assaultrifles");
-            skillIcons[16] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_shotguns");
-            skillIcons[17] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_sniperrifles");
-            skillIcons[18] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_lmgs");
-            skillIcons[19] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_hmgs");
-            skillIcons[20] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_launchers");
-            skillIcons[21] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_ugls");
-            skillIcons[22] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_grenades");
-            skillIcons[23] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_melee");
-            skillIcons[24] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_dmrs");
-            skillIcons[25] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_recoilcontrol");
-            skillIcons[26] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_weapondrawing");
-            skillIcons[27] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_troubleshooting");
-            skillIcons[28] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_surgery");
-            skillIcons[29] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_covertmovement");
-            skillIcons[30] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_search");
-            skillIcons[31] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_magdrills");
-            skillIcons[32] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_sniping");
-            skillIcons[33] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_pronemovement");
-            skillIcons[34] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_fieldmedical");
-            skillIcons[35] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_basicmedical");
-            skillIcons[36] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_lightarmor");
-            skillIcons[37] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_heavyarmor");
-            skillIcons[38] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_basicweaponmodding");
-            skillIcons[39] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_advancedweaponmodding");
-            skillIcons[40] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_nightoperations");
-            skillIcons[41] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_silentoperations");
-            skillIcons[42] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_lockpicking");
-            skillIcons[43] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_weapontreatment");
-            skillIcons[44] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_freetrading");
-            skillIcons[45] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_auctions");
-            skillIcons[46] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_cleanoperations");
-            skillIcons[47] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_barter");
-            skillIcons[48] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_shadowconnections");
-            skillIcons[49] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_taskperformance");
-            skillIcons[50] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_crafting");
-            skillIcons[51] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_hideoutmanagement");
-            skillIcons[52] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_weaponswitch");
-            skillIcons[53] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_equipmentmanagement");
-            skillIcons[54] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_aksystems");
-            skillIcons[55] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_assaultoperations");
-            skillIcons[56] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_authority");
-            skillIcons[57] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_heavycaliber");
-            skillIcons[58] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_rawpower");
-            skillIcons[59] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_arsystems");
-            skillIcons[60] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_deepweaponmodding");
-            skillIcons[61] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_longrangeoptics");
-            skillIcons[62] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_negotiations");
-            skillIcons[63] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_tactics");
+            //skillIcons[0] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_endurance");
+            //skillIcons[1] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_strength");
+            //skillIcons[2] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_vitality");
+            //skillIcons[3] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_health");
+            //skillIcons[4] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_stressresistance");
+            //skillIcons[5] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_metabolism");
+            //skillIcons[6] = assetsBundles[0].LoadAsset<Sprite>("skill_physical_immunity");
+            //skillIcons[7] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_perception");
+            //skillIcons[8] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_intellect");
+            //skillIcons[9] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_attention");
+            //skillIcons[10] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_charisma");
+            //skillIcons[11] = assetsBundles[0].LoadAsset<Sprite>("skill_mental_memory");
+            //skillIcons[12] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_pistols");
+            //skillIcons[13] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_revolvers");
+            //skillIcons[14] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_smgs");
+            //skillIcons[15] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_assaultrifles");
+            //skillIcons[16] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_shotguns");
+            //skillIcons[17] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_sniperrifles");
+            //skillIcons[18] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_lmgs");
+            //skillIcons[19] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_hmgs");
+            //skillIcons[20] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_launchers");
+            //skillIcons[21] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_ugls");
+            //skillIcons[22] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_grenades");
+            //skillIcons[23] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_melee");
+            //skillIcons[24] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_dmrs");
+            //skillIcons[25] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_recoilcontrol");
+            //skillIcons[26] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_weapondrawing");
+            //skillIcons[27] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_troubleshooting");
+            //skillIcons[28] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_surgery");
+            //skillIcons[29] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_covertmovement");
+            //skillIcons[30] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_search");
+            //skillIcons[31] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_magdrills");
+            //skillIcons[32] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_sniping");
+            //skillIcons[33] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_pronemovement");
+            //skillIcons[34] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_fieldmedical");
+            //skillIcons[35] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_basicmedical");
+            //skillIcons[36] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_lightarmor");
+            //skillIcons[37] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_heavyarmor");
+            //skillIcons[38] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_basicweaponmodding");
+            //skillIcons[39] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_advancedweaponmodding");
+            //skillIcons[40] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_nightoperations");
+            //skillIcons[41] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_silentoperations");
+            //skillIcons[42] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_lockpicking");
+            //skillIcons[43] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_weapontreatment");
+            //skillIcons[44] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_freetrading");
+            //skillIcons[45] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_auctions");
+            //skillIcons[46] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_cleanoperations");
+            //skillIcons[47] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_barter");
+            //skillIcons[48] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_shadowconnections");
+            //skillIcons[49] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_taskperformance");
+            //skillIcons[50] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_crafting");
+            //skillIcons[51] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_hideoutmanagement");
+            //skillIcons[52] = assetsBundles[0].LoadAsset<Sprite>("skill_combat_weaponswitch");
+            //skillIcons[53] = assetsBundles[0].LoadAsset<Sprite>("skill_practical_equipmentmanagement");
+            //skillIcons[54] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_aksystems");
+            //skillIcons[55] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_assaultoperations");
+            //skillIcons[56] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_authority");
+            //skillIcons[57] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_heavycaliber");
+            //skillIcons[58] = assetsBundles[0].LoadAsset<Sprite>("skill_special_bear_rawpower");
+            //skillIcons[59] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_arsystems");
+            //skillIcons[60] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_deepweaponmodding");
+            //skillIcons[61] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_longrangeoptics");
+            //skillIcons[62] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_negotiations");
+            //skillIcons[63] = assetsBundles[0].LoadAsset<Sprite>("skill_special_usec_tactics");
 
             /*
             // Load prefabs and assets
@@ -669,7 +651,7 @@ namespace EFM
             List<GameObject> rigConfigurations = new List<GameObject>();
             pocketSlots = new FVRQuickBeltSlot[4];
             int rigIndex = 0;
-            GameObject pocketsConfiguration = assetsBundles[1].LoadAsset<GameObject>("PocketsConfiguration");
+            GameObject pocketsConfiguration = playerBundle.LoadAsset<GameObject>("PocketsConfiguration");
             rigConfigurations.Add(pocketsConfiguration);
             for (int j = 0; j < pocketsConfiguration.transform.childCount; ++j)
             {
@@ -737,13 +719,13 @@ namespace EFM
             {
                 LogInfo("\tLoading Item" + i);
                 int assetBundleIndex = i > 500 ? 1 : 0;
-                GameObject itemPrefab = assetsBundles[assetBundleIndex].LoadAsset<GameObject>("Item" + i);
+                GameObject itemPrefab = itemsBundle.LoadAsset<GameObject>("Item" + i);
                 itemPrefab.name = defaultItemsData["ItemDefaults"][i]["DefaultPhysicalObject"]["DefaultObjectWrapper"]["DisplayName"].ToString();
 
                 itemPrefabs.Add(itemPrefab);
                 itemNames.Add(i.ToString(), itemPrefab.name);
 
-                Sprite itemIcon = assetsBundles[assetBundleIndex].LoadAsset<Sprite>("Item" + i + "_Icon");
+                Sprite itemIcon = itemIconsBundle.LoadAsset<Sprite>("Item" + i + "_Icon");
                 itemIcons.Add(i.ToString(), itemIcon);
 
                 int itemType = ((int)defaultItemsData["ItemDefaults"][i]["ItemType"]);
@@ -875,7 +857,7 @@ namespace EFM
                         int count = 0;
                         for (int j = 0; j < sounds.Length; ++j)
                         {
-                            sounds[j] = assetsBundles[0].LoadAsset<AudioClip>(itemSound + "_" + soundCategories[j]);
+                            sounds[j] = itemSoundsBundle.LoadAsset<AudioClip>(itemSound + "_" + soundCategories[j]);
                             count += sounds[j] == null ? 0 : 1;
                         }
                         if (count == 0)
@@ -950,7 +932,7 @@ namespace EFM
                 {
                     // Setup the slots for the player rig config and the rig config
                     int slotCount = 0;
-                    GameObject quickBeltConfiguration = assetsBundles[assetBundleIndex].LoadAsset<GameObject>("Item" + i + "Configuration");
+                    GameObject quickBeltConfiguration = playerBundle.LoadAsset<GameObject>("Item" + i + "Configuration");
                     customItemWrapper.rigSlots = new List<FVRQuickBeltSlot>();
                     for (int j = 0; j < quickBeltConfiguration.transform.childCount; ++j)
                     {
@@ -1718,8 +1700,8 @@ namespace EFM
 
         private void LoadDefaultAssets()
         {
-            defaultAssetsBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMDefaultAssets.ab");
-            mainMenuPointable = defaultAssetsBundle.LoadAsset<GameObject>("MainMenuPointable");
+            defaultBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMDefaultAssets.ab");
+            mainMenuPointable = defaultBundle.LoadAsset<GameObject>("MainMenuPointable");
 
             mainMenuBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMMainMenu.ab");
             string[] bundledScenes = mainMenuBundle.GetAllScenePaths();
@@ -1733,12 +1715,6 @@ namespace EFM
         private void SetVanillaItems()
         {
             // Start by loading custom-vanilla icons
-            itemIcons.Add("DingPack", assetsBundles[0].LoadAsset<Sprite>("ItemDingPack_Icon"));
-            itemIcons.Add("FlipzoLighter", assetsBundles[0].LoadAsset<Sprite>("ItemFlipzoLighter_Icon"));
-            itemIcons.Add("GarageTool_FlatheadScrewdriver", assetsBundles[0].LoadAsset<Sprite>("ItemGarageTool_FlatheadScrewdriver_Icon"));
-            itemIcons.Add("GarageTool_WrenchTwoSided", assetsBundles[0].LoadAsset<Sprite>("ItemGarageTool_WrenchTwoSided_Icon"));
-            itemIcons.Add("HairsprayCan", assetsBundles[0].LoadAsset<Sprite>("ItemHairsprayCan_Icon"));
-            itemIcons.Add("Matchbox", assetsBundles[0].LoadAsset<Sprite>("ItemMatchbox_Icon"));
         }
 
         private static MeatovItem.ItemRarity ItemRarityStringToEnum(string name)
@@ -2592,14 +2568,14 @@ namespace EFM
                         {
                             hideoutBundle.Unload(true);
                             hideoutBundle = null;
-                            for(int i=0; i < assetsBundles.Length; ++i)
-                            {
-                                if (assetsBundles[i] != null)
-                                {
-                                    assetsBundles[i].Unload(true);
-                                }
-                            }
-                            assetsBundles = null;
+                            itemsBundle.Unload(true);
+                            itemsBundle = null;
+                            itemIconsBundle.Unload(true);
+                            itemIconsBundle = null;
+                            itemSoundsBundle.Unload(true);
+                            itemSoundsBundle = null;
+                            playerBundle.Unload(true);
+                            playerBundle = null;
                         }
 
                         Mod.currentLocationIndex = -1;

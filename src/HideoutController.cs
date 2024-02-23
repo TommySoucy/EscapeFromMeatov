@@ -121,6 +121,7 @@ namespace EFM
         private int insuredSetIndex = 0;
         private float scavTimer;
         public Dictionary<string, List<MeatovItem>> inventory;
+        public Dictionary<string, int> inventoryAmount;
         private Dictionary<int, int[]> fullPartConditions;
         private Dictionary<int, GameObject> medicalPartElements;
         private int totalMedicalTreatmentPrice;
@@ -1373,6 +1374,7 @@ namespace EFM
                 if (inventory == null)
                 {
                     inventory = new Dictionary<string, List<MeatovItem>>();
+                    inventoryAmount = new Dictionary<string, int>();
                 }
 
                 if (Mod.playerInventory == null)
