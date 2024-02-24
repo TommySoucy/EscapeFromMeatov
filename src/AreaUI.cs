@@ -100,11 +100,17 @@ namespace EFM
 
         public void Init()
         {
+            currentContent.gameObject.SetActive(true);
+            futureContent.gameObject.SetActive(false);
+
             UpdateStatusTexts();
             UpdateStatusIcons();
             UpdateDescriptions();
+            TODO: // Set productions
             UpdateRequirements();
             UpdateBonuses();
+            UpdateBottomButtons();
+            TODO: // Remember to set middle hover scrolls next frame
         }
 
         public void UpdateStatusTexts()
@@ -177,6 +183,8 @@ namespace EFM
             }
         }
 
+        TODO: // Set icon background
+        TODO: // Set time on upgrade and contruction status
         public void UpdateStatusIcons()
         {
             // Border
@@ -197,6 +205,22 @@ namespace EFM
                     summaryIconBorder.sprite = borderSprites[2];
                     fullIconBorder.sprite = borderSprites[2];
                 }
+            }
+
+            // Background
+            if (area.upgrading)
+            {
+                summaryIconProductionBackground.SetActive(false);
+                summaryIconProgressBackground.SetActive(true);
+                fullIconProductionBackground.SetActive(false);
+                fullIconProgressBackground.SetActive(true);
+            }
+            else
+            {
+                summaryIconProductionBackground.SetActive(area.hasReadyProduction);
+                summaryIconProgressBackground.SetActive(false);
+                fullIconProductionBackground.SetActive(area.hasReadyProduction);
+                fullIconProgressBackground.SetActive(false);
             }
 
             // Bottom right, current level stuff
@@ -395,7 +419,207 @@ namespace EFM
                 for(int i=0; i < bonuses.Length; ++i)
                 {
                     BonusUI bonus = Instantiate(bonusPrefab, bonusPanel.transform).GetComponent<BonusUI>();
-                    bonus.
+                    bonus.bonusIcon.gameObject.SetActive(true);
+                    switch (bonuses[i].iconPath)
+                    {
+                        case "/files/Hideout/icon_hideout_fuelslots.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[4];
+                            break;
+                        case "/files/Hideout/icon_hideout_createitem_generic.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[2];
+                            break;
+                        case "/files/Hideout/icon_hideout_createitem_meds.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[3];
+                            break;
+                        case "/files/Hideout/icon_hideout_scavitem.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[5];
+                            break;
+                        case "/files/Hideout/icon_hideout_videocardslots.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[8];
+                            break;
+                        case "/files/Hideout/icon_hideout_createitem_bitcoin.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[1];
+                            break;
+                        case "/files/Hideout/icon_hideout_shootingrangeunlock.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[6];
+                            break;
+                        case "/files/Hideout/icon_hideout_unlocked.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[7];
+                            break;
+                        default:
+                            bonus.bonusIcon.gameObject.SetActive(false);
+                            break;
+                    }
+                    if (bonuses[i].bonusType == Bonus.BonusType.ExperienceRate 
+                        || bonuses[i].bonusType == Bonus.BonusType.SkillGroupLevelingBoost)
+                    {
+                        bonus.bonusIcon.gameObject.SetActive(true);
+                        bonus.bonusIcon.sprite = bonus.bonusIcons[0];
+                    }
+                    if (Mod.localeDB["hideout_" + bonuses[i].ID] != null)
+                    {
+                        bonus.description.text = Mod.localeDB["hideout_" + bonuses[i].ID].ToString();
+                    }
+                    else if(Mod.localeDB["hideout_" + bonuses[i].bonusType.ToString()] != null)
+                    {
+                        bonus.description.text = Mod.localeDB["hideout_" + bonuses[i].bonusType.ToString()].ToString();
+                    }
+                    else
+                    {
+                        Mod.LogError("DEV: Could not get bonus description. Bonus ID: " + bonuses[i].ID);
+                    }
+                    switch (bonuses[i].bonusType)
+                    {
+                        case Bonus.BonusType.EnergyRegeneration:
+                        case Bonus.BonusType.DebuffEndDelay:
+                        case Bonus.BonusType.RepairArmorBonus:
+                        case Bonus.BonusType.HydrationRegeneration:
+                        case Bonus.BonusType.HealthRegeneration:
+                        case Bonus.BonusType.ScavCooldownTimer:
+                        case Bonus.BonusType.QuestMoneyReward:
+                        case Bonus.BonusType.InsuranceReturnTime:
+                        case Bonus.BonusType.RagfairCommission:
+                        case Bonus.BonusType.ExperienceRate:
+                        case Bonus.BonusType.FuelConsumption:
+                        case Bonus.BonusType.RepairWeaponBonus:
+                            if (bonuses[i].value > 0)
+                            {
+                                bonus.effect.text = "+" + bonuses[i].value + "%";
+                            }
+                            break;
+                        case Bonus.BonusType.SkillGroupLevelingBoost:
+                            if (bonuses[i].value > 0)
+                            {
+                                bonus.effect.text = "+" + bonuses[i].value + "%";
+                            }
+                            bonus.description.text = bonuses[i].skillType.ToString() +" "+ bonus.description.text;
+                            break;
+                        case Bonus.BonusType.AdditionalSlots:
+                        case Bonus.BonusType.MaximumEnergyReserve:
+                            bonus.effect.text = "+" + bonuses[i].value;
+                            break;
+                        case Bonus.BonusType.UnlockArmorRepair:
+                        case Bonus.BonusType.StashSize:
+                        case Bonus.BonusType.TextBonus:
+                        case Bonus.BonusType.UnlockWeaponModification:
+                        case Bonus.BonusType.UnlockWeaponRepair:
+                            bonus.effect.gameObject.SetActive(false);
+                            break;
+                    }
+
+                    bonuses[i].bonusUI = bonus;
+                    bonus.gameObject.SetActive(true);
+                }
+            }
+        }
+
+        public void UpdateFutureBonuses()
+        {
+            // Destroy any existing bonuses
+            while(futureBonusPanel.transform.childCount > 2)
+            {
+                Transform currentChild = futureBonusPanel.transform.GetChild(2);
+                currentChild.parent = null;
+                Destroy(currentChild.gameObject);
+            }
+
+            if (futureBonusPanel.activeSelf)
+            {
+                Bonus[] bonuses = area.bonusesPerLevel[area.currentLevel + 1];
+
+                for(int i=0; i < bonuses.Length; ++i)
+                {
+                    BonusUI bonus = Instantiate(futureBonusPrefab, futureBonusPanel.transform).GetComponent<BonusUI>();
+                    bonus.bonusIcon.gameObject.SetActive(true);
+                    switch (bonuses[i].iconPath)
+                    {
+                        case "/files/Hideout/icon_hideout_fuelslots.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[4];
+                            break;
+                        case "/files/Hideout/icon_hideout_createitem_generic.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[2];
+                            break;
+                        case "/files/Hideout/icon_hideout_createitem_meds.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[3];
+                            break;
+                        case "/files/Hideout/icon_hideout_scavitem.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[5];
+                            break;
+                        case "/files/Hideout/icon_hideout_videocardslots.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[8];
+                            break;
+                        case "/files/Hideout/icon_hideout_createitem_bitcoin.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[1];
+                            break;
+                        case "/files/Hideout/icon_hideout_shootingrangeunlock.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[6];
+                            break;
+                        case "/files/Hideout/icon_hideout_unlocked.png":
+                            bonus.bonusIcon.sprite = bonus.bonusIcons[7];
+                            break;
+                        default:
+                            bonus.bonusIcon.gameObject.SetActive(false);
+                            break;
+                    }
+                    if (bonuses[i].bonusType == Bonus.BonusType.ExperienceRate 
+                        || bonuses[i].bonusType == Bonus.BonusType.SkillGroupLevelingBoost)
+                    {
+                        bonus.bonusIcon.gameObject.SetActive(true);
+                        bonus.bonusIcon.sprite = bonus.bonusIcons[0];
+                    }
+                    if (Mod.localeDB["hideout_" + bonuses[i].ID] != null)
+                    {
+                        bonus.description.text = Mod.localeDB["hideout_" + bonuses[i].ID].ToString();
+                    }
+                    else if(Mod.localeDB["hideout_" + bonuses[i].bonusType.ToString()] != null)
+                    {
+                        bonus.description.text = Mod.localeDB["hideout_" + bonuses[i].bonusType.ToString()].ToString();
+                    }
+                    else
+                    {
+                        Mod.LogError("DEV: Could not get bonus description. Bonus ID: " + bonuses[i].ID);
+                    }
+                    switch (bonuses[i].bonusType)
+                    {
+                        case Bonus.BonusType.EnergyRegeneration:
+                        case Bonus.BonusType.DebuffEndDelay:
+                        case Bonus.BonusType.RepairArmorBonus:
+                        case Bonus.BonusType.HydrationRegeneration:
+                        case Bonus.BonusType.HealthRegeneration:
+                        case Bonus.BonusType.ScavCooldownTimer:
+                        case Bonus.BonusType.QuestMoneyReward:
+                        case Bonus.BonusType.InsuranceReturnTime:
+                        case Bonus.BonusType.RagfairCommission:
+                        case Bonus.BonusType.ExperienceRate:
+                        case Bonus.BonusType.FuelConsumption:
+                        case Bonus.BonusType.RepairWeaponBonus:
+                            if (bonuses[i].value > 0)
+                            {
+                                bonus.effect.text = "+" + bonuses[i].value + "%";
+                            }
+                            break;
+                        case Bonus.BonusType.SkillGroupLevelingBoost:
+                            if (bonuses[i].value > 0)
+                            {
+                                bonus.effect.text = "+" + bonuses[i].value + "%";
+                            }
+                            bonus.description.text = bonuses[i].skillType.ToString() +" "+ bonus.description.text;
+                            break;
+                        case Bonus.BonusType.AdditionalSlots:
+                        case Bonus.BonusType.MaximumEnergyReserve:
+                            bonus.effect.text = "+" + bonuses[i].value;
+                            break;
+                        case Bonus.BonusType.UnlockArmorRepair:
+                        case Bonus.BonusType.StashSize:
+                        case Bonus.BonusType.TextBonus:
+                        case Bonus.BonusType.UnlockWeaponModification:
+                        case Bonus.BonusType.UnlockWeaponRepair:
+                            bonus.effect.gameObject.SetActive(false);
+                            break;
+                    }
+
+                    bonuses[i].bonusUI = bonus;
+                    bonus.gameObject.SetActive(true);
                 }
             }
         }
@@ -734,6 +958,36 @@ namespace EFM
                         skillRequirements[i].skillRequirementUI = skillRequirement;
                         skillRequirement.gameObject.SetActive(true);
                     }
+                }
+            }
+        }
+
+        public void UpdateBottomButtons()
+        {
+            if(area.currentLevel == area.startLevel)
+            {
+                if (!area.upgrading)
+                {
+                    constructButton.SetActive(area.AllRequirementsFulfilled());
+                }
+                levelButton.SetActive(false);
+                backButton.SetActive(false);
+                upgradeButton.SetActive(false);
+            }
+            else
+            {
+                constructButton.SetActive(false);
+                if (currentContent.gameObject.activeSelf)
+                {
+                    levelButton.SetActive(true);
+                    backButton.SetActive(false);
+                    upgradeButton.SetActive(false);
+                }
+                else
+                {
+                    levelButton.SetActive(false);
+                    backButton.SetActive(true);
+                    upgradeButton.SetActive(area.AllRequirementsFulfilled());
                 }
             }
         }

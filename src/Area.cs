@@ -20,6 +20,7 @@ namespace EFM
         public Bonus[][] bonusesPerLevel;
         public List<List<Production>> productionsPerLevel;
         public Dictionary<string, Production> productionsByID;
+        public bool hasReadyProduction;
 
         // Live
         private int _currentLevel;
@@ -400,6 +401,16 @@ namespace EFM
         public void OnStopProduction(Production production)
         {
             activeProductions.Remove(production);
+
+            if(production.readyCount > 0)
+            {
+                hasReadyProduction = true;
+                if (!upgrading)
+                {
+                    UI.summaryIconProductionBackground.SetActive(true);
+                    UI.fullIconProductionBackground.SetActive(true);
+                }
+            }
         }
 
         public List<Production> GetActiveProductions()
@@ -1008,6 +1019,10 @@ namespace EFM
             inProduction = (bool)productionData["inProduction"];
             progress = (float)productionData["progress"];
             readyCount = (int)productionData["readyCount"];
+            if(readyCount > 0)
+            {
+                area.hasReadyProduction = true;
+            }
         }
 
         public void Update()
