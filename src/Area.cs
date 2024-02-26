@@ -39,7 +39,8 @@ namespace EFM
         }
         [NonSerialized]
         public bool upgrading;
-        public DateTime upgradeStartTime;
+        [NonSerialized]
+        public float upgradeTimeLeft; // Amount of seconds currently ongoing upgrade still has to go
         [NonSerialized]
         public List<Production> activeProductions = new List<Production>();
 
@@ -214,6 +215,21 @@ namespace EFM
             if(index == 20)
             {
                 OnSlotContentChanged += productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged;
+
+                // Then call it initially to recalculate base time based on GPU count
+                productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged();
+            }
+
+            // Special case for Scav Case (14)
+            // Productions stored in separate file (scavcase.json)
+            if(index == 14)
+            {
+                for (int i = 0; i < Mod.scavCaseProductionsDB.Count; ++i)
+                {
+                    JToken productionData = Mod.scavCaseProductionsDB[i];
+                    Production newProduction = new Production(this, productionData);
+                    productionsPerLevel[newProduction.areaLevel].Add(newProduction);
+                }
             }
         }
 
@@ -225,7 +241,7 @@ namespace EFM
             upgrading = (bool)HideoutController.loadedData["hideout"]["areas"][index]["upgrading"];
             if (upgrading)
             {
-                upgradeStartTime = new DateTime((long)HideoutController.loadedData["hideout"]["areas"][index]["upgradeStartTime"]);
+                upgradeTimeLeft = (float)HideoutController.loadedData["hideout"]["areas"][index]["upgradeTimeLeft"] - (float)HideoutController.secondsSinceSave;
             }
 
             // Production live data has been loaded upon their instantiation
@@ -932,10 +948,13 @@ namespace EFM
         public string ID;
         public ProductionView productionUI;
         public FarmingView farmingUI;
+        public bool scavCase;
+        public ScavCaseView scavCaseUI;
         public int areaLevel;
         public int time; // Seconds
         public bool needFuelForAllProductionTime;
         public string endProduct;
+        public Vector2Int[] endProductRarities;
         public bool continuous;
         public int limit;
         public int count;
@@ -973,7 +992,7 @@ namespace EFM
         public delegate void OnStopProductionDelegate(Production production);
         public event OnStopProductionDelegate OnStopProduction;
 
-        public Production(Area area, JToken data)
+        public Production(Area area, JToken data, bool scavCase = false)
         {
             this.area = area;
             OnBeginProduction += area.OnBeginProduction;
@@ -981,23 +1000,59 @@ namespace EFM
 
             ID = data["_id"].ToString();
             area.productionsByID.Add(ID, this);
-            time = (int)data["productionTime"];
-            needFuelForAllProductionTime = (bool)data["needFuelForAllProductionTime"];
-            endProduct = Mod.TarkovIDtoH3ID(data["endProduct"].ToString());
-            continuous = (bool)data["continuous"];
-            count = (int)data["count"];
-            limit = (int)data["productionLimitCount"];
+            this.scavCase = scavCase;
+            JArray requirementsArray = null;
+            if (scavCase)
+            {
+                endProductRarities = new Vector2Int[3];
+                if (data["EndProducts"]["Common"] != null)
+                {
+                    endProductRarities[0] = new Vector2Int((int)data["EndProducts"]["Common"]["min"], (int)data["EndProducts"]["Common"]["max"]);
+                }
+                else
+                {
+                    endProductRarities[0] = new Vector2Int(0, 0);
+                }
+                if (data["EndProducts"]["Rare"] != null)
+                {
+                    endProductRarities[1] = new Vector2Int((int)data["EndProducts"]["Rare"]["min"], (int)data["EndProducts"]["Rare"]["max"]);
+                }
+                else
+                {
+                    endProductRarities[1] = new Vector2Int(0, 0);
+                }
+                if (data["EndProducts"]["Superrare"] != null)
+                {
+                    endProductRarities[2] = new Vector2Int((int)data["EndProducts"]["Superrare"]["min"], (int)data["EndProducts"]["Superrare"]["max"]);
+                }
+                else
+                {
+                    endProductRarities[2] = new Vector2Int(0, 0);
+                }
+                time = (int)data["ProductionTime"];
+                requirementsArray = data["Requirements"] as JArray;
+            }
+            else
+            {
+                endProduct = Mod.TarkovIDtoH3ID(data["endProduct"].ToString());
+                needFuelForAllProductionTime = (bool)data["needFuelForAllProductionTime"];
+                continuous = (bool)data["continuous"];
+                count = (int)data["count"];
+                limit = (int)data["productionLimitCount"];
+                time = (int)data["productionTime"];
+                requirementsArray = data["requirements"] as JArray;
+            }
+            progressBaseTime = time;
 
             requirements = new List<Requirement>();
-            JArray requirementsArray = data["requirements"] as JArray;
             bool foundProductionAreaRequirement = false;
-            for (int i=0; i < requirementsArray.Count; ++i)
+            for (int i = 0; i < requirementsArray.Count; ++i)
             {
                 Requirement newRequirement = new Requirement(requirementsArray[i]);
                 newRequirement.production = this;
                 newRequirement.area = area;
 
-                if(newRequirement.requirementType == Requirement.RequirementType.Area && newRequirement.areaIndex == area.index)
+                if (newRequirement.requirementType == Requirement.RequirementType.Area && newRequirement.areaIndex == area.index)
                 {
                     areaLevel = newRequirement.areaLevel;
                     foundProductionAreaRequirement = true;
@@ -1005,7 +1060,7 @@ namespace EFM
             }
             if (!foundProductionAreaRequirement)
             {
-                // This is to handle cases like bitcoin farm production
+                // This is to handle cases like bitcoin farm and scav case productions
                 // If production does not specify the level this production 
                 // should be listed in, we assume it should be listed since startLevel + 1
                 areaLevel = area.startLevel + 1;
@@ -1019,7 +1074,7 @@ namespace EFM
             inProduction = (bool)productionData["inProduction"];
             progress = (float)productionData["progress"];
             readyCount = (int)productionData["readyCount"];
-            if(readyCount > 0)
+            if (readyCount > 0)
             {
                 area.hasReadyProduction = true;
             }
@@ -1046,43 +1101,62 @@ namespace EFM
                 {
                     TODO: // Instantiate end product(s) and any tools we used
 
-                    if (area.areaVolumesPerLevel[area.currentLevel][0].items.Count == limit)
+                    ++readyCount;
+                    if (continuous)
+                    {
+                        farmingUI.getButton.SetActive(true);
+                    }
+                    else
+                    {
+                        productionUI.getButton.SetActive(true);
+                    }
+
+                    if (readyCount == limit)
                     {
                         inProduction = false;
+                        if (continuous)
+                        {
+                            farmingUI.productionStatus.SetActive(false);
+                            farmingUI.timePanel.percentage.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            productionUI.productionStatus.SetActive(false);
+                            productionUI.timePanel.percentage.gameObject.SetActive(false);
+                        }
                     }
                     else
                     {
                         if (continuous)
                         {
-                            if (timeLeftSet)
-                            {
-                                timeLeft = progressBaseTime;
-                            }
-                            else
-                            {
-                                timeLeft = time;
-                            }
+                            timeLeft = progressBaseTime;
+                            farmingUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
+                            progress = 0;
+                            productionUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
                         }
                         else
                         {
-                            inProduction = false;
-                            timeLeft = time;
-                            productionUI.timePanel.requiredTime.text = Mod.FormatTimeString(timeLeft);
+                            productionUI.productionStatus.SetActive(false);
                             productionUI.timePanel.percentage.gameObject.SetActive(false);
                             productionUI.startButton.SetActive(AllRequirementsFulfilled());
+                            inProduction = false;
                         }
-                        progress = 0;
                     }
                 }
                 else
                 {
-                    productionUI.timePanel.requiredTime.text = Mod.FormatTimeString(timeLeft);
                     progress = (1 - timeLeft / progressBaseTime) * 100;
-                    productionUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
-
                     if (continuous)
                     {
+                        farmingUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
+                        farmingUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
+
                         //TODO: // Have a timer for each resource requirement and consume resource as needed
+                    }
+                    else
+                    {
+                        productionUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
+                        productionUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
                     }
                 }
             }
@@ -1132,6 +1206,7 @@ namespace EFM
             }
             timeLeft = time / (1 + (GPUCount - 1) * Area.GPUBoostRate);
             progressBaseTime = timeLeft;
+            farmingUI.timePanel.requiredTime.text = Mod.FormatTimeString(progressBaseTime);
             timeLeft = timeLeft - timeLeft * (progress / 100);
             timeLeftSet = true;
             inProduction = GPUCount > 0;

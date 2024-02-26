@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
+using static Valve.VR.SteamVR_TrackedObject;
 
 namespace EFM
 {
@@ -112,6 +113,8 @@ namespace EFM
         public static float[] defaultHealthRates;
         public static float defaultEnergyRate;
         public static float defaultHydrationRate;
+        public static DateTime saveTime;
+        public static double secondsSinceSave;
         public float time;
         private bool cancelRaidLoad;
         private bool loadingRaid;
@@ -1313,6 +1316,8 @@ namespace EFM
             Mod.preventLoadMagUpdateLists = true;
             Mod.attachmentLocalTransform = new List<KeyValuePair<GameObject, object>>();
 
+            saveTime = DateTime.UtcNow;
+
             // Check if we have loaded data
             if (loadedData == null)
             {
@@ -1885,8 +1890,9 @@ namespace EFM
             Mod.otherActiveSlots.Clear();
 
             // Load player status if not loading in from a raid
-            long secondsSinceSave = GetTimeSeconds() - (long)loadedData["time"];
-            float minutesSinceSave = secondsSinceSave / 60.0f;
+            saveTime = new DateTime((long)HideoutController.loadedData["time"]);
+            secondsSinceSave = (float)DateTime.UtcNow.Subtract(saveTime).TotalSeconds;
+            float minutesSinceSave = (float)secondsSinceSave / 60.0f;
             if (!Mod.justFinishedRaid || Mod.chosenCharIndex == 1)
             {
                 Mod.level = (int)loadedData["level"];
@@ -1957,7 +1963,7 @@ namespace EFM
                 }
             }
 
-            scavTimer = (long)loadedData["scavTimer"] - secondsSinceSave;
+            scavTimer = (float)((long)loadedData["scavTimer"] - secondsSinceSave);
 
             // Instantiate items
             Transform itemsRoot = transform.GetChild(2);

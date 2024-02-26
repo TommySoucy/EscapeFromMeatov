@@ -232,6 +232,7 @@ namespace EFM
         // DB
         public static JArray areasDB;
         public static JArray productionsDB;
+        public static JArray scavCaseProductionsDB;
         public static JObject hideoutsettingsDB;
         public static JObject localeDB;
         public static JObject itemDB;
@@ -1468,6 +1469,7 @@ namespace EFM
 
             areasDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/areas.json"));
             productionsDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/production.json"));
+            scavCaseProductionsDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/scavcase.json"));
             hideoutsettingsDB = JObject.Parse(File.ReadAllText(path + "/database/hideout/settings.json"));
             Area.GPUBoostRate = (float)hideoutsettingsDB["gpuBoostRate"];
             localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
