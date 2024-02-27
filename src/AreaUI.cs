@@ -526,8 +526,8 @@ namespace EFM
                                     || currentProduction.requirements[0].requirementType == Requirement.RequirementType.Resource)
                                 {
                                     RequirementItemView itemRequirement = farmingView.installedItemView;
-                                    TODO: // Update this view on stash inventory changed, probably do that in production, subscribe if production is continuous
                                     ResultItemView itemRequirementStash = farmingView.stashItemView;
+                                    currentProduction.requirements[0].stashItemUI = itemRequirementStash;
 
                                     int parsedID = -1;
                                     if (int.TryParse(currentProduction.requirements[0].itemID, out parsedID))
@@ -611,7 +611,6 @@ namespace EFM
                                 // Add requirements
                                 for (int k = 0; k < currentProduction.requirements.Count; ++k)
                                 {
-                                    TODO: // make sure that itemviews in assets have a tool icon that we can enable in case of tool requirement
                                     if (currentProduction.requirements[k].requirementType == Requirement.RequirementType.Item
                                         || currentProduction.requirements[k].requirementType == Requirement.RequirementType.Resource
                                         || currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool)

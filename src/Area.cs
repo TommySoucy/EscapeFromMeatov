@@ -458,6 +458,7 @@ namespace EFM
         public SkillRequirement skillRequirementUI;
         public TraderRequirement traderRequirementUI;
         public ResultItemView itemResultUI;
+        public ResultItemView stashItemUI;
         public bool fulfilled;
 
         public enum RequirementType
@@ -603,10 +604,9 @@ namespace EFM
             {
                 case RequirementType.Item:
                     int count = 0;
-                    if(HideoutController.instance.inventoryAmount.TryGetValue(itemID, out int currentItemCount))
+                    if(HideoutController.instance.inventoryAmount.TryGetValue(itemID, out count))
                     {
-                        fulfilled = currentItemCount >= itemCount;
-                        count = currentItemCount;
+                        fulfilled = count >= itemCount;
                     }
                     else
                     {
@@ -621,6 +621,10 @@ namespace EFM
                     else if (itemResultUI != null)
                     {
                         itemResultUI.amount.text = Mathf.Min(count, itemCount).ToString() + "/" + itemCount;
+                    }
+                    if(stashItemUI != null)
+                    {
+                        stashItemUI.amount.text = count.ToString() + "\n(STASH)";
                     }
                     break;
                 case RequirementType.Tool:
@@ -665,6 +669,10 @@ namespace EFM
                     {
                         itemResultUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
                     }
+                    if (stashItemUI != null)
+                    {
+                        stashItemUI.amount.text = totalAmount.ToString() + "\n(STASH)";
+                    }
                     break;
             }
 
@@ -691,38 +699,37 @@ namespace EFM
                     fulfilled = totalAmount >= 0;
                     if (itemRequirementUI != null)
                     {
-                        itemRequirementUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
+                        itemRequirementUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString();
                         itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
                         itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
                     }
                     else if (itemResultUI != null)
                     {
-                        itemResultUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
+                        itemResultUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "\n(INSTALLED)";
                     }
                     break;
-                case RequirementType.Item: todo
-                    int totalAmount = 0;
+                case RequirementType.Item:
+                    int itemCount = 0;
                     for(int i=0; i < area.areaSlotsPerLevel[area.currentLevel].Length; ++i)
                     {
                         if(area.areaSlotsPerLevel[area.currentLevel][i].item != null)
                         {
-                            totalAmount += area.areaSlotsPerLevel[area.currentLevel][i].item.amount;
+                            ++itemCount;
                         }
                     }
                     // Note that here we only check greater than 0
-                    // Slot resource requirements are really only used for continuous productions
-                    // These requirements specify an amount to COMPLETE the production
-                    // but the production itself should be in production if we have more than 0 amount
-                    fulfilled = totalAmount >= 0;
+                    // Slot item requirements are really only used for continuous productions
+                    // The production itself should be in production if we have more than 0 item installed
+                    fulfilled = itemCount >= 0;
                     if (itemRequirementUI != null)
                     {
-                        itemRequirementUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
+                        itemRequirementUI.amount.text = itemCount.ToString();
                         itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
                         itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
                     }
                     else if (itemResultUI != null)
                     {
-                        itemResultUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
+                        itemResultUI.amount.text = itemCount.ToString() + "\n(INSTALLED)";
                     }
                     break;
             }
@@ -1147,8 +1154,6 @@ namespace EFM
                 timeLeft -= Time.deltaTime;
                 if(timeLeft <= 0)
                 {
-                    TODO: // Instantiate end product(s) and any tools we used
-
                     ++readyCount;
                     if (scavCase)
                     {
@@ -1221,10 +1226,9 @@ namespace EFM
                     progress = (1 - timeLeft / progressBaseTime) * 100;
                     if (continuous)
                     {
+                        TODO: // Have a timer for each resource requirement and consume resource as needed
                         farmingUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
                         farmingUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
-
-                        //TODO: // Have a timer for each resource requirement and consume resource as needed
                     }
                     else
                     {
