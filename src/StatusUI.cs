@@ -308,7 +308,7 @@ namespace EFM
 
         public void UpdateTaskListHeight()
         {
-            // We chould always wait until 1 frame after setting the UI before calling this because
+            // We should always wait until 1 frame after setting the UI before calling this because
             // tasksParent.sizeDelta.y only get updated the frame after any changes
             // 250 is the height we see in the view
             if (tasksParent.sizeDelta.y > 250)

@@ -99,6 +99,21 @@ namespace EFM
         public AudioSource genericAudioSource;
         public AudioClip[] genericAudioClips; // AreaSelected, UpgradeBegin, UpgradeComplete, ItemInstalled, ItemStarted, ItemComplete
 
+        public int mustUpdateMiddleHeight = 0;
+
+        public void Update()
+        {
+            if (mustUpdateMiddleHeight == 0)
+            {
+                UpdateTaskListHeight();
+                --mustUpdateMiddleHeight;
+            }
+            else if (mustUpdateMiddleHeight > 0)
+            {
+                --mustUpdateMiddleHeight;
+            }
+        }
+
         public void Init()
         {
             currentContent.gameObject.SetActive(true);
@@ -111,7 +126,29 @@ namespace EFM
             UpdateRequirements();
             UpdateBonuses();
             UpdateBottomButtons();
-            TODO: // Remember to set middle hover scrolls next frame
+
+            ++mustUpdateMiddleHeight;
+        }
+
+        public void UpdateTaskListHeight()
+        {
+            // We should always wait until 1 frame after setting the UI before calling this because
+            // parent.sizeDelta.y only get updated the frame after any changes
+            // 350 is the height we see in the view
+            RectTransform parentToUse = currentContent.gameObject.activeSelf ? currentContent : futureContent;
+            if (parentToUse.sizeDelta.y > 350)
+            {
+                downHoverscroll.rate = 1 / (parentToUse.sizeDelta.y / 350);
+                upHoverscroll.rate = downHoverscroll.rate;
+                downHoverscroll.scrollbar.value = 1; // Put it back to the top
+                downHoverscroll.gameObject.SetActive(true);
+                upHoverscroll.gameObject.SetActive(false);
+            }
+            else
+            {
+                downHoverscroll.gameObject.SetActive(false);
+                upHoverscroll.gameObject.SetActive(false);
+            }
         }
 
         public void UpdateStatusTexts()
