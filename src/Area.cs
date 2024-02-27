@@ -477,7 +477,7 @@ namespace EFM
         public string itemID;
 
         // Item
-        public int itemCount;
+        public int itemCount = 1;
 
         // Resource
         public int resourceCount;
@@ -499,51 +499,59 @@ namespace EFM
 
         public Requirement(JToken requirementData)
         {
-            requirementType = RequirementTypeFromName(requirementData["type"].ToString());
-
-            switch (requirementType)
+            if(requirementData == null)
             {
-                case RequirementType.Item:
-                    itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                    itemCount = (int)requirementData["count"];
-                    HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
-                    break;
-                case RequirementType.Area:
-                    areaIndex = (int)requirementData["areaType"];
-                    areaLevel = (int)requirementData["requiredLevel"];
-                    area.controller.areas[areaIndex].OnAreaLevelChanged += OnAreaLevelChanged;
-                    break;
-                case RequirementType.Skill:
-                    skillIndex = Skill.SkillNameToIndex(requirementData["skillName"].ToString());
-                    if(skillIndex == -1)
-                    {
-                        requirementType = RequirementType.None;
-                    }
-                    else
-                    {
-                        skillLevel = (int)requirementData["skillLevel"];
-                    }
-                    Mod.skills[skillIndex].OnSkillLevelChanged += OnSkillLevelChanged;
-                    break;
-                case RequirementType.Trader:
-                    trader = Mod.traders[Trader.IDToIndex(requirementData["traderId"].ToString())];
-                    traderLevel = (int)requirementData["loyaltyLevel"];
-                    trader.OnTraderLevelChanged += OnTraderLevelChanged;
-                    break;
-                case RequirementType.Tool:
-                    itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                    HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
-                    break;
-                case RequirementType.Resource:
-                    itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                    resourceCount = (int)requirementData["resource"];
-                    HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
-                    area.OnSlotContentChanged += OnAreaSlotContentChanged;
-                    break;
-                case RequirementType.QuestComplete:
-                    task = Task.allTasks[requirementData["questId"].ToString()];
-                    task.OnTaskCompleted += OnTaskCompleted;
-                    break;
+
+            }
+            else
+            {
+                requirementType = RequirementTypeFromName(requirementData["type"].ToString());
+
+                switch (requirementType)
+                {
+                    case RequirementType.Item:
+                        itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
+                        itemCount = (int)requirementData["count"];
+                        HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                        area.OnSlotContentChanged += OnAreaSlotContentChanged;
+                        break;
+                    case RequirementType.Area:
+                        areaIndex = (int)requirementData["areaType"];
+                        areaLevel = (int)requirementData["requiredLevel"];
+                        area.controller.areas[areaIndex].OnAreaLevelChanged += OnAreaLevelChanged;
+                        break;
+                    case RequirementType.Skill:
+                        skillIndex = Skill.SkillNameToIndex(requirementData["skillName"].ToString());
+                        if (skillIndex == -1)
+                        {
+                            requirementType = RequirementType.None;
+                        }
+                        else
+                        {
+                            skillLevel = (int)requirementData["skillLevel"];
+                        }
+                        Mod.skills[skillIndex].OnSkillLevelChanged += OnSkillLevelChanged;
+                        break;
+                    case RequirementType.Trader:
+                        trader = Mod.traders[Trader.IDToIndex(requirementData["traderId"].ToString())];
+                        traderLevel = (int)requirementData["loyaltyLevel"];
+                        trader.OnTraderLevelChanged += OnTraderLevelChanged;
+                        break;
+                    case RequirementType.Tool:
+                        itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
+                        HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                        break;
+                    case RequirementType.Resource:
+                        itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
+                        resourceCount = (int)requirementData["resource"];
+                        HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                        area.OnSlotContentChanged += OnAreaSlotContentChanged;
+                        break;
+                    case RequirementType.QuestComplete:
+                        task = Task.allTasks[requirementData["questId"].ToString()];
+                        task.OnTaskCompleted += OnTaskCompleted;
+                        break;
+                }
             }
         }
 
@@ -668,6 +676,31 @@ namespace EFM
             switch (requirementType)
             {
                 case RequirementType.Resource:
+                    int totalAmount = 0;
+                    for(int i=0; i < area.areaSlotsPerLevel[area.currentLevel].Length; ++i)
+                    {
+                        if(area.areaSlotsPerLevel[area.currentLevel][i].item != null)
+                        {
+                            totalAmount += area.areaSlotsPerLevel[area.currentLevel][i].item.amount;
+                        }
+                    }
+                    // Note that here we only check greater than 0
+                    // Slot resource requirements are really only used for continuous productions
+                    // These requirements specify an amount to COMPLETE the production
+                    // but the production itself should be in production if we have more than 0 amount
+                    fulfilled = totalAmount >= 0;
+                    if (itemRequirementUI != null)
+                    {
+                        itemRequirementUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
+                        itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
+                        itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
+                    }
+                    else if (itemResultUI != null)
+                    {
+                        itemResultUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
+                    }
+                    break;
+                case RequirementType.Item: todo
                     int totalAmount = 0;
                     for(int i=0; i < area.areaSlotsPerLevel[area.currentLevel].Length; ++i)
                     {
@@ -1030,6 +1063,7 @@ namespace EFM
                     endProductRarities[2] = new Vector2Int(0, 0);
                 }
                 time = (int)data["ProductionTime"];
+                limit = 1;
                 requirementsArray = data["Requirements"] as JArray;
             }
             else
@@ -1058,6 +1092,20 @@ namespace EFM
                     foundProductionAreaRequirement = true;
                 }
             }
+
+            // Bitcoin farm special case
+            // We want to make sure its production has a GPU resource requirement
+            if(area.index == 20)
+            {
+                Requirement newRequirement = new Requirement(null);
+                newRequirement.production = this;
+                newRequirement.area = area;
+                newRequirement.itemID = "159";
+                newRequirement.resourceCount = 0;
+                HideoutController.instance.OnHideoutInventoryChanged += newRequirement.OnHideoutInventoryChanged;
+                area.OnSlotContentChanged += newRequirement.OnAreaSlotContentChanged;
+            }
+
             if (!foundProductionAreaRequirement)
             {
                 // This is to handle cases like bitcoin farm and scav case productions
@@ -1102,44 +1150,69 @@ namespace EFM
                     TODO: // Instantiate end product(s) and any tools we used
 
                     ++readyCount;
-                    if (continuous)
+                    if (scavCase)
                     {
-                        farmingUI.getButton.SetActive(true);
+                        scavCaseUI.getButton.SetActive(true);
                     }
                     else
                     {
-                        productionUI.getButton.SetActive(true);
+                        if (continuous)
+                        {
+                            farmingUI.getButton.SetActive(true);
+                        }
+                        else
+                        {
+                            productionUI.getButton.SetActive(true);
+                        }
                     }
 
                     if (readyCount == limit)
                     {
                         inProduction = false;
-                        if (continuous)
+                        if (scavCase)
                         {
-                            farmingUI.productionStatus.SetActive(false);
-                            farmingUI.timePanel.percentage.gameObject.SetActive(false);
+                            scavCaseUI.productionStatus.SetActive(false);
+                            scavCaseUI.timePanel.percentage.gameObject.SetActive(false);
                         }
                         else
                         {
-                            productionUI.productionStatus.SetActive(false);
-                            productionUI.timePanel.percentage.gameObject.SetActive(false);
+                            if (continuous)
+                            {
+                                farmingUI.productionStatus.SetActive(false);
+                                farmingUI.timePanel.percentage.gameObject.SetActive(false);
+                            }
+                            else
+                            {
+                                productionUI.productionStatus.SetActive(false);
+                                productionUI.timePanel.percentage.gameObject.SetActive(false);
+                            }
                         }
                     }
                     else
                     {
-                        if (continuous)
+                        if (scavCase)
                         {
-                            timeLeft = progressBaseTime;
-                            farmingUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
-                            progress = 0;
-                            productionUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
+                            scavCaseUI.productionStatus.SetActive(false);
+                            scavCaseUI.timePanel.percentage.gameObject.SetActive(false);
+                            scavCaseUI.startButton.SetActive(AllRequirementsFulfilled());
+                            inProduction = false;
                         }
                         else
                         {
-                            productionUI.productionStatus.SetActive(false);
-                            productionUI.timePanel.percentage.gameObject.SetActive(false);
-                            productionUI.startButton.SetActive(AllRequirementsFulfilled());
-                            inProduction = false;
+                            if (continuous)
+                            {
+                                timeLeft = progressBaseTime;
+                                farmingUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
+                                progress = 0;
+                                productionUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
+                            }
+                            else
+                            {
+                                productionUI.productionStatus.SetActive(false);
+                                productionUI.timePanel.percentage.gameObject.SetActive(false);
+                                productionUI.startButton.SetActive(AllRequirementsFulfilled());
+                                inProduction = false;
+                            }
                         }
                     }
                 }

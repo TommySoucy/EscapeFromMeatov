@@ -405,6 +405,7 @@ namespace EFM
                         if(area.index == 14) // Scav case
                         {
                             GameObject scavCaseProduction = Instantiate(scavCaseViewPrefab, productionPanelContainer.transform);
+                            scavCaseProduction.SetActive(true);
                             ScavCaseView scavCaseProductionView = scavCaseProduction.GetComponent<ScavCaseView>();
                             currentProduction.scavCaseUI = scavCaseProductionView;
                             scavCaseProductionView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
@@ -477,20 +478,109 @@ namespace EFM
                             if (currentProduction.continuous) // Farming
                             {
                                 GameObject farmingProduction = Instantiate(farmingViewPrefab, productionPanelContainer.transform);
-                                ScavCaseView scavCaseProductionView = scavCaseProduction.GetComponent<ScavCaseView>();
-                                currentProduction.scavCaseUI = scavCaseProductionView;
+                                farmingProduction.SetActive(true);
+                                FarmingView farmingView = farmingProduction.GetComponent<FarmingView>();
+                                currentProduction.farmingUI = farmingView;
+                                farmingView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
 
-                                // Make sure only time panel arrow is enabled
-                                scavCaseProductionView.timePanel.percentage.gameObject.SetActive(false);
-                                scavCaseProductionView.timePanel.requiredTime.transform.parent.gameObject.SetActive(false);
+                                // Set requirement
+                                // Note: This makes assumption that a farming production only ever has a single requirement
+                                if (currentProduction.requirements[0].requirementType == Requirement.RequirementType.Item
+                                    || currentProduction.requirements[0].requirementType == Requirement.RequirementType.Resource)
+                                {
+                                    RequirementItemView itemRequirement = farmingView.installedItemView;
+                                    TODO: // Update this view on stash inventory changed, probably do that in production, subscribe if production is continuous
+                                    ResultItemView itemRequirementStash = farmingView.stashItemView;
+
+                                    int parsedID = -1;
+                                    if (int.TryParse(currentProduction.requirements[0].itemID, out parsedID))
+                                    {
+                                        itemRequirement.itemView.itemIcon.sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
+                                        itemRequirementStash.itemView.itemIcon.sprite = itemRequirement.itemView.itemIcon.sprite;
+                                    }
+                                    else
+                                    {
+                                        // TODO: // Get vanilla Icon without loading vanilla item
+                                    }
+
+                                    int itemCount = 0;
+                                    if(currentProduction.requirements[0].requirementType == Requirement.RequirementType.Item)
+                                    {
+                                        for (int l = 0; l < area.areaSlotsPerLevel[area.currentLevel].Length; ++l)
+                                        {
+                                            if (area.areaSlotsPerLevel[area.currentLevel][i].item != null)
+                                            {
+                                                ++itemCount;
+                                            }
+                                        }
+                                    }
+                                    else // Resource
+                                    {
+                                        for (int l = 0; l < area.areaSlotsPerLevel[area.currentLevel].Length; ++l)
+                                        {
+                                            if (area.areaSlotsPerLevel[area.currentLevel][i].item != null)
+                                            {
+                                                ++area.areaSlotsPerLevel[area.currentLevel][i].item.amount;
+                                            }
+                                        }
+                                    }
+                                    itemRequirement.amount.text = itemCount.ToString()+"\n(INSTALLED)";
+
+                                    if (HideoutController.instance.inventoryAmount.TryGetValue(currentProduction.requirements[0].itemID, out int itemInventoryCount))
+                                    {
+                                        itemRequirementStash.amount.text = itemInventoryCount.ToString()+"\n(STASH)";
+                                    }
+                                    else
+                                    {
+                                        itemRequirementStash.amount.text = "0\n(STASH)";
+                                    }
+
+                                    itemRequirement.gameObject.SetActive(true);
+                                }
+
+                                // Set buttons
+                                farmingProduction.gameObject.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
+                                if (currentProduction.readyCount > 0)
+                                {
+                                    farmingView.getButton.SetActive(true);
+                                }
+                                else
+                                {
+                                    farmingView.getButton.SetActive(false);
+                                }
+
+                                // Set status
+                                if (currentProduction.inProduction)
+                                {
+                                    farmingView.timePanel.percentage.gameObject.SetActive(true);
+                                    farmingView.timePanel.percentage.text = ((int)currentProduction.progress).ToString() + "%";
+                                    farmingView.productionStatus.SetActive(true);
+                                    farmingView.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(currentProduction.timeLeft) + ")...";
+                                }
+                                else
+                                {
+                                    farmingView.productionStatus.SetActive(false);
+                                    farmingView.timePanel.percentage.gameObject.SetActive(false);
+                                }
+                            }
+                            else // Normal production
+                            {
+                                GameObject productionObject = Instantiate(productionViewPrefab, productionPanelContainer.transform);
+                                productionObject.SetActive(true);
+                                ProductionView productionView = productionObject.GetComponent<ProductionView>();
+                                currentProduction.productionUI = productionView;
+                                productionView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
 
                                 // Add requirements
                                 for (int k = 0; k < currentProduction.requirements.Count; ++k)
                                 {
-                                    if (currentProduction.requirements[k].requirementType == Requirement.RequirementType.Item)
+                                    TODO: // make sure that itemviews in assets have a tool icon that we can enable in case of tool requirement
+                                    if (currentProduction.requirements[k].requirementType == Requirement.RequirementType.Item
+                                        || currentProduction.requirements[k].requirementType == Requirement.RequirementType.Resource
+                                        || currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool)
                                     {
                                         // Add new requirement
-                                        RequirementItemView itemRequirement = Instantiate(scavCaseProductionView.requirementItemViewPrefab, scavCaseProductionView.requirementsPanel).GetComponent<RequirementItemView>();
+                                        RequirementItemView itemRequirement = Instantiate(productionView.requirementItemViewPrefab, productionView.requirementsPanel).GetComponent<RequirementItemView>();
 
                                         int parsedID = -1;
                                         if (int.TryParse(currentProduction.requirements[k].itemID, out parsedID))
@@ -501,6 +591,10 @@ namespace EFM
                                         {
                                             // TODO: // Get vanilla Icon without loading vanilla item
                                         }
+
+                                        itemRequirement.itemView.toolIcon.SetActive(currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
+                                        itemRequirement.itemView.toolBorder.SetActive(currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
+
                                         if (HideoutController.instance.inventoryAmount.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
                                         {
                                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
@@ -518,38 +612,34 @@ namespace EFM
                                 }
 
                                 // Set buttons
-                                scavCaseProduction.gameObject.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
+                                productionObject.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                                 if (currentProduction.readyCount > 0)
                                 {
-                                    scavCaseProductionView.getButton.SetActive(true);
+                                    productionView.getButton.SetActive(true);
                                     if (currentProduction.readyCount < currentProduction.limit)
                                     {
-                                        scavCaseProductionView.startButton.SetActive(false);
+                                        productionView.startButton.SetActive(false);
                                     }
                                 }
                                 else
                                 {
-                                    scavCaseProductionView.getButton.SetActive(false);
-                                    scavCaseProductionView.startButton.SetActive(currentProduction.AllRequirementsFulfilled());
+                                    productionView.getButton.SetActive(false);
+                                    productionView.startButton.SetActive(currentProduction.AllRequirementsFulfilled());
                                 }
 
                                 // Set status
                                 if (currentProduction.inProduction)
                                 {
-                                    scavCaseProductionView.timePanel.percentage.gameObject.SetActive(true);
-                                    scavCaseProductionView.timePanel.percentage.text = ((int)currentProduction.progress).ToString() + "%";
-                                    scavCaseProductionView.productionStatus.SetActive(true);
-                                    scavCaseProductionView.productionStatusText.text = "Collecting\n(" + Mod.FormatTimeString(currentProduction.timeLeft) + ")...";
+                                    productionView.timePanel.percentage.gameObject.SetActive(true);
+                                    productionView.timePanel.percentage.text = ((int)currentProduction.progress).ToString() + "%";
+                                    productionView.productionStatus.SetActive(true);
+                                    productionView.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(currentProduction.timeLeft) + ")...";
                                 }
                                 else
                                 {
-                                    scavCaseProductionView.productionStatus.SetActive(false);
-                                    scavCaseProductionView.timePanel.percentage.gameObject.SetActive(false);
+                                    productionView.productionStatus.SetActive(false);
+                                    productionView.timePanel.percentage.gameObject.SetActive(false);
                                 }
-                            }
-                            else // Normal production
-                            {
-                                TODO:
                             }
                         }
                     }

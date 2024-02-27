@@ -25,6 +25,8 @@ namespace EFM
         public Sprite[] currencyIcons;
         public Image infoValueIcon;
         public Text infoValueText;
+        public GameObject toolIcon;
+        public GameObject toolBorder;
 
         public void SetItem(MeatovItem itemData)
         {
