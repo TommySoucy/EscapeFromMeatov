@@ -6,6 +6,7 @@ namespace EFM
     public class ScavCaseView : MonoBehaviour
     {
         public AreaUI area;
+        public Production production;
         public Transform requirementsPanel;
         public GameObject requirementItemViewPrefab;
         public TimePanel timePanel;

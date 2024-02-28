@@ -6,6 +6,7 @@ namespace EFM
     public class FarmingView : MonoBehaviour
     {
         public AreaUI area;
+        public Production production;
         public ResultItemView stashItemView;
         public GameObject setAllButton;
         public GameObject setOneButton;

@@ -116,44 +116,50 @@ namespace EFM
                     break;
             }
             defaultUnlocked = (bool)Mod.traderBaseDB[index]["unlockedByDefault"];
-            insuranceAvailable = (bool)Mod.traderBaseDB[index]["insurance"]["availability"];
-            List<string> tempInsuranceExcluded = new List<string>();
-            JArray insuranceExcludedArray = Mod.traderBaseDB[index]["insurance"]["excluded_category"] as JArray;
-            if(insuranceExcludedArray != null)
+            insuranceAvailable = Mod.traderBaseDB[index]["insurance"] == null ? false : (bool)Mod.traderBaseDB[index]["insurance"]["availability"];
+            if (insuranceAvailable)
             {
-                for(int i=0; i < insuranceExcludedArray.Count; ++i)
+                List<string> tempInsuranceExcluded = new List<string>();
+                JArray insuranceExcludedArray = Mod.traderBaseDB[index]["insurance"]["excluded_category"] as JArray;
+                if (insuranceExcludedArray != null)
                 {
-                    tempInsuranceExcluded.Add(Mod.TarkovIDtoH3ID(insuranceExcludedArray[i].ToString()));
+                    for (int i = 0; i < insuranceExcludedArray.Count; ++i)
+                    {
+                        tempInsuranceExcluded.Add(Mod.TarkovIDtoH3ID(insuranceExcludedArray[i].ToString()));
+                    }
+                    insuranceExcluded = tempInsuranceExcluded.ToArray();
                 }
-                insuranceExcluded = tempInsuranceExcluded.ToArray();
+                insuranceMinReturnTime = (int)Mod.traderBaseDB[index]["insurance"]["min_return_hour"];
+                insuranceMaxReturnTime = (int)Mod.traderBaseDB[index]["insurance"]["max_return_hour"];
+                insuranceMaxStorageTime = (int)Mod.traderBaseDB[index]["insurance"]["max_storage_time"];
+                insuranceRate = (int)Mod.traderBaseDB[index]["insurance"]["min_payment"];
             }
-            insuranceMinReturnTime = (int)Mod.traderBaseDB[index]["insurance"]["min_return_hour"];
-            insuranceMaxReturnTime = (int)Mod.traderBaseDB[index]["insurance"]["max_return_hour"];
-            insuranceMaxStorageTime = (int)Mod.traderBaseDB[index]["insurance"]["max_storage_time"];
-            insuranceRate = (int)Mod.traderBaseDB[index]["insurance"]["min_payment"];
-            repairAvailable = (bool)Mod.traderBaseDB[index]["repair"]["availability"];
-            repairCurrency = Mod.ItemIDToCurrencyIndex(Mod.traderBaseDB[index]["repair"]["repairCurrency"].ToString());
-            repairCurrencyCoef = (int)Mod.traderBaseDB[index]["repair"]["currency_coefficient"];
-            List<string> tempRepairExcludedList = new List<string>();
-            JArray repairExcludedArray = Mod.traderBaseDB[index]["repair"]["excluded_category"] as JArray;
-            if (repairExcludedArray != null)
+            repairAvailable = Mod.traderBaseDB[index]["repair"] == null ? false : (bool)Mod.traderBaseDB[index]["repair"]["availability"];
+            if (repairAvailable)
             {
-                for (int i = 0; i < repairExcludedArray.Count; ++i)
+                repairCurrency = Mod.ItemIDToCurrencyIndex(Mod.traderBaseDB[index]["repair"]["currency"].ToString());
+                repairCurrencyCoef = (int)Mod.traderBaseDB[index]["repair"]["currency_coefficient"];
+                List<string> tempRepairExcludedList = new List<string>();
+                JArray repairExcludedArray = Mod.traderBaseDB[index]["repair"]["excluded_category"] as JArray;
+                if (repairExcludedArray != null)
                 {
-                    tempRepairExcludedList.Add(Mod.TarkovIDtoH3ID(repairExcludedArray[i].ToString()));
+                    for (int i = 0; i < repairExcludedArray.Count; ++i)
+                    {
+                        tempRepairExcludedList.Add(Mod.TarkovIDtoH3ID(repairExcludedArray[i].ToString()));
+                    }
                 }
-            }
-            JArray repairExcludedIDsArray = Mod.traderBaseDB[index]["repair"]["excluded_category"] as JArray;
-            if (repairExcludedIDsArray != null)
-            {
-                for (int i = 0; i < repairExcludedIDsArray.Count; ++i)
+                JArray repairExcludedIDsArray = Mod.traderBaseDB[index]["repair"]["excluded_category"] as JArray;
+                if (repairExcludedIDsArray != null)
                 {
-                    tempRepairExcludedList.Add(Mod.TarkovIDtoH3ID(repairExcludedIDsArray[i].ToString()));
+                    for (int i = 0; i < repairExcludedIDsArray.Count; ++i)
+                    {
+                        tempRepairExcludedList.Add(Mod.TarkovIDtoH3ID(repairExcludedIDsArray[i].ToString()));
+                    }
                 }
+                repairExcluded = tempRepairExcludedList.ToArray();
+                repairPriceRate = (float)Mod.traderBaseDB[index]["repair"]["price_rate"];
+                repairQuality = (float)Mod.traderBaseDB[index]["repair"]["quality"];
             }
-            repairExcluded = tempRepairExcludedList.ToArray();
-            repairPriceRate = (float)Mod.traderBaseDB[index]["repair"]["price_rate"];
-            repairQuality = (float)Mod.traderBaseDB[index]["repair"]["quality"];
             switch (currency)
             {
                 case 0:
@@ -224,14 +230,28 @@ namespace EFM
             }
             levels = tempLevels.ToArray();
 
-            if(Mod.traderAssortDB != null)
+            if (Mod.traderAssortDB[index] != null)
             {
                 bartersByLevel = new Dictionary<int, List<Barter>>();
                 bartersByItemID = new Dictionary<string, List<Barter>>();
                 Dictionary<string, int> barterLevelPerID = Mod.traderAssortDB[index]["loyal_level_items"].ToObject<Dictionary<string, int>>();
-                foreach(KeyValuePair<string, int> barterLevelEntry in barterLevelPerID)
+                JArray itemsArray = Mod.traderAssortDB[index]["items"] as JArray;
+                foreach (KeyValuePair<string, int> barterLevelEntry in barterLevelPerID)
                 {
-                    string barterItemID = Mod.TarkovIDtoH3ID(Mod.traderAssortDB[index]["items"][barterLevelEntry.Key].ToString());
+                    string barterItemID = null;
+                    for (int i=0; i< itemsArray.Count; ++i)
+                    {
+                        if (itemsArray[i]["_id"].ToString().Equals(barterLevelEntry.Key))
+                        {
+                            barterItemID = Mod.TarkovIDtoH3ID(itemsArray[i]["_tpl"].ToString());
+                            break;
+                        }
+                    }
+                    if(barterItemID == null)
+                    {
+                        Mod.LogWarning("DEV: Trader "+index+": "+ID+": Couldn't get Item ID for barter with ID: "+ barterLevelEntry.Key);
+                        continue;
+                    }
 
                     JArray schemes = Mod.traderAssortDB[index]["barter_scheme"][barterLevelEntry.Key] as JArray;
                     for(int i=0; i < schemes.Count; ++i)

@@ -442,7 +442,7 @@ namespace EFM
                         if(area.index == 14) // Scav case
                         {
                             GameObject scavCaseProduction = Instantiate(scavCaseViewPrefab, productionPanelContainer.transform);
-                            scavCaseProduction.SetActive(true);
+                            scavCaseProduction.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                             ScavCaseView scavCaseProductionView = scavCaseProduction.GetComponent<ScavCaseView>();
                             currentProduction.scavCaseUI = scavCaseProductionView;
                             scavCaseProductionView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
@@ -481,7 +481,6 @@ namespace EFM
                             }
 
                             // Set buttons
-                            scavCaseProduction.gameObject.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                             if (currentProduction.readyCount > 0)
                             {
                                 scavCaseProductionView.getButton.SetActive(true);
@@ -515,7 +514,7 @@ namespace EFM
                             if (currentProduction.continuous) // Farming
                             {
                                 GameObject farmingProduction = Instantiate(farmingViewPrefab, productionPanelContainer.transform);
-                                farmingProduction.SetActive(true);
+                                farmingProduction.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                                 FarmingView farmingView = farmingProduction.GetComponent<FarmingView>();
                                 currentProduction.farmingUI = farmingView;
                                 farmingView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
@@ -576,7 +575,6 @@ namespace EFM
                                 }
 
                                 // Set buttons
-                                farmingProduction.gameObject.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                                 if (currentProduction.readyCount > 0)
                                 {
                                     farmingView.getButton.SetActive(true);
@@ -603,7 +601,7 @@ namespace EFM
                             else // Normal production
                             {
                                 GameObject productionObject = Instantiate(productionViewPrefab, productionPanelContainer.transform);
-                                productionObject.SetActive(true);
+                                productionObject.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                                 ProductionView productionView = productionObject.GetComponent<ProductionView>();
                                 currentProduction.productionUI = productionView;
                                 productionView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
@@ -648,7 +646,6 @@ namespace EFM
                                 }
 
                                 // Set buttons
-                                productionObject.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                                 if (currentProduction.readyCount > 0)
                                 {
                                     productionView.getButton.SetActive(true);
