@@ -135,6 +135,8 @@ namespace EFM
                 if ((int)Mod.areasDB[i]["type"] == index)
                 {
                     areaData = Mod.areasDB[i];
+                    Mod.LogInfo("\tGot data");
+                    break;
                 }
             }
 
@@ -162,7 +164,7 @@ namespace EFM
                     requirementsByTypePerLevel[i] = new Dictionary<Requirement.RequirementType, List<Requirement>>();
                     for (int j = 0; j < levelRequirements.Count; ++j)
                     {
-                        Requirement currentRequirement = new Requirement(levelRequirements[j]);
+                        Requirement currentRequirement = new Requirement(levelRequirements[j], this);
                         if (requirementsByTypePerLevel[i].TryGetValue(currentRequirement.requirementType, out List<Requirement> currentRequirements))
                         {
                             currentRequirements.Add(currentRequirement);
@@ -184,7 +186,7 @@ namespace EFM
                     bonusesPerLevel[i] = new Bonus[levelBonuses.Count];
                     for (int j = 0; j < levelBonuses.Count; ++j)
                     {
-                        Bonus currentBonus = new Bonus(levelBonuses[j]);
+                        Bonus currentBonus = new Bonus(levelBonuses[j], this);
                         if (currentBonus.bonusType == Bonus.BonusType.None)
                         {
                             bonusesPerLevel[i][j] = null;
@@ -215,9 +217,6 @@ namespace EFM
             if(index == 20)
             {
                 OnSlotContentChanged += productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged;
-
-                // Then call it initially to recalculate base time based on GPU count
-                productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged();
             }
 
             // Special case for Scav Case (14)
@@ -227,7 +226,7 @@ namespace EFM
                 for (int i = 0; i < Mod.scavCaseProductionsDB.Count; ++i)
                 {
                     JToken productionData = Mod.scavCaseProductionsDB[i];
-                    Production newProduction = new Production(this, productionData);
+                    Production newProduction = new Production(this, productionData, true);
                     productionsPerLevel[newProduction.areaLevel].Add(newProduction);
                 }
             }
@@ -235,6 +234,11 @@ namespace EFM
 
         public void LoadLiveData()
         {
+            if(HideoutController.loadedData["hideout"] == null)
+            {
+                return;
+            }
+
             powered = requiresPower && (bool)HideoutController.loadedData["hideout"]["powered"];
             previousPowered = powered;
             currentLevel = (int)HideoutController.loadedData["hideout"]["areas"][index]["level"];
@@ -268,6 +272,19 @@ namespace EFM
                         productionsPerLevel[i][j].requirements[k].UpdateFulfilled();
                     }
                 }
+            }
+
+            // Set area based on live data
+            for(int i=0; i < levels.Length; ++i)
+            {
+                levels[i].SetActive(i == currentLevel);
+            }
+
+            // Special case for bitcoin farm
+            // If it has slots, we need to make sure bitcoin production rate is calculated
+            if (currentLevel > startLevel)
+            {
+                productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged();
             }
         }
 
@@ -498,21 +515,22 @@ namespace EFM
         // QuestComplete
         public Task task;
 
-        public Requirement(JToken requirementData)
+        public Requirement(JToken requirementData, Area area = null, Production production = null)
         {
-            if(requirementData == null)
+            if(requirementData != null)
             {
-
-            }
-            else
-            {
+                this.area = area;
+                this.production = production;
                 requirementType = RequirementTypeFromName(requirementData["type"].ToString());
 
                 switch (requirementType)
                 {
                     case RequirementType.Item:
                         itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                        itemCount = (int)requirementData["count"];
+                        if(requirementData["count"] != null)
+                        {
+                            itemCount = (int)requirementData["count"];
+                        }
                         HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
                         area.OnSlotContentChanged += OnAreaSlotContentChanged;
                         break;
@@ -561,7 +579,6 @@ namespace EFM
             requirementType = RequirementType.Area;
             this.areaIndex = areaIndex;
             this.areaLevel = areaLevel;
-            area.controller.areas[areaIndex].OnAreaLevelChanged += OnAreaLevelChanged;
         }
 
         public static RequirementType RequirementTypeFromName(string name)
@@ -896,8 +913,9 @@ namespace EFM
         // SkillGroupLevelingBoost
         public Skill.SkillType skillType;
 
-        public Bonus(JToken bonusData)
+        public Bonus(JToken bonusData, Area area)
         {
+            this.area = area;
             bonusType = BonusTypeFromName(bonusData["type"].ToString());
 
             if(bonusData["value"] != null)
@@ -1039,6 +1057,7 @@ namespace EFM
             OnStopProduction += area.OnStopProduction;
 
             ID = data["_id"].ToString();
+
             area.productionsByID.Add(ID, this);
             this.scavCase = scavCase;
             JArray requirementsArray = null;
@@ -1089,9 +1108,7 @@ namespace EFM
             bool foundProductionAreaRequirement = false;
             for (int i = 0; i < requirementsArray.Count; ++i)
             {
-                Requirement newRequirement = new Requirement(requirementsArray[i]);
-                newRequirement.production = this;
-                newRequirement.area = area;
+                Requirement newRequirement = new Requirement(requirementsArray[i], area, this);
 
                 if (newRequirement.requirementType == Requirement.RequirementType.Area && newRequirement.areaIndex == area.index)
                 {
@@ -1102,14 +1119,12 @@ namespace EFM
 
             // Bitcoin farm special case
             // We want to make sure its production has a GPU resource requirement
-            if(area.index == 20)
+            if (area.index == 20)
             {
-                Requirement newRequirement = new Requirement(null);
-                newRequirement.production = this;
-                newRequirement.area = area;
+                Requirement newRequirement = new Requirement(null, area, this);
+                newRequirement.requirementType = Requirement.RequirementType.Item;
                 newRequirement.itemID = "159";
                 newRequirement.resourceCount = 0;
-                HideoutController.instance.OnHideoutInventoryChanged += newRequirement.OnHideoutInventoryChanged;
                 area.OnSlotContentChanged += newRequirement.OnAreaSlotContentChanged;
             }
 
@@ -1122,13 +1137,17 @@ namespace EFM
                 Requirement newRequirement = new Requirement(area.index, areaLevel);
                 newRequirement.production = this;
                 newRequirement.area = area;
+                area.OnAreaLevelChanged += newRequirement.OnAreaLevelChanged;
             }
 
             // Load live data
-            JToken productionData = HideoutController.loadedData["hideout"]["areas"][area.index]["productions"][ID];
-            inProduction = (bool)productionData["inProduction"];
-            progress = (float)productionData["progress"];
-            readyCount = (int)productionData["readyCount"];
+            if(HideoutController.loadedData["hideout"] != null)
+            {
+                JToken productionData = HideoutController.loadedData["hideout"]["areas"][area.index]["productions"][ID];
+                inProduction = (bool)productionData["inProduction"];
+                progress = (float)productionData["progress"];
+                readyCount = (int)productionData["readyCount"];
+            }
             if (readyCount > 0)
             {
                 area.hasReadyProduction = true;

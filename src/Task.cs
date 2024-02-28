@@ -218,13 +218,10 @@ namespace EFM
 
         public Condition(Task task, JToken data)
         {
-            Mod.LogInfo("Setup condition for task "+task.ID+" for trader "+task.trader.index+": "+task.trader.ID+", data null?: "+(data == null));
             this.task = task;
 
             JToken properties = data["_props"];
             ID = properties["id"].ToString();
-            Mod.LogInfo("\tID: "+ID+", parent null?: "+(data["_parent"] == null));
-            Mod.LogInfo("\tParent : "+ data["_parent"].ToString()+", parsed null?: "+(Enum.Parse(typeof(ConditionType), data["_parent"].ToString()) == null));
             conditionType = (ConditionType)Enum.Parse(typeof(ConditionType), data["_parent"].ToString());
             if(Mod.localeDB[ID] == null)
             {
@@ -252,13 +249,11 @@ namespace EFM
             switch (conditionType)
             {
                 case ConditionType.CounterCreator:
-                    Mod.LogInfo("\t\tcounter");
                     value = (int)properties["value"];
                     counterOneSessionOnly = (bool)properties["oneSessionOnly"];
                     SetupCounters(properties);
                     break;
                 case ConditionType.HandoverItem:
-                    Mod.LogInfo("\t\thandoveritem");
                     if(properties["minDurability"] != null)
                     {
                         minDurability = (float)properties["minDurability"];
@@ -280,13 +275,11 @@ namespace EFM
                     }
                     break;
                 case ConditionType.Level:
-                    Mod.LogInfo("\t\tlevel");
                     value = (int)properties["value"];
                     compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     description = "Reach level "+ value;
                     break;
                 case ConditionType.FindItem:
-                    Mod.LogInfo("\t\tfinditem");
                     value = (int)properties["value"];
                     minDurability = (float)properties["minDurability"];
                     maxDurability = (float)properties["maxDurability"];
@@ -300,7 +293,6 @@ namespace EFM
                     findItemCountInRaid = (bool)properties["countInRaid"];
                     break;
                 case ConditionType.Quest:
-                    Mod.LogInfo("\t\tquest");
                     string targetTaskID = properties["target"].ToString();
                     if (Task.allTasks.TryGetValue(targetTaskID, out Task targetTask))
                     {
@@ -330,7 +322,6 @@ namespace EFM
                     }
                     break;
                 case ConditionType.LeaveItemAtLocation:
-                    Mod.LogInfo("\t\tleaveitematloc");
                     value = (int)properties["value"];
                     minDurability = (float)properties["minDurability"];
                     maxDurability = (float)properties["maxDurability"];
@@ -345,7 +336,6 @@ namespace EFM
                     zoneID = properties["zoneId"].ToString();
                     break;
                 case ConditionType.PlaceBeacon:
-                    Mod.LogInfo("\t\tplacebeacon");
                     value = (int)properties["value"];
                     targetItemIDs = properties["target"].ToObject<List<string>>();
                     for (int i = 0; i < targetItemIDs.Count; ++i)
@@ -356,7 +346,6 @@ namespace EFM
                     zoneID = properties["zoneId"].ToString();
                     break;
                 case ConditionType.TraderLoyalty:
-                    Mod.LogInfo("\t\ttraderloyalty");
                     value = (int)properties["value"];
                     compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     targetTrader = Mod.traders[Trader.IDToIndex(properties["target"].ToString())];
@@ -366,7 +355,6 @@ namespace EFM
                     }
                     break;
                 case ConditionType.TraderStanding:
-                    Mod.LogInfo("\t\ttraderstanding");
                     standingValue = (float)properties["value"];
                     if(properties["compareMethod"] == null)
                     {
@@ -386,13 +374,11 @@ namespace EFM
                     }
                     break;
                 case ConditionType.Skill:
-                    Mod.LogInfo("\t\tskill");
                     value = (int)properties["value"];
                     compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     targetSkill = Mod.skills[Skill.SkillNameToIndex(properties["target"].ToString())];
                     break;
                 case ConditionType.WeaponAssembly:
-                    Mod.LogInfo("\t\tweaponassembly");
                     value = (int)properties["value"];
                     targetItemIDs = properties["target"].ToObject<List<string>>();
                     for (int i = 0; i < targetItemIDs.Count; ++i)

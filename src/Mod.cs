@@ -1702,7 +1702,7 @@ namespace EFM
 
         private void LoadDefaultAssets()
         {
-            defaultBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMDefaultAssets.ab");
+            defaultBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMDefaults.ab");
             mainMenuPointable = defaultBundle.LoadAsset<GameObject>("MainMenuPointable");
 
             mainMenuBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMMainMenu.ab");

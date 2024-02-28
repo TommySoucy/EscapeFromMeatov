@@ -1186,12 +1186,13 @@ namespace EFM
 
         private void SetupPlayerRig()
         {
+            Mod.LogInfo("Setting up player rig, current player body null?: " +(GM.CurrentPlayerBody == null)+ ", current player root null?: " + (GM.CurrentPlayerBody == null));
             // Set player's max health
-            float totalMaxHealth = 0;
-            foreach (float bodyPartMaxHealth in Mod.currentMaxHealth)
-            {
-                totalMaxHealth += bodyPartMaxHealth;
-            }
+            //float totalMaxHealth = 0;
+            //foreach (float bodyPartMaxHealth in Mod.currentMaxHealth)
+            //{
+            //    totalMaxHealth += bodyPartMaxHealth;
+            //}
 
             // Player status
             Instantiate(Mod.playerStatusUIPrefab, GM.CurrentPlayerRoot);
@@ -1873,13 +1874,6 @@ namespace EFM
                 //Mod.insuredItems = new List<InsuredSet>();
 
                 //Mod.preventLoadMagUpdateLists = false;
-
-                for(int i=0; i < areaController.areas.Length; ++i)
-                {
-                    areaController.areas[i].powered = false;
-                    areaController.areas[i].currentLevel = areaController.areas[i].startLevel;
-                    // If have data, we should also set slot content
-                }
 
                 TODO: // Initialize Traders' live data and set events for them and their task conditions
 
