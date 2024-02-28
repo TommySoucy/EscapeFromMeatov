@@ -74,6 +74,7 @@ namespace EFM
                 for(int i=0; i < conditions.Count; ++i)
                 {
                     conditions[i].questTargetTask = this;
+                    conditions[i].description = "Complete task: " + name;
                 }
                 waitingTaskConditions.Remove(ID);
             }
@@ -139,7 +140,9 @@ namespace EFM
         public enum CompareMethod
         {
             GreaterEqual, // >=
-            SmallerEqual // <=
+            SmallerEqual, // <=
+            Greater, // >
+            Smaller // <
         }
         public enum ConditionType
         {
@@ -151,15 +154,17 @@ namespace EFM
             LeaveItemAtLocation,
             TraderLoyalty,
             Skill,
-            WeaponAssembly
+            WeaponAssembly,
+            PlaceBeacon,
+            TraderStanding
         }
         public ConditionType conditionType;
-        public string description;
+        public string description = null;
         public List<VisibilityCondition> visibilityConditions;
-        public float minDurability;
-        public float maxDurability;
+        public float minDurability = 0;
+        public float maxDurability = float.MaxValue;
         public int value;
-        public bool onlyFoundInRaid;
+        public bool onlyFoundInRaid = false;
         public int dogtagLevel;
         public List<string> targetItemIDs;
         public CompareMethod compareMethod;
@@ -172,12 +177,14 @@ namespace EFM
         // Quest
         public Task questTargetTask;
         public List<Task.TaskState> questTaskStates;
-        public int questAvailableAfter; // How many seconds after target task has reached status is this condition fulfilled
+        public int questAvailableAfter = 0; // How many seconds after target task has reached status is this condition fulfilled
         public int questDispersion; // How moany seconds on top of AvailableAfter condition may be fulfilled, so this condition can be fulfilled questAvailableAfter+Random.Range(0,dispersion)
-        // LeaveItemAtLocation
+        // LeaveItemAtLocation, PlaceBeacon
         public float plantTime; // Seconds
-        // TraderLoyalty
+        // TraderLoyalty, TraderStanding
         public Trader targetTrader;
+        // TraderStanding
+        public float standingValue;
         // Skill
         public Skill targetSkill;
         // WeaponAssembly
@@ -211,28 +218,60 @@ namespace EFM
 
         public Condition(Task task, JToken data)
         {
+            Mod.LogInfo("Setup condition for task "+task.ID+" for trader "+task.trader.index+": "+task.trader.ID+", data null?: "+(data == null));
             this.task = task;
 
-            ID = data["id"].ToString();
+            JToken properties = data["_props"];
+            ID = properties["id"].ToString();
+            Mod.LogInfo("\tID: "+ID+", parent null?: "+(data["_parent"] == null));
+            Mod.LogInfo("\tParent : "+ data["_parent"].ToString()+", parsed null?: "+(Enum.Parse(typeof(ConditionType), data["_parent"].ToString()) == null));
             conditionType = (ConditionType)Enum.Parse(typeof(ConditionType), data["_parent"].ToString());
-            description = Mod.localeDB[ID].ToString();
+            if(Mod.localeDB[ID] == null)
+            {
+                switch (conditionType)
+                {
+                    case ConditionType.Level:
+                    case ConditionType.Quest:
+                    case ConditionType.TraderLoyalty:
+                    case ConditionType.TraderStanding:
+                        // Handled further down when we set other values
+                        break;
+                    default:
+                        Mod.LogError("DEV: "+conditionType+" condition with ID: "+ ID+" of task: "+ task.ID+" does not have description in locale");
+                        break;
+                }
+            }
+            else
+            {
+                description = Mod.localeDB[ID].ToString();
+            }
 
             SetupVisibilityConditions(data);
 
             // Set condition type specific data
-            JToken properties = data["_props"];
             switch (conditionType)
             {
                 case ConditionType.CounterCreator:
+                    Mod.LogInfo("\t\tcounter");
                     value = (int)properties["value"];
                     counterOneSessionOnly = (bool)properties["oneSessionOnly"];
                     SetupCounters(properties);
                     break;
                 case ConditionType.HandoverItem:
-                    minDurability = (float)properties["minDurability"];
-                    maxDurability = (float)properties["maxDurability"];
+                    Mod.LogInfo("\t\thandoveritem");
+                    if(properties["minDurability"] != null)
+                    {
+                        minDurability = (float)properties["minDurability"];
+                    }
+                    if(properties["maxDurability"] != null)
+                    {
+                        maxDurability = (float)properties["maxDurability"];
+                    }
                     value = (int)properties["value"];
-                    onlyFoundInRaid = (bool)properties["onlyFoundInRaid"];
+                    if (properties["onlyFoundInRaid"] != null)
+                    {
+                        onlyFoundInRaid = (bool)properties["onlyFoundInRaid"];
+                    }
                     dogtagLevel = (int)properties["dogtagLevel"];
                     targetItemIDs = properties["target"].ToObject<List<string>>();
                     for (int i = 0; i < targetItemIDs.Count; ++i)
@@ -241,10 +280,13 @@ namespace EFM
                     }
                     break;
                 case ConditionType.Level:
+                    Mod.LogInfo("\t\tlevel");
                     value = (int)properties["value"];
-                    compareMethod = properties["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
+                    description = "Reach level "+ value;
                     break;
                 case ConditionType.FindItem:
+                    Mod.LogInfo("\t\tfinditem");
                     value = (int)properties["value"];
                     minDurability = (float)properties["minDurability"];
                     maxDurability = (float)properties["maxDurability"];
@@ -258,10 +300,12 @@ namespace EFM
                     findItemCountInRaid = (bool)properties["countInRaid"];
                     break;
                 case ConditionType.Quest:
+                    Mod.LogInfo("\t\tquest");
                     string targetTaskID = properties["target"].ToString();
                     if (Task.allTasks.TryGetValue(targetTaskID, out Task targetTask))
                     {
                         questTargetTask = targetTask;
+                        description = "Complete task: " + targetTask.name;
                     }
                     else
                     {
@@ -280,9 +324,13 @@ namespace EFM
                     {
                         questTaskStates.Add((Task.TaskState)(int)taskStateArray[i]);
                     }
-                    questAvailableAfter = (int)properties["availableAfter"];
+                    if(properties["availableAfter"] != null)
+                    {
+                        questAvailableAfter = (int)properties["availableAfter"];
+                    }
                     break;
                 case ConditionType.LeaveItemAtLocation:
+                    Mod.LogInfo("\t\tleaveitematloc");
                     value = (int)properties["value"];
                     minDurability = (float)properties["minDurability"];
                     maxDurability = (float)properties["maxDurability"];
@@ -296,17 +344,55 @@ namespace EFM
                     plantTime = (int)properties["plantTime"];
                     zoneID = properties["zoneId"].ToString();
                     break;
-                case ConditionType.TraderLoyalty:
+                case ConditionType.PlaceBeacon:
+                    Mod.LogInfo("\t\tplacebeacon");
                     value = (int)properties["value"];
-                    compareMethod = properties["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    targetItemIDs = properties["target"].ToObject<List<string>>();
+                    for (int i = 0; i < targetItemIDs.Count; ++i)
+                    {
+                        targetItemIDs[i] = Mod.TarkovIDtoH3ID(targetItemIDs[i]);
+                    }
+                    plantTime = (int)properties["plantTime"];
+                    zoneID = properties["zoneId"].ToString();
+                    break;
+                case ConditionType.TraderLoyalty:
+                    Mod.LogInfo("\t\ttraderloyalty");
+                    value = (int)properties["value"];
+                    compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     targetTrader = Mod.traders[Trader.IDToIndex(properties["target"].ToString())];
+                    if(description == null)
+                    {
+                        description = "Reach level " + value + " with " + targetTrader.name;
+                    }
+                    break;
+                case ConditionType.TraderStanding:
+                    Mod.LogInfo("\t\ttraderstanding");
+                    standingValue = (float)properties["value"];
+                    if(properties["compareMethod"] == null)
+                    {
+                        if(standingValue < 0)
+                        {
+                            compareMethod = CompareMethod.SmallerEqual;
+                        }
+                    }
+                    else
+                    {
+                        compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
+                    }
+                    targetTrader = Mod.traders[Trader.IDToIndex(properties["target"].ToString())];
+                    if(description == null)
+                    {
+                        description = "Reach standing " + value + " with " + targetTrader.name;
+                    }
                     break;
                 case ConditionType.Skill:
+                    Mod.LogInfo("\t\tskill");
                     value = (int)properties["value"];
-                    compareMethod = properties["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     targetSkill = Mod.skills[Skill.SkillNameToIndex(properties["target"].ToString())];
                     break;
                 case ConditionType.WeaponAssembly:
+                    Mod.LogInfo("\t\tweaponassembly");
                     value = (int)properties["value"];
                     targetItemIDs = properties["target"].ToObject<List<string>>();
                     for (int i = 0; i < targetItemIDs.Count; ++i)
@@ -324,24 +410,42 @@ namespace EFM
                         hasItemFromCategories[i] = Mod.TarkovIDtoH3ID(hasItemFromCategories[i]);
                     }
                     weaponAccuracy = (float)properties["baseAccuracy"]["value"];
-                    weaponAccuracyCompareMethod = properties["baseAccuracy"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    weaponAccuracyCompareMethod = CompareMethodFromString(properties["baseAccuracy"]["compareMethod"].ToString());
                     weaponDurability = (float)properties["durability"]["value"];
-                    weaponDurabilityCompareMethod = properties["durability"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    weaponDurabilityCompareMethod = CompareMethodFromString(properties["durability"]["compareMethod"].ToString());
                     weaponEffectiveDistance = (float)properties["effectiveDistance"]["value"];
-                    weaponEffectiveDistanceCompareMethod = properties["effectiveDistance"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    weaponEffectiveDistanceCompareMethod = CompareMethodFromString(properties["effectiveDistance"]["compareMethod"].ToString());
                     weaponEmptyTacticalSlot = (int)properties["emptyTacticalSlot"]["value"];
-                    weaponEmptyTacticalSlotCompareMethod = properties["emptyTacticalSlot"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    weaponEmptyTacticalSlotCompareMethod = CompareMethodFromString(properties["emptyTacticalSlot"]["compareMethod"].ToString());
                     weaponErgonomics = (int)properties["ergonomics"]["value"];
-                    weaponErgonomicsCompareMethod = properties["ergonomics"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    weaponErgonomicsCompareMethod = CompareMethodFromString(properties["ergonomics"]["compareMethod"].ToString());
                     weaponMagazineCapacity = (int)properties["magazineCapacity"]["value"];
-                    weaponMagazineCapacityCompareMethod = properties["magazineCapacity"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    weaponMagazineCapacityCompareMethod = CompareMethodFromString(properties["magazineCapacity"]["compareMethod"].ToString());
                     weaponMuzzleVelocity = (float)properties["muzzleVelocity"]["value"];
-                    weaponMuzzleVelocityCompareMethod = properties["muzzleVelocity"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    weaponMuzzleVelocityCompareMethod = CompareMethodFromString(properties["muzzleVelocity"]["compareMethod"].ToString());
                     weaponRecoil = (float)properties["recoil"]["value"];
-                    weaponRecoilCompareMethod = properties["recoil"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    weaponRecoilCompareMethod = CompareMethodFromString(properties["recoil"]["compareMethod"].ToString());
                     weaponWeight = (float)properties["weight"]["value"];
-                    weaponWeightCompareMethod = properties["weight"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    weaponWeightCompareMethod = CompareMethodFromString(properties["weight"]["compareMethod"].ToString());
                     break;
+            }
+        }
+
+        public static CompareMethod CompareMethodFromString(string s)
+        {
+            switch (s)
+            {
+                case ">=":
+                    return CompareMethod.GreaterEqual;
+                case "<=":
+                    return CompareMethod.SmallerEqual;
+                case ">":
+                    return CompareMethod.Greater;
+                case "<":
+                    return CompareMethod.Smaller;
+                default:
+                    Mod.LogError("DEV: CompareMethodFromString got string " + s);
+                    return CompareMethod.GreaterEqual;
             }
         }
 
@@ -409,11 +513,14 @@ namespace EFM
             Equipment,
             InZone,
             Shots,
-            UseItem
+            UseItem,
+            LaunchFlare,
+            ExitName,
+            HealthBuff,
         }
         public CounterCreatorConditionType counterCreatorConditionType;
         // Kills
-        public Condition.CompareMethod killCompareMethod;
+        public Condition.CompareMethod killCompareMethod = Condition.CompareMethod.GreaterEqual;
         public Condition.CompareMethod killDistanceCompareMethod; // Could be omitted from DB
         public int killDistance; // Could be omitted from DB
         public enum EnemyTarget
@@ -426,7 +533,7 @@ namespace EFM
         }
         public EnemyTarget killTarget;
         public List<string> killSavageRoles; // Could be omitted from DB
-        public int killValue;
+        public int killValue = 1;
         public List<string> killWeaponWhitelist; // Could be omitted from DB
         public List<List<string>> killWeaponModWhitelists; // Could be omitted from DB
         public List<List<string>> killWeaponModBlacklists; // Could be omitted from DB
@@ -445,7 +552,7 @@ namespace EFM
         public List<HealthEffectEntry> killEnemyHealthEffects; // Could be omitted from DB
         // HealthEffect
         public List<HealthEffectEntry> healthEffects;
-        public int healthEffectDuration;
+        public int healthEffectDuration = 0;
         public Condition.CompareMethod healthEffectDurationCompareMethod;
         // Location
         public List<string> locationTargets;
@@ -484,6 +591,10 @@ namespace EFM
         public Condition.CompareMethod useItemCompareMethod;
         public int useItemValue;
         public List<string> useItemTargets;
+        // ExitName
+        public string exitName;
+        // HealthBuff
+        public List<string> buffTargets;
 
         public ConditionCounter(Condition condition, JToken data)
         {
@@ -494,10 +605,13 @@ namespace EFM
             switch (counterCreatorConditionType)
             {
                 case CounterCreatorConditionType.Kills:
-                    killCompareMethod = properties["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    if (properties["compareMethod"] != null)
+                    {
+                        killCompareMethod = Condition.CompareMethodFromString(properties["compareMethod"].ToString());
+                    }
                     if (properties["distance"] != null)
                     {
-                        killDistanceCompareMethod = properties["distance"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                        killDistanceCompareMethod = Condition.CompareMethodFromString(properties["distance"]["compareMethod"].ToString());
                         killDistance = (int)properties["distance"]["value"];
                     }
                     killTarget = (EnemyTarget)Enum.Parse(typeof(EnemyTarget), properties["target"].ToString(), true);
@@ -506,7 +620,10 @@ namespace EFM
                     {
                         killSavageRoles = savageRolesArray.ToObject<List<string>>();
                     }
-                    killValue = (int)properties["value"];
+                    if(properties["value"] != null)
+                    {
+                        killValue = (int)properties["value"];
+                    }
                     JArray weaponArray = properties["weapon"] as JArray;
                     if(weaponArray != null)
                     {
@@ -525,7 +642,7 @@ namespace EFM
                             List<string> newSubList = weaponModArray[i].ToObject<List<string>>();
                             for(int j=0; j < newSubList.Count; ++j)
                             {
-                                newSubList[i] = Mod.TarkovIDtoH3ID(newSubList[i]);
+                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
                             }
                             killWeaponModWhitelists.Add(newSubList);
                         }
@@ -539,7 +656,7 @@ namespace EFM
                             List<string> newSubList = weaponModArray[i].ToObject<List<string>>();
                             for(int j=0; j < newSubList.Count; ++j)
                             {
-                                newSubList[i] = Mod.TarkovIDtoH3ID(newSubList[i]);
+                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
                             }
                             killWeaponModBlacklists.Add(newSubList);
                         }
@@ -589,8 +706,11 @@ namespace EFM
                     {
                         healthEffects.Add(new HealthEffectEntry(healthEffectArray[i]));
                     }
-                    healthEffectDuration = (int)properties["time"]["value"];
-                    healthEffectDurationCompareMethod = properties["time"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    if(properties["time"] != null)
+                    {
+                        healthEffectDuration = (int)properties["time"]["value"];
+                        healthEffectDurationCompareMethod = Condition.CompareMethodFromString(properties["time"]["compareMethod"].ToString());
+                    }
                     break;
                 case CounterCreatorConditionType.Equipment:
                     JArray equipmentArray = properties["equipmentInclusive"] as JArray;
@@ -602,7 +722,7 @@ namespace EFM
                             List<string> newSubList = equipmentArray[i].ToObject<List<string>>();
                             for (int j = 0; j < newSubList.Count; ++j)
                             {
-                                newSubList[i] = Mod.TarkovIDtoH3ID(newSubList[i]);
+                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
                             }
                             equipmentWhitelists.Add(newSubList);
                         }
@@ -616,7 +736,7 @@ namespace EFM
                             List<string> newSubList = equipmentArray[i].ToObject<List<string>>();
                             for (int j = 0; j < newSubList.Count; ++j)
                             {
-                                newSubList[i] = Mod.TarkovIDtoH3ID(newSubList[i]);
+                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
                             }
                             equipmentBlacklists.Add(newSubList);
                         }
@@ -627,10 +747,10 @@ namespace EFM
                     zoneIDs = zoneIDArray.ToObject<List<string>>();
                     break;
                 case CounterCreatorConditionType.Shots:
-                    shotCompareMethod = properties["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    shotCompareMethod = Condition.CompareMethodFromString(properties["compareMethod"].ToString());
                     if (properties["distance"] != null)
                     {
-                        shotDistanceCompareMethod = properties["distance"]["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                        shotDistanceCompareMethod = Condition.CompareMethodFromString(properties["distance"]["compareMethod"].ToString());
                         shotDistance = (int)properties["distance"]["value"];
                     }
                     shotTarget = (EnemyTarget)Enum.Parse(typeof(EnemyTarget), properties["target"].ToString(), true);
@@ -658,7 +778,7 @@ namespace EFM
                             List<string> newSubList = shotWeaponModArray[i].ToObject<List<string>>();
                             for (int j = 0; j < newSubList.Count; ++j)
                             {
-                                newSubList[i] = Mod.TarkovIDtoH3ID(newSubList[i]);
+                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
                             }
                             shotWeaponModWhitelists.Add(newSubList);
                         }
@@ -672,7 +792,7 @@ namespace EFM
                             List<string> newSubList = shotWeaponModArray[i].ToObject<List<string>>();
                             for (int j = 0; j < newSubList.Count; ++j)
                             {
-                                newSubList[i] = Mod.TarkovIDtoH3ID(newSubList[i]);
+                                newSubList[j] = Mod.TarkovIDtoH3ID(newSubList[j]);
                             }
                             shotWeaponModBlacklists.Add(newSubList);
                         }
@@ -701,13 +821,23 @@ namespace EFM
                     }
                     break;
                 case CounterCreatorConditionType.UseItem:
-                    useItemCompareMethod = properties["compareMethod"].ToString().Equals(">=") ? Condition.CompareMethod.GreaterEqual : Condition.CompareMethod.SmallerEqual;
+                    useItemCompareMethod = Condition.CompareMethodFromString(properties["compareMethod"].ToString());
                     useItemTargets = properties["target"].ToObject<List<string>>();
                     for (int i = 0; i < useItemTargets.Count; ++i)
                     {
                         useItemTargets[i] = Mod.TarkovIDtoH3ID(useItemTargets[i]);
                     }
                     useItemValue = (int)properties["value"];
+                    break;
+                case CounterCreatorConditionType.LaunchFlare:
+                    zoneIDs = new List<string>();
+                    zoneIDs.Add(properties["target"].ToString());
+                    break;
+                case CounterCreatorConditionType.ExitName:
+                    exitName = properties["exitName"].ToString();
+                    break;
+                case CounterCreatorConditionType.HealthBuff:
+                    buffTargets = properties["target"].ToObject<List<string>>();
                     break;
             }
         }
@@ -763,7 +893,10 @@ namespace EFM
             TraderStanding,
             Item,
             TraderUnlock,
-            AssortmentUnlock
+            AssortmentUnlock,
+            Skill,
+            ProductionScheme,
+            TraderStandingRestore,
         }
         public RewardType rewardType;
 
@@ -782,7 +915,11 @@ namespace EFM
         // Item
         public List<string> itemIDs;
         public int amount;
-        public bool foundInRaid;
+        public bool foundInRaid = false;
+
+        // Skill
+        public Skill skill;
+        public int value;
 
         public Reward(Task task, JToken data)
         {
@@ -795,6 +932,7 @@ namespace EFM
                     experience = (int)data["value"];
                     break;
                 case RewardType.TraderStanding:
+                case RewardType.TraderStandingRestore:
                     trader = Mod.traders[Trader.IDToIndex(data["target"].ToString())];
                     standing = (float)data["value"];
                     break;
@@ -806,7 +944,10 @@ namespace EFM
                         itemIDs.Add(Mod.TarkovIDtoH3ID(itemsArray[i]["_tpl"].ToString()));
                     }
                     amount = (int)data["value"];
-                    foundInRaid = (bool)data["findInRaid"];
+                    if(data["findInRaid"] != null)
+                    {
+                        foundInRaid = (bool)data["findInRaid"];
+                    }
                     break;
                 case RewardType.TraderUnlock:
                     trader = Mod.traders[Trader.IDToIndex(data["target"].ToString())];
@@ -827,6 +968,14 @@ namespace EFM
                             }
                         }
                     }
+                    break;
+                case RewardType.Skill:
+                    skill = Mod.skills[Skill.SkillNameToIndex(data["target"].ToString())];
+                    value = (int)data["value"];
+                    break;
+                case RewardType.ProductionScheme:
+                    // Note: This type of reward will be handled by the relevant production's QuestComplete 
+                    //       condition which will be handled as an unlock condition
                     break;
             }
         }

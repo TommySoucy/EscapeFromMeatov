@@ -97,6 +97,8 @@ namespace EFM
             this.index = index;
             this.ID = ID;
 
+            tasks = new List<Task>();
+
             name = Mod.localeDB[ID + " Nickname"].ToString();
             string currencyString = Mod.traderBaseDB[index]["currency"].ToString();
             switch (currencyString)

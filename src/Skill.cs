@@ -273,9 +273,9 @@ namespace EFM
                     return 10;
                 case "Memory":
                     return 11;
-                case "Pistols":
+                case "Pistol":
                     return 12;
-                case "Revolvers":
+                case "Revolver":
                     return 13;
                 case "SMG":
                     return 14;
