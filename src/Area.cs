@@ -78,6 +78,19 @@ namespace EFM
 
         public void Start()
         {
+            // Special case for christmas tree (21)
+            // Disable instead of init if not in season
+            if(index == 21)
+            {
+                DateTime now = DateTime.UtcNow;
+                if ((now.Month != 12 || now.Day < 15)
+                    && (now.Month != 1 || now.Day > 15))
+                {
+                    gameObject.SetActive(false);
+                    return;
+                }
+            }
+
             LoadStaticData();
 
             UpdateObjectsPerLevel();
@@ -235,6 +248,15 @@ namespace EFM
         {
             if(HideoutController.loadedData["hideout"] == null)
             {
+                // No hideout save data, set defaults
+                powered = false;
+                currentLevel = startLevel;
+                upgrading = false;
+                for (int i = 0; i < levels.Length; ++i)
+                {
+                    levels[i].SetActive(i == currentLevel);
+                }
+
                 return;
             }
 
@@ -280,11 +302,7 @@ namespace EFM
             }
 
             // Special case for bitcoin farm
-            // If it has slots, we need to make sure bitcoin production rate is calculated
-            if (currentLevel > startLevel)
-            {
-                productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged();
-            }
+            productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged();
         }
 
         public void Update()

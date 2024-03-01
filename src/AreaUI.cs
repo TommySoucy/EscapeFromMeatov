@@ -103,14 +103,19 @@ namespace EFM
 
         public void Update()
         {
+
+            TODO: // Make a new script that we can attach to current and future content that OnEnable() will calculate hoverscroll necessity on NEXT FRAME
+            //          It shoudld be able to take in a max height like the default hardcoded 350 we already have
             if (mustUpdateMiddleHeight == 0)
             {
-                UpdateTaskListHeight();
+                Mod.LogInfo("area "+area.index+" mustUpdateMiddleHeight = 0, updating for current heights: " + currentContent.sizeDelta.y + ", " + futureContent.sizeDelta.y);
+                UpdateMiddleHeight();
                 --mustUpdateMiddleHeight;
             }
             else if (mustUpdateMiddleHeight > 0)
             {
                 --mustUpdateMiddleHeight;
+                Mod.LogInfo("area " + area.index + " mustUpdateMiddleHeight was > 0, now: " + mustUpdateMiddleHeight);
             }
         }
 
@@ -127,15 +132,17 @@ namespace EFM
             UpdateBonuses();
             UpdateBottomButtons();
 
-            ++mustUpdateMiddleHeight;
+            mustUpdateMiddleHeight+=10;
+            Mod.LogInfo("Done init for Area UI: " + area.index+", update middle: "+mustUpdateMiddleHeight+", current heights: "+currentContent.sizeDelta.y+", "+futureContent.sizeDelta.y);
         }
 
-        public void UpdateTaskListHeight()
+        public void UpdateMiddleHeight()
         {
             // We should always wait until 1 frame after setting the UI before calling this because
             // parent.sizeDelta.y only get updated the frame after any changes
             // 350 is the height we see in the view
             RectTransform parentToUse = currentContent.gameObject.activeSelf ? currentContent : futureContent;
+            Mod.LogInfo("Updating middle height for area " + area.index + ", height: " + parentToUse.sizeDelta.y);
             if (parentToUse.sizeDelta.y > 350)
             {
                 downHoverscroll.rate = 1 / (parentToUse.sizeDelta.y / 350);
@@ -153,7 +160,8 @@ namespace EFM
 
         public void UpdateStatusTexts()
         {
-            Mod.LogInfo("Updating status text for area " + area.index);
+            Mod.LogInfo("Updating status text, area null?: " + (area == null)+", parent: "+name);
+            Mod.LogInfo("parent: "+transform.parent.parent.parent.name);
             if (area.upgrading)
             {
                 if (area.currentLevel == area.startLevel)
@@ -171,20 +179,16 @@ namespace EFM
             }
             else
             {
-                Mod.LogInfo("\tNot upgrading");
                 if (area.AllRequirementsFulfilled())
                 {
-                    Mod.LogInfo("\t\tAll requirements fulfilled");
                     if (area.currentLevel == area.startLevel)
                     {
-                        Mod.LogInfo("\t\t\t0");
                         summaryStatusText.text = "Ready to Construct";
                         fullStatusText.text = "Ready to Construct";
                         fullStatusImage.sprite = statusSprites[1];
                     }
                     else
                     {
-                        Mod.LogInfo("\t\t\t1");
                         summaryStatusText.text = "Ready to Upgrade";
                         fullStatusText.text = "Ready to Upgrade";
                         fullStatusImage.sprite = statusSprites[4];
@@ -192,44 +196,52 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.LogInfo("\t\tNot all requirements fulfilled");
                     if (area.powered)
                     {
-                        Mod.LogInfo("\t\t\tPowered");
-                        if (area.activeProductions.Count > 0)
+                        if(area.currentLevel == area.startLevel)
                         {
-                            Mod.LogInfo("\t\t\t0");
-                            summaryStatusText.text = "Crafting (" + area.activeProductions.Count + ")";
-                            fullStatusText.text = "Crafting (" + area.activeProductions.Count + ")";
-                            fullStatusImage.sprite = statusSprites[3];
-                        }
-                        else
-                        {
-                            Mod.LogInfo("\t\t\t1");
                             summaryStatusText.text = "Stand By";
                             fullStatusText.text = "Stand By";
                             fullStatusImage.sprite = null;
+                        }
+                        else
+                        {
+                            if (area.activeProductions.Count > 0)
+                            {
+                                summaryStatusText.text = "Crafting (" + area.activeProductions.Count + ")";
+                                fullStatusText.text = "Crafting (" + area.activeProductions.Count + ")";
+                                fullStatusImage.sprite = statusSprites[3];
+                            }
+                            else
+                            {
+                                summaryStatusText.text = "Stand By";
+                                fullStatusText.text = "Stand By";
+                                fullStatusImage.sprite = null;
+                            }
                         }
                     }
                     else
                     {
-                        Mod.LogInfo("\t\t\tNot Powered");
-                        if (area.requiresPower)
+                        if (area.currentLevel == area.startLevel)
                         {
-                            Mod.LogInfo("\t\t\t0");
-                            summaryStatusText.text = "Out of Fuel";
-                            fullStatusText.text = "Out of Fuel";
-                            fullStatusImage.sprite = statusSprites[6];
+                            summaryStatusText.text = "Stand By";
+                            fullStatusText.text = "Stand By";
+                            fullStatusImage.sprite = null;
                         }
                         else
                         {
-                            Mod.LogInfo("\t\t\t1, summaryStatusText == null?: "+(summaryStatusText == null));
-                            summaryStatusText.text = "Stand By";
-                            Mod.LogInfo("\t\t\t1, fullStatusText == null?: " + (fullStatusText == null));
-                            fullStatusText.text = "Stand By";
-                            Mod.LogInfo("\t\t\t1, fullStatusImage == null?: " + (fullStatusImage == null));
-                            fullStatusImage.sprite = null;
-                            Mod.LogInfo("\t\t\t1");
+                            if (area.requiresPower)
+                            {
+                                summaryStatusText.text = "Out of Fuel";
+                                fullStatusText.text = "Out of Fuel";
+                                fullStatusImage.sprite = statusSprites[6];
+                            }
+                            else
+                            {
+                                summaryStatusText.text = "Stand By";
+                                fullStatusText.text = "Stand By";
+                                fullStatusImage.sprite = null;
+                            }
                         }
                     }
                 }
@@ -964,7 +976,7 @@ namespace EFM
                         else
                         {
                             // Make new parent if current is full or non existent
-                            if(currentAreaRequirementParent == null || currentAreaRequirementParent.childCount >= 2)
+                            if(currentAreaRequirementParent == null || currentAreaRequirementParent.childCount > 2)
                             {
                                 currentAreaRequirementParent = Instantiate(areaRequirementPanel, requirementPanel.transform).transform;
                                 currentAreaRequirementParent.gameObject.SetActive(true);
@@ -980,7 +992,7 @@ namespace EFM
                             }
                             else
                             {
-                                areaRequirement.areaName.text = Mod.localeDB["hideout_area_" + area.index + "_name"].ToString();
+                                areaRequirement.areaName.text = Mod.localeDB["hideout_area_" + areaRequirements[i].areaIndex + "_name"].ToString();
                             }
                             areaRequirement.fulfilled.SetActive(areaRequirements[i].fulfilled);
                             areaRequirement.unfulfilled.SetActive(!areaRequirements[i].fulfilled);
@@ -997,7 +1009,7 @@ namespace EFM
                     for(int i=0; i< itemRequirements.Count; ++i)
                     {
                         // Make new parent if current is full or non existent
-                        if (currentItemRequirementParent == null || currentItemRequirementParent.childCount >= 5)
+                        if (currentItemRequirementParent == null || currentItemRequirementParent.childCount > 5)
                         {
                             currentItemRequirementParent = Instantiate(itemRequirementPanel, requirementPanel.transform).transform;
                             currentItemRequirementParent.gameObject.SetActive(true);
@@ -1038,7 +1050,7 @@ namespace EFM
                     for(int i=0; i< traderRequirements.Count; ++i)
                     {
                         // Make new parent if current is full or non existent
-                        if(currentTraderRequirementParent == null || currentTraderRequirementParent.childCount >= 3)
+                        if(currentTraderRequirementParent == null || currentTraderRequirementParent.childCount > 3)
                         {
                             currentTraderRequirementParent = Instantiate(traderRequirementPanel, requirementPanel.transform).transform;
                             currentTraderRequirementParent.gameObject.SetActive(true);
@@ -1074,7 +1086,7 @@ namespace EFM
                     for(int i=0; i< skillRequirements.Count; ++i)
                     {
                         // Make new parent if current is full or non existent
-                        if(currentSkillRequirementParent == null || currentSkillRequirementParent.childCount >= 3)
+                        if(currentSkillRequirementParent == null || currentSkillRequirementParent.childCount > 3)
                         {
                             currentSkillRequirementParent = Instantiate(skillRequirementPanel, requirementPanel.transform).transform;
                             currentSkillRequirementParent.gameObject.SetActive(true);
@@ -1133,7 +1145,7 @@ namespace EFM
                         else
                         {
                             // Make new parent if current is full or non existent
-                            if (currentAreaRequirementParent == null || currentAreaRequirementParent.childCount >= 2)
+                            if (currentAreaRequirementParent == null || currentAreaRequirementParent.childCount > 2)
                             {
                                 currentAreaRequirementParent = Instantiate(futureAreaRequirementPanel, futureRequirementPanel.transform).transform;
                                 currentAreaRequirementParent.gameObject.SetActive(true);
@@ -1149,7 +1161,7 @@ namespace EFM
                             }
                             else
                             {
-                                areaRequirement.areaName.text = Mod.localeDB["hideout_area_" + area.index + "_name"].ToString();
+                                areaRequirement.areaName.text = Mod.localeDB["hideout_area_" + areaRequirements[i].areaIndex + "_name"].ToString();
                             }
                             areaRequirement.fulfilled.SetActive(areaRequirements[i].fulfilled);
                             areaRequirement.unfulfilled.SetActive(!areaRequirements[i].fulfilled);
@@ -1166,7 +1178,7 @@ namespace EFM
                     for (int i = 0; i < itemRequirements.Count; ++i)
                     {
                         // Make new parent if current is full or non existent
-                        if (currentItemRequirementParent == null || currentItemRequirementParent.childCount >= 5)
+                        if (currentItemRequirementParent == null || currentItemRequirementParent.childCount > 5)
                         {
                             currentItemRequirementParent = Instantiate(futureItemRequirementPanel, futureRequirementPanel.transform).transform;
                             currentItemRequirementParent.gameObject.SetActive(true);
@@ -1207,7 +1219,7 @@ namespace EFM
                     for (int i = 0; i < traderRequirements.Count; ++i)
                     {
                         // Make new parent if current is full or non existent
-                        if (currentTraderRequirementParent == null || currentTraderRequirementParent.childCount >= 3)
+                        if (currentTraderRequirementParent == null || currentTraderRequirementParent.childCount > 3)
                         {
                             currentTraderRequirementParent = Instantiate(futureTraderRequirementPanel, futureRequirementPanel.transform).transform;
                             currentTraderRequirementParent.gameObject.SetActive(true);
@@ -1243,7 +1255,7 @@ namespace EFM
                     for (int i = 0; i < skillRequirements.Count; ++i)
                     {
                         // Make new parent if current is full or non existent
-                        if (currentSkillRequirementParent == null || currentSkillRequirementParent.childCount >= 3)
+                        if (currentSkillRequirementParent == null || currentSkillRequirementParent.childCount > 3)
                         {
                             currentSkillRequirementParent = Instantiate(futureSkillRequirementPanel, futureRequirementPanel.transform).transform;
                             currentSkillRequirementParent.gameObject.SetActive(true);
@@ -1350,11 +1362,17 @@ namespace EFM
         public void OnLevelClicked()
         {
             // TODO
+
+            // Must update height because we change page, content may be different
+            ++mustUpdateMiddleHeight;
         }
 
         public void OnBackClicked()
         {
             // TODO
+
+            // Must update height because we change page, content may be different
+            ++mustUpdateMiddleHeight;
         }
 
         public void OnUpgradeClicked()
