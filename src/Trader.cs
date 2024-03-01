@@ -360,6 +360,8 @@ namespace EFM
                     return "II";
                 case 3:
                     return "III";
+                case 4:
+                    return "IV";
                 default:
                     Mod.LogError("DEV: Trader.LevelToRoman was given invalid level: "+level+":\n"+Environment.StackTrace);
                     return level.ToString();

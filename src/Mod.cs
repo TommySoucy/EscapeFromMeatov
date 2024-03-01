@@ -36,7 +36,7 @@ namespace EFM
         public static AssetBundle mainMenuBundle;
         public static AssetBundle hideoutBundle;
         public static AssetBundle itemIconsBundle;
-        public static AssetBundle itemsBundle;
+        public static AssetBundle[] itemsBundles;
         public static AssetBundle itemSoundsBundle;
         public static AssetBundle playerBundle;
         public static AssetBundleCreateRequest currentRaidBundleRequest;
@@ -719,8 +719,7 @@ namespace EFM
             for (int i = 0; i < ((JArray)defaultItemsData["ItemDefaults"]).Count; ++i)
             {
                 LogInfo("\tLoading Item" + i);
-                int assetBundleIndex = i > 500 ? 1 : 0;
-                GameObject itemPrefab = itemsBundle.LoadAsset<GameObject>("Item" + i);
+                GameObject itemPrefab = GetItemPrefab(i);
                 itemPrefab.name = defaultItemsData["ItemDefaults"][i]["DefaultPhysicalObject"]["DefaultObjectWrapper"]["DisplayName"].ToString();
 
                 itemPrefabs.Add(itemPrefab);
@@ -2570,8 +2569,11 @@ namespace EFM
                         {
                             hideoutBundle.Unload(true);
                             hideoutBundle = null;
-                            itemsBundle.Unload(true);
-                            itemsBundle = null;
+                            for(int i=0; i < itemsBundles.Length; ++i)
+                            {
+                                itemsBundles[i].Unload(true);
+                                itemsBundles[i] = null;
+                            }
                             itemIconsBundle.Unload(true);
                             itemIconsBundle = null;
                             itemSoundsBundle.Unload(true);
@@ -2763,6 +2765,12 @@ namespace EFM
                     securedRightHandInteractable = null;
                 }
             }
+        }
+
+        public static GameObject GetItemPrefab(int index)
+        {
+            int bundleIndex = index / 300;
+            return itemsBundles[bundleIndex].LoadAsset<GameObject>("Item" + index);
         }
 
         public static string GetBodyPartName(int index)

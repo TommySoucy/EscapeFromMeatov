@@ -63,7 +63,13 @@ namespace EFM
             {
                 Mod.LogInfo("Loading main asset bundles");
                 Mod.playerBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMPlayer.ab");
-                //Mod.assetsBundles[1] = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMAssets1.ab");
+                Mod.itemsBundles = new AssetBundle[3];
+                for (int i = 0; i < 3; ++i) 
+                {
+                    Mod.itemsBundles[i] = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMItems" + i + ".ab");
+                }
+                Mod.itemIconsBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMItemIcons.ab");
+                Mod.itemSoundsBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMItemSounds.ab");
                 Mod.LogInfo("Loading hideout bundle");
                 Mod.hideoutBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMHideout.ab");
                 Mod.LogInfo("Loaded hideout bundles");

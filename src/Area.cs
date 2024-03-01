@@ -135,7 +135,6 @@ namespace EFM
                 if ((int)Mod.areasDB[i]["type"] == index)
                 {
                     areaData = Mod.areasDB[i];
-                    Mod.LogInfo("\tGot data");
                     break;
                 }
             }

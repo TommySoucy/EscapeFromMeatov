@@ -153,6 +153,7 @@ namespace EFM
 
         public void UpdateStatusTexts()
         {
+            Mod.LogInfo("Updating status text for area " + area.index);
             if (area.upgrading)
             {
                 if (area.currentLevel == area.startLevel)
@@ -170,16 +171,20 @@ namespace EFM
             }
             else
             {
+                Mod.LogInfo("\tNot upgrading");
                 if (area.AllRequirementsFulfilled())
                 {
+                    Mod.LogInfo("\t\tAll requirements fulfilled");
                     if (area.currentLevel == area.startLevel)
                     {
+                        Mod.LogInfo("\t\t\t0");
                         summaryStatusText.text = "Ready to Construct";
                         fullStatusText.text = "Ready to Construct";
                         fullStatusImage.sprite = statusSprites[1];
                     }
                     else
                     {
+                        Mod.LogInfo("\t\t\t1");
                         summaryStatusText.text = "Ready to Upgrade";
                         fullStatusText.text = "Ready to Upgrade";
                         fullStatusImage.sprite = statusSprites[4];
@@ -187,16 +192,20 @@ namespace EFM
                 }
                 else
                 {
+                    Mod.LogInfo("\t\tNot all requirements fulfilled");
                     if (area.powered)
                     {
+                        Mod.LogInfo("\t\t\tPowered");
                         if (area.activeProductions.Count > 0)
                         {
+                            Mod.LogInfo("\t\t\t0");
                             summaryStatusText.text = "Crafting (" + area.activeProductions.Count + ")";
                             fullStatusText.text = "Crafting (" + area.activeProductions.Count + ")";
                             fullStatusImage.sprite = statusSprites[3];
                         }
                         else
                         {
+                            Mod.LogInfo("\t\t\t1");
                             summaryStatusText.text = "Stand By";
                             fullStatusText.text = "Stand By";
                             fullStatusImage.sprite = null;
@@ -204,17 +213,23 @@ namespace EFM
                     }
                     else
                     {
+                        Mod.LogInfo("\t\t\tNot Powered");
                         if (area.requiresPower)
                         {
+                            Mod.LogInfo("\t\t\t0");
                             summaryStatusText.text = "Out of Fuel";
                             fullStatusText.text = "Out of Fuel";
                             fullStatusImage.sprite = statusSprites[6];
                         }
                         else
                         {
+                            Mod.LogInfo("\t\t\t1, summaryStatusText == null?: "+(summaryStatusText == null));
                             summaryStatusText.text = "Stand By";
+                            Mod.LogInfo("\t\t\t1, fullStatusText == null?: " + (fullStatusText == null));
                             fullStatusText.text = "Stand By";
+                            Mod.LogInfo("\t\t\t1, fullStatusImage == null?: " + (fullStatusImage == null));
                             fullStatusImage.sprite = null;
+                            Mod.LogInfo("\t\t\t1");
                         }
                     }
                 }
@@ -360,11 +375,11 @@ namespace EFM
         {
             string currentDescription = null;
             string futureDescription = null;
-            if(Mod.localeDB["hideout_area_" + area.index + "_stage_"+area.currentLevel+"_description"] == null)
+            if(Mod.localeDB["hideout_area_" + area.index + "_stage_"+area.currentLevel+"_description"] != null)
             {
                 currentDescription = Mod.localeDB["hideout_area_" + area.index + "_stage_" + area.currentLevel + "_description"].ToString();
             }
-            if(Mod.localeDB["hideout_area_" + area.index + "_stage_"+(area.currentLevel+1).ToString()+"_description"] == null)
+            if(Mod.localeDB["hideout_area_" + area.index + "_stage_"+(area.currentLevel+1).ToString()+"_description"] != null)
             {
                 futureDescription = Mod.localeDB["hideout_area_" + area.index + "_stage_" + (area.currentLevel + 1).ToString() + "_description"].ToString();
             }
@@ -936,7 +951,7 @@ namespace EFM
                 Dictionary<Requirement.RequirementType, List<Requirement>> requirements = area.requirementsByTypePerLevel[area.currentLevel + 1];
 
                 // Area requirements
-                if(requirements.TryGetValue(Requirement.RequirementType.Area, out List<Requirement> areaRequirements))
+                if (requirements.TryGetValue(Requirement.RequirementType.Area, out List<Requirement> areaRequirements))
                 {
                     Transform currentAreaRequirementParent = null;
                     for(int i=0; i< areaRequirements.Count; ++i)
@@ -976,13 +991,13 @@ namespace EFM
                 }
 
                 // Item requirements
-                if(requirements.TryGetValue(Requirement.RequirementType.Item, out List<Requirement> itemRequirements))
+                if (requirements.TryGetValue(Requirement.RequirementType.Item, out List<Requirement> itemRequirements))
                 {
                     Transform currentItemRequirementParent = null;
                     for(int i=0; i< itemRequirements.Count; ++i)
                     {
                         // Make new parent if current is full or non existent
-                        if(currentItemRequirementParent == null || currentItemRequirementParent.childCount >= 5)
+                        if (currentItemRequirementParent == null || currentItemRequirementParent.childCount >= 5)
                         {
                             currentItemRequirementParent = Instantiate(itemRequirementPanel, requirementPanel.transform).transform;
                             currentItemRequirementParent.gameObject.SetActive(true);
@@ -1017,7 +1032,7 @@ namespace EFM
                 }
 
                 // Trader requirements
-                if(requirements.TryGetValue(Requirement.RequirementType.Trader, out List<Requirement> traderRequirements))
+                if (requirements.TryGetValue(Requirement.RequirementType.Trader, out List<Requirement> traderRequirements))
                 {
                     Transform currentTraderRequirementParent = null;
                     for(int i=0; i< traderRequirements.Count; ++i)
@@ -1053,7 +1068,7 @@ namespace EFM
                 }
 
                 // Skill requirements
-                if(requirements.TryGetValue(Requirement.RequirementType.Skill, out List<Requirement> skillRequirements))
+                if (requirements.TryGetValue(Requirement.RequirementType.Skill, out List<Requirement> skillRequirements))
                 {
                     Transform currentSkillRequirementParent = null;
                     for(int i=0; i< skillRequirements.Count; ++i)
