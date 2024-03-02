@@ -11,7 +11,7 @@ namespace EFM
         public HoverScroll other;
 
         public bool up;
-        public float rate; // fraction of page/s
+        public float rate; // fraction of entire scrollview height/s
 		private bool scrolling;
 
 		public override void Update()
@@ -24,7 +24,7 @@ namespace EFM
 
                 if (up)
                 {
-                    scrollbar.value += rate * Time.deltaTime * 1.5f;
+                    scrollbar.value += rate * Time.deltaTime;
 
                     if (scrollbar.value >= 1)
                     {
@@ -35,7 +35,7 @@ namespace EFM
                 }
                 else
                 {
-                    scrollbar.value -= rate * Time.deltaTime * 1.5f;
+                    scrollbar.value -= rate * Time.deltaTime;
 
                     if (scrollbar.value <= 0)
                     {

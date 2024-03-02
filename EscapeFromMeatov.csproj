@@ -56,6 +56,7 @@
     <Compile Include="src\ExtractionLimitUI.cs" />
     <Compile Include="src\ExtractionUI.cs" />
     <Compile Include="src\FarmingView.cs" />
+    <Compile Include="src\HoverScrollProcessor.cs" />
     <Compile Include="src\ItemDescriptionListEntryUI.cs" />
     <Compile Include="src\ItemDescriptionUI.cs" />
     <Compile Include="src\ItemRewardView.cs" />

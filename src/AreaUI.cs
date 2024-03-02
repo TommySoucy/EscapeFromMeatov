@@ -90,34 +90,11 @@ namespace EFM
         public GameObject upgradeButton;
         public RectTransform currentContent;
         public RectTransform futureContent;
-        public RectTransform visibleHeightTransform;
-        public HoverScroll upHoverscroll;
-        public HoverScroll downHoverscroll;
         public GameObject upgradeConfirmDialog;
         public GameObject warningDialog;
         public GameObject blockDialog;
         public AudioSource genericAudioSource;
         public AudioClip[] genericAudioClips; // AreaSelected, UpgradeBegin, UpgradeComplete, ItemInstalled, ItemStarted, ItemComplete
-
-        public int mustUpdateMiddleHeight = 0;
-
-        public void Update()
-        {
-
-            TODO: // Make a new script that we can attach to current and future content that OnEnable() will calculate hoverscroll necessity on NEXT FRAME
-            //          It shoudld be able to take in a max height like the default hardcoded 350 we already have
-            if (mustUpdateMiddleHeight == 0)
-            {
-                Mod.LogInfo("area "+area.index+" mustUpdateMiddleHeight = 0, updating for current heights: " + currentContent.sizeDelta.y + ", " + futureContent.sizeDelta.y);
-                UpdateMiddleHeight();
-                --mustUpdateMiddleHeight;
-            }
-            else if (mustUpdateMiddleHeight > 0)
-            {
-                --mustUpdateMiddleHeight;
-                Mod.LogInfo("area " + area.index + " mustUpdateMiddleHeight was > 0, now: " + mustUpdateMiddleHeight);
-            }
-        }
 
         public void Init()
         {
@@ -131,31 +108,6 @@ namespace EFM
             UpdateRequirements();
             UpdateBonuses();
             UpdateBottomButtons();
-
-            mustUpdateMiddleHeight+=10;
-            Mod.LogInfo("Done init for Area UI: " + area.index+", update middle: "+mustUpdateMiddleHeight+", current heights: "+currentContent.sizeDelta.y+", "+futureContent.sizeDelta.y);
-        }
-
-        public void UpdateMiddleHeight()
-        {
-            // We should always wait until 1 frame after setting the UI before calling this because
-            // parent.sizeDelta.y only get updated the frame after any changes
-            // 350 is the height we see in the view
-            RectTransform parentToUse = currentContent.gameObject.activeSelf ? currentContent : futureContent;
-            Mod.LogInfo("Updating middle height for area " + area.index + ", height: " + parentToUse.sizeDelta.y);
-            if (parentToUse.sizeDelta.y > 350)
-            {
-                downHoverscroll.rate = 1 / (parentToUse.sizeDelta.y / 350);
-                upHoverscroll.rate = downHoverscroll.rate;
-                downHoverscroll.scrollbar.value = 1; // Put it back to the top
-                downHoverscroll.gameObject.SetActive(true);
-                upHoverscroll.gameObject.SetActive(false);
-            }
-            else
-            {
-                downHoverscroll.gameObject.SetActive(false);
-                upHoverscroll.gameObject.SetActive(false);
-            }
         }
 
         public void UpdateStatusTexts()
@@ -1362,17 +1314,11 @@ namespace EFM
         public void OnLevelClicked()
         {
             // TODO
-
-            // Must update height because we change page, content may be different
-            ++mustUpdateMiddleHeight;
         }
 
         public void OnBackClicked()
         {
             // TODO
-
-            // Must update height because we change page, content may be different
-            ++mustUpdateMiddleHeight;
         }
 
         public void OnUpgradeClicked()

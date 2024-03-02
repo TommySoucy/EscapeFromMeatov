@@ -17,6 +17,11 @@ namespace EFM
         public static int meatovTimeMultiplier = 7;
         public static JObject loadedData;
 
+        public static float loadingHideoutAVGProgress;
+        public static bool loadingHideoutAssets;
+        public static bool loadingHideoutLatest;
+        public static int loadingHideoutSlotIndex;
+
         public virtual void Awake()
         {
             FetchAvailableSaveFiles();
@@ -24,6 +29,37 @@ namespace EFM
             InitUI();
 
             init = true;
+        }
+
+        public virtual void Update()
+        {
+            if (loadingHideoutAssets)
+            {
+                loadingHideoutAVGProgress = 0;
+                loadingHideoutAVGProgress += Mod.playerBundleRequest.progress;
+                for(int i=0; i < Mod.itemsBundlesRequests.Length; ++i)
+                {
+                    loadingHideoutAVGProgress += Mod.itemsBundlesRequests[i].progress;
+                }
+                loadingHideoutAVGProgress += Mod.itemIconsBundleRequest.progress;
+                loadingHideoutAVGProgress += Mod.hideoutBundleRequest.progress;
+
+                loadingHideoutAVGProgress /= 3 + Mod.itemsBundlesRequests.Length;
+
+                // Check if they are done loading
+                bool doneLoadingItems = true;
+                for (int i = 0; i < Mod.itemsBundlesRequests.Length; ++i)
+                {
+                    doneLoadingItems &= Mod.itemsBundlesRequests[i].isDone;
+                }
+                if (doneLoadingItems 
+                    && Mod.playerBundleRequest.isDone
+                    && Mod.itemIconsBundleRequest.isDone
+                    && Mod.hideoutBundleRequest.isDone)
+                {
+                    LoadHideout(loadingHideoutSlotIndex, loadingHideoutLatest);
+                }
+            }
         }
 
         // This should be called everytime we save because there may be a new save available
@@ -61,26 +97,53 @@ namespace EFM
             // Load necessary assets
             if (Mod.hideoutBundle == null)
             {
+                loadingHideoutAssets = true;
+                loadingHideoutSlotIndex = slotIndex;
+                loadingHideoutLatest = latest;
+
                 Mod.LogInfo("Loading main asset bundles");
-                Mod.playerBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMPlayer.ab");
+                Mod.playerBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMPlayer.ab");
+                Mod.itemsBundlesRequests = new AssetBundleCreateRequest[3];
                 Mod.itemsBundles = new AssetBundle[3];
                 for (int i = 0; i < 3; ++i) 
                 {
-                    Mod.itemsBundles[i] = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMItems" + i + ".ab");
+                    Mod.itemsBundlesRequests[i] = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMItems" + i + ".ab");
                 }
-                Mod.itemIconsBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMItemIcons.ab");
-                Mod.itemSoundsBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMItemSounds.ab");
-                Mod.LogInfo("Loading hideout bundle");
-                Mod.hideoutBundle = AssetBundle.LoadFromFile(Mod.path + "/Assets/EFMHideout.ab");
-                Mod.LogInfo("Loaded hideout bundles");
+                Mod.itemIconsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMItemIcons.ab");
+                Mod.hideoutBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideout.ab");
+                return;
+            }
+            else
+            {
+                if(Mod.playerBundleRequest != null)
+                {
+                    loadingHideoutAssets = false;
 
-                Mod.playerStatusUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("StatusUI");
-                Mod.staminaBarPrefab = Mod.playerBundle.LoadAsset<GameObject>("StaminaBar");
-                Mod.consumeUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ConsumeUI");
-                Mod.stackSplitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("StackSplitUI");
-                Mod.extractionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionUI");
-                Mod.extractionLimitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionLimitUI");
-                Mod.itemDescriptionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ItemDescriptionUI");
+                    Mod.playerBundle = Mod.playerBundleRequest.assetBundle;
+                    for(int i=0; i < Mod.itemsBundles.Length; ++i)
+                    {
+                        Mod.itemsBundles[i] = Mod.itemsBundlesRequests[i].assetBundle;
+                    }
+                    Mod.itemIconsBundle = Mod.itemIconsBundleRequest.assetBundle;
+                    Mod.hideoutBundle = Mod.hideoutBundleRequest.assetBundle;
+
+                    Mod.playerStatusUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("StatusUI");
+                    Mod.staminaBarPrefab = Mod.playerBundle.LoadAsset<GameObject>("StaminaBar");
+                    Mod.consumeUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ConsumeUI");
+                    Mod.stackSplitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("StackSplitUI");
+                    Mod.extractionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionUI");
+                    Mod.extractionLimitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionLimitUI");
+                    Mod.itemDescriptionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ItemDescriptionUI");
+
+                    Mod.playerBundleRequest = null;
+                    Mod.itemsBundlesRequests = null;
+                    Mod.itemIconsBundleRequest = null;
+                    Mod.hideoutBundleRequest = null;
+                }
+                // else
+                // Already have the bundles loaded and already cleared requests
+                // So all assets are already loaded and we can continue with loading
+                // This would be the case if we load a save from the hideout itself
             }
 
             if (availableSaveFiles == null)

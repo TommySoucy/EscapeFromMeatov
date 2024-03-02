@@ -12,6 +12,7 @@ namespace EFM
         public AudioSource clickAudio;
         public GameObject[] pages;
         public Transform spawn;
+        public Text loadProgressText;
 
         public override void Awake()
         {
@@ -24,6 +25,16 @@ namespace EFM
 
             // Set to no quickbelt slot
             GM.CurrentPlayerBody.ConfigureQuickbelt(-4);
+        }
+
+        public override void Update()
+        {
+            base.Update();
+
+            if (loadingHideoutAssets)
+            {
+                loadProgressText.text = ((int)loadingHideoutAVGProgress * 100).ToString()+"%";
+            }
         }
 
         public override void InitUI()
@@ -46,12 +57,16 @@ namespace EFM
         public void OnNewGameClicked()
         {
             LoadHideout();
+            pages[0].SetActive(false);
+            pages[2].SetActive(true);
             clickAudio.Play();
         }
 
         public void OnContinueClicked()
         {
             LoadHideout(-1, true);
+            pages[0].SetActive(false);
+            pages[2].SetActive(true);
             clickAudio.Play();
         }
 
@@ -65,6 +80,8 @@ namespace EFM
         public void OnLoadSlotClicked(int slotIndex)
         {
             LoadHideout(slotIndex);
+            pages[1].SetActive(false);
+            pages[2].SetActive(true);
             clickAudio.Play();
         }
 

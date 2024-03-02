@@ -35,10 +35,13 @@ namespace EFM
         public static AssetBundle defaultBundle;
         public static AssetBundle mainMenuBundle;
         public static AssetBundle hideoutBundle;
+        public static AssetBundleCreateRequest hideoutBundleRequest;
         public static AssetBundle itemIconsBundle;
+        public static AssetBundleCreateRequest itemIconsBundleRequest;
         public static AssetBundle[] itemsBundles;
-        public static AssetBundle itemSoundsBundle;
+        public static AssetBundleCreateRequest[] itemsBundlesRequests;
         public static AssetBundle playerBundle;
+        public static AssetBundleCreateRequest playerBundleRequest;
         public static AssetBundleCreateRequest currentRaidBundleRequest;
         public static List<GameObject> securedMainSceneComponents;
         public static List<GameObject> securedObjects;
@@ -374,7 +377,7 @@ namespace EFM
                                 break;
                             case 5: // Start new meatov game
                                 Mod.LogInfo("\tDebug: Start new meatov game");
-                                UIController.LoadHideout();
+                                GameObject.Find("Hideout").GetComponent<MenuController>().OnNewGameClicked();
                                 break;
                             case 6: // Start factory raid
                                 Mod.LogInfo("\tDebug: Start factory raid");
@@ -383,11 +386,11 @@ namespace EFM
                                 break;
                             case 7: // Load autosave
                                 Mod.LogInfo("\tDebug: Load autosave");
-                                UIController.LoadHideout(5);
+                                GameObject.Find("Hideout").GetComponent<MenuController>().OnLoadSlotClicked(5);
                                 break;
                             case 8: // Load latest save
                                 Mod.LogInfo("\tDebug: Load latest save");
-                                UIController.LoadHideout(-1, true);
+                                GameObject.Find("Hideout").GetComponent<MenuController>().OnContinueClicked();
                                 break;
                             case 9: // Save on slot 0
                                 Mod.LogInfo("\tDebug: Save on slot 0");
@@ -857,7 +860,6 @@ namespace EFM
                         int count = 0;
                         for (int j = 0; j < sounds.Length; ++j)
                         {
-                            sounds[j] = itemSoundsBundle.LoadAsset<AudioClip>(itemSound + "_" + soundCategories[j]);
                             count += sounds[j] == null ? 0 : 1;
                         }
                         if (count == 0)
@@ -2576,8 +2578,6 @@ namespace EFM
                             }
                             itemIconsBundle.Unload(true);
                             itemIconsBundle = null;
-                            itemSoundsBundle.Unload(true);
-                            itemSoundsBundle = null;
                             playerBundle.Unload(true);
                             playerBundle = null;
                         }
