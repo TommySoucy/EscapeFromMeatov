@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FistVR;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -441,7 +442,7 @@ namespace EFM
                                     }
                                     else
                                     {
-                                        // TODO: // Get vanilla Icon without loading vanilla item
+                                        itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[k].itemID).Sprite;
                                     }
                                     if (HideoutController.instance.inventoryAmount.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
                                     {
@@ -515,7 +516,7 @@ namespace EFM
                                     }
                                     else
                                     {
-                                        // TODO: // Get vanilla Icon without loading vanilla item
+                                        itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[0].itemID).Sprite;
                                     }
 
                                     int itemCount = 0;
@@ -602,7 +603,7 @@ namespace EFM
                                         }
                                         else
                                         {
-                                            // TODO: // Get vanilla Icon without loading vanilla item
+                                            itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[k].itemID).Sprite;
                                         }
 
                                         itemRequirement.itemView.toolIcon.SetActive(currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
@@ -977,7 +978,7 @@ namespace EFM
                         }
                         else
                         {
-                            // TODO: // Get vanilla Icon without loading vanilla item
+                            itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(itemRequirements[i].itemID).Sprite;
                         }
                         if(HideoutController.instance.inventoryAmount.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
                         {
@@ -1146,7 +1147,7 @@ namespace EFM
                         }
                         else
                         {
-                            // TODO: // Get vanilla Icon without loading vanilla item
+                            itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(itemRequirements[i].itemID).Sprite;
                         }
                         if (HideoutController.instance.inventoryAmount.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
                         {
