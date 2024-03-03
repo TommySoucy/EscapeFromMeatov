@@ -67,9 +67,10 @@ namespace EFM
         public static float raidTime = 0;
         public static bool inMeatovScene;
         public static int pocketsConfigIndex;
+        public static Dictionary<int, GameObject> quickbeltConfigurations;
         public static float distanceTravelledSprinting;
         public static float distanceTravelledWalking;
-        public static GameObject[] itemsInPocketSlots;
+        public static MeatovItem[] itemsInPocketSlots;
         public static FVRQuickBeltSlot[] pocketSlots;
         public static ShoulderStorage leftShoulderSlot;
         public static ShoulderStorage rightShoulderSlot;
@@ -377,7 +378,7 @@ namespace EFM
                                 break;
                             case 5: // Start new meatov game
                                 Mod.LogInfo("\tDebug: Start new meatov game");
-                                GameObject.Find("Hideout").GetComponent<MenuController>().OnNewGameClicked();
+                                FindObjectOfType<MenuController>().OnNewGameClicked();
                                 break;
                             case 6: // Start factory raid
                                 Mod.LogInfo("\tDebug: Start factory raid");
@@ -448,6 +449,13 @@ namespace EFM
                                 if (HideoutController.instance != null)
                                 {
                                     Mod.LogInfo("\tMemory: "+ HideoutController.instance.GCManager.gc_get_total_memory(false));
+                                }
+                                break;
+                            case 17: // Dump item IDs
+                                Mod.LogInfo("\tDebug: Dumping item IDs");
+                                foreach (KeyValuePair<string, ItemSpawnerID> entry in IM.Instance.SpawnerIDDic)
+                                {
+                                    Mod.LogInfo(entry.Key);
                                 }
                                 break;
                         }
@@ -703,7 +711,7 @@ namespace EFM
             }
 
             pocketsConfigIndex = ManagerSingleton<GM>.Instance.QuickbeltConfigurations.Length + rigIndex++;
-            itemsInPocketSlots = new GameObject[4];
+            itemsInPocketSlots = new MeatovItem[4];
 
             LogInfo("Loading item prefabs...");
             // Load custom item prefabs

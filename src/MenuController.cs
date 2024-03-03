@@ -33,7 +33,7 @@ namespace EFM
 
             if (loadingHideoutAssets)
             {
-                loadProgressText.text = ((int)loadingHideoutAVGProgress * 100).ToString()+"%";
+                loadProgressText.text = ((int)(loadingHideoutAVGProgress * 100)).ToString()+"%";
             }
         }
 

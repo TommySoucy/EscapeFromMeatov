@@ -451,16 +451,6 @@ namespace EFM
 
             Mod.meatovItemByInteractive.Add(physObj, this);
 
-            if (physObj.RootRigidbody == null)
-            {
-                // This has to be done because attachments and ammo container, when attached to a firearm, will have their rigidbodies detroyed
-                weight = (int)(((FVRPhysicalObject.RigidbodyStoredParams)typeof(FVRPhysicalObject).GetField("StoredRBParams").GetValue(physObj)).Mass * 1000);
-            }
-            else
-            {
-                weight = (int)(physObj.RootRigidbody.mass * 1000);
-            }
-
             if (itemType != ItemType.LootContainer)
 			{
 				_mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
@@ -2030,9 +2020,6 @@ namespace EFM
 					itemsInSlots[i].SetActive(false); 
 				}
 			}
-
-			// TODO: Review if this is necessary, why should we be clearing the slots above pockets of their contents when we close a rig?
-			//GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
 		}
 
 		private void SetContainerOpen(bool open, bool isRightHand = false)

@@ -1,6 +1,9 @@
-﻿using System;
+﻿using FistVR;
+using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -57,6 +60,14 @@ namespace EFM
                     && Mod.itemIconsBundleRequest.isDone
                     && Mod.hideoutBundleRequest.isDone)
                 {
+                    Mod.playerBundle = Mod.playerBundleRequest.assetBundle;
+                    for (int i = 0; i < Mod.itemsBundles.Length; ++i)
+                    {
+                        Mod.itemsBundles[i] = Mod.itemsBundlesRequests[i].assetBundle;
+                    }
+                    Mod.itemIconsBundle = Mod.itemIconsBundleRequest.assetBundle;
+                    Mod.hideoutBundle = Mod.hideoutBundleRequest.assetBundle;
+
                     LoadHideout(loadingHideoutSlotIndex, loadingHideoutLatest);
                 }
             }
@@ -92,16 +103,13 @@ namespace EFM
 
         public static void LoadHideout(int slotIndex = -1, bool latest = false)
         {
-            Mod.LogInfo("LoadHideout called");
-
             // Load necessary assets
-            if (Mod.hideoutBundle == null)
+            if (Mod.hideoutBundle == null) // Need to load asset bundles
             {
                 loadingHideoutAssets = true;
                 loadingHideoutSlotIndex = slotIndex;
                 loadingHideoutLatest = latest;
 
-                Mod.LogInfo("Loading main asset bundles");
                 Mod.playerBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMPlayer.ab");
                 Mod.itemsBundlesRequests = new AssetBundleCreateRequest[3];
                 Mod.itemsBundles = new AssetBundle[3];
@@ -113,19 +121,11 @@ namespace EFM
                 Mod.hideoutBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideout.ab");
                 return;
             }
-            else
+            else // Asset bundles loaded
             {
-                if(Mod.playerBundleRequest != null)
+                if(Mod.playerBundleRequest != null) // Reqeust still exists meaning we haven't loaded the assets
                 {
                     loadingHideoutAssets = false;
-
-                    Mod.playerBundle = Mod.playerBundleRequest.assetBundle;
-                    for(int i=0; i < Mod.itemsBundles.Length; ++i)
-                    {
-                        Mod.itemsBundles[i] = Mod.itemsBundlesRequests[i].assetBundle;
-                    }
-                    Mod.itemIconsBundle = Mod.itemIconsBundleRequest.assetBundle;
-                    Mod.hideoutBundle = Mod.hideoutBundleRequest.assetBundle;
 
                     Mod.playerStatusUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("StatusUI");
                     Mod.staminaBarPrefab = Mod.playerBundle.LoadAsset<GameObject>("StaminaBar");
@@ -134,6 +134,10 @@ namespace EFM
                     Mod.extractionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionUI");
                     Mod.extractionLimitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionLimitUI");
                     Mod.itemDescriptionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ItemDescriptionUI");
+
+                    Mod.quickbeltConfigurations = new Dictionary<int, GameObject>();
+                    Mod.pocketsConfigIndex = GM.Instance.QuickbeltConfigurations.Length;
+                    GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("PocketsConfiguration"));
 
                     Mod.playerBundleRequest = null;
                     Mod.itemsBundlesRequests = null;

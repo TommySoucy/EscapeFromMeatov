@@ -442,7 +442,14 @@ namespace EFM
                                     }
                                     else
                                     {
-                                        itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[k].itemID).Sprite;
+                                        if (IM.HasSpawnedID(currentProduction.requirements[k].itemID))
+                                        {
+                                            itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[k].itemID).Sprite;
+                                        }
+                                        else
+                                        {
+                                            Mod.LogError("DEV: Could not get spawner ID for item: " + currentProduction.requirements[k].itemID);
+                                        }
                                     }
                                     if (HideoutController.instance.inventoryAmount.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
                                     {
@@ -516,7 +523,14 @@ namespace EFM
                                     }
                                     else
                                     {
-                                        itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[0].itemID).Sprite;
+                                        if (IM.HasSpawnedID(currentProduction.requirements[0].itemID))
+                                        {
+                                            itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[0].itemID).Sprite;
+                                        }
+                                        else
+                                        {
+                                            Mod.LogError("DEV: Could not get spawner ID for item: " + currentProduction.requirements[0].itemID);
+                                        }
                                     }
 
                                     int itemCount = 0;
@@ -603,7 +617,14 @@ namespace EFM
                                         }
                                         else
                                         {
-                                            itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[k].itemID).Sprite;
+                                            if (IM.HasSpawnedID(currentProduction.requirements[k].itemID))
+                                            {
+                                                itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[k].itemID).Sprite;
+                                            }
+                                            else
+                                            {
+                                                Mod.LogError("DEV: Could not get spawner ID for item: " + currentProduction.requirements[k].itemID);
+                                            }
                                         }
 
                                         itemRequirement.itemView.toolIcon.SetActive(currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
@@ -978,7 +999,14 @@ namespace EFM
                         }
                         else
                         {
-                            itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(itemRequirements[i].itemID).Sprite;
+                            if (IM.HasSpawnedID(itemRequirements[i].itemID))
+                            {
+                                itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(itemRequirements[i].itemID).Sprite;
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Could not get spawner ID for item: " + itemRequirements[i].itemID);
+                            }
                         }
                         if(HideoutController.instance.inventoryAmount.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
                         {
@@ -1147,7 +1175,14 @@ namespace EFM
                         }
                         else
                         {
-                            itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(itemRequirements[i].itemID).Sprite;
+                            if (IM.HasSpawnedID(itemRequirements[i].itemID))
+                            {
+                                itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(itemRequirements[i].itemID).Sprite;
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Could not get spawner ID for item: " + itemRequirements[i].itemID);
+                            }
                         }
                         if (HideoutController.instance.inventoryAmount.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
                         {
@@ -1271,6 +1306,7 @@ namespace EFM
 
         public void OnSummaryClicked()
         {
+            buttonClickSound.Play();
             genericAudioSource.PlayOneShot(genericAudioClips[0]);
             OpenUI();
         }

@@ -240,8 +240,10 @@ namespace EFM
             init = true;
         }
 
-        private void Update()
+        public override void Update()
         {
+            base.Update();
+
             if (init)
             {
                 UpdateTime();
@@ -1234,74 +1236,6 @@ namespace EFM
             Mod.rightHand.otherHand = Mod.leftHand;
             Mod.leftHand.otherHand = Mod.rightHand;
 
-            /*
-             * GameObject slotObject = equipSlotParent.GetChild(i).GetChild(0).gameObject;
-                slotObject.tag = "QuickbeltSlot";
-                slotObject.SetActive(false); // Just so Awake() isn't called until we've set slot components fields
-
-                EFM_EquipmentSlot slotComponent = slotObject.AddComponent<EFM_EquipmentSlot>();
-                StatusUI.instance.equipmentSlots.Add(slotComponent);
-                slotComponent.QuickbeltRoot = slotObject.transform;
-                slotComponent.HoverGeo = slotObject.transform.GetChild(0).GetChild(0).gameObject;
-                slotComponent.HoverGeo.SetActive(false);
-                slotComponent.PoseOverride = slotObject.transform.GetChild(0).GetChild(2);
-                slotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Sphere;
-                slotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
-                slotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
-
-                // Set slot sphere materials
-                slotObject.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().material = Mod.quickSlotHoverMaterial;
-                slotObject.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().material = Mod.quickSlotConstantMaterial;
-             * */
-
-            // Shoulder storage
-            //GameObject rightShoulderSlot = GameObject.Instantiate(Mod.rectQuickBeltSlotPrefab, GM.CurrentPlayerBody.Head);
-            //rightShoulderSlot.name = "RightShoulderSlot";
-            //rightShoulderSlot.tag = "QuickbeltSlot";
-            //rightShoulderSlot.SetActive(false);
-            //rightShoulderSlot.transform.GetChild(0).localScale = new Vector3(0.3f, 0.3f, 0.3f);
-            //rightShoulderSlot.transform.GetChild(0).localPosition = new Vector3(0.15f, 0, -0.05f);
-
-            //ShoulderStorage rightSlotComponent = rightShoulderSlot.AddComponent<ShoulderStorage>();
-            //rightSlotComponent.right = true;
-            //Mod.rightShoulderSlot = rightSlotComponent;
-            //rightSlotComponent.QuickbeltRoot = rightShoulderSlot.transform;
-            //rightSlotComponent.HoverGeo = rightShoulderSlot.transform.GetChild(0).GetChild(0).gameObject;
-            //rightSlotComponent.HoverGeo.SetActive(false);
-            //rightSlotComponent.PoseOverride = rightShoulderSlot.transform.GetChild(0).GetChild(2);
-            //rightSlotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear;
-            //rightSlotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
-            //rightSlotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
-            //rightSlotComponent.RectBounds = rightShoulderSlot.transform.GetChild(0);
-
-            //GameObject leftShoulderSlot = GameObject.Instantiate(Mod.rectQuickBeltSlotPrefab, GM.CurrentPlayerBody.Head);
-            //leftShoulderSlot.name = "LeftShoulderSlot";
-            //leftShoulderSlot.tag = "QuickbeltSlot";
-            //leftShoulderSlot.SetActive(false);
-            //leftShoulderSlot.transform.GetChild(0).localScale = new Vector3(0.3f, 0.3f, 0.3f);
-            //leftShoulderSlot.transform.GetChild(0).localPosition = new Vector3(-0.15f, 0, -0.05f);
-
-            //ShoulderStorage leftSlotComponent = leftShoulderSlot.AddComponent<ShoulderStorage>();
-            //leftSlotComponent.right = true;
-            //Mod.leftShoulderSlot = leftSlotComponent;
-            //leftSlotComponent.QuickbeltRoot = leftShoulderSlot.transform;
-            //leftSlotComponent.HoverGeo = leftShoulderSlot.transform.GetChild(0).GetChild(0).gameObject;
-            //leftSlotComponent.HoverGeo.SetActive(false);
-            //leftSlotComponent.PoseOverride = leftShoulderSlot.transform.GetChild(0).GetChild(2);
-            //leftSlotComponent.Shape = FVRQuickBeltSlot.QuickbeltSlotShape.Rectalinear;
-            //leftSlotComponent.SizeLimit = FVRPhysicalObject.FVRPhysicalObjectSize.CantCarryBig;
-            //leftSlotComponent.Type = FVRQuickBeltSlot.QuickbeltSlotType.Standard;
-            //leftSlotComponent.RectBounds = leftShoulderSlot.transform.GetChild(0);
-
-            // Set shoulders invisible
-            //rightShoulderSlot.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().enabled = false;
-            //rightShoulderSlot.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().enabled = false;
-            //leftShoulderSlot.transform.GetChild(0).GetChild(0).GetComponent<Renderer>().enabled = false;
-            //leftShoulderSlot.transform.GetChild(0).GetChild(1).GetComponent<Renderer>().enabled = false;
-
-            //rightShoulderSlot.SetActive(true);
-            //leftShoulderSlot.SetActive(true);
-
             // Set movement control
             GM.CurrentMovementManager.Mode = FVRMovementManager.MovementMode.TwinStick;
             GM.Options.MovementOptions.Touchpad_Confirm = FVRMovementManager.TwoAxisMovementConfirm.OnTouch;
@@ -1310,6 +1244,10 @@ namespace EFM
             // Disable wrist menus
             //Mod.rightHand.fvrHand.DisableWristMenu();
             //Mod.leftHand.fvrHand.DisableWristMenu();
+
+            // Set QB config to pockets
+            Mod.pocketSlots = new FVRQuickBeltSlot[4];
+            GM.CurrentPlayerBody.ConfigureQuickbelt(Mod.pocketsConfigIndex);
         }
 
         public void ProcessData()
@@ -4652,7 +4590,7 @@ namespace EFM
             // Check if in pocket
             for (int i = 0; i < 4; ++i)
             {
-                if (Mod.itemsInPocketSlots[i] != null && Mod.itemsInPocketSlots[i].Equals(item.gameObject))
+                if (Mod.itemsInPocketSlots[i] != null && Mod.itemsInPocketSlots[i].gameObject.Equals(item.gameObject))
                 {
                     savedItem["pocketSlotIndex"] = i;
                     break;

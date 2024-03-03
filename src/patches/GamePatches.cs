@@ -46,13 +46,13 @@ namespace EFM
             //PatchController.Verify(testQuickbeltPatchOriginal, harmony, true);
             //harmony.Patch(testQuickbeltPatchOriginal, new HarmonyMethod(testQuickbeltPatchPrefix));
 
-            //// SetQuickBeltSlotPatch
-            //MethodInfo setQuickBeltSlotPatchOriginal = typeof(FVRPhysicalObject).GetMethod("SetQuickBeltSlot", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo setQuickBeltSlotPatchPrefix = typeof(SetQuickBeltSlotPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo setQuickBeltSlotPatchPostfix = typeof(SetQuickBeltSlotPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // SetQuickBeltSlotPatch
+            MethodInfo setQuickBeltSlotPatchOriginal = typeof(FVRPhysicalObject).GetMethod("SetQuickBeltSlot", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo setQuickBeltSlotPatchPrefix = typeof(SetQuickBeltSlotPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo setQuickBeltSlotPatchPostfix = typeof(SetQuickBeltSlotPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(setQuickBeltSlotPatchOriginal, harmony, true);
-            //harmony.Patch(setQuickBeltSlotPatchOriginal, new HarmonyMethod(setQuickBeltSlotPatchPrefix), new HarmonyMethod(setQuickBeltSlotPatchPostfix));
+            PatchController.Verify(setQuickBeltSlotPatchOriginal, harmony, true);
+            harmony.Patch(setQuickBeltSlotPatchOriginal, new HarmonyMethod(setQuickBeltSlotPatchPrefix), new HarmonyMethod(setQuickBeltSlotPatchPostfix));
 
             //// BeginInteractionPatch
             //MethodInfo beginInteractionPatchOriginal = typeof(FVRPhysicalObject).GetMethod("BeginInteraction", BindingFlags.Public | BindingFlags.Instance);
@@ -513,11 +513,11 @@ namespace EFM
                 // Secure pocket contents
                 if (Mod.itemsInPocketSlots != null)
                 {
-                    foreach (GameObject itemInPocket in Mod.itemsInPocketSlots)
+                    foreach (MeatovItem itemInPocket in Mod.itemsInPocketSlots)
                     {
                         if (itemInPocket != null)
                         {
-                            SecureObject(itemInPocket);
+                            SecureObject(itemInPocket.gameObject);
                         }
                     }
                 }
@@ -1015,8 +1015,25 @@ namespace EFM
         }
     }
 
-    // Patches FVRPlayerBody.ConfigureQuickbelt so we can call it with index -1 to clear the quickbelt, or to save which is the latest quick belt index we configured
-    // This completely replaces the original
+    // Patches FVRPlayerBody.ConfigureQuickbelt for custom behavior
+    // -1: Set to pocket configuration (Gets rid of any slots above)
+    //     Making assumption that pockets will always be the first 6 slots
+    //     Used when we take off a rig
+    //     Note that the items themselves are not attached to the slot,
+    //     so they don't get destroyed along with it
+    //     Those will simply get disabled when we take off the rig
+    // -2: Like -1 but also destroys the items in those slots
+    //     Used when we load the hideout from the hideout because we
+    //     want to keep pockets, but not other slots, and items on those other slots
+    //     should stop existing
+    //     Note that this whole case may not be necessary because when we reload the hideout
+    //     it is like changing scene, so every gameobject in the scene will get destroyed anyway
+    //     and considering that items in QB doesn't get attached to the slot, it should remain a part of
+    //     the scene, and will get destroyed along with it
+    // -3: Like -2 but also destroys items in pockets
+    //     Currently unused, it was supposed to be used on death to clear QBS completely,
+    //     but now we instead drop everything on death instead
+    // -4: Destroy all slots, this essentially sets the QBS config to None
     class ConfigureQuickbeltPatch
     {
         static bool Prefix(int index, ref FVRPlayerBody __instance)
@@ -1029,9 +1046,9 @@ namespace EFM
             if (index < 0)
             {
                 // Clear the belt above the pockets
-                if (__instance.QBSlots_Internal.Count > 4)
+                if (__instance.QBSlots_Internal.Count > 6)
                 {
-                    for (int i = __instance.QBSlots_Internal.Count - 1; i >= 4; --i)
+                    for (int i = __instance.QBSlots_Internal.Count - 1; i >= 6; --i)
                     {
                         if (__instance.QBSlots_Internal[i] == null)
                         {
@@ -1051,7 +1068,7 @@ namespace EFM
                     }
                 }
 
-                // If -3 or -4 also destroy objects in pockets, but dont get rid of the slots themselves
+                // If -3 also destroy objects in pockets, but dont get rid of the slots themselves
                 // This is unused but was meant to be in case of death. Instead we jsut detach everything from player upon death and then laod base 
                 // and set the config to pockets only
                 if (index == -3)
@@ -1094,9 +1111,9 @@ namespace EFM
             else if (index > Mod.pocketsConfigIndex) // If index is higher than the pockets configuration index, we must keep the pocket slots intact
             {
                 // Only check for slots other than pockets
-                if (__instance.QBSlots_Internal.Count >  4)
+                if (__instance.QBSlots_Internal.Count >  6)
                 {
-                    for (int i = __instance.QBSlots_Internal.Count - 1; i >=  4; i--)
+                    for (int i = __instance.QBSlots_Internal.Count - 1; i >= 6; i--)
                     {
                         if (__instance.QBSlots_Internal[i] == null)
                         {
@@ -1159,11 +1176,6 @@ namespace EFM
                         }
                     }
                 }
-                PlayerBackPack[] array = UnityEngine.Object.FindObjectsOfType<PlayerBackPack>();
-                for (int k = 0; k < array.Length; k++)
-                {
-                    array[k].RegisterQuickbeltSlots();
-                }
                 UnityEngine.Object.Destroy(gameObject);
 
                 // Set custom quick belt config index
@@ -1184,12 +1196,32 @@ namespace EFM
                 return;
             }
 
-            // Refresh the pocket quickbelt slots if necessary, they should always be the first 4 in the list of quickbelt slots
+            // Refresh the pocket and shoulder quickbelt slots if necessary, they should always be the first 6 in the list of quickbelt slots
             if (index >= Mod.pocketsConfigIndex)
             {
                 for (int i = 0; i < 4; ++i)
                 {
                     Mod.pocketSlots[i] = __instance.QBSlots_Internal[i];
+                }
+                ShoulderStorage currentShoulder = __instance.QBSlots_Internal[4] as ShoulderStorage;
+                if(currentShoulder == null)
+                {
+                    Mod.LogError("DEV: Could not get right shoulder from pocket config slots");
+                    return;
+                }
+                else
+                {
+                    Mod.rightShoulderSlot = currentShoulder;
+                }
+                currentShoulder = __instance.QBSlots_Internal[5] as ShoulderStorage;
+                if (currentShoulder == null)
+                {
+                    Mod.LogError("DEV: Could not get left shoulder from pocket config slots");
+                    return;
+                }
+                else
+                {
+                    Mod.leftShoulderSlot = currentShoulder;
                 }
             }
         }
@@ -1468,7 +1500,7 @@ namespace EFM
                 Mod.LogInfo("Item " + __instance.name + " is already in slot: " + (slot == null ? "null" : slot.name) + ", skipipng SetQuickBeltSlotPatch patch");
                 skipPatch = true;
 
-                // Even if skipping patch, need to make sure taht in the case of the backpack shoulder slot, we still set it as equip slot
+                // Even if skipping patch, need to make sure that in the case of the backpack shoulder slot, we still set it as equip slot
                 // This is in case the backpack is harnessed to the slot, it will already have this slot assigned but we can't skip this
                 if (slot != null)
                 {
@@ -1496,13 +1528,13 @@ namespace EFM
                 __instance.transform.localScale = Vector3.one;
 
                 // Prefix will be called before the object's current slot is set to null, so we can check if it was taken from an equipment slot or a rig slot
-                MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
+                MeatovItem MI = __instance.GetComponent<MeatovItem>();
                 if (__instance.QuickbeltSlot is EquipmentSlot)
                 {
                     // Have to remove equipment
-                    if (customItemWrapper != null)
+                    if (MI != null)
                     {
-                        EquipmentSlot.TakeOffEquipment(customItemWrapper);
+                        EquipmentSlot.TakeOffEquipment(MI);
                     }
 
                     // Also set left shoulder object to null if this is backpack slot
@@ -1519,11 +1551,11 @@ namespace EFM
                         Mod.rightShoulderObject = null;
                         __instance.gameObject.SetActive(true);
                     }
-                    //else
-                    //{
-                    //    Mod.leftShoulderObject = null;
-                    //    EFM_EquipmentSlot.TakeOffEquipment(customItemWrapper);
-                    //}
+                    else
+                    {
+                        Mod.leftShoulderObject = null;
+                        EquipmentSlot.TakeOffEquipment(MI);
+                    }
                 }
                 else if (__instance.QuickbeltSlot is AreaSlot)
                 {
@@ -1548,7 +1580,7 @@ namespace EFM
                     // Check if in pockets
                     for (int i = 0; i < 4; ++i)
                     {
-                        if (Mod.itemsInPocketSlots[i] != null && Mod.itemsInPocketSlots[i].Equals(__instance.gameObject))
+                        if (Mod.itemsInPocketSlots[i] != null && Mod.itemsInPocketSlots[i].gameObject.Equals(__instance.gameObject))
                         {
                             Mod.itemsInPocketSlots[i] = null;
                             return;
@@ -1562,16 +1594,16 @@ namespace EFM
                         Transform rootOwner = slotRootParent.parent;
                         if (rootOwner != null)
                         {
-                            MeatovItem rigItemWrapper = rootOwner.GetComponent<MeatovItem>();
-                            if (rigItemWrapper != null && (rigItemWrapper.itemType == MeatovItem.ItemType.Rig || rigItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig))
+                            MeatovItem rigMI = rootOwner.GetComponent<MeatovItem>();
+                            if (rigMI != null && (rigMI.itemType == MeatovItem.ItemType.Rig || rigMI.itemType == MeatovItem.ItemType.ArmoredRig))
                             {
                                 // This slot is owned by a rig, need to update that rig's content
-                                for (int slotIndex = 0; slotIndex < rigItemWrapper.rigSlots.Count; ++slotIndex)
+                                for (int slotIndex = 0; slotIndex < rigMI.rigSlots.Count; ++slotIndex)
                                 {
-                                    if (rigItemWrapper.rigSlots[slotIndex].Equals(__instance.QuickbeltSlot))
+                                    if (rigMI.rigSlots[slotIndex].Equals(__instance.QuickbeltSlot))
                                     {
-                                        rigItemWrapper.itemsInSlots[slotIndex] = null;
-                                        rigItemWrapper.currentWeight -= customItemWrapper.currentWeight;
+                                        rigMI.itemsInSlots[slotIndex] = null;
+                                        rigMI.currentWeight -= MI.currentWeight;
                                         return;
                                     }
                                 }
@@ -1591,7 +1623,7 @@ namespace EFM
                                 if (EquipmentSlot.currentRig.itemsInSlots[i] == __instance.gameObject)
                                 {
                                     EquipmentSlot.currentRig.itemsInSlots[i] = null;
-                                    EquipmentSlot.currentRig.currentWeight -= customItemWrapper.currentWeight;
+                                    EquipmentSlot.currentRig.currentWeight -= MI.currentWeight;
                                     EquipmentSlot.currentRig.UpdateRigMode();
                                     return;
                                 }
@@ -1612,11 +1644,11 @@ namespace EFM
                 }
 
                 // Add to All if necessary
-                MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
-                if (customItemWrapper != null)
-                {
-                    Mod.AddToAll(__instance, customItemWrapper);
-                }
+                //MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
+                //if (customItemWrapper != null)
+                //{
+                //    Mod.AddToAll(__instance, customItemWrapper);
+                //}
             }
         }
 
@@ -1663,7 +1695,7 @@ namespace EFM
             {
                 if (Mod.pocketSlots[i].Equals(slot))
                 {
-                    Mod.itemsInPocketSlots[i] = __instance.gameObject;
+                    Mod.itemsInPocketSlots[i] = __instance.GetComponent<MeatovItem>();
                     return;
                 }
             }
@@ -1677,11 +1709,11 @@ namespace EFM
                     Mod.rightShoulderObject = __instance.gameObject;
                     __instance.gameObject.SetActive(__instance.IsAltHeld || __instance.IsHeld); // Dont want to set inactive if held, and could be held if harnessed
                 }
-                //else
-                //{
-                //    Mod.leftShoulderObject = __instance.gameObject;
-                //    EFM_EquipmentSlot.WearEquipment(__instance.GetComponent<EFM_CustomItemWrapper>());
-                //}
+                else
+                {
+                    Mod.leftShoulderObject = __instance.gameObject;
+                    EquipmentSlot.WearEquipment(__instance.GetComponent<MeatovItem>());
+                }
 
                 return;
             }
@@ -1733,12 +1765,12 @@ namespace EFM
             {
                 // Find slot index in config
                 bool foundSlot = false;
-                for (int slotIndex = 4; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
+                for (int slotIndex = 6; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
                 {
                     if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex].Equals(slot))
                     {
                         MeatovItem equipmentItemWrapper = EquipmentSlot.currentRig;
-                        equipmentItemWrapper.itemsInSlots[slotIndex - 4] = __instance.gameObject;
+                        equipmentItemWrapper.itemsInSlots[slotIndex - 6] = __instance.gameObject;
                         equipmentItemWrapper.currentWeight += __instance.GetComponent<MeatovItem>().currentWeight;
                         equipmentItemWrapper.UpdateRigMode();
 
