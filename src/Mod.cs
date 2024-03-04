@@ -107,6 +107,7 @@ namespace EFM
         public static GameObject[] scavRaidReturnItems; // Hands, Equipment, Right shoulder, pockets
         public static GameObject instantiatedItem;
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
+        public static Dictionary<string, MeatovItemData> meatovItemData = new Dictionary<string, MeatovItemData>();
 
         // Player
         public static int level = 1;
@@ -1369,23 +1370,37 @@ namespace EFM
 
         public static IEnumerator SetVanillaIcon(string ID, Image image)
         {
-            // TODO: Maybe set a loading icon sprite by default to indicate to player 
+            // A vanilla icon will be fetched from a spawner ID
+            // The spawner ID's itemID may be different from the actual item ID
+            // The ID given as argument is the actual item ID
+            cont from here
             image.sprite = null;
-            yield return IM.OD[ID].GetGameObjectAsync();
-            GameObject itemPrefab = IM.OD[ID].GetGameObject();
-            if (itemPrefab == null)
+            if (IM.HasSpawnedID(ID))
             {
-                Mod.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
+                image.sprite = IM.GetSpawnerID(ID).Sprite;
+            }
+            else
+            {
 
-                IM.OD[ID].RefreshCache();
-                itemPrefab = IM.OD[ID].GetGameObject();
+                yield return IM.OD[ID].GetGameObjectAsync();
+                GameObject itemPrefab = IM.OD[ID].GetGameObject(); 
+                if (itemPrefab == null)
+                {
+                    Mod.LogError("Failed to get prefab " + ID + " for vanilla icon");
+                }
+                else
+                {
+                    FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
+                    if (physObj.ObjectWrapper.SpawnedFromId == null)
+                    {
+
+                    }
+                    else
+                    {
+                        image.sprite = IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+                    }
+                }
             }
-            if (itemPrefab == null)
-            {
-                Mod.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
-            }
-            FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
-            image.sprite = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
         }
 
         private void SetFilterListsFor(MeatovItem customItemWrapper, int index)
