@@ -35,7 +35,9 @@ namespace EFM
 
             LootContainer = 16,
 
-            DogTag = 17
+            DogTag = 17,
+
+            Firearm = 18,
         }
 
         public enum WeaponClass
@@ -88,7 +90,6 @@ namespace EFM
         public FireArmMagazineType magType;
         [NonSerialized]
         public FireArmClipType clipType;
-        [NonSerialized]
         public FireArmRoundType roundType;
         [NonSerialized]
         public bool inAll;

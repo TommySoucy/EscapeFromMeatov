@@ -76,7 +76,7 @@ namespace EFM
             parents = data["parents"].ToObject<string[]>();
             weight = (int)data["weight"];
             volumes = data["volumes"].ToObject<int[]>();
-            weight = (int)data["lootExperience"];
+            lootExperience = (int)data["lootExperience"];
             name = data["name"].ToString();
             description = data["description"].ToString();
             canSellOnRagfair = (bool)data["canSellOnRagfair"];
@@ -102,6 +102,8 @@ namespace EFM
             mediumSlotCount = (int)data["mediumSlotCount"];
 
             maxVolume = (int)data["maxVolume"];
+
+            cartridge = data["cartridge"].ToString();
             roundClass = (FireArmRoundClass)Enum.Parse(typeof(FireArmRoundClass), data["roundClass"].ToString());
 
             maxStack = (int)data["maxStack"];
@@ -111,66 +113,52 @@ namespace EFM
             useTime = (float)data["useTime"];
             amountRate = (float)data["amountRate"];
 
-            cont from here// we should probably read from properties effectsDamage and effectsHealth
-            Dictionary<string, JToken> damageEffects = data["effects_damage"].ToObject<Dictionary<string, JToken>>();
-            foreach (KeyValuePair<string, JToken> damageEntry in damageEffects)
+            Dictionary<string, JToken> consumeEffectData = data["consumeEffects"].ToObject<Dictionary<string, JToken>>();
+            foreach (KeyValuePair<string, JToken> consumeEffectEntry in consumeEffectData)
             {
                 ConsumableEffect consumableEffect = new ConsumableEffect();
                 consumeEffects.Add(consumableEffect);
-                consumableEffect.delay = (float)damageEntry.Value["delay"];
-                consumableEffect.duration = (float)damageEntry.Value["duration"];
-                if (damageEntry.Value["cost"] != null)
-                {
-                    consumableEffect.cost = (int)damageEntry.Value["cost"];
-                }
-                switch (damageEntry.Key)
+                consumableEffect.value = (float)consumeEffectEntry.Value["value"];
+                consumableEffect.delay = (float)consumeEffectEntry.Value["delay"];
+                consumableEffect.duration = (float)consumeEffectEntry.Value["duration"];
+                consumableEffect.cost = (int)consumeEffectEntry.Value["cost"];
+                switch (consumeEffectEntry.Key)
                 {
                     case "RadExposure":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.RadExposure;
                         break;
                     case "Pain":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Pain;
-                        if (damageEntry.Value["fadeOut"] != null)
+                        if (consumeEffectEntry.Value["fadeOut"] != null)
                         {
-                            consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                            consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
                         }
                         break;
                     case "Contusion":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Contusion;
-                        consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
                         break;
                     case "Intoxication":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Intoxication;
-                        consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
                         break;
                     case "LightBleeding":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.LightBleeding;
-                        consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
                         break;
                     case "Fracture":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Fracture;
-                        consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
                         break;
                     case "DestroyedPart":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.DestroyedPart;
-                        consumableEffect.healthPenaltyMax = (float)damageEntry.Value["healthPenaltyMax"] / 100;
-                        consumableEffect.healthPenaltyMin = (float)damageEntry.Value["healthPenaltyMin"] / 100;
+                        consumableEffect.healthPenaltyMax = (float)consumeEffectEntry.Value["healthPenaltyMax"] / 100;
+                        consumableEffect.healthPenaltyMin = (float)consumeEffectEntry.Value["healthPenaltyMin"] / 100;
                         break;
                     case "HeavyBleeding":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.HeavyBleeding;
-                        consumableEffect.fadeOut = (float)damageEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
                         break;
-                }
-            }
-            
-            Dictionary<string, JToken> healthEffects = data["effects_health"].ToObject<Dictionary<string, JToken>>();
-            foreach (KeyValuePair<string, JToken> healthEntry in healthEffects)
-            {
-                ConsumableEffect consumableEffect = new ConsumableEffect();
-                consumeEffects.Add(consumableEffect);
-                consumableEffect.value = (float)healthEntry.Value["value"];
-                switch (healthEntry.Key)
-                {
                     case "Hydration":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Hydration;
                         break;
@@ -180,21 +168,18 @@ namespace EFM
                 }
             }
 
-            JArray buffs = Mod.globalDB["config"]["Health"]["Effects"]["Stimulator"]["Buffs"][data["StimulatorBuffs"].ToString()] as JArray;
-            foreach (JToken buff in buffs)
+            Dictionary<string, JToken> buffEffectData = data["buffEffects"].ToObject<Dictionary<string, JToken>>();
+            foreach (KeyValuePair<string, JToken> buffEffectEntry in buffEffectData)
             {
-                BuffEffect currentBuff = new BuffEffect();
-                currentBuff.effectType = (Effect.EffectType)Enum.Parse(typeof(Effect.EffectType), buff["BuffType"].ToString());
-                currentBuff.chance = (float)buff["Chance"];
-                currentBuff.delay = (float)buff["Delay"];
-                currentBuff.duration = (float)buff["Duration"];
-                currentBuff.value = (float)buff["Value"];
-                currentBuff.absolute = (bool)buff["AbsoluteValue"];
-                if (currentBuff.effectType == Effect.EffectType.SkillRate)
-                {
-                    currentBuff.skillIndex = Skill.SkillNameToIndex(buff["SkillName"].ToString());
-                }
-                effects.Add(currentBuff);
+                BuffEffect buffEffect = new BuffEffect();
+                effects.Add(buffEffect);
+                buffEffect.effectType = (Effect.EffectType)Enum.Parse(typeof(Effect.EffectType), buffEffectEntry.Value["effectType"].ToString());
+                buffEffect.value = (float)buffEffectEntry.Value["value"];
+                buffEffect.chance = (float)buffEffectEntry.Value["chance"];
+                buffEffect.delay = (float)buffEffectEntry.Value["delay"];
+                buffEffect.duration = (float)buffEffectEntry.Value["duration"];
+                buffEffect.absolute = (bool)buffEffectEntry.Value["absolute"];
+                buffEffect.skillIndex = (int)buffEffectEntry.Value["skillIndex"];
             }
         }
     }

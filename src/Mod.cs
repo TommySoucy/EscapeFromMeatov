@@ -1373,7 +1373,6 @@ namespace EFM
             // A vanilla icon will be fetched from a spawner ID
             // The spawner ID's itemID may be different from the actual item ID
             // The ID given as argument is the actual item ID
-            cont from here
             image.sprite = null;
             if (IM.HasSpawnedID(ID))
             {
