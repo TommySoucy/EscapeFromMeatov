@@ -51,20 +51,20 @@ namespace EFM
             {
 				string randomFilterID = spawnFilter[UnityEngine.Random.Range(0, spawnFilter.Count)];
 				string itemID = "";
-                if (Mod.itemsByParents.TryGetValue(randomFilterID, out List<string> possibleItems))
-                {
-					itemID = possibleItems[UnityEngine.Random.Range(0, possibleItems.Count)];
-                }
-                else if(Mod.itemMap.ContainsKey(randomFilterID))
-                {
-                    itemID = Mod.TarkovIDtoH3ID(randomFilterID);
-                }
-                else
-                {
-                    // Spawn random round instead
-                    itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
-                    continue;
-				}
+    //            if (Mod.itemsByParents.TryGetValue(randomFilterID, out List<string> possibleItems))
+    //            {
+				//	itemID = possibleItems[UnityEngine.Random.Range(0, possibleItems.Count)];
+    //            }
+    //            else if(Mod.itemMap.ContainsKey(randomFilterID))
+    //            {
+    //                itemID = Mod.TarkovIDtoH3ID(randomFilterID);
+    //            }
+    //            else
+    //            {
+    //                // Spawn random round instead
+    //                itemID = Mod.usedRoundIDs[UnityEngine.Random.Range(0, Mod.usedRoundIDs.Count - 1)];
+    //                continue;
+				//}
 
 				if (int.TryParse(itemID, out int result))
                 {

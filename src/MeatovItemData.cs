@@ -74,6 +74,17 @@ namespace EFM
             itemType = (MeatovItem.ItemType)Enum.Parse(typeof(MeatovItem.ItemType), data["itemType"].ToString());
             rarity = (MeatovItem.ItemRarity)Enum.Parse(typeof(MeatovItem.ItemRarity), data["rarity"].ToString());
             parents = data["parents"].ToObject<string[]>();
+            for(int i=0; i < parents.Length; ++i)
+            {
+                if (Mod.itemsByParents.TryGetValue(parents[i], out List<MeatovItemData> parentList))
+                {
+                    parentList.Add(this);
+                }
+                else
+                {
+                    Mod.itemsByParents.Add(parents[i], parentList);
+                }
+            }
             weight = (int)data["weight"];
             volumes = data["volumes"].ToObject<int[]>();
             lootExperience = (int)data["lootExperience"];

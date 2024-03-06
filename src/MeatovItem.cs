@@ -64,14 +64,19 @@ namespace EFM
         }
 
         [Header("General")]
+        [NonSerialized]
+        public MeatovItemData itemData;
         public string H3ID;
         public string tarkovID;
+        public string H3SpawnerID;
+        public int index = -1;
         [NonSerialized]
         public bool vanilla;
         public ItemType itemType;
 		public List<string> parents;
         public int weight;
 		public int lootExperience;
+        public bool canSellOnRagfair;
 		public ItemRarity rarity;
 		public string itemName;
 		public string description;
@@ -320,134 +325,83 @@ namespace EFM
 
         public static void Setup(FVRPhysicalObject physicalObject)
         {
-            MeatovItem meatovItem = physicalObject.gameObject.AddComponent<MeatovItem>();
-            JObject defaultItemDataEntry = Mod.vanillaItemData["NewVanillaItems"][physicalObject.ObjectWrapper.ItemID] as JObject;
-            meatovItem.tarkovID = defaultItemDataEntry["TarkovID"].ToString();
-            meatovItem.description = defaultItemDataEntry["Description"].ToString();
-            meatovItem.lootExperience = (int)defaultItemDataEntry["LootExperience"];
-            meatovItem.creditCost = (int)defaultItemDataEntry["CreditCost"];
-            meatovItem.parents = ((JArray)defaultItemDataEntry["parents"]).ToObject<List<string>>();
-            meatovItem.volumes = new int[1];
-            meatovItem.volumes[0] = (int)((float)defaultItemDataEntry["Volume"] * Mod.volumePrecisionMultiplier); 
-
-            if (physicalObject is FVRFireArm)
-            {
-                FVRFireArm asFireArm = physicalObject as FVRFireArm;
-
-                // Set chamber firearm vars
-                // TODO: Check if this is necessary, shouldnt already be done by h3?
-                if (asFireArm.GetChambers() != null && asFireArm.GetChambers().Count > 0)
-                {
-                    foreach (FVRFireArmChamber chamber in asFireArm.GetChambers())
-                    {
-                        chamber.Firearm = asFireArm;
-                    }
-                }
-
-                meatovItem.compatibilityValue = 3;
-                if (asFireArm.UsesMagazines)
-                {
-                    meatovItem.usesAmmoContainers = true;
-                    meatovItem.usesMags = true;
-                    meatovItem.magType = asFireArm.MagazineType;
-                }
-                else if (asFireArm.UsesClips)
-                {
-                    meatovItem.usesAmmoContainers = true;
-                    meatovItem.usesMags = false;
-                    meatovItem.clipType = asFireArm.ClipType;
-                }
-                meatovItem.roundType = asFireArm.RoundType;
-            }
-            else if (meatovItem.physObj is FVRFireArmMagazine)
-            {
-                meatovItem.compatibilityValue = 1;
-                meatovItem.roundType = (physicalObject as FVRFireArmMagazine).RoundType;
-            }
-            else if (physicalObject is FVRFireArmClip)
-            {
-                meatovItem.compatibilityValue = 1;
-                meatovItem.roundType = (physicalObject as FVRFireArmClip).RoundType;
-            }
-            else if (physicalObject is Speedloader)
-            {
-                meatovItem.compatibilityValue = 1;
-                meatovItem.roundType = (physicalObject as Speedloader).Chambers[0].Type;
-            }
-            else if (physicalObject is FVRFireArmRound)
-            {
-                Mod.usedRoundIDs.Add(meatovItem.H3ID);
-
-                // TODO: Figure out how to get a round's compatible mags efficiently so we can list them in the round's description
-            }
-
-            // Set weapon class
-            foreach (string parent in meatovItem.parents)
-            {
-                if (parent.Equals("5447b5cf4bdc2d65278b4567"))
-                {
-                    meatovItem.weaponClass = WeaponClass.Pistol;
-                    break;
-                }
-                else if (parent.Equals("617f1ef5e8b54b0998387733"))
-                {
-                    meatovItem.weaponClass = WeaponClass.Revolver;
-                    break;
-                }
-                else if (parent.Equals("5447b5e04bdc2d62278b4567"))
-                {
-                    meatovItem.weaponClass = WeaponClass.SMG;
-                    break;
-                }
-                else if (parent.Equals("5447b5f14bdc2d61278b4567"))
-                {
-                    meatovItem.weaponClass = WeaponClass.Assault;
-                    break;
-                }
-                else if (parent.Equals("5447b6094bdc2dc3278b4567"))
-                {
-                    meatovItem.weaponClass = WeaponClass.Shotgun;
-                    break;
-                }
-                else if (parent.Equals("5447b6254bdc2dc3278b4568"))
-                {
-                    meatovItem.weaponClass = WeaponClass.Sniper;
-                    break;
-                }
-                else if (parent.Equals("5447b5fc4bdc2d87278b4567"))
-                {
-                    meatovItem.weaponClass = WeaponClass.LMG;
-                    break;
-                }
-                else if (parent.Equals("5447bed64bdc2d97278b4568"))
-                {
-                    meatovItem.weaponClass = WeaponClass.HMG;
-                    break;
-                }
-                else if (parent.Equals("5447bedf4bdc2d87278b4568"))
-                {
-                    meatovItem.weaponClass = WeaponClass.Launcher;
-                    break;
-                }
-                else if (parent.Equals("5447bee84bdc2dc3278b4569"))
-                {
-                    meatovItem.weaponClass = WeaponClass.AttachedLauncher;
-                    break;
-                }
-                else if (parent.Equals("5447b6194bdc2d67278b4567"))
-                {
-                    meatovItem.weaponClass = WeaponClass.DMR;
-                    break;
-                }
-                continue;
-            }
+            // Just need to add component, data actually gets set in Awake()
+            physicalObject.gameObject.AddComponent<MeatovItem>();
         }
 
-		private void Awake()
+        public void SetData(MeatovItemData data)
+        {
+            itemData = data;
+
+            TODO: // Maybe instead of having default data in MeatovItem,
+            //       we could leave it all in MeatovItemData, and this class would instead only be used
+            //       for live data
+            //       When we need access to default data from an object instance, we can just access it through item.itemData
+            tarkovID = data.tarkovID;
+            H3ID = data.H3ID;
+            H3SpawnerID = data.H3SpawnerID;
+
+            itemType = data.itemType;
+            rarity = data.rarity;
+            parents = new List<string>(data.parents);
+            weight = data.weight;
+            volumes = data.volumes;
+            lootExperience = data.lootExperience;
+            itemName = data.name;
+            description = data.description;
+            canSellOnRagfair = data.canSellOnRagfair; TODO0: // Set this in custom prefabs
+
+            compatibilityValue = data.compatibilityValue;
+            usesMags = data.usesMags;
+            usesAmmoContainers = data.usesAmmoContainers;
+            magType = data.magType;
+            clipType = data.clipType;
+            roundType = data.roundType;
+            weaponClass = data.weaponclass;
+
+            blocksEarpiece = data.blocksEarpiece;
+            blocksEyewear = data.blocksEyewear;
+            blocksFaceCover = data.blocksFaceCover;
+            blocksHeadwear = data.blocksHeadwear;
+
+            coverage = data.coverage;
+            damageResist = data.damageResist;
+            maxArmor = data.maxArmor;
+
+            maxVolume = data.maxVolume;
+
+            cartridge = data.cartridge;
+            roundClass = data.roundClass;
+
+            maxStack = data.maxStack;
+
+            maxAmount = data.maxAmount;
+
+            useTime = data.useTime;
+            amountRate = data.amountRate;
+            effects = data.effects;
+            consumeEffects = data.consumeEffects;
+
+            dogtagLevel = data.dogtagLevel;
+            dogtagName = data.dogtagName;
+        }
+
+        private void Awake()
 		{
             if(physObj == null)
             {
                 physObj = gameObject.GetComponent<FVRPhysicalObject>();
+            }
+
+            // Set data based on default data
+            if (index == -1) // Vanilla, index will not be set
+            {
+                SetData(Mod.vanillaItemData[physObj.ObjectWrapper.ItemID]);
+            }
+            else // Custom, index will already have been set in asset
+            {
+                // Data already set, just need to set reference to data object
+                itemData = Mod.customItemData[index];
             }
 
             Mod.meatovItemByInteractive.Add(physObj, this);
