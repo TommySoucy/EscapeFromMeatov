@@ -123,7 +123,7 @@ namespace EFM
             }
             else // Asset bundles loaded
             {
-                if(Mod.playerBundleRequest != null) // Reqeust still exists meaning we haven't loaded the assets
+                if(Mod.playerBundleRequest != null) // Request still exists meaning we haven't loaded the assets
                 {
                     loadingHideoutAssets = false;
 
@@ -134,6 +134,7 @@ namespace EFM
                     Mod.extractionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionUI");
                     Mod.extractionLimitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionLimitUI");
                     Mod.itemDescriptionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ItemDescriptionUI");
+                    Mod.devItemSpawnerPrefab = Mod.playerBundle.LoadAsset<GameObject>("DevItemSpawner");
 
                     Mod.quickbeltConfigurations = new Dictionary<int, GameObject>();
                     Mod.pocketsConfigIndex = GM.Instance.QuickbeltConfigurations.Length;

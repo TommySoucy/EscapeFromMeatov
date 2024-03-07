@@ -10,6 +10,7 @@ using System.Reflection.Emit;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using H3MP.Patches;
+using H3MP.Scripts;
 
 namespace EFM
 {
@@ -416,10 +417,57 @@ namespace EFM
 
             PatchController.Verify(internal_InstantiateSingleWithParentPatchOriginal, harmony, true);
             harmony.Patch(internal_InstantiateSingleWithParentPatchOriginal, null, new HarmonyMethod(internal_InstantiateSingleWithParentPatchPostfix));
+
+            // WristMenuPatch
+            MethodInfo wristMenuPatchUpdateOriginal = typeof(FVRWristMenu2).GetMethod("Update", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo wristMenuPatchUpdatePrefix = typeof(WristMenuPatch).GetMethod("UpdatePrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo wristMenuPatchAwakeOriginal = typeof(FVRWristMenu2).GetMethod("Awake", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo wristMenuPatchAwakePrefix = typeof(WristMenuPatch).GetMethod("AwakePrefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(wristMenuPatchUpdateOriginal, harmony, true);
+            PatchController.Verify(wristMenuPatchAwakeOriginal, harmony, true);
+            harmony.Patch(wristMenuPatchUpdateOriginal, new HarmonyMethod(wristMenuPatchUpdatePrefix));
+            harmony.Patch(wristMenuPatchAwakeOriginal, new HarmonyMethod(wristMenuPatchAwakePrefix));
         }
     }
-    
+
     #region GamePatches
+    // Patches FVRWristMenu2.Update and Awake to add our EFM section to it
+    class WristMenuPatch
+    {
+        static void UpdatePrefix(FVRWristMenu2 __instance)
+        {
+            if (!EFMWristMenuSection.init)
+            {
+                EFMWristMenuSection.init = true;
+
+                AddSection(__instance);
+
+                // Regenerate with our new section
+                __instance.RegenerateButtons();
+            }
+        }
+
+        static void AwakePrefix(FVRWristMenu2 __instance)
+        {
+            AddSection(__instance);
+        }
+
+        private static void AddSection(FVRWristMenu2 __instance)
+        {
+            GameObject section = new GameObject("Section_EFM", typeof(RectTransform));
+            section.transform.SetParent(__instance.MenuGO.transform);
+            section.transform.localPosition = new Vector3(0, 300, 0);
+            section.transform.localRotation = Quaternion.identity;
+            section.transform.localScale = Vector3.one;
+            section.GetComponent<RectTransform>().sizeDelta = new Vector2(350, 350);
+            FVRWristMenuSection sectionScript = section.AddComponent<EFMWristMenuSection>();
+            sectionScript.ButtonText = "EFM";
+            __instance.Sections.Add(sectionScript);
+            section.SetActive(false);
+        }
+    }
+
     // Patches SteamVR_LoadLevel.Begin() So we can keep certain objects from other scenes
     class LoadLevelBeginPatch
     {

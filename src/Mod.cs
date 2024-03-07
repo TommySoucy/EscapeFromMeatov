@@ -205,8 +205,6 @@ namespace EFM
         public static bool assetLoaded;
         public static GameObject scenePrefab_Menu;
         public static GameObject mainMenuPointable;
-        public static GameObject quickBeltSlotPrefab;
-        public static GameObject rectQuickBeltSlotPrefab;
         public static Material quickSlotHoverMaterial;
         public static Material quickSlotConstantMaterial;
         public static List<GameObject> itemPrefabs;
@@ -229,6 +227,7 @@ namespace EFM
         public static GameObject neededForPrefab;
         public static GameObject ammoContainsPrefab;
         public static GameObject staminaBarPrefab;
+        public static GameObject devItemSpawnerPrefab;
         public static Sprite cartridgeIcon;
         public static Sprite[] playerLevelIcons;
         public static AudioClip[] barbedWireClips;
@@ -856,24 +855,29 @@ namespace EFM
 
         private void ParseDefaultItemData()
         {
+            Mod.LogInfo("ParseDefaultItemData");
             JObject data = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
 
             itemsByParents = new Dictionary<string, List<MeatovItemData>>();
 
+            Mod.LogInfo("\tCustom");
             JArray customData = data["customItemData"] as JArray;
             customItemData = new MeatovItemData[customData.Count];
             // Here, we start at 3 because previous are placeholder for test items
             for (int i=3; i < customData.Count; ++i)
             {
+                Mod.LogInfo("\t"+i+", custom data null?: " + (customData[i] == null));
                 customItemData[i] = new MeatovItemData(customData[i]);
             }
 
+            Mod.LogInfo("\tVanilla");
             Dictionary<string,JToken> vanillaData = data["vanillaItemData"].ToObject<Dictionary<string, JToken>>();
             vanillaItemData = new Dictionary<string, MeatovItemData>();
             foreach(KeyValuePair<string,JToken> entry in vanillaData)
             {
                 vanillaItemData.Add(entry.Key, new MeatovItemData(entry.Value));
             }
+            Mod.LogInfo("\tDone");
         }
 
         private void ParseItemMap()

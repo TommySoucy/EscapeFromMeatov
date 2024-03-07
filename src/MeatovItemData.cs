@@ -15,7 +15,7 @@ namespace EFM
         public string tarkovID; // Original tarkov ID
         public string H3ID; // ID of the item in IM.OD or the index in string form in case of a custom EFM item
         public string H3SpawnerID; // ID of the item in IM.SpawnerIDDic (Vanilla/Non-EFM Modded item only)
-        public int index; // Custom EFM item index
+        public int index = -1; // Custom EFM item index
 
         public MeatovItem.ItemType itemType;
         public MeatovItem.ItemRarity rarity;
@@ -66,15 +66,20 @@ namespace EFM
 
         public MeatovItemData(JToken data)
         {
+            if(data["tarkovID"] == null)
+            {
+                return;
+            }
+
             tarkovID = data["tarkovID"].ToString();
             H3ID = data["H3ID"].ToString();
-            H3SpawnerID = data["H3SpawnerID"].ToString();
-            index = (int)data["index"];
+            H3SpawnerID = data["H3SpawnerID"] == null ? null : data["H3SpawnerID"].ToString();
+            index = data["index"] == null ? -1 : (int)data["index"];
 
             itemType = (MeatovItem.ItemType)Enum.Parse(typeof(MeatovItem.ItemType), data["itemType"].ToString());
             rarity = (MeatovItem.ItemRarity)Enum.Parse(typeof(MeatovItem.ItemRarity), data["rarity"].ToString());
             parents = data["parents"].ToObject<string[]>();
-            for(int i=0; i < parents.Length; ++i)
+            for (int i=0; i < parents.Length; ++i)
             {
                 if (Mod.itemsByParents.TryGetValue(parents[i], out List<MeatovItemData> parentList))
                 {
@@ -82,7 +87,7 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.itemsByParents.Add(parents[i], parentList);
+                    Mod.itemsByParents.Add(parents[i], new List<MeatovItemData>() { this });
                 }
             }
             weight = (int)data["weight"];
@@ -124,51 +129,52 @@ namespace EFM
             useTime = (float)data["useTime"];
             amountRate = (float)data["amountRate"];
 
-            Dictionary<string, JToken> consumeEffectData = data["consumeEffects"].ToObject<Dictionary<string, JToken>>();
-            foreach (KeyValuePair<string, JToken> consumeEffectEntry in consumeEffectData)
+            JArray consumeEffectData = data["consumeEffects"] as JArray;
+            consumeEffects = new List<ConsumableEffect>();
+            for (int i=0;i< consumeEffectData.Count;++i)
             {
                 ConsumableEffect consumableEffect = new ConsumableEffect();
                 consumeEffects.Add(consumableEffect);
-                consumableEffect.value = (float)consumeEffectEntry.Value["value"];
-                consumableEffect.delay = (float)consumeEffectEntry.Value["delay"];
-                consumableEffect.duration = (float)consumeEffectEntry.Value["duration"];
-                consumableEffect.cost = (int)consumeEffectEntry.Value["cost"];
-                switch (consumeEffectEntry.Key)
+                consumableEffect.value = (float)consumeEffectData[i]["value"];
+                consumableEffect.delay = (float)consumeEffectData[i]["delay"];
+                consumableEffect.duration = (float)consumeEffectData[i]["duration"];
+                consumableEffect.cost = (int)consumeEffectData[i]["cost"];
+                switch (consumeEffectData[i]["effectType"].ToString())
                 {
                     case "RadExposure":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.RadExposure;
                         break;
                     case "Pain":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Pain;
-                        if (consumeEffectEntry.Value["fadeOut"] != null)
+                        if (consumeEffectData[i]["fadeOut"] != null)
                         {
-                            consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
+                            consumableEffect.fadeOut = (float)consumeEffectData[i]["fadeOut"];
                         }
                         break;
                     case "Contusion":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Contusion;
-                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectData[i]["fadeOut"];
                         break;
                     case "Intoxication":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Intoxication;
-                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectData[i]["fadeOut"];
                         break;
                     case "LightBleeding":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.LightBleeding;
-                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectData[i]["fadeOut"];
                         break;
                     case "Fracture":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Fracture;
-                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectData[i]["fadeOut"];
                         break;
                     case "DestroyedPart":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.DestroyedPart;
-                        consumableEffect.healthPenaltyMax = (float)consumeEffectEntry.Value["healthPenaltyMax"] / 100;
-                        consumableEffect.healthPenaltyMin = (float)consumeEffectEntry.Value["healthPenaltyMin"] / 100;
+                        consumableEffect.healthPenaltyMax = (float)consumeEffectData[i]["healthPenaltyMax"] / 100;
+                        consumableEffect.healthPenaltyMin = (float)consumeEffectData[i]["healthPenaltyMin"] / 100;
                         break;
                     case "HeavyBleeding":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.HeavyBleeding;
-                        consumableEffect.fadeOut = (float)consumeEffectEntry.Value["fadeOut"];
+                        consumableEffect.fadeOut = (float)consumeEffectData[i]["fadeOut"];
                         break;
                     case "Hydration":
                         consumableEffect.effectType = ConsumableEffect.ConsumableEffectType.Hydration;
@@ -179,18 +185,19 @@ namespace EFM
                 }
             }
 
-            Dictionary<string, JToken> buffEffectData = data["buffEffects"].ToObject<Dictionary<string, JToken>>();
-            foreach (KeyValuePair<string, JToken> buffEffectEntry in buffEffectData)
+            JArray buffEffectData = data["buffEffects"] as JArray;
+            effects = new List<BuffEffect>();
+            for (int i=0; i< buffEffectData.Count;++i)
             {
                 BuffEffect buffEffect = new BuffEffect();
                 effects.Add(buffEffect);
-                buffEffect.effectType = (Effect.EffectType)Enum.Parse(typeof(Effect.EffectType), buffEffectEntry.Value["effectType"].ToString());
-                buffEffect.value = (float)buffEffectEntry.Value["value"];
-                buffEffect.chance = (float)buffEffectEntry.Value["chance"];
-                buffEffect.delay = (float)buffEffectEntry.Value["delay"];
-                buffEffect.duration = (float)buffEffectEntry.Value["duration"];
-                buffEffect.absolute = (bool)buffEffectEntry.Value["absolute"];
-                buffEffect.skillIndex = (int)buffEffectEntry.Value["skillIndex"];
+                buffEffect.effectType = (Effect.EffectType)Enum.Parse(typeof(Effect.EffectType), buffEffectData[i]["effectType"].ToString());
+                buffEffect.value = (float)buffEffectData[i]["value"];
+                buffEffect.chance = (float)buffEffectData[i]["chance"];
+                buffEffect.delay = (float)buffEffectData[i]["delay"];
+                buffEffect.duration = (float)buffEffectData[i]["duration"];
+                buffEffect.absolute = (bool)buffEffectData[i]["absolute"];
+                buffEffect.skillIndex = (int)buffEffectData[i]["skillIndex"];
             }
         }
     }

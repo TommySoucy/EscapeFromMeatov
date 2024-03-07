@@ -349,7 +349,7 @@ namespace EFM
             lootExperience = data.lootExperience;
             itemName = data.name;
             description = data.description;
-            canSellOnRagfair = data.canSellOnRagfair; TODO0: // Set this in custom prefabs
+            canSellOnRagfair = data.canSellOnRagfair;
 
             compatibilityValue = data.compatibilityValue;
             usesMags = data.usesMags;

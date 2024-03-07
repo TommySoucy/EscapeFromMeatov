@@ -52,6 +52,9 @@
     <Compile Include="src\CategoryTreeNode.cs" />
     <Compile Include="src\ContainerVolume.cs" />
     <Compile Include="src\ContainmentVolume.cs" />
+    <Compile Include="src\DevItemSpawner.cs" />
+    <Compile Include="src\DevItemSpawnerEntry.cs" />
+    <Compile Include="src\EFMWristMenuSection.cs" />
     <Compile Include="src\ExtractionCardUI.cs" />
     <Compile Include="src\ExtractionLimitUI.cs" />
     <Compile Include="src\ExtractionUI.cs" />
