@@ -389,6 +389,8 @@ namespace EFM
                     }
 
                     UI.Init();
+
+                    UI.genericAudioSource.PlayOneShot(UI.genericAudioClips[2]);
                 }
 
                 UI.UpdateStatusTexts();

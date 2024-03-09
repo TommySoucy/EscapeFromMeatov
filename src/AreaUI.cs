@@ -1290,6 +1290,8 @@ namespace EFM
 
             area.BeginUpgrade();
 
+            genericAudioSource.PlayOneShot(genericAudioClips[1]);
+
             UpdateStatusIcons();
             UpdateStatusTexts();
             UpdateBottomButtons();
@@ -1325,7 +1327,15 @@ namespace EFM
 
         public void OnUpgradeClicked()
         {
-            // TODO
+            buttonClickSound.Play();
+
+            area.BeginUpgrade();
+
+            genericAudioSource.PlayOneShot(genericAudioClips[1]);
+
+            UpdateStatusIcons();
+            UpdateStatusTexts();
+            UpdateBottomButtons();
         }
 
         public void OnUpgradeConfirmConfirmClicked()
