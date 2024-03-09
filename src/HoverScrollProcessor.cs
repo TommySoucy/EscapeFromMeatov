@@ -45,7 +45,7 @@ namespace EFM
                 We want to scroll 0.25 of scroll bar value per second.
                 It will take 4 seconds to scroll down entire view.
                 Taking the difference between maxHeight (What we see) and total height (instead of just using total height)
-                is necessary because we our view already spans maxHeight (What we see), we won't have to 
+                is necessary because our view already spans maxHeight (What we see), we won't have to 
                 scroll through that, we will only have to scroll through the difference, so that is what we want to calculate our rate
                 from.
              */

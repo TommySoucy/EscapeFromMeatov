@@ -199,17 +199,17 @@ namespace EFM
             }
             else
             {
-                if (Mod.itemIcons.ContainsKey(this.descriptionPack.ID))
-                {
-                    Sprite currentSprite = Mod.itemIcons[this.descriptionPack.ID];
-                    summaryIcon.sprite = currentSprite;
-                    fullIcon.sprite = currentSprite;
-                }
-                else
-                {
-                    AnvilManager.Run(Mod.SetVanillaIcon(this.descriptionPack.ID, summaryIcon));
-                    AnvilManager.Run(Mod.SetVanillaIcon(this.descriptionPack.ID, fullIcon));
-                }
+                //if (Mod.itemIcons.ContainsKey(this.descriptionPack.ID))
+                //{
+                //    Sprite currentSprite = Mod.itemIcons[this.descriptionPack.ID];
+                //    summaryIcon.sprite = currentSprite;
+                //    fullIcon.sprite = currentSprite;
+                //}
+                //else
+                //{
+                //    //Mod.SetVanillaIcon(this.descriptionPack.ID, summaryIcon));
+                //    //Mod.SetVanillaIcon(this.descriptionPack.ID, fullIcon));
+                //}
             }
 
             // Summary

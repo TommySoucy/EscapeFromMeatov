@@ -40,7 +40,7 @@ namespace EFM
 
             Text textOut = null;
             InitButton(new List<int>() { 0 }, new List<Vector3>() { new Vector3(0, 75, 0) }, new Vector2(1000, 150), new Vector2(140, 70), OnDevClicked, "Dev", out textOut);
-            //InitButton(new List<int>() { 0 }, new List<Vector3>() { new Vector3(0, 0, 0) }, new Vector2(1200, 150), new Vector2(140, 70), OnDirectConnectionClicked, "Direct connection", out textOut);
+            InitButton(new List<int>() { 0 }, new List<Vector3>() { new Vector3(0, 0, 0) }, new Vector2(1200, 150), new Vector2(140, 70), OnStatusClicked, "Status", out textOut);
             InitButton(new List<int>() { 1 }, new List<Vector3>() { new Vector3(0, 75, 0) }, new Vector2(500, 240), new Vector2(140, 70), OnItemsClicked, "Items", out textOut);
             //InitButton(new List<int>() { 1 }, new List<Vector3>() { Vector3.zero }, new Vector2(500, 240), new Vector2(140, 70), OnConnectClicked, "Join", out textOut);
             //InitButton(new List<int>() { 0, 1, 2, 3 }, new List<Vector3>() { new Vector3(0, -75, 0), new Vector3(0, -75, 0), new Vector3(0, -75, 0), new Vector3(0, -75, 0) }, new Vector2(500, 150), new Vector2(140, 70), OnOptionsClicked, "Options", out textOut);
@@ -108,6 +108,20 @@ namespace EFM
             SM.PlayGlobalUISound(SM.GlobalUISound.Beep, transform.position);
 
             SetPage(1);
+        }
+
+        private void OnStatusClicked(Text textRef)
+        {
+            if(StatusUI.instance == null)
+            {
+                SM.PlayGlobalUISound(SM.GlobalUISound.Error, transform.position);
+            }
+            else
+            {
+                StatusUI.instance.Toggle();
+                transform.position = GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.5f;
+                transform.rotation = Quaternion.Euler(0, GM.CurrentPlayerBody.Head.rotation.eulerAngles.y, 0);
+            }
         }
 
         private void OnItemsClicked(Text textRef)

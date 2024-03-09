@@ -113,8 +113,6 @@ namespace EFM
 
         public void UpdateStatusTexts()
         {
-            Mod.LogInfo("Updating status text, area null?: " + (area == null)+", parent: "+name);
-            Mod.LogInfo("parent: "+transform.parent.parent.parent.name);
             if (area.upgrading)
             {
                 if (area.currentLevel == area.startLevel)
@@ -316,7 +314,7 @@ namespace EFM
             fullIconReadyToUpgrade.SetActive(false);
             fullIconUpgrading.SetActive(false);
             fullIconProducingPanel.SetActive(false);
-            if (area.requiresPower)
+            if (area.currentLevel > area.startLevel && area.requiresPower)
             {
                 if (area.powered)
                 {
@@ -435,23 +433,9 @@ namespace EFM
                                     // Add new requirement
                                     RequirementItemView itemRequirement = Instantiate(scavCaseProductionView.requirementItemViewPrefab, scavCaseProductionView.requirementsPanel).GetComponent<RequirementItemView>();
 
-                                    int parsedID = -1;
-                                    if (int.TryParse(currentProduction.requirements[k].itemID, out parsedID))
-                                    {
-                                        itemRequirement.itemView.itemIcon.sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
-                                    }
-                                    else
-                                    {
-                                        if (IM.HasSpawnedID(currentProduction.requirements[k].itemID))
-                                        {
-                                            itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[k].itemID).Sprite;
-                                        }
-                                        else
-                                        {
-                                            Mod.LogError("DEV: Could not get spawner ID for item: " + currentProduction.requirements[k].itemID);
-                                        }
-                                    }
-                                    if (HideoutController.instance.inventoryAmount.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
+                                    Mod.SetIcon(currentProduction.requirements[k].itemID, itemRequirement.itemView.itemIcon);
+
+                                    if (HideoutController.instance.inventory.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
                                     {
                                         itemRequirement.amount.text = Mathf.Max(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                     }
@@ -556,7 +540,7 @@ namespace EFM
                                     }
                                     itemRequirement.amount.text = itemCount.ToString()+"\n(INSTALLED)";
 
-                                    if (HideoutController.instance.inventoryAmount.TryGetValue(currentProduction.requirements[0].itemID, out int itemInventoryCount))
+                                    if (HideoutController.instance.inventory.TryGetValue(currentProduction.requirements[0].itemID, out int itemInventoryCount))
                                     {
                                         itemRequirementStash.amount.text = itemInventoryCount.ToString()+"\n(STASH)";
                                     }
@@ -610,27 +594,12 @@ namespace EFM
                                         // Add new requirement
                                         RequirementItemView itemRequirement = Instantiate(productionView.requirementItemViewPrefab, productionView.requirementsPanel).GetComponent<RequirementItemView>();
 
-                                        int parsedID = -1;
-                                        if (int.TryParse(currentProduction.requirements[k].itemID, out parsedID))
-                                        {
-                                            itemRequirement.itemView.itemIcon.sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
-                                        }
-                                        else
-                                        {
-                                            if (IM.HasSpawnedID(currentProduction.requirements[k].itemID))
-                                            {
-                                                itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(currentProduction.requirements[k].itemID).Sprite;
-                                            }
-                                            else
-                                            {
-                                                Mod.LogError("DEV: Could not get spawner ID for item: " + currentProduction.requirements[k].itemID);
-                                            }
-                                        }
+                                        Mod.SetIcon(currentProduction.requirements[k].itemID, itemRequirement.itemView.itemIcon);
 
                                         itemRequirement.itemView.toolIcon.SetActive(currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
                                         itemRequirement.itemView.toolBorder.SetActive(currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
 
-                                        if (HideoutController.instance.inventoryAmount.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
+                                        if (HideoutController.instance.inventory.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
                                         {
                                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                         }
@@ -992,23 +961,9 @@ namespace EFM
                         // Add new requirement
                         RequirementItemView itemRequirement = Instantiate(itemRequirementPrefab, currentItemRequirementParent).GetComponent<RequirementItemView>();
 
-                        int parsedID = -1;
-                        if(int.TryParse(itemRequirements[i].itemID, out parsedID))
-                        {
-                            itemRequirement.itemView.itemIcon.sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
-                        }
-                        else
-                        {
-                            if (IM.HasSpawnedID(itemRequirements[i].itemID))
-                            {
-                                itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(itemRequirements[i].itemID).Sprite;
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Could not get spawner ID for item: " + itemRequirements[i].itemID);
-                            }
-                        }
-                        if(HideoutController.instance.inventoryAmount.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
+                        Mod.SetIcon(itemRequirements[i].itemID, itemRequirement.itemView.itemIcon);
+
+                        if(HideoutController.instance.inventory.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
                         {
                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         }
@@ -1168,23 +1123,9 @@ namespace EFM
                         // Add new requirement
                         RequirementItemView itemRequirement = Instantiate(futureItemRequirementPrefab, currentItemRequirementParent).GetComponent<RequirementItemView>();
 
-                        int parsedID = -1;
-                        if (int.TryParse(itemRequirements[i].itemID, out parsedID))
-                        {
-                            itemRequirement.itemView.itemIcon.sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
-                        }
-                        else
-                        {
-                            if (IM.HasSpawnedID(itemRequirements[i].itemID))
-                            {
-                                itemRequirement.itemView.itemIcon.sprite = IM.GetSpawnerID(itemRequirements[i].itemID).Sprite;
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Could not get spawner ID for item: " + itemRequirements[i].itemID);
-                            }
-                        }
-                        if (HideoutController.instance.inventoryAmount.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
+                        Mod.SetIcon(itemRequirements[i].itemID, itemRequirement.itemView.itemIcon);
+
+                        if (HideoutController.instance.inventory.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
                         {
                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         }

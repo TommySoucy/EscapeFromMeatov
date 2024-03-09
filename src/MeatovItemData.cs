@@ -70,7 +70,7 @@ namespace EFM
             {
                 return;
             }
-
+            
             tarkovID = data["tarkovID"].ToString();
             H3ID = data["H3ID"].ToString();
             H3SpawnerID = data["H3SpawnerID"] == null ? null : data["H3SpawnerID"].ToString();

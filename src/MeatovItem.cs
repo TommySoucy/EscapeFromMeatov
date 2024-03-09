@@ -63,6 +63,14 @@ namespace EFM
             Not_exist
         }
 
+        // Hiderarchy
+        [NonSerialized]
+        public MeatovItem parent;
+        [NonSerialized]
+        public int childIndex; // Our index in our parent's children list
+        [NonSerialized]
+        public List<MeatovItem> children = new List<MeatovItem>();
+
         [Header("General")]
         [NonSerialized]
         public MeatovItemData itemData;
@@ -139,7 +147,7 @@ namespace EFM
         [NonSerialized]
         public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
         [NonSerialized]
-        public int locationIndex; // 0: Player inventory, 1: Base, 2: Raid, 3: Area slot. This is to keep track of where an item is in general
+        public int locationIndex = -1; // 0: Player inventory, 1: Base, 2: Raid
         [NonSerialized]
         public DescriptionManager descriptionManager; // The current description manager displaying this item's description
         [NonSerialized]
@@ -412,40 +420,62 @@ namespace EFM
 			}
 			modeInitialized = true;
 
-			descriptionPack = new DescriptionPack();
-			if (itemType == ItemType.LootContainer)
-			{
-				descriptionPack.itemType = ItemType.LootContainer;
-			}
-			else
-			{
-				if (takeCurrentLocation)
-				{
-					locationIndex = Mod.currentLocationIndex;
-				}
+            UpdateInventories();
+		}
 
-				descriptionPack.ID = H3ID;
-				descriptionPack.isCustom = !vanilla;
-				descriptionPack.isPhysical = true;
-				descriptionPack.MI = this;
-				descriptionPack.name = itemName;
-				descriptionPack.description = description;
-				descriptionPack.amountRequiredPerArea = new int[22];
-
-                if (Mod.itemIcons.TryGetValue(H3ID, out Sprite icon))
+        public void UpdateInventories()
+        {
+            // Find new location
+            int newLocation = -1;
+            if (parent != null)
+            {
+                newLocation = parent.locationIndex;
+            }
+            else
+            {
+                if (physObj.m_hand != null
+                    || (physObj.QuickbeltSlot != null && physObj.QuickbeltSlot.IsPlayer))
                 {
-                    descriptionPack.icon = icon;
+                    newLocation = 0;
                 }
                 else
                 {
-                    descriptionPack.icon = physObj is FVRFireArmRound ? Mod.cartridgeIcon : IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
+                    newLocation = Mod.currentLocationIndex;
+                }
+            }
+
+            // Update inventories only if location has changed
+            if(locationIndex != newLocation)
+            {
+                if(locationIndex == 0)
+                {
+                    Mod.RemoveFromPlayerInventory(this);
+                }
+                else if(locationIndex == 1)
+                {
+                    HideoutController.instance.RemoveFromInventory(this);
                 }
 
-                SetCurrentWeight(this);
-			}
-		}
+                if (newLocation == 0)
+                {
+                    Mod.AddToPlayerInventory(this);
+                }
+                else if (newLocation == 1)
+                {
+                    HideoutController.instance.AddToInventory(this);
+                }
+            }
 
-		public static int SetCurrentWeight(MeatovItem item)
+            locationIndex = newLocation;
+
+            // Update children
+            for (int i=0; i < children.Count; ++i)
+            {
+                children[i].UpdateInventories();
+            }
+        }
+
+        public static int SetCurrentWeight(MeatovItem item)
 		{
 			if (item == null)
 			{
@@ -1087,7 +1117,7 @@ namespace EFM
 					if (amount == 0)
 					{
 						// Update player inventory and weight
-						Mod.RemoveFromPlayerInventory(transform, true);
+						Mod.RemoveFromPlayerInventory(this);
 						Mod.weight -= currentWeight;
 						destroyed = true;
 						physObj.ForceBreakInteraction();
@@ -2242,9 +2272,9 @@ namespace EFM
             hand.MI = this;
             hand.hasScript = true;
 
-            // Ensure the Display_InteractionSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
+            // Ensure the Grabbity_HoverSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
             // This is only necessary for equipment items because the slots are much smaller than the item itself so we need to know what specific point to put inside the slot
-            if(hand.MI.itemType == ItemType.Backpack ||
+            if (hand.MI.itemType == ItemType.Backpack ||
 			   hand.MI.itemType == ItemType.Container ||
 			   hand.MI.itemType == ItemType.ArmoredRig ||
 			   hand.MI.itemType == ItemType.Rig ||
@@ -2262,6 +2292,8 @@ namespace EFM
                 }
                 hand.updateInteractionSphere = true;
             }
+
+            UpdateInventories();
         }
 
 		public void EndInteraction(Hand hand)
@@ -2278,11 +2310,22 @@ namespace EFM
                 }
                 hand.updateInteractionSphere = false;
             }
+
+            UpdateInventories();
         }
 
         public void OnDestroy()
         {
             Mod.meatovItemByInteractive.Remove(physObj);
+
+            if(locationIndex == 0)
+            {
+                Mod.RemoveFromPlayerInventory(this);
+            }
+            else if(locationIndex == 1)
+            {
+                HideoutController.instance.RemoveFromInventory(this);
+            }
         }
 	}
 }

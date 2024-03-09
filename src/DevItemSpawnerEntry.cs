@@ -17,7 +17,7 @@ namespace EFM
 
         public void Spawn()
         {
-            if(item.index == -1)
+            if(item.index != -1)
             {
                 Instantiate(Mod.itemPrefabs[item.index], spawner.transform.position + spawner.transform.forward * -0.2f, Quaternion.identity);
             }

@@ -130,7 +130,7 @@ namespace EFM
         public static float currentEnergyRate;
         public static float currentHydrationRate;
         public static Dictionary<string, int> playerInventory;
-        public static Dictionary<string, List<GameObject>> playerInventoryObjects;
+        public static Dictionary<string, List<MeatovItem>> playerInventoryItems;
         //public static List<InsuredSet> insuredItems;
         public static float staminaTimer = 0;
         public static float stamina = 100;
@@ -216,7 +216,6 @@ namespace EFM
         public static GameObject doorRightPrefab;
         public static GameObject doorDoublePrefab;
         public static bool initDoors = true;
-        public static Dictionary<string, Sprite> itemIcons;
         public static GameObject playerStatusUIPrefab;
         public static GameObject extractionUIPrefab;
         public static GameObject extractionLimitUIPrefab;
@@ -521,40 +520,6 @@ namespace EFM
             }
         }
 
-        public static IEnumerator SetVanillaIcon(string ID, Image image)
-        {
-            // A vanilla icon will be fetched from a spawner ID
-            // The spawner ID's itemID may be different from the actual item ID
-            // The ID given as argument is the actual item ID
-            image.sprite = null;
-            if (IM.HasSpawnedID(ID))
-            {
-                image.sprite = IM.GetSpawnerID(ID).Sprite;
-            }
-            else
-            {
-
-                yield return IM.OD[ID].GetGameObjectAsync();
-                GameObject itemPrefab = IM.OD[ID].GetGameObject(); 
-                if (itemPrefab == null)
-                {
-                    Mod.LogError("Failed to get prefab " + ID + " for vanilla icon");
-                }
-                else
-                {
-                    FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
-                    if (physObj.ObjectWrapper.SpawnedFromId == null)
-                    {
-
-                    }
-                    else
-                    {
-                        image.sprite = IM.GetSpawnerID(physObj.ObjectWrapper.SpawnedFromId).Sprite;
-                    }
-                }
-            }
-        }
-
         private void LoadDB()
         {
             globalDB = JObject.Parse(File.ReadAllText(path + "/database/globals.json"));
@@ -855,29 +820,24 @@ namespace EFM
 
         private void ParseDefaultItemData()
         {
-            Mod.LogInfo("ParseDefaultItemData");
             JObject data = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
 
             itemsByParents = new Dictionary<string, List<MeatovItemData>>();
 
-            Mod.LogInfo("\tCustom");
             JArray customData = data["customItemData"] as JArray;
             customItemData = new MeatovItemData[customData.Count];
             // Here, we start at 3 because previous are placeholder for test items
             for (int i=3; i < customData.Count; ++i)
             {
-                Mod.LogInfo("\t"+i+", custom data null?: " + (customData[i] == null));
                 customItemData[i] = new MeatovItemData(customData[i]);
             }
 
-            Mod.LogInfo("\tVanilla");
             Dictionary<string,JToken> vanillaData = data["vanillaItemData"].ToObject<Dictionary<string, JToken>>();
             vanillaItemData = new Dictionary<string, MeatovItemData>();
             foreach(KeyValuePair<string,JToken> entry in vanillaData)
             {
                 vanillaItemData.Add(entry.Key, new MeatovItemData(entry.Value));
             }
-            Mod.LogInfo("\tDone");
         }
 
         private void ParseItemMap()
@@ -960,418 +920,394 @@ namespace EFM
             }
         }
 
-        public static void AddToPlayerInventory(Transform item, bool updateTypeLists)
+        public static void AddToPlayerInventory(MeatovItem item)
         {
-            MeatovItem customItemWrapper = item.GetComponent<MeatovItem>();
-            FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
-            if (physObj == null || physObj.ObjectWrapper == null)
+            if (playerInventory.ContainsKey(item.H3ID))
             {
-                return; // Grenade pin for example, has no wrapper
-            }
-            string itemID = physObj.ObjectWrapper.ItemID;
-            if (playerInventory.ContainsKey(itemID))
-            {
-                playerInventory[itemID] += customItemWrapper != null ? customItemWrapper.stack : 1;
-                playerInventoryObjects[itemID].Add(item.gameObject);
+                playerInventory[item.H3ID] += item.stack;
+                playerInventoryItems[item.H3ID].Add(item);
             }
             else
             {
-                playerInventory.Add(itemID, customItemWrapper != null ? customItemWrapper.stack : 1);
-                playerInventoryObjects.Add(itemID, new List<GameObject> { item.gameObject });
+                playerInventory.Add(item.H3ID, item.stack);
+                playerInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
             }
 
-            if (updateTypeLists)
+            if (item.itemType == MeatovItem.ItemType.AmmoBox)
             {
-                if (customItemWrapper != null)
+                FVRFireArmMagazine boxMagazine = item.physObj as FVRFireArmMagazine;
+                foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                 {
-                    if (customItemWrapper.itemType == MeatovItem.ItemType.AmmoBox)
+                    if (loadedRound == null || loadedRound.LR_ObjectWrapper == null)
                     {
-                        FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
-                        foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
-                        {
-                            if (loadedRound == null || loadedRound.LR_ObjectWrapper == null)
-                            {
-                                break;
-                            }
-                            string roundName = loadedRound.LR_ObjectWrapper.DisplayName;
+                        break;
+                    }
+                    string roundName = loadedRound.LR_ObjectWrapper.DisplayName;
 
-                            if (roundsByType.ContainsKey(boxMagazine.RoundType))
+                    if (roundsByType.ContainsKey(boxMagazine.RoundType))
+                    {
+                        if (roundsByType[boxMagazine.RoundType] == null)
+                        {
+                            roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
+                            roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                        }
+                        else
+                        {
+                            if (roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
                             {
-                                if (roundsByType[boxMagazine.RoundType] == null)
-                                {
-                                    roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
-                                    roundsByType[boxMagazine.RoundType].Add(roundName, 1);
-                                }
-                                else
-                                {
-                                    if (roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
-                                    {
-                                        roundsByType[boxMagazine.RoundType][roundName] += 1;
-                                    }
-                                    else
-                                    {
-                                        roundsByType[boxMagazine.RoundType].Add(roundName, 1);
-                                    }
-                                }
+                                roundsByType[boxMagazine.RoundType][roundName] += 1;
                             }
                             else
                             {
-                                roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
                                 roundsByType[boxMagazine.RoundType].Add(roundName, 1);
                             }
                         }
                     }
-                    else if (customItemWrapper.physObj is FVRFireArmMagazine)
+                    else
                     {
-                        FVRFireArmMagazine asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                        if (magazinesByType.ContainsKey(asMagazine.MagazineType))
+                        roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
+                        roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                    }
+                }
+            }
+            else if (item.physObj is FVRFireArmMagazine)
+            {
+                FVRFireArmMagazine asMagazine = item.physObj as FVRFireArmMagazine;
+                if (magazinesByType.ContainsKey(asMagazine.MagazineType))
+                {
+                    if (magazinesByType[asMagazine.MagazineType] == null)
+                    {
+                        magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                        magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                    }
+                    else
+                    {
+                        if (magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
                         {
-                            if (magazinesByType[asMagazine.MagazineType] == null)
-                            {
-                                magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
-                                magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
-                            }
-                            else
-                            {
-                                if (magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
-                                {
-                                    magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
-                                }
-                                else
-                                {
-                                    magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
-                                }
-                            }
+                            magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
                         }
                         else
                         {
-                            magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
                             magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                         }
                     }
-                    else if (customItemWrapper.physObj is FVRFireArmClip)
+                }
+                else
+                {
+                    magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
+                    magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                }
+            }
+            else if (item.physObj is FVRFireArmClip)
+            {
+                FVRFireArmClip asClip = item.physObj as FVRFireArmClip;
+                if (clipsByType.ContainsKey(asClip.ClipType))
+                {
+                    if (clipsByType[asClip.ClipType] == null)
                     {
-                        FVRFireArmClip asClip = customItemWrapper.physObj as FVRFireArmClip;
-                        if (clipsByType.ContainsKey(asClip.ClipType))
+                        clipsByType[asClip.ClipType] = new Dictionary<string, int>();
+                        clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                    }
+                    else
+                    {
+                        if (clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
                         {
-                            if (clipsByType[asClip.ClipType] == null)
-                            {
-                                clipsByType[asClip.ClipType] = new Dictionary<string, int>();
-                                clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
-                            }
-                            else
-                            {
-                                if (clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
-                                {
-                                    clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
-                                }
-                                else
-                                {
-                                    clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
-                                }
-                            }
+                            clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
                         }
                         else
                         {
-                            clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
                             clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
                         }
                     }
-                    else if (customItemWrapper.physObj is FVRFireArmRound)
+                }
+                else
+                {
+                    clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                    clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                }
+            }
+            else if (item.physObj is FVRFireArmRound)
+            {
+                FVRFireArmRound asRound = item.physObj as FVRFireArmRound;
+                if (roundsByType.ContainsKey(asRound.RoundType))
+                {
+                    if (roundsByType[asRound.RoundType] == null)
                     {
-                        FVRFireArmRound asRound = customItemWrapper.physObj as FVRFireArmRound;
-                        if (roundsByType.ContainsKey(asRound.RoundType))
+                        roundsByType[asRound.RoundType] = new Dictionary<string, int>();
+                        roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                    }
+                    else
+                    {
+                        if (roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
                         {
-                            if (roundsByType[asRound.RoundType] == null)
-                            {
-                                roundsByType[asRound.RoundType] = new Dictionary<string, int>();
-                                roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
-                            }
-                            else
-                            {
-                                if (roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
-                                {
-                                    roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
-                                }
-                                else
-                                {
-                                    roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
-                                }
-                            }
+                            roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
                         }
                         else
                         {
-                            roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
                             roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
                         }
                     }
                 }
+                else
+                {
+                    roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                    roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                }
             }
 
             // Check for more items that may be contained inside this one
-            if (customItemWrapper != null)
-            {
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack || customItemWrapper.itemType == MeatovItem.ItemType.Container || customItemWrapper.itemType == MeatovItem.ItemType.Pouch)
-                {
-                    foreach (Transform innerItem in customItemWrapper.containerItemRoot)
-                    {
-                        AddToPlayerInventory(innerItem, updateTypeLists);
-                    }
-                }
-                else if (customItemWrapper.itemType == MeatovItem.ItemType.Rig || customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig)
-                {
-                    foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
-                    {
-                        if (innerItem != null)
-                        {
-                            AddToPlayerInventory(innerItem.transform, updateTypeLists);
-                        }
-                    }
-                }
-                else if (physObj is FVRFireArm)
-                {
-                    FVRFireArm asFireArm = (FVRFireArm)physObj;
+            // NOTE: Now handled by MeatovItem.UpdateInventories() and parent tracking system
+            //if (customItemWrapper != null)
+            //{
+            //    if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack || customItemWrapper.itemType == MeatovItem.ItemType.Container || customItemWrapper.itemType == MeatovItem.ItemType.Pouch)
+            //    {
+            //        foreach (Transform innerItem in customItemWrapper.containerItemRoot)
+            //        {
+            //            AddToPlayerInventory(innerItem, updateTypeLists);
+            //        }
+            //    }
+            //    else if (customItemWrapper.itemType == MeatovItem.ItemType.Rig || customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig)
+            //    {
+            //        foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
+            //        {
+            //            if (innerItem != null)
+            //            {
+            //                AddToPlayerInventory(innerItem.transform, updateTypeLists);
+            //            }
+            //        }
+            //    }
+            //    else if (physObj is FVRFireArm)
+            //    {
+            //        FVRFireArm asFireArm = (FVRFireArm)physObj;
 
-                    // Ammo container
-                    if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
-                    {
-                        AddToPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
-                    }
-                    else if (asFireArm.UsesClips && asFireArm.Clip != null)
-                    {
-                        AddToPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
-                    }
+            //        // Ammo container
+            //        if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
+            //        {
+            //            AddToPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
+            //        }
+            //        else if (asFireArm.UsesClips && asFireArm.Clip != null)
+            //        {
+            //            AddToPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
+            //        }
 
-                    // Attachments
-                    if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
-                    {
-                        foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
-                        {
-                            AddToPlayerInventory(attachment.transform, updateTypeLists);
-                        }
-                    }
-                }
-                else if (physObj is FVRFireArmAttachment)
-                {
-                    FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)physObj;
+            //        // Attachments
+            //        if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
+            //        {
+            //            foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
+            //            {
+            //                AddToPlayerInventory(attachment.transform, updateTypeLists);
+            //            }
+            //        }
+            //    }
+            //    else if (physObj is FVRFireArmAttachment)
+            //    {
+            //        FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)physObj;
 
-                    if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
-                    {
-                        foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
-                        {
-                            AddToPlayerInventory(attachment.transform, updateTypeLists);
-                        }
-                    }
-                }
-            }
+            //        if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
+            //        {
+            //            foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
+            //            {
+            //                AddToPlayerInventory(attachment.transform, updateTypeLists);
+            //            }
+            //        }
+            //    }
+            //}
         }
 
-        public static void RemoveFromPlayerInventory(Transform item, bool updateTypeLists)
+        public static void RemoveFromPlayerInventory(MeatovItem item)
         {
-            MeatovItem customItemWrapper = item.GetComponent<MeatovItem>();
-            FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
-            if (physObj == null || physObj.ObjectWrapper == null)
+            if (playerInventory.ContainsKey(item.H3ID))
             {
-                return; // Grenade pin for example, has no wrapper
-            }
-            string itemID = physObj.ObjectWrapper.ItemID;
-            if (playerInventory.ContainsKey(itemID))
-            {
-                playerInventory[itemID] -= customItemWrapper != null ? customItemWrapper.stack : 1;
-                playerInventoryObjects[itemID].Remove(item.gameObject);
+                playerInventory[item.H3ID] -= item.stack;
+                playerInventoryItems[item.H3ID].Remove(item);
             }
             else
             {
-                Mod.LogError("Attempting to remove " + itemID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
+                Mod.LogError("Attempting to remove " + item.H3ID + " from player inventory but key was not found in it:\n" + Environment.StackTrace);
                 return;
             }
-            if (playerInventory[itemID] == 0)
+            if (playerInventory[item.H3ID] == 0)
             {
-                playerInventory.Remove(itemID);
-                playerInventoryObjects.Remove(itemID);
+                playerInventory.Remove(item.H3ID);
+                playerInventoryItems.Remove(item.H3ID);
             }
 
-            if (updateTypeLists)
+            if (item.itemType == MeatovItem.ItemType.AmmoBox)
             {
-                if (customItemWrapper != null)
+                FVRFireArmMagazine boxMagazine = item.physObj as FVRFireArmMagazine;
+                foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                 {
-                    if (customItemWrapper.itemType == MeatovItem.ItemType.AmmoBox)
+                    if (loadedRound == null)
                     {
-                        FVRFireArmMagazine boxMagazine = customItemWrapper.GetComponent<FVRFireArmMagazine>();
-                        foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
-                        {
-                            if (loadedRound == null)
-                            {
-                                break;
-                            }
+                        break;
+                    }
 
-                            string roundName = loadedRound.LR_ObjectWrapper.DisplayName;
+                    string roundName = loadedRound.LR_ObjectWrapper.DisplayName;
 
-                            if (roundsByType.ContainsKey(boxMagazine.RoundType))
-                            {
-                                if (roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
-                                {
-                                    roundsByType[boxMagazine.RoundType][roundName] -= 1;
-                                    if (roundsByType[boxMagazine.RoundType][roundName] == 0)
-                                    {
-                                        roundsByType[boxMagazine.RoundType].Remove(roundName);
-                                    }
-                                    if (roundsByType[boxMagazine.RoundType].Count == 0)
-                                    {
-                                        roundsByType.Remove(boxMagazine.RoundType);
-                                    }
-                                }
-                                else
-                                {
-                                    Mod.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from player inventory but ammo name was not found in roundsByType:\n" + Environment.StackTrace);
-                                }
-                            }
-                            else
-                            {
-                                Mod.LogError("Attempting to remove " + itemID + "  which is ammo box that contains ammo: " + roundName + " from player inventory but ammo type was not found in roundsByType:\n" + Environment.StackTrace);
-                            }
-                        }
-                    }
-                    else if (physObj is FVRFireArmMagazine)
+                    if (roundsByType.ContainsKey(boxMagazine.RoundType))
                     {
-                        FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
-                        if (magazinesByType.ContainsKey(asMagazine.MagazineType))
+                        if (roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
                         {
-                            if (magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            roundsByType[boxMagazine.RoundType][roundName] -= 1;
+                            if (roundsByType[boxMagazine.RoundType][roundName] == 0)
                             {
-                                magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] -= 1;
-                                if (magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] == 0)
-                                {
-                                    magazinesByType[asMagazine.MagazineType].Remove(asMagazine.ObjectWrapper.DisplayName);
-                                }
-                                if (magazinesByType[asMagazine.MagazineType].Count == 0)
-                                {
-                                    magazinesByType.Remove(asMagazine.MagazineType);
-                                }
+                                roundsByType[boxMagazine.RoundType].Remove(roundName);
                             }
-                            else
+                            if (roundsByType[boxMagazine.RoundType].Count == 0)
                             {
-                                Mod.LogError("Attempting to remove " + itemID + "  which is mag from player inventory but its name was not found in magazinesByType:\n" + Environment.StackTrace);
+                                roundsByType.Remove(boxMagazine.RoundType);
                             }
                         }
                         else
                         {
-                            Mod.LogError("Attempting to remove " + itemID + "  which is mag from player inventory but its type was not found in magazinesByType:\n" + Environment.StackTrace);
+                            Mod.LogError("Attempting to remove " + item.H3ID + "  which is ammo box that contains ammo: " + roundName + " from player inventory but ammo name was not found in roundsByType:\n" + Environment.StackTrace);
                         }
                     }
-                    else if (physObj is FVRFireArmClip)
+                    else
                     {
-                        FVRFireArmClip asClip = physObj as FVRFireArmClip;
-                        if (clipsByType.ContainsKey(asClip.ClipType))
-                        {
-                            if (clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
-                            {
-                                clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] -= 1;
-                                if (clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] == 0)
-                                {
-                                    clipsByType[asClip.ClipType].Remove(asClip.ObjectWrapper.DisplayName);
-                                }
-                                if (clipsByType[asClip.ClipType].Count == 0)
-                                {
-                                    clipsByType.Remove(asClip.ClipType);
-                                }
-                            }
-                            else
-                            {
-                                Mod.LogError("Attempting to remove " + itemID + "  which is clip from player inventory but its name was not found in clipsByType:\n" + Environment.StackTrace);
-                            }
-                        }
-                        else
-                        {
-                            Mod.LogError("Attempting to remove " + itemID + "  which is clip from player inventory but its type was not found in clipsByType:\n" + Environment.StackTrace);
-                        }
+                        Mod.LogError("Attempting to remove " + item.H3ID + "  which is ammo box that contains ammo: " + roundName + " from player inventory but ammo type was not found in roundsByType:\n" + Environment.StackTrace);
                     }
-                    else if (physObj is FVRFireArmRound)
+                }
+            }
+            else if (item.physObj is FVRFireArmMagazine)
+            {
+                FVRFireArmMagazine asMagazine = item.physObj as FVRFireArmMagazine;
+                if (magazinesByType.ContainsKey(asMagazine.MagazineType))
+                {
+                    if (magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
                     {
-                        FVRFireArmRound asRound = physObj as FVRFireArmRound;
-                        if (roundsByType.ContainsKey(asRound.RoundType))
+                        magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] -= 1;
+                        if (magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] == 0)
                         {
-                            if (roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
-                            {
-                                roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] -= 1;
-                                if (roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] == 0)
-                                {
-                                    roundsByType[asRound.RoundType].Remove(asRound.ObjectWrapper.DisplayName);
-                                }
-                                if (roundsByType[asRound.RoundType].Count == 0)
-                                {
-                                    roundsByType.Remove(asRound.RoundType);
-                                }
-                            }
-                            else
-                            {
-                                Mod.LogError("Attempting to remove " + itemID + "  which is round from player inventory but its name was not found in roundsByType:\n" + Environment.StackTrace);
-                            }
+                            magazinesByType[asMagazine.MagazineType].Remove(asMagazine.ObjectWrapper.DisplayName);
                         }
-                        else
+                        if (magazinesByType[asMagazine.MagazineType].Count == 0)
                         {
-                            Mod.LogError("Attempting to remove " + itemID + "  which is round from player inventory but its type was not found in roundsByType:\n" + Environment.StackTrace);
+                            magazinesByType.Remove(asMagazine.MagazineType);
                         }
                     }
+                    else
+                    {
+                        Mod.LogError("Attempting to remove " + item.H3ID + "  which is mag from player inventory but its name was not found in magazinesByType:\n" + Environment.StackTrace);
+                    }
+                }
+                else
+                {
+                    Mod.LogError("Attempting to remove " + item.H3ID + "  which is mag from player inventory but its type was not found in magazinesByType:\n" + Environment.StackTrace);
+                }
+            }
+            else if (item.physObj is FVRFireArmClip)
+            {
+                FVRFireArmClip asClip = item.physObj as FVRFireArmClip;
+                if (clipsByType.ContainsKey(asClip.ClipType))
+                {
+                    if (clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                    {
+                        clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] -= 1;
+                        if (clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] == 0)
+                        {
+                            clipsByType[asClip.ClipType].Remove(asClip.ObjectWrapper.DisplayName);
+                        }
+                        if (clipsByType[asClip.ClipType].Count == 0)
+                        {
+                            clipsByType.Remove(asClip.ClipType);
+                        }
+                    }
+                    else
+                    {
+                        Mod.LogError("Attempting to remove " + item.H3ID + "  which is clip from player inventory but its name was not found in clipsByType:\n" + Environment.StackTrace);
+                    }
+                }
+                else
+                {
+                    Mod.LogError("Attempting to remove " + item.H3ID + "  which is clip from player inventory but its type was not found in clipsByType:\n" + Environment.StackTrace);
+                }
+            }
+            else if (item.physObj is FVRFireArmRound)
+            {
+                FVRFireArmRound asRound = item.physObj as FVRFireArmRound;
+                if (roundsByType.ContainsKey(asRound.RoundType))
+                {
+                    if (roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                    {
+                        roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] -= 1;
+                        if (roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] == 0)
+                        {
+                            roundsByType[asRound.RoundType].Remove(asRound.ObjectWrapper.DisplayName);
+                        }
+                        if (roundsByType[asRound.RoundType].Count == 0)
+                        {
+                            roundsByType.Remove(asRound.RoundType);
+                        }
+                    }
+                    else
+                    {
+                        Mod.LogError("Attempting to remove " + item.H3ID + "  which is round from player inventory but its name was not found in roundsByType:\n" + Environment.StackTrace);
+                    }
+                }
+                else
+                {
+                    Mod.LogError("Attempting to remove " + item.H3ID + "  which is round from player inventory but its type was not found in roundsByType:\n" + Environment.StackTrace);
                 }
             }
 
             // Check for more items that may be contained inside this one
-            if (customItemWrapper != null)
-            {
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack || customItemWrapper.itemType == MeatovItem.ItemType.Container || customItemWrapper.itemType == MeatovItem.ItemType.Pouch)
-                {
-                    foreach (Transform innerItem in customItemWrapper.containerItemRoot)
-                    {
-                        RemoveFromPlayerInventory(innerItem, updateTypeLists);
-                    }
-                }
-                else if (customItemWrapper.itemType == MeatovItem.ItemType.Rig || customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig)
-                {
-                    foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
-                    {
-                        if (innerItem != null)
-                        {
-                            RemoveFromPlayerInventory(innerItem.transform, updateTypeLists);
-                        }
-                    }
-                }
-                else if (physObj is FVRFireArm)
-                {
-                    FVRFireArm asFireArm = (FVRFireArm)physObj;
+            // NOTE: This is now handled by MeatovItem.UpdateInventories() and parent tracking system
+            //if (customItemWrapper != null)
+            //{
+            //    if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack || customItemWrapper.itemType == MeatovItem.ItemType.Container || customItemWrapper.itemType == MeatovItem.ItemType.Pouch)
+            //    {
+            //        foreach (Transform innerItem in customItemWrapper.containerItemRoot)
+            //        {
+            //            RemoveFromPlayerInventory(innerItem, updateTypeLists);
+            //        }
+            //    }
+            //    else if (customItemWrapper.itemType == MeatovItem.ItemType.Rig || customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig)
+            //    {
+            //        foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
+            //        {
+            //            if (innerItem != null)
+            //            {
+            //                RemoveFromPlayerInventory(innerItem.transform, updateTypeLists);
+            //            }
+            //        }
+            //    }
+            //    else if (physObj is FVRFireArm)
+            //    {
+            //        FVRFireArm asFireArm = (FVRFireArm)physObj;
 
-                    // Ammo container
-                    if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
-                    {
-                        RemoveFromPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
-                    }
-                    else if (asFireArm.UsesClips && asFireArm.Clip != null)
-                    {
-                        RemoveFromPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
-                    }
+            //        // Ammo container
+            //        if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
+            //        {
+            //            RemoveFromPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
+            //        }
+            //        else if (asFireArm.UsesClips && asFireArm.Clip != null)
+            //        {
+            //            RemoveFromPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
+            //        }
 
-                    // Attachments
-                    if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
-                    {
-                        foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
-                        {
-                            RemoveFromPlayerInventory(attachment.transform, updateTypeLists);
-                        }
-                    }
-                }
-                else if (physObj is FVRFireArmAttachment)
-                {
-                    FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)physObj;
+            //        // Attachments
+            //        if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
+            //        {
+            //            foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
+            //            {
+            //                RemoveFromPlayerInventory(attachment.transform, updateTypeLists);
+            //            }
+            //        }
+            //    }
+            //    else if (physObj is FVRFireArmAttachment)
+            //    {
+            //        FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)physObj;
 
-                    if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
-                    {
-                        foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
-                        {
-                            RemoveFromPlayerInventory(attachment.transform, updateTypeLists);
-                        }
-                    }
-                }
-            }
+            //        if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
+            //        {
+            //            foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
+            //            {
+            //                RemoveFromPlayerInventory(attachment.transform, updateTypeLists);
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         public static void AddExperience(int xp, int type = 0 /*0: General (kill, raid result, etc.), 1: Looting, 2: Healing, 3: Exploration*/, string notifMsg = null)
@@ -1731,7 +1667,7 @@ namespace EFM
                         Mod.currentLocationIndex = -1;
                         break;
                     case "MeatovMainMenu":
-                        //Mod.currentHideoutManager = null;
+                        QualitySettings.pixelLightCount = 10;
                         break;
                     case "MeatovHideout":
                         // UnsecureObjects();
@@ -2035,6 +1971,34 @@ namespace EFM
             return false;
         }
 
+        public static void SetIcon(string itemID, Image icon)
+        {
+            int parsedID = -1;
+            if (int.TryParse(itemID, out parsedID))
+            {
+                icon.sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
+            }
+            else
+            {
+                if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData) && itemData.H3SpawnerID != null && IM.HasSpawnedID(itemData.H3SpawnerID))
+                {
+                    icon.sprite = IM.GetSpawnerID(itemData.H3SpawnerID).Sprite;
+                }
+                else // Could not get icon from item data (spawner ID)
+                {
+                    Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + itemID + "_Icon");
+                    if (sprite == null)
+                    {
+                        Mod.LogError("DEV: Could not get icon for " + itemID);
+                    }
+                    else
+                    {
+                        icon.sprite = sprite;
+                    }
+                }
+            }
+        }
+
         public static void LogInfo(string message, bool debug = true)
         {
             if (debug)
@@ -2112,7 +2076,7 @@ namespace EFM
             }
             else
             {
-                // This item was caught by H3MP's instantiation patches abd must be setup now
+                // This item was caught by H3MP's instantiation patches and must be setup now
                 FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
                 if (physicalObject != null && physicalObject.ObjectWrapper != null)
                 {

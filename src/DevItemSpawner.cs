@@ -33,10 +33,6 @@ namespace EFM
 
             // Add entries
             DisplayList();
-
-            // Set buttons
-            nextButton.SetActive(true);
-            previousButton.SetActive(false);
         }
 
         public void BuildList(string s)
@@ -64,15 +60,21 @@ namespace EFM
             // Handle vanilla IDs and names
             for(int i = 0; i < Mod.customItemData.Length; ++i)
             {
-                if(Mod.customItemData[i] != null && Mod.customItemData[i].name.IndexOf(text.text, StringComparison.OrdinalIgnoreCase) >= 0)
+                if(Mod.customItemData[i] != null && Mod.customItemData[i].name != null && Mod.customItemData[i].name.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     items.Add(Mod.customItemData[i]);
                 }
             }
-            foreach(KeyValuePair<string, MeatovItemData> dataEntry in Mod.vanillaItemData)
+            Mod.LogInfo("Finding vanilla items containing "+s);
+            foreach (KeyValuePair<string, MeatovItemData> dataEntry in Mod.vanillaItemData)
             {
-                if (dataEntry.Value != null && (dataEntry.Key.IndexOf(text.text, StringComparison.OrdinalIgnoreCase) >= 0 || dataEntry.Value.name.IndexOf(text.text, StringComparison.OrdinalIgnoreCase) >= 0))
+                if(dataEntry.Value != null)
                 {
+                    Mod.LogInfo("\t"+ dataEntry.Key+" : "+ dataEntry.Value.name);
+                }
+                if (dataEntry.Value != null && (dataEntry.Key.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0 || dataEntry.Value.name.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    Mod.LogInfo("\t\tAdded");
                     items.Add(dataEntry.Value);
                 }
             }
@@ -83,7 +85,9 @@ namespace EFM
             // Clear previous entries
             while (listParent.childCount > 1)
             {
-                DestroyImmediate(listParent.GetChild(1).gameObject);
+                Transform currentChild = listParent.GetChild(1);
+                currentChild.parent = null;
+                DestroyImmediate(currentChild.gameObject);
             }
 
             // Create new entries
@@ -97,7 +101,12 @@ namespace EFM
                 DevItemSpawnerEntry entry = Instantiate(itemEntryPrefab, listParent).GetComponent<DevItemSpawnerEntry>();
                 entry.text.text = data.name;
                 entry.item = data;
+                entry.gameObject.SetActive(true);
             }
+
+            // Set buttons
+            nextButton.SetActive(items.Count > 8);
+            previousButton.SetActive(false);
         }
 
         public void Close()
