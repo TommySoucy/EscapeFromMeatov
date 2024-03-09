@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FMOD;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
@@ -371,6 +372,27 @@ namespace EFM
                     productionsPerLevel[i][j].Update();
                 }
             }
+
+            if (upgrading)
+            {
+                upgradeTimeLeft -= Time.deltaTime;
+
+                if(upgradeTimeLeft <= 0)
+                {
+                    upgrading = false;
+
+                    ++currentLevel;
+
+                    for (int i = 0; i < levels.Length; ++i)
+                    {
+                        levels[i].SetActive(i == currentLevel);
+                    }
+
+                    UI.Init();
+                }
+
+                UI.UpdateStatusTexts();
+            }
         }
 
         public void UpdateObjectsPerLevel()
@@ -480,6 +502,68 @@ namespace EFM
                 }
             }
             return productions;
+        }
+
+        public void BeginUpgrade()
+        {
+            // Set into upgrade state
+            upgrading = true;
+            upgradeTimeLeft = constructionTimePerLevel[currentLevel + 1];
+
+            // Consume requirements
+            List<Requirement> itemRequirements = requirementsByTypePerLevel[currentLevel + 1][Requirement.RequirementType.Item];
+            for(int i=0; i < itemRequirements.Count; ++i)
+            {
+                Requirement itemRequirement = itemRequirements[i];
+                int countLeft  = itemRequirement.itemCount;
+                while(countLeft > 0)
+                {
+                    MeatovItem item = GetClosestItem(itemRequirement.itemID);
+                    if(item.stack > countLeft)
+                    {
+                        item.stack -= countLeft;
+                        countLeft = 0;
+                        break;
+                    }
+                    else
+                    {
+                        countLeft -= item.stack;
+                        Destroy(item.gameObject);
+                    }
+                }
+            }
+        }
+
+        public MeatovItem GetClosestItem(string H3ID)
+        {
+            if(HideoutController.instance.inventoryItems.TryGetValue(H3ID, out List<MeatovItem> items))
+            {
+                MeatovItem closest = null;
+                float closestDistance = float.MaxValue;
+                for(int i=0; i < items.Count; ++i)
+                {
+                    if (closest == null)
+                    {
+                        closestDistance = Vector3.Distance(items[i].transform.position, transform.position - Vector3.down);
+                        closest = items[i];
+                    }
+                    else
+                    {
+                        float distance = Vector3.Distance(items[i].transform.position, transform.position - Vector3.down);
+                        if(distance < closestDistance)
+                        {
+                            closestDistance = distance;
+                            closest = items[i];
+                        }
+                    }
+                }
+
+                return closest;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 
@@ -863,25 +947,9 @@ namespace EFM
 
         public void UpdateAreaUpgradeUI()
         {
-            if (area.AllRequirementsFulfilled())
-            {
-                if (area.currentLevel == area.startLevel) // Area still needs to be constructed, no next page, just enable construct button
-                {
-                    area.UI.constructButton.SetActive(true);
-                }
-                else // Area already constructed, but only display upgrade button if on next page
-                {
-                    if (area.UI.onNextPage)
-                    {
-                        area.UI.upgradeButton.SetActive(true);
-                    }
-                }
-            }
-            else
-            {
-                area.UI.constructButton.SetActive(false);
-                area.UI.upgradeButton.SetActive(false);
-            }
+            area.UI.UpdateBottomButtons();
+            area.UI.UpdateStatusIcons();
+            area.UI.UpdateStatusTexts();
         }
     }
 

@@ -1286,17 +1286,41 @@ namespace EFM
 
         public void OnConstructClicked()
         {
-            // TODO
+            buttonClickSound.Play();
+
+            area.BeginUpgrade();
+
+            UpdateStatusIcons();
+            UpdateStatusTexts();
+            UpdateBottomButtons();
         }
 
         public void OnLevelClicked()
         {
-            // TODO
+            buttonClickSound.Play();
+
+            // Page
+            currentContent.gameObject.SetActive(false);
+            futureContent.gameObject.SetActive(true);
+
+            // Buttons
+            levelButton.SetActive(false);
+            backButton.SetActive(true);
+            upgradeButton.SetActive(area.AllRequirementsFulfilled());
         }
 
         public void OnBackClicked()
         {
-            // TODO
+            buttonClickSound.Play();
+
+            // Page
+            currentContent.gameObject.SetActive(true);
+            futureContent.gameObject.SetActive(false);
+
+            // Buttons
+            levelButton.SetActive(true);
+            backButton.SetActive(false);
+            upgradeButton.SetActive(false);
         }
 
         public void OnUpgradeClicked()
