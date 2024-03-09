@@ -3035,7 +3035,7 @@ namespace EFM
                 __instance.DeadBolt.m_timeSinceKeyInOut = 0f;
                 FVRViveHand hand = __instance.m_hand;
                 // Use correct key item prefab
-                GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(int.TryParse(__instance.KeyFO, out int result) ? Mod.itemPrefabs[result] : IM.OD[__instance.KeyFO].GetGameObject(), __instance.transform.position, __instance.transform.rotation);
+                GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(int.TryParse(__instance.KeyFO, out int result) ? Mod.GetItemPrefab(result) : IM.OD[__instance.KeyFO].GetGameObject(), __instance.transform.position, __instance.transform.rotation);
                 LockKey component = gameObject.GetComponent<LockKey>();
                 ___m_keyLerp = 1f;
                 __instance.ForceBreakInteraction();
@@ -3066,7 +3066,7 @@ namespace EFM
 
             DoorWrapper doorWrapper = __instance.transform.parent.parent.parent.parent.parent.GetComponent<DoorWrapper>();
 
-            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(int.TryParse(__instance.KeyFO, out int result) ? Mod.itemPrefabs[result] : IM.OD[__instance.KeyFO].GetGameObject(), __instance.transform.position, __instance.transform.rotation);
+            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(int.TryParse(__instance.KeyFO, out int result) ? Mod.GetItemPrefab(result) : IM.OD[__instance.KeyFO].GetGameObject(), __instance.transform.position, __instance.transform.rotation);
             LockKey component = gameObject.GetComponent<LockKey>();
             __instance.KeyMesh.mesh = component.KeyMesh.mesh;
             __instance.TagMesh.mesh = component.TagMesh.mesh;

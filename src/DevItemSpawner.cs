@@ -93,7 +93,7 @@ namespace EFM
             // Create new entries
             for(int i=0; i<8; ++i)
             {
-                if(index + i > items.Count)
+                if(index + i >= items.Count)
                 {
                     break;
                 }

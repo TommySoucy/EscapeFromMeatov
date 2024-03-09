@@ -257,13 +257,15 @@ namespace EFM
 		public int stack
 		{
 			get { return _stack; }
-			set { 
+			set {
+                int preValue = _stack;
 				_stack = value;
 				UpdateStackModel();
 				if (descriptionManager != null)
 				{
 					descriptionManager.SetDescriptionPack();
 				}
+                UpdateInventoryStacks(preValue);
 			}
 		}
 		public int maxStack;
@@ -472,6 +474,19 @@ namespace EFM
             for (int i=0; i < children.Count; ++i)
             {
                 children[i].UpdateInventories();
+            }
+        }
+
+        public void UpdateInventoryStacks(int preStack)
+        {
+            // Add stack difference to inventory
+            if (locationIndex == 0)
+            {
+                Mod.AddToPlayerInventory(this, true, stack - preStack);
+            }
+            else if (locationIndex == 1)
+            {
+                HideoutController.instance.AddToInventory(this, true, stack - preStack);
             }
         }
 
@@ -736,177 +751,93 @@ namespace EFM
 			// If A has started being pressed this frame
 			if (usageButtonDown)
 			{
-				//if (leaveItemProcessor == null)
-				//{
-				//	switch (itemType)
-				//	{
-				//		case ItemType.ArmoredRig:
-				//		case ItemType.Rig:
-				//		case ItemType.Backpack:
-				//		case ItemType.BodyArmor:
-				//		case ItemType.Container:
-				//		case ItemType.Pouch:
-				//			ToggleMode(true, hand.IsThisTheRightHand);
-				//			break;
-				//		case ItemType.Money:
-				//			if (splittingStack)
-				//			{
-				//				// End splitting
-				//				if (splitAmount != stack || splitAmount == 0)
-				//				{
-				//					stack -= splitAmount;
+                switch (itemType)
+                {
+                    case ItemType.ArmoredRig:
+                    case ItemType.Rig:
+                    case ItemType.Backpack:
+                    case ItemType.BodyArmor:
+                    case ItemType.Container:
+                    case ItemType.Pouch:
+                        ToggleMode(true, hand.IsThisTheRightHand);
+                        break;
+                    case ItemType.Money:
+                        if (splittingStack)
+                        {
+                            // End splitting
+                            if (splitAmount != stack && splitAmount != 0)
+                            {
+                                stack -= splitAmount;
 
-				//					GameObject itemObject = Instantiate(Mod.itemPrefabs[int.Parse(H3ID)], hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity);
-				//					if (Mod.currentLocationIndex == 1) // In hideout
-				//					{
-				//						itemObject.transform.parent = HideoutController.instance.transform.GetChild(HideoutController.instance.transform.childCount - 2);
-				//						MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
-				//						CIW.stack = splitAmount;
-				//						HideoutController.instance.inventoryObjects[H3ID].Add(itemObject);
-				//					}
-				//					else // In raid
-				//					{
-				//						itemObject.transform.parent = Mod.currentRaidManager.transform.GetChild(1).GetChild(1).GetChild(2);
-				//						MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
-				//						CIW.stack = splitAmount;
-				//					}
-				//				}
-				//				// else the chosen amount is 0 or max, meaning cancel the split
-				//				CancelSplit();
-				//			}
-				//			else
-				//			{
-				//				// Start splitting
-				//				Mod.stackSplitUI.SetActive(true);
-				//				Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
-				//				Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
-				//				stackSplitStartPosition = hand.transform.position;
-				//				stackSplitRightVector = hand.transform.right;
-				//				stackSplitRightVector.y = 0;
+                                MeatovItem splitItem = Instantiate(Mod.GetItemPrefab(index), hand.transform.position + hand.transform.forward * 0.2f, Quaternion.identity).GetComponent<MeatovItem>();
+                                splitItem.stack = splitAmount;
+                                splitItem.UpdateInventories();
+                            }
+                            // else the chosen amount is 0 or max, meaning cancel the split
+                            CancelSplit();
+                        }
+                        else
+                        {
+                            // Start splitting
+                            Mod.stackSplitUI.SetActive(true);
+                            Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
+                            Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
+                            stackSplitStartPosition = hand.transform.position;
+                            stackSplitRightVector = hand.transform.right;
+                            stackSplitRightVector.y = 0;
 
-				//				splittingStack = true;
-				//				Mod.amountChoiceUIUp = true;
-				//				Mod.splittingItem = this;
-				//			}
-				//			break;
-				//		default:
-				//			break;
-				//	}
-    //            }
-			}
+                            splittingStack = true;
+                            Mod.amountChoiceUIUp = true;
+                            Mod.splittingItem = this;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
 
 			// If A is being pressed this frame
 			if (usageButtonPressed)
 			{
-				//if (leaveItemProcessor == null || validConsumePress)
-				//{
-				//	leavingTimer = 0;
-				//	switch (itemType)
-				//	{
-				//		case ItemType.Consumable:
-				//			bool otherHandConsuming = false;
-				//			if (!validConsumePress)
-				//			{
-				//				otherHandConsuming = EFMHand.otherHand.consuming;
-				//			}
-				//			if (!otherHandConsuming)
-				//			{
-				//				EFMHand.consuming = true;
+                switch (itemType)
+                {
+                    case ItemType.Consumable:
+                        if (!EFMHand.otherHand.consuming)
+                        {
+                            EFMHand.consuming = true;
 
-				//				// Increment timer
-				//				consumableTimer += Time.deltaTime;
+                            // Increment timer
+                            consumableTimer += Time.deltaTime;
 
-				//				float use = Mathf.Clamp01(consumableTimer / useTime);
-				//				Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
-				//				if (amountRate == 0)
-				//				{
-				//					// This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
-				//					if (consumableTimer >= useTime)
-				//					{
-				//						Mod.consumeUIText.color = Color.green;
-				//					}
-				//					else
-				//					{
-				//						Mod.consumeUIText.color = Color.red;
-				//					}
-				//				}
-				//				else
-				//				{
-				//					Mod.consumeUIText.color = Color.white;
-				//				}
-				//				Mod.consumeUI.transform.parent = hand.transform;
-				//				Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
-				//				Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
-				//				Mod.consumeUI.SetActive(true);
-				//				validConsumePress = true;
-				//			}
-				//			break;
-				//		default:
-				//			break;
-				//	}
-    //            }
-    //            else if(leaveItemProcessor != null)
-    //            {
-				//	bool otherHandLeaving = false;
-				//	if (!validLeaveItemPress)
-				//	{
-				//		otherHandLeaving = EFMHand.otherHand.leaving;
-				//	}
-				//	if (!otherHandLeaving)
-				//	{
-				//		EFMHand.leaving = true;
-
-				//		// Increment timer
-				//		leavingTimer += Time.deltaTime;
-
-				//		if(leaveItemTime == -1)
-				//		{
-				//			List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[H3ID];
-				//			leaveItemTime = conditions[conditions.Count - 1].plantTime;
-				//		}
-
-				//		Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", leavingTimer, leaveItemTime);
-				//		Mod.consumeUIText.color = Color.white;
-				//		Mod.consumeUI.transform.parent = hand.transform;
-				//		Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
-				//		Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
-				//		Mod.consumeUI.SetActive(true);
-				//		validLeaveItemPress = true;
-
-				//		if (leavingTimer >= leaveItemTime)
-				//		{
-				//			EFMHand.leaving = false;
-				//			validLeaveItemPress = false;
-				//			leavingTimer = 0;
-				//			leaveItemTime = -1;
-
-				//			List<TraderTaskCondition> conditions = leaveItemProcessor.conditionsByItemID[H3ID];
-				//			if(conditions.Count > 0)
-				//			{
-				//				TraderTaskCondition condition = conditions[conditions.Count - 1];
-				//				++condition.itemCount;
-				//				TraderStatus.UpdateConditionFulfillment(condition);
-				//				if (condition.fulfilled)
-				//				{
-				//					conditions.RemoveAt(conditions.Count - 1);
-				//				}
-				//			}
-				//			if (conditions.Count == 0)
-				//			{
-				//				leaveItemProcessor.conditionsByItemID.Remove(H3ID);
-				//				leaveItemProcessor.itemIDs.Remove(H3ID);
-				//			}
-
-				//			// Update player inventory and weight
-				//			Mod.RemoveFromPlayerInventory(transform, true);
-				//			Mod.weight -= currentWeight;
-				//			destroyed = true;
-				//			physObj.ForceBreakInteraction();
-				//			Destroy(gameObject);
-				//		}
-				//	}
-				//}
-			}
+                            float use = Mathf.Clamp01(consumableTimer / useTime);
+                            Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
+                            if (amountRate == 0)
+                            {
+                                // This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
+                                if (consumableTimer >= useTime)
+                                {
+                                    Mod.consumeUIText.color = Color.green;
+                                }
+                                else
+                                {
+                                    Mod.consumeUIText.color = Color.red;
+                                }
+                            }
+                            else
+                            {
+                                Mod.consumeUIText.color = Color.white;
+                            }
+                            Mod.consumeUI.transform.parent = hand.transform;
+                            Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
+                            Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
+                            Mod.consumeUI.SetActive(true);
+                            validConsumePress = true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
 
 			// If A has been released this frame
 			if (usageButtonUp)
@@ -950,20 +881,6 @@ namespace EFM
 								}
 							}
 						}
-						//else // This should never happen anymore because single unit consumable have amountRate = 0 and maxAmount = 1
-						//{
-						//	// Consume the whole thing if timer >= useTime because this is a single unit consumable
-						//	if(consumableTimer >= useTime)
-						//  {
-						//		// Attempt to apply effects at full effectiveness
-						//		// Consume if succesful
-						//		if (ApplyEffects(1, 0))
-						//		{
-						//			amount = 0;
-						//			Destroy(gameObject);
-						//		}
-						//	}
-						//}
 					}
 					else if (amountRate == 0)
 					{
@@ -1887,7 +1804,7 @@ namespace EFM
 					stackTriggers[i].SetActive(i == index);
 				}
 			}
-			else
+			else if(models != null)
 			{
 				for (int i = 0; i < models.Length; ++i)
 				{
@@ -2269,6 +2186,7 @@ namespace EFM
 
 		public void BeginInteraction(Hand hand)
 		{
+            Mod.LogInfo((hand.fvrHand.IsThisTheRightHand ? "Right" : "Left") + " hand began interacting with " + itemData.name);
             hand.MI = this;
             hand.hasScript = true;
 
@@ -2298,6 +2216,7 @@ namespace EFM
 
 		public void EndInteraction(Hand hand)
         {
+            Mod.LogInfo((hand.fvrHand.IsThisTheRightHand ? "Right" : "Left") + " hand began interacting with " + itemData.name);
 
             if (hand != null)
             {

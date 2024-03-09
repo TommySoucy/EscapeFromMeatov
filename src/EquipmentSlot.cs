@@ -25,32 +25,31 @@ namespace EFM
         public static bool wearingEyewear;
         public static MeatovItem currentEyewear;
 
-        public static void WearEquipment(MeatovItem customItemWrapper)
+        public static void WearEquipment(MeatovItem MI)
         {
-            Mod.LogInfo("WearEquipment called on " + customItemWrapper.gameObject.name);
-            //EFM_CustomItemWrapper customItemWrapper = CurObject.GetComponentInChildren<EFM_CustomItemWrapper>();
-            if (customItemWrapper != null)
+            Mod.LogInfo("WearEquipment called on " + MI.gameObject.name);
+            if (MI != null)
             {
                 // Close if necessary
-                if (customItemWrapper.open)
+                if (MI.open)
                 {
-                    customItemWrapper.ToggleMode(false);
+                    MI.ToggleMode(false);
                 }
 
-                switch (customItemWrapper.itemType)
+                switch (MI.itemType)
                 {
                     case MeatovItem.ItemType.Helmet:
                     case MeatovItem.ItemType.Headwear:
                         if (!wearingHeadwear)
                         {
                             wearingHeadwear = true;
-                            currentHeadwear = customItemWrapper;
+                            currentHeadwear = MI;
                         }
                         break;
                     case MeatovItem.ItemType.Rig:
                         if (!wearingRig && !wearingArmoredRig)
                         {
-                            EquipRig(customItemWrapper);
+                            EquipRig(MI);
                             wearingRig = true;
                         }
                         break;
@@ -58,51 +57,51 @@ namespace EFM
                         if (!wearingBodyArmor)
                         {
                             wearingBodyArmor = true;
-                            currentArmor = customItemWrapper;
+                            currentArmor = MI;
                         }
                         break;
                     case MeatovItem.ItemType.ArmoredRig:
                         if (!wearingArmoredRig && !wearingRig)
                         {
-                            EquipRig(customItemWrapper);
+                            EquipRig(MI);
                             wearingArmoredRig = true;
-                            currentArmor = customItemWrapper;
-                            currentRig = customItemWrapper;
+                            currentArmor = MI;
+                            currentRig = MI;
                         }
                         break;
                     case MeatovItem.ItemType.Backpack:
                         if (!wearingBackpack)
                         {
                             wearingBackpack = true;
-                            currentBackpack = customItemWrapper;
+                            currentBackpack = MI;
                         }
                         break;
                     case MeatovItem.ItemType.Pouch:
                         if (!wearingPouch)
                         {
                             wearingPouch = true;
-                            currentPouch = customItemWrapper;
+                            currentPouch = MI;
                         }
                         break;
                     case MeatovItem.ItemType.Earpiece:
                         if (!wearingEarpiece)
                         {
                             wearingEarpiece = true;
-                            currentEarpiece = customItemWrapper;
+                            currentEarpiece = MI;
                         }
                         break;
                     case MeatovItem.ItemType.FaceCover:
                         if (!wearingFaceCover)
                         {
                             wearingFaceCover = true;
-                            currentFaceCover = customItemWrapper;
+                            currentFaceCover = MI;
                         }
                         break;
                     case MeatovItem.ItemType.Eyewear:
                         if (!wearingEyewear)
                         {
                             wearingEyewear = true;
-                            currentEyewear = customItemWrapper;
+                            currentEyewear = MI;
                         }
                         break;
                     default:

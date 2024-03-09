@@ -18,10 +18,10 @@ namespace EFM
         {
             base.Awake();
 
-            Mod.currentLocationIndex = 0;
+            Mod.currentLocationIndex = -1;
 
             // TP Player
-            GM.CurrentMovementManager.TeleportToPoint(spawn.position, true, spawn.rotation.eulerAngles);
+            GM.CurrentMovementManager.TeleportToPoint(spawn.position, false, spawn.rotation.eulerAngles);
 
             // Set to no quickbelt slot
             GM.CurrentPlayerBody.ConfigureQuickbelt(-4);

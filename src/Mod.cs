@@ -207,7 +207,6 @@ namespace EFM
         public static GameObject mainMenuPointable;
         public static Material quickSlotHoverMaterial;
         public static Material quickSlotConstantMaterial;
-        public static List<GameObject> itemPrefabs;
         public static Dictionary<string, string> itemNames;
         public static Dictionary<string, string> itemDescriptions;
         public static Dictionary<string, int> itemWeights;
@@ -920,138 +919,159 @@ namespace EFM
             }
         }
 
-        public static void AddToPlayerInventory(MeatovItem item)
+        public static void AddToPlayerInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
         {
-            if (playerInventory.ContainsKey(item.H3ID))
+            if (stackOnly)
             {
-                playerInventory[item.H3ID] += item.stack;
-                playerInventoryItems[item.H3ID].Add(item);
+                if (playerInventory.ContainsKey(item.H3ID))
+                {
+                    playerInventory[item.H3ID] += stackDifference;
+
+                    if(playerInventory[item.H3ID] <= 0)
+                    {
+                        Mod.LogError("DEV: AddToPlayerInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
+                        playerInventory.Remove(item.H3ID);
+                        playerInventoryItems.Remove(item.H3ID);
+                    }
+                }
+                else
+                {
+                    Mod.LogError("DEV: AddToPlayerInventory stackonly with difference " + stackDifference + " for " + item.name + " did not find ID in playerInventory:\n"+Environment.StackTrace);
+                }
             }
             else
             {
-                playerInventory.Add(item.H3ID, item.stack);
-                playerInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
-            }
-
-            if (item.itemType == MeatovItem.ItemType.AmmoBox)
-            {
-                FVRFireArmMagazine boxMagazine = item.physObj as FVRFireArmMagazine;
-                foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
+                if (playerInventory.ContainsKey(item.H3ID))
                 {
-                    if (loadedRound == null || loadedRound.LR_ObjectWrapper == null)
-                    {
-                        break;
-                    }
-                    string roundName = loadedRound.LR_ObjectWrapper.DisplayName;
+                    playerInventory[item.H3ID] += item.stack;
+                    playerInventoryItems[item.H3ID].Add(item);
+                }
+                else
+                {
+                    playerInventory.Add(item.H3ID, item.stack);
+                    playerInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                }
 
-                    if (roundsByType.ContainsKey(boxMagazine.RoundType))
+                if (item.itemType == MeatovItem.ItemType.AmmoBox)
+                {
+                    FVRFireArmMagazine boxMagazine = item.physObj as FVRFireArmMagazine;
+                    foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                     {
-                        if (roundsByType[boxMagazine.RoundType] == null)
+                        if (loadedRound == null || loadedRound.LR_ObjectWrapper == null)
                         {
-                            roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
-                            roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                            break;
                         }
-                        else
+                        string roundName = loadedRound.LR_ObjectWrapper.DisplayName;
+
+                        if (roundsByType.ContainsKey(boxMagazine.RoundType))
                         {
-                            if (roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
+                            if (roundsByType[boxMagazine.RoundType] == null)
                             {
-                                roundsByType[boxMagazine.RoundType][roundName] += 1;
+                                roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
+                                roundsByType[boxMagazine.RoundType].Add(roundName, 1);
                             }
                             else
                             {
-                                roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                                if (roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
+                                {
+                                    roundsByType[boxMagazine.RoundType][roundName] += 1;
+                                }
+                                else
+                                {
+                                    roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
+                            roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                        }
+                    }
+                }
+                else if (item.physObj is FVRFireArmMagazine)
+                {
+                    FVRFireArmMagazine asMagazine = item.physObj as FVRFireArmMagazine;
+                    if (magazinesByType.ContainsKey(asMagazine.MagazineType))
+                    {
+                        if (magazinesByType[asMagazine.MagazineType] == null)
+                        {
+                            magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                             }
                         }
                     }
                     else
                     {
-                        roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
-                        roundsByType[boxMagazine.RoundType].Add(roundName, 1);
-                    }
-                }
-            }
-            else if (item.physObj is FVRFireArmMagazine)
-            {
-                FVRFireArmMagazine asMagazine = item.physObj as FVRFireArmMagazine;
-                if (magazinesByType.ContainsKey(asMagazine.MagazineType))
-                {
-                    if (magazinesByType[asMagazine.MagazineType] == null)
-                    {
-                        magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                        magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
                         magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                     }
-                    else
-                    {
-                        if (magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
-                        {
-                            magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
-                        }
-                        else
-                        {
-                            magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
-                        }
-                    }
                 }
-                else
+                else if (item.physObj is FVRFireArmClip)
                 {
-                    magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
-                    magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
-                }
-            }
-            else if (item.physObj is FVRFireArmClip)
-            {
-                FVRFireArmClip asClip = item.physObj as FVRFireArmClip;
-                if (clipsByType.ContainsKey(asClip.ClipType))
-                {
-                    if (clipsByType[asClip.ClipType] == null)
+                    FVRFireArmClip asClip = item.physObj as FVRFireArmClip;
+                    if (clipsByType.ContainsKey(asClip.ClipType))
                     {
-                        clipsByType[asClip.ClipType] = new Dictionary<string, int>();
-                        clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
-                    }
-                    else
-                    {
-                        if (clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                        if (clipsByType[asClip.ClipType] == null)
                         {
-                            clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
-                        }
-                        else
-                        {
+                            clipsByType[asClip.ClipType] = new Dictionary<string, int>();
                             clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
                         }
-                    }
-                }
-                else
-                {
-                    clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
-                    clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
-                }
-            }
-            else if (item.physObj is FVRFireArmRound)
-            {
-                FVRFireArmRound asRound = item.physObj as FVRFireArmRound;
-                if (roundsByType.ContainsKey(asRound.RoundType))
-                {
-                    if (roundsByType[asRound.RoundType] == null)
-                    {
-                        roundsByType[asRound.RoundType] = new Dictionary<string, int>();
-                        roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                        else
+                        {
+                            if (clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
                     }
                     else
                     {
-                        if (roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                        clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                        clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                    }
+                }
+                else if (item.physObj is FVRFireArmRound)
+                {
+                    FVRFireArmRound asRound = item.physObj as FVRFireArmRound;
+                    if (roundsByType.ContainsKey(asRound.RoundType))
+                    {
+                        if (roundsByType[asRound.RoundType] == null)
                         {
-                            roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                            roundsByType[asRound.RoundType] = new Dictionary<string, int>();
+                            roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
                         }
                         else
                         {
-                            roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                            if (roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                            {
+                                roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                            }
                         }
                     }
-                }
-                else
-                {
-                    roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
-                    roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                    else
+                    {
+                        roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                        roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                    }
                 }
             }
 
@@ -1623,6 +1643,10 @@ namespace EFM
                     {
                         SecureMainSceneComponents();
                     }
+
+                    // Increase limit of pixel light count to something we are never going to reach
+                    // We should never use more than what we have at lvl 3 illumnation in hideout + a few considering possible flashlights, etc.
+                    QualitySettings.pixelLightCount = 100;
                 }
                 else // Not loading into meatov scene
                 {
@@ -1635,6 +1659,9 @@ namespace EFM
                         }
                         securedMainSceneComponents.Clear();
                     }
+
+                    // Reset pixel light count
+                    GM.RefreshQuality();
                 }
             }
             else // Done loading
@@ -1660,14 +1687,12 @@ namespace EFM
                             playerBundle = null;
                         }
 
-                        Mod.currentLocationIndex = -1;
                         inMeatovScene = false;
                         HideoutController.instance = null;
                         LoadMainMenu();
                         Mod.currentLocationIndex = -1;
                         break;
                     case "MeatovMainMenu":
-                        QualitySettings.pixelLightCount = 10;
                         break;
                     case "MeatovHideout":
                         // UnsecureObjects();

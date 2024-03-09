@@ -68,7 +68,7 @@ namespace EFM
 
 				if (int.TryParse(itemID, out int result))
                 {
-					MeatovItem prefabCIW = Mod.itemPrefabs[result].GetComponent<MeatovItem>();
+					MeatovItem prefabCIW = Mod.GetItemPrefab(result).GetComponent<MeatovItem>();
 
 					if(UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabCIW.rarity))
                     {
@@ -150,7 +150,7 @@ namespace EFM
 
 					int itemID = customIDs[customIDs.Count - 1];
 					customIDs.RemoveAt(customIDs.Count - 1);
-					GameObject itemObject = Instantiate(Mod.itemPrefabs[itemID], itemObjectsRoot);
+					GameObject itemObject = Instantiate(Mod.GetItemPrefab(itemID), itemObjectsRoot);
 
 					itemObject.GetComponent<Rigidbody>().isKinematic = true;
 					if (mainContainerCollider is BoxCollider)

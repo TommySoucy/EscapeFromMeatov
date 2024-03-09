@@ -71,44 +71,6 @@ namespace EFM
                 OnCloseClicked();
             }
 
-            // Left (TODO: Non main hand) menu button for Vive and WMR
-            //if (Mod.leftHand.fvrHand.CMode == ControlMode.Vive || Mod.leftHand.fvrHand.CMode == ControlMode.WMR &&
-            //    Mod.leftHand.fvrHand.CurrentHoveredQuickbeltSlot == null)
-            //{
-            //    if (Mod.leftHand.fvrHand.Input.BYButtonDown)
-            //    {
-            //        Toggle();
-            //    }
-            //    if (Mod.leftHand.fvrHand.Input.BYButtonPressed && IsOpen())
-            //    {
-            //        transform.position = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
-            //        transform.rotation = Quaternion.Euler(0, Mod.leftHand.transform.rotation.eulerAngles.y, 0);
-            //    }
-            //}
-            //else // Index or Oculus
-            //{
-            //    bool leftItemInteractable = Mod.leftHand.hasScript && ((int)Mod.leftHand.MI.itemType >= 2 && (int)Mod.leftHand.MI.itemType <= 10);
-            //    bool rightItemInteractable = Mod.rightHand.hasScript && ((int)Mod.rightHand.MI.itemType >= 2 && (int)Mod.rightHand.MI.itemType <= 10);
-            //    if ((Mod.leftHand.fvrHand.Input.BYButtonDown && !leftItemInteractable && Mod.leftHand.fvrHand.CurrentHoveredQuickbeltSlot == null) ||
-            //        (Mod.rightHand.fvrHand.Input.BYButtonDown && !rightItemInteractable && Mod.rightHand.fvrHand.CurrentHoveredQuickbeltSlot == null))
-            //    {
-            //        Toggle();
-            //    }
-            //    if (IsOpen())
-            //    {
-            //        if (Mod.leftHand.fvrHand.Input.BYButtonPressed && !leftItemInteractable && Mod.leftHand.fvrHand.CurrentHoveredQuickbeltSlot == null)
-            //        {
-            //            transform.position = Mod.leftHand.transform.position + Mod.leftHand.transform.forward * 0.6f + Mod.leftHand.transform.right * 0.3f;
-            //            transform.rotation = Quaternion.Euler(0, Mod.leftHand.transform.rotation.eulerAngles.y, 0);
-            //        }
-            //        else if (Mod.rightHand.fvrHand.Input.BYButtonPressed && !rightItemInteractable && Mod.rightHand.fvrHand.CurrentHoveredQuickbeltSlot == null)
-            //        {
-            //            transform.position = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.6f + Mod.rightHand.transform.right * -0.3f;
-            //            transform.rotation = Quaternion.Euler(0, Mod.rightHand.transform.rotation.eulerAngles.y, 0);
-            //        }
-            //    }
-            //}
-
             UpdateStamina();
 
             TODO: // Make this work with hoverscroll processor

@@ -119,8 +119,8 @@ namespace EFM
             else
             {
                 StatusUI.instance.Toggle();
-                transform.position = GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.5f;
-                transform.rotation = Quaternion.Euler(0, GM.CurrentPlayerBody.Head.rotation.eulerAngles.y, 0);
+                StatusUI.instance.transform.position = GM.CurrentPlayerBody.Head.position + GM.CurrentPlayerBody.Head.forward * 0.5f;
+                StatusUI.instance.transform.rotation = Quaternion.Euler(0, GM.CurrentPlayerBody.Head.rotation.eulerAngles.y, 0);
             }
         }
 

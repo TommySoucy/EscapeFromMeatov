@@ -17,20 +17,26 @@ namespace EFM
 
         public void Spawn()
         {
+            MeatovItem spawnedItem = null;
             if(item.index != -1)
             {
-                Instantiate(Mod.itemPrefabs[item.index], spawner.transform.position + spawner.transform.forward * -0.2f, Quaternion.identity);
+                spawnedItem = Instantiate(Mod.GetItemPrefab(item.index), spawner.transform.position + spawner.transform.forward * -0.2f, Quaternion.identity).GetComponent<MeatovItem>();
             }
             else // Vanilla
             {
                 if(IM.OD.TryGetValue(item.H3ID, out FVRObject v))
                 {
-                    Instantiate(v.GetGameObject(), spawner.transform.position + spawner.transform.forward * -0.2f, Quaternion.identity);
+                    spawnedItem = Instantiate(v.GetGameObject(), spawner.transform.position + spawner.transform.forward * -0.2f, Quaternion.identity).GetComponent<MeatovItem>();
                 }
                 else
                 {
                     Mod.LogError("DEV: Could not get prefab for " + item.H3ID + " : " + item.name);
                 }
+            }
+
+            if(spawnedItem != null && item.maxStack > 1)
+            {
+                spawnedItem.stack = item.maxStack;
             }
         }
     }

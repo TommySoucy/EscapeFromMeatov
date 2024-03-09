@@ -153,7 +153,7 @@ namespace EFM
             Mod.currentLocationIndex = 1;
 
             // TP Player
-            GM.CurrentMovementManager.TeleportToPoint(spawn.position, true, spawn.rotation.eulerAngles);
+            GM.CurrentMovementManager.TeleportToPoint(spawn.position, false, spawn.rotation.eulerAngles);
 
             Mod.dead = false;
 
@@ -2347,140 +2347,161 @@ namespace EFM
             pointableButton.Button.onClick.AddListener(() => { OnDonateClick(tutorialTransform.GetChild(18).GetChild(5).gameObject); });
         }
 
-        public void AddToInventory(MeatovItem item)
+        public void AddToInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
         {
-            if (inventory.ContainsKey(item.H3ID))
+            if (stackOnly)
             {
-                inventory[item.H3ID] += item.stack;
-                inventoryItems[item.H3ID].Add(item);
+                if (inventory.ContainsKey(item.H3ID))
+                {
+                    inventory[item.H3ID] += stackDifference;
+
+                    if (inventory[item.H3ID] <= 0)
+                    {
+                        Mod.LogError("DEV: AddToPlayerInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
+                        inventory.Remove(item.H3ID);
+                        inventoryItems.Remove(item.H3ID);
+                    }
+                }
+                else
+                {
+                    Mod.LogError("DEV: AddToPlayerInventory stackonly with difference " + stackDifference + " for " + item.name + " did not find ID in playerInventory:\n" + Environment.StackTrace);
+                }
             }
             else
             {
-                inventory.Add(item.H3ID, item.stack);
-                inventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
-            }
-
-            if (item.itemType == MeatovItem.ItemType.AmmoBox)
-            {
-                FVRFireArmMagazine boxMagazine = item.physObj as FVRFireArmMagazine;
-                foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
+                if (inventory.ContainsKey(item.H3ID))
                 {
-                    if (loadedRound == null)
-                    {
-                        break;
-                    }
+                    inventory[item.H3ID] += item.stack;
+                    inventoryItems[item.H3ID].Add(item);
+                }
+                else
+                {
+                    inventory.Add(item.H3ID, item.stack);
+                    inventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                }
 
-                    string roundName = AM.GetFullRoundName(boxMagazine.RoundType, loadedRound.LR_Class);
-
-                    if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
+                if (item.itemType == MeatovItem.ItemType.AmmoBox)
+                {
+                    FVRFireArmMagazine boxMagazine = item.physObj as FVRFireArmMagazine;
+                    foreach (FVRLoadedRound loadedRound in boxMagazine.LoadedRounds)
                     {
-                        if (Mod.roundsByType[boxMagazine.RoundType] == null)
+                        if (loadedRound == null)
                         {
-                            Mod.roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
-                            Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                            break;
                         }
-                        else
+
+                        string roundName = AM.GetFullRoundName(boxMagazine.RoundType, loadedRound.LR_Class);
+
+                        if (Mod.roundsByType.ContainsKey(boxMagazine.RoundType))
                         {
-                            if (Mod.roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
+                            if (Mod.roundsByType[boxMagazine.RoundType] == null)
                             {
-                                Mod.roundsByType[boxMagazine.RoundType][roundName] += 1;
+                                Mod.roundsByType[boxMagazine.RoundType] = new Dictionary<string, int>();
+                                Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
                             }
                             else
                             {
-                                Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                                if (Mod.roundsByType[boxMagazine.RoundType].ContainsKey(roundName))
+                                {
+                                    Mod.roundsByType[boxMagazine.RoundType][roundName] += 1;
+                                }
+                                else
+                                {
+                                    Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Mod.roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
+                            Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
+                        }
+                    }
+                }
+                else if (item.physObj is FVRFireArmMagazine)
+                {
+                    FVRFireArmMagazine asMagazine = item.physObj as FVRFireArmMagazine;
+                    if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
+                    {
+                        if (Mod.magazinesByType[asMagazine.MagazineType] == null)
+                        {
+                            Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
+                        }
+                        else
+                        {
+                            if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                             }
                         }
                     }
                     else
                     {
-                        Mod.roundsByType.Add(boxMagazine.RoundType, new Dictionary<string, int>());
-                        Mod.roundsByType[boxMagazine.RoundType].Add(roundName, 1);
-                    }
-                }
-            }
-            else if (item.physObj is FVRFireArmMagazine)
-            {
-                FVRFireArmMagazine asMagazine = item.physObj as FVRFireArmMagazine;
-                if (Mod.magazinesByType.ContainsKey(asMagazine.MagazineType))
-                {
-                    if (Mod.magazinesByType[asMagazine.MagazineType] == null)
-                    {
-                        Mod.magazinesByType[asMagazine.MagazineType] = new Dictionary<string, int>();
+                        Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
                         Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
                     }
-                    else
-                    {
-                        if (Mod.magazinesByType[asMagazine.MagazineType].ContainsKey(asMagazine.ObjectWrapper.DisplayName))
-                        {
-                            Mod.magazinesByType[asMagazine.MagazineType][asMagazine.ObjectWrapper.DisplayName] += 1;
-                        }
-                        else
-                        {
-                            Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
-                        }
-                    }
                 }
-                else
+                else if (item.physObj is FVRFireArmClip)
                 {
-                    Mod.magazinesByType.Add(asMagazine.MagazineType, new Dictionary<string, int>());
-                    Mod.magazinesByType[asMagazine.MagazineType].Add(asMagazine.ObjectWrapper.DisplayName, 1);
-                }
-            }
-            else if (item.physObj is FVRFireArmClip)
-            {
-                Mod.LogInfo("3");
-                FVRFireArmClip asClip = item.physObj as FVRFireArmClip;
-                if (Mod.clipsByType.ContainsKey(asClip.ClipType))
-                {
-                    if (Mod.clipsByType[asClip.ClipType] == null)
+                    Mod.LogInfo("3");
+                    FVRFireArmClip asClip = item.physObj as FVRFireArmClip;
+                    if (Mod.clipsByType.ContainsKey(asClip.ClipType))
                     {
-                        Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
-                        Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
-                    }
-                    else
-                    {
-                        if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                        if (Mod.clipsByType[asClip.ClipType] == null)
                         {
-                            Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
-                        }
-                        else
-                        {
+                            Mod.clipsByType[asClip.ClipType] = new Dictionary<string, int>();
                             Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
                         }
-                    }
-                }
-                else
-                {
-                    Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
-                    Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
-                }
-            }
-            else if (item.physObj is FVRFireArmRound)
-            {
-                FVRFireArmRound asRound = item.physObj as FVRFireArmRound;
-                if (Mod.roundsByType.ContainsKey(asRound.RoundType))
-                {
-                    if (Mod.roundsByType[asRound.RoundType] == null)
-                    {
-                        Mod.roundsByType[asRound.RoundType] = new Dictionary<string, int>();
-                        Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                        else
+                        {
+                            if (Mod.clipsByType[asClip.ClipType].ContainsKey(asClip.ObjectWrapper.DisplayName))
+                            {
+                                Mod.clipsByType[asClip.ClipType][asClip.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                            }
+                        }
                     }
                     else
                     {
-                        if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                        Mod.clipsByType.Add(asClip.ClipType, new Dictionary<string, int>());
+                        Mod.clipsByType[asClip.ClipType].Add(asClip.ObjectWrapper.DisplayName, 1);
+                    }
+                }
+                else if (item.physObj is FVRFireArmRound)
+                {
+                    FVRFireArmRound asRound = item.physObj as FVRFireArmRound;
+                    if (Mod.roundsByType.ContainsKey(asRound.RoundType))
+                    {
+                        if (Mod.roundsByType[asRound.RoundType] == null)
                         {
-                            Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                            Mod.roundsByType[asRound.RoundType] = new Dictionary<string, int>();
+                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
                         }
                         else
                         {
-                            Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                            if (Mod.roundsByType[asRound.RoundType].ContainsKey(asRound.ObjectWrapper.DisplayName))
+                            {
+                                Mod.roundsByType[asRound.RoundType][asRound.ObjectWrapper.DisplayName] += 1;
+                            }
+                            else
+                            {
+                                Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                            }
                         }
                     }
-                }
-                else
-                {
-                    Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
-                    Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                    else
+                    {
+                        Mod.roundsByType.Add(asRound.RoundType, new Dictionary<string, int>());
+                        Mod.roundsByType[asRound.RoundType].Add(asRound.ObjectWrapper.DisplayName, 1);
+                    }
                 }
             }
 
@@ -2506,6 +2527,11 @@ namespace EFM
             //        }
             //    }
             //}
+
+            if(OnHideoutInventoryChanged != null)
+            {
+                OnHideoutInventoryChanged();
+            }
         }
 
         public static bool RemoveFromContainer(Transform item, MeatovItem MI)
@@ -2704,6 +2730,11 @@ namespace EFM
             //        }
             //    }
             //}
+
+            if (OnHideoutInventoryChanged != null)
+            {
+                OnHideoutInventoryChanged();
+            }
         }
 
         private GameObject LoadSavedItem(Transform parent, JToken item, int locationIndex = -1, bool inAll = false)
@@ -2714,7 +2745,7 @@ namespace EFM
             if (int.TryParse(item["PhysicalObject"]["ObjectWrapper"]["ItemID"].ToString(), out parsedID))
             {
                 // Custom item, fetch from our own assets
-                prefabToUse = Mod.itemPrefabs[parsedID];
+                prefabToUse = Mod.GetItemPrefab(parsedID);
             }
             else
             {
@@ -2791,7 +2822,7 @@ namespace EFM
                     if (int.TryParse(rawContainerID, out parsedContainerID))
                     {
                         // Custom mag, fetch from our own assets
-                        containerPrefabToUse = Mod.itemPrefabs[parsedContainerID];
+                        containerPrefabToUse = Mod.GetItemPrefab(parsedContainerID);
                     }
                     else if (rawContainerID.Equals("InternalMag"))
                     {
@@ -3300,7 +3331,7 @@ namespace EFM
                 if (int.TryParse(currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString(), out parsedID))
                 {
                     // Custom item, fetch from our own assets
-                    prefabToUse = Mod.itemPrefabs[parsedID];
+                    prefabToUse = Mod.GetItemPrefab(parsedID);
                 }
                 else
                 {
