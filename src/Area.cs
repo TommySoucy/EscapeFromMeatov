@@ -567,6 +567,30 @@ namespace EFM
                 return null;
             }
         }
+
+        public void SetUpgradeCheckProcessors(int level, bool active)
+        {
+            if(activeCheckProcessors != null)
+            {
+                if (activeCheckProcessors[0] != null)
+                {
+                    activeCheckProcessors[0].gameObject.SetActive(false);
+                }
+                if (activeCheckProcessors[1] != null)
+                {
+                    activeCheckProcessors[1].gameObject.SetActive(false);
+                }
+            }
+
+            if (upgradeCheckProcessors[level][0] != null)
+            {
+                upgradeCheckProcessors[level][0].gameObject.SetActive(true);
+            }
+            if (upgradeCheckProcessors[level][1] != null)
+            {
+                upgradeCheckProcessors[level][1].gameObject.SetActive(true);
+            }
+        }
     }
 
     public class Requirement

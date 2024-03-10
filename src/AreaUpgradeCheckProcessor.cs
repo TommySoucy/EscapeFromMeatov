@@ -22,6 +22,8 @@ namespace EFM
                 {
                     items[i].upgradeCheckBlockedIndex = -1;
                     items[i].upgradeCheckWarnedIndex = -1;
+                    items[i].upgradeBlockCount = 0;
+                    items[i].upgradeWarnCount = 0;
                     items[i].RemoveHighlight();
                 }
             }
@@ -30,29 +32,25 @@ namespace EFM
 
         public void OnTriggerEnter(Collider other)
         {
-            Mod.LogInfo("Area upgrade processor, block?: " + block + " on trigger enter called");
             Transform currentTransform = other.transform;
             for (int i = 0; i < maxUpCheck; ++i) 
             {
                 if(currentTransform != null)
                 {
-                    MeatovItem MIW = currentTransform.GetComponent<MeatovItem>();
-                    if(MIW != null)
+                    MeatovItem item = currentTransform.GetComponent<MeatovItem>();
+                    if(item != null)
                     {
                         if (block)
                         {
-                            if (MIW.upgradeCheckBlockedIndex == -1)
+                            ++item.upgradeBlockCount;
+
+                            // If item is not already blocking
+                            if (item.upgradeCheckBlockedIndex == -1)
                             {
-                                if (MIW.upgradeCheckWarnedIndex == -1)
-                                {
-                                    MIW.upgradeCheckBlockedIndex = items.Count;
-                                    items.Add(MIW);
-                                }
-                                else
-                                {
-                                    MIW.upgradeCheckBlockedIndex = MIW.upgradeCheckWarnedIndex;
-                                }
-                                MIW.Highlight(Color.red);
+                                // Set to block and add to items
+                                item.upgradeCheckBlockedIndex = items.Count;
+                                items.Add(item);
+                                item.Highlight(Color.red);
 
                                 areaUI.blockDialog.SetActive(true);
                                 areaUI.warningDialog.SetActive(false);
@@ -61,19 +59,22 @@ namespace EFM
                         }
                         else
                         {
-                            if (MIW.upgradeCheckWarnedIndex == -1)
+                            ++item.upgradeWarnCount;
+
+                            // If item not already warning
+                            if (item.upgradeCheckWarnedIndex == -1)
                             {
-                                if (MIW.upgradeCheckBlockedIndex == -1)
+                                // Set to warn and add to items
+                                item.upgradeCheckWarnedIndex = items.Count;
+                                items.Add(item);
+
+                                if(item.upgradeBlockCount <= 0)
                                 {
-                                    MIW.upgradeCheckWarnedIndex = items.Count;
-                                    items.Add(MIW);
-                                    MIW.Highlight(Color.yellow);
-                                }
-                                else
-                                {
-                                    MIW.upgradeCheckWarnedIndex = MIW.upgradeCheckBlockedIndex;
+                                    // Only highlight if not blocking because blocking gets priority
+                                    item.Highlight(Color.yellow);
                                 }
 
+                                // Only have warning dialog if not blocking because blocking gets priority
                                 areaUI.warningDialog.SetActive(!areaUI.blockDialog.activeSelf);
                                 areaUI.upgradeConfirmDialog.SetActive(false);
                             }
@@ -99,45 +100,49 @@ namespace EFM
             {
                 if (currentTransform != null)
                 {
-                    MeatovItem MIW = currentTransform.GetComponent<MeatovItem>();
-                    if (MIW != null)
+                    MeatovItem item = currentTransform.GetComponent<MeatovItem>();
+                    if (item != null)
                     {
                         if (block)
                         {
-                            if (MIW.upgradeCheckBlockedIndex != -1)
+                            --item.upgradeBlockCount;
+
+                            if (item.upgradeBlockCount <= 0)
                             {
-                                if(MIW.upgradeCheckWarnedIndex == -1)
+                                items[items.Count - 1].upgradeCheckBlockedIndex = items[items.Count - 1].upgradeCheckBlockedIndex == -1 ? -1 : item.upgradeCheckBlockedIndex;
+                                items[item.upgradeCheckBlockedIndex] = items[items.Count - 1];
+                                items.RemoveAt(items.Count - 1);
+                                item.upgradeCheckBlockedIndex = -1;
+
+                                if (item.upgradeCheckWarnedIndex == -1)
                                 {
-                                    items[items.Count - 1].upgradeCheckBlockedIndex = items[items.Count - 1].upgradeCheckBlockedIndex == -1 ? -1 : MIW.upgradeCheckBlockedIndex;
-                                    items[items.Count - 1].upgradeCheckWarnedIndex = items[items.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : MIW.upgradeCheckBlockedIndex;
-                                    items[MIW.upgradeCheckBlockedIndex] = items[items.Count - 1];
-                                    items.RemoveAt(items.Count - 1);
-                                    MIW.RemoveHighlight();
+                                    item.RemoveHighlight();
                                 }
                                 else
                                 {
-                                    MIW.Highlight(Color.yellow);
+                                    item.Highlight(Color.yellow);
                                 }
-                                MIW.upgradeCheckBlockedIndex = -1;
 
-                                RemovedLastBlock();
+                                RemovedBlock();
                             }
                         }
                         else
                         {
-                            if (MIW.upgradeCheckWarnedIndex != -1)
-                            {
-                                if (MIW.upgradeCheckBlockedIndex == -1)
-                                {
-                                    items[items.Count - 1].upgradeCheckBlockedIndex = items[items.Count - 1].upgradeCheckBlockedIndex == -1 ? -1 : MIW.upgradeCheckWarnedIndex;
-                                    items[items.Count - 1].upgradeCheckWarnedIndex = items[items.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : MIW.upgradeCheckWarnedIndex;
-                                    items[MIW.upgradeCheckWarnedIndex] = items[items.Count - 1];
-                                    items.RemoveAt(items.Count - 1);
-                                    MIW.RemoveHighlight();
-                                }
-                                MIW.upgradeCheckWarnedIndex = -1;
+                            --item.upgradeWarnCount;
 
-                                RemovedLastWarn();
+                            if (item.upgradeWarnCount <= 0)
+                            {
+                                items[items.Count - 1].upgradeCheckWarnedIndex = items[items.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : item.upgradeCheckWarnedIndex;
+                                items[item.upgradeCheckWarnedIndex] = items[items.Count - 1];
+                                items.RemoveAt(items.Count - 1);
+                                item.upgradeCheckWarnedIndex = -1;
+
+                                if (item.upgradeCheckBlockedIndex == -1)
+                                {
+                                    item.RemoveHighlight();
+                                }
+
+                                RemovedWarn();
                             }
                         }
                         break;
@@ -154,7 +159,7 @@ namespace EFM
             }
         }
 
-        private void RemovedLastBlock()
+        private void RemovedBlock()
         {
             if (items.Count == 0)
             {
@@ -171,12 +176,16 @@ namespace EFM
             }
         }
 
-        private void RemovedLastWarn()
+        private void RemovedWarn()
         {
             if (items.Count == 0)
             {
                 areaUI.warningDialog.SetActive(false);
-                areaUI.upgradeConfirmDialog.SetActive(true);
+
+                if (counterPart.items.Count <= 0)
+                {
+                    areaUI.upgradeConfirmDialog.SetActive(true);
+                }
             }
         }
     }

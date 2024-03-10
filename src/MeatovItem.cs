@@ -94,6 +94,10 @@ namespace EFM
         [NonSerialized]
         public int upgradeCheckWarnedIndex = -1;
         [NonSerialized]
+		public int upgradeBlockCount = 0;
+        [NonSerialized]
+        public int upgradeWarnCount = 0;
+        [NonSerialized]
         public int compatibilityValue; // 0: Does not need mag or round, 1: Needs mag, 2: Needs round, 3: Needs both
         [NonSerialized]
         public bool usesMags; // Could be clip
