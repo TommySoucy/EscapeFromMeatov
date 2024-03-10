@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace EFM
@@ -32,129 +33,97 @@ namespace EFM
 
         public void OnTriggerEnter(Collider other)
         {
-            Transform currentTransform = other.transform;
-            for (int i = 0; i < maxUpCheck; ++i) 
+            MeatovItem item = other.GetComponentInParents<MeatovItem>(maxUpCheck);
+            if(item != null)
             {
-                if(currentTransform != null)
+                if (block)
                 {
-                    MeatovItem item = currentTransform.GetComponent<MeatovItem>();
-                    if(item != null)
+                    ++item.upgradeBlockCount;
+
+                    // If item is not already blocking
+                    if (item.upgradeCheckBlockedIndex == -1)
                     {
-                        if (block)
-                        {
-                            ++item.upgradeBlockCount;
+                        // Set to block and add to items
+                        item.upgradeCheckBlockedIndex = items.Count;
+                        items.Add(item);
+                        item.Highlight(Color.red);
 
-                            // If item is not already blocking
-                            if (item.upgradeCheckBlockedIndex == -1)
-                            {
-                                // Set to block and add to items
-                                item.upgradeCheckBlockedIndex = items.Count;
-                                items.Add(item);
-                                item.Highlight(Color.red);
-
-                                areaUI.blockDialog.SetActive(true);
-                                areaUI.warningDialog.SetActive(false);
-                                areaUI.upgradeConfirmDialog.SetActive(false);
-                            }
-                        }
-                        else
-                        {
-                            ++item.upgradeWarnCount;
-
-                            // If item not already warning
-                            if (item.upgradeCheckWarnedIndex == -1)
-                            {
-                                // Set to warn and add to items
-                                item.upgradeCheckWarnedIndex = items.Count;
-                                items.Add(item);
-
-                                if(item.upgradeBlockCount <= 0)
-                                {
-                                    // Only highlight if not blocking because blocking gets priority
-                                    item.Highlight(Color.yellow);
-                                }
-
-                                // Only have warning dialog if not blocking because blocking gets priority
-                                areaUI.warningDialog.SetActive(!areaUI.blockDialog.activeSelf);
-                                areaUI.upgradeConfirmDialog.SetActive(false);
-                            }
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        currentTransform = currentTransform.parent;
+                        areaUI.blockDialog.SetActive(true);
+                        areaUI.warningDialog.SetActive(false);
+                        areaUI.upgradeConfirmDialog.SetActive(false);
                     }
                 }
                 else
                 {
-                    break;
+                    ++item.upgradeWarnCount;
+
+                    // If item not already warning
+                    if (item.upgradeCheckWarnedIndex == -1)
+                    {
+                        // Set to warn and add to items
+                        item.upgradeCheckWarnedIndex = items.Count;
+                        items.Add(item);
+
+                        if(item.upgradeBlockCount <= 0)
+                        {
+                            // Only highlight if not blocking because blocking gets priority
+                            item.Highlight(Color.yellow);
+                        }
+
+                        // Only have warning dialog if not blocking because blocking gets priority
+                        areaUI.warningDialog.SetActive(!areaUI.blockDialog.activeSelf);
+                        areaUI.upgradeConfirmDialog.SetActive(false);
+                    }
                 }
             }
         }
 
         public void OnTriggerExit(Collider other)
         {
-            Transform currentTransform = other.transform;
-            for (int i = 0; i < maxUpCheck; ++i)
+            MeatovItem item = other.GetComponentInParents<MeatovItem>();
+            if (item != null)
             {
-                if (currentTransform != null)
+                if (block)
                 {
-                    MeatovItem item = currentTransform.GetComponent<MeatovItem>();
-                    if (item != null)
+                    --item.upgradeBlockCount;
+
+                    if (item.upgradeBlockCount <= 0)
                     {
-                        if (block)
+                        items[items.Count - 1].upgradeCheckBlockedIndex = items[items.Count - 1].upgradeCheckBlockedIndex == -1 ? -1 : item.upgradeCheckBlockedIndex;
+                        items[item.upgradeCheckBlockedIndex] = items[items.Count - 1];
+                        items.RemoveAt(items.Count - 1);
+                        item.upgradeCheckBlockedIndex = -1;
+
+                        if (item.upgradeCheckWarnedIndex == -1)
                         {
-                            --item.upgradeBlockCount;
-
-                            if (item.upgradeBlockCount <= 0)
-                            {
-                                items[items.Count - 1].upgradeCheckBlockedIndex = items[items.Count - 1].upgradeCheckBlockedIndex == -1 ? -1 : item.upgradeCheckBlockedIndex;
-                                items[item.upgradeCheckBlockedIndex] = items[items.Count - 1];
-                                items.RemoveAt(items.Count - 1);
-                                item.upgradeCheckBlockedIndex = -1;
-
-                                if (item.upgradeCheckWarnedIndex == -1)
-                                {
-                                    item.RemoveHighlight();
-                                }
-                                else
-                                {
-                                    item.Highlight(Color.yellow);
-                                }
-
-                                RemovedBlock();
-                            }
+                            item.RemoveHighlight();
                         }
                         else
                         {
-                            --item.upgradeWarnCount;
-
-                            if (item.upgradeWarnCount <= 0)
-                            {
-                                items[items.Count - 1].upgradeCheckWarnedIndex = items[items.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : item.upgradeCheckWarnedIndex;
-                                items[item.upgradeCheckWarnedIndex] = items[items.Count - 1];
-                                items.RemoveAt(items.Count - 1);
-                                item.upgradeCheckWarnedIndex = -1;
-
-                                if (item.upgradeCheckBlockedIndex == -1)
-                                {
-                                    item.RemoveHighlight();
-                                }
-
-                                RemovedWarn();
-                            }
+                            item.Highlight(Color.yellow);
                         }
-                        break;
-                    }
-                    else
-                    {
-                        currentTransform = currentTransform.parent;
+
+                        RemovedBlock();
                     }
                 }
                 else
                 {
-                    break;
+                    --item.upgradeWarnCount;
+
+                    if (item.upgradeWarnCount <= 0)
+                    {
+                        items[items.Count - 1].upgradeCheckWarnedIndex = items[items.Count - 1].upgradeCheckWarnedIndex == -1 ? -1 : item.upgradeCheckWarnedIndex;
+                        items[item.upgradeCheckWarnedIndex] = items[items.Count - 1];
+                        items.RemoveAt(items.Count - 1);
+                        item.upgradeCheckWarnedIndex = -1;
+
+                        if (item.upgradeCheckBlockedIndex == -1)
+                        {
+                            item.RemoveHighlight();
+                        }
+
+                        RemovedWarn();
+                    }
                 }
             }
         }

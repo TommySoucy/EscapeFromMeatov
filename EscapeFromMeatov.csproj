@@ -55,6 +55,7 @@
     <Compile Include="src\DevItemSpawner.cs" />
     <Compile Include="src\DevItemSpawnerEntry.cs" />
     <Compile Include="src\EFMWristMenuSection.cs" />
+    <Compile Include="src\Extensions.cs" />
     <Compile Include="src\ExtractionCardUI.cs" />
     <Compile Include="src\ExtractionLimitUI.cs" />
     <Compile Include="src\ExtractionUI.cs" />

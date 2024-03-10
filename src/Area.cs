@@ -568,7 +568,7 @@ namespace EFM
             }
         }
 
-        public void SetUpgradeCheckProcessors(int level, bool active)
+        public void SetUpgradeCheckProcessors(bool active)
         {
             if(activeCheckProcessors != null)
             {
@@ -582,13 +582,16 @@ namespace EFM
                 }
             }
 
-            if (upgradeCheckProcessors[level][0] != null)
+            if(upgradeCheckProcessors != null && upgradeCheckProcessors[currentLevel] != null)
             {
-                upgradeCheckProcessors[level][0].gameObject.SetActive(true);
-            }
-            if (upgradeCheckProcessors[level][1] != null)
-            {
-                upgradeCheckProcessors[level][1].gameObject.SetActive(true);
+                if (upgradeCheckProcessors[currentLevel][0] != null)
+                {
+                    upgradeCheckProcessors[currentLevel][0].gameObject.SetActive(true);
+                }
+                if (upgradeCheckProcessors[currentLevel][1] != null)
+                {
+                    upgradeCheckProcessors[currentLevel][1].gameObject.SetActive(true);
+                }
             }
         }
     }

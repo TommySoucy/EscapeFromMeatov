@@ -1288,7 +1288,7 @@ namespace EFM
         {
             buttonClickSound.Play();
 
-            area.SetUpgradeCheckProcessors(area.currentLevel + 1, true);
+            area.SetUpgradeCheckProcessors(true);
         }
 
         public void OnLevelClicked()
@@ -1323,7 +1323,7 @@ namespace EFM
         {
             buttonClickSound.Play();
 
-            area.SetUpgradeCheckProcessors(area.currentLevel + 1, true);
+            area.SetUpgradeCheckProcessors(true);
         }
 
         public void OnUpgradeConfirmConfirmClicked()
@@ -1343,7 +1343,7 @@ namespace EFM
         {
             buttonClickSound.Play();
 
-            area.SetUpgradeCheckProcessors(area.currentLevel + 1, false);
+            area.SetUpgradeCheckProcessors(false);
         }
 
         public void OnWarningContinueClicked()
@@ -1358,14 +1358,14 @@ namespace EFM
         {
             buttonClickSound.Play();
 
-            area.SetUpgradeCheckProcessors(area.currentLevel + 1, false);
+            area.SetUpgradeCheckProcessors(false);
         }
 
         public void OnBlockCancelClicked()
         {
             buttonClickSound.Play();
 
-            area.SetUpgradeCheckProcessors(area.currentLevel + 1, false);
+            area.SetUpgradeCheckProcessors(false);
         }
     }
 }
