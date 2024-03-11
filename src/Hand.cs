@@ -12,8 +12,6 @@ namespace EFM
         public List<Collider> togglableColliders;
         public TradeVolume collidingTradeVolume;
         private Collider tradeVolumeCollider;
-        public Switch collidingSwitch;
-        public List<Collider> switchColliders;
         public bool hoverValid;
         public FVRViveHand fvrHand;
         public bool consuming;
@@ -21,14 +19,13 @@ namespace EFM
 
         // Held item
         public bool hasScript;
-        public MeatovItem MI;
+        public MeatovItem heldItem;
         public bool updateInteractionSphere;
 
         private void Awake()
         {
             fvrHand = transform.GetComponent<FVRViveHand>();
             togglableColliders = new List<Collider>();
-            switchColliders = new List<Collider>();
         }
 
         private void Update()
@@ -37,24 +34,7 @@ namespace EFM
             {
                 if (fvrHand.IsInStreamlinedMode)
                 {
-                    if (fvrHand.Input.TriggerDown || fvrHand.Input.IsGrabDown)
-                    {
-                        switch (collidingTogglableWrapper.itemType)
-                        {
-                            case MeatovItem.ItemType.ArmoredRig:
-                            case MeatovItem.ItemType.Rig:
-                            case MeatovItem.ItemType.Backpack:
-                            case MeatovItem.ItemType.BodyArmor:
-                            case MeatovItem.ItemType.Container:
-                            case MeatovItem.ItemType.Pouch:
-                            case MeatovItem.ItemType.LootContainer:
-                                collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    else if (fvrHand.Input.AXButtonDown)
+                    if (fvrHand.Input.AXButtonDown)
                     {
                         switch (collidingTogglableWrapper.itemType)
                         {
@@ -74,58 +54,38 @@ namespace EFM
                 }
                 else
                 {
-                    if (fvrHand.Input.TriggerDown || fvrHand.Input.IsGrabDown)
-                    {
-                        switch (collidingTogglableWrapper.itemType)
-                        {
-                            case MeatovItem.ItemType.ArmoredRig:
-                            case MeatovItem.ItemType.Rig:
-                            case MeatovItem.ItemType.Backpack:
-                            case MeatovItem.ItemType.BodyArmor:
-                            case MeatovItem.ItemType.Container:
-                            case MeatovItem.ItemType.Pouch:
-                            case MeatovItem.ItemType.LootContainer:
-                                collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        Vector2 touchpadAxes = fvrHand.Input.TouchpadAxes;
+                    Vector2 touchpadAxes = fvrHand.Input.TouchpadAxes;
 
-                        // If touchpad has started being pressed this frame
-                        if (fvrHand.Input.TouchpadDown)
+                    // If touchpad has started being pressed this frame
+                    if (fvrHand.Input.TouchpadDown)
+                    {
+                        Vector2 TouchpadClickInitiation = touchpadAxes;
+                        if (touchpadAxes.magnitude > 0.3f)
                         {
-                            Vector2 TouchpadClickInitiation = touchpadAxes;
-                            if (touchpadAxes.magnitude > 0.2f)
+                            if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
                             {
-                                if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
+                                switch (collidingTogglableWrapper.itemType)
                                 {
-                                    switch (collidingTogglableWrapper.itemType)
-                                    {
-                                        case MeatovItem.ItemType.ArmoredRig:
-                                        case MeatovItem.ItemType.Rig:
-                                        case MeatovItem.ItemType.Backpack:
-                                        case MeatovItem.ItemType.BodyArmor:
-                                        case MeatovItem.ItemType.Container:
-                                        case MeatovItem.ItemType.Pouch:
-                                        case MeatovItem.ItemType.LootContainer:
-                                            collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
-                                            break;
-                                        default:
-                                            break;
-                                    }
+                                    case MeatovItem.ItemType.ArmoredRig:
+                                    case MeatovItem.ItemType.Rig:
+                                    case MeatovItem.ItemType.Backpack:
+                                    case MeatovItem.ItemType.BodyArmor:
+                                    case MeatovItem.ItemType.Container:
+                                    case MeatovItem.ItemType.Pouch:
+                                    case MeatovItem.ItemType.LootContainer:
+                                        collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                        break;
+                                    default:
+                                        break;
                                 }
                             }
                         }
                     }
                 }
             }
-            else if(fvrHand.CurrentInteractable != null && hasScript)
+            else if(heldItem != null)
             {
-                MI.TakeInput(fvrHand, this);
+                heldItem.TakeInput(fvrHand, this);
             }
 
             if (updateInteractionSphere)
@@ -140,19 +100,13 @@ namespace EFM
 
         private void OnTriggerEnter(Collider collider)
         {
-            if (switchColliders.Contains(collider) || togglableColliders.Contains(collider))
+            if (togglableColliders.Contains(collider))
             {
                 return;
             }
 
             bool mustBuzz = false;
-            if (collider.gameObject.GetComponent<Switch>() != null)
-            {
-                collidingSwitch = collider.gameObject.GetComponent<Switch>();
-                switchColliders.Add(collider);
-                mustBuzz = true;
-            }
-            else if (collider.transform.parent != null && collider.transform.parent.GetComponent<TradeVolume>() != null)
+            if (collider.transform.parent != null && collider.transform.parent.GetComponent<TradeVolume>() != null)
             {
                 collidingTradeVolume = collider.transform.parent.GetComponent<TradeVolume>();
                 tradeVolumeCollider = collider;
@@ -380,10 +334,6 @@ namespace EFM
                 }
 
                 collidingContainerWrapper = null;
-            }
-            if (collidingSwitch != null && switchColliders.Remove(collider) && switchColliders.Count == 0)
-            {
-                collidingSwitch = null;
             }
             if (collidingTradeVolume != null && tradeVolumeCollider.Equals(collider))
             {

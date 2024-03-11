@@ -1,12 +1,9 @@
 ﻿using FistVR;
-using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
@@ -2191,22 +2188,22 @@ namespace EFM
 		public void BeginInteraction(Hand hand)
 		{
             Mod.LogInfo((hand.fvrHand.IsThisTheRightHand ? "Right" : "Left") + " hand began interacting with " + itemData.name);
-            hand.MI = this;
+            hand.heldItem = this;
             hand.hasScript = true;
 
             // Ensure the Grabbity_HoverSphere is displayed also when holding equipment item, so we know where to put the item in an equip slot
             // This is only necessary for equipment items because the slots are much smaller than the item itself so we need to know what specific point to put inside the slot
-            if (hand.MI.itemType == ItemType.Backpack ||
-			   hand.MI.itemType == ItemType.Container ||
-			   hand.MI.itemType == ItemType.ArmoredRig ||
-			   hand.MI.itemType == ItemType.Rig ||
-			   hand.MI.itemType == ItemType.BodyArmor ||
-		       hand.MI.itemType == ItemType.Eyewear ||
-			   hand.MI.itemType == ItemType.Headwear ||
-			   hand.MI.itemType == ItemType.Helmet ||
-			   hand.MI.itemType == ItemType.Earpiece ||
-			   hand.MI.itemType == ItemType.Pouch ||
-			   hand.MI.itemType == ItemType.FaceCover)
+            if (hand.heldItem.itemType == ItemType.Backpack ||
+			   hand.heldItem.itemType == ItemType.Container ||
+			   hand.heldItem.itemType == ItemType.ArmoredRig ||
+			   hand.heldItem.itemType == ItemType.Rig ||
+			   hand.heldItem.itemType == ItemType.BodyArmor ||
+		       hand.heldItem.itemType == ItemType.Eyewear ||
+			   hand.heldItem.itemType == ItemType.Headwear ||
+			   hand.heldItem.itemType == ItemType.Helmet ||
+			   hand.heldItem.itemType == ItemType.Earpiece ||
+			   hand.heldItem.itemType == ItemType.Pouch ||
+			   hand.heldItem.itemType == ItemType.FaceCover)
             {
                 if (!hand.fvrHand.Grabbity_HoverSphere.gameObject.activeSelf)
                 {
@@ -2224,7 +2221,7 @@ namespace EFM
 
             if (hand != null)
             {
-                hand.MI = null;
+                hand.heldItem = null;
                 hand.hasScript = false;
 
                 if (hand.fvrHand.Grabbity_HoverSphere.gameObject.activeSelf)
