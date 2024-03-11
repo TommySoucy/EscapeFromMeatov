@@ -99,7 +99,8 @@ namespace EFM
 
         public void Init()
         {
-            currentContent.gameObject.SetActive(true);
+            // Make sure both contents are inactive
+            currentContent.gameObject.SetActive(false);
             futureContent.gameObject.SetActive(false);
 
             UpdateStatusTexts();
@@ -109,6 +110,10 @@ namespace EFM
             UpdateRequirements();
             UpdateBonuses();
             UpdateBottomButtons();
+
+            // Once content set, reenable current
+            // Ensures its HoverScrollProcessor.OnEnable is called
+            currentContent.gameObject.SetActive(true);
         }
 
         public void UpdateStatusTexts()
