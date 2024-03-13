@@ -64,6 +64,8 @@ namespace EFM
         [NonSerialized]
         public MeatovItem parent;
         [NonSerialized]
+        public ContainmentVolume parentVolume;
+        [NonSerialized]
         public int childIndex; // Our index in our parent's children list
         [NonSerialized]
         public List<MeatovItem> children = new List<MeatovItem>();
@@ -2231,7 +2233,42 @@ namespace EFM
                 hand.updateInteractionSphere = false;
             }
 
+            if(hand.collidingVolume != null)
+            {
+                hand.collidingVolume.AddItem(this);
+                hand.collidingVolume.Unoffer();
+                hand.volumeCollider = null;
+            }
+
             UpdateInventories();
+        }
+
+        public void OnTransformParentChanged()
+        {
+            MeatovItem newParent = transform.GetComponentInParents<MeatovItem>();
+            if (newParent != parent)
+            {
+                // Remove from previous parent
+                parent.children[childIndex] = parent.children[parent.children.Count - 1];
+                parent.children[childIndex].childIndex = childIndex;
+                parent.children.RemoveAt(parent.children.Count - 1);
+                parent = null;
+                childIndex = -1; 
+                
+                // If was in a volume, obviously no longer in there so remove from it
+                if (parentVolume != null)
+                {
+                    parentVolume.RemoveItem(this);
+                }
+
+                // Add to new parent
+                if (newParent != null)
+                {
+                    parent = newParent;
+                    childIndex = parent.children.Count;
+                    parent.children.Add(this);
+                }
+            }
         }
 
         public void OnDestroy()

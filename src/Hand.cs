@@ -1,18 +1,17 @@
 ﻿using FistVR;
 using System.Collections.Generic;
 using UnityEngine;
+using Valve.VR.InteractionSystem;
 
 namespace EFM
 {
     public class Hand : MonoBehaviour
     {
         public Hand otherHand;
-        public MeatovItem collidingContainerWrapper;
-        public MeatovItem collidingTogglableWrapper;
-        public List<Collider> togglableColliders;
-        public TradeVolume collidingTradeVolume;
-        private Collider tradeVolumeCollider;
-        public bool hoverValid;
+        public MeatovItem collidingTogglable;
+        public Collider togglableCollider;
+        public ContainmentVolume collidingVolume;
+        public Collider volumeCollider;
         public FVRViveHand fvrHand;
         public bool consuming;
         public bool leaving;
@@ -25,18 +24,17 @@ namespace EFM
         private void Awake()
         {
             fvrHand = transform.GetComponent<FVRViveHand>();
-            togglableColliders = new List<Collider>();
         }
 
         private void Update()
         {
-            if (fvrHand.CurrentInteractable == null && collidingTogglableWrapper != null)
+            if (fvrHand.CurrentInteractable == null && collidingTogglable != null)
             {
                 if (fvrHand.IsInStreamlinedMode)
                 {
                     if (fvrHand.Input.AXButtonDown)
                     {
-                        switch (collidingTogglableWrapper.itemType)
+                        switch (collidingTogglable.itemType)
                         {
                             case MeatovItem.ItemType.ArmoredRig:
                             case MeatovItem.ItemType.Rig:
@@ -45,7 +43,7 @@ namespace EFM
                             case MeatovItem.ItemType.Container:
                             case MeatovItem.ItemType.Pouch:
                             case MeatovItem.ItemType.LootContainer:
-                                collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                collidingTogglable.ToggleMode(false, fvrHand.IsThisTheRightHand);
                                 break;
                             default:
                                 break;
@@ -64,7 +62,7 @@ namespace EFM
                         {
                             if (Vector2.Angle(touchpadAxes, Vector2.down) <= 45f)
                             {
-                                switch (collidingTogglableWrapper.itemType)
+                                switch (collidingTogglable.itemType)
                                 {
                                     case MeatovItem.ItemType.ArmoredRig:
                                     case MeatovItem.ItemType.Rig:
@@ -73,7 +71,7 @@ namespace EFM
                                     case MeatovItem.ItemType.Container:
                                     case MeatovItem.ItemType.Pouch:
                                     case MeatovItem.ItemType.LootContainer:
-                                        collidingTogglableWrapper.ToggleMode(false, fvrHand.IsThisTheRightHand);
+                                        collidingTogglable.ToggleMode(false, fvrHand.IsThisTheRightHand);
                                         break;
                                     default:
                                         break;
@@ -100,250 +98,59 @@ namespace EFM
 
         private void OnTriggerEnter(Collider collider)
         {
-            if (togglableColliders.Contains(collider))
+            ContainmentVolume volume = collider.GetComponent<ContainmentVolume>();
+            if (volume != null)
             {
-                return;
-            }
-
-            bool mustBuzz = false;
-            if (collider.transform.parent != null && collider.transform.parent.GetComponent<TradeVolume>() != null)
-            {
-                collidingTradeVolume = collider.transform.parent.GetComponent<TradeVolume>();
-                tradeVolumeCollider = collider;
-                mustBuzz = true;
-            }
-            else if (collider.transform.parent != null)
-            {
-                if (collider.gameObject.name.Equals("Interactive"))
+                if (heldItem != null && volumeCollider == null && (otherHand.collidingVolume == null || otherHand.collidingVolume != volume) && volume.Offer(heldItem))
                 {
-                    MeatovItem lootContainerCIW = collider.transform.parent.GetComponent<MeatovItem>();
-                    if (lootContainerCIW != null && lootContainerCIW.itemType == MeatovItem.ItemType.LootContainer)
-                    {
-                        collidingTogglableWrapper = lootContainerCIW;
-                        togglableColliders.Add(collider);
-                        mustBuzz = true;
-                    }
+                    collidingVolume = volume;
+                    volumeCollider = collider;
+                    fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
                 }
-                else if (collider.transform.parent.name.Equals("Interactives") && collider.transform.parent.parent != null)
+            }
+            else
+            {
+                if(togglableCollider == null && heldItem == null)
                 {
-                    MeatovItem lootContainerCIW = collider.transform.parent.parent.GetComponent<MeatovItem>();
-                    if (lootContainerCIW != null && lootContainerCIW.itemType == MeatovItem.ItemType.LootContainer)
+                    MeatovItem meatovItem = collider.GetComponent<MeatovItem>();
+                    if (meatovItem = null)
                     {
-                        collidingTogglableWrapper = lootContainerCIW;
-                        togglableColliders.Add(collider);
-                        mustBuzz = true;
-                    }
-                }
-                else if (collider.transform.parent.parent != null)
-                {
-                    if (collider.transform.parent.parent.name.Equals("Interactives") && collider.transform.parent.parent.parent != null)
-                    {
-                        MeatovItem itemCIW = collider.transform.parent.parent.parent.GetComponent<MeatovItem>();
-                        if (itemCIW != null && (fvrHand.CurrentInteractable == null || !fvrHand.CurrentInteractable.Equals(itemCIW.physObj)) &&
-                            (itemCIW.itemType == MeatovItem.ItemType.Container ||
-                             itemCIW.itemType == MeatovItem.ItemType.Backpack ||
-                             itemCIW.itemType == MeatovItem.ItemType.Pouch))
+                        OtherInteractable otherInteractable = collider.GetComponent<OtherInteractable>();
+                        if (otherInteractable != null)
                         {
-                            collidingTogglableWrapper = itemCIW;
-                            togglableColliders.Add(collider);
-                            mustBuzz = true;
+                            TODO e: // This must be set in all assets using volumes
+                            meatovItem = otherInteractable.ownerItem;
                         }
                     }
-                }
-            }
 
-            ContainerVolume mainContainer = collider.GetComponent<ContainerVolume>();
-            bool newMainContainer = false;
-            if (mainContainer != null && collidingContainerWrapper != mainContainer.ownerItem)
-            {
-                MeatovItem customItemWrapper = mainContainer.ownerItem;
-                if ((fvrHand.CurrentInteractable == null || !fvrHand.CurrentInteractable.Equals(customItemWrapper.physObj)) &&
-                    (customItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
-                     customItemWrapper.itemType == MeatovItem.ItemType.Container ||
-                     customItemWrapper.itemType == MeatovItem.ItemType.Pouch))
-                {
-                    Mod.LogInfo("\tGot container CIW");
-                    // Clear the previous colliding container if we had one
-                    if (collidingContainerWrapper != null)
+                    if (meatovItem != null)
                     {
-                        Mod.LogInfo("\t\tAlready had a colliding container, clearing");
-                        hoverValid = false;
-                        collidingContainerWrapper.SetContainerHovered(false);
-                    }
-
-                    newMainContainer = true;
-                    collidingContainerWrapper = customItemWrapper;
-                    Mod.LogInfo("\tcollidingContainerWrapper now has ID: "+ collidingContainerWrapper.H3ID);
-                }
-            }
-
-            // Set container hovered if necessary
-            if (newMainContainer && collidingContainerWrapper.canInsertItems)
-            {
-                Mod.LogInfo("\tCan insert items into it");
-                // Verify container mode
-                if (collidingContainerWrapper.mainContainer.activeSelf)
-                {
-                    Mod.LogInfo("\t\tmain container is active");
-                    // Set material, if this hand is also holding something that fits in the container, set the material to hovered
-                    if (fvrHand.CurrentInteractable != null && fvrHand.CurrentInteractable is FVRPhysicalObject)
-                    {
-                        Mod.LogInfo("\t\t\tWe are holding something");
-                        int volumeToUse = 0;
-                        string IDToUse = "";
-                        List<string> parentsToUse = null;
-                        FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;
-                        MeatovItem heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<MeatovItem>();
-                        volumeToUse = heldCustomItemWrapper.volumes[heldCustomItemWrapper.mode];
-                        IDToUse = heldCustomItemWrapper.H3ID;
-                        parentsToUse = heldCustomItemWrapper.parents;
-
-                        // Check if volume fits in bag
-                        if (collidingContainerWrapper.containingVolume + volumeToUse <= collidingContainerWrapper.maxVolume)
+                        if (meatovItem.itemType == MeatovItem.ItemType.LootContainer
+                            || meatovItem.itemType == MeatovItem.ItemType.Container
+                            || meatovItem.itemType == MeatovItem.ItemType.Backpack
+                            || meatovItem.itemType == MeatovItem.ItemType.Pouch)
                         {
-                            // Also check if the container can contain the item through filters
-                            if (collidingContainerWrapper.whiteList != null)
-                            {
-                                // If whitelist includes item and blacklist doesn't
-                                if (Mod.IDDescribedInList(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
-                                {
-                                    Mod.LogInfo("\t\t\t\tIt fits in container, setting valid");
-                                    hoverValid = true;
-                                    collidingContainerWrapper.SetContainerHovered(true);
-                                    fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
-                                }
-                                else
-                                {
-                                    hoverValid = false;
-                                    collidingContainerWrapper.SetContainerHovered(false);
-                                }
-                            }
-                            else
-                            {
-                                hoverValid = true;
-                                collidingContainerWrapper.SetContainerHovered(true);
-                                fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
-                            }
-                        }
-                        else if (!otherHand.hoverValid)
-                        {
-                            hoverValid = false;
-                            collidingContainerWrapper.SetContainerHovered(false);
+                            collidingTogglable = meatovItem;
+                            togglableCollider = collider;
+                            fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
                         }
                     }
-                    else if (!otherHand.hoverValid)
-                    {
-                        hoverValid = false;
-                        collidingContainerWrapper.SetContainerHovered(false);
-                    }
-                }
-                else // Backpack closed
-                {
-                    hoverValid = false;
-                    collidingContainerWrapper.SetContainerHovered(false);
-                }
-            }
-            else if(mustBuzz)
-            {
-                fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
-            }
-        }
-
-        private void OnTriggerStay()
-        {
-            // Check if dropped the held item
-            if (collidingContainerWrapper != null)
-            {
-                // Verify container mode
-                if (collidingContainerWrapper.mainContainer.activeSelf && !hoverValid)
-                {
-                    // Container is active but hover invalid
-                    // Set material in case the hand dropped what it had
-                    // Set material, if this hand is also holding something that fits in the container, set the material to hovered
-                    if (fvrHand.CurrentInteractable != null && fvrHand.CurrentInteractable is FVRPhysicalObject)
-                    {
-                        int volumeToUse = 0;
-                        string IDToUse = "";
-                        List<string> parentsToUse = null;
-                        FVRPhysicalObject physicalObject = fvrHand.CurrentInteractable as FVRPhysicalObject;
-                        MeatovItem heldCustomItemWrapper = fvrHand.CurrentInteractable.GetComponent<MeatovItem>();
-                        volumeToUse = heldCustomItemWrapper.volumes[heldCustomItemWrapper.mode];
-                        IDToUse = heldCustomItemWrapper.H3ID;
-                        parentsToUse = heldCustomItemWrapper.parents;
-
-                        // Check if volume fits in bag
-                        if (collidingContainerWrapper.containingVolume + volumeToUse <= collidingContainerWrapper.maxVolume)
-                        {
-                            // Also check if the container can contain the item through filters
-                            if (collidingContainerWrapper.whiteList != null)
-                            {
-                                // If whitelist includes item and blacklist doesn't
-                                if (Mod.IDDescribedInList(IDToUse, parentsToUse, collidingContainerWrapper.whiteList, collidingContainerWrapper.blackList))
-                                {
-                                    Mod.LogInfo("\t\t\t\tIt fits in container, setting valid");
-                                    hoverValid = true;
-                                    collidingContainerWrapper.SetContainerHovered(true);
-                                    fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
-                                }
-                                else
-                                {
-                                    hoverValid = false;
-                                    collidingContainerWrapper.SetContainerHovered(false);
-                                }
-                            }
-                            else
-                            {
-                                hoverValid = true;
-                                collidingContainerWrapper.SetContainerHovered(true);
-                                fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);
-                            }
-                        }
-                        else if (!otherHand.hoverValid || otherHand.collidingContainerWrapper != collidingContainerWrapper)
-                        {
-                            hoverValid = false;
-                            collidingContainerWrapper.SetContainerHovered(false);
-                        }
-                    }
-                }
-                else if(!collidingContainerWrapper.mainContainer.activeSelf && hoverValid && (!otherHand.hoverValid || otherHand.collidingContainerWrapper != collidingContainerWrapper))
-                {
-                    hoverValid = false;
-                    collidingContainerWrapper.SetContainerHovered(false);
-                }
-            }
-            else if(collidingTradeVolume != null)
-            {
-                // Set material in case the hand dropped what it had
-                if (fvrHand.CurrentInteractable == null)
-                {
-                    hoverValid = false;
-                    collidingTradeVolume.SetContainerHovered(false);
                 }
             }
         }
 
         private void OnTriggerExit(Collider collider)
         {
-            ContainerVolume mainContainer = collider.GetComponent<ContainerVolume>();
-            if (mainContainer != null && collidingContainerWrapper == mainContainer.ownerItem)
+            if(collider == volumeCollider)
             {
-                if (!otherHand.hoverValid || otherHand.collidingContainerWrapper != collidingContainerWrapper)
-                {
-                    hoverValid = false;
-                    collidingContainerWrapper.SetContainerHovered(false);
-                }
-
-                collidingContainerWrapper = null;
+                collidingVolume.Unoffer();
+                collidingVolume = null;
+                volumeCollider = null;
             }
-            if (collidingTradeVolume != null && tradeVolumeCollider.Equals(collider))
+            if(collider == togglableCollider)
             {
-                collidingTradeVolume.SetContainerHovered(false);
-                collidingTradeVolume = null;
-                tradeVolumeCollider = null;
-            }
-            if (collidingTogglableWrapper != null && togglableColliders.Remove(collider) && togglableColliders.Count == 0)
-            {
-                collidingTogglableWrapper = null;
+                collidingVolume = null;
+                volumeCollider = null;
             }
         }
     }

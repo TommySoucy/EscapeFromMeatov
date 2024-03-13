@@ -938,13 +938,13 @@ namespace EFM
                 if (hand.IsThisTheRightHand)
                 {
                     collidingContainerWrapper = Mod.rightHand.collidingContainerWrapper;
-                    collidingTradeVolume = Mod.rightHand.collidingTradeVolume;
+                    collidingTradeVolume = Mod.rightHand.collidingVolume;
                     Mod.LogInfo("\tfrom right hand, container null? " + (collidingContainerWrapper == null));
                 }
                 else // Left hand
                 {
                     collidingContainerWrapper = Mod.leftHand.collidingContainerWrapper;
-                    collidingTradeVolume = Mod.leftHand.collidingTradeVolume;
+                    collidingTradeVolume = Mod.leftHand.collidingVolume;
                     Mod.LogInfo("\tfrom left hand, container null? " + (collidingContainerWrapper == null));
                 }
             }
@@ -1908,13 +1908,13 @@ namespace EFM
                     customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig ||
                     customItemWrapper.itemType == MeatovItem.ItemType.Rig)
                 {
-                    if (hand.IsThisTheRightHand && Mod.rightHand.collidingTogglableWrapper != null && Mod.rightHand.collidingTogglableWrapper == customItemWrapper)
+                    if (hand.IsThisTheRightHand && Mod.rightHand.collidingTogglable != null && Mod.rightHand.collidingTogglable == customItemWrapper)
                     {
-                        Mod.rightHand.collidingTogglableWrapper = null;
+                        Mod.rightHand.collidingTogglable = null;
                     }
-                    else if (!hand.IsThisTheRightHand && Mod.leftHand.collidingTogglableWrapper != null && Mod.leftHand.collidingTogglableWrapper == customItemWrapper)
+                    else if (!hand.IsThisTheRightHand && Mod.leftHand.collidingTogglable != null && Mod.leftHand.collidingTogglable == customItemWrapper)
                     {
-                        Mod.leftHand.collidingTogglableWrapper = null;
+                        Mod.leftHand.collidingTogglable = null;
                     }
                 }
 

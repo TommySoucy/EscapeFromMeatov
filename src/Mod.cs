@@ -1966,10 +1966,8 @@ namespace EFM
             // Check item ID
             if (whiteList.Contains(IDToUse))
             {
-                // The specific item is specified as fitting or not, we dont need to check the list of ancestors
-                //return !collidingContainerWrapper.blackList.Contains(IDToUse);
-
-                // In truth, a specific ID in whitelist should mean that this item fits. The specific ID should never be specified in both white and black lists
+                // A specific item ID in whitelist should mean that this item fits
+                // A specific item ID should obviously never be specified in both white and black lists
                 return true;
             }
 
@@ -1993,6 +1991,7 @@ namespace EFM
             }
 
             // Getting this far would mean that the item's ID nor any of its ancestors are in the whitelist, so doesn't fit
+            // Note that this means anything that uses a whitelist should at least specify the global item ID 54009119af1c881c07000029
             return false;
         }
 
