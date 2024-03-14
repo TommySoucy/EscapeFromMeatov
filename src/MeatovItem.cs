@@ -1,4 +1,5 @@
 ﻿using FistVR;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -209,7 +210,7 @@ namespace EFM
         [NonSerialized]
 		public int configurationIndex;
         [NonSerialized]
-		public GameObject[] itemsInSlots;
+		public MeatovItem[] itemsInSlots;
 		public Transform configurationRoot;
 		public List<RigSlot> rigSlots;
         [NonSerialized]
@@ -423,6 +424,15 @@ namespace EFM
 			}
 			modeInitialized = true;
 
+            if(itemType == ItemType.Rig || itemType == ItemType.ArmoredRig)
+            {
+                if(!Mod.quickbeltConfigurationIndices.TryGetValue(index, out configurationIndex))
+                {
+                    configurationIndex = GM.Instance.QuickbeltConfigurations.Length;
+                    GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("Item"+index+"Configuration"));
+                }
+            }
+
             UpdateInventories();
 		}
 
@@ -502,11 +512,11 @@ namespace EFM
 
 			if (item.itemType == ItemType.Rig || item.itemType == ItemType.ArmoredRig)
 			{
-				foreach (GameObject containedItem in item.itemsInSlots) 
+				foreach (MeatovItem containedItem in item.itemsInSlots) 
 				{
 					if(containedItem != null)
                     {
-						item.currentWeight += SetCurrentWeight(containedItem.GetComponent<MeatovItem>());
+						item.currentWeight += SetCurrentWeight(containedItem);
                     }
 				}
 			}
@@ -1820,55 +1830,6 @@ namespace EFM
 			}
 		}
 
-		private void OpenRig(bool processslots, bool isRightHand = false)
-		{
-			configurationRoot.gameObject.SetActive(true);
-
-            // Set active slots
-            activeSlotsSetIndex = Mod.looseRigSlots.Count;
-            Mod.looseRigSlots.Add(rigSlots);
-
-			// Load items into their slots
-			for (int i = 0; i < itemsInSlots.Length; ++i)
-			{
-				if (itemsInSlots[i] != null)
-				{
-					FVRPhysicalObject physicalObject = itemsInSlots[i].GetComponent<FVRPhysicalObject>();
-					MeatovItem CIW = itemsInSlots[i].GetComponent<MeatovItem>();
-					if(CIW != null && !CIW.inAll)
-                    {
-						FVRInteractiveObject.All.Add(physicalObject);
-						typeof(FVRInteractiveObject).GetField("m_index", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(FVRInteractiveObject.All[FVRInteractiveObject.All.Count - 1], FVRInteractiveObject.All.Count - 1);
-
-						CIW.inAll = true;
-					}
-					SetQuickBeltSlotPatch.dontProcessRigWeight = true; // Dont want to add the weight of this item to the rig as we set its slot, the item is already in the rig
-					physicalObject.SetQuickBeltSlot(rigSlots[i]);
-					physicalObject.SetParentage(null);
-					physicalObject.transform.localScale = Vector3.one;
-					physicalObject.transform.position = rigSlots[i].transform.position;
-					rigSlots[i].transform.localPosition = Vector3.zero;
-					rigSlots[i].transform.localRotation = Quaternion.identity;
-					FieldInfo grabPointTransformField = typeof(FVRPhysicalObject).GetField("m_grabPointTransform", BindingFlags.NonPublic | BindingFlags.Instance);
-					Transform m_grabPointTransform = (Transform)grabPointTransformField.GetValue(physicalObject);
-					if (m_grabPointTransform != null)
-					{
-						if (physicalObject.QBPoseOverride != null)
-						{
-							m_grabPointTransform.position = physicalObject.QBPoseOverride.position;
-							m_grabPointTransform.rotation = physicalObject.QBPoseOverride.rotation;
-						}
-						else if (physicalObject.PoseOverride != null)
-						{
-							m_grabPointTransform.position = physicalObject.PoseOverride.position;
-							m_grabPointTransform.rotation = physicalObject.PoseOverride.rotation;
-						}
-					}
-					itemsInSlots[i].SetActive(true);
-				}
-			}
-		}
-
         public void UpdateClosedMode()
         {
             if(mode == 0)
@@ -1907,13 +1868,22 @@ namespace EFM
             }
         }
 
-		private void CloseRig(bool processslots, bool isRightHand = false)
+        public void OpenRig(bool processslots, bool isRightHand = false)
+        {
+            configurationRoot.gameObject.SetActive(true);
+
+            // Set active slots
+            activeSlotsSetIndex = Mod.looseRigSlots.Count;
+            Mod.looseRigSlots.Add(rigSlots);
+        }
+
+        public void CloseRig(bool processslots, bool isRightHand = false)
 		{
 			configurationRoot.gameObject.SetActive(false);
 
             // Remove from other active slots
             Mod.looseRigSlots[activeSlotsSetIndex] = Mod.looseRigSlots[Mod.looseRigSlots.Count - 1];
-            MeatovItem replacementRig = (Mod.looseRigSlots[activeSlotsSetIndex][0] as RigSlot).ownerItem;
+            MeatovItem replacementRig = Mod.looseRigSlots[activeSlotsSetIndex][0].ownerItem;
             replacementRig.activeSlotsSetIndex = activeSlotsSetIndex;
             Mod.looseRigSlots.RemoveAt(Mod.looseRigSlots.Count - 1);
 		}
@@ -2273,7 +2243,7 @@ namespace EFM
                 // If was in a volume, must check if still correct one
                 // because of the order in which this parent changed event is called and when we call
                 // EndInteraction on the item to add it to a volume,
-                // if we call this after for any reason, we obviously don't want to remvoe from volume we just added this item to
+                // if we call this after for any reason, we obviously don't want to remove from volume we just added this item to
                 if (parentVolume != null)
                 {
                     MeatovItem ownerItem = null;

@@ -136,7 +136,7 @@ namespace EFM
                     Mod.itemDescriptionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ItemDescriptionUI");
                     Mod.devItemSpawnerPrefab = Mod.playerBundle.LoadAsset<GameObject>("DevItemSpawner");
 
-                    Mod.quickbeltConfigurations = new Dictionary<int, GameObject>();
+                    Mod.quickbeltConfigurationIndices = new Dictionary<int, int>();
                     Mod.pocketsConfigIndex = GM.Instance.QuickbeltConfigurations.Length;
                     GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("PocketsConfiguration"));
 

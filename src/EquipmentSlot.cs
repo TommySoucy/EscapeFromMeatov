@@ -25,31 +25,31 @@ namespace EFM
         public static bool wearingEyewear;
         public static MeatovItem currentEyewear;
 
-        public static void WearEquipment(MeatovItem MI)
+        public static void WearEquipment(MeatovItem item)
         {
-            Mod.LogInfo("WearEquipment called on " + MI.gameObject.name);
-            if (MI != null)
+            Mod.LogInfo("WearEquipment called on " + item.gameObject.name);
+            if (item != null)
             {
                 // Close if necessary
-                if (MI.open)
+                if (item.open)
                 {
-                    MI.ToggleMode(false);
+                    item.ToggleMode(false);
                 }
 
-                switch (MI.itemType)
+                switch (item.itemType)
                 {
                     case MeatovItem.ItemType.Helmet:
                     case MeatovItem.ItemType.Headwear:
                         if (!wearingHeadwear)
                         {
                             wearingHeadwear = true;
-                            currentHeadwear = MI;
+                            currentHeadwear = item;
                         }
                         break;
                     case MeatovItem.ItemType.Rig:
                         if (!wearingRig && !wearingArmoredRig)
                         {
-                            EquipRig(MI);
+                            EquipRig(item);
                             wearingRig = true;
                         }
                         break;
@@ -57,51 +57,51 @@ namespace EFM
                         if (!wearingBodyArmor)
                         {
                             wearingBodyArmor = true;
-                            currentArmor = MI;
+                            currentArmor = item;
                         }
                         break;
                     case MeatovItem.ItemType.ArmoredRig:
                         if (!wearingArmoredRig && !wearingRig)
                         {
-                            EquipRig(MI);
+                            EquipRig(item);
                             wearingArmoredRig = true;
-                            currentArmor = MI;
-                            currentRig = MI;
+                            currentArmor = item;
+                            currentRig = item;
                         }
                         break;
                     case MeatovItem.ItemType.Backpack:
                         if (!wearingBackpack)
                         {
                             wearingBackpack = true;
-                            currentBackpack = MI;
+                            currentBackpack = item;
                         }
                         break;
                     case MeatovItem.ItemType.Pouch:
                         if (!wearingPouch)
                         {
                             wearingPouch = true;
-                            currentPouch = MI;
+                            currentPouch = item;
                         }
                         break;
                     case MeatovItem.ItemType.Earpiece:
                         if (!wearingEarpiece)
                         {
                             wearingEarpiece = true;
-                            currentEarpiece = MI;
+                            currentEarpiece = item;
                         }
                         break;
                     case MeatovItem.ItemType.FaceCover:
                         if (!wearingFaceCover)
                         {
                             wearingFaceCover = true;
-                            currentFaceCover = MI;
+                            currentFaceCover = item;
                         }
                         break;
                     case MeatovItem.ItemType.Eyewear:
                         if (!wearingEyewear)
                         {
                             wearingEyewear = true;
-                            currentEyewear = MI;
+                            currentEyewear = item;
                         }
                         break;
                     default:
@@ -115,12 +115,12 @@ namespace EFM
             }
         }
 
-        public static void TakeOffEquipment(MeatovItem customItemWrapper)
+        public static void TakeOffEquipment(MeatovItem item)
         {
             //EFM_CustomItemWrapper customItemWrapper = objectLastFrame.GetComponentInChildren<EFM_CustomItemWrapper>();
-            if (customItemWrapper != null)
+            if (item != null)
             {
-                switch (customItemWrapper.itemType)
+                switch (item.itemType)
                 {
                     case MeatovItem.ItemType.Helmet:
                     case MeatovItem.ItemType.Headwear:
@@ -128,34 +128,16 @@ namespace EFM
                         currentHeadwear = null;
                         break;
                     case MeatovItem.ItemType.Rig:
-                        // Transfer item objects from config to the rig object
-                        for (int i=0; i < customItemWrapper.itemsInSlots.Length; ++i)
-                        {
-                            if(customItemWrapper.itemsInSlots[i] != null)
-                            {
-                                customItemWrapper.itemsInSlots[i].SetActive(false);
-                            }
-                        }
-                        GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
+                        UnequipRig();
                         wearingRig = false;
-                        currentRig = null; // This needs to be done after ConfigureQuickbelt(-1) because it is used in it
                         break;
                     case MeatovItem.ItemType.BodyArmor:
                         wearingBodyArmor = false;
                         currentArmor = null;
                         break;
                     case MeatovItem.ItemType.ArmoredRig:
-                        // Transfer item objects from config to the rig object
-                        for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
-                        {
-                            if (customItemWrapper.itemsInSlots[i] != null)
-                            {
-                                customItemWrapper.itemsInSlots[i].SetActive(false);
-                            }
-                        }
-                        GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
+                        UnequipRig();
                         wearingArmoredRig = false;
-                        currentRig = null; // This needs to be done after ConfigureQuickbelt(-1) because it is used in it
                         currentArmor = null;
                         break;
                     case MeatovItem.ItemType.Backpack:
@@ -189,43 +171,51 @@ namespace EFM
             }
         }
 
-        private static void EquipRig(MeatovItem customItemWrapper)
+        private static void EquipRig(MeatovItem item)
         {
-            Mod.LogInfo("Equip rig called on "+customItemWrapper.gameObject.name);
+            Mod.LogInfo("Equip rig called on "+item.itemName);
             // Load the config
-            GM.CurrentPlayerBody.ConfigureQuickbelt(customItemWrapper.configurationIndex);
+            GM.CurrentPlayerBody.ConfigureQuickbelt(item.configurationIndex);
 
             // Load items into their slots
-            for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
+            for (int i = 0; i < item.itemsInSlots.Length; ++i)
             {
-                if (customItemWrapper.itemsInSlots[i] != null)
+                if (item.itemsInSlots[i] != null)
                 {
-                    FVRPhysicalObject physicalObject = customItemWrapper.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
-                    physicalObject.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i + 4]);
-                    physicalObject.SetParentage(null);
+                    FVRPhysicalObject physicalObject = item.itemsInSlots[i].GetComponent<FVRPhysicalObject>();
+                    SetQuickBeltSlotPatch.dontProcessRigWeight = true; // Dont want to add the weight of this item to the rig as we set its slot, the item is already in the rig
+                    physicalObject.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i + 6]);
+                    SetQuickBeltSlotPatch.dontProcessRigWeight = false;
                     physicalObject.transform.localScale = Vector3.one;
-                    customItemWrapper.itemsInSlots[i].transform.localPosition = Vector3.zero;
-                    customItemWrapper.itemsInSlots[i].transform.localRotation = Quaternion.identity;
-                    FieldInfo grabPointTransformField = typeof(FVRPhysicalObject).GetField("m_grabPointTransform", BindingFlags.NonPublic | BindingFlags.Instance);
-                    Transform m_grabPointTransform = (Transform)grabPointTransformField.GetValue(physicalObject);
-                    if (m_grabPointTransform != null)
-                    {
-                        if (physicalObject.QBPoseOverride != null)
-                        {
-                            m_grabPointTransform.position = physicalObject.QBPoseOverride.position;
-                            m_grabPointTransform.rotation = physicalObject.QBPoseOverride.rotation;
-                        }
-                        else if (physicalObject.PoseOverride != null)
-                        {
-                            m_grabPointTransform.position = physicalObject.PoseOverride.position;
-                            m_grabPointTransform.rotation = physicalObject.PoseOverride.rotation;
-                        }
-                    }
-                    customItemWrapper.itemsInSlots[i].SetActive(true);
                 }
             }
 
-            currentRig = customItemWrapper;
+            currentRig = item;
+        }
+
+        private static void UnequipRig()
+        {
+            if(currentRig != null)
+            {
+                Mod.LogInfo("UnequipRig called on " + currentRig.itemName);
+                // Load the config
+                GM.CurrentPlayerBody.ConfigureQuickbelt(-1);
+
+                // Load items into their slots
+                for (int i = 0; i < currentRig.itemsInSlots.Length; ++i)
+                {
+                    if (currentRig.itemsInSlots[i] != null)
+                    {
+                        MeatovItem item = currentRig.itemsInSlots[i];
+                        SetQuickBeltSlotPatch.dontProcessRigWeight = true; // Dont want to add the weight of this item to the rig as we set its slot, the item is already in the rig
+                        item.physObj.SetQuickBeltSlot(item.rigSlots[i]);
+                        SetQuickBeltSlotPatch.dontProcessRigWeight = false;
+                        item.physObj.transform.localScale = Vector3.one;
+                    }
+                }
+
+                currentRig = null;
+            }
         }
 
         public static void Clear()

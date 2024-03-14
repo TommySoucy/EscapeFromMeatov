@@ -67,7 +67,7 @@ namespace EFM
         public static float raidTime = 0;
         public static bool inMeatovScene;
         public static int pocketsConfigIndex;
-        public static Dictionary<int, GameObject> quickbeltConfigurations;
+        public static Dictionary<int, int> quickbeltConfigurationIndices;
         public static float distanceTravelledSprinting;
         public static float distanceTravelledWalking;
         public static MeatovItem[] itemsInPocketSlots;
@@ -1072,64 +1072,6 @@ namespace EFM
                     }
                 }
             }
-
-            // Check for more items that may be contained inside this one
-            // NOTE: Now handled by MeatovItem.UpdateInventories() and parent tracking system
-            //if (customItemWrapper != null)
-            //{
-            //    if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack || customItemWrapper.itemType == MeatovItem.ItemType.Container || customItemWrapper.itemType == MeatovItem.ItemType.Pouch)
-            //    {
-            //        foreach (Transform innerItem in customItemWrapper.containerItemRoot)
-            //        {
-            //            AddToPlayerInventory(innerItem, updateTypeLists);
-            //        }
-            //    }
-            //    else if (customItemWrapper.itemType == MeatovItem.ItemType.Rig || customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig)
-            //    {
-            //        foreach (GameObject innerItem in customItemWrapper.itemsInSlots)
-            //        {
-            //            if (innerItem != null)
-            //            {
-            //                AddToPlayerInventory(innerItem.transform, updateTypeLists);
-            //            }
-            //        }
-            //    }
-            //    else if (physObj is FVRFireArm)
-            //    {
-            //        FVRFireArm asFireArm = (FVRFireArm)physObj;
-
-            //        // Ammo container
-            //        if (asFireArm.UsesMagazines && asFireArm.Magazine != null)
-            //        {
-            //            AddToPlayerInventory(asFireArm.Magazine.transform, updateTypeLists);
-            //        }
-            //        else if (asFireArm.UsesClips && asFireArm.Clip != null)
-            //        {
-            //            AddToPlayerInventory(asFireArm.Clip.transform, updateTypeLists);
-            //        }
-
-            //        // Attachments
-            //        if (asFireArm.Attachments != null && asFireArm.Attachments.Count > 0)
-            //        {
-            //            foreach (FVRFireArmAttachment attachment in asFireArm.Attachments)
-            //            {
-            //                AddToPlayerInventory(attachment.transform, updateTypeLists);
-            //            }
-            //        }
-            //    }
-            //    else if (physObj is FVRFireArmAttachment)
-            //    {
-            //        FVRFireArmAttachment asFireArmAttachment = (FVRFireArmAttachment)physObj;
-
-            //        if (asFireArmAttachment.Attachments != null && asFireArmAttachment.Attachments.Count > 0)
-            //        {
-            //            foreach (FVRFireArmAttachment attachment in asFireArmAttachment.Attachments)
-            //            {
-            //                AddToPlayerInventory(attachment.transform, updateTypeLists);
-            //            }
-            //        }
-            //    }
-            //}
         }
 
         public static void RemoveFromPlayerInventory(MeatovItem item)

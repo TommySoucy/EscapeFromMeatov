@@ -484,11 +484,11 @@ namespace EFM
                 // Items inside a rig will not be attached to the rig, so much secure them separately
                 if (CIW.itemType == MeatovItem.ItemType.Rig || CIW.itemType == MeatovItem.ItemType.ArmoredRig)
                 {
-                    foreach (GameObject innerItem in CIW.itemsInSlots)
+                    foreach (MeatovItem innerItem in CIW.itemsInSlots)
                     {
                         if (innerItem != null)
                         {
-                            SecureObject(innerItem);
+                            SecureObject(innerItem.gameObject);
                         }
                     }
                 }
@@ -1466,7 +1466,7 @@ namespace EFM
     // Patches FVRPhysicalObject.SetQuickBeltSlot so we can keep track of what goes in and out of rigs
     class SetQuickBeltSlotPatch
     {
-        private static bool skipPatch;
+        public static bool skipPatch;
         public static bool dontProcessRigWeight;
 
         static void Prefix(ref FVRQuickBeltSlot slot, ref FVRPhysicalObject __instance)
@@ -1598,7 +1598,11 @@ namespace EFM
                                 if (EquipmentSlot.currentRig.itemsInSlots[i] == item.gameObject)
                                 {
                                     EquipmentSlot.currentRig.itemsInSlots[i] = null;
-                                    EquipmentSlot.currentRig.currentWeight -= item.currentWeight;
+
+                                    if (!dontProcessRigWeight)
+                                    {
+                                        EquipmentSlot.currentRig.currentWeight -= item.currentWeight;
+                                    }
 
                                     // The model of the rig in the equipment slot should be updated
                                     EquipmentSlot.currentRig.UpdateClosedMode();
@@ -1723,7 +1727,7 @@ namespace EFM
                     {
                         if (rig.rigSlots[slotIndex] == __instance.QuickbeltSlot)
                         {
-                            rig.itemsInSlots[slotIndex] = item.gameObject;
+                            rig.itemsInSlots[slotIndex] = item;
                             rig.currentWeight += item.currentWeight;
                             rig.UpdateClosedMode();
                             return;
@@ -1739,8 +1743,11 @@ namespace EFM
                     if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex] == slot)
                     {
                         MeatovItem parentRigItem = EquipmentSlot.currentRig;
-                        parentRigItem.itemsInSlots[slotIndex - 6] = __instance.gameObject;
-                        parentRigItem.currentWeight += item.currentWeight;
+                        parentRigItem.itemsInSlots[slotIndex - 6] = item;
+                        if (!dontProcessRigWeight)
+                        {
+                            parentRigItem.currentWeight += item.currentWeight;
+                        }
                         parentRigItem.UpdateClosedMode();
                         break;
                     }
@@ -1753,6 +1760,7 @@ namespace EFM
     // Also to give player the loot experience in case they haven't picked it up before
     class BeginInteractionPatch
     {
+        cont from here // Go through this and implement everything in it that is still necessary
         static void Prefix(FVRViveHand hand, ref FVRPhysicalObject __instance)
         {
             if (!Mod.inMeatovScene)
