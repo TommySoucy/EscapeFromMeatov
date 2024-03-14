@@ -489,6 +489,7 @@ namespace EFM
 
         public void Close()
         {
+            TODO: // Must review if this will actually make slotted equipment items hidden, because it won't if they don't get parented to the slot
             canvas.SetActive(false);
             slotsParent.SetActive(false);
         }

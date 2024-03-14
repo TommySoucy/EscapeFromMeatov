@@ -1394,5 +1394,10 @@ namespace EFM
 
             area.SetUpgradeCheckProcessors(false);
         }
+
+        public void PlaySlotInputSound()
+        {
+            genericAudioSource.PlayOneShot(genericAudioClips[3]);
+        }
     }
 }

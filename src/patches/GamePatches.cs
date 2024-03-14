@@ -12,6 +12,7 @@ using UnityEngine.SceneManagement;
 using H3MP.Patches;
 using H3MP.Scripts;
 using System.Net.Mail;
+using static FistVR.SosigInventory;
 
 namespace EFM
 {
@@ -41,12 +42,12 @@ namespace EFM
             PatchController.Verify(configureQuickbeltPatchOriginal, harmony, true);
             harmony.Patch(configureQuickbeltPatchOriginal, new HarmonyMethod(configureQuickbeltPatchPrefix), new HarmonyMethod(configureQuickbeltPatchPostfix));
 
-            //// TestQuickbeltPatch
-            //MethodInfo testQuickbeltPatchOriginal = typeof(FVRViveHand).GetMethod("TestQuickBeltDistances", BindingFlags.NonPublic | BindingFlags.Instance);
-            //MethodInfo testQuickbeltPatchPrefix = typeof(TestQuickbeltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // TestQuickbeltPatch
+            MethodInfo testQuickbeltPatchOriginal = typeof(FVRViveHand).GetMethod("TestQuickBeltDistances", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo testQuickbeltPatchPrefix = typeof(TestQuickbeltPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(testQuickbeltPatchOriginal, harmony, true);
-            //harmony.Patch(testQuickbeltPatchOriginal, new HarmonyMethod(testQuickbeltPatchPrefix));
+            PatchController.Verify(testQuickbeltPatchOriginal, harmony, true);
+            harmony.Patch(testQuickbeltPatchOriginal, new HarmonyMethod(testQuickbeltPatchPrefix));
 
             // SetQuickBeltSlotPatch
             MethodInfo setQuickBeltSlotPatchOriginal = typeof(FVRPhysicalObject).GetMethod("SetQuickBeltSlot", BindingFlags.Public | BindingFlags.Instance);
@@ -937,14 +938,14 @@ namespace EFM
             {
                 if (hand.IsThisTheRightHand)
                 {
-                    collidingContainerWrapper = Mod.rightHand.collidingContainerWrapper;
-                    collidingTradeVolume = Mod.rightHand.collidingVolume;
+                    //collidingContainerWrapper = Mod.rightHand.collidingContainerWrapper;
+                    //collidingTradeVolume = Mod.rightHand.collidingVolume;
                     Mod.LogInfo("\tfrom right hand, container null? " + (collidingContainerWrapper == null));
                 }
                 else // Left hand
                 {
-                    collidingContainerWrapper = Mod.leftHand.collidingContainerWrapper;
-                    collidingTradeVolume = Mod.leftHand.collidingVolume;
+                    //collidingContainerWrapper = Mod.leftHand.collidingContainerWrapper;
+                    //collidingTradeVolume = Mod.leftHand.collidingVolume;
                     Mod.LogInfo("\tfrom left hand, container null? " + (collidingContainerWrapper == null));
                 }
             }
@@ -957,7 +958,7 @@ namespace EFM
                 Mod.RemoveFromAll(primary, heldMI);
             }
 
-            if (collidingContainerWrapper != null && (hand.IsThisTheRightHand ? Mod.rightHand.hoverValid : Mod.leftHand.hoverValid) && (heldMI == null || !heldMI.Equals(collidingContainerWrapper)))
+            if (collidingContainerWrapper != null /*&& (hand.IsThisTheRightHand ? Mod.rightHand.hoverValid : Mod.leftHand.hoverValid)*/ && (heldMI == null || !heldMI.Equals(collidingContainerWrapper)))
             {
                 Mod.LogInfo("\tChecking if item fits in container");
                 // Check if item fits in container
@@ -1225,7 +1226,7 @@ namespace EFM
     // This completely replaces the original
     class TestQuickbeltPatch
     {
-        static bool Prefix(ref FVRViveHand __instance, ref FVRViveHand.HandState ___m_state, ref FVRInteractiveObject ___m_currentInteractable)
+        static bool Prefix(FVRViveHand __instance, FVRViveHand.HandState ___m_state, FVRInteractiveObject ___m_currentInteractable)
         {
             if (!Mod.inMeatovScene)
             {
@@ -1247,19 +1248,17 @@ namespace EFM
             FVRQuickBeltSlot fvrquickBeltSlot = null;
             bool flag = false;
             Vector3 position = __instance.PoseOverride.position;
-            // To make sure the way items must be positioned relative to a QBS in order to put it inside it is predictable, 
-            // we ignore the held item here, so we will always be using the hand's position to test QB distances
-            //if (__instance.CurrentInteractable != null)
-            //{
-            //    if (__instance.CurrentInteractable.PoseOverride != null)
-            //    {
-            //        position = __instance.CurrentInteractable.PoseOverride.position;
-            //    }
-            //    else
-            //    {
-            //        position = __instance.CurrentInteractable.transform.position;
-            //    }
-            //}
+            if (__instance.CurrentInteractable != null)
+            {
+                if (__instance.CurrentInteractable.PoseOverride != null)
+                {
+                    position = __instance.CurrentInteractable.PoseOverride.position;
+                }
+                else
+                {
+                    position = __instance.CurrentInteractable.transform.position;
+                }
+            }
             for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; i++)
             {
                 if (GM.CurrentPlayerBody.QBSlots_Internal[i].IsPointInsideMe(position))
@@ -1295,7 +1294,7 @@ namespace EFM
 
             // Check equip slots if status UI is active
             int equipmentSlotIndex = -1;
-            if (StatusUI.instance != null && StatusUI.instance.IsOpen() && fvrquickBeltSlot == null && StatusUI.instance.equipmentSlots != null)
+            if (fvrquickBeltSlot == null && StatusUI.instance != null && StatusUI.instance.IsOpen() && StatusUI.instance.equipmentSlots != null)
             {
                 for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
                 {
@@ -1308,8 +1307,9 @@ namespace EFM
                 }
             }
 
-            // Check other active slots if it is not equip slot
-            if (equipmentSlotIndex == -1 && Mod.otherActiveSlots != null)
+            // Check other active slots
+            TODO e: // make sure we use those
+            if (fvrquickBeltSlot == null && Mod.otherActiveSlots != null)
             {
                 for (int setIndex = 0; setIndex < Mod.otherActiveSlots.Count; ++setIndex)
                 {
@@ -1324,33 +1324,24 @@ namespace EFM
                 }
             }
 
-            // Check shoulder slots
-            int shoulderIndex = -1;
-            if (fvrquickBeltSlot == null)
-            {
-                if (Mod.leftShoulderSlot != null && Mod.leftShoulderSlot.IsPointInsideMe(position))
-                {
-                    fvrquickBeltSlot = Mod.leftShoulderSlot;
-                    shoulderIndex = 0;
-                }
-                else if (Mod.rightShoulderSlot != null && Mod.rightShoulderSlot.IsPointInsideMe(position))
-                {
-                    fvrquickBeltSlot = Mod.rightShoulderSlot;
-                    shoulderIndex = 1;
-                }
-            }
-
             // Check area slots
-            if (fvrquickBeltSlot == null && Mod.areaSlots != null)
+            if (fvrquickBeltSlot == null && HideoutController.instance != null)
             {
-                //foreach (FVRQuickBeltSlot slot in Mod.areaSlots)
-                //{
-                //    if (slot != null && slot.transform.parent.gameObject.activeSelf && slot.IsPointInsideMe(position))
-                //    {
-                //        fvrquickBeltSlot = slot;
-                //        break;
-                //    }
-                //}
+                for(int i=0; i < HideoutController.instance.areaController.areas.Length; ++i)
+                {
+                    Area area = HideoutController.instance.areaController.areas[i];
+                    if (area.areaSlotsPerLevel != null && area.currentLevel < area.areaSlotsPerLevel.Length)
+                    {
+                        for(int j = 0; j < area.areaSlotsPerLevel[area.currentLevel].Length; ++j)
+                        {
+                            if (area.areaSlotsPerLevel[area.currentLevel][j].IsPointInsideMe(position))
+                            {
+                                fvrquickBeltSlot = area.areaSlotsPerLevel[area.currentLevel][j];
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
             if (fvrquickBeltSlot == null)
@@ -1370,7 +1361,11 @@ namespace EFM
                     {
                         __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                     }
-                    else if (shoulderIndex == 0 && StatusUI.instance.equipmentSlots[0].CurObject != null && !StatusUI.instance.equipmentSlots[0].CurObject.IsHeld && StatusUI.instance.equipmentSlots[0].CurObject.IsInteractable())
+                    else if (fvrquickBeltSlot is ShoulderStorage 
+                        && !(fvrquickBeltSlot as ShoulderStorage).right 
+                        && StatusUI.instance.equipmentSlots[0].CurObject != null 
+                        && !StatusUI.instance.equipmentSlots[0].CurObject.IsHeld 
+                        && StatusUI.instance.equipmentSlots[0].CurObject.IsInteractable())
                     {
                         // Set hovered QB slot to backpack equip slot if it is left shoulder and backpack slot is not empty
                         __instance.CurrentHoveredQuickbeltSlot = StatusUI.instance.equipmentSlots[0];
@@ -1382,14 +1377,14 @@ namespace EFM
                     if (fvrquickBeltSlot.CurObject == null && fvrquickBeltSlot.SizeLimit >= fvrphysicalObject.Size && fvrphysicalObject.QBSlotType == fvrquickBeltSlot.Type)
                     {
                         // Check for equipment compatibility if slot is an equipment slot
-                        MeatovItem customItemWrapper = fvrphysicalObject.GetComponent<MeatovItem>();
+                        MeatovItem item = Mod.meatovItemByInteractive.TryGetValue(fvrphysicalObject, out item) ? item : fvrphysicalObject.GetComponent<MeatovItem>();
                         if (equipmentSlotIndex > -1)
                         {
-                            if (customItemWrapper != null)
+                            if (item != null)
                             {
-                                bool typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == customItemWrapper.itemType;
+                                bool typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == item.itemType;
                                 bool otherCompatible = true;
-                                switch (customItemWrapper.itemType)
+                                switch (item.itemType)
                                 {
                                     case MeatovItem.ItemType.ArmoredRig:
                                         typeCompatible = StatusUI.instance.equipmentSlots[equipmentSlotIndex].equipmentType == MeatovItem.ItemType.BodyArmor;
@@ -1436,31 +1431,26 @@ namespace EFM
                                 }
                             }
                         }
-                        else if (shoulderIndex > -1)
+                        else if (fvrquickBeltSlot is ShoulderStorage)
                         {
                             // If left shoulder, make sure item is backpack, and player not already wearing a backpack
-                            // If right shoulder, make sure item is a firearm
-                            if (shoulderIndex == 0 && customItemWrapper != null && customItemWrapper.itemType == MeatovItem.ItemType.Backpack && EquipmentSlot.currentBackpack == null)
+                            // If right shoulder, make sure item is a firearm or melee weapon
+                            if (!(fvrquickBeltSlot as ShoulderStorage).right && item.itemType == MeatovItem.ItemType.Backpack && EquipmentSlot.currentBackpack == null)
                             {
                                 __instance.CurrentHoveredQuickbeltSlot = StatusUI.instance.equipmentSlots[0];
                             }
-                            else if (shoulderIndex == 1 && fvrphysicalObject is FVRFireArm)
+                            else if ((fvrquickBeltSlot as ShoulderStorage).right && (item.itemType == MeatovItem.ItemType.Firearm || fvrphysicalObject is FVRMeleeWeapon))
                             {
                                 __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                             }
                         }
                         else if (fvrquickBeltSlot is AreaSlot)
                         {
-                            //AreaSlot asAreaSlot = fvrquickBeltSlot as AreaSlot;
-                            string IDToUse;
-                            if (customItemWrapper != null)
+                            AreaSlot asAreaSlot = fvrquickBeltSlot as AreaSlot;
+                            if(Mod.IDDescribedInList(item.H3ID, item.parents, asAreaSlot.filter, null))
                             {
-                                IDToUse = customItemWrapper.H3ID;
+                                __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                             }
-                            //if (asAreaSlot.filter.Contains(IDToUse))
-                            //{
-                            //    __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
-                            //}
                         }
                         else
                         {
@@ -1488,10 +1478,11 @@ namespace EFM
             }
             Mod.LogInfo("SetQuickBeltSlotPatch called");
 
-            // This may be the case, and in this case we don't want to redo everything we do in the patch, so just skip
+            // In case that new slot is same as current, we want to skip most of the patch
+            // Can be possible in case of harnessed slot
             if (slot == __instance.QuickbeltSlot)
             {
-                Mod.LogInfo("Item " + __instance.name + " is already in slot: " + (slot == null ? "null" : slot.name) + ", skipipng SetQuickBeltSlotPatch patch");
+                Mod.LogInfo("Item " + __instance.name + " is already in slot: " + (slot == null ? "null" : slot.name) + ", skipping SetQuickBeltSlotPatch patch");
                 skipPatch = true;
 
                 // Even if skipping patch, need to make sure that in the case of the backpack shoulder slot, we still set it as equip slot
@@ -1503,7 +1494,8 @@ namespace EFM
                     {
                         if (!(slot as ShoulderStorage).right)
                         {
-                            slot = StatusUI.instance.equipmentSlots[0]; // Set the slot as the backpack equip slot
+                            // Set the slot ref as the backpack equip slot so the original method puts it in this one instead
+                            slot = StatusUI.instance.equipmentSlots[0];
                         }
                     }
                 }
@@ -1522,13 +1514,13 @@ namespace EFM
                 __instance.transform.localScale = Vector3.one;
 
                 // Prefix will be called before the object's current slot is set to null, so we can check if it was taken from an equipment slot or a rig slot
-                MeatovItem MI = __instance.GetComponent<MeatovItem>();
+                MeatovItem item = __instance.GetComponent<MeatovItem>();
                 if (__instance.QuickbeltSlot is EquipmentSlot)
                 {
                     // Have to remove equipment
-                    if (MI != null)
+                    if (item != null)
                     {
-                        EquipmentSlot.TakeOffEquipment(MI);
+                        EquipmentSlot.TakeOffEquipment(item);
                     }
 
                     // Also set left shoulder object to null if this is backpack slot
@@ -1539,34 +1531,29 @@ namespace EFM
                 }
                 else if (__instance.QuickbeltSlot is ShoulderStorage)
                 {
+                    // Manage item begin removed from shoulder slot
                     ShoulderStorage asShoulderSlot = __instance.QuickbeltSlot as ShoulderStorage;
                     if (asShoulderSlot.right)
                     {
                         Mod.rightShoulderObject = null;
-                        __instance.gameObject.SetActive(true);
                     }
                     else
                     {
+                        // Only backpacks fit in left shoulder slot
                         Mod.leftShoulderObject = null;
-                        EquipmentSlot.TakeOffEquipment(MI);
+
+                        // So make sure we take it off as equipment
+                        EquipmentSlot.TakeOffEquipment(item);
+
                     }
                 }
                 else if (__instance.QuickbeltSlot is AreaSlot)
                 {
-                    //AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
-                    //Mod.currentHideoutManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = null;
-
-                    if (Mod.areaSlotShouldUpdate)
+                    AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
+                    if(asAreaSlot.item == item)
                     {
-                        //BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
-
-                        //areaManager.slotItems[asAreaSlot.slotIndex] = null;
-
-                        //areaManager.UpdateBasedOnSlots();
-                    }
-                    else
-                    {
-                        Mod.areaSlotShouldUpdate = true;
+                        asAreaSlot.item = null;
+                        asAreaSlot.area.OnSlotContentChangedInvoke();
                     }
                 }
                 else
@@ -1574,7 +1561,7 @@ namespace EFM
                     // Check if in pockets
                     for (int i = 0; i < 4; ++i)
                     {
-                        if (Mod.itemsInPocketSlots[i] != null && Mod.itemsInPocketSlots[i].gameObject.Equals(__instance.gameObject))
+                        if (Mod.itemsInPocketSlots[i] == item)
                         {
                             Mod.itemsInPocketSlots[i] = null;
                             return;
@@ -1582,24 +1569,19 @@ namespace EFM
                     }
 
                     // Check if slot in a loose rig
-                    Transform slotRootParent = __instance.QuickbeltSlot.transform.parent.parent;
-                    if (slotRootParent != null)
+                    if(__instance.QuickbeltSlot is RigSlot)
                     {
-                        Transform rootOwner = slotRootParent.parent;
-                        if (rootOwner != null)
+                        MeatovItem rig = (__instance.QuickbeltSlot as RigSlot).ownerItem;
+                        if (rig != null && (rig.itemType == MeatovItem.ItemType.Rig || rig.itemType == MeatovItem.ItemType.ArmoredRig))
                         {
-                            MeatovItem rigMI = rootOwner.GetComponent<MeatovItem>();
-                            if (rigMI != null && (rigMI.itemType == MeatovItem.ItemType.Rig || rigMI.itemType == MeatovItem.ItemType.ArmoredRig))
+                            // This slot is owned by a rig, need to update that rig's content
+                            for (int slotIndex = 0; slotIndex < rig.rigSlots.Count; ++slotIndex)
                             {
-                                // This slot is owned by a rig, need to update that rig's content
-                                for (int slotIndex = 0; slotIndex < rigMI.rigSlots.Count; ++slotIndex)
+                                if (rig.rigSlots[slotIndex] == __instance.QuickbeltSlot)
                                 {
-                                    if (rigMI.rigSlots[slotIndex].Equals(__instance.QuickbeltSlot))
-                                    {
-                                        rigMI.itemsInSlots[slotIndex] = null;
-                                        rigMI.currentWeight -= MI.currentWeight;
-                                        return;
-                                    }
+                                    rig.itemsInSlots[slotIndex] = null;
+                                    rig.currentWeight -= item.currentWeight;
+                                    return;
                                 }
                             }
                         }
@@ -1614,11 +1596,13 @@ namespace EFM
                             // Find item in rig's itemsInSlots and remove it
                             for (int i = 0; i < EquipmentSlot.currentRig.itemsInSlots.Length; ++i)
                             {
-                                if (EquipmentSlot.currentRig.itemsInSlots[i] == __instance.gameObject)
+                                if (EquipmentSlot.currentRig.itemsInSlots[i] == item.gameObject)
                                 {
                                     EquipmentSlot.currentRig.itemsInSlots[i] = null;
-                                    EquipmentSlot.currentRig.currentWeight -= MI.currentWeight;
-                                    EquipmentSlot.currentRig.UpdateRigMode();
+                                    EquipmentSlot.currentRig.currentWeight -= item.currentWeight;
+
+                                    // The model of the rig in the equipment slot should be updated
+                                    EquipmentSlot.currentRig.UpdateClosedMode();
                                     return;
                                 }
                             }
@@ -1632,17 +1616,11 @@ namespace EFM
                 if (slot is ShoulderStorage)
                 {
                     if (!(slot as ShoulderStorage).right)
-                    {
-                        slot = StatusUI.instance.equipmentSlots[0]; // Set the slot as the backpack equip slot
+                    { 
+                        // Set the slot ref as the backpack equip slot so the original method puts it in this one instead
+                        slot = StatusUI.instance.equipmentSlots[0];
                     }
                 }
-
-                // Add to All if necessary
-                //MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
-                //if (customItemWrapper != null)
-                //{
-                //    Mod.AddToAll(__instance, customItemWrapper);
-                //}
             }
         }
 
@@ -1653,21 +1631,19 @@ namespace EFM
                 return;
             }
 
+            MeatovItem item = __instance.GetComponent<MeatovItem>();
+
             if (skipPatch)
             {
                 skipPatch = false;
 
-                // Even if skipping, we still want to make sure that if the slot is not null, we set the item's parent to null
-                // Also make sure that if it is an equip slot, set active depending on player status display if the item is not being held
                 if (slot != null)
                 {
-                    __instance.SetParentage(null);
-
-                    // This is for in case we harnessed backpack to the shoulder slot
                     if (slot is EquipmentSlot && __instance.m_hand == null)
                     {
-                        __instance.gameObject.SetActive(StatusUI.instance.IsOpen());
-                        __instance.GetComponent<MeatovItem>().UpdateBackpackMode();
+                        // Update mode in case of a togglable equipment item, because we want to make sure it is
+                        // using the correct closed model
+                        item.UpdateClosedMode();
                     }
                 }
 
@@ -1682,14 +1658,14 @@ namespace EFM
             // Ensure the item's parent is null
             // TODO: EndInteractionInInventorySlot is supposed to attach the item to quick belt root but this was only happening to equipment in equip slots and not on rig slots
             // So should we attach them to the slots or no? because it causes extreme lag and is clearly unnecessary
-            __instance.SetParentage(null);
+            //__instance.SetParentage(null);
 
             // Check if pocket slot
             for (int i = 0; i < 4; ++i)
             {
-                if (Mod.pocketSlots[i].Equals(slot))
+                if (Mod.pocketSlots[i] == slot)
                 {
-                    Mod.itemsInPocketSlots[i] = __instance.GetComponent<MeatovItem>();
+                    Mod.itemsInPocketSlots[i] = item;
                     return;
                 }
             }
@@ -1701,36 +1677,21 @@ namespace EFM
                 if (asShoulderSlot.right)
                 {
                     Mod.rightShoulderObject = __instance.gameObject;
-                    __instance.gameObject.SetActive(__instance.IsAltHeld || __instance.IsHeld); // Dont want to set inactive if held, and could be held if harnessed
                 }
-                else
-                {
-                    Mod.leftShoulderObject = __instance.gameObject;
-                    EquipmentSlot.WearEquipment(__instance.GetComponent<MeatovItem>());
-                }
+                // else, Note that this can't happen because of how we handle this shoulder in the Prefix
 
                 return;
             }
 
             if (slot is AreaSlot)
             {
-                //AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
-                //Mod.currentHideoutManager.baseAreaManagers[asAreaSlot.areaIndex].slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
+                AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
+                asAreaSlot.item = item;
+                asAreaSlot.area.OnSlotContentChangedInvoke();
 
-                if (Mod.areaSlotShouldUpdate)
-                {
-                    //BaseAreaManager areaManager = __instance.QuickbeltSlot.transform.parent.parent.parent.GetComponent<BaseAreaManager>();
+                asAreaSlot.area.UI.PlaySlotInputSound();
 
-                    ////areaManager.slotItems[asAreaSlot.slotIndex] = __instance.gameObject;
-
-                    //areaManager.UpdateBasedOnSlots();
-
-                    //areaManager.PlaySlotInputSound();
-                }
-                else
-                {
-                    Mod.areaSlotShouldUpdate = true;
-                }
+                asAreaSlot.UpdatePose();
             }
 
             if (slot is EquipmentSlot)
@@ -1741,85 +1702,54 @@ namespace EFM
                     __instance.transform.localScale = __instance.QBPoseOverride.localScale;
 
                     // Also set the slot's poseoverride to the QBPoseOverride of the item so it get positionned properly
-                    // Multiply poseoverride position by 10 because our pose override is set in cm not relativ to scale of QBTransform but H3 sets position relative to it
+                    // Multiply poseoverride position by 10 because our pose override is set in cm not relative to scale of QBTransform but H3 sets position relative to it
                     slot.PoseOverride.localPosition = __instance.QBPoseOverride.localPosition * 10;
                 }
 
                 // If this is backpack slot, also set left shoulder to the object
-                if (slot.Equals(StatusUI.instance.equipmentSlots[0]))
+                if (slot == StatusUI.instance.equipmentSlots[0])
                 {
                     Mod.leftShoulderObject = __instance.gameObject;
                 }
 
-                EquipmentSlot.WearEquipment(__instance.GetComponent<MeatovItem>());
-
-                __instance.gameObject.SetActive(StatusUI.instance.IsOpen());
+                EquipmentSlot.WearEquipment(item);
             }
-            else if (EquipmentSlot.wearingArmoredRig || EquipmentSlot.wearingRig) // We are wearing custom quick belt, check if slot is in there, update if it is
+            else if (slot is RigSlot)
             {
-                // Find slot index in config
-                bool foundSlot = false;
-                for (int slotIndex = 6; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
+                MeatovItem rig = (__instance.QuickbeltSlot as RigSlot).ownerItem;
+                if (rig != null && (rig.itemType == MeatovItem.ItemType.Rig || rig.itemType == MeatovItem.ItemType.ArmoredRig))
                 {
-                    if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex].Equals(slot))
+                    // This slot is owned by a rig, need to update that rig's content
+                    for (int slotIndex = 0; slotIndex < rig.rigSlots.Count; ++slotIndex)
                     {
-                        MeatovItem equipmentItemWrapper = EquipmentSlot.currentRig;
-                        equipmentItemWrapper.itemsInSlots[slotIndex - 6] = __instance.gameObject;
-                        equipmentItemWrapper.currentWeight += __instance.GetComponent<MeatovItem>().currentWeight;
-                        equipmentItemWrapper.UpdateRigMode();
-
-                        foundSlot = true;
-                        break;
-                    }
-                }
-
-                if (!foundSlot)
-                {
-                    PlaceInOtherRig(slot, __instance);
-                }
-            }
-            else // Check if the slot is owned by a rig, if it is need to update 
-            {
-                PlaceInOtherRig(slot, __instance);
-            }
-        }
-
-        private static void PlaceInOtherRig(FVRQuickBeltSlot slot, FVRPhysicalObject __instance)
-        {
-            Transform slotRootParent = slot.transform.parent.parent;
-            if (slotRootParent != null)
-            {
-                Transform rootOwner = slotRootParent.parent;
-                if (rootOwner != null)
-                {
-                    MeatovItem customItemWrapper = rootOwner.GetComponent<MeatovItem>();
-                    if (customItemWrapper != null && (customItemWrapper.itemType == MeatovItem.ItemType.Rig || customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig))
-                    {
-                        // This slot is owned by a rig, need to update that rig's content
-                        // Upadte rig content
-                        for (int slotIndex = 0; slotIndex < customItemWrapper.rigSlots.Count; ++slotIndex)
+                        if (rig.rigSlots[slotIndex] == __instance.QuickbeltSlot)
                         {
-                            if (customItemWrapper.rigSlots[slotIndex].Equals(slot))
-                            {
-                                customItemWrapper.itemsInSlots[slotIndex] = __instance.gameObject;
-
-                                Mod.LogInfo("Added item to rig: " + customItemWrapper.name + ", dont precess weight: " + dontProcessRigWeight);
-                                // Update rig weight
-                                if (dontProcessRigWeight)
-                                {
-                                    dontProcessRigWeight = false;
-                                }
-                                else
-                                {
-                                    customItemWrapper.currentWeight += __instance.GetComponent<MeatovItem>().currentWeight;
-                                }
-                                return;
-                            }
+                            rig.itemsInSlots[slotIndex] = item.gameObject;
+                            rig.currentWeight += item.currentWeight;
+                            rig.UpdateClosedMode();
+                            return;
                         }
                     }
                 }
             }
+            else if (EquipmentSlot.wearingArmoredRig || EquipmentSlot.wearingRig) // We are wearing custom quick belt, check if slot is in there, update if it is
+            {
+                // Find slot index in config
+                for (int slotIndex = 6; slotIndex < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++slotIndex)
+                {
+                    if (GM.CurrentPlayerBody.QBSlots_Internal[slotIndex] == slot)
+                    {
+                        MeatovItem parentRigItem = EquipmentSlot.currentRig;
+                        parentRigItem.itemsInSlots[slotIndex - 6] = __instance.gameObject;
+                        parentRigItem.currentWeight += item.currentWeight;
+                        parentRigItem.UpdateClosedMode();
+                        break;
+                    }
+                }
+            }
         }
+
+        TODO: // Make all slots on rigs into RigSlots in assets
     }
 
     // Patches FVRPhysicalObject.BeginInteraction() in order to know if we have begun interacting with a rig from an equipment slot
@@ -1833,32 +1763,11 @@ namespace EFM
                 return;
             }
 
-            // Ensure the object is active
-            // This is more specifically for the case of using the left shoulder slot to access the backpack slot
-            // while the equipment slots arent displayed, so the backpack is inactive, we must activate it
-            Mod.LogInfo("Began interacting with " + __instance.name + ", qbs null?: " + (__instance.QuickbeltSlot == null) + ", harnessed?: " + __instance.m_isHardnessed);
-            __instance.gameObject.SetActive(true);
-
-            // If the item is harnessed to a quickbelt slot, must scale it to 1 while interacting with it in case it was scaled down in the slot
-            if (__instance.QuickbeltSlot != null && __instance.m_isHardnessed)
-            {
-                __instance.transform.localScale = Vector3.one;
-
-                // TODO: Will need to review if this is necessary because an item grabbed with both and and then let go with one will shift the item to the hand that is still holding it
-                //if (__instance.QuickbeltSlot == Mod.rightShoulderSlot) 
-                //{
-                //    // Set the item's position to approx hand to ensure it doesn't have to collide with anything to get there
-                //    __instance.transform.position = hand.transform.position;
-                //}
-            }
-
             MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
             if (customItemWrapper != null)
             {
                 // Add to All if necessary
                 Mod.AddToAll(__instance, customItemWrapper);
-
-                customItemWrapper.hideoutSpawned = false;
 
                 if (customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig || customItemWrapper.itemType == MeatovItem.ItemType.Rig)
                 {
@@ -1887,17 +1796,17 @@ namespace EFM
                     customItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
                     customItemWrapper.itemType == MeatovItem.ItemType.Container)
                 {
-                    if (hand.IsThisTheRightHand && Mod.rightHand.collidingContainerWrapper != null && Mod.rightHand.collidingContainerWrapper.Equals(customItemWrapper))
+                    if (hand.IsThisTheRightHand /*&& Mod.rightHand.collidingContainerWrapper != null && Mod.rightHand.collidingContainerWrapper.Equals(customItemWrapper)*/)
                     {
-                        Mod.rightHand.hoverValid = false;
-                        Mod.rightHand.collidingContainerWrapper.SetContainerHovered(false);
-                        Mod.rightHand.collidingContainerWrapper = null;
+                        //Mod.rightHand.hoverValid = false;
+                        //Mod.rightHand.collidingContainerWrapper.SetContainerHovered(false);
+                        //Mod.rightHand.collidingContainerWrapper = null;
                     }
-                    else if (!hand.IsThisTheRightHand && Mod.leftHand.collidingContainerWrapper != null && Mod.leftHand.collidingContainerWrapper.Equals(customItemWrapper))
+                    else if (!hand.IsThisTheRightHand /*&& Mod.leftHand.collidingContainerWrapper != null && Mod.leftHand.collidingContainerWrapper.Equals(customItemWrapper)*/)
                     {
-                        Mod.leftHand.hoverValid = false;
-                        Mod.leftHand.collidingContainerWrapper.SetContainerHovered(false);
-                        Mod.leftHand.collidingContainerWrapper = null;
+                        //Mod.leftHand.hoverValid = false;
+                        //Mod.leftHand.collidingContainerWrapper.SetContainerHovered(false);
+                        //Mod.leftHand.collidingContainerWrapper = null;
                     }
                 }
 
@@ -5910,19 +5819,7 @@ namespace EFM
     // Patches FVRViveHand.CurrentInteractable.set to keep track of item held
     class HandCurrentInteractableSetPatch
     {
-        static FVRInteractiveObject preObject;
-
-        static void Prefix(ref FVRViveHand __instance, ref FVRInteractiveObject ___m_currentInteractable)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            preObject = ___m_currentInteractable;
-        }
-
-        static void Postfix(ref FVRViveHand __instance, ref FVRInteractiveObject ___m_currentInteractable)
+        static void Prefix(ref FVRViveHand __instance, FVRInteractiveObject value, FVRInteractiveObject ___m_currentInteractable)
         {
             if (!Mod.inMeatovScene)
             {
@@ -5931,22 +5828,17 @@ namespace EFM
 
             if (___m_currentInteractable != null)
             {
-                if (preObject != ___m_currentInteractable)
+                if (Mod.meatovItemByInteractive.TryGetValue(___m_currentInteractable, out MeatovItem meatovItem))
                 {
-                    if (Mod.meatovItemByInteractive.TryGetValue(___m_currentInteractable, out MeatovItem meatovItem))
-                    {
-                        meatovItem.BeginInteraction(__instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
-                    }
+                    meatovItem.EndInteraction(__instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
                 }
             }
-            else // ___m_currentInteractable == null
+
+            if(value != null)
             {
-                if (preObject != null) // Dropped preObject
+                if (Mod.meatovItemByInteractive.TryGetValue(value, out MeatovItem meatovItem))
                 {
-                    if (Mod.meatovItemByInteractive.TryGetValue(preObject, out MeatovItem meatovItem))
-                    {
-                        meatovItem.EndInteraction(__instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
-                    }
+                    meatovItem.BeginInteraction(__instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
                 }
             }
         }

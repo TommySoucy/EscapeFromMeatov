@@ -142,8 +142,6 @@ namespace EFM
         public bool looted;
         [NonSerialized]
         public bool foundInRaid;
-        [NonSerialized]
-        public bool hideoutSpawned;
         private DescriptionPack descriptionPack;
         [NonSerialized]
         private long previousDescriptionTime;
@@ -213,7 +211,7 @@ namespace EFM
         [NonSerialized]
 		public GameObject[] itemsInSlots;
 		public Transform configurationRoot;
-		public List<FVRQuickBeltSlot> rigSlots;
+		public List<RigSlot> rigSlots;
         [NonSerialized]
 		private int activeSlotsSetIndex;
 
@@ -1871,43 +1869,42 @@ namespace EFM
 			}
 		}
 
-		public void UpdateRigMode()
-		{
-			// Return right away if not a rig or if open
-			if (!(itemType == ItemType.Rig || itemType == ItemType.ArmoredRig) || mode == 0)
-			{
-				return;
-            }
-
-			for(int i=0; i < itemsInSlots.Length; ++i)
+        public void UpdateClosedMode()
+        {
+            if(mode == 0)
             {
-				if(itemsInSlots[i] != null)
-				{
-					SetMode(1);
-					return;
-                }
+                return;
             }
 
-			// If we get this far it is because no items in slots, so set to closed empty
-			SetMode(2);
-        }
+            switch (itemType)
+            {
+                case ItemType.Rig:
+                case ItemType.ArmoredRig:
+                    for (int i = 0; i < itemsInSlots.Length; ++i)
+                    {
+                        if (itemsInSlots[i] != null)
+                        {
+                            SetMode(1);
+                            break;
+                        }
+                    }
 
-		public void UpdateBackpackMode()
-		{
-			// Return right away if not a backpack or if open
-			if (itemType != ItemType.Backpack || mode == 0)
-			{
-				return;
+                    // If we get this far it is because no items in slots, so set to closed empty
+                    SetMode(2);
+                    break;
+                case ItemType.Backpack:
+                case ItemType.Pouch:
+                case ItemType.Container:
+                    if (containerItemRoot.childCount > 0)
+                    {
+                        SetMode(1);
+                    }
+                    else
+                    {
+                        SetMode(2);
+                    }
+                    break;
             }
-
-			if(containerItemRoot.childCount > 0)
-			{
-				SetMode(1);
-            }
-            else
-			{
-				SetMode(2);
-			}
         }
 
 		private void CloseRig(bool processslots, bool isRightHand = false)
@@ -2233,8 +2230,16 @@ namespace EFM
                 hand.updateInteractionSphere = false;
             }
 
-            if(hand.collidingVolume != null)
+            // Check hovered QBS because we want to prioritize that over EFM volumes
+            if(hand.fvrHand.CurrentHoveredQuickbeltSlot == null && hand.collidingVolume != null)
             {
+                // Remove from previous volume if it had one
+                if(parentVolume != null && hand.collidingVolume != parentVolume)
+                {
+                    parentVolume.RemoveItem(this);
+                }
+
+                // Add to new volume
                 hand.collidingVolume.AddItem(this);
                 hand.collidingVolume.Unoffer();
                 hand.volumeCollider = null;
@@ -2245,7 +2250,23 @@ namespace EFM
 
         public void OnTransformParentChanged()
         {
-            MeatovItem newParent = transform.GetComponentInParents<MeatovItem>();
+            MeatovItem newParent = null;
+
+            if(physObj.QuickbeltSlot != null)
+            {
+                // If in QBS, we may not be attached directly to the QBS itself so go through it instead of transform parent
+                newParent = physObj.QuickbeltSlot.GetComponentInParents<MeatovItem>();
+            }
+            else if(physObj is FVRFireArmAttachment && (physObj as FVRFireArmAttachment).curMount != null)
+            {
+                // If attachment, we may be parented to some root item instead of the item that owns the mount we are on
+                newParent = (physObj as FVRFireArmAttachment).curMount.GetComponentInParents<MeatovItem>();
+            }
+            else
+            {
+                newParent = transform.GetComponentInParents<MeatovItem>();
+            }
+
             if (newParent != parent)
             {
                 // Remove from previous parent
@@ -2255,10 +2276,22 @@ namespace EFM
                 parent = null;
                 childIndex = -1; 
                 
-                // If was in a volume, obviously no longer in there so remove from it
+                // If was in a volume, must check if still correct one
+                // because of the order in which this parent changed event is called and when we call
+                // EndInteraction on the item to add it to a volume,
+                // if we call this after for any reason, we obviously don't want to remvoe from volume we just added this item to
                 if (parentVolume != null)
                 {
-                    parentVolume.RemoveItem(this);
+                    MeatovItem ownerItem = null;
+                    if (parentVolume is ContainerVolume)
+                    {
+                        ownerItem = (parentVolume as ContainerVolume).ownerItem;
+                    }
+
+                    if(ownerItem != parent)
+                    {
+                        parentVolume.RemoveItem(this);
+                    }
                 }
 
                 // Add to new parent

@@ -88,8 +88,6 @@ namespace EFM
         public static Dictionary<string, int> ammoBoxByAmmoID;
         public static Dictionary<string, int> requiredForQuest;
         public static Dictionary<string, List<DescriptionManager>> activeDescriptionsByItemID;
-        public static List<AreaSlot> areaSlots;
-        public static bool areaSlotShouldUpdate = true;
         public static List<AreaBonus> activeBonuses;
         public static Trader[] traders;
         public static Dictionary<int, List<Task>> tasksByTraderIndex;
@@ -1977,16 +1975,23 @@ namespace EFM
                 // If whitelist contains the ancestor ID
                 if (whiteList.Contains(parentsToUse[i]))
                 {
-                    // Must check if any prior ancestor IDs are in the blacklist
-                    // If an prior ancestor or the item's ID is found in the blacklist, return false, the item does not fit
-                    for (int j = 0; j < i; ++j)
+                    if(blackList == null)
                     {
-                        if (blackList.Contains(parentsToUse[j]))
-                        {
-                            return false;
-                        }
+                        return true;
                     }
-                    return !blackList.Contains(IDToUse);
+                    else
+                    {
+                        // Must check if any prior ancestor IDs are in the blacklist
+                        // If an prior ancestor or the item's ID is found in the blacklist, return false, the item does not fit
+                        for (int j = 0; j < i; ++j)
+                        {
+                            if (blackList.Contains(parentsToUse[j]))
+                            {
+                                return false;
+                            }
+                        }
+                        return !blackList.Contains(IDToUse);
+                    }
                 }
             }
 

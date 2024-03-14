@@ -118,7 +118,6 @@ namespace EFM
                         OtherInteractable otherInteractable = collider.GetComponent<OtherInteractable>();
                         if (otherInteractable != null)
                         {
-                            TODO e: // This must be set in all assets using volumes
                             meatovItem = otherInteractable.ownerItem;
                         }
                     }
