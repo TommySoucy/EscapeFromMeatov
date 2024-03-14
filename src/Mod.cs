@@ -53,7 +53,7 @@ namespace EFM
         public static bool beginInteractingEquipRig;
         public static Hand rightHand;
         public static Hand leftHand;
-        public static List<List<FVRQuickBeltSlot>> otherActiveSlots;
+        public static List<List<RigSlot>> looseRigSlots;
         public static int chosenCharIndex;
         public static int chosenMapIndex;
         public static int chosenTimeIndex;

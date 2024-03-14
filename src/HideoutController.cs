@@ -1820,7 +1820,7 @@ namespace EFM
             }
 
             // Clear other active slots since we shouldn't have any on load
-            Mod.otherActiveSlots.Clear();
+            Mod.looseRigSlots.Clear();
 
             // Load player status if not loading in from a raid
             saveTime = new DateTime((long)HideoutController.loadedData["time"]);
@@ -3105,7 +3105,7 @@ namespace EFM
                         // Update the current weight of the rig
                         MeatovItem.SetCurrentWeight(MI);
 
-                        MI.UpdateRigMode();
+                        MI.UpdateClosedMode();
                     }
                 }
 
@@ -3129,7 +3129,7 @@ namespace EFM
                         }
                     }
 
-                    MI.UpdateBackpackMode();
+                    MI.UpdateClosedMode();
                 }
 
                 // Container

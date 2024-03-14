@@ -1824,9 +1824,9 @@ namespace EFM
 		{
 			configurationRoot.gameObject.SetActive(true);
 
-			// Set active slots
-			Mod.otherActiveSlots.Add(rigSlots);
-			activeSlotsSetIndex = Mod.otherActiveSlots.Count - 1;
+            // Set active slots
+            activeSlotsSetIndex = Mod.looseRigSlots.Count;
+            Mod.looseRigSlots.Add(rigSlots);
 
 			// Load items into their slots
 			for (int i = 0; i < itemsInSlots.Length; ++i)
@@ -1911,17 +1911,11 @@ namespace EFM
 		{
 			configurationRoot.gameObject.SetActive(false);
 
-			// Remove from other active slots
-			Mod.otherActiveSlots.RemoveAt(activeSlotsSetIndex);
-
-			// Take all items out of their slots
-			for (int i = 0; i < itemsInSlots.Length; ++i)
-			{
-				if (itemsInSlots[i] != null)
-				{
-					itemsInSlots[i].SetActive(false); 
-				}
-			}
+            // Remove from other active slots
+            Mod.looseRigSlots[activeSlotsSetIndex] = Mod.looseRigSlots[Mod.looseRigSlots.Count - 1];
+            MeatovItem replacementRig = (Mod.looseRigSlots[activeSlotsSetIndex][0] as RigSlot).ownerItem;
+            replacementRig.activeSlotsSetIndex = activeSlotsSetIndex;
+            Mod.looseRigSlots.RemoveAt(Mod.looseRigSlots.Count - 1);
 		}
 
 		private void SetContainerOpen(bool open, bool isRightHand = false)

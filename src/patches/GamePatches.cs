@@ -1105,7 +1105,7 @@ namespace EFM
             }
             else if (index > Mod.pocketsConfigIndex) // If index is higher than the pockets configuration index, we must keep the pocket slots intact
             {
-                // Only check for slots other than pockets
+                // Only check for slots other than pockets/shoulders
                 if (__instance.QBSlots_Internal.Count >  6)
                 {
                     for (int i = __instance.QBSlots_Internal.Count - 1; i >= 6; i--)
@@ -1308,16 +1308,15 @@ namespace EFM
             }
 
             // Check other active slots
-            TODO e: // make sure we use those
-            if (fvrquickBeltSlot == null && Mod.otherActiveSlots != null)
+            if (fvrquickBeltSlot == null && Mod.looseRigSlots != null)
             {
-                for (int setIndex = 0; setIndex < Mod.otherActiveSlots.Count; ++setIndex)
+                for (int setIndex = 0; setIndex < Mod.looseRigSlots.Count; ++setIndex)
                 {
-                    for (int slotIndex = 0; slotIndex < Mod.otherActiveSlots[setIndex].Count; ++slotIndex)
+                    for (int slotIndex = 0; slotIndex < Mod.looseRigSlots[setIndex].Count; ++slotIndex)
                     {
-                        if (Mod.otherActiveSlots[setIndex][slotIndex].IsPointInsideMe(position))
+                        if (Mod.looseRigSlots[setIndex][slotIndex].IsPointInsideMe(position))
                         {
-                            fvrquickBeltSlot = Mod.otherActiveSlots[setIndex][slotIndex];
+                            fvrquickBeltSlot = Mod.looseRigSlots[setIndex][slotIndex];
                             break;
                         }
                     }
@@ -1748,8 +1747,6 @@ namespace EFM
                 }
             }
         }
-
-        TODO: // Make all slots on rigs into RigSlots in assets
     }
 
     // Patches FVRPhysicalObject.BeginInteraction() in order to know if we have begun interacting with a rig from an equipment slot
