@@ -246,6 +246,7 @@ namespace EFM
             SetupVisibilityConditions(data);
 
             // Set condition type specific data
+            TODO e: // Set target items to actual item data instead of just IDs and then subscribe to the corresponding events, like FindItem
             switch (conditionType)
             {
                 case ConditionType.CounterCreator:

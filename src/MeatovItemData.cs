@@ -64,6 +64,9 @@ namespace EFM
         public int dogtagLevel = 1;
         public string dogtagName;
 
+        public delegate void OnItemFoundDelegate();
+        public event OnItemFoundDelegate OnItemFound;
+
         public MeatovItemData(JToken data)
         {
             if(data["tarkovID"] == null)
@@ -198,6 +201,14 @@ namespace EFM
                 buffEffect.duration = (float)buffEffectData[i]["duration"];
                 buffEffect.absolute = (bool)buffEffectData[i]["absolute"];
                 buffEffect.skillIndex = (int)buffEffectData[i]["skillIndex"];
+            }
+        }
+
+        public void OnItemFoundInvoke()
+        {
+            if(OnItemFound != null)
+            {
+                OnItemFound();
             }
         }
     }

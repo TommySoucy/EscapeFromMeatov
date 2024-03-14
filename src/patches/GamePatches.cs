@@ -1760,7 +1760,6 @@ namespace EFM
     // Also to give player the loot experience in case they haven't picked it up before
     class BeginInteractionPatch
     {
-        cont from here // Go through this and implement everything in it that is still necessary
         static void Prefix(FVRViveHand hand, ref FVRPhysicalObject __instance)
         {
             if (!Mod.inMeatovScene)
@@ -1768,104 +1767,30 @@ namespace EFM
                 return;
             }
 
-            MeatovItem customItemWrapper = __instance.GetComponent<MeatovItem>();
-            if (customItemWrapper != null)
+            MeatovItem item = __instance.GetComponent<MeatovItem>();
+            if (item != null)
             {
-                // Add to All if necessary
-                Mod.AddToAll(__instance, customItemWrapper);
-
-                if (customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig || customItemWrapper.itemType == MeatovItem.ItemType.Rig)
+                if (item.itemType == MeatovItem.ItemType.ArmoredRig || item.itemType == MeatovItem.ItemType.Rig)
                 {
-                    // Update whether we are picking the rig up from an equip slot
-                    Mod.beginInteractingEquipRig = __instance.QuickbeltSlot != null && __instance.QuickbeltSlot is EquipmentSlot;
-
                     // Check which PoseOverride to use depending on hand side
-                    __instance.PoseOverride = hand.IsThisTheRightHand ? customItemWrapper.rightHandPoseOverride : customItemWrapper.leftHandPoseOverride;
+                    __instance.PoseOverride = hand.IsThisTheRightHand ? item.rightHandPoseOverride : item.leftHandPoseOverride;
                 }
-                else if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack)
+                else if (item.itemType == MeatovItem.ItemType.Backpack)
                 {
                     // Check which PoseOverride to use depending on hand side
-                    __instance.PoseOverride = hand.IsThisTheRightHand ? customItemWrapper.rightHandPoseOverride : customItemWrapper.leftHandPoseOverride;
+                    __instance.PoseOverride = hand.IsThisTheRightHand ? item.rightHandPoseOverride : item.leftHandPoseOverride;
 
                     // If taken out of shoulderStorage, align with hand. Only do this if the item is not currently being held
                     // because if the backpack is harnessed, held, and then switched between hands, it will align with the new hand
                     // This is prefix so m_hand should still be null if newly grabbed
-                    if (Mod.leftShoulderObject != null && Mod.leftShoulderObject.Equals(customItemWrapper.gameObject) && __instance.m_hand == null)
+                    if (Mod.leftShoulderObject != null && Mod.leftShoulderObject.Equals(item.gameObject) && __instance.m_hand == null)
                     {
                         FVRViveHand.AlignChild(__instance.transform, __instance.PoseOverride, hand.transform);
                     }
                 }
-
-                // Check if this item is a container, if so need to check if we were colliding with its container volume and make sure we are not
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Pouch ||
-                    customItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
-                    customItemWrapper.itemType == MeatovItem.ItemType.Container)
-                {
-                    if (hand.IsThisTheRightHand /*&& Mod.rightHand.collidingContainerWrapper != null && Mod.rightHand.collidingContainerWrapper.Equals(customItemWrapper)*/)
-                    {
-                        //Mod.rightHand.hoverValid = false;
-                        //Mod.rightHand.collidingContainerWrapper.SetContainerHovered(false);
-                        //Mod.rightHand.collidingContainerWrapper = null;
-                    }
-                    else if (!hand.IsThisTheRightHand /*&& Mod.leftHand.collidingContainerWrapper != null && Mod.leftHand.collidingContainerWrapper.Equals(customItemWrapper)*/)
-                    {
-                        //Mod.leftHand.hoverValid = false;
-                        //Mod.leftHand.collidingContainerWrapper.SetContainerHovered(false);
-                        //Mod.leftHand.collidingContainerWrapper = null;
-                    }
-                }
-
-                // Check if this item is a togglable, if so need to check if we were colliding with it and make sure we are not
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Pouch ||
-                    customItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
-                    customItemWrapper.itemType == MeatovItem.ItemType.Container ||
-                    customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig ||
-                    customItemWrapper.itemType == MeatovItem.ItemType.Rig)
-                {
-                    if (hand.IsThisTheRightHand && Mod.rightHand.collidingTogglable != null && Mod.rightHand.collidingTogglable == customItemWrapper)
-                    {
-                        Mod.rightHand.collidingTogglable = null;
-                    }
-                    else if (!hand.IsThisTheRightHand && Mod.leftHand.collidingTogglable != null && Mod.leftHand.collidingTogglable == customItemWrapper)
-                    {
-                        Mod.leftHand.collidingTogglable = null;
-                    }
-                }
-
-                if (!customItemWrapper.looted)
-                {
-                    customItemWrapper.looted = true;
-                    if (Mod.currentLocationIndex == 2)
-                    {
-                        if (customItemWrapper.lootExperience > 0)
-                        {
-                            Mod.AddExperience(customItemWrapper.lootExperience, 1);
-                        }
-
-                        //if (customItemWrapper.foundInRaid && Mod.taskFindItemConditionsByItemID.ContainsKey(customItemWrapper.H3ID))
-                        //{
-                        //    foreach (TraderTaskCondition condition in Mod.taskFindItemConditionsByItemID[customItemWrapper.H3ID])
-                        //    {
-                        //        if (condition.failCondition && condition.task.taskState != TraderTask.TaskState.Active)
-                        //        {
-                        //            continue;
-                        //        }
-
-                        //        if (!condition.fulfilled)
-                        //        {
-                        //            ++condition.itemCount;
-                        //            TraderStatus.UpdateConditionFulfillment(condition);
-                        //        }
-                        //    }
-                        //}
-                    }
-                    Mod.AddSkillExp(Skill.uniqueLoot, 7);
-                }
-
-                // Update lists
-                customItemWrapper.UpdateInventories();
             }
             
+            td
             // Check if in trade volume or container
             TradeVolume tradeVolume = null;
             if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
@@ -1897,10 +1822,10 @@ namespace EFM
                                                     containerItemWrapper.itemType == MeatovItem.ItemType.Container ||
                                                     containerItemWrapper.itemType == MeatovItem.ItemType.Pouch))
                 {
-                    containerItemWrapper.currentWeight -= customItemWrapper.currentWeight;
+                    containerItemWrapper.currentWeight -= item.currentWeight;
 
                     Mod.LogInfo("Grabbed item from container: " + containerItemWrapper.name + ", prevol: " + containerItemWrapper.containingVolume);
-                    containerItemWrapper.containingVolume -= customItemWrapper.volumes[customItemWrapper.mode];
+                    containerItemWrapper.containingVolume -= item.volumes[item.mode];
                     Mod.LogInfo("Postvol: " + containerItemWrapper.containingVolume);
 
                     // Reset cols of item so that they are non trigger again and can collide with the world and the container
@@ -1927,11 +1852,6 @@ namespace EFM
             if (!Mod.inMeatovScene)
             {
                 return;
-            }
-
-            if (Mod.beginInteractingEquipRig)
-            {
-                Mod.beginInteractingEquipRig = false;
             }
 
             // Ensure the item is parented to null

@@ -2175,6 +2175,25 @@ namespace EFM
                 hand.updateInteractionSphere = true;
             }
 
+            if (!looted)
+            {
+                looted = true;
+                if (Mod.currentLocationIndex == 2)
+                {
+                    if (lootExperience > 0)
+                    {
+                        Mod.AddExperience(lootExperience, 1);
+                    }
+
+                    if (foundInRaid)
+                    {
+                        itemData.OnItemFoundInvoke();
+                    }
+                }
+
+                Mod.AddSkillExp(Skill.uniqueLoot, 7);
+            }
+
             UpdateInventories();
         }
 

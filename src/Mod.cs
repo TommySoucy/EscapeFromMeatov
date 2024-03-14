@@ -50,7 +50,6 @@ namespace EFM
         public static int saveSlotIndex = -1;
         public static int currentQuickBeltConfiguration = -1;
         public static int firstCustomConfigIndex = -1;
-        public static bool beginInteractingEquipRig;
         public static Hand rightHand;
         public static Hand leftHand;
         public static List<List<RigSlot>> looseRigSlots;
