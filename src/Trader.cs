@@ -94,6 +94,7 @@ namespace EFM
 
         public Trader(int index, string ID)
         {
+            TODO e: // Load save data
             this.index = index;
             this.ID = ID;
 

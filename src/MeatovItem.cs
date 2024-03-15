@@ -2184,11 +2184,11 @@ namespace EFM
                     {
                         Mod.AddExperience(lootExperience, 1);
                     }
+                }
 
-                    if (foundInRaid)
-                    {
-                        itemData.OnItemFoundInvoke();
-                    }
+                if (foundInRaid)
+                {
+                    itemData.OnItemFoundInvoke();
                 }
 
                 Mod.AddSkillExp(Skill.uniqueLoot, 7);

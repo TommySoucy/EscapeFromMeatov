@@ -35,14 +35,14 @@ namespace EFM
             Success,
             Fail = 5
         }
-        private TaskState _taskState;
+        private TaskState _taskState = TaskState.Locked;
         public TaskState taskState
         {
             get { return _taskState; }
             set
             {
                 _taskState = value;
-                if(_taskState == TaskState.Complete)
+                if (_taskState == TaskState.Complete)
                 {
                     OnTaskCompletedInvoke();
                 }
@@ -58,6 +58,7 @@ namespace EFM
 
         public Task(KeyValuePair<string, JToken> questData)
         {
+            TODO e: // Load saved data
             ID = questData.Key;
             allTasks.Add(ID, this);
             name = Mod.localeDB[questData.Value["name"].ToString()].ToString();
@@ -74,6 +75,7 @@ namespace EFM
                 for(int i=0; i < conditions.Count; ++i)
                 {
                     conditions[i].questTargetTask = this;
+                    OnTaskCompleted += conditions[i].OnTaskCompleted;
                     conditions[i].description = "Complete task: " + name;
                 }
                 waitingTaskConditions.Remove(ID);
@@ -92,6 +94,90 @@ namespace EFM
             SetupRewards(finishRewards, questData.Value["rewards"]["Success"] as JArray);
             failRewards = new List<Reward>();
             SetupRewards(failRewards, questData.Value["rewards"]["Fail"] as JArray);
+        }
+
+        public void UpdateEventSubscription(TaskState from, TaskState to, bool onlyTo = false)
+        {
+            // We want to unsibscribe from events we needed to be subscribed to in the previous state
+            // Then subscribe to the events we need to be subscribed to in the new state
+            if (!onlyTo)
+            {
+                switch (from)
+                {
+                    case TaskState.Locked:
+                    case TaskState.Available:
+                        for (int i = 0; i < startConditions.Count; ++i)
+                        {
+                            if (startConditions[i].subscribedToEvents)
+                            {
+                                startConditions[i].UnsubscribeFromEvents();
+                            }
+                        }
+                        for (int i = 0; i < failConditions.Count; ++i)
+                        {
+                            if (failConditions[i].subscribedToEvents)
+                            {
+                                failConditions[i].UnsubscribeFromEvents();
+                            }
+                        }
+                        break;
+                    case TaskState.Active:
+                    case TaskState.Success:
+                        for (int i = 0; i < finishConditions.Count; ++i)
+                        {
+                            if (finishConditions[i].subscribedToEvents)
+                            {
+                                finishConditions[i].UnsubscribeFromEvents();
+                            }
+                        }
+                        for (int i = 0; i < failConditions.Count; ++i)
+                        {
+                            if (failConditions[i].subscribedToEvents)
+                            {
+                                failConditions[i].UnsubscribeFromEvents();
+                            }
+                        }
+                        break;
+                }
+            }
+
+            switch (to)
+            {
+                case TaskState.Locked:
+                case TaskState.Available:
+                    for (int i = 0; i < startConditions.Count; ++i)
+                    {
+                        if (!startConditions[i].subscribedToEvents)
+                        {
+                            startConditions[i].SubscribeToEvents();
+                        }
+                    }
+                    for (int i = 0; i < failConditions.Count; ++i)
+                    {
+                        if (!failConditions[i].subscribedToEvents)
+                        {
+                            failConditions[i].SubscribeToEvents();
+                        }
+                    }
+                    break;
+                case TaskState.Active:
+                case TaskState.Success:
+                    for (int i = 0; i < finishConditions.Count; ++i)
+                    {
+                        if (!finishConditions[i].subscribedToEvents)
+                        {
+                            finishConditions[i].SubscribeToEvents();
+                        }
+                    }
+                    for (int i = 0; i < failConditions.Count; ++i)
+                    {
+                        if (!failConditions[i].subscribedToEvents)
+                        {
+                            failConditions[i].SubscribeToEvents();
+                        }
+                    }
+                    break;
+            }
         }
 
         public void SetupConditions(List<Condition> conditions, JArray conditionData)
@@ -166,7 +252,7 @@ namespace EFM
         public int value;
         public bool onlyFoundInRaid = false;
         public int dogtagLevel;
-        public List<string> targetItemIDs;
+        public List<MeatovItemData> targetItems;
         public CompareMethod compareMethod;
         public string zoneID;
         // CounterCreator
@@ -188,7 +274,7 @@ namespace EFM
         // Skill
         public Skill targetSkill;
         // WeaponAssembly
-        public List<string> containsItems;
+        public List<MeatovItemData> containsItems;
         public List<string> hasItemFromCategories;
         public float weaponAccuracy;
         public CompareMethod weaponAccuracyCompareMethod;
@@ -246,7 +332,6 @@ namespace EFM
             SetupVisibilityConditions(data);
 
             // Set condition type specific data
-            TODO e: // Set target items to actual item data instead of just IDs and then subscribe to the corresponding events, like FindItem
             switch (conditionType)
             {
                 case ConditionType.CounterCreator:
@@ -269,16 +354,34 @@ namespace EFM
                         onlyFoundInRaid = (bool)properties["onlyFoundInRaid"];
                     }
                     dogtagLevel = (int)properties["dogtagLevel"];
-                    targetItemIDs = properties["target"].ToObject<List<string>>();
-                    for (int i = 0; i < targetItemIDs.Count; ++i)
+                    List<string> handoverItemTargetItemIDs = properties["target"].ToObject<List<string>>();
+                    targetItems = new List<MeatovItemData>();
+                    for (int i = 0; i < handoverItemTargetItemIDs.Count; ++i)
                     {
-                        targetItemIDs[i] = Mod.TarkovIDtoH3ID(targetItemIDs[i]);
+                        string itemID = Mod.TarkovIDtoH3ID(handoverItemTargetItemIDs[i]);
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                        }
+                        else
+                        {
+                            if(Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                targetItems.Add(Mod.vanillaItemData[itemID]);
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " handoveritem condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
+                        }
                     }
                     break;
                 case ConditionType.Level:
                     value = (int)properties["value"];
                     compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     description = "Reach level "+ value;
+                    Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
                     break;
                 case ConditionType.FindItem:
                     value = (int)properties["value"];
@@ -286,10 +389,29 @@ namespace EFM
                     maxDurability = (float)properties["maxDurability"];
                     onlyFoundInRaid = (bool)properties["onlyFoundInRaid"];
                     dogtagLevel = (int)properties["dogtagLevel"];
-                    targetItemIDs = properties["target"].ToObject<List<string>>();
-                    for (int i = 0; i < targetItemIDs.Count; ++i)
+                    List<string> findItemTargetItemIDs = properties["target"].ToObject<List<string>>();
+                    targetItems = new List<MeatovItemData>();
+                    for (int i = 0; i < findItemTargetItemIDs.Count; ++i)
                     {
-                        targetItemIDs[i] = Mod.TarkovIDtoH3ID(targetItemIDs[i]);
+                        string itemID = Mod.TarkovIDtoH3ID(findItemTargetItemIDs[i]);
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                            Mod.customItemData[parsedIndex].OnItemFound += OnItemFound;
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                targetItems.Add(Mod.vanillaItemData[itemID]);
+                                Mod.vanillaItemData[itemID].OnItemFound += OnItemFound;
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " find item condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
+                        }
                     }
                     findItemCountInRaid = (bool)properties["countInRaid"];
                     break;
@@ -298,6 +420,7 @@ namespace EFM
                     if (Task.allTasks.TryGetValue(targetTaskID, out Task targetTask))
                     {
                         questTargetTask = targetTask;
+                        questTargetTask.OnTaskCompleted += OnTaskCompleted;
                         description = "Complete task: " + targetTask.name;
                     }
                     else
@@ -321,6 +444,7 @@ namespace EFM
                     {
                         questAvailableAfter = (int)properties["availableAfter"];
                     }
+
                     break;
                 case ConditionType.LeaveItemAtLocation:
                     value = (int)properties["value"];
@@ -328,20 +452,54 @@ namespace EFM
                     maxDurability = (float)properties["maxDurability"];
                     onlyFoundInRaid = (bool)properties["onlyFoundInRaid"];
                     dogtagLevel = (int)properties["dogtagLevel"];
-                    targetItemIDs = properties["target"].ToObject<List<string>>();
-                    for (int i = 0; i < targetItemIDs.Count; ++i)
+                    List<string> leaveItemTargetItemIDs = properties["target"].ToObject<List<string>>();
+                    targetItems = new List<MeatovItemData>();
+                    for (int i = 0; i < leaveItemTargetItemIDs.Count; ++i)
                     {
-                        targetItemIDs[i] = Mod.TarkovIDtoH3ID(targetItemIDs[i]);
+                        string itemID = Mod.TarkovIDtoH3ID(leaveItemTargetItemIDs[i]);
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                targetItems.Add(Mod.vanillaItemData[itemID]);
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " leave item condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
+                        }
                     }
                     plantTime = (int)properties["plantTime"];
                     zoneID = properties["zoneId"].ToString();
                     break;
                 case ConditionType.PlaceBeacon:
                     value = (int)properties["value"];
-                    targetItemIDs = properties["target"].ToObject<List<string>>();
-                    for (int i = 0; i < targetItemIDs.Count; ++i)
+                    List<string> leaveBeaconTargetItemIDs = properties["target"].ToObject<List<string>>();
+                    targetItems = new List<MeatovItemData>();
+                    for (int i = 0; i < leaveBeaconTargetItemIDs.Count; ++i)
                     {
-                        targetItemIDs[i] = Mod.TarkovIDtoH3ID(targetItemIDs[i]);
+                        string itemID = Mod.TarkovIDtoH3ID(leaveBeaconTargetItemIDs[i]);
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                targetItems.Add(Mod.vanillaItemData[itemID]);
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " leave beacon condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
+                        }
                     }
                     plantTime = (int)properties["plantTime"];
                     zoneID = properties["zoneId"].ToString();
@@ -354,6 +512,7 @@ namespace EFM
                     {
                         description = "Reach level " + value + " with " + targetTrader.name;
                     }
+                    targetTrader.OnTraderLevelChanged += OnTraderLevelChanged;
                     break;
                 case ConditionType.TraderStanding:
                     standingValue = (float)properties["value"];
@@ -373,23 +532,59 @@ namespace EFM
                     {
                         description = "Reach standing " + value + " with " + targetTrader.name;
                     }
+                    targetTrader.OnTraderStandingChanged += OnTraderStandingChanged;
                     break;
                 case ConditionType.Skill:
                     value = (int)properties["value"];
                     compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     targetSkill = Mod.skills[Skill.SkillNameToIndex(properties["target"].ToString())];
+                    targetSkill.OnSkillLevelChanged += OnSkillLevelChanged;
                     break;
                 case ConditionType.WeaponAssembly:
                     value = (int)properties["value"];
-                    targetItemIDs = properties["target"].ToObject<List<string>>();
-                    for (int i = 0; i < targetItemIDs.Count; ++i)
+                    List<string> weaponAssemblyTargetItemIDs = properties["target"].ToObject<List<string>>();
+                    targetItems = new List<MeatovItemData>();
+                    for (int i = 0; i < weaponAssemblyTargetItemIDs.Count; ++i)
                     {
-                        targetItemIDs[i] = Mod.TarkovIDtoH3ID(targetItemIDs[i]);
+                        string itemID = Mod.TarkovIDtoH3ID(weaponAssemblyTargetItemIDs[i]);
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                targetItems.Add(Mod.vanillaItemData[itemID]);
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " weapon assembly condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
+                        }
                     }
-                    containsItems = properties["containsItems"].ToObject<List<string>>();
-                    for (int i = 0; i < containsItems.Count; ++i)
+                    List<string> weaponAssemblyContainsTargetItemIDs = properties["containsItems"].ToObject<List<string>>();
+                    containsItems = new List<MeatovItemData>();
+                    for (int i = 0; i < weaponAssemblyContainsTargetItemIDs.Count; ++i)
                     {
-                        containsItems[i] = Mod.TarkovIDtoH3ID(containsItems[i]);
+                        string itemID = Mod.TarkovIDtoH3ID(weaponAssemblyContainsTargetItemIDs[i]);
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            containsItems.Add(Mod.customItemData[parsedIndex]);
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                containsItems.Add(Mod.vanillaItemData[itemID]);
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " weapon assembly contains condition " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
+                        }
                     }
                     hasItemFromCategories = properties["hasItemFromCategory"].ToObject<List<string>>();
                     for (int i = 0; i < hasItemFromCategories.Count; ++i)

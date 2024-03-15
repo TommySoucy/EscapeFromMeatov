@@ -1588,26 +1588,21 @@ namespace EFM
 
                     if (EquipmentSlot.currentRig != null) // Is slot of current rig
                     {
-                        // If we are setting this object's slot to null, it may be because we have begun interacting with
-                        // the rig equipment and therefore should not remove it from the rig's itemsInSlots
-                        if (!Mod.beginInteractingEquipRig)
+                        // Find item in rig's itemsInSlots and remove it
+                        for (int i = 0; i < EquipmentSlot.currentRig.itemsInSlots.Length; ++i)
                         {
-                            // Find item in rig's itemsInSlots and remove it
-                            for (int i = 0; i < EquipmentSlot.currentRig.itemsInSlots.Length; ++i)
+                            if (EquipmentSlot.currentRig.itemsInSlots[i] == item.gameObject)
                             {
-                                if (EquipmentSlot.currentRig.itemsInSlots[i] == item.gameObject)
+                                EquipmentSlot.currentRig.itemsInSlots[i] = null;
+
+                                if (!dontProcessRigWeight)
                                 {
-                                    EquipmentSlot.currentRig.itemsInSlots[i] = null;
-
-                                    if (!dontProcessRigWeight)
-                                    {
-                                        EquipmentSlot.currentRig.currentWeight -= item.currentWeight;
-                                    }
-
-                                    // The model of the rig in the equipment slot should be updated
-                                    EquipmentSlot.currentRig.UpdateClosedMode();
-                                    return;
+                                    EquipmentSlot.currentRig.currentWeight -= item.currentWeight;
                                 }
+
+                                // The model of the rig in the equipment slot should be updated
+                                EquipmentSlot.currentRig.UpdateClosedMode();
+                                return;
                             }
                         }
                     }
@@ -1790,7 +1785,7 @@ namespace EFM
                 }
             }
             
-            td
+            TODO e: // Cont from here once we've setup the task condition event subscriptions
             // Check if in trade volume or container
             TradeVolume tradeVolume = null;
             if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
