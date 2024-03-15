@@ -381,6 +381,7 @@ namespace EFM
                     value = (int)properties["value"];
                     compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     description = "Reach level "+ value;
+                    TODO e: // Events like these should be subscribed to only until the condition is fulfilled, which is dependent on save data, so yes, we should subscribe to these by default but we should only do so at save loading instead of now
                     Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
                     break;
                 case ConditionType.FindItem:
