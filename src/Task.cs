@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mono.Cecil.Mdb;
+using System;
 using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -58,7 +59,7 @@ namespace EFM
 
         public Task(KeyValuePair<string, JToken> questData)
         {
-            TODO e: // Load saved data
+            TODO e: // Load saved data, and once we do, call UpdateEventSubscription to subscribe to necessary events
             ID = questData.Key;
             allTasks.Add(ID, this);
             name = Mod.localeDB[questData.Value["name"].ToString()].ToString();
@@ -75,7 +76,6 @@ namespace EFM
                 for(int i=0; i < conditions.Count; ++i)
                 {
                     conditions[i].questTargetTask = this;
-                    OnTaskCompleted += conditions[i].OnTaskCompleted;
                     conditions[i].description = "Complete task: " + name;
                 }
                 waitingTaskConditions.Remove(ID);
@@ -108,34 +108,22 @@ namespace EFM
                     case TaskState.Available:
                         for (int i = 0; i < startConditions.Count; ++i)
                         {
-                            if (startConditions[i].subscribedToEvents)
-                            {
-                                startConditions[i].UnsubscribeFromEvents();
-                            }
+                            startConditions[i].UnsubscribeFromEvents();
                         }
                         for (int i = 0; i < failConditions.Count; ++i)
                         {
-                            if (failConditions[i].subscribedToEvents)
-                            {
-                                failConditions[i].UnsubscribeFromEvents();
-                            }
+                            failConditions[i].UnsubscribeFromEvents();
                         }
                         break;
                     case TaskState.Active:
                     case TaskState.Success:
                         for (int i = 0; i < finishConditions.Count; ++i)
                         {
-                            if (finishConditions[i].subscribedToEvents)
-                            {
-                                finishConditions[i].UnsubscribeFromEvents();
-                            }
+                            finishConditions[i].UnsubscribeFromEvents();
                         }
                         for (int i = 0; i < failConditions.Count; ++i)
                         {
-                            if (failConditions[i].subscribedToEvents)
-                            {
-                                failConditions[i].UnsubscribeFromEvents();
-                            }
+                            failConditions[i].UnsubscribeFromEvents();
                         }
                         break;
                 }
@@ -147,34 +135,22 @@ namespace EFM
                 case TaskState.Available:
                     for (int i = 0; i < startConditions.Count; ++i)
                     {
-                        if (!startConditions[i].subscribedToEvents)
-                        {
-                            startConditions[i].SubscribeToEvents();
-                        }
+                        startConditions[i].SubscribeToEvents();
                     }
                     for (int i = 0; i < failConditions.Count; ++i)
                     {
-                        if (!failConditions[i].subscribedToEvents)
-                        {
-                            failConditions[i].SubscribeToEvents();
-                        }
+                        failConditions[i].SubscribeToEvents();
                     }
                     break;
                 case TaskState.Active:
                 case TaskState.Success:
                     for (int i = 0; i < finishConditions.Count; ++i)
                     {
-                        if (!finishConditions[i].subscribedToEvents)
-                        {
-                            finishConditions[i].SubscribeToEvents();
-                        }
+                        finishConditions[i].SubscribeToEvents();
                     }
                     for (int i = 0; i < failConditions.Count; ++i)
                     {
-                        if (!failConditions[i].subscribedToEvents)
-                        {
-                            failConditions[i].SubscribeToEvents();
-                        }
+                        failConditions[i].SubscribeToEvents();
                     }
                     break;
             }
@@ -296,7 +272,9 @@ namespace EFM
         public CompareMethod weaponWeightCompareMethod;
 
         // Live data
+        public bool fulfilled;
         public int count;
+        public bool subscribedToEvents;
 
         // Objects
         public TaskObjectiveUI marketUI;
@@ -381,8 +359,6 @@ namespace EFM
                     value = (int)properties["value"];
                     compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     description = "Reach level "+ value;
-                    TODO e: // Events like these should be subscribed to only until the condition is fulfilled, which is dependent on save data, so yes, we should subscribe to these by default but we should only do so at save loading instead of now
-                    Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
                     break;
                 case ConditionType.FindItem:
                     value = (int)properties["value"];
@@ -399,14 +375,12 @@ namespace EFM
                         if (int.TryParse(itemID, out parsedIndex))
                         {
                             targetItems.Add(Mod.customItemData[parsedIndex]);
-                            Mod.customItemData[parsedIndex].OnItemFound += OnItemFound;
                         }
                         else
                         {
                             if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
                             {
                                 targetItems.Add(Mod.vanillaItemData[itemID]);
-                                Mod.vanillaItemData[itemID].OnItemFound += OnItemFound;
                             }
                             else
                             {
@@ -421,7 +395,6 @@ namespace EFM
                     if (Task.allTasks.TryGetValue(targetTaskID, out Task targetTask))
                     {
                         questTargetTask = targetTask;
-                        questTargetTask.OnTaskCompleted += OnTaskCompleted;
                         description = "Complete task: " + targetTask.name;
                     }
                     else
@@ -513,7 +486,6 @@ namespace EFM
                     {
                         description = "Reach level " + value + " with " + targetTrader.name;
                     }
-                    targetTrader.OnTraderLevelChanged += OnTraderLevelChanged;
                     break;
                 case ConditionType.TraderStanding:
                     standingValue = (float)properties["value"];
@@ -533,13 +505,11 @@ namespace EFM
                     {
                         description = "Reach standing " + value + " with " + targetTrader.name;
                     }
-                    targetTrader.OnTraderStandingChanged += OnTraderStandingChanged;
                     break;
                 case ConditionType.Skill:
                     value = (int)properties["value"];
                     compareMethod = CompareMethodFromString(properties["compareMethod"].ToString());
                     targetSkill = Mod.skills[Skill.SkillNameToIndex(properties["target"].ToString())];
-                    targetSkill.OnSkillLevelChanged += OnSkillLevelChanged;
                     break;
                 case ConditionType.WeaponAssembly:
                     value = (int)properties["value"];
@@ -614,6 +584,139 @@ namespace EFM
             }
         }
 
+        public void SubscribeToEvents()
+        {
+            if (!subscribedToEvents)
+            {
+                switch (conditionType)
+                {
+                    case ConditionType.CounterCreator:
+                        for(int i=0; i < counters.Count; ++i)
+                        {
+                            counters[i].SubscribeToEvents();
+                        }
+                        subscribedToEvents = true;
+                        break;
+                    case ConditionType.HandoverItem:
+                    case ConditionType.WeaponAssembly:
+                        for(int i=0; i < targetItems.Count; ++i)
+                        {
+                            targetItems[i].OnItemHandedIn += OnItemHandedIn;
+                        }
+                        subscribedToEvents = true;
+                        break;
+                    case ConditionType.Level:
+                        fulfilled = CompareInt(compareMethod, Mod.level, value);
+                        if (!fulfilled)
+                        {
+                            Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
+                            subscribedToEvents = true;
+                        }
+                        break;
+                    case ConditionType.FindItem:
+                        for (int i = 0; i < targetItems.Count; ++i)
+                        {
+                            targetItems[i].OnItemFound += OnItemFound;
+                        }
+                        subscribedToEvents = true;
+                        break;
+                    case ConditionType.Quest:
+                        fulfilled = questTargetTask.taskState == Task.TaskState.Complete;
+                        if (!fulfilled)
+                        {
+                            questTargetTask.OnTaskCompleted += OnTaskCompleted;
+                            subscribedToEvents = true;
+                        }
+                        break;
+                    case ConditionType.LeaveItemAtLocation:
+                    case ConditionType.PlaceBeacon:
+                        for (int i = 0; i < targetItems.Count; ++i)
+                        {
+                            targetItems[i].OnItemLeft += OnItemLeft;
+                        }
+                        subscribedToEvents = true;
+                        break;
+                    case ConditionType.TraderLoyalty:
+                        fulfilled = CompareInt(compareMethod, targetTrader.level, value);
+                        if (!fulfilled)
+                        {
+                            targetTrader.OnTraderLevelChanged += OnTraderLevelChanged;
+                            subscribedToEvents = true;
+                        }
+                        break;
+                    case ConditionType.TraderStanding:
+                        fulfilled = CompareFloat(compareMethod, targetTrader.standing, value);
+                        if (!fulfilled)
+                        {
+                            targetTrader.OnTraderStandingChanged += OnTraderStandingChanged;
+                            subscribedToEvents = true;
+                        }
+                        break;
+                    case ConditionType.Skill:
+                        fulfilled = CompareInt(compareMethod, targetSkill.GetLevel(), value);
+                        if (!fulfilled)
+                        {
+                            targetSkill.OnSkillLevelChanged += OnSkillLevelChanged;
+                            subscribedToEvents = true;
+                        }
+                        break;
+                }
+            }
+        }
+
+        public void UnsubscribeFromEvents()
+        {
+            if (subscribedToEvents)
+            {
+                switch (conditionType)
+                {
+                    case ConditionType.CounterCreator:
+                        for(int i=0; i < counters.Count; ++i)
+                        {
+                            counters[i].UnsubscribeFromEvents();
+                        }
+                        break;
+                    case ConditionType.HandoverItem:
+                    case ConditionType.WeaponAssembly:
+                        for(int i=0; i < targetItems.Count; ++i)
+                        {
+                            targetItems[i].OnItemHandedIn -= OnItemHandedIn;
+                        }
+                        break;
+                    case ConditionType.Level:
+                        Mod.OnPlayerLevelChanged -= OnPlayerLevelChanged;
+                        break;
+                    case ConditionType.FindItem:
+                        for (int i = 0; i < targetItems.Count; ++i)
+                        {
+                            targetItems[i].OnItemFound -= OnItemFound;
+                        }
+                        break;
+                    case ConditionType.Quest:
+                        questTargetTask.OnTaskCompleted -= OnTaskCompleted;
+                        break;
+                    case ConditionType.LeaveItemAtLocation:
+                    case ConditionType.PlaceBeacon:
+                        for (int i = 0; i < targetItems.Count; ++i)
+                        {
+                            targetItems[i].OnItemLeft -= OnItemLeft;
+                        }
+                        break;
+                    case ConditionType.TraderLoyalty:
+                        targetTrader.OnTraderLevelChanged -= OnTraderLevelChanged;
+                        break;
+                    case ConditionType.TraderStanding:
+                        targetTrader.OnTraderStandingChanged -= OnTraderStandingChanged;
+                        break;
+                    case ConditionType.Skill:
+                        targetSkill.OnSkillLevelChanged -= OnSkillLevelChanged;
+                        break;
+                }
+
+                subscribedToEvents = false;
+            }
+        }
+
         public static CompareMethod CompareMethodFromString(string s)
         {
             switch (s)
@@ -629,6 +732,40 @@ namespace EFM
                 default:
                     Mod.LogError("DEV: CompareMethodFromString got string " + s);
                     return CompareMethod.GreaterEqual;
+            }
+        }
+
+        public static bool CompareInt(CompareMethod method, int x, int y)
+        {
+            switch (method)
+            {
+                case CompareMethod.Smaller:
+                    return x < y;
+                case CompareMethod.SmallerEqual:
+                    return x <= y;
+                case CompareMethod.Greater:
+                    return x > y;
+                case CompareMethod.GreaterEqual:
+                    return x >= y;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool CompareFloat(CompareMethod method, float x, float y)
+        {
+            switch (method)
+            {
+                case CompareMethod.Smaller:
+                    return x < y;
+                case CompareMethod.SmallerEqual:
+                    return x <= y;
+                case CompareMethod.Greater:
+                    return x > y;
+                case CompareMethod.GreaterEqual:
+                    return x >= y;
+                default:
+                    return false;
             }
         }
 
@@ -773,11 +910,14 @@ namespace EFM
         // UseItem
         public Condition.CompareMethod useItemCompareMethod;
         public int useItemValue;
-        public List<string> useItemTargets;
+        public List<MeatovItemData> useItemTargets;
         // ExitName
         public string exitName;
         // HealthBuff
         public List<string> buffTargets;
+
+        // Live data
+        public bool subscribedToEvents;
 
         public ConditionCounter(Condition condition, JToken data)
         {
@@ -1005,10 +1145,27 @@ namespace EFM
                     break;
                 case CounterCreatorConditionType.UseItem:
                     useItemCompareMethod = Condition.CompareMethodFromString(properties["compareMethod"].ToString());
-                    useItemTargets = properties["target"].ToObject<List<string>>();
-                    for (int i = 0; i < useItemTargets.Count; ++i)
+                    List<string> useItemTargetItemIDs = properties["target"].ToObject<List<string>>();
+                    useItemTargets = new List<MeatovItemData>();
+                    for (int i = 0; i < useItemTargetItemIDs.Count; ++i)
                     {
-                        useItemTargets[i] = Mod.TarkovIDtoH3ID(useItemTargets[i]);
+                        string itemID = Mod.TarkovIDtoH3ID(useItemTargetItemIDs[i]);
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            useItemTargets.Add(Mod.customItemData[parsedIndex]);
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                useItemTargets.Add(Mod.vanillaItemData[itemID]);
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Task " +condition.task.ID + " use item counter condition from condition " + condition.ID + " targets item " + itemID + " for which we do not have data");
+                            }
+                        }
                     }
                     useItemValue = (int)properties["value"];
                     break;
@@ -1022,6 +1179,73 @@ namespace EFM
                 case CounterCreatorConditionType.HealthBuff:
                     buffTargets = properties["target"].ToObject<List<string>>();
                     break;
+            }
+        }
+
+        public void SubscribeToEvents()
+        {
+            TODO: // These events should probably be put into RaidControlelr once we create it
+            if (!subscribedToEvents)
+            {
+                switch (counterCreatorConditionType)
+                {
+                    case CounterCreatorConditionType.Kills:
+                        Mod.OnKill += OnKill;
+                        break;
+                    case CounterCreatorConditionType.ExitStatus:
+                        Mod.OnRaidExit += OnRaidExit;
+                        break;
+                    case CounterCreatorConditionType.VisitPlace:
+                        Mod.OnPlaceVisited += OnPlaceVisited;
+                        break;
+                    case CounterCreatorConditionType.Shots:
+                        Mod.OnShot += OnShot;
+                        break;
+                    case CounterCreatorConditionType.UseItem:
+                        for (int i = 0; i < useItemTargets.Count; ++i)
+                        {
+                            useItemTargets[i].OnItemUsed += OnItemUsed;
+                        }
+                        break;
+                    case CounterCreatorConditionType.LaunchFlare:
+                        Mod.OnFlareLaunched += OnFlareLaunched;
+                        break;
+                }
+
+                subscribedToEvents = true;
+            }
+        }
+
+        public void UnsubscribeFromEvents()
+        {
+            if (subscribedToEvents)
+            {
+                switch (counterCreatorConditionType)
+                {
+                    case CounterCreatorConditionType.Kills:
+                        Mod.OnKill -= OnKill;
+                        break;
+                    case CounterCreatorConditionType.ExitStatus:
+                        Mod.OnRaidExit -= OnRaidExit;
+                        break;
+                    case CounterCreatorConditionType.VisitPlace:
+                        Mod.OnPlaceVisited -= OnPlaceVisited;
+                        break;
+                    case CounterCreatorConditionType.Shots:
+                        Mod.OnShot -= OnShot;
+                        break;
+                    case CounterCreatorConditionType.UseItem:
+                        for (int i = 0; i < useItemTargets.Count; ++i)
+                        {
+                            useItemTargets[i].OnItemUsed -= OnItemUsed;
+                        }
+                        break;
+                    case CounterCreatorConditionType.LaunchFlare:
+                        Mod.OnFlareLaunched -= OnFlareLaunched;
+                        break;
+                }
+
+                subscribedToEvents = false;
             }
         }
     }

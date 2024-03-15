@@ -225,6 +225,11 @@ namespace EFM
         public delegate void OnSkillLevelChangedDelegate();
         public event OnSkillLevelChangedDelegate OnSkillLevelChanged;
 
+        public int GetLevel()
+        {
+            return (int)(progress / 100);
+        }
+
         public static SkillType SkillTypeFromName(string name)
         {
             switch (name)
