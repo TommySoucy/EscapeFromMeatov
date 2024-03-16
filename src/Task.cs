@@ -30,14 +30,15 @@ namespace EFM
         public List<Reward> failRewards;
 
         // Live data
+        // Note values of TaskState enum, some values are enforced to match database
         public enum TaskState
         {
-            Locked,
-            Available = 2,
-            Active,
-            Complete = 4,
-            Success,
-            Fail = 5
+            Locked = 0,
+            Available = 2, // Must be 2
+            Active = 1,
+            Complete = 4, // Must be 4
+            Success = 3,
+            Fail = 5 // Must be 5
         }
         private TaskState _taskState = TaskState.Locked;
         public TaskState taskState
@@ -45,8 +46,9 @@ namespace EFM
             get { return _taskState; }
             set
             {
+                TaskState preValue = _taskState;
                 _taskState = value;
-                if (_taskState == TaskState.Complete)
+                if (_taskState != preValue)
                 {
                     OnTaskStateChangedInvoke();
                 }
@@ -84,14 +86,13 @@ namespace EFM
                 waitingTaskConditions.Remove(ID);
             }
 
-            TODO e: // Subscribe to condition fulfillment changed, at which point we'll need to check if we fulfilled all start, finish, or fail conditions and set the task state appropriately
             TODO e: // Make sure to make the UI subscribe to the task state changed and condition fulfillment changed events so it can set its elements in consequence
             startConditions = new List<Condition>();
-            SetupConditions(startConditions, questData.Value["conditions"]["AvailableForStart"] as JArray);
+            SetupConditions(startConditions, TaskState.Available, questData.Value["conditions"]["AvailableForStart"] as JArray);
             finishConditions = new List<Condition>();
-            SetupConditions(finishConditions, questData.Value["conditions"]["AvailableForFinish"] as JArray);
+            SetupConditions(finishConditions, TaskState.Success, questData.Value["conditions"]["AvailableForFinish"] as JArray);
             failConditions = new List<Condition>();
-            SetupConditions(failConditions, questData.Value["conditions"]["Fail"] as JArray);
+            SetupConditions(failConditions, TaskState.Fail, questData.Value["conditions"]["Fail"] as JArray);
 
             startRewards = new List<Reward>();
             SetupRewards(startRewards, questData.Value["rewards"]["Started"] as JArray);
@@ -114,10 +115,12 @@ namespace EFM
                         for (int i = 0; i < startConditions.Count; ++i)
                         {
                             startConditions[i].UnsubscribeFromEvents();
+                            startConditions[i].OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
                         }
                         for (int i = 0; i < failConditions.Count; ++i)
                         {
                             failConditions[i].UnsubscribeFromEvents();
+                            failConditions[i].OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
                         }
                         break;
                     case TaskState.Active:
@@ -125,10 +128,12 @@ namespace EFM
                         for (int i = 0; i < finishConditions.Count; ++i)
                         {
                             finishConditions[i].UnsubscribeFromEvents();
+                            finishConditions[i].OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
                         }
                         for (int i = 0; i < failConditions.Count; ++i)
                         {
                             failConditions[i].UnsubscribeFromEvents();
+                            failConditions[i].OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
                         }
                         break;
                 }
@@ -141,10 +146,12 @@ namespace EFM
                     for (int i = 0; i < startConditions.Count; ++i)
                     {
                         startConditions[i].SubscribeToEvents();
+                        startConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
                     }
                     for (int i = 0; i < failConditions.Count; ++i)
                     {
                         failConditions[i].SubscribeToEvents();
+                        failConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
                     }
                     break;
                 case TaskState.Active:
@@ -152,16 +159,18 @@ namespace EFM
                     for (int i = 0; i < finishConditions.Count; ++i)
                     {
                         finishConditions[i].SubscribeToEvents();
+                        finishConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
                     }
                     for (int i = 0; i < failConditions.Count; ++i)
                     {
                         failConditions[i].SubscribeToEvents();
+                        failConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
                     }
                     break;
             }
         }
 
-        public void SetupConditions(List<Condition> conditions, JArray conditionData)
+        public void SetupConditions(List<Condition> conditions, TaskState targetState, JArray conditionData)
         {
             if (conditionData == null || conditionData.Count == 0)
             {
@@ -170,7 +179,8 @@ namespace EFM
 
             for (int i = 0; i < conditionData.Count; ++i)
             {
-                conditions.Add(new Condition(this, conditionData[i]));
+                Condition newCondition = new Condition(this, targetState, conditionData[i]);
+                conditions.Add(newCondition);
             }
         }
 
@@ -185,6 +195,75 @@ namespace EFM
             {
                 rewards.Add(new Reward(this, rewardData[i]));
             }
+        }
+
+        public void OnConditionFulfillmentChanged(Condition condition)
+        {
+            // We can assume that we will only receive this event for currently active conditions
+            if (condition.fulfilled)
+            {
+                // Condition has been fulfilled, we need to check if all condition, depending on 
+                // current state, are fulfilled so we can change state if necessary
+                switch (condition.targetState)
+                {
+                    case TaskState.Available:
+                        if (AllConditionsFulfilled(startConditions))
+                        {
+                            if(taskState == TaskState.Locked)
+                            {
+                                taskState = TaskState.Available;
+                                // No need to update event subscription because we still want to listen to the same events
+                                // UpdateEventSubscription(TaskState.Locked, TaskState.Available);
+                            }
+                        }
+                        break;
+                    case TaskState.Success:
+                        if (AllConditionsFulfilled(finishConditions))
+                        {
+                            if (taskState == TaskState.Active)
+                            {
+                                taskState = TaskState.Success;
+                                // No need to update event subscription because we still want to listen to the same events
+                                // UpdateEventSubscription(TaskState.Active, TaskState.Success);
+                            }
+                        }
+                        break;
+                    case TaskState.Fail:
+                        if (AllConditionsFulfilled(failConditions))
+                        {
+                            // Not matter what state we are in (unless its already fail), we want to change state to fail
+                            if (taskState != TaskState.Fail)
+                            {
+                                taskState = TaskState.Fail;
+                                UpdateEventSubscription(taskState, TaskState.Fail);
+                            }
+                        }
+                        break;
+                }
+            }
+            else // Condition changed from fulfilled to unfulfilled
+            {
+                if(condition.targetState == TaskState.Available && taskState == TaskState.Available)
+                {
+                    taskState = TaskState.Locked;
+                }
+                else if( condition.targetState == TaskState.Success && taskState == TaskState.Success)
+                {
+                    taskState = TaskState.Active;
+                }
+            }
+        }
+
+        public static bool AllConditionsFulfilled(List<Condition> conditions)
+        {
+            for(int i=0; i < conditions.Count; ++i)
+            {
+                if (!conditions[i].fulfilled)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void OnTaskStateChangedInvoke()
@@ -226,6 +305,7 @@ namespace EFM
             TraderStanding
         }
         public ConditionType conditionType;
+        public Task.TaskState targetState;
         public string description = null;
         public List<VisibilityCondition> visibilityConditions;
         public float minDurability = 0;
@@ -302,9 +382,10 @@ namespace EFM
         public delegate void OnConditionFulfillmentChangedDelegate(Condition condition);
         public event OnConditionFulfillmentChangedDelegate OnConditionFulfillmentChanged;
 
-        public Condition(Task task, JToken data)
+        public Condition(Task task, Task.TaskState targetState, JToken data)
         {
             this.task = task;
+            this.targetState = targetState;
 
             JToken properties = data["_props"];
             ID = properties["id"].ToString();
