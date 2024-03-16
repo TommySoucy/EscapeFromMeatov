@@ -1366,11 +1366,80 @@ namespace EFM
             }
         }
 
+        public void OnShot(ShotData shotData)
+        {
+            if(counterCreatorConditionType == CounterCreatorConditionType.Kills)
+            {
+                if (Condition.CompareFloat(killDistanceCompareMethod, shotData.distance, killDistance)
+                    && DoesEnemyTargetMatch(killTarget, shotData.enemyTarget, killSavageRoles, shotData.savageRole)
+                    && Mod.IDDescribedInList(shotData.weaponData.H3ID, new List<string>(shotData.weaponData.parents), killWeaponWhitelist, null)
+                    && (killWeaponModWhitelists == null || killWeaponModWhitelists.Count == 0 || IDsDescribedInMultipleLists(shotData.weaponChildrenData, killWeaponModWhitelists))
+                    && (killWeaponModBlacklists == null || killWeaponModBlacklists.Count == 0 || !IDsDescribedInMultipleLists(shotData.weaponChildrenData, killWeaponModBlacklists))
+                    && MatchesHealthEffectList(shotData.enemyHealthEffects, killEnemyHealthEffects)
+                    && killBodyParts.Contains(shotData.bodyPart))
+                {
+                    ++condition.count;
+                    condition.fulfilled = condition.count >= condition.value;
+                }
+            }
+        }
+
         public void OnRaidExit(ExitStatus status, string exitID)
         {
             if(counterCreatorConditionType == CounterCreatorConditionType.ExitStatus)
             {
-                cont from ehre
+                if (exitStatuses.Contains(status))
+                {
+                    List<string> zoneIDs = null;
+                    for(int i=0; i < condition.counters.Count; ++i)
+                    {
+                        if (condition.counters[i].counterCreatorConditionType == CounterCreatorConditionType.InZone)
+                        {
+                            zoneIDs = condition.counters[i].zoneIDs;
+                            break;
+                        }
+                    }
+                    if(zoneIDs != null && zoneIDs.Contains(exitID))
+                    {
+                        TODO: // Also check for Location counter once we know how well set this up
+                        ++condition.count;
+                        condition.fulfilled = condition.count >= condition.value;
+                    }
+                }
+            }
+        }
+
+        public void OnPlaceVisited(string placeID)
+        {
+            if(counterCreatorConditionType == CounterCreatorConditionType.VisitPlace)
+            {
+                if (visitTarget.Equals(placeID))
+                {
+                    ++condition.count;
+                    condition.fulfilled = condition.count >= condition.value;
+                }
+            }
+        }
+
+        public void OnFlareLaunched(string placeID)
+        {
+            if(counterCreatorConditionType == CounterCreatorConditionType.LaunchFlare)
+            {
+                if (zoneIDs.Contains(placeID))
+                {
+                    ++condition.count;
+                    condition.fulfilled = condition.count >= condition.value;
+                }
+            }
+        }
+
+        public void OnItemUsed()
+        {
+            if(counterCreatorConditionType == CounterCreatorConditionType.UseItem)
+            {
+                TODO: // Also check for Location counter once we know how well set this up
+                ++condition.count;
+                condition.fulfilled = condition.count >= condition.value;
             }
         }
 

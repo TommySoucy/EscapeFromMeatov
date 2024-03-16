@@ -878,7 +878,7 @@ namespace EFM
 								{
 									amount = 0;
 
-									UpdateUseItemCounterConditions();
+                                    itemData.OnItemUsedInvoke();
 								}
 							}
 							else
@@ -888,8 +888,8 @@ namespace EFM
 								{
 									amount -= amountToConsume;
 
-									UpdateUseItemCounterConditions();
-								}
+                                    itemData.OnItemUsedInvoke();
+                                }
 							}
 						}
 					}
@@ -904,8 +904,8 @@ namespace EFM
 							{
 								amount -= 1;
 
-								UpdateUseItemCounterConditions();
-							}
+                                itemData.OnItemUsedInvoke();
+                            }
 							// Apply effects at full effectiveness
 						}
 					}
@@ -968,13 +968,13 @@ namespace EFM
 								{
 									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
 
-									UpdateUseItemCounterConditions();
-								}
+                                    itemData.OnItemUsedInvoke();
+                                }
                             }
                             else
-							{
-								UpdateUseItemCounterConditions();
-							}
+                            {
+                                itemData.OnItemUsedInvoke();
+                            }
 						}
 						else
 						{
@@ -1030,13 +1030,13 @@ namespace EFM
 								{
 									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
 
-									UpdateUseItemCounterConditions();
-								}
+                                    itemData.OnItemUsedInvoke();
+                                }
                             }
                             else
-							{
-								UpdateUseItemCounterConditions();
-							}
+                            {
+                                itemData.OnItemUsedInvoke();
+                            }
 						}
 					}
 
@@ -1062,41 +1062,6 @@ namespace EFM
 				}
 			}
 		}
-
-		private void UpdateUseItemCounterConditions()
-        {
-   //         if (Mod.currentUseItemCounterConditionsByItemID.ContainsKey(H3ID))
-   //         {
-			//	List<TraderTaskCounterCondition> useItemCounterConditions = Mod.currentUseItemCounterConditionsByItemID[H3ID];
-			//	foreach (TraderTaskCounterCondition counterCondition in useItemCounterConditions)
-			//	{
-			//		// Check task and condition state validity
-			//		if (!counterCondition.parentCondition.visible)
-			//		{
-			//			continue;
-			//		}
-
-			//		// Check constraint counters (Location, Equipment, HealthEffect, InZone)
-			//		bool constrained = false;
-			//		foreach (TraderTaskCounterCondition otherCounterCondition in counterCondition.parentCondition.counters)
-			//		{
-			//			if (!TraderStatus.CheckCounterConditionConstraint(otherCounterCondition))
-			//			{
-			//				constrained = true;
-			//				break;
-			//			}
-			//		}
-			//		if (constrained)
-			//		{
-			//			continue;
-			//		}
-
-			//		// Successful use, increment count and update fulfillment 
-			//		++counterCondition.useCount;
-			//		TraderStatus.UpdateCounterConditionFulfillment(counterCondition);
-			//	}
-			//}
-        }
 
 		public void CancelSplit()
         {

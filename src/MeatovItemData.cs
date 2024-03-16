@@ -70,6 +70,9 @@ namespace EFM
         public delegate void OnItemLeftDelegate(string locationID);
         public event OnItemLeftDelegate OnItemLeft;
 
+        public delegate void OnItemUsedDelegate();
+        public event OnItemUsedDelegate OnItemUsed;
+
         public MeatovItemData(JToken data)
         {
             if(data["tarkovID"] == null)
@@ -220,6 +223,14 @@ namespace EFM
             if(OnItemLeft != null)
             {
                 OnItemLeft(locationID);
+            }
+        }
+
+        public void OnItemUsedInvoke()
+        {
+            if(OnItemUsed != null)
+            {
+                OnItemUsed();
             }
         }
     }

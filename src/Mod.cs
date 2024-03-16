@@ -271,8 +271,14 @@ namespace EFM
         public static event OnPlayerLevelChangedDelegate OnPlayerLevelChanged;
         public delegate void OnKillDelegate(KillData killData);
         public static event OnKillDelegate OnKill;
+        public delegate void OnShotDelegate(ShotData shotData);
+        public static event OnShotDelegate OnShot;
         public delegate void OnRaidExitDelegate(ConditionCounter.ExitStatus status, string exitID);
         public static event OnRaidExitDelegate OnRaidExit;
+        public delegate void OnPlaceVisitedDelegate(string placeID);
+        public static event OnPlaceVisitedDelegate OnPlaceVisited;
+        public delegate void OnFlareLaunchedDelegate(string placeID);
+        public static event OnFlareLaunchedDelegate OnFlareLaunched;
 
         public void Start()
         {
@@ -486,6 +492,38 @@ namespace EFM
             if(OnRaidExit != null)
             {
                 OnRaidExit(status, exitID);
+            }
+        }
+
+        public static void OnKillInvoke(KillData killData)
+        {
+            if(OnKill != null)
+            {
+                OnKill(killData);
+            }
+        }
+
+        public static void OnShotInvoke(ShotData shotData)
+        {
+            if(OnShot != null)
+            {
+                OnShot(shotData);
+            }
+        }
+
+        public static void OnPlaceVisitedInvoke(string placeID)
+        {
+            if(OnPlaceVisited != null)
+            {
+                OnPlaceVisited(placeID);
+            }
+        }
+
+        public static void OnFlareLaunchedInvoke(string placeID)
+        {
+            if(OnFlareLaunched != null)
+            {
+                OnFlareLaunched(placeID);
             }
         }
 
