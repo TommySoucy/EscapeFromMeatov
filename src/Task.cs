@@ -84,7 +84,8 @@ namespace EFM
                 waitingTaskConditions.Remove(ID);
             }
 
-            TODO e: // Subscribe to condition fulfillment changed
+            TODO e: // Subscribe to condition fulfillment changed, at which point we'll need to check if we fulfilled all start, finish, or fail conditions and set the task state appropriately
+            TODO e: // Make sure to make the UI subscribe to the task state changed and condition fulfillment changed events so it can set its elements in consequence
             startConditions = new List<Condition>();
             SetupConditions(startConditions, questData.Value["conditions"]["AvailableForStart"] as JArray);
             finishConditions = new List<Condition>();
