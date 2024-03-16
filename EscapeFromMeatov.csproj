@@ -65,6 +65,7 @@
     <Compile Include="src\ItemDescriptionUI.cs" />
     <Compile Include="src\ItemRewardView.cs" />
     <Compile Include="src\ItemView.cs" />
+    <Compile Include="src\KillData.cs" />
     <Compile Include="src\MeatovItem.cs" />
     <Compile Include="src\DamageVolume.cs" />
     <Compile Include="src\IDescribable.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="src\ResultItemView.cs" />
     <Compile Include="src\RigSlot.cs" />
     <Compile Include="src\ScavCaseView.cs" />
+    <Compile Include="src\ShotData.cs" />
     <Compile Include="src\SkillRequirement.cs" />
     <Compile Include="src\SkillUI.cs" />
     <Compile Include="src\StackSplitUI.cs" />

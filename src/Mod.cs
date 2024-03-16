@@ -107,7 +107,12 @@ namespace EFM
         public static Dictionary<string, MeatovItemData> meatovItemData = new Dictionary<string, MeatovItemData>();
 
         // Player
-        public static int level = 1;
+        private static int _level = 1;
+        public static int level 
+        {
+            get { return _level; }
+            set { _level = value; OnPlayerLevelChangedInvoke(); }
+        }
         public static int experience = 0;
         public static bool dead;
         // Parts arrays: 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
@@ -260,6 +265,14 @@ namespace EFM
         public static bool spawnOnlyFirstAI = false;
         public static bool spawnedFirstAI = false;
         public static bool forceSpawnAI = false;
+
+        // Events
+        public delegate void OnPlayerLevelChangedDelegate();
+        public static event OnPlayerLevelChangedDelegate OnPlayerLevelChanged;
+        public delegate void OnKillDelegate(KillData killData);
+        public static event OnKillDelegate OnKill;
+        public delegate void OnRaidExitDelegate(ConditionCounter.ExitStatus status, string exitID);
+        public static event OnRaidExitDelegate OnRaidExit;
 
         public void Start()
         {
@@ -458,6 +471,22 @@ namespace EFM
                 }
             }
 #endif
+        }
+
+        public static void OnPlayerLevelChangedInvoke()
+        {
+            if(OnPlayerLevelChanged != null)
+            {
+                OnPlayerLevelChanged();
+            }
+        }
+
+        public static void OnRaidExitInvoke(ConditionCounter.ExitStatus status, string exitID)
+        {
+            if(OnRaidExit != null)
+            {
+                OnRaidExit(status, exitID);
+            }
         }
 
         public void DumpLayers()
@@ -1939,6 +1968,16 @@ namespace EFM
             // Getting this far would mean that the item's ID nor any of its ancestors are in the whitelist, so doesn't fit
             // Note that this means anything that uses a whitelist should at least specify the global item ID 54009119af1c881c07000029
             return false;
+        }
+
+        public static bool IDDescribedInLists(string IDToUse, List<string> parentsToUse, List<List<string>> whiteLists, List<List<string>> blackLists)
+        {
+            bool described = false;
+            for(int i=0; i<whiteLists.Count && i < blackLists.Count; ++i)
+            {
+                described |= IDDescribedInList(IDToUse, parentsToUse, whiteLists[i], blackLists[i]);
+            }
+            return described;
         }
 
         public static void SetIcon(string itemID, Image icon)

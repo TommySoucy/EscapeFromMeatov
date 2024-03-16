@@ -1,7 +1,10 @@
 ﻿using Mono.Cecil.Mdb;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.PerformanceData;
+using System.Linq;
 using Valve.Newtonsoft.Json.Linq;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace EFM
 {
@@ -45,7 +48,7 @@ namespace EFM
                 _taskState = value;
                 if (_taskState == TaskState.Complete)
                 {
-                    OnTaskCompletedInvoke();
+                    OnTaskStateChangedInvoke();
                 }
             }
         }
@@ -54,8 +57,8 @@ namespace EFM
         public TaskUI marketUI;
         public TaskUI playerUI;
 
-        public delegate void OnTaskCompletedDelegate();
-        public event OnTaskCompletedDelegate OnTaskCompleted;
+        public delegate void OnTaskStateChangedDelegate();
+        public event OnTaskStateChangedDelegate OnTaskStateChanged;
 
         public Task(KeyValuePair<string, JToken> questData)
         {
@@ -81,6 +84,7 @@ namespace EFM
                 waitingTaskConditions.Remove(ID);
             }
 
+            TODO e: // Subscribe to condition fulfillment changed
             startConditions = new List<Condition>();
             SetupConditions(startConditions, questData.Value["conditions"]["AvailableForStart"] as JArray);
             finishConditions = new List<Condition>();
@@ -182,11 +186,11 @@ namespace EFM
             }
         }
 
-        public void OnTaskCompletedInvoke()
+        public void OnTaskStateChangedInvoke()
         {
-            if(OnTaskCompleted != null)
+            if(OnTaskStateChanged != null)
             {
-                OnTaskCompleted();
+                OnTaskStateChanged();
             }
         }
     }
@@ -272,13 +276,30 @@ namespace EFM
         public CompareMethod weaponWeightCompareMethod;
 
         // Live data
-        public bool fulfilled;
+        private bool _fulfilled;
+        public bool fulfilled
+        {
+            get { return _fulfilled; }
+            set 
+            {
+                bool preValue = _fulfilled;
+                _fulfilled = value;
+                if (preValue != _fulfilled)
+                {
+                    OnConditionFulfillmentChangedInvoke(this);
+                }
+            }
+        }
         public int count;
         public bool subscribedToEvents;
 
         // Objects
         public TaskObjectiveUI marketUI;
         public TaskObjectiveUI playerUI;
+
+        // Events
+        public delegate void OnConditionFulfillmentChangedDelegate(Condition condition);
+        public event OnConditionFulfillmentChangedDelegate OnConditionFulfillmentChanged;
 
         public Condition(Task task, JToken data)
         {
@@ -418,7 +439,6 @@ namespace EFM
                     {
                         questAvailableAfter = (int)properties["availableAfter"];
                     }
-
                     break;
                 case ConditionType.LeaveItemAtLocation:
                     value = (int)properties["value"];
@@ -591,17 +611,13 @@ namespace EFM
                 switch (conditionType)
                 {
                     case ConditionType.CounterCreator:
+                        if (counterOneSessionOnly)
+                        {
+                            Mod.OnRaidExit += OnRaidExit;
+                        }
                         for(int i=0; i < counters.Count; ++i)
                         {
                             counters[i].SubscribeToEvents();
-                        }
-                        subscribedToEvents = true;
-                        break;
-                    case ConditionType.HandoverItem:
-                    case ConditionType.WeaponAssembly:
-                        for(int i=0; i < targetItems.Count; ++i)
-                        {
-                            targetItems[i].OnItemHandedIn += OnItemHandedIn;
                         }
                         subscribedToEvents = true;
                         break;
@@ -624,7 +640,7 @@ namespace EFM
                         fulfilled = questTargetTask.taskState == Task.TaskState.Complete;
                         if (!fulfilled)
                         {
-                            questTargetTask.OnTaskCompleted += OnTaskCompleted;
+                            questTargetTask.OnTaskStateChanged += OnTaskStateChanged;
                             subscribedToEvents = true;
                         }
                         break;
@@ -671,16 +687,13 @@ namespace EFM
                 switch (conditionType)
                 {
                     case ConditionType.CounterCreator:
-                        for(int i=0; i < counters.Count; ++i)
+                        if (counterOneSessionOnly)
+                        {
+                            Mod.OnRaidExit -= OnRaidExit;
+                        }
+                        for (int i=0; i < counters.Count; ++i)
                         {
                             counters[i].UnsubscribeFromEvents();
-                        }
-                        break;
-                    case ConditionType.HandoverItem:
-                    case ConditionType.WeaponAssembly:
-                        for(int i=0; i < targetItems.Count; ++i)
-                        {
-                            targetItems[i].OnItemHandedIn -= OnItemHandedIn;
                         }
                         break;
                     case ConditionType.Level:
@@ -693,7 +706,7 @@ namespace EFM
                         }
                         break;
                     case ConditionType.Quest:
-                        questTargetTask.OnTaskCompleted -= OnTaskCompleted;
+                        questTargetTask.OnTaskStateChanged -= OnTaskStateChanged;
                         break;
                     case ConditionType.LeaveItemAtLocation:
                     case ConditionType.PlaceBeacon:
@@ -815,6 +828,92 @@ namespace EFM
             for(int i=0; i < counterArray.Count; ++i)
             {
                 counters.Add(new ConditionCounter(this, counterArray[i]));
+            }
+        }
+
+        public void OnConditionFulfillmentChangedInvoke(Condition condition)
+        {
+            if (fulfilled)
+            {
+                UnsubscribeFromEvents();
+            }
+            else
+            {
+                SubscribeToEvents();
+            }
+
+            if(OnConditionFulfillmentChanged != null)
+            {
+                OnConditionFulfillmentChanged(condition);
+            }
+        }
+
+        public void OnPlayerLevelChanged()
+        {
+            if(conditionType == ConditionType.Level)
+            {
+                fulfilled = CompareInt(compareMethod, Mod.level, value);
+            }
+        }
+
+        public void OnItemFound()
+        {
+            if(conditionType == ConditionType.FindItem)
+            {
+                ++count;
+                fulfilled = CompareInt(compareMethod, count, value);
+            }
+        }
+
+        public void OnItemLeft(string locationID)
+        {
+            if(conditionType == ConditionType.LeaveItemAtLocation)
+            {
+                if (locationID.Equals(zoneID))
+                {
+                    ++count;
+                    fulfilled = CompareInt(compareMethod, count, value);
+                }
+            }
+        }
+
+        public void OnTaskStateChanged()
+        {
+            if(conditionType == ConditionType.Quest)
+            {
+                fulfilled = questTaskStates.Contains(questTargetTask.taskState);
+            }
+        }
+
+        public void OnTraderLevelChanged()
+        {
+            if(conditionType == ConditionType.TraderLoyalty)
+            {
+                fulfilled = CompareInt(compareMethod, targetTrader.level, value);
+            }
+        }
+
+        public void OnTraderStandingChanged()
+        {
+            if(conditionType == ConditionType.TraderStanding)
+            {
+                fulfilled = CompareFloat(compareMethod, targetTrader.standing, standingValue);
+            }
+        }
+
+        public void OnSkillLevelChanged()
+        {
+            if(conditionType == ConditionType.Skill)
+            {
+                fulfilled = CompareInt(compareMethod, targetSkill.GetLevel(), value);
+            }
+        }
+
+        public void OnRaidExit(ConditionCounter.ExitStatus status, string exitID)
+        {
+            if(conditionType == ConditionType.CounterCreator && counterOneSessionOnly && !fulfilled)
+            {
+                count = 0;
             }
         }
     }
@@ -1184,7 +1283,7 @@ namespace EFM
 
         public void SubscribeToEvents()
         {
-            TODO: // These events should probably be put into RaidControlelr once we create it
+            TODO: // These events should probably be put into RaidController once we create it
             if (!subscribedToEvents)
             {
                 switch (counterCreatorConditionType)
@@ -1248,6 +1347,75 @@ namespace EFM
                 subscribedToEvents = false;
             }
         }
+
+        public void OnKill(KillData killData)
+        {
+            if(counterCreatorConditionType == CounterCreatorConditionType.Kills)
+            {
+                if (Condition.CompareFloat(killDistanceCompareMethod, killData.distance, killDistance)
+                    && DoesEnemyTargetMatch(killTarget, killData.enemyTarget, killSavageRoles, killData.savageRole)
+                    && Mod.IDDescribedInList(killData.weaponData.H3ID, new List<string>(killData.weaponData.parents), killWeaponWhitelist, null)
+                    && (killWeaponModWhitelists == null || killWeaponModWhitelists.Count == 0 || IDsDescribedInMultipleLists(killData.weaponChildrenData, killWeaponModWhitelists))
+                    && (killWeaponModBlacklists == null || killWeaponModBlacklists.Count == 0 || !IDsDescribedInMultipleLists(killData.weaponChildrenData, killWeaponModBlacklists))
+                    && MatchesHealthEffectList(killData.enemyHealthEffects, killEnemyHealthEffects)
+                    && killBodyParts.Contains(killData.bodyPart))
+                {
+                    ++condition.count;
+                    condition.fulfilled = condition.count >= condition.value;
+                }
+            }
+        }
+
+        public void OnRaidExit(ExitStatus status, string exitID)
+        {
+            if(counterCreatorConditionType == CounterCreatorConditionType.ExitStatus)
+            {
+                cont from ehre
+            }
+        }
+
+        public static bool MatchesHealthEffectList(List<HealthEffectEntry> gotEntries, List<HealthEffectEntry> list)
+        {
+            for(int i = 0; i < list.Count; i++)
+            {
+                for(int j = 0; j < gotEntries.Count; ++j)
+                {
+                    if (list[i].Matches(gotEntries[j]))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static bool IDsDescribedInMultipleLists(List<MeatovItemData> items, List<List<string>> list)
+        {
+            for(int i = 0; i < list.Count; ++i)
+            {
+                for(int j=0; j < items.Count; ++j)
+                {
+                    if (list[i].Contains(items[j].H3ID))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static bool DoesEnemyTargetMatch(EnemyTarget wanted, EnemyTarget got, List<string> savageRoles, string gotSavageRole)
+        {
+            // Got can only ever be something specific (Savage, BEAR, or USEC)
+            if (got == EnemyTarget.Savage)
+            {
+                return (wanted == EnemyTarget.Any || wanted == got) && (savageRoles == null || (gotSavageRole != null && savageRoles.Contains(gotSavageRole)));
+            }
+            else // Must be BEAR or USEC
+            {
+                return wanted == EnemyTarget.Any || wanted == EnemyTarget.AnyPmc || wanted == got;
+            }
+        }
     }
 
     public class HealthEffectEntry
@@ -1266,6 +1434,29 @@ namespace EFM
             }
             JArray effectsArray = data["effects"] as JArray;
             effects = effectsArray.ToObject<List<string>>();
+        }
+
+        public bool Matches(HealthEffectEntry other)
+        {
+            bool hasBodyPart = false;
+            for(int i=0; i < other.bodyParts.Count; ++i)
+            {
+                if (bodyParts.Contains(other.bodyParts[i]))
+                {
+                    hasBodyPart = true;
+                    break;
+                }
+            }
+            bool hasEffect = false;
+            for(int i=0; i < other.effects.Count; ++i)
+            {
+                if (effects.Contains(other.effects[i]))
+                {
+                    hasEffect = true;
+                    break;
+                }
+            }
+            return hasBodyPart && hasEffect;
         }
     }
 
