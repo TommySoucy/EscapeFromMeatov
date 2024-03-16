@@ -96,7 +96,6 @@ namespace EFM
         public static bool amountChoiceUIUp;
         public static MeatovItem splittingItem;
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
-        public static List<KeyValuePair<GameObject, object>> attachmentLocalTransform;
         public static int attachmentCheckNeeded;
         public static List<FVRInteractiveObject> physObjColResetList;
         public static int physObjColResetNeeded;

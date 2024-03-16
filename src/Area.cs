@@ -247,23 +247,13 @@ namespace EFM
 
         public void LoadLiveData()
         {
-            if(HideoutController.loadedData["hideout"] == null)
-            {
-                // No hideout save data, set defaults
-                powered = false;
-                currentLevel = startLevel;
-                upgrading = false;
-                for (int i = 0; i < levels.Length; ++i)
-                {
-                    levels[i].SetActive(i == currentLevel);
-                }
-
-                return;
-            }
-
             powered = requiresPower && (bool)HideoutController.loadedData["hideout"]["powered"];
             previousPowered = powered;
             currentLevel = (int)HideoutController.loadedData["hideout"]["areas"][index]["level"];
+            if(currentLevel == 0)
+            {
+                currentLevel = startLevel;
+            }
             upgrading = (bool)HideoutController.loadedData["hideout"]["areas"][index]["upgrading"];
             if (upgrading)
             {
@@ -698,7 +688,7 @@ namespace EFM
                         break;
                     case RequirementType.QuestComplete:
                         task = Task.allTasks[requirementData["questId"].ToString()];
-                        task.OnTaskCompleted += OnTaskCompleted;
+                        task.OnTaskStateChanged += OnTaskStateChanged;
                         break;
                 }
             }
@@ -742,7 +732,7 @@ namespace EFM
             OnAreaLevelChanged();
             OnTraderLevelChanged();
             OnSkillLevelChanged();
-            OnTaskCompleted();
+            OnTaskStateChanged();
         }
 
         public void OnHideoutInventoryChanged()
@@ -935,7 +925,7 @@ namespace EFM
             UpdateAreaUI();
         }
 
-        public void OnTaskCompleted()
+        public void OnTaskStateChanged()
         {
             switch (requirementType)
             {
@@ -1255,7 +1245,13 @@ namespace EFM
             }
 
             // Load live data
-            if(HideoutController.loadedData["hideout"] != null)
+            if(HideoutController.loadedData["hideout"]["areas"][area.index]["productions"][ID] != null)
+            {
+                inProduction = false;
+                progress = 0;
+                readyCount = 0;
+            }
+            else
             {
                 JToken productionData = HideoutController.loadedData["hideout"]["areas"][area.index]["productions"][ID];
                 inProduction = (bool)productionData["inProduction"];

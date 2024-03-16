@@ -1253,9 +1253,6 @@ namespace EFM
 
         public void ProcessData()
         {
-            Mod.preventLoadMagUpdateLists = true;
-            Mod.attachmentLocalTransform = new List<KeyValuePair<GameObject, object>>();
-
             saveTime = DateTime.UtcNow;
 
             // Check if we have loaded data
@@ -2867,10 +2864,6 @@ namespace EFM
                         }
 
                         clipPhysicalObject.Load(firearmPhysicalObject);
-
-                        // Store the clip's supposed local position so we can ensure it is correct later
-                        Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(containerObject, firearmPhysicalObject.ClipMountPos));
-                        Mod.attachmentCheckNeeded = 5;
                     }
                     else if (firearmPhysicalObject.UsesMagazines && containerPhysicalObject is FVRFireArmMagazine)
                     {
@@ -2905,10 +2898,6 @@ namespace EFM
                             }
 
                             magPhysicalObject.Load(firearmPhysicalObject);
-
-                            // Store the mag's supposed local position so we can ensure it is correct later
-                            Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(containerObject, firearmPhysicalObject.MagazineMountPos));
-                            Mod.attachmentCheckNeeded = 5;
                         }
                     }
                 }
@@ -3365,10 +3354,6 @@ namespace EFM
 
                 // ObjectWrapper
                 itemObjectWrapper.ItemID = currentPhysicalObject["ObjectWrapper"]["ItemID"].ToString();
-
-                // Store the attachment's supposed local position so we can ensure it is correct later
-                Mod.attachmentLocalTransform.Add(new KeyValuePair<GameObject, object>(itemObject, new Vector3[] { itemObject.transform.localPosition, itemObject.transform.localEulerAngles }));
-                Mod.attachmentCheckNeeded = 5;
             }
         }
 

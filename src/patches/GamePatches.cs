@@ -5503,28 +5503,6 @@ namespace EFM
                 return;
             }
 
-            if (Mod.attachmentCheckNeeded >= 0)
-            {
-                --Mod.attachmentCheckNeeded;
-
-                if (Mod.attachmentCheckNeeded == 0)
-                {
-                    foreach (KeyValuePair<GameObject, object> attachCheck in Mod.attachmentLocalTransform)
-                    {
-                        if (attachCheck.Value is Transform)
-                        {
-                            attachCheck.Key.transform.localPosition = (attachCheck.Value as Transform).localPosition;
-                            attachCheck.Key.transform.localRotation = (attachCheck.Value as Transform).localRotation;
-                        }
-                        else
-                        {
-                            attachCheck.Key.transform.localPosition = (attachCheck.Value as Vector3[])[0];
-                            attachCheck.Key.transform.localEulerAngles = (attachCheck.Value as Vector3[])[1];
-                        }
-                    }
-                }
-            }
-
             if (Mod.physObjColResetNeeded >= 0)
             {
                 --Mod.physObjColResetNeeded;

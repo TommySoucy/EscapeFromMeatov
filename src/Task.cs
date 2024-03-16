@@ -104,7 +104,7 @@ namespace EFM
 
         public void UpdateEventSubscription(TaskState from, TaskState to, bool onlyTo = false)
         {
-            // We want to unsibscribe from events we needed to be subscribed to in the previous state
+            // We want to unsubscribe from events we needed to be subscribed to in the previous state
             // Then subscribe to the events we need to be subscribed to in the new state
             if (!onlyTo)
             {
