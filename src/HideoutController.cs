@@ -1253,44 +1253,46 @@ namespace EFM
 
         public void ProcessData()
         {
-            saveTime = DateTime.UtcNow;
+            // Clear other active slots since we shouldn't have any on load
+            Mod.looseRigSlots.Clear();
 
-            // Check if we have loaded data
-            if (loadedData == null)
+            // Load the save time
+            saveTime = new DateTime((long)HideoutController.loadedData["time"]);
+            secondsSinceSave = (float)DateTime.UtcNow.Subtract(saveTime).TotalSeconds;
+            float minutesSinceSave = (float)secondsSinceSave / 60.0f;
+
+            // Load player data only if we don't want to use the data from the PMC raid we just finished
+            if (!Mod.justFinishedRaid || Mod.chosenCharIndex == 1)
             {
-                // No loaded data, set defaults
-                loadedData = new JObject();
-                Mod.level = 1;
-
-                Mod.currentMaxHealth = new float[7];
-                for (int i = 0; i < 7; ++i)
+                Mod.level = (int)loadedData["level"];
+                Mod.experience = (int)loadedData["experience"];
+                Mod.health = loadedData["health"].ToObject<float[]>();
+                for (int i = 0; i < Mod.health.Length; ++i)
                 {
-                    Mod.currentMaxHealth[i] = Mod.defaultMaxHealth[i];
+                    Mod.health[i] += Mathf.Min(Mod.currentHealthRates[i] * minutesSinceSave, Mod.currentMaxHealth[i]);
                 }
-                Mod.health = new float[7];
-                for (int i = 0; i < 7; ++i)
-                {
-                    Mod.health[i] = Mod.currentMaxHealth[i];
-                }
-                Mod.currentHealthRates = new float[7];
-                Mod.currentNonLethalHealthRates = new float[7];
-                for (int i = 0; i < 7; ++i)
-                {
-                    Mod.currentNonLethalHealthRates[i] = defaultHealthRates[i];
-                }
-
-                Mod.currentMaxEnergy = Mod.defaultMaxEnergy;
-                Mod.energy = Mod.currentMaxEnergy;
-                Mod.currentEnergyRate = defaultEnergyRate;
-                Mod.currentMaxHydration = Mod.defaultMaxHydration;
-                Mod.hydration = Mod.currentMaxHydration;
-                Mod.currentHydrationRate = defaultHydrationRate;
-                Mod.weight = 0;
-
+                Mod.currentHealthRates = loadedData["healthRates"].ToObject<float[]>();
+                Mod.currentNonLethalHealthRates = loadedData["nonLethalHealthRates"].ToObject<float[]>();
+                Mod.currentMaxHealth = loadedData["maxHealth"].ToObject<float[]>();
+                Mod.currentMaxHydration = (float)loadedData["maxHydration"];
+                Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.defaultMaxHydration);
+                Mod.currentMaxEnergy = (float)loadedData["maxEnergy"];
+                Mod.energy = Mathf.Min((float)loadedData["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.defaultMaxEnergy);
+                Mod.maxStamina = (float)loadedData["maxStamina"];
+                Mod.stamina = Mod.maxStamina;
+                Mod.weight = (int)loadedData["weight"];
+                Mod.totalRaidCount = (int)loadedData["totalRaidCount"];
+                Mod.runThroughRaidCount = (int)loadedData["runThroughRaidCount"];
+                Mod.survivedRaidCount = (int)loadedData["survivedRaidCount"];
+                Mod.MIARaidCount = (int)loadedData["MIARaidCount"];
+                Mod.KIARaidCount = (int)loadedData["KIARaidCount"];
+                Mod.failedRaidCount = (int)loadedData["failedRaidCount"];
                 Mod.skills = new Skill[64];
                 for (int i = 0; i < 64; ++i)
                 {
                     Mod.skills[i] = new Skill();
+                    Mod.skills[i].progress = (float)loadedData["skills"][i]["progress"];
+                    Mod.skills[i].currentProgress = Mod.skills[i].progress;
                     if (i >= 0 && i <= 6)
                     {
                         Mod.skills[i].skillType = Skill.SkillType.Physical;
@@ -1313,574 +1315,34 @@ namespace EFM
                     }
                 }
 
-                if (inventoryItems == null)
+                // Set bonuses depending on skills
+                float enduranceLevel = Mod.skills[0].progress / 100;
+                Mod.maxStamina += Mod.maxStamina / 100 * enduranceLevel;
+                if (enduranceLevel >= 51)
                 {
-                    inventory = new Dictionary<string, int>();
-                    inventoryItems = new Dictionary<string, List<MeatovItem>>();
+                    Mod.maxStamina += 20;
                 }
 
+                // Player items
                 if (Mod.playerInventory == null)
                 {
                     Mod.playerInventory = new Dictionary<string, int>();
                     Mod.playerInventoryItems = new Dictionary<string, List<MeatovItem>>();
                 }
-
-                // Spawn standard edition starting items
-                //Transform itemRoot = transform.GetChild(transform.childCount - 2);
-                //GameObject.Instantiate(Mod.itemPrefabs[199], new Vector3(0.782999f, 0.6760001f, 6.609f), Quaternion.Euler(0f, 37.55229f, 0f), itemRoot);
-                //GameObject.Instantiate(IM.OD["UtilityFlashlight"].GetGameObject(), new Vector3(0.782999f, 0.8260001f, 6.609f), Quaternion.Euler(0f, 37.55229f, 0f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(16.685f, 0.405f, -2.755f), Quaternion.Euler(328.4395f, 270.6471f, 2.003955E-06f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(8.198049f, 0.4181025f, -6.029191f), Quaternion.Euler(346.8106f, 0f, 0f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[396], new Vector3(-4.905951f, 0.4161026f, 23.27681f), Quaternion.Euler(348.9087f, 0f, 0f), itemRoot);
-                //GameObject ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.007049f, 0.5902026f, 3.70981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //MeatovItem customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //FVRFireArmMagazine asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.007049f, 0.5902026f, 3.64581f), Quaternion.Euler(0f, 5.83668f, 0f), itemRoot); customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(0.9946489f, 0.5902026f, 3.578609f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.004449f, 0.5902026f, 3.49771f), Quaternion.Euler(0f, 323.5824f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.084949f, 0.5902026f, 3.58231f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.145749f, 0.6102026f, 3.68561f), Quaternion.Euler(0f, 0f, 86.27259f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.117249f, 0.5902026f, 3.39831f), Quaternion.Euler(0f, 350.4561f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.117249f, 1.496603f, 3.39831f), Quaternion.Euler(0f, 350.4561f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(1.049649f, 1.496603f, 3.63981f), Quaternion.Euler(0f, 221.015f, 180f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(0.9520493f, 0.2060025f, 4.07481f), Quaternion.Euler(0f, 54.43977f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-4.89295f, 0.02490258f, -7.48019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-4.825951f, 0.02490258f, -7.42929f), Quaternion.Euler(0f, 56.71285f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(16.25405f, 0.02390254f, -1.25619f), Quaternion.Euler(0f, 51.82084f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.582951f, 0.07820261f, 1.22981f), Quaternion.Euler(0f, 51.82084f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.651051f, 0.07820261f, 1.23771f), Quaternion.Euler(0f, 117.0799f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[678], new Vector3(-3.61725f, 0.1157026f, 1.23901f), Quaternion.Euler(0f, 106.7499f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //GameObject.Instantiate(IM.OD["PinnedGrenadeXM84"].GetGameObject(), new Vector3(-0.04095078f, 0.4530027f, 4.52161f), Quaternion.Euler(0f, 0f, 271.3958f), itemRoot);
-                //GameObject.Instantiate(IM.OD["PinnedGrenadeXM84"].GetGameObject(), new Vector3(-0.2619514f, 0.4481025f, 4.35781f), Quaternion.Euler(359.111f, 39.55607f, 271.0761f), itemRoot);
-                //GameObject consumableObject = GameObject.Instantiate(Mod.itemPrefabs[608], new Vector3(-3.854952f, 0.1344025f, 0.6271096f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //MeatovItem consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[608], new Vector3(13.58705f, 0.08240259f, -2.68019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(13.41505f, 0.1511025f, -0.4421903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(13.46805f, 0.1511025f, -0.2891903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(16.04205f, 0.05110264f, -1.50819f), Quaternion.Euler(45f, 27.66409f, 270.0001f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[597], new Vector3(-3.742851f, 0.1030025f, 0.8398097f), Quaternion.Euler(45f, 27.66409f, 270.0001f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(11.52605f, 0.1997025f, -2.04419f), Quaternion.Euler(0f, 10.17791f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(8.865049f, 0.5168025f, -4.50319f), Quaternion.Euler(0f, 10.17791f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[623], new Vector3(8.865049f, 0.5331025f, -4.43109f), Quaternion.Euler(14.04671f, 10.49514f, 2.574447f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(11.78305f, 0.1993027f, -2.02819f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(-4.93795f, 0.07120264f, 1.75981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[595], new Vector3(-4.906952f, 0.07120264f, 1.86681f), Quaternion.Euler(0f, 21.25007f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(11.44805f, 0.1927025f, -1.02219f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(11.40375f, 0.1927025f, -1.12049f), Quaternion.Euler(0f, 7.272392f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[596], new Vector3(12.21005f, 0.1927025f, -1.70619f), Quaternion.Euler(0f, 29.66055f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(16.37205f, 0.04950261f, -1.18019f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(11.35405f, 0.04950261f, -2.26519f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(-4.762951f, 0.1073025f, 1.95981f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[636], new Vector3(-4.830952f, 0.1073025f, 2.08881f), Quaternion.Euler(0f, 0f, 270.0742f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[628], new Vector3(-4.569649f, 0.0717026f, 1.841403f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[628], new Vector3(-4.73295f, 0.8293025f, 10.27161f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(0.3083f, 0.1314001f, 32.8823f), Quaternion.Euler(0f, 333.2294f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(-4.58f, 0.1506f, 1.13f), Quaternion.Euler(0f, 7.700641f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[593], new Vector3(11.6359f, 0.2268f, -1.4793f), Quaternion.Euler(0f, 7.700641f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[656], new Vector3(-0.6802502f, 0.3907025f, 3.97801f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[63], new Vector3(2.551049f, 0.2303026f, -5.279191f), Quaternion.Euler(0f, 302.7106f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //GameObject.Instantiate(Mod.itemPrefabs[513], new Vector3(14.11435f, 0.3618026f, -0.3831904f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[594], new Vector3(13.90705f, 0.01460254f, -1.54019f), Quaternion.Euler(0f, 324.3596f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //GameObject.Instantiate(Mod.itemPrefabs[93], new Vector3(0.9440489f, 0.00280261f, 15.13881f), Quaternion.Euler(0f, 327.9549f, 0f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[92], new Vector3(0.9536486f, 0.03980255f, 15.15481f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //GameObject moneyObject = GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(-4.80595f, 0.01010263f, -7.312191f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //customItemWrapper = moneyObject.GetComponent<MeatovItem>();
-                //customItemWrapper.stack = 80000;
-                //moneyObject = GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(-0.6729507f, 0.3903027f, 4.17981f), Quaternion.Euler(0f, 314.1891f, 0f), itemRoot);
-                //customItemWrapper = moneyObject.GetComponent<MeatovItem>();
-                //customItemWrapper.stack = 175000;
-                //moneyObject = GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(11.68705f, 0.1943026f, -1.87019f), Quaternion.Euler(0f, 68.00121f, 0f), itemRoot);
-                //customItemWrapper = moneyObject.GetComponent<MeatovItem>();
-                //customItemWrapper.stack = 200000;
-                //moneyObject = GameObject.Instantiate(Mod.itemPrefabs[203], new Vector3(11.74695f, 0.1985025f, -1.77169f), Quaternion.Euler(0f, 30.20087f, 0f), itemRoot);
-                //customItemWrapper = moneyObject.GetComponent<MeatovItem>();
-                //customItemWrapper.stack = 45000;
-                //GameObject.Instantiate(IM.OD["CombatKnife"].GetGameObject(), new Vector3(-3.296951f, 0.03210258f, 0.4808097f), Quaternion.Euler(358.7422f, 318.3018f, 270.2902f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[568], new Vector3(16.10405f, 0.08310258f, -2.71819f), Quaternion.Euler(0f, 0f, 291.3354f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[567], new Vector3(0.6410007f, 0.03299999f, 15.506f), Quaternion.Euler(0f, 0f, 90f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[586], new Vector3(14.22805f, 0.03710258f, -0.2551903f), Quaternion.Euler(0f, 292.561f, 270f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[436], new Vector3(-4.393351f, 0.1706026f, 0.6231097f), Quaternion.Euler(270f, 271.9656f, 0f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[436], new Vector3(0.8820486f, 1.820103f, 4.05281f), Quaternion.Euler(272.9363f, 269.8858f, 89.99997f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[413], new Vector3(1.112049f, 0.1021026f, -1.00119f), Quaternion.Euler(82.1389f, 122.4497f, 8.344072f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[510], new Vector3(16.28405f, -0.04089737f, -2.97019f), Quaternion.Euler(270f, 261.68f, 0f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[511], new Vector3(12.28205f, -0.02909744f, -0.5291904f), Quaternion.Euler(270f, 299.4444f, 0f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[480], new Vector3(-6.411951f, 0.3561025f, -5.55619f), Quaternion.Euler(272.2496f, 4.349851E-05f, 160.9452f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[518], new Vector3(11.73005f, 0.06210256f, -4.120191f), Quaternion.Euler(0f, 49.91647f, 0f), itemRoot);
-                //GameObject.Instantiate(Mod.itemPrefabs[514], new Vector3(-4.182951f, 0.1709025f, 11.94181f), Quaternion.Euler(319.921f, 331.6011f, 3.973541f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MP5A4"].GetGameObject(), new Vector3(0.7950497f, 0.6081026f, 7.395809f), Quaternion.Euler(0f, 26.78772f, 270f), itemRoot);
-                //GameObject.Instantiate(IM.OD["PP19Vityaz"].GetGameObject(), new Vector3(-0.3019505f, 0.1272025f, 3.753809f), Quaternion.Euler(0.1332195f, 79.69434f, 89.81905f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineMp530rndStraight"].GetGameObject(), new Vector3(0.2940483f, 0.4071026f, 4.71781f), Quaternion.Euler(0.1332366f, 104.3259f, 89.81904f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineMp530rndStraight"].GetGameObject(), new Vector3(0.3930492f, 0.4071026f, 4.71281f), Quaternion.Euler(0.08480537f, 90.13348f, 89.79189f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineMp530rndStraight"].GetGameObject(), new Vector3(0.5190487f, 0.4071026f, 4.64981f), Quaternion.Euler(0.1998774f, 130.7681f, 89.8973f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazinePP19Vityaz30rnd"].GetGameObject(), new Vector3(0.4270496f, 0.1021026f, 4.14481f), Quaternion.Euler(0.1820061f, 122.0492f, 89.86818f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazinePP19Vityaz30rnd"].GetGameObject(), new Vector3(0.3400497f, 0.1021026f, 4.13681f), Quaternion.Euler(0.1820061f, 122.0492f, 89.86818f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazinePP19Vityaz30rnd"].GetGameObject(), new Vector3(0.2160492f, 0.1021026f, 4.06881f), Quaternion.Euler(0.08534154f, 90.28258f, 89.79212f), itemRoot);
-                //GameObject.Instantiate(IM.OD["M9A3"].GetGameObject(), new Vector3(11.14705f, 0.2051027f, -1.68719f), Quaternion.Euler(0.08534154f, 90.28258f, 89.79212f), itemRoot);
-                //GameObject.Instantiate(IM.OD["CZ75Shadow"].GetGameObject(), new Vector3(15.75105f, 0.03310263f, -1.46119f), Quaternion.Euler(0.2009627f, 184.5467f, 90.10056f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(11.16405f, 0.2041025f, -1.83819f), Quaternion.Euler(0.02504972f, 74.36313f, 89.77668f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(11.22505f, 0.2041025f, -1.89619f), Quaternion.Euler(0.002482774f, 68.59618f, 89.7753f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(10.98705f, 0.2051027f, -1.68019f), Quaternion.Euler(359.7862f, 355.9008f, 89.93082f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(11.21405f, 0.2051027f, -1.50319f), Quaternion.Euler(359.776f, 333.3978f, 90.0179f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineM9A1"].GetGameObject(), new Vector3(11.30105f, 0.2051027f, -1.38819f), Quaternion.Euler(359.794f, 314.4457f, 90.08968f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(15.89105f, 0.03310263f, -1.35319f), Quaternion.Euler(0.1624631f, 201.6643f, 90.15526f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(15.87605f, 0.03310263f, -1.22519f), Quaternion.Euler(0.1624631f, 201.6643f, 90.15526f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(16.01305f, 0.03210258f, -1.44519f), Quaternion.Euler(0.126526f, 213.6976f, 90.18571f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(16.03705f, 0.03210258f, -1.57219f), Quaternion.Euler(0.1118922f, 218.1005f, 90.19489f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineCZ75Shadow"].GetGameObject(), new Vector3(16.33705f, 0.03110254f, -1.62219f), Quaternion.Euler(0.2137769f, 140.0049f, 89.93072f), itemRoot);
-                //GameObject.Instantiate(IM.OD["M4A1v2Rightie"].GetGameObject(), new Vector3(8.036049f, 0.4011025f, -4.61919f), Quaternion.Euler(0.06372909f, 231.488f, 90.21549f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineStanag2"].GetGameObject(), new Vector3(7.859049f, 0.4021025f, -4.53319f), Quaternion.Euler(0.05014384f, 235.0685f, 90.21905f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineStanag2"].GetGameObject(), new Vector3(7.761049f, 0.4021025f, -4.608191f), Quaternion.Euler(0.01802146f, 243.3631f, 90.22398f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineStanag2"].GetGameObject(), new Vector3(8.064049f, 0.4021025f, -4.38819f), Quaternion.Euler(359.7971f, 312.504f, 90.0966f), itemRoot);
-                //GameObject.Instantiate(IM.OD["AK74N"].GetGameObject(), new Vector3(7.153049f, 0.4011025f, -5.07319f), Quaternion.Euler(359.9211f, 268.5323f, 90.21038f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineAK74N"].GetGameObject(), new Vector3(7.389049f, 0.4011025f, -4.85919f), Quaternion.Euler(359.9642f, 257.1226f, 90.22184f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineAK74N"].GetGameObject(), new Vector3(7.376049f, 0.4011025f, -4.76219f), Quaternion.Euler(0.009509331f, 245.5376f, 90.2245f), itemRoot);
-                //GameObject.Instantiate(IM.OD["MagazineAK74N"].GetGameObject(), new Vector3(7.210049f, 0.4011025f, -4.81319f), Quaternion.Euler(359.8211f, 300.7395f, 90.13593f), itemRoot);
-                //GameObject.Instantiate(IM.OD["PinnedGrenadeM67"].GetGameObject(), new Vector3(-0.3319511f, 0.4461026f, 4.372809f), Quaternion.Euler(359.4122f, 24.90105f, 271.266f), itemRoot);
-                //GameObject.Instantiate(IM.OD["PinnedGrenadeF1Russia"].GetGameObject(), new Vector3(-0.3249512f, 0.4461026f, 4.47281f), Quaternion.Euler(359.9848f, 0.6241663f, 271.3957f), itemRoot);
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[711], new Vector3(-3.788952f, 0.03410256f, 1.97721f), Quaternion.Euler(0f, 348.3584f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[706], new Vector3(10.97705f, 0.04020262f, -1.23219f), Quaternion.Euler(0f, 97.96564f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(7.163049f, 0.03710258f, -4.63719f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(4.257049f, 0.3941026f, -5.22419f), Quaternion.Euler(0f, 70.93663f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //ammoBoxObject = GameObject.Instantiate(Mod.itemPrefabs[684], new Vector3(4.222049f, 0.3941026f, -5.41819f), Quaternion.Euler(90f, 102f, 0f), itemRoot);
-                //customItemWrapper = ammoBoxObject.GetComponent<MeatovItem>();
-                //asMagazine = customItemWrapper.physObj as FVRFireArmMagazine;
-                //for (int i = 0; i < customItemWrapper.maxAmount; ++i)
-                //{
-                //    asMagazine.AddRound(customItemWrapper.roundClass, false, false);
-                //}
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.5500488f, 0.03410256f, 33.48181f), Quaternion.Euler(0f, 343.748f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[619], new Vector3(0.8410492f, 0.1321025f, 33.00081f), Quaternion.Euler(0f, 93.00641f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[633], new Vector3(-0.3458996f, 0.09630001f, 32.2702f), Quaternion.Euler(332.3804f, 73.96642f, 1.927157E-06f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[633], new Vector3(-0.2215977f, 0.03030002f, 32.30628f), Quaternion.Euler(0f, 345.1047f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[182], new Vector3(14.78605f, 0.002902627f, -0.4561903f), Quaternion.Euler(0f, 0f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-                //consumableObject = GameObject.Instantiate(Mod.itemPrefabs[180], new Vector3(-8.410952f, 0.01550257f, -7.51019f), Quaternion.Euler(0f, 56.62873f, 0f), itemRoot);
-                //consumableCIW = consumableObject.GetComponent<MeatovItem>();
-                //consumableCIW.amount = consumableCIW.maxAmount;
-
-                //// Instantiate other
-                //if (TraderStatus.waitingQuestConditions == null)
-                //{
-                //    TraderStatus.foundTasks = new Dictionary<string, TraderTask>();
-                //    TraderStatus.foundTaskConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                //    TraderStatus.waitingQuestConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                //    TraderStatus.waitingVisibilityConditions = new Dictionary<string, List<TraderTaskCondition>>();
-                //}
-                //else
-                //{
-                //    TraderStatus.foundTasks.Clear();
-                //    TraderStatus.foundTaskConditions.Clear();
-                //    TraderStatus.waitingQuestConditions.Clear();
-                //    TraderStatus.waitingVisibilityConditions.Clear();
-                //}
-                //Mod.traderStatuses = new TraderStatus[8];
-                //for (int i = 0; i < 8; i++)
-                //{
-                //    Mod.traderStatuses[i] = new TraderStatus(null, i, Mod.traderBaseDB[i]["nickname"].ToString(), 0, 0, i == 7 ? false : true, Mod.traderBaseDB[i]["currency"].ToString(), Mod.traderAssortDB[i], Mod.traderCategoriesDB[i]);
-                //}
-                //for (int i = 0; i < 8; i++)
-                //{
-                //    Mod.traderStatuses[i].Init();
-                //}
-
-                // Add active tasks to player status list
-                // Also check each condition for visibility
-                //foreach (KeyValuePair<string, TraderTask> task in TraderStatus.foundTasks)
-                //{
-                //    if (task.Value.taskState == TraderTask.TaskState.Active || task.Value.taskState == TraderTask.TaskState.Complete)
-                //    {
-                //        StatusUI.instance.AddTask(task.Value);
-                //    }
-                //    else
-                //    {
-                //        task.Value.statusListElement = null;
-                //    }
-
-                //    foreach (TraderTaskCondition condition in task.Value.startConditions)
-                //    {
-                //        bool visiblityFulfilled = true;
-                //        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
-                //        {
-                //            foreach (TraderTaskCondition visCond in condition.visibilityConditions)
-                //            {
-                //                if (!visCond.fulfilled)
-                //                {
-                //                    visiblityFulfilled = false;
-                //                    break;
-                //                }
-                //            }
-                //        }
-                //        condition.visible = visiblityFulfilled;
-                //        if (condition.marketListElement != null)
-                //        {
-                //            condition.marketListElement.SetActive(visiblityFulfilled);
-                //        }
-                //        if (condition.statusListElement != null)
-                //        {
-                //            condition.statusListElement.gameObject.SetActive(visiblityFulfilled);
-                //        }
-                //    }
-
-                //    foreach (TraderTaskCondition condition in task.Value.completionConditions)
-                //    {
-                //        bool visiblityFulfilled = true;
-                //        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
-                //        {
-                //            foreach (TraderTaskCondition visCond in condition.visibilityConditions)
-                //            {
-                //                if (!visCond.fulfilled)
-                //                {
-                //                    visiblityFulfilled = false;
-                //                    break;
-                //                }
-                //            }
-                //        }
-                //        condition.visible = visiblityFulfilled;
-                //        if (condition.marketListElement != null)
-                //        {
-                //            condition.marketListElement.SetActive(visiblityFulfilled);
-                //        }
-                //        if (condition.statusListElement != null)
-                //        {
-                //            condition.statusListElement.gameObject.SetActive(visiblityFulfilled);
-                //        }
-
-                //        // Add condition to completion list if necessary
-                //        if (condition.visible)
-                //        {
-                //            if (condition.conditionType == TraderTaskCondition.ConditionType.CounterCreator)
-                //            {
-                //                foreach (TraderTaskCounterCondition counterCondition in condition.counters)
-                //                {
-                //                    if (Mod.taskCompletionCounterConditionsByType.ContainsKey(counterCondition.counterConditionType))
-                //                    {
-                //                        Mod.taskCompletionCounterConditionsByType[counterCondition.counterConditionType].Add(counterCondition);
-                //                    }
-                //                    else
-                //                    {
-                //                        List<TraderTaskCounterCondition> newList = new List<TraderTaskCounterCondition>();
-                //                        Mod.taskCompletionCounterConditionsByType.Add(counterCondition.counterConditionType, newList);
-                //                        newList.Add(counterCondition);
-                //                    }
-                //                }
-                //            }
-                //            else
-                //            {
-                //                if (Mod.taskCompletionConditionsByType.ContainsKey(condition.conditionType))
-                //                {
-                //                    Mod.taskCompletionConditionsByType[condition.conditionType].Add(condition);
-                //                }
-                //                else
-                //                {
-                //                    List<TraderTaskCondition> newList = new List<TraderTaskCondition>();
-                //                    Mod.taskCompletionConditionsByType.Add(condition.conditionType, newList);
-                //                    newList.Add(condition);
-                //                }
-                //            }
-                //        }
-                //    }
-
-                //    foreach (TraderTaskCondition condition in task.Value.failConditions)
-                //    {
-                //        bool visiblityFulfilled = true;
-                //        if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
-                //        {
-                //            foreach (TraderTaskCondition visCond in condition.visibilityConditions)
-                //            {
-                //                if (!visCond.fulfilled)
-                //                {
-                //                    visiblityFulfilled = false;
-                //                    break;
-                //                }
-                //            }
-                //        }
-                //        condition.visible = visiblityFulfilled;
-                //        if (condition.marketListElement != null)
-                //        {
-                //            condition.marketListElement.SetActive(visiblityFulfilled);
-                //        }
-                //        if (condition.statusListElement != null)
-                //        {
-                //            condition.statusListElement.gameObject.SetActive(visiblityFulfilled);
-                //        }
-                //    }
-                //}
-
-                // Init exploration trigger bools
-                //if (Mod.triggeredExplorationTriggers == null)
-                //{
-                //    Mod.triggeredExplorationTriggers = new List<List<bool>>();
-                //}
-                //else
-                //{
-                //    Mod.triggeredExplorationTriggers.Clear();
-                //}
-                //for (int i = 0; i < 12; ++i)
-                //{
-                //    Mod.triggeredExplorationTriggers.Add(new List<bool>());
-                //}
-
-                // Setup tutorial
-                //SetupTutorial();
-
-                //scavTimer = 0;
-
-                //Mod.playerInventory.Clear();
-                //Mod.playerInventoryObjects.Clear();
-                //Mod.insuredItems = new List<InsuredSet>();
-
-                //Mod.preventLoadMagUpdateLists = false;
-
-                TODO: // Initialize Traders' live data and set events for them and their task conditions
-
-                return;
+                TODO: // Load player Items
             }
 
-            // Clear other active slots since we shouldn't have any on load
-            Mod.looseRigSlots.Clear();
-
-            // Load player status if not loading in from a raid
-            saveTime = new DateTime((long)HideoutController.loadedData["time"]);
-            secondsSinceSave = (float)DateTime.UtcNow.Subtract(saveTime).TotalSeconds;
-            float minutesSinceSave = (float)secondsSinceSave / 60.0f;
-            if (!Mod.justFinishedRaid || Mod.chosenCharIndex == 1)
+            // Load hideout items
+            if (inventoryItems == null)
             {
-                Mod.level = (int)loadedData["level"];
-                StatusUI.instance.UpdatePlayerLevel();
-                Mod.experience = (int)loadedData["experience"];
-                Mod.health = loadedData["health"].ToObject<float[]>();
-                for (int i = 0; i < Mod.health.Length; ++i)
-                {
-                    Mod.health[i] += Mathf.Min(Mod.currentHealthRates[i] * minutesSinceSave, Mod.currentMaxHealth[i]);
-                }
-                Mod.defaultMaxHydration = (float)loadedData["maxHydration"];
-                Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.defaultMaxHydration);
-                Mod.defaultMaxEnergy = (float)loadedData["maxEnergy"];
-                Mod.energy = Mathf.Min((float)loadedData["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.defaultMaxEnergy);
-                Mod.stamina = (float)loadedData["stamina"];
-                Mod.maxStamina = (float)loadedData["maxStamina"];
-                Mod.weight = (int)loadedData["weight"];
-                Mod.totalRaidCount = (int)loadedData["totalRaidCount"];
-                Mod.runThroughRaidCount = (int)loadedData["runThroughRaidCount"];
-                Mod.survivedRaidCount = (int)loadedData["survivedRaidCount"];
-                Mod.MIARaidCount = (int)loadedData["MIARaidCount"];
-                Mod.KIARaidCount = (int)loadedData["KIARaidCount"];
-                Mod.failedRaidCount = (int)loadedData["failedRaidCount"];
-                Mod.skills = new Skill[64];
-                for (int i = 0; i < 64; ++i)
-                {
-                    Mod.skills[i] = new Skill();
-                    Mod.skills[i].progress = (float)loadedData["skills"][i]["progress"];
-                    Mod.skills[i].currentProgress = Mod.skills[i].progress;
-
-                    if (i == 0)
-                    {
-                        float enduranceLevel = Mod.skills[0].progress / 100;
-                        Mod.maxStamina += (float)loadedData["maxStamina"] / 100 * enduranceLevel;
-
-                        if (enduranceLevel >= 51)
-                        {
-                            Mod.maxStamina += 20;
-                        }
-                    }
-
-                    // 0-6 unless 4 physical
-                    // 28-53 unless 52 practical
-                    // 54-63 special
-                    if (i >= 0 && i <= 6 && i != 4)
-                    {
-                        Mod.skills[i].skillType = Skill.SkillType.Physical;
-                    }
-                    else if (i >= 28 && i <= 53 && i != 52)
-                    {
-                        Mod.skills[i].skillType = Skill.SkillType.Practical;
-                    }
-                    else if (i >= 54 && i <= 63)
-                    {
-                        Mod.skills[i].skillType = Skill.SkillType.Special;
-                    }
-                }
+                inventory = new Dictionary<string, int>();
+                inventoryItems = new Dictionary<string, List<MeatovItem>>();
             }
+
+            TODO: // Load hideout items
+
+            TODO: // Initialize Traders' live data and set events for them and their task conditions
+
             //TraderStatus.fenceRestockTimer = (float)loadedData["fenceRestockTimer"] - secondsSinceSave;
 
             if (Mod.justFinishedRaid)
@@ -5034,11 +4496,6 @@ namespace EFM
         private void SaveDataToFile()
         {
             File.WriteAllText(Mod.path + "/EscapeFromMeatov/" + (Mod.saveSlotIndex == 5 ? "AutoSave" : "Slot" + Mod.saveSlotIndex) + ".sav", loadedData.ToString());
-        }
-
-        public void UpdateBasedOnPlayerLevel()
-        {
-            //marketManager.UpdateBasedOnPlayerLevel();
         }
 
         public void OnHideoutInventoryChangedInvoke()

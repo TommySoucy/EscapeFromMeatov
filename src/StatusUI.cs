@@ -60,6 +60,8 @@ namespace EFM
             // Set static instance
             instance = this;
 
+            Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
+
             // Ensure disabled by default
             Close();
         }
@@ -289,7 +291,7 @@ namespace EFM
             }
         }
 
-        public void UpdatePlayerLevel()
+        public void OnPlayerLevelChanged()
         {
             levelIcon.sprite = levelSprites[Mod.level / 5];
             level.text = Mod.level.ToString();
@@ -518,6 +520,11 @@ namespace EFM
             infoView.SetActive(!infoView.activeSelf);
             infoClosedIcon.SetActive(!infoView.activeSelf);
             infoOpenIcon.SetActive(infoView.activeSelf);
+        }
+
+        public void OnDestroy()
+        {
+            Mod.OnPlayerLevelChanged -= OnPlayerLevelChanged;
         }
 
         [Serializable]

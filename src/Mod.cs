@@ -112,7 +112,12 @@ namespace EFM
             get { return _level; }
             set { _level = value; OnPlayerLevelChangedInvoke(); }
         }
-        public static int experience = 0;
+        private static int _experience = 0;
+        public static int experience
+        {
+            get { return _experience; }
+            set { _experience = value; OnPlayerExperienceChangedInvoke(); }
+        }
         public static bool dead;
         // Parts arrays: 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
         public static float[] defaultMaxHealth;
@@ -268,6 +273,8 @@ namespace EFM
         // Events
         public delegate void OnPlayerLevelChangedDelegate();
         public static event OnPlayerLevelChangedDelegate OnPlayerLevelChanged;
+        public delegate void OnPlayerExperienceChangedDelegate();
+        public static event OnPlayerExperienceChangedDelegate OnPlayerExperienceChanged;
         public delegate void OnKillDelegate(KillData killData);
         public static event OnKillDelegate OnKill;
         public delegate void OnShotDelegate(ShotData shotData);
@@ -486,6 +493,14 @@ namespace EFM
             }
         }
 
+        public static void OnPlayerExperienceChangedInvoke()
+        {
+            if(OnPlayerExperienceChanged != null)
+            {
+                OnPlayerExperienceChanged();
+            }
+        }
+
         public static void OnRaidExitInvoke(ConditionCounter.ExitStatus status, string exitID)
         {
             if(OnRaidExit != null)
@@ -654,10 +669,8 @@ namespace EFM
                 newTask.trader.tasks.Add(newTask);
             }
 
-            //globalDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/globals.json"));
             //MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
             //MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
-            //questDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/templates/quests.json"));
             //XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
             //locationsLootDB = new JObject[12];
             //locationsBaseDB = new JObject[12];
@@ -1346,7 +1359,6 @@ namespace EFM
             // Add skill and area bonuses
             xp = (int)(xp * (HideoutController.currentExperienceRate + HideoutController.currentExperienceRate * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)));
 
-            int preLevel = level;
             experience += xp;
             int XPForNextLevel = (int)XPPerLevel[level]["exp"]; // XP for current level would be at level - 1
             while (experience >= XPForNextLevel)
@@ -1354,25 +1366,6 @@ namespace EFM
                 ++level;
                 experience -= XPForNextLevel;
                 XPForNextLevel = (int)XPPerLevel[level]["exp"];
-            }
-
-            // Update UI if necessary
-            if (preLevel != level)
-            {
-                StatusUI.instance.UpdatePlayerLevel();
-                if (currentLocationIndex == 1) // In hideout
-                {
-                    HideoutController.instance.UpdateBasedOnPlayerLevel();
-                }
-
-                // Update level task conditions
-                //if (taskStartConditionsByType.ContainsKey(TraderTaskCondition.ConditionType.Level))
-                //{
-                //    foreach (TraderTaskCondition condition in taskStartConditionsByType[TraderTaskCondition.ConditionType.Level])
-                //    {
-                //        TraderStatus.UpdateConditionFulfillment(condition);
-                //    }
-                //}
             }
 
             if (type == 1)
