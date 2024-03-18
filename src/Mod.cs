@@ -631,8 +631,27 @@ namespace EFM
             for(int i=0; i < skills.Length; ++i)
             {
                 skills[i] = new Skill();
+                if (i >= 0 && i <= 6)
+                {
+                    skills[i].skillType = Skill.SkillType.Physical;
+                }
+                else if (i >= 7 && i <= 11)
+                {
+                    skills[i].skillType = Skill.SkillType.Mental;
+                }
+                else if (i >= 12 && i <= 27)
+                {
+                    skills[i].skillType = Skill.SkillType.Combat;
+                }
+                else if (i >= 28 && i <= 53)
+                {
+                    skills[i].skillType = Skill.SkillType.Practical;
+                }
+                else if (i >= 54 && i <= 63)
+                {
+                    skills[i].skillType = Skill.SkillType.Special;
+                }
             }
-
             LoadSkillVars();
 
             areasDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/areas.json"));

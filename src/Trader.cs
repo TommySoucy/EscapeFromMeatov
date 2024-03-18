@@ -94,7 +94,6 @@ namespace EFM
 
         public Trader(int index, string ID)
         {
-            TODO e: // Load save data
             this.index = index;
             this.ID = ID;
 
@@ -295,6 +294,12 @@ namespace EFM
                     }
                 }
             }
+        }
+
+        public void LoadData(JToken data)
+        {
+            level = (int)data["level"];
+            standing = (float)data["standing"];
         }
 
         public static int IDToIndex(string ID)

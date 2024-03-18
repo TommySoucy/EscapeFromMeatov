@@ -102,6 +102,41 @@ namespace EFM
             SetupRewards(failRewards, questData.Value["rewards"]["Fail"] as JArray);
         }
 
+        public void LoadData(JToken data)
+        {
+            if (data == null)
+            {
+                for(int i=0; i < startConditions.Count; ++i)
+                {
+                    startConditions[i].LoadData(null);
+                }
+                for(int i=0; i < finishConditions.Count; ++i)
+                {
+                    finishConditions[i].LoadData(null);
+                }
+                for(int i=0; i < failConditions.Count; ++i)
+                {
+                    failConditions[i].LoadData(null);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < startConditions.Count; ++i)
+                {
+                    startConditions[i].LoadData(data["conditions"][startConditions[i].ID]);
+                }
+                for (int i = 0; i < finishConditions.Count; ++i)
+                {
+                    finishConditions[i].LoadData(data["conditions"][startConditions[i].ID]);
+                }
+                for (int i = 0; i < failConditions.Count; ++i)
+                {
+                    failConditions[i].LoadData(data["conditions"][startConditions[i].ID]);
+                }
+            }
+
+        }
+
         public void UpdateEventSubscription(TaskState from, TaskState to, bool onlyTo = false)
         {
             // We want to unsubscribe from events we needed to be subscribed to in the previous state
@@ -314,7 +349,7 @@ namespace EFM
         public bool onlyFoundInRaid = false;
         public int dogtagLevel;
         public List<MeatovItemData> targetItems;
-        public CompareMethod compareMethod;
+        public CompareMethod compareMethod = CompareMethod.GreaterEqual;
         public string zoneID;
         // CounterCreator
         public List<ConditionCounter> counters;
@@ -682,6 +717,50 @@ namespace EFM
                     weaponRecoilCompareMethod = CompareMethodFromString(properties["recoil"]["compareMethod"].ToString());
                     weaponWeight = (float)properties["weight"]["value"];
                     weaponWeightCompareMethod = CompareMethodFromString(properties["weight"]["compareMethod"].ToString());
+                    break;
+            }
+        }
+
+        public void LoadData(JToken data)
+        {
+            if(data == null)
+            {
+                count = 0;
+            }
+            else
+            {
+                count = (int)data["count"];
+            }
+
+            UpdateFulfillment();
+        }
+
+        public void UpdateFulfillment()
+        {
+            switch (conditionType)
+            {
+                case ConditionType.CounterCreator:
+                case ConditionType.FindItem:
+                case ConditionType.LeaveItemAtLocation:
+                case ConditionType.PlaceBeacon:
+                case ConditionType.HandoverItem:
+                case ConditionType.WeaponAssembly:
+                    fulfilled = CompareInt(compareMethod, count, value);
+                    break;
+                case ConditionType.Level:
+                    fulfilled = CompareInt(compareMethod, Mod.level, value);
+                    break;
+                case ConditionType.Quest:
+                    fulfilled = questTargetTask.taskState == Task.TaskState.Complete;
+                    break;
+                case ConditionType.TraderLoyalty:
+                    fulfilled = CompareInt(compareMethod, targetTrader.level, value);
+                    break;
+                case ConditionType.TraderStanding:
+                    fulfilled = CompareFloat(compareMethod, targetTrader.standing, value);
+                    break;
+                case ConditionType.Skill:
+                    fulfilled = CompareInt(compareMethod, targetSkill.GetLevel(), value);
                     break;
             }
         }
