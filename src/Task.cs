@@ -408,6 +408,7 @@ namespace EFM
         }
         public int count;
         public bool subscribedToEvents;
+        public bool visible;
 
         // Objects
         public TaskObjectiveUI marketUI;
@@ -733,6 +734,7 @@ namespace EFM
             }
 
             UpdateFulfillment();
+            UpdateVisibility();
         }
 
         public void UpdateFulfillment()
@@ -765,6 +767,19 @@ namespace EFM
             }
         }
 
+        public void UpdateVisibility()
+        {
+            visible = true;
+            for(int i=0; i < visibilityConditions.Count; ++i)
+            {
+                if (!visibilityConditions[i].fulfilled)
+                {
+                    visible = false;
+                    return;
+                }
+            }
+        }
+
         public void SubscribeToEvents()
         {
             if (!subscribedToEvents)
@@ -780,6 +795,11 @@ namespace EFM
                         {
                             counters[i].SubscribeToEvents();
                         }
+                        for(int i=0; i < visibilityConditions.Count; ++i)
+                        {
+                            visibilityConditions[i].OnVisibilityConditionFullfilmentChanged += OnVisibilityConditionFulfillmentChanged;
+                            visibilityConditions[i].SubscribeToEvents();
+                        }
                         subscribedToEvents = true;
                         break;
                     case ConditionType.Level:
@@ -787,6 +807,11 @@ namespace EFM
                         if (!fulfilled)
                         {
                             Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
+                            for (int i = 0; i < visibilityConditions.Count; ++i)
+                            {
+                                visibilityConditions[i].OnVisibilityConditionFullfilmentChanged += OnVisibilityConditionFulfillmentChanged;
+                                visibilityConditions[i].SubscribeToEvents();
+                            }
                             subscribedToEvents = true;
                         }
                         break;
@@ -795,6 +820,11 @@ namespace EFM
                         {
                             targetItems[i].OnItemFound += OnItemFound;
                         }
+                        for (int i = 0; i < visibilityConditions.Count; ++i)
+                        {
+                            visibilityConditions[i].OnVisibilityConditionFullfilmentChanged += OnVisibilityConditionFulfillmentChanged;
+                            visibilityConditions[i].SubscribeToEvents();
+                        }
                         subscribedToEvents = true;
                         break;
                     case ConditionType.Quest:
@@ -802,6 +832,11 @@ namespace EFM
                         if (!fulfilled)
                         {
                             questTargetTask.OnTaskStateChanged += OnTaskStateChanged;
+                            for (int i = 0; i < visibilityConditions.Count; ++i)
+                            {
+                                visibilityConditions[i].OnVisibilityConditionFullfilmentChanged += OnVisibilityConditionFulfillmentChanged;
+                                visibilityConditions[i].SubscribeToEvents();
+                            }
                             subscribedToEvents = true;
                         }
                         break;
@@ -811,6 +846,11 @@ namespace EFM
                         {
                             targetItems[i].OnItemLeft += OnItemLeft;
                         }
+                        for (int i = 0; i < visibilityConditions.Count; ++i)
+                        {
+                            visibilityConditions[i].OnVisibilityConditionFullfilmentChanged += OnVisibilityConditionFulfillmentChanged;
+                            visibilityConditions[i].SubscribeToEvents();
+                        }
                         subscribedToEvents = true;
                         break;
                     case ConditionType.TraderLoyalty:
@@ -818,6 +858,11 @@ namespace EFM
                         if (!fulfilled)
                         {
                             targetTrader.OnTraderLevelChanged += OnTraderLevelChanged;
+                            for (int i = 0; i < visibilityConditions.Count; ++i)
+                            {
+                                visibilityConditions[i].OnVisibilityConditionFullfilmentChanged += OnVisibilityConditionFulfillmentChanged;
+                                visibilityConditions[i].SubscribeToEvents();
+                            }
                             subscribedToEvents = true;
                         }
                         break;
@@ -826,6 +871,11 @@ namespace EFM
                         if (!fulfilled)
                         {
                             targetTrader.OnTraderStandingChanged += OnTraderStandingChanged;
+                            for (int i = 0; i < visibilityConditions.Count; ++i)
+                            {
+                                visibilityConditions[i].OnVisibilityConditionFullfilmentChanged += OnVisibilityConditionFulfillmentChanged;
+                                visibilityConditions[i].SubscribeToEvents();
+                            }
                             subscribedToEvents = true;
                         }
                         break;
@@ -834,6 +884,11 @@ namespace EFM
                         if (!fulfilled)
                         {
                             targetSkill.OnSkillLevelChanged += OnSkillLevelChanged;
+                            for (int i = 0; i < visibilityConditions.Count; ++i)
+                            {
+                                visibilityConditions[i].OnVisibilityConditionFullfilmentChanged += OnVisibilityConditionFulfillmentChanged;
+                                visibilityConditions[i].SubscribeToEvents();
+                            }
                             subscribedToEvents = true;
                         }
                         break;
@@ -887,6 +942,11 @@ namespace EFM
                         break;
                 }
 
+                for (int i = 0; i < visibilityConditions.Count; ++i)
+                {
+                    visibilityConditions[i].OnVisibilityConditionFullfilmentChanged -= OnVisibilityConditionFulfillmentChanged;
+                    visibilityConditions[i].UnsubscribeFromEvents();
+                }
                 subscribedToEvents = false;
             }
         }
@@ -1076,6 +1136,11 @@ namespace EFM
             {
                 count = 0;
             }
+        }
+
+        public void OnVisibilityConditionFulfillmentChanged()
+        {
+            UpdateVisibility();
         }
     }
 
@@ -1702,12 +1767,65 @@ namespace EFM
         // CompleteCondition
         public Condition targetCondition;
 
+        // Live data
+        private bool _fulfilled;
+        public bool fulfilled
+        {
+            get { return _fulfilled; }
+            set 
+            {
+                bool preValue = _fulfilled;
+                _fulfilled = value;
+                if(preValue != _fulfilled)
+                {
+                    OnVisibilityConditionFullfilmentChangedInvoke();
+                }
+            }
+        }
+
+        // Events
+        public delegate void OnVisibilityConditionFullfilmentChangedDelegate();
+        public event OnVisibilityConditionFullfilmentChangedDelegate OnVisibilityConditionFullfilmentChanged;
+
         public VisibilityCondition(Condition condition, Condition targetCondition)
         {
             this.condition = condition;
 
             visibilityConditionType = VisibilityConditionType.CompleteCondition;
             this.targetCondition = targetCondition;
+        }
+
+        public void SubscribeToEvents()
+        {
+            switch (visibilityConditionType)
+            {
+                case VisibilityConditionType.CompleteCondition:
+                    targetCondition.OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+                    break;
+            }
+        }
+
+        public void UnsubscribeFromEvents()
+        {
+            switch (visibilityConditionType)
+            {
+                case VisibilityConditionType.CompleteCondition:
+                    targetCondition.OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
+                    break;
+            }
+        }
+
+        public void OnConditionFulfillmentChanged(Condition condition)
+        {
+            fulfilled = targetCondition.fulfilled;
+        }
+
+        public void OnVisibilityConditionFullfilmentChangedInvoke()
+        {
+            if(OnVisibilityConditionFullfilmentChanged != null)
+            {
+                OnVisibilityConditionFullfilmentChanged();
+            }
         }
     }
 

@@ -1348,8 +1348,6 @@ namespace EFM
 
             //TraderStatus.fenceRestockTimer = (float)loadedData["fenceRestockTimer"] - secondsSinceSave;
 
-            
-
             scavTimer = (float)((long)loadedData["scavTimer"] - secondsSinceSave);
 
             // Instantiate items
