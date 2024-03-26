@@ -31,6 +31,7 @@ namespace EFM
 
 		public void OnClick(int index)
         {
+            TODO: // Set in asset
 			if (!active)
 			{
 				transform.GetChild(1).gameObject.SetActive(true);

@@ -9,6 +9,8 @@ namespace EFM
 {
     public class TaskUI : MonoBehaviour
     {
+        public Task task;
+
         public Text taskName;
         public Text location;
         public GameObject activeStatus;
@@ -25,6 +27,13 @@ namespace EFM
         public GameObject statRewardPrefab;
         public GameObject unknownRewardPrefab;
         public GameObject traderRewardPrefab;
+
+        public void SetTask(Task task)
+        {
+            this.task = task;
+
+
+        }
 
         public void OnClicked()
         {

@@ -28,6 +28,14 @@ namespace EFM
         public static readonly float handDamageResist = 0.5f;
         //public static readonly float[] sizeVolumes = { 1, 2, 5, 30, 0, 50}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
         public static readonly float volumePrecisionMultiplier = 1000; // Volumes are stored as floats but are processed as ints to avoid precision errors, this is how precise we should be when converting, this goes down to 10th of a mililiter
+        public static int neededForQuestPriority = 2;
+        public static int neededForAreaPriority = 3;
+        public static int neededForWishlistPriority = 4;
+        public static int neededForBarterPriority = 0;
+        public static int neededForProductionPriority = 1;
+        public static bool checkmarkFutureAreas = false;
+        public static bool checkmarkFutureProductions = false;
+        public static bool checkmarkFutureQuests = false;
 
         // Live data
         public static Mod modInstance;
@@ -103,7 +111,6 @@ namespace EFM
         public static GameObject[] scavRaidReturnItems; // Hands, Equipment, Right shoulder, pockets
         public static GameObject instantiatedItem;
         public static Dictionary<FVRInteractiveObject, MeatovItem> meatovItemByInteractive = new Dictionary<FVRInteractiveObject, MeatovItem>();
-        public static Dictionary<string, MeatovItemData> meatovItemData = new Dictionary<string, MeatovItemData>();
 
         // Player
         private static int _level = 1;
@@ -1893,6 +1900,20 @@ namespace EFM
             return itemsBundles[bundleIndex].LoadAsset<GameObject>("Item" + index);
         }
 
+        public static bool GetItemData(string H3ID, out MeatovItemData itemData)
+        {
+            int index = -1;
+            if(int.TryParse(H3ID, out index))
+            {
+                itemData = customItemData[index];
+                return itemData != null;
+            }
+            else
+            {
+                return vanillaItemData.TryGetValue(H3ID, out itemData);
+            }
+        }
+
         public static string GetBodyPartName(int index)
         {
             switch (index)
@@ -1956,6 +1977,18 @@ namespace EFM
             int minutes = (int)(time % 3600 / 60);
             int seconds = (int)(time % 3600 % 60);
             return String.Format("{0:00}:{1:00}:{2:00}", hours, minutes, seconds);
+        }
+
+        public static long GetItemCountInInventories(string H3ID)
+        {
+            long count = 0;
+            int intCount = 0;
+            HideoutController.inventory.TryGetValue(H3ID, out intCount);
+            count += intCount;
+            playerInventory.TryGetValue(H3ID, out intCount);
+            count += intCount;
+
+            return count;
         }
 
         public static float GetRaritySpawnChanceMultiplier(MeatovItem.ItemRarity rarity)
@@ -2148,7 +2181,7 @@ namespace EFM
             }
         }
 
-        public static string FormatCompleteMoneyString(int amount)
+        public static string FormatCompleteMoneyString(long amount)
         {
             string s = amount.ToString();
             int charCount = 0;
@@ -2161,6 +2194,23 @@ namespace EFM
                 ++charCount;
             }
             return s;
+        }
+
+        public static string FormatMoneyString(long amount)
+        {
+            if (amount < 1000L)
+            {
+                return amount.ToString();
+            }
+            if (amount < 1000000L)
+            {
+                long num = amount / 1000L;
+                long num2 = amount / 100L % 10L;
+                return num + ((num2 != 0L) ? ("." + num2) : "") + "k";
+            }
+            long num3 = amount / 1000000L;
+            long num4 = amount / 100000L % 10L;
+            return num3 + ((num4 != 0L) ? ("." + num4) : "") + "M";
         }
     }
 

@@ -656,7 +656,7 @@ namespace EFM
 		}
 
 		public bool AddItemToContainer(FVRPhysicalObject item)
-		{
+		{ 
 			if (itemType != ItemType.Backpack &&
 			   itemType != ItemType.Container &&
 			   itemType != ItemType.Pouch)
@@ -1698,6 +1698,12 @@ namespace EFM
 
 		public void ToggleMode(bool inHand, bool isRightHand = false)
 		{
+            // Can't open item that has a parent item (ex.: backpack in volume)
+            if(!open && parent != null)
+            {
+                return;
+            }
+
 			open = !open;
 			if (open)
 			{

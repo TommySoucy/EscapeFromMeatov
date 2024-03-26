@@ -123,7 +123,7 @@ namespace EFM
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         private int insuredSetIndex = 0;
         private float scavTimer;
-        public Dictionary<string, int> inventory;
+        public static Dictionary<string, int> inventory;
         public Dictionary<string, List<MeatovItem>> inventoryItems;
         private Dictionary<int, int[]> fullPartConditions;
         private Dictionary<int, GameObject> medicalPartElements;
@@ -1305,12 +1305,12 @@ namespace EFM
                 }
 
                 // Player items
+                TODO: // Load player Items
                 if (Mod.playerInventory == null)
                 {
                     Mod.playerInventory = new Dictionary<string, int>();
                     Mod.playerInventoryItems = new Dictionary<string, List<MeatovItem>>();
                 }
-                TODO: // Load player Items
             }
             else if (Mod.justFinishedRaid)
             {
@@ -1328,8 +1328,13 @@ namespace EFM
                 inventory = new Dictionary<string, int>();
                 inventoryItems = new Dictionary<string, List<MeatovItem>>();
             }
+            else
+            {
+                inventory.Clear();
+                inventoryItems.Clear();
+            }
 
-            TODO: // Load hideout items
+            TODO1: // Load hideout items
 
             // Load trader data
             JArray traderDataArray = loadedData["hideout"]["traders"] as JArray;
@@ -1427,6 +1432,22 @@ namespace EFM
                         Mod.triggeredExplorationTriggers.Add(new List<bool>());
                     }
                 }
+            }
+
+            // Load wishlist
+            Mod.wishList = loadedData["wishlist"].ToObject<List<string>>();
+
+            // Get what each meatov item is needed for now that we have all the necessary data
+            for (int i = 0; i < Mod.customItemData.Length; ++i)
+            {
+                if (Mod.customItemData[i] != null)
+                {
+                    Mod.customItemData[i].InitCheckmarkData();
+                }
+            }
+            foreach (KeyValuePair<string, MeatovItemData> vanillaItemDataEntry in Mod.vanillaItemData)
+            {
+                vanillaItemDataEntry.Value.InitCheckmarkData();
             }
         }
 
@@ -1585,6 +1606,7 @@ namespace EFM
 
         public void AddToInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
         {
+            // StackOnly should be true if not item location was changed, but the stack count has
             if (stackOnly)
             {
                 if (inventory.ContainsKey(item.H3ID))
@@ -1593,14 +1615,14 @@ namespace EFM
 
                     if (inventory[item.H3ID] <= 0)
                     {
-                        Mod.LogError("DEV: AddToPlayerInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
+                        Mod.LogError("DEV: Hideout AddToInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
                         inventory.Remove(item.H3ID);
                         inventoryItems.Remove(item.H3ID);
                     }
                 }
                 else
                 {
-                    Mod.LogError("DEV: AddToPlayerInventory stackonly with difference " + stackDifference + " for " + item.name + " did not find ID in playerInventory:\n" + Environment.StackTrace);
+                    Mod.LogError("DEV: Hideout AddToInventory stackonly with difference " + stackDifference + " for " + item.name + " did not find ID in playerInventory:\n" + Environment.StackTrace);
                 }
             }
             else
@@ -3833,7 +3855,7 @@ namespace EFM
             }
 
             // Check if in tradeVolume
-            if (item.parent != null && item.parent.parent != null && item.parent.parent.GetComponent<TradeVolume>() != null)
+            if (item.parent != null && item.parent.parent != null && item.parent.parent.GetComponent<ContainmentVolume>() != null)
             {
                 savedItem["inTradeVolume"] = true;
             }

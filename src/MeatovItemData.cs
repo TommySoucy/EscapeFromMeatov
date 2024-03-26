@@ -1,6 +1,8 @@
 ﻿using FistVR;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
@@ -64,14 +66,35 @@ namespace EFM
         public int dogtagLevel = 1;
         public string dogtagName;
 
+        // Checkmark data
+        private bool _onWishlist;
+        public bool onWishlist
+        {
+            get { return _onWishlist; }
+            set
+            {
+                bool preValue = _onWishlist;
+                _onWishlist = value;
+                if(preValue != _onWishlist)
+                {
+                    OnWishlistChangedInvoke();
+                }
+            }
+        }
+        public Dictionary<int, Dictionary<int, int>> neededForLevelByArea; // Levels(key) and count(value) in which Areas this item is needed
+        public Dictionary<int, Dictionary<int, Dictionary<Production, int>>> neededForProductionByLevelByArea; // Productions for which Level in which Areas this item is needed
+        public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTrader; // Barters for which Level for which Trader this item is needed
+        public Dictionary<Task, int> neededForTasks; // Tasks for which this item is needed
+
+        // Events
         public delegate void OnItemFoundDelegate();
         public event OnItemFoundDelegate OnItemFound;
-
         public delegate void OnItemLeftDelegate(string locationID);
         public event OnItemLeftDelegate OnItemLeft;
-
         public delegate void OnItemUsedDelegate();
         public event OnItemUsedDelegate OnItemUsed;
+        public delegate void OnWishlistChangedDelegate();
+        public event OnWishlistChangedDelegate OnWishlistChanged;
 
         public MeatovItemData(JToken data)
         {
@@ -210,6 +233,357 @@ namespace EFM
             }
         }
 
+        public void InitCheckmarkData()
+        {
+            if (HideoutController.instance == null)
+            {
+                Mod.LogError("MeatovItemData.UpdateCheckmarkData called but missing hideout instance!");
+                return;
+            }
+
+            if (neededForLevelByArea == null)
+            {
+                neededForLevelByArea = new Dictionary<int, Dictionary<int, int>>();
+                neededForProductionByLevelByArea = new Dictionary<int, Dictionary<int, Dictionary<Production, int>>>();
+                neededForBarterByLevelByTrader = new Dictionary<int, Dictionary<int, Dictionary<Barter, int>>>();
+                neededForTasks = new Dictionary<Task, int>();
+            }
+            else
+            {
+                // Already got all the checkmark data
+                // Note that this ever has to be done once
+                // Everything this item is needed for never changes
+                return;
+            }
+
+            onWishlist = Mod.wishList.Contains(H3ID);
+
+            // Get Area specific data (Upgrades, Productions)
+            for (int i = 0; i < HideoutController.instance.areaController.areas.Length; ++i)
+            {
+                Area area = HideoutController.instance.areaController.areas[i];
+                for (int j = 0; j < area.requirementsByTypePerLevel.Length; ++j)
+                {
+                    Dictionary<Requirement.RequirementType, List<Requirement>> requirementsByType = area.requirementsByTypePerLevel[j];
+                    if (requirementsByType.ContainsKey(Requirement.RequirementType.Item) && requirementsByType[Requirement.RequirementType.Item] != null)
+                    {
+                        List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Item];
+                        for (int k = 0; k < itemRequirements.Count; ++k)
+                        {
+                            Requirement requirement = itemRequirements[k];
+                            if (requirement.itemID.Equals(H3ID))
+                            {
+                                int newCount = requirement.itemCount;
+                                if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
+                                {
+                                    int currentCount = 0;
+                                    if (levels.TryGetValue(j, out currentCount))
+                                    {
+                                        levels[j] = currentCount + newCount;
+                                    }
+                                    else
+                                    {
+                                        levels.Add(j, newCount);
+                                    }
+                                }
+                                else
+                                {
+                                    Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
+                                    newLevelsDict.Add(j, newCount);
+                                    neededForLevelByArea.Add(i, newLevelsDict);
+                                }
+                            }
+                        }
+                    }
+                    if (requirementsByType.ContainsKey(Requirement.RequirementType.Tool) && requirementsByType[Requirement.RequirementType.Tool] != null)
+                    {
+                        List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Tool];
+                        for (int k = 0; k < itemRequirements.Count; ++k)
+                        {
+                            Requirement requirement = itemRequirements[k];
+                            if (requirement.itemID.Equals(H3ID))
+                            {
+                                if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
+                                {
+                                    int currentCount = 0;
+                                    if (levels.TryGetValue(j, out currentCount))
+                                    {
+                                        levels[j] = currentCount + 1;
+                                    }
+                                    else
+                                    {
+                                        levels.Add(j, 1);
+                                    }
+                                }
+                                else
+                                {
+                                    Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
+                                    newLevelsDict.Add(j, 1);
+                                    neededForLevelByArea.Add(i, newLevelsDict);
+                                }
+                            }
+                        }
+                    }
+                }
+                for (int j = 0; j < area.productionsPerLevel.Count; ++j)
+                {
+                    List<Production> productions = area.productionsPerLevel[j];
+                    for (int k = 0; k < productions.Count; ++k)
+                    {
+                        Production production = productions[k];
+                        for (int l = 0; l < production.requirements.Count; ++l)
+                        {
+                            Requirement requirement = production.requirements[l];
+                            if (requirement.itemID.Equals(H3ID))
+                            {
+                                int newCount = requirement.itemCount;
+                                if (neededForProductionByLevelByArea.TryGetValue(i, out Dictionary<int, Dictionary<Production, int>> levels))
+                                {
+                                    if (levels.TryGetValue(j, out Dictionary<Production, int> productionsDict))
+                                    {
+                                        int currentCount = 0;
+                                        if (productionsDict.TryGetValue(production, out currentCount))
+                                        {
+                                            productionsDict[production] = currentCount + newCount;
+                                        }
+                                        else
+                                        {
+                                            productionsDict.Add(production, newCount);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
+                                        newProductionDict.Add(production, newCount);
+                                        levels.Add(j, newProductionDict);
+                                    }
+                                }
+                                else
+                                {
+                                    Dictionary<int, Dictionary<Production, int>> newLevelsDict = new Dictionary<int, Dictionary<Production, int>>();
+                                    Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
+                                    newProductionDict.Add(production, newCount);
+                                    newLevelsDict.Add(j, newProductionDict);
+                                    neededForProductionByLevelByArea.Add(i, newLevelsDict);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Barters
+            for(int i=0; i < Mod.traders.Length; ++i)
+            {
+                Trader trader = Mod.traders[i];
+                for (int j = 0; j < trader.bartersByLevel.Count; ++j)
+                {
+                    List<Barter> barters = trader.bartersByLevel[j];
+                    for (int k = 0; k < barters.Count; ++k)
+                    {
+                        Barter barter = barters[k];
+                        for (int l = 0; l < barter.prices.Length; ++l)
+                        {
+                            BarterPrice price = barter.prices[l];
+                            if (price.itemData == this)
+                            {
+                                int newCount = price.count;
+                                if (neededForBarterByLevelByTrader.TryGetValue(i, out Dictionary<int, Dictionary<Barter, int>> levels))
+                                {
+                                    if (levels.TryGetValue(j, out Dictionary<Barter, int> bartersDict))
+                                    {
+                                        int currentCount = 0;
+                                        if (bartersDict.TryGetValue(barter, out currentCount))
+                                        {
+                                            bartersDict[barter] = currentCount + newCount;
+                                        }
+                                        else
+                                        {
+                                            bartersDict.Add(barter, newCount);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
+                                        newBarterDict.Add(barter, newCount);
+                                        levels.Add(j, newBarterDict);
+                                    }
+                                }
+                                else
+                                {
+                                    Dictionary<int, Dictionary<Barter, int>> newLevelsDict = new Dictionary<int, Dictionary<Barter, int>>();
+                                    Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
+                                    newBarterDict.Add(barter, newCount);
+                                    newLevelsDict.Add(j, newBarterDict);
+                                    neededForBarterByLevelByTrader.Add(i, newLevelsDict);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Tasks
+            foreach(KeyValuePair<string, Task> taskEntry in Task.allTasks)
+            {
+                for(int i=0; i < taskEntry.Value.finishConditions.Count; ++i)
+                {
+                    Condition condition = taskEntry.Value.finishConditions[i];
+                    if (condition.conditionType == Condition.ConditionType.HandoverItem
+                        || condition.conditionType == Condition.ConditionType.LeaveItemAtLocation
+                        || condition.conditionType == Condition.ConditionType.PlaceBeacon
+                        || condition.conditionType == Condition.ConditionType.WeaponAssembly)
+                    {
+                        for(int j=0; j < condition.targetItems.Count; ++j)
+                        {
+                            if (condition.targetItems[j] == this)
+                            {
+                                int currentCount = 0;
+                                if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
+                                {
+                                    neededForTasks[taskEntry.Value] = currentCount + condition.value;
+                                }
+                                else
+                                {
+                                    neededForTasks.Add(taskEntry.Value, condition.value);
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                    else if(condition.conditionType == Condition.ConditionType.CounterCreator)
+                    {
+                        for (int j = 0; j < condition.counters.Count; ++j) 
+                        {
+                            if (condition.counters[j].counterCreatorConditionType == ConditionCounter.CounterCreatorConditionType.UseItem)
+                            {
+                                for(int k = 0; k< condition.counters[j].useItemTargets.Count; ++k)
+                                {
+                                    if (condition.counters[j].useItemTargets[k] == this)
+                                    {
+                                        int currentCount = 0;
+                                        if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
+                                        {
+                                            neededForTasks[taskEntry.Value] = currentCount + condition.value;
+                                        }
+                                        else
+                                        {
+                                            neededForTasks.Add(taskEntry.Value, condition.value);
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            else if(condition.counters[j].counterCreatorConditionType == ConditionCounter.CounterCreatorConditionType.Equipment)
+                            {
+                                for (int k = 0; k < condition.counters[j].equipmentWhitelists.Count; ++k)
+                                {
+                                    if (condition.counters[j].equipmentWhitelists[k].Contains(H3ID))
+                                    {
+                                        int currentCount = 0;
+                                        if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
+                                        {
+                                            neededForTasks[taskEntry.Value] = currentCount + 1;
+                                        }
+                                        else
+                                        {
+                                            neededForTasks.Add(taskEntry.Value, 1);
+                                        }
+                                        break;
+                                    }
+                                    bool foundInWhitelists = false;
+                                    for (int l=0; l < parents.Length; ++l)
+                                    {
+                                        if (condition.counters[j].equipmentWhitelists[k].Contains(parents[l]))
+                                        {
+                                            int currentCount = 0;
+                                            if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
+                                            {
+                                                neededForTasks[taskEntry.Value] = currentCount + 1;
+                                            }
+                                            else
+                                            {
+                                                neededForTasks.Add(taskEntry.Value, 1);
+                                            }
+                                            foundInWhitelists = true;
+                                            break;
+                                        }
+                                    }
+                                    if (foundInWhitelists)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public Color GetCheckmarkColor()
+        {
+            cont from here // Keep this neededfor array in MeatovItemData and keep it up to date with events
+            MoreCheckmarksMod.neededFor[0] = questItem;
+            MoreCheckmarksMod.neededFor[1] = neededStruct.foundNeeded || neededStruct.foundFulfilled;
+            MoreCheckmarksMod.neededFor[2] = wishlist;
+            MoreCheckmarksMod.neededFor[3] = gotBarters;
+            MoreCheckmarksMod.neededFor[4] = craftRequired;
+
+            // Find needed with highest priority
+            int currentNeeded = -1;
+            int currentHighest = -1;
+            for (int i = 0; i < 5; ++i)
+            {
+                if (MoreCheckmarksMod.neededFor[i] && MoreCheckmarksMod.priorities[i] > currentHighest)
+                {
+                    currentNeeded = i;
+                    currentHighest = MoreCheckmarksMod.priorities[i];
+                }
+            }
+
+            // Set checkmark if necessary
+            if (currentNeeded > -1)
+            {
+                // Handle special case of areas
+                if (currentNeeded == 1)
+                {
+                    if (neededStruct.foundNeeded) // Need more
+                    {
+                        SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.needMoreColor);
+                    }
+                    else if (neededStruct.foundFulfilled) // We have enough for at least one upgrade
+                    {
+                        if (MoreCheckmarksMod.fulfilledAnyCanBeUpgraded) // We want to know when have enough for at least one upgrade
+                        {
+                            SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.fulfilledColor);
+                        }
+                        else // We only want fulfilled checkmark when ALL requiring this item can be upgraded
+                        {
+                            // Check if we trully do not need more of this item for now
+                            if (neededStruct.possessedCount >= neededStruct.requiredCount)
+                            {
+                                SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.fulfilledColor);
+                            }
+                            else // Still need more
+                            {
+                                SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.needMoreColor);
+                            }
+                        }
+                    }
+                }
+                else // Not area, just set color
+                {
+                    SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.colors[currentNeeded]);
+                }
+            }
+            else if (item.MarkedAsSpawnedInSession) // Item not needed for anything but found in raid
+            {
+                SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Color.white);
+            }
+        }
+
         public void OnItemFoundInvoke()
         {
             if(OnItemFound != null)
@@ -231,6 +605,14 @@ namespace EFM
             if(OnItemUsed != null)
             {
                 OnItemUsed();
+            }
+        }
+
+        public void OnWishlistChangedInvoke()
+        {
+            if(OnWishlistChanged != null)
+            {
+                OnWishlistChanged();
             }
         }
     }

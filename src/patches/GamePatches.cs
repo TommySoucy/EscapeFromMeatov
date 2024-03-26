@@ -57,13 +57,12 @@ namespace EFM
             PatchController.Verify(setQuickBeltSlotPatchOriginal, harmony, true);
             harmony.Patch(setQuickBeltSlotPatchOriginal, new HarmonyMethod(setQuickBeltSlotPatchPrefix), new HarmonyMethod(setQuickBeltSlotPatchPostfix));
 
-            //// BeginInteractionPatch
-            //MethodInfo beginInteractionPatchOriginal = typeof(FVRPhysicalObject).GetMethod("BeginInteraction", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo beginInteractionPatchPrefix = typeof(BeginInteractionPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo beginInteractionPatchPostfix = typeof(BeginInteractionPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // BeginInteractionPatch
+            MethodInfo beginInteractionPatchOriginal = typeof(FVRPhysicalObject).GetMethod("BeginInteraction", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo beginInteractionPatchPrefix = typeof(BeginInteractionPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(beginInteractionPatchOriginal, harmony, true);
-            //harmony.Patch(beginInteractionPatchOriginal, new HarmonyMethod(beginInteractionPatchPrefix), new HarmonyMethod(beginInteractionPatchPostfix));
+            PatchController.Verify(beginInteractionPatchOriginal, harmony, false);
+            harmony.Patch(beginInteractionPatchOriginal, new HarmonyMethod(beginInteractionPatchPrefix));
 
             //// DamagePatch
             //MethodInfo damagePatchOriginal = typeof(FVRPlayerHitbox).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(Damage) }, null);
@@ -135,12 +134,12 @@ namespace EFM
             //PatchController.Verify(deadBoltFVRFixedUpdatePatchOriginal, harmony, true);
             //harmony.Patch(deadBoltFVRFixedUpdatePatchOriginal, null, new HarmonyMethod(deadBoltFVRFixedUpdatePatchPostfix));
 
-            //// InteractiveSetAllLayersPatch
-            //MethodInfo interactiveSetAllLayersPatchOriginal = typeof(FVRInteractiveObject).GetMethod("SetAllCollidersToLayer", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo interactiveSetAllLayersPatchPrefix = typeof(InteractiveSetAllLayersPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // InteractiveSetAllCollidersToLayerPatch
+            MethodInfo interactiveSetAllCollidersToLayerOriginal = typeof(FVRInteractiveObject).GetMethod("SetAllCollidersToLayer", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo interactiveSetAllCollidersToLayerPrefix = typeof(InteractiveSetAllCollidersToLayerPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(interactiveSetAllLayersPatchOriginal, harmony, true);
-            //harmony.Patch(interactiveSetAllLayersPatchOriginal, new HarmonyMethod(interactiveSetAllLayersPatchPrefix));
+            PatchController.Verify(interactiveSetAllCollidersToLayerOriginal, harmony, true);
+            harmony.Patch(interactiveSetAllCollidersToLayerOriginal, new HarmonyMethod(interactiveSetAllCollidersToLayerPrefix));
 
             //// HandUpdatePatch
             //MethodInfo handUpdatePatchOriginal = typeof(FVRViveHand).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -1751,8 +1750,7 @@ namespace EFM
         }
     }
 
-    // Patches FVRPhysicalObject.BeginInteraction() in order to know if we have begun interacting with a rig from an equipment slot
-    // Also to give player the loot experience in case they haven't picked it up before
+    // Patches FVRPhysicalObject.BeginInteraction() to manage which pose override to use
     class BeginInteractionPatch
     {
         static void Prefix(FVRViveHand hand, ref FVRPhysicalObject __instance)
@@ -1765,96 +1763,21 @@ namespace EFM
             MeatovItem item = __instance.GetComponent<MeatovItem>();
             if (item != null)
             {
-                if (item.itemType == MeatovItem.ItemType.ArmoredRig || item.itemType == MeatovItem.ItemType.Rig)
+                // Set pose override depending on item type and hand side
+                // Must be done in prefix(?) to make sure vanilla handles interaction with correct pose override
+                if (item.itemType == MeatovItem.ItemType.ArmoredRig || item.itemType == MeatovItem.ItemType.Rig || item.itemType == MeatovItem.ItemType.Backpack)
                 {
-                    // Check which PoseOverride to use depending on hand side
-                    __instance.PoseOverride = hand.IsThisTheRightHand ? item.rightHandPoseOverride : item.leftHandPoseOverride;
-                }
-                else if (item.itemType == MeatovItem.ItemType.Backpack)
-                {
-                    // Check which PoseOverride to use depending on hand side
                     __instance.PoseOverride = hand.IsThisTheRightHand ? item.rightHandPoseOverride : item.leftHandPoseOverride;
 
-                    // If taken out of shoulderStorage, align with hand. Only do this if the item is not currently being held
-                    // because if the backpack is harnessed, held, and then switched between hands, it will align with the new hand
-                    // This is prefix so m_hand should still be null if newly grabbed
-                    if (Mod.leftShoulderObject != null && Mod.leftShoulderObject.Equals(item.gameObject) && __instance.m_hand == null)
-                    {
-                        FVRViveHand.AlignChild(__instance.transform, __instance.PoseOverride, hand.transform);
-                    }
+                    //// If taken out of shoulderStorage, align with hand. Only do this if the item is not currently being held
+                    //// because if the backpack is harnessed, held, and then switched between hands, it will align with the new hand
+                    //// This is prefix so m_hand should still be null if newly grabbed
+                    //if (Mod.leftShoulderObject != null && Mod.leftShoulderObject.Equals(item.gameObject) && __instance.m_hand == null)
+                    //{
+                    //    FVRViveHand.AlignChild(__instance.transform, __instance.PoseOverride, hand.transform);
+                    //}
                 }
             }
-            
-            TODO e: // Cont from here once we've setup the task condition event subscriptions
-            // Check if in trade volume or container
-            TradeVolume tradeVolume = null;
-            if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
-            {
-                tradeVolume = __instance.transform.parent.parent.GetComponent<TradeVolume>();
-            }
-            if (tradeVolume != null)
-            {
-                // Reset cols of item so that they are non trigger again and can collide with the world
-                for (int i = tradeVolume.resetColPairs.Count - 1; i >= 0; --i)
-                {
-                    if (tradeVolume.resetColPairs[i].physObj.Equals(__instance))
-                    {
-                        foreach (Collider col in tradeVolume.resetColPairs[i].colliders)
-                        {
-                            col.isTrigger = false;
-                        }
-                        tradeVolume.resetColPairs.RemoveAt(i);
-                        break;
-                    }
-                }
-
-                //tradeVolume.market.UpdateBasedOnItem(false, __instance.GetComponent<MeatovItem>());
-            }
-            else if (__instance.transform.parent != null && __instance.transform.parent.parent != null)
-            {
-                MeatovItem containerItemWrapper = __instance.transform.parent.parent.GetComponent<MeatovItem>();
-                if (containerItemWrapper != null && (containerItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
-                                                    containerItemWrapper.itemType == MeatovItem.ItemType.Container ||
-                                                    containerItemWrapper.itemType == MeatovItem.ItemType.Pouch))
-                {
-                    containerItemWrapper.currentWeight -= item.currentWeight;
-
-                    Mod.LogInfo("Grabbed item from container: " + containerItemWrapper.name + ", prevol: " + containerItemWrapper.containingVolume);
-                    containerItemWrapper.containingVolume -= item.volumes[item.mode];
-                    Mod.LogInfo("Postvol: " + containerItemWrapper.containingVolume);
-
-                    // Reset cols of item so that they are non trigger again and can collide with the world and the container
-                    for (int i = containerItemWrapper.resetColPairs.Count - 1; i >= 0; --i)
-                    {
-                        if (containerItemWrapper.resetColPairs[i].physObj.Equals(__instance))
-                        {
-                            foreach (Collider col in containerItemWrapper.resetColPairs[i].colliders)
-                            {
-                                col.isTrigger = false;
-                            }
-                            containerItemWrapper.resetColPairs.RemoveAt(i);
-                            break;
-                        }
-                    }
-
-                    __instance.RecoverRigidbody();
-                }
-            }
-        }
-
-        static void Postfix(ref FVRPhysicalObject __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            // Ensure the item is parented to null
-            // This is because typically the items are parented to player body, when we move with two axis mode the position of held item is then moved along with the body
-            // This move is done using body.transform.position = x, moving items this way with many children which each have many colliders is very demanding to the physics engine
-            // This causes extreme lag and is not necessary since the item's position will be set to the hand's through the item's rigidbody instead which is much less performance heavy
-            // This was mainly a problem with backpacks with many items in them begin held while moving
-            __instance.transform.parent = null;
         }
     }
 
@@ -3028,7 +2951,7 @@ namespace EFM
     // Patches FVRInteractiveObject.SetAllCollidersToLayer to make sure it doesn't set the layer of GOs with layer already set to NonBlockingSmoke
     // because layer is used by open backpacks and rigs in order to prevent items from colliding with them so its easier to put items in the container
     // This completely replaces the original
-    class InteractiveSetAllLayersPatch
+    class InteractiveSetAllCollidersToLayerPatch
     {
         static bool Prefix(bool triggersToo, string layerName, ref Collider[] ___m_colliders, ref FVRInteractiveObject __instance)
         {

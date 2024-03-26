@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mono.Cecil;
+using System;
 using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -31,6 +32,7 @@ namespace EFM
         public Dictionary<int, List<Barter>> bartersByLevel;
         public Dictionary<string, List<Barter>> bartersByItemID;
         public List<Task> tasks;
+        public Dictionary<string, bool> rewardBarters;
 
         // Live data
         private int _level;
@@ -80,9 +82,6 @@ namespace EFM
         public bool unlocked;
         public int balance;
 
-        // Objects
-        public TraderUI UI;
-
         public delegate void OnTraderLevelChangedDelegate();
         public event OnTraderLevelChangedDelegate OnTraderLevelChanged;
 
@@ -98,6 +97,7 @@ namespace EFM
             this.ID = ID;
 
             tasks = new List<Task>();
+            rewardBarters = new Dictionary<string, bool>();
 
             name = Mod.localeDB[ID + " Nickname"].ToString();
             string currencyString = Mod.traderBaseDB[index]["currency"].ToString();
@@ -260,14 +260,14 @@ namespace EFM
                     {
                         Barter currentBarter = new Barter();
                         currentBarter.level = barterLevelEntry.Value;
-                        currentBarter.itemID = barterItemID;
+                        Mod.GetItemData(barterItemID, out currentBarter.itemData);
 
                         List<BarterPrice> tempBarterPrices = new List<BarterPrice>();
                         JArray currentScheme = schemes[i] as JArray;
                         for(int j=0; j < currentScheme.Count; ++j)
                         {
                             BarterPrice currentBarterPrice = new BarterPrice();
-                            currentBarterPrice.itemID = Mod.TarkovIDtoH3ID(currentScheme[j]["_tpl"].ToString());
+                            Mod.GetItemData(Mod.TarkovIDtoH3ID(currentScheme[j]["_tpl"].ToString()), out currentBarterPrice.itemData);
                             currentBarterPrice.count = (int)currentScheme[j]["count"];
 
                             tempBarterPrices.Add(currentBarterPrice);
@@ -300,6 +300,11 @@ namespace EFM
         {
             level = (int)data["level"];
             standing = (float)data["standing"];
+            unlocked = (bool)data["unlocked"];
+            if (!unlocked)
+            {
+                unlocked = defaultUnlocked;
+            }
         }
 
         public static int IDToIndex(string ID)
@@ -358,7 +363,8 @@ namespace EFM
 
         public static string LevelToRoman(int level)
         {
-            switch (level)
+            // +1 because level is 0 based
+            switch (level + 1)
             {
                 case 1:
                     return "I";
@@ -432,7 +438,7 @@ namespace EFM
     public class Barter
     {
         // Static data
-        public string itemID;
+        public MeatovItemData itemData;
         public int level;
         public BarterPrice[] prices;
         public bool needUnlock;
@@ -443,7 +449,10 @@ namespace EFM
 
     public class BarterPrice
     {
-        public string itemID;
+        public MeatovItemData itemData;
         public int count;
+
+        // DogTag specific
+        public int dogTagLevel;
     }
 }

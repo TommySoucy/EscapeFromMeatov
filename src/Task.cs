@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.PerformanceData;
 using System.Linq;
 using Valve.Newtonsoft.Json.Linq;
+using static EFM.Task;
 using static UnityEngine.EventSystems.EventTrigger;
 
 namespace EFM
@@ -64,7 +65,6 @@ namespace EFM
 
         public Task(KeyValuePair<string, JToken> questData)
         {
-            TODO e: // Load saved data, and once we do, call UpdateEventSubscription to subscribe to necessary events
             ID = questData.Key;
             allTasks.Add(ID, this);
             name = Mod.localeDB[questData.Value["name"].ToString()].ToString();
@@ -86,7 +86,7 @@ namespace EFM
                 waitingTaskConditions.Remove(ID);
             }
 
-            TODO e: // Make sure to make the UI subscribe to the task state changed and condition fulfillment changed events so it can set its elements in consequence
+            TODO: // Make sure to make the UI subscribe to the task state changed and condition fulfillment changed events so it can set its elements in consequence
             startConditions = new List<Condition>();
             SetupConditions(startConditions, TaskState.Available, questData.Value["conditions"]["AvailableForStart"] as JArray);
             finishConditions = new List<Condition>();
@@ -95,11 +95,11 @@ namespace EFM
             SetupConditions(failConditions, TaskState.Fail, questData.Value["conditions"]["Fail"] as JArray);
 
             startRewards = new List<Reward>();
-            SetupRewards(startRewards, questData.Value["rewards"]["Started"] as JArray);
+            SetupRewards(startRewards, TaskState.Active, questData.Value["rewards"]["Started"] as JArray);
             finishRewards = new List<Reward>();
-            SetupRewards(finishRewards, questData.Value["rewards"]["Success"] as JArray);
+            SetupRewards(finishRewards, TaskState.Complete, questData.Value["rewards"]["Success"] as JArray);
             failRewards = new List<Reward>();
-            SetupRewards(failRewards, questData.Value["rewards"]["Fail"] as JArray);
+            SetupRewards(failRewards, TaskState.Fail, questData.Value["rewards"]["Fail"] as JArray);
         }
 
         public void LoadData(JToken data)
@@ -219,7 +219,7 @@ namespace EFM
             }
         }
 
-        public void SetupRewards(List<Reward> rewards, JArray rewardData)
+        public void SetupRewards(List<Reward> rewards, TaskState targetState, JArray rewardData)
         {
             if (rewardData == null || rewardData.Count == 0)
             {
@@ -228,7 +228,7 @@ namespace EFM
 
             for (int i = 0; i < rewardData.Count; ++i)
             {
-                rewards.Add(new Reward(this, rewardData[i]));
+                rewards.Add(new Reward(this, targetState, rewardData[i]));
             }
         }
 
@@ -1832,6 +1832,7 @@ namespace EFM
     public class Reward
     {
         public Task task;
+        public TaskState targetState;
 
         public enum RewardType
         {
@@ -1867,9 +1868,10 @@ namespace EFM
         public Skill skill;
         public int value;
 
-        public Reward(Task task, JToken data)
+        public Reward(Task task, TaskState targetState, JToken data)
         {
             this.task = task;
+            this.targetState = targetState;
 
             rewardType = (RewardType)Enum.Parse(typeof(RewardType), data["type"].ToString());
             switch (rewardType)
@@ -1907,6 +1909,10 @@ namespace EFM
                         string itemID = Mod.TarkovIDtoH3ID(assortItemsArray[i]["_tpl"].ToString());
                         if (trader.bartersByItemID.TryGetValue(itemID, out List<Barter> currentBarters))
                         {
+                            if (!trader.rewardBarters.ContainsKey(itemID))
+                            {
+                                trader.rewardBarters.Add(itemID, false);
+                            }
                             barters.AddRange(currentBarters);
                             for(int j=0; j < currentBarters.Count; ++j)
                             {
@@ -1914,6 +1920,7 @@ namespace EFM
                             }
                         }
                     }
+                    task.OnTaskStateChanged += OnTaskStateChanged;
                     break;
                 case RewardType.Skill:
                     skill = Mod.skills[Skill.SkillNameToIndex(data["target"].ToString())];
@@ -1923,6 +1930,62 @@ namespace EFM
                     // Note: This type of reward will be handled by the relevant production's QuestComplete 
                     //       condition which will be handled as an unlock condition
                     break;
+            }
+        }
+
+        public void Award()
+        {
+            switch (rewardType)
+            {
+                case RewardType.Experience:
+                    Mod.experience += experience;
+                    break;
+                case RewardType.TraderStanding:
+                case RewardType.TraderStandingRestore:
+                    trader.standing += standing;
+                    break;
+                case RewardType.Item:
+                    TODO: // Spawn item
+                    break;
+                case RewardType.TraderUnlock:
+                    trader.unlocked = true;
+                    break;
+                case RewardType.AssortmentUnlock:
+                    // Handled by OnTaskStateChanged
+                    break;
+                case RewardType.Skill:
+                    skill.progress += value;
+                    break;
+                case RewardType.ProductionScheme:
+                    TODO0: // Add production to area, see how the production is handled in DB, is it already in area production DB and we should prevent 
+                    //        adding it to UI if not unlocked? Or do we have to add it when awarded?
+                    break;
+            }
+        }
+
+        public void OnTaskStateChanged()
+        {
+            // We do not save whether a reward has been awarded or not
+            // For an Item reward for example, we spawn the item when awarded, and the
+            // item gets saved in hideout inventory or on player. We do not have to save anything 
+            // specific to the reward
+            // For assort unlock though, instead of keeping track and saving which 
+            // assorts have been unlocked, we just keep track of a live state.
+            // This is what we need to update here
+            if(task.taskState == targetState)
+            {
+                switch (rewardType)
+                {
+                    case RewardType.AssortmentUnlock:
+                        for(int i=0; i < barters.Count; ++i)
+                        {
+                            if (trader.rewardBarters.ContainsKey(barters[i].itemData.H3ID))
+                            {
+                                trader.rewardBarters[barters[i].itemData.H3ID] = true;
+                            }
+                        }
+                        break;
+                }
             }
         }
     }

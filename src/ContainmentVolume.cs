@@ -18,6 +18,11 @@ namespace EFM
         [NonSerialized]
         public List<MeatovItem> items = new List<MeatovItem>();
 
+        public delegate void OnItemAddedDelegate(MeatovItem item);
+        public event OnItemAddedDelegate OnItemAdded;
+        public delegate void OnItemRemovedDelegate(MeatovItem item);
+        public event OnItemRemovedDelegate OnItemRemoved;
+
         public bool AddItem(MeatovItem item)
         {
             staticVolume.SetActive(true);
@@ -40,6 +45,8 @@ namespace EFM
                 volume += item.volumes[item.mode];
                 items.Add(item);
                 item.parentVolume = this;
+
+                OnItemAddedInvoke(item);
             }
             return fits;
         }
@@ -50,6 +57,8 @@ namespace EFM
             {
                 volume -= item.volumes[item.mode];
                 item.parentVolume = null;
+
+                OnItemRemovedInvoke(item);
             }
         }
 
@@ -65,6 +74,22 @@ namespace EFM
         {
             staticVolume.SetActive(true);
             activeVolume.SetActive(false);
+        }
+
+        public void OnItemAddedInvoke(MeatovItem item)
+        {
+            if(OnItemAdded != null)
+            {
+                OnItemAdded(item);
+            }
+        }
+
+        public void OnItemRemovedInvoke(MeatovItem item)
+        {
+            if(OnItemRemoved != null)
+            {
+                OnItemRemoved(item);
+            }
         }
     }
 }
