@@ -34,7 +34,7 @@ namespace EFM
                 _currentLevel = value;
                 if(preLevel != _currentLevel)
                 {
-                    OnAreaLevelChangedInvoke();
+                    OnAreaLevelChangedInvoke(this);
                 }
             }
         }
@@ -74,7 +74,7 @@ namespace EFM
         public delegate void OnSlotContentChangedDelegate();
         public event OnSlotContentChangedDelegate OnSlotContentChanged;
 
-        public delegate void OnAreaLevelChangedDelegate();
+        public delegate void OnAreaLevelChangedDelegate(Area area);
         public event OnAreaLevelChangedDelegate OnAreaLevelChanged;
 
         public void Start()
@@ -448,12 +448,12 @@ namespace EFM
             }
         }
 
-        public void OnAreaLevelChangedInvoke()
+        public void OnAreaLevelChangedInvoke(Area area)
         {
             // Raise event
             if (OnAreaLevelChanged != null)
             {
-                OnAreaLevelChanged();
+                OnAreaLevelChanged(area);
             }
         }
 
@@ -729,10 +729,10 @@ namespace EFM
         {
             OnHideoutInventoryChanged();
             OnAreaSlotContentChanged();
-            OnAreaLevelChanged();
+            OnAreaLevelChanged(area);
             OnTraderLevelChanged();
             OnSkillLevelChanged();
-            OnTaskStateChanged();
+            OnTaskStateChanged(null);
         }
 
         public void OnHideoutInventoryChanged()
@@ -741,7 +741,7 @@ namespace EFM
             {
                 case RequirementType.Item:
                     int count = 0;
-                    if(HideoutController.inventory.TryGetValue(itemID, out count))
+                    if(HideoutController.instance.inventory.TryGetValue(itemID, out count))
                     {
                         fulfilled = count >= itemCount;
                     }
@@ -766,7 +766,7 @@ namespace EFM
                     break;
                 case RequirementType.Tool:
                     int toolCount = 0;
-                    if (HideoutController.inventory.TryGetValue(itemID, out int toolCurrentItemCount))
+                    if (HideoutController.instance.inventory.TryGetValue(itemID, out int toolCurrentItemCount))
                     {
                         fulfilled = toolCurrentItemCount >= 1;
                         toolCount = toolCurrentItemCount;
@@ -788,7 +788,7 @@ namespace EFM
                     break;
                 case RequirementType.Resource:
                     int totalAmount = 0;
-                    if (HideoutController.inventory.TryGetValue(itemID, out totalAmount))
+                    if (HideoutController.instance.inventory.TryGetValue(itemID, out totalAmount))
                     {
                         fulfilled = totalAmount >= resourceCount;
                     }
@@ -874,7 +874,7 @@ namespace EFM
             UpdateAreaUI();
         }
 
-        public void OnAreaLevelChanged()
+        public void OnAreaLevelChanged(Area area)
         {
             switch (requirementType)
             {
@@ -925,12 +925,12 @@ namespace EFM
             UpdateAreaUI();
         }
 
-        public void OnTaskStateChanged()
+        public void OnTaskStateChanged(Task task)
         {
             switch (requirementType)
             {
                 case RequirementType.QuestComplete:
-                    fulfilled = task.taskState == Task.TaskState.Complete;
+                    fulfilled = (task == null ? this.task : task).taskState == Task.TaskState.Complete;
                     break;
             }
 

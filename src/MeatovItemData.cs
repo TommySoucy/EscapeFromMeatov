@@ -67,6 +67,7 @@ namespace EFM
         public string dogtagName;
 
         // Checkmark data
+        public bool[] neededFor; // Task, 
         private bool _onWishlist;
         public bool onWishlist
         {
@@ -82,9 +83,18 @@ namespace EFM
             }
         }
         public Dictionary<int, Dictionary<int, int>> neededForLevelByArea; // Levels(key) and count(value) in which Areas this item is needed
+        public Dictionary<int, Dictionary<int, int>> neededForLevelByAreaCurrent; // Levels in which Areas this item is CURRENTLY needed  (Depends on Mod.checkmarkFutureAreas)
+        // If Mod.checkmarkAreaFulfillledMinimum
+        // Then we will want to display fulfilled area upgrade checkmark (Instead of needed), if 
+        // we have enough of this item for AT LEAST one upgrade
+        // Otherwise, only if we have enough for all upgrades requiring this item
+        // For this, we need to keep track of the area uprade item requirement
+        // requiring the least amount of this item
+        public int minimumUpgradeAmount;
         public Dictionary<int, Dictionary<int, Dictionary<Production, int>>> neededForProductionByLevelByArea; // Productions for which Level in which Areas this item is needed
         public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTrader; // Barters for which Level for which Trader this item is needed
         public Dictionary<Task, int> neededForTasks; // Tasks for which this item is needed
+        public Dictionary<Task, int> neededForTasksCurrent; // Tasks for which this item is CURRENTLY needed (Depends on Mod.checkmarkFutureQuests)
 
         // Events
         public delegate void OnItemFoundDelegate();
@@ -243,10 +253,12 @@ namespace EFM
 
             if (neededForLevelByArea == null)
             {
+                neededFor = new bool[5];
                 neededForLevelByArea = new Dictionary<int, Dictionary<int, int>>();
                 neededForProductionByLevelByArea = new Dictionary<int, Dictionary<int, Dictionary<Production, int>>>();
                 neededForBarterByLevelByTrader = new Dictionary<int, Dictionary<int, Dictionary<Barter, int>>>();
                 neededForTasks = new Dictionary<Task, int>();
+                neededForTasksCurrent = new Dictionary<Task, int>();
             }
             else
             {
@@ -262,6 +274,8 @@ namespace EFM
             for (int i = 0; i < HideoutController.instance.areaController.areas.Length; ++i)
             {
                 Area area = HideoutController.instance.areaController.areas[i];
+
+                // Area upgrades
                 for (int j = 0; j < area.requirementsByTypePerLevel.Length; ++j)
                 {
                     Dictionary<Requirement.RequirementType, List<Requirement>> requirementsByType = area.requirementsByTypePerLevel[j];
@@ -292,6 +306,41 @@ namespace EFM
                                     newLevelsDict.Add(j, newCount);
                                     neededForLevelByArea.Add(i, newLevelsDict);
                                 }
+
+                                // Set initial needed for state
+                                if (area.currentLevel < area.levels.Length - 1)
+                                {
+                                    area.OnAreaLevelChanged += OnAreaLevelChanged;
+
+                                    // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
+                                    neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
+                                    if (neededFor[1])
+                                    {
+                                        if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int,int> neededForLevels))
+                                        {
+                                            int currentCount = 0;
+                                            if (neededForLevels.TryGetValue(j, out currentCount))
+                                            {
+                                                neededForLevels[j] = currentCount + newCount;
+                                            }
+                                            else
+                                            {
+                                                neededForLevels.Add(j, newCount);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
+                                            newLevelsDict.Add(j, newCount);
+                                            neededForLevelByAreaCurrent.Add(i, newLevelsDict);
+
+                                            if(newCount < minimumUpgradeAmount)
+                                            {
+                                                minimumUpgradeAmount = newCount;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -321,10 +370,47 @@ namespace EFM
                                     newLevelsDict.Add(j, 1);
                                     neededForLevelByArea.Add(i, newLevelsDict);
                                 }
+
+                                // Set initial needed for state
+                                if (area.currentLevel < area.levels.Length - 1)
+                                {
+                                    area.OnAreaLevelChanged += OnAreaLevelChanged;
+
+                                    // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
+                                    neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
+                                    if (neededFor[1])
+                                    {
+                                        if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
+                                        {
+                                            int currentCount = 0;
+                                            if (neededForLevels.TryGetValue(j, out currentCount))
+                                            {
+                                                neededForLevels[j] = currentCount + 1;
+                                            }
+                                            else
+                                            {
+                                                neededForLevels.Add(j, 1);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
+                                            newLevelsDict.Add(j, 1);
+                                            neededForLevelByAreaCurrent.Add(i, newLevelsDict);
+
+                                            if (1 < minimumUpgradeAmount)
+                                            {
+                                                minimumUpgradeAmount = 1;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
+
+                // Productions
                 for (int j = 0; j < area.productionsPerLevel.Count; ++j)
                 {
                     List<Production> productions = area.productionsPerLevel[j];
@@ -448,6 +534,26 @@ namespace EFM
                                     neededForTasks.Add(taskEntry.Value, condition.value);
                                 }
 
+                                // Set initial needed for state
+                                if(taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
+                                {
+                                    taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+
+                                    // Needed for quest if we want future quests (Active or not) or if currently active
+                                    neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
+                                    if (neededFor[0])
+                                    {
+                                        if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
+                                        {
+                                            neededForTasksCurrent[taskEntry.Value] = currentCount + condition.value;
+                                        }
+                                        else
+                                        {
+                                            neededForTasksCurrent.Add(taskEntry.Value, condition.value);
+                                        }
+                                    }
+                                }
+
                                 break;
                             }
                         }
@@ -471,6 +577,27 @@ namespace EFM
                                         {
                                             neededForTasks.Add(taskEntry.Value, condition.value);
                                         }
+
+                                        // Set initial needed for state
+                                        if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
+                                        {
+                                            taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+
+                                            // Needed for quest if we want future quests (Active or not) or if currently active
+                                            neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
+                                            if (neededFor[0])
+                                            {
+                                                if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
+                                                {
+                                                    neededForTasksCurrent[taskEntry.Value] = currentCount + condition.value;
+                                                }
+                                                else
+                                                {
+                                                    neededForTasksCurrent.Add(taskEntry.Value, condition.value);
+                                                }
+                                            }
+                                        }
+
                                         break;
                                     }
                                 }
@@ -490,6 +617,27 @@ namespace EFM
                                         {
                                             neededForTasks.Add(taskEntry.Value, 1);
                                         }
+
+                                        // Set initial needed for state
+                                        if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
+                                        {
+                                            taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+
+                                            // Needed for quest if we want future quests (Active or not) or if currently active
+                                            neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
+                                            if (neededFor[0])
+                                            {
+                                                if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
+                                                {
+                                                    neededForTasksCurrent[taskEntry.Value] = currentCount + condition.value;
+                                                }
+                                                else
+                                                {
+                                                    neededForTasksCurrent.Add(taskEntry.Value, condition.value);
+                                                }
+                                            }
+                                        }
+
                                         break;
                                     }
                                     bool foundInWhitelists = false;
@@ -506,6 +654,27 @@ namespace EFM
                                             {
                                                 neededForTasks.Add(taskEntry.Value, 1);
                                             }
+
+                                            // Set initial needed for state
+                                            if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
+                                            {
+                                                taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+
+                                                // Needed for quest if we want future quests (Active or not) or if currently active
+                                                neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
+                                                if (neededFor[0])
+                                                {
+                                                    if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
+                                                    {
+                                                        neededForTasksCurrent[taskEntry.Value] = currentCount + condition.value;
+                                                    }
+                                                    else
+                                                    {
+                                                        neededForTasksCurrent.Add(taskEntry.Value, condition.value);
+                                                    }
+                                                }
+                                            }
+
                                             foundInWhitelists = true;
                                             break;
                                         }
@@ -522,11 +691,86 @@ namespace EFM
             }
         }
 
+        public void OnTaskStateChanged(Task task)
+        {
+            if(task.taskState == Task.TaskState.Complete || task.taskState == Task.TaskState.Fail)
+            {
+                if (neededForTasksCurrent.Remove(task))
+                {
+                    // This item was currently needed for this task, must update needed for state
+                    neededFor[0] = neededForTasksCurrent.Count > 0;
+                }
+
+                task.OnTaskStateChanged -= OnTaskStateChanged;
+            }
+            else if(task.taskState != Task.TaskState.Active)
+            {
+                neededFor[0] = Mod.checkmarkFutureQuests;
+                if (!neededFor[0])
+                {
+                    neededForTasksCurrent.Remove(task);
+                }
+            }
+            else // Changed to Active
+            {
+                // If we are getting this event and we changed to active, it means this task this item is needed for 
+                // is now active. If not already in neededForTasksCurrent, we must add it now
+                // It might have already been in there because of Mod.checkmarkFutureQuests
+                neededFor[0] = true;
+                if (!neededForTasksCurrent.ContainsKey(task))
+                {
+                    neededForTasksCurrent.Add(task, neededForTasks[task]);
+                }
+            }
+        }
+
+        public void OnAreaLevelChanged(Area area)
+        {
+            // Note that here we assume level of an area can only ever go up and only by 1
+            if (area.currentLevel == area.levels.Length - 1)
+            {
+                // Reached highest level, this item is not needed for this area anymore
+                area.OnAreaLevelChanged -= OnAreaLevelChanged;
+
+                neededForLevelByAreaCurrent.Remove(area.index);
+
+                // Might still be needed by another area
+                neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
+            }
+            else
+            {
+                neededForLevelByAreaCurrent[area.index].Remove(area.currentLevel);
+
+                if(neededForLevelByAreaCurrent[area.index].Count == 0)
+                {
+                    area.OnAreaLevelChanged -= OnAreaLevelChanged;
+
+                    neededForLevelByAreaCurrent.Remove(area.index);
+
+                    neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
+                }
+            }
+
+            // If still needed, must find minimum again as it might have changed
+            if (neededFor[1])
+            {
+                int minimum = int.MaxValue;
+                foreach (KeyValuePair<int, Dictionary<int, int>> neededAreaEntry in neededForLevelByAreaCurrent)
+                {
+                    foreach (KeyValuePair<int, int> neededLevelEntry in neededAreaEntry.Value)
+                    {
+                        if (neededLevelEntry.Value < minimum)
+                        {
+                            minimum = neededLevelEntry.Value;
+                        }
+                    }
+                }
+                minimumUpgradeAmount = minimum;
+            }
+        }
+
         public Color GetCheckmarkColor()
         {
-            cont from here // Keep this neededfor array in MeatovItemData and keep it up to date with events
-            MoreCheckmarksMod.neededFor[0] = questItem;
-            MoreCheckmarksMod.neededFor[1] = neededStruct.foundNeeded || neededStruct.foundFulfilled;
             MoreCheckmarksMod.neededFor[2] = wishlist;
             MoreCheckmarksMod.neededFor[3] = gotBarters;
             MoreCheckmarksMod.neededFor[4] = craftRequired;

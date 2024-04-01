@@ -34,8 +34,12 @@ namespace EFM
         public static int neededForBarterPriority = 0;
         public static int neededForProductionPriority = 1;
         public static bool checkmarkFutureAreas = false;
+        public static bool checkmarkAreaFulfillledMinimum = false;
         public static bool checkmarkFutureProductions = false;
         public static bool checkmarkFutureQuests = false;
+        public static bool checkmarkFutureBarters = false;
+        public static bool checkmarkShowBarter = false;
+        public static bool checkmarkShowProduction = false;
 
         // Live data
         public static Mod modInstance;

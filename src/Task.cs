@@ -51,7 +51,7 @@ namespace EFM
                 _taskState = value;
                 if (_taskState != preValue)
                 {
-                    OnTaskStateChangedInvoke();
+                    OnTaskStateChangedInvoke(this);
                 }
             }
         }
@@ -60,7 +60,7 @@ namespace EFM
         public TaskUI marketUI;
         public TaskUI playerUI;
 
-        public delegate void OnTaskStateChangedDelegate();
+        public delegate void OnTaskStateChangedDelegate(Task task);
         public event OnTaskStateChangedDelegate OnTaskStateChanged;
 
         public Task(KeyValuePair<string, JToken> questData)
@@ -301,11 +301,11 @@ namespace EFM
             return true;
         }
 
-        public void OnTaskStateChangedInvoke()
+        public void OnTaskStateChangedInvoke(Task task)
         {
             if(OnTaskStateChanged != null)
             {
-                OnTaskStateChanged();
+                OnTaskStateChanged(task);
             }
         }
     }
@@ -1098,7 +1098,7 @@ namespace EFM
             }
         }
 
-        public void OnTaskStateChanged()
+        public void OnTaskStateChanged(Task task)
         {
             if(conditionType == ConditionType.Quest)
             {
@@ -1963,7 +1963,7 @@ namespace EFM
             }
         }
 
-        public void OnTaskStateChanged()
+        public void OnTaskStateChanged(Task task)
         {
             // We do not save whether a reward has been awarded or not
             // For an Item reward for example, we spawn the item when awarded, and the
