@@ -510,7 +510,7 @@ namespace EFM
                 int countLeft  = itemRequirement.itemCount;
                 while(countLeft > 0)
                 {
-                    MeatovItem item = GetClosestItem(itemRequirement.itemID);
+                    MeatovItem item = GetClosestItem(itemRequirement.item.H3ID);
                     if(item.stack > countLeft)
                     {
                         item.stack -= countLeft;
@@ -612,7 +612,7 @@ namespace EFM
         public RequirementType requirementType;
 
         // Item, Tool, and Resource
-        public string itemID;
+        public MeatovItemData item;
 
         // Item
         public int itemCount = 1;
@@ -646,8 +646,25 @@ namespace EFM
                 switch (requirementType)
                 {
                     case RequirementType.Item:
-                        itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                        if(requirementData["count"] != null)
+                        string itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            item = Mod.customItemData[parsedIndex];
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                item = Mod.vanillaItemData[itemID];
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: "+(production == null ? "Area":"Prodution") +" item requirement targets item " + itemID + " for which we do not have data");
+                            }
+                        }
+
+                        if (requirementData["count"] != null)
                         {
                             itemCount = (int)requirementData["count"];
                         }
@@ -677,11 +694,43 @@ namespace EFM
                         trader.OnTraderLevelChanged += OnTraderLevelChanged;
                         break;
                     case RequirementType.Tool:
-                        itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
+                        string toolItemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
+                        int toolParsedIndex = -1;
+                        if (int.TryParse(toolItemID, out toolParsedIndex))
+                        {
+                            item = Mod.customItemData[toolParsedIndex];
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(toolItemID, out MeatovItemData itemData))
+                            {
+                                item = Mod.vanillaItemData[toolItemID];
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " tool requirement targets item " + toolItemID + " for which we do not have data");
+                            }
+                        }
                         HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
                         break;
                     case RequirementType.Resource:
-                        itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
+                        string resourceItemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
+                        int resourceParsedIndex = -1;
+                        if (int.TryParse(resourceItemID, out resourceParsedIndex))
+                        {
+                            item = Mod.customItemData[resourceParsedIndex];
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(resourceItemID, out MeatovItemData itemData))
+                            {
+                                item = Mod.vanillaItemData[resourceItemID];
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " item requirement targets item " + resourceItemID + " for which we do not have data");
+                            }
+                        }
                         resourceCount = (int)requirementData["resource"];
                         HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
                         area.OnSlotContentChanged += OnAreaSlotContentChanged;
@@ -741,7 +790,7 @@ namespace EFM
             {
                 case RequirementType.Item:
                     int count = 0;
-                    if(HideoutController.instance.inventory.TryGetValue(itemID, out count))
+                    if(HideoutController.instance.inventory.TryGetValue(item.H3ID, out count))
                     {
                         fulfilled = count >= itemCount;
                     }
@@ -766,7 +815,7 @@ namespace EFM
                     break;
                 case RequirementType.Tool:
                     int toolCount = 0;
-                    if (HideoutController.instance.inventory.TryGetValue(itemID, out int toolCurrentItemCount))
+                    if (HideoutController.instance.inventory.TryGetValue(item.H3ID, out int toolCurrentItemCount))
                     {
                         fulfilled = toolCurrentItemCount >= 1;
                         toolCount = toolCurrentItemCount;
@@ -788,7 +837,7 @@ namespace EFM
                     break;
                 case RequirementType.Resource:
                     int totalAmount = 0;
-                    if (HideoutController.instance.inventory.TryGetValue(itemID, out totalAmount))
+                    if (HideoutController.instance.inventory.TryGetValue(item.H3ID, out totalAmount))
                     {
                         fulfilled = totalAmount >= resourceCount;
                     }
@@ -1227,7 +1276,7 @@ namespace EFM
             {
                 Requirement newRequirement = new Requirement(null, area, this);
                 newRequirement.requirementType = Requirement.RequirementType.Item;
-                newRequirement.itemID = "159";
+                newRequirement.item = Mod.customItemData[159];
                 newRequirement.resourceCount = 0;
                 area.OnSlotContentChanged += newRequirement.OnAreaSlotContentChanged;
             }
