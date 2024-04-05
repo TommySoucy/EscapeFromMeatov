@@ -62,6 +62,7 @@ namespace EFM
             Mod.SetIcon(itemData.H3ID, itemIcon);
             infoSpecial.SetActive(itemData.itemType == MeatovItem.ItemType.Pouch);
             TODO: // Set checkmark
+            TODO0: // make events and sub to them for any event relevant to the item that would change the checkmark color (wishlistchanged (Already exists), needed for a quest changed, now have nough of it in stash for area upgrade, etc.)
             itemData.OnWishlistChanged += OnWishlistChanged;
 
             // Set overrides

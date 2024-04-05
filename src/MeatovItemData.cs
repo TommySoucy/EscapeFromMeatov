@@ -1,7 +1,6 @@
 ﻿using FistVR;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -76,6 +75,10 @@ namespace EFM
             {
                 bool preValue = _onWishlist;
                 _onWishlist = value;
+                if(neededFor != null)
+                {
+                    neededFor[2] = _onWishlist;
+                }
                 if(preValue != _onWishlist)
                 {
                     OnWishlistChangedInvoke();
@@ -93,6 +96,7 @@ namespace EFM
         public int minimumUpgradeAmount;
         public Dictionary<int, Dictionary<int, Dictionary<Production, int>>> neededForProductionByLevelByArea; // Productions for which Level in which Areas this item is needed
         public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTrader; // Barters for which Level for which Trader this item is needed
+        public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTraderCurrent; // Barters for which Level for which Trader this item is CURRENTLY needed (Depends on Mod.checkmarkFutureBarters)
         public Dictionary<Task, int> neededForTasks; // Tasks for which this item is needed
         public Dictionary<Task, int> neededForTasksCurrent; // Tasks for which this item is CURRENTLY needed (Depends on Mod.checkmarkFutureQuests)
 
@@ -269,6 +273,7 @@ namespace EFM
             }
 
             onWishlist = Mod.wishList.Contains(H3ID);
+            neededFor[2] = onWishlist;
 
             // Get Area specific data (Upgrades, Productions)
             for (int i = 0; i < HideoutController.instance.areaController.areas.Length; ++i)
@@ -502,6 +507,45 @@ namespace EFM
                                     newBarterDict.Add(barter, newCount);
                                     newLevelsDict.Add(j, newBarterDict);
                                     neededForBarterByLevelByTrader.Add(i, newLevelsDict);
+                                }
+
+                                // Set initial needed for state
+                                // Note that trader level and both decrease and increase so we must always listen to level change event
+                                trader.OnTraderLevelChanged += OnTraderLevelChanged;
+
+                                // Needed for barter if we want future barters (Implying we want all of them) or this barter's trader's level is <= trader's current level
+                                neededFor[2] = Mod.checkmarkFutureBarters || j <= trader.level;
+                                if (neededFor[2])
+                                {
+                                    if (neededForBarterByLevelByTraderCurrent.TryGetValue(i, out Dictionary<int, Dictionary<Barter, int>> currentLevels))
+                                    {
+                                        if (currentLevels.TryGetValue(j, out Dictionary<Barter, int> bartersDict))
+                                        {
+                                            int currentCount = 0;
+                                            if (bartersDict.TryGetValue(barter, out currentCount))
+                                            {
+                                                bartersDict[barter] = currentCount + newCount;
+                                            }
+                                            else
+                                            {
+                                                bartersDict.Add(barter, newCount);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
+                                            newBarterDict.Add(barter, newCount);
+                                            currentLevels.Add(j, newBarterDict);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Dictionary<int, Dictionary<Barter, int>> newLevelsDict = new Dictionary<int, Dictionary<Barter, int>>();
+                                        Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
+                                        newBarterDict.Add(barter, newCount);
+                                        newLevelsDict.Add(j, newBarterDict);
+                                        neededForBarterByLevelByTraderCurrent.Add(i, newLevelsDict);
+                                    }
                                 }
                             }
                         }
@@ -751,6 +795,7 @@ namespace EFM
                 }
             }
 
+            TODO: // If item needed for area upgrade, we must keep track of inventory count so as to update our checkmark color accordingly since count may become greater/smaller than minimum
             // If still needed, must find minimum again as it might have changed
             if (neededFor[1])
             {
@@ -769,10 +814,74 @@ namespace EFM
             }
         }
 
+        public void OnTraderLevelChanged(Trader trader)
+        {
+            if (!Mod.checkmarkFutureBarters)
+            {
+                // Ensure only <= trader levels are present in neededForBarterByLevelByTraderCurrent
+                if(neededForBarterByLevelByTraderCurrent.TryGetValue(trader.index, out Dictionary<int, Dictionary<Barter, int>> levels))
+                {
+                    if (neededForBarterByLevelByTrader.TryGetValue(trader.index, out Dictionary<int, Dictionary<Barter, int>> toCheckLevels))
+                    {
+                        foreach (KeyValuePair<int, Dictionary<Barter, int>> toCheckLevelEntry in toCheckLevels)
+                        {
+                            if (toCheckLevelEntry.Key <= trader.level && !levels.ContainsKey(toCheckLevelEntry.Key))
+                            {
+                                // Barters of this level should be currently needed but arent in current yet, must add
+                                Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
+                                foreach (KeyValuePair<Barter, int> toAddBarterEntry in toCheckLevelEntry.Value)
+                                {
+                                    newBarterDict.Add(toAddBarterEntry.Key, toAddBarterEntry.Value);
+                                }
+                                levels.Add(toCheckLevelEntry.Key, newBarterDict);
+                            }
+                            else if(toCheckLevelEntry.Key > trader.level && levels.ContainsKey(toCheckLevelEntry.Key))
+                            {
+                                // Barters of this level NOT currently needed but are in current, must remove
+                                levels.Remove(toCheckLevelEntry.Key);
+                                if(levels.Count == 0)
+                                {
+                                    neededForBarterByLevelByTraderCurrent.Remove(trader.index);
+                                }
+                            }
+                        }
+                    }
+                    else // This should never happen, if not in neededForBarterByLevelByTrader, it should never be in current
+                    {
+                        Mod.LogError("Item "+H3ID+ " in neededForBarterByLevelByTraderCurrent not in neededForBarterByLevelByTrader, for trader "+ trader.index);
+                        neededForBarterByLevelByTraderCurrent.Remove(trader.index);
+                        trader.OnTraderLevelChanged -= OnTraderLevelChanged;
+                    }
+                }
+                else // Trader was not in dict of currently needed for barters
+                {
+                    // Only need to check if barters must be added
+                    if(neededForBarterByLevelByTrader.TryGetValue(trader.index, out Dictionary<int, Dictionary<Barter, int>> toAddLevels))
+                    {
+                        foreach(KeyValuePair<int, Dictionary<Barter, int>> toAddLevelEntry in toAddLevels)
+                        {
+                            if(toAddLevelEntry.Key <= trader.level)
+                            {
+                                Dictionary<int, Dictionary<Barter, int>> newLevelsDict = new Dictionary<int, Dictionary<Barter, int>>();
+                                Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
+                                foreach (KeyValuePair<Barter, int> toAddBarterEntry in toAddLevelEntry.Value)
+                                {
+                                    newBarterDict.Add(toAddBarterEntry.Key, toAddBarterEntry.Value);
+                                }
+                                newLevelsDict.Add(toAddLevelEntry.Key, newBarterDict);
+                                neededForBarterByLevelByTraderCurrent.Add(trader.index, newLevelsDict);
+                            }
+                        }
+                    }
+                }
+            }
+            // else, neededForBarterByLevelByTraderCurrent should contain all levels no matter the current trader level
+
+            neededFor[2] = neededForBarterByLevelByTraderCurrent.Count > 0;
+        }
+
         public Color GetCheckmarkColor()
         {
-            MoreCheckmarksMod.neededFor[2] = wishlist;
-            MoreCheckmarksMod.neededFor[3] = gotBarters;
             MoreCheckmarksMod.neededFor[4] = craftRequired;
 
             // Find needed with highest priority

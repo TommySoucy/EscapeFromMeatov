@@ -45,7 +45,7 @@ namespace EFM
                 _level = value;
                 if(preLevel != _level)
                 {
-                    OnTraderLevelChangedInvoke();
+                    OnTraderLevelChangedInvoke(this);
                 }
             }
         }
@@ -82,7 +82,7 @@ namespace EFM
         public bool unlocked;
         public int balance;
 
-        public delegate void OnTraderLevelChangedDelegate();
+        public delegate void OnTraderLevelChangedDelegate(Trader trader);
         public event OnTraderLevelChangedDelegate OnTraderLevelChanged;
 
         public delegate void OnTraderStandingChangedDelegate();
@@ -398,11 +398,11 @@ namespace EFM
             }
         }
 
-        public void OnTraderLevelChangedInvoke()
+        public void OnTraderLevelChangedInvoke(Trader trader)
         {
             if(OnTraderLevelChanged != null)
             {
-                OnTraderLevelChanged();
+                OnTraderLevelChanged(trader);
             }
         }
 
