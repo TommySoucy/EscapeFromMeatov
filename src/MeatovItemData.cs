@@ -279,6 +279,7 @@ namespace EFM
             for (int i = 0; i < HideoutController.instance.areaController.areas.Length; ++i)
             {
                 Area area = HideoutController.instance.areaController.areas[i];
+                bool subscribed = false;
 
                 // Area upgrades
                 for (int j = 0; j < area.requirementsByTypePerLevel.Length; ++j)
@@ -315,7 +316,11 @@ namespace EFM
                                 // Set initial needed for state
                                 if (area.currentLevel < area.levels.Length - 1)
                                 {
-                                    area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                    if (!subscribed)
+                                    {
+                                        area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                        subscribed = true;
+                                    }
 
                                     // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
                                     neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
@@ -379,7 +384,11 @@ namespace EFM
                                 // Set initial needed for state
                                 if (area.currentLevel < area.levels.Length - 1)
                                 {
-                                    area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                    if (!subscribed)
+                                    {
+                                        area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                        subscribed = true;
+                                    }
 
                                     // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
                                     neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
@@ -467,6 +476,7 @@ namespace EFM
             for(int i=0; i < Mod.traders.Length; ++i)
             {
                 Trader trader = Mod.traders[i];
+                bool subscribed = false;
                 for (int j = 0; j < trader.bartersByLevel.Count; ++j)
                 {
                     List<Barter> barters = trader.bartersByLevel[j];
@@ -511,7 +521,11 @@ namespace EFM
 
                                 // Set initial needed for state
                                 // Note that trader level and both decrease and increase so we must always listen to level change event
-                                trader.OnTraderLevelChanged += OnTraderLevelChanged;
+                                if (!subscribed)
+                                {
+                                    trader.OnTraderLevelChanged += OnTraderLevelChanged;
+                                    subscribed = true;
+                                }
 
                                 // Needed for barter if we want future barters (Implying we want all of them) or this barter's trader's level is <= trader's current level
                                 neededFor[2] = Mod.checkmarkFutureBarters || j <= trader.level;
@@ -556,7 +570,8 @@ namespace EFM
             // Tasks
             foreach(KeyValuePair<string, Task> taskEntry in Task.allTasks)
             {
-                for(int i=0; i < taskEntry.Value.finishConditions.Count; ++i)
+                bool subscribed = false;
+                for (int i=0; i < taskEntry.Value.finishConditions.Count; ++i)
                 {
                     Condition condition = taskEntry.Value.finishConditions[i];
                     if (condition.conditionType == Condition.ConditionType.HandoverItem
@@ -581,7 +596,11 @@ namespace EFM
                                 // Set initial needed for state
                                 if(taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                 {
-                                    taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+                                    if (!subscribed)
+                                    {
+                                        taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+                                        subscribed = true;
+                                    }
 
                                     // Needed for quest if we want future quests (Active or not) or if currently active
                                     neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
@@ -625,7 +644,11 @@ namespace EFM
                                         // Set initial needed for state
                                         if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                         {
-                                            taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+                                            if (!subscribed)
+                                            {
+                                                taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+                                                subscribed = true;
+                                            }
 
                                             // Needed for quest if we want future quests (Active or not) or if currently active
                                             neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
@@ -665,7 +688,11 @@ namespace EFM
                                         // Set initial needed for state
                                         if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                         {
-                                            taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+                                            if (!subscribed)
+                                            {
+                                                taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+                                                subscribed = true;
+                                            }
 
                                             // Needed for quest if we want future quests (Active or not) or if currently active
                                             neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
@@ -702,7 +729,11 @@ namespace EFM
                                             // Set initial needed for state
                                             if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                             {
-                                                taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+                                                if (!subscribed)
+                                                {
+                                                    taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+                                                    subscribed = true;
+                                                }
 
                                                 // Needed for quest if we want future quests (Active or not) or if currently active
                                                 neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
