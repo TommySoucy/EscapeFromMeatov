@@ -388,7 +388,8 @@ namespace EFM
 
         public void UpdateRequirements()
         {
-            if(area.currentLevel == area.startLevel)
+            TODO e: // Set itemView items by  using SetItemData
+            if (area.currentLevel == area.startLevel)
             {
                 requirementPanel.SetActive(true);
                 futureRequirementPanel.SetActive(false);
@@ -404,6 +405,7 @@ namespace EFM
 
         public void UpdateProductions()
         {
+            TODO e: // Set itemView items by  using SetItemData
             productionPanel.SetActive(area.currentLevel != area.startLevel);
 
             // Destroy any existing productions
@@ -440,7 +442,7 @@ namespace EFM
 
                                     Mod.SetIcon(currentProduction.requirements[k].itemID, itemRequirement.itemView.itemIcon);
 
-                                    if (HideoutController.inventory.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
+                                    if (HideoutController.instance.inventory.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
                                     {
                                         itemRequirement.amount.text = Mathf.Max(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                     }
@@ -545,7 +547,7 @@ namespace EFM
                                     }
                                     itemRequirement.amount.text = itemCount.ToString()+"\n(INSTALLED)";
 
-                                    if (HideoutController.inventory.TryGetValue(currentProduction.requirements[0].itemID, out int itemInventoryCount))
+                                    if (HideoutController.instance.inventory.TryGetValue(currentProduction.requirements[0].itemID, out int itemInventoryCount))
                                     {
                                         itemRequirementStash.amount.text = itemInventoryCount.ToString()+"\n(STASH)";
                                     }
@@ -604,7 +606,7 @@ namespace EFM
                                         itemRequirement.itemView.toolIcon.SetActive(currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
                                         itemRequirement.itemView.toolBorder.SetActive(currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
 
-                                        if (HideoutController.inventory.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
+                                        if (HideoutController.instance.inventory.TryGetValue(currentProduction.requirements[k].itemID, out int itemInventoryCount))
                                         {
                                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                         }
@@ -968,7 +970,7 @@ namespace EFM
 
                         Mod.SetIcon(itemRequirements[i].itemID, itemRequirement.itemView.itemIcon);
 
-                        if(HideoutController.inventory.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
+                        if(HideoutController.instance.inventory.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
                         {
                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         }
@@ -1130,7 +1132,7 @@ namespace EFM
 
                         Mod.SetIcon(itemRequirements[i].itemID, itemRequirement.itemView.itemIcon);
 
-                        if (HideoutController.inventory.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
+                        if (HideoutController.instance.inventory.TryGetValue(itemRequirements[i].itemID, out int itemInventoryCount))
                         {
                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         }

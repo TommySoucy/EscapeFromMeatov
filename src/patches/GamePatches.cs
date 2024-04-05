@@ -782,6 +782,7 @@ namespace EFM
     // Patches FVRInteractiveObject.EndInteraction so we know when we drop an item so we can set its parent to the items transform so it can be saved properly later
     class EndInteractionPatch
     {
+        cont from here // Check if anything in here must remain or can be moved to MeatovItem
         public static bool ignoreEndInteraction; // Flag to be set to ignore endinteraction call because it is being handled elsewhere (see FireArmLoadMagPatch)
 
         static void Postfix(FVRViveHand hand, ref FVRInteractiveObject __instance)

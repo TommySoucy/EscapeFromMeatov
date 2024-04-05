@@ -730,7 +730,7 @@ namespace EFM
             OnHideoutInventoryChanged();
             OnAreaSlotContentChanged();
             OnAreaLevelChanged(area);
-            OnTraderLevelChanged();
+            OnTraderLevelChanged(null);
             OnSkillLevelChanged();
             OnTaskStateChanged(null);
         }
@@ -891,12 +891,12 @@ namespace EFM
             UpdateAreaUI();
         }
 
-        public void OnTraderLevelChanged()
+        public void OnTraderLevelChanged(Trader trader)
         {
             switch (requirementType)
             {
                 case RequirementType.Trader:
-                    fulfilled = trader.level >= traderLevel;
+                    fulfilled = (trader == null ? this.trader : trader).level >= traderLevel;
                     if (traderRequirementUI)
                     {
                         traderRequirementUI.fulfilled.SetActive(fulfilled);

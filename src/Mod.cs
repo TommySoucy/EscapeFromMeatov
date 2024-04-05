@@ -28,11 +28,9 @@ namespace EFM
         public static readonly float handDamageResist = 0.5f;
         //public static readonly float[] sizeVolumes = { 1, 2, 5, 30, 0, 50}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
         public static readonly float volumePrecisionMultiplier = 1000; // Volumes are stored as floats but are processed as ints to avoid precision errors, this is how precise we should be when converting, this goes down to 10th of a mililiter
-        public static int neededForQuestPriority = 2;
-        public static int neededForAreaPriority = 3;
-        public static int neededForWishlistPriority = 4;
-        public static int neededForBarterPriority = 0;
-        public static int neededForProductionPriority = 1;
+        public static int[] neededForPriorities = new int[] { 2, 3, 4, 0, 1 }; // Task, Area, Wishlist, Barter, Production
+        public static Color[] neededForColors = new Color[] { Color.yellow, Color.red, Color.cyan, Color.magenta, Color.blue }; // Task, Area, Wishlist, Barter, Production
+        public static Color neededForAreaFulfilledColor = Color.green;
         public static bool checkmarkFutureAreas = false;
         public static bool checkmarkAreaFulfillledMinimum = false;
         public static bool checkmarkFutureProductions = false;

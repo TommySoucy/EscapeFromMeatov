@@ -9,7 +9,7 @@ namespace EFM
     // This should contain:
     // - everything we will need to instantiate an item (Really just an item ID)
     // - everything a description would need (Because we might not have a physical item as a describable)
-    // - all static tarkov data for a vanilla item (Not live data like if it is currently isured or something like that)
+    // - all static tarkov data for a vanilla item (Not live data like if it found in raid or something like that)
     public class MeatovItemData
     {
         // Identifying data
@@ -66,7 +66,7 @@ namespace EFM
         public string dogtagName;
 
         // Checkmark data
-        public bool[] neededFor; // Task, 
+        public bool[] neededFor; // Task, Area upgrade, wishlist, barters, production
         private bool _onWishlist;
         public bool onWishlist
         {
@@ -81,7 +81,7 @@ namespace EFM
                 }
                 if(preValue != _onWishlist)
                 {
-                    OnWishlistChangedInvoke();
+                    OnNeededForChangedInvoke(2);
                 }
             }
         }
@@ -95,6 +95,7 @@ namespace EFM
         // requiring the least amount of this item
         public int minimumUpgradeAmount;
         public Dictionary<int, Dictionary<int, Dictionary<Production, int>>> neededForProductionByLevelByArea; // Productions for which Level in which Areas this item is needed
+        public Dictionary<int, Dictionary<int, Dictionary<Production, int>>> neededForProductionByLevelByAreaCurrent; // Productions for which Level in which Areas this item is CURRENTLY needed (Depends on Mod.checkmarkFutureProductions)
         public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTrader; // Barters for which Level for which Trader this item is needed
         public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTraderCurrent; // Barters for which Level for which Trader this item is CURRENTLY needed (Depends on Mod.checkmarkFutureBarters)
         public Dictionary<Task, int> neededForTasks; // Tasks for which this item is needed
@@ -107,8 +108,8 @@ namespace EFM
         public event OnItemLeftDelegate OnItemLeft;
         public delegate void OnItemUsedDelegate();
         public event OnItemUsedDelegate OnItemUsed;
-        public delegate void OnWishlistChangedDelegate();
-        public event OnWishlistChangedDelegate OnWishlistChanged;
+        public delegate void OnNeededForChangedDelegate(int index);
+        public event OnNeededForChangedDelegate OnNeededForChanged;
 
         public MeatovItemData(JToken data)
         {
@@ -466,6 +467,51 @@ namespace EFM
                                     newLevelsDict.Add(j, newProductionDict);
                                     neededForProductionByLevelByArea.Add(i, newLevelsDict);
                                 }
+
+                                // Set initial needed for state
+                                if (area.currentLevel < area.levels.Length - 1)
+                                {
+                                    if (!subscribed)
+                                    {
+                                        area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                        subscribed = true;
+                                    }
+
+                                    // Needed for production if this requirement's level is a future one and (we want future productions or this requirement's level is next)
+                                    neededFor[4] = j > area.currentLevel && (Mod.checkmarkFutureProductions || j == (area.currentLevel + 1));
+                                    if (neededFor[4])
+                                    {
+                                        if (neededForProductionByLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, Dictionary<Production, int>> currentLevels))
+                                        {
+                                            if (currentLevels.TryGetValue(j, out Dictionary<Production, int> productionsDict))
+                                            {
+                                                int currentCount = 0;
+                                                if (productionsDict.TryGetValue(production, out currentCount))
+                                                {
+                                                    productionsDict[production] = currentCount + newCount;
+                                                }
+                                                else
+                                                {
+                                                    productionsDict.Add(production, newCount);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
+                                                newProductionDict.Add(production, newCount);
+                                                currentLevels.Add(j, newProductionDict);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Dictionary<int, Dictionary<Production, int>> newLevelsDict = new Dictionary<int, Dictionary<Production, int>>();
+                                            Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
+                                            newProductionDict.Add(production, newCount);
+                                            newLevelsDict.Add(j, newProductionDict);
+                                            neededForProductionByLevelByAreaCurrent.Add(i, newLevelsDict);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -528,8 +574,8 @@ namespace EFM
                                 }
 
                                 // Needed for barter if we want future barters (Implying we want all of them) or this barter's trader's level is <= trader's current level
-                                neededFor[2] = Mod.checkmarkFutureBarters || j <= trader.level;
-                                if (neededFor[2])
+                                neededFor[3] = Mod.checkmarkFutureBarters || j <= trader.level;
+                                if (neededFor[3])
                                 {
                                     if (neededForBarterByLevelByTraderCurrent.TryGetValue(i, out Dictionary<int, Dictionary<Barter, int>> currentLevels))
                                     {
@@ -768,6 +814,8 @@ namespace EFM
 
         public void OnTaskStateChanged(Task task)
         {
+            bool preNeeded = neededFor[0];
+
             if(task.taskState == Task.TaskState.Complete || task.taskState == Task.TaskState.Fail)
             {
                 if (neededForTasksCurrent.Remove(task))
@@ -797,10 +845,18 @@ namespace EFM
                     neededForTasksCurrent.Add(task, neededForTasks[task]);
                 }
             }
+
+            if(preNeeded != neededFor[0])
+            {
+                OnNeededForChangedInvoke(0);
+            }
         }
 
         public void OnAreaLevelChanged(Area area)
         {
+            bool preNeededForArea = neededFor[1];
+            bool preNeededForProduction = neededFor[4];
+
             // Note that here we assume level of an area can only ever go up and only by 1
             if (area.currentLevel == area.levels.Length - 1)
             {
@@ -808,21 +864,34 @@ namespace EFM
                 area.OnAreaLevelChanged -= OnAreaLevelChanged;
 
                 neededForLevelByAreaCurrent.Remove(area.index);
+                neededForProductionByLevelByAreaCurrent.Remove(area.index);
 
                 // Might still be needed by another area
                 neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
+                neededFor[4] = neededForProductionByLevelByAreaCurrent.Count > 0;
             }
             else
             {
                 neededForLevelByAreaCurrent[area.index].Remove(area.currentLevel);
+                neededForProductionByLevelByAreaCurrent[area.index].Remove(area.currentLevel);
 
                 if(neededForLevelByAreaCurrent[area.index].Count == 0)
                 {
-                    area.OnAreaLevelChanged -= OnAreaLevelChanged;
-
                     neededForLevelByAreaCurrent.Remove(area.index);
 
                     neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
+                }
+
+                if(neededForProductionByLevelByAreaCurrent[area.index].Count == 0)
+                {
+                    neededForProductionByLevelByAreaCurrent.Remove(area.index);
+
+                    neededFor[4] = neededForProductionByLevelByAreaCurrent.Count > 0;
+                }
+
+                if (!neededForLevelByAreaCurrent.ContainsKey(area.index) && !neededForProductionByLevelByAreaCurrent.ContainsKey(area.index))
+                {
+                    area.OnAreaLevelChanged -= OnAreaLevelChanged;
                 }
             }
 
@@ -843,10 +912,21 @@ namespace EFM
                 }
                 minimumUpgradeAmount = minimum;
             }
+
+            if (preNeededForArea != neededFor[1])
+            {
+                OnNeededForChangedInvoke(1);
+            }
+            if (preNeededForProduction != neededFor[4])
+            {
+                OnNeededForChangedInvoke(4);
+            }
         }
 
         public void OnTraderLevelChanged(Trader trader)
         {
+            bool preNeeded = neededFor[3];
+
             if (!Mod.checkmarkFutureBarters)
             {
                 // Ensure only <= trader levels are present in neededForBarterByLevelByTraderCurrent
@@ -908,22 +988,25 @@ namespace EFM
             }
             // else, neededForBarterByLevelByTraderCurrent should contain all levels no matter the current trader level
 
-            neededFor[2] = neededForBarterByLevelByTraderCurrent.Count > 0;
+            neededFor[3] = neededForBarterByLevelByTraderCurrent.Count > 0;
+
+            if (preNeeded != neededFor[3])
+            {
+                OnNeededForChangedInvoke(3);
+            }
         }
 
-        public Color GetCheckmarkColor()
+        public bool GetCheckmark(out Color color)
         {
-            MoreCheckmarksMod.neededFor[4] = craftRequired;
-
             // Find needed with highest priority
             int currentNeeded = -1;
             int currentHighest = -1;
             for (int i = 0; i < 5; ++i)
             {
-                if (MoreCheckmarksMod.neededFor[i] && MoreCheckmarksMod.priorities[i] > currentHighest)
+                if (neededFor[i] && Mod.neededForPriorities[i] > currentHighest)
                 {
                     currentNeeded = i;
-                    currentHighest = MoreCheckmarksMod.priorities[i];
+                    currentHighest = Mod.neededForPriorities[i];
                 }
             }
 
@@ -933,39 +1016,26 @@ namespace EFM
                 // Handle special case of areas
                 if (currentNeeded == 1)
                 {
-                    if (neededStruct.foundNeeded) // Need more
+                    long itemCount = Mod.GetItemCountInInventories(H3ID);
+                    if(itemCount >= minimumUpgradeAmount)
                     {
-                        SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.needMoreColor);
+                        color = Mod.neededForAreaFulfilledColor;
                     }
-                    else if (neededStruct.foundFulfilled) // We have enough for at least one upgrade
+                    else
                     {
-                        if (MoreCheckmarksMod.fulfilledAnyCanBeUpgraded) // We want to know when have enough for at least one upgrade
-                        {
-                            SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.fulfilledColor);
-                        }
-                        else // We only want fulfilled checkmark when ALL requiring this item can be upgraded
-                        {
-                            // Check if we trully do not need more of this item for now
-                            if (neededStruct.possessedCount >= neededStruct.requiredCount)
-                            {
-                                SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.fulfilledColor);
-                            }
-                            else // Still need more
-                            {
-                                SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.needMoreColor);
-                            }
-                        }
+                        color = Mod.neededForColors[1];
                     }
                 }
-                else // Not area, just set color
+                else // Not area, return corresponding color
                 {
-                    SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, MoreCheckmarksMod.colors[currentNeeded]);
+                    color = Mod.neededForColors[currentNeeded];
                 }
+
+                return true;
             }
-            else if (item.MarkedAsSpawnedInSession) // Item not needed for anything but found in raid
-            {
-                SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Color.white);
-            }
+
+            color = Color.clear;
+            return false;
         }
 
         public void OnItemFoundInvoke()
@@ -992,11 +1062,11 @@ namespace EFM
             }
         }
 
-        public void OnWishlistChangedInvoke()
+        public void OnNeededForChangedInvoke(int index)
         {
-            if(OnWishlistChanged != null)
+            if(OnNeededForChanged != null)
             {
-                OnWishlistChanged();
+                OnNeededForChanged(index);
             }
         }
     }

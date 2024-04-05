@@ -19,7 +19,8 @@ namespace EFM
         public GameObject infoSpecial;
         public Text infoShortNameText;
 
-        public Image infoCheckmark;
+        public Image infoNeededForCheckmark;
+        public GameObject infoFoundInRaidCheckmark;
         public GameObject infoInsuredIcon;
         public GameObject insuredBorder;
         public Text infoCountText;
@@ -34,6 +35,7 @@ namespace EFM
         {
             this.item = item;
 
+            infoFoundInRaidCheckmark.SetActive(item.foundInRaid);
             infoInsuredIcon.SetActive(item.insured);
             insuredBorder.SetActive(item.insured);
             infoCountText.text = item.maxAmount > 0 ? item.amount.ToString() : item.stack.ToString();
@@ -53,7 +55,7 @@ namespace EFM
         {
             if(this.itemData != null)
             {
-                this.itemData.OnWishlistChanged -= OnWishlistChanged;
+                this.itemData.OnNeededForChanged -= OnNeededForChanged;
             }
 
             this.itemData = itemData;
@@ -61,9 +63,16 @@ namespace EFM
             // Set static data
             Mod.SetIcon(itemData.H3ID, itemIcon);
             infoSpecial.SetActive(itemData.itemType == MeatovItem.ItemType.Pouch);
-            TODO: // Set checkmark
-            TODO0: // make events and sub to them for any event relevant to the item that would change the checkmark color (wishlistchanged (Already exists), needed for a quest changed, now have nough of it in stash for area upgrade, etc.)
-            itemData.OnWishlistChanged += OnWishlistChanged;
+            if(itemData.GetCheckmark(out Color color))
+            {
+                infoNeededForCheckmark.gameObject.SetActive(true);
+                infoNeededForCheckmark.color = color;
+            }
+            else
+            {
+                infoNeededForCheckmark.gameObject.SetActive(true);
+            }
+            itemData.OnNeededForChanged += OnNeededForChanged;
 
             // Set overrides
             if (hasInsuredOverride)
@@ -98,11 +107,24 @@ namespace EFM
             // TODO
         }
 
+        public void OnNeededForChanged(int index)
+        {
+            if (itemData.GetCheckmark(out Color color))
+            {
+                infoNeededForCheckmark.gameObject.SetActive(true);
+                infoNeededForCheckmark.color = color;
+            }
+            else
+            {
+                infoNeededForCheckmark.gameObject.SetActive(true);
+            }
+        }
+
         public void OnDestroy()
         {
             if (itemData != null)
             {
-                itemData.OnWishlistChanged -= OnWishlistChanged;
+                itemData.OnNeededForChanged -= OnNeededForChanged;
             }
         }
     }
