@@ -1106,7 +1106,7 @@ namespace EFM
             }
         }
 
-        public void OnTraderLevelChanged()
+        public void OnTraderLevelChanged(Trader trader)
         {
             if(conditionType == ConditionType.TraderLoyalty)
             {

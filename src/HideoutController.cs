@@ -123,7 +123,7 @@ namespace EFM
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         private int insuredSetIndex = 0;
         private float scavTimer;
-        public Dictionary<string, int> inventory;
+        public static Dictionary<string, int> inventory;
         public Dictionary<string, List<MeatovItem>> inventoryItems;
         private Dictionary<int, int[]> fullPartConditions;
         private Dictionary<int, GameObject> medicalPartElements;

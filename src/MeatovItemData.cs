@@ -292,7 +292,7 @@ namespace EFM
                         for (int k = 0; k < itemRequirements.Count; ++k)
                         {
                             Requirement requirement = itemRequirements[k];
-                            if (requirement.itemID.Equals(H3ID))
+                            if (requirement.item.H3ID.Equals(H3ID))
                             {
                                 int newCount = requirement.itemCount;
                                 if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
@@ -361,7 +361,7 @@ namespace EFM
                         for (int k = 0; k < itemRequirements.Count; ++k)
                         {
                             Requirement requirement = itemRequirements[k];
-                            if (requirement.itemID.Equals(H3ID))
+                            if (requirement.item.H3ID.Equals(H3ID))
                             {
                                 if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
                                 {
@@ -435,7 +435,7 @@ namespace EFM
                         for (int l = 0; l < production.requirements.Count; ++l)
                         {
                             Requirement requirement = production.requirements[l];
-                            if (requirement.itemID.Equals(H3ID))
+                            if (requirement.item.H3ID.Equals(H3ID))
                             {
                                 int newCount = requirement.itemCount;
                                 if (neededForProductionByLevelByArea.TryGetValue(i, out Dictionary<int, Dictionary<Production, int>> levels))

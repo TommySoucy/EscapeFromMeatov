@@ -790,7 +790,7 @@ namespace EFM
             {
                 case RequirementType.Item:
                     int count = 0;
-                    if(HideoutController.instance.inventory.TryGetValue(item.H3ID, out count))
+                    if(HideoutController.inventory.TryGetValue(item.H3ID, out count))
                     {
                         fulfilled = count >= itemCount;
                     }
@@ -815,7 +815,7 @@ namespace EFM
                     break;
                 case RequirementType.Tool:
                     int toolCount = 0;
-                    if (HideoutController.instance.inventory.TryGetValue(item.H3ID, out int toolCurrentItemCount))
+                    if (HideoutController.inventory.TryGetValue(item.H3ID, out int toolCurrentItemCount))
                     {
                         fulfilled = toolCurrentItemCount >= 1;
                         toolCount = toolCurrentItemCount;
@@ -837,7 +837,7 @@ namespace EFM
                     break;
                 case RequirementType.Resource:
                     int totalAmount = 0;
-                    if (HideoutController.instance.inventory.TryGetValue(item.H3ID, out totalAmount))
+                    if (HideoutController.inventory.TryGetValue(item.H3ID, out totalAmount))
                     {
                         fulfilled = totalAmount >= resourceCount;
                     }

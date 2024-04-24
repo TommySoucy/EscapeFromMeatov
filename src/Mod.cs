@@ -1879,7 +1879,6 @@ namespace EFM
                         // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
                         Mod.physObjColResetList.Add(securedLeftHandInteractable);
                         Mod.physObjColResetNeeded = 5;
-                        EndInteractionPatch.ignoreEndInteraction = true;
                     }
                     leftHand.fvrHand.ForceSetInteractable(securedLeftHandInteractable);
                     securedLeftHandInteractable = null;
@@ -1888,7 +1887,6 @@ namespace EFM
                         // Set item's cols to NoCol for now so that it doesn't collide with anything on its way to the hand
                         Mod.physObjColResetList.Add(securedRightHandInteractable);
                         Mod.physObjColResetNeeded = 5;
-                        EndInteractionPatch.ignoreEndInteraction = true;
                     }
                     rightHand.fvrHand.ForceSetInteractable(securedRightHandInteractable);
                     securedRightHandInteractable = null;

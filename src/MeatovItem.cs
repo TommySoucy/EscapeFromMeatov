@@ -1889,7 +1889,7 @@ namespace EFM
 				return descriptionPack;
             }
 
-            //descriptionPack.amount = (HideoutController.instance.inventory.ContainsKey(H3ID) ? HideoutController.instance.inventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
+            //descriptionPack.amount = (HideoutController.inventory.ContainsKey(H3ID) ? HideoutController.instance.inventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
 			descriptionPack.amountRequired = 0;
 			for (int i=0; i < 22; ++i)
 			{
@@ -2165,12 +2165,23 @@ namespace EFM
                 Mod.AddSkillExp(Skill.uniqueLoot, 7);
             }
 
+            // Handle harnessed case
+            if (physObj.m_isHardnessed)
+            {
+                // Scale item back to 1 if harnessed
+                // When items are put in equipment slot they are scaled down to fit the slot
+                // This scaling is done in SetQuickBeltSlotPatch
+                // If item is harnessed, this patch doesn't get called because the item's slot doesn't actually change
+                // So we need to handle scaling with harnessed items here
+                transform.localScale = Vector3.one;
+            }
+
             UpdateInventories();
         }
 
 		public void EndInteraction(Hand hand)
         {
-            Mod.LogInfo((hand.fvrHand.IsThisTheRightHand ? "Right" : "Left") + " hand began interacting with " + itemData.name);
+            Mod.LogInfo((hand.fvrHand.IsThisTheRightHand ? "Right" : "Left") + " hand stopped interacting with " + itemData.name);
 
             if (hand != null)
             {
@@ -2197,6 +2208,33 @@ namespace EFM
                 hand.collidingVolume.AddItem(this);
                 hand.collidingVolume.Unoffer();
                 hand.volumeCollider = null;
+            }
+
+            // Handle harnessed case
+            if (physObj.m_isHardnessed)
+            {
+                // Scale item back to correspond with QBS if harnessed
+                // When items are put in equipment slot they are scaled down to fit the slot
+                // This scaling is done in SetQuickBeltSlotPatch
+                // If item is harnessed, this patch doesn't get called because the item's slot doesn't actually change
+                // So we need to handle scaling with harnessed items here
+                transform.localScale = physObj.QBPoseOverride.localScale;
+
+                // For the same reason, we must make sure that a togglable item in a slot is closed
+                if (open)
+                {
+                    ToggleMode(false);
+                }
+            }
+            
+            // Play drop sound
+            // Vanilla will for sure not have play a release sound for a custom item because phys obj asset has release sound None
+            if (hand.fvrHand.CanMakeGrabReleaseSound && itemSounds != null && itemSounds[0] != null)
+            {
+                AudioEvent audioEvent = new AudioEvent();
+                audioEvent.Clips.Add(itemSounds[0]);
+                SM.PlayCoreSound(FVRPooledAudioType.GenericClose, audioEvent, hand.fvrHand.Input.Pos);
+                hand.fvrHand.HandMadeGrabReleaseSound();
             }
 
             UpdateInventories();

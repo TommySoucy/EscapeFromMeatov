@@ -25,7 +25,7 @@ namespace EFM
         public GameObject insuredBorder;
         public Text infoCountText;
         public GameObject infoValue;
-        public Sprite[] currencyIcons; // RUB, USD, EUR
+        public Sprite[] currencyIcons; // RUB, USD, EUR, Item
         public Image infoValueIcon;
         public Text infoValueText;
         public GameObject toolIcon;

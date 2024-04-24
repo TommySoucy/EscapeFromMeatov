@@ -28,7 +28,7 @@ namespace EFM
 				descriptionPack.description = description;
 				// descriptionPack.icon = Mod.itemIcons[ID]; TODO: Since in the case of a non physical describable we dont know if it has an itemIcon entry, need to handle this wehn we set the icon sprite in the description
 				descriptionPack.amountRequiredPerArea = new int[22];
-				//descriptionPack.amount = (HideoutController.instance.inventory.ContainsKey(itemID) ? HideoutController.instance.inventory[itemID] : 0) + (Mod.playerInventory.ContainsKey(itemID) ? Mod.playerInventory[itemID] : 0);
+				//descriptionPack.amount = (HideoutController.inventory.ContainsKey(itemID) ? HideoutController.instance.inventory[itemID] : 0) + (Mod.playerInventory.ContainsKey(itemID) ? Mod.playerInventory[itemID] : 0);
 				Mod.LogInfo("Item " + itemID + " description amount = " + descriptionPack.amount);
 				descriptionPack.amountRequired = 0;
 				for (int i = 0; i < 22; ++i)

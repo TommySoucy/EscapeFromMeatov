@@ -388,7 +388,6 @@ namespace EFM
 
         public void UpdateRequirements()
         {
-            TODO e: // Set itemView items by  using SetItemData
             if (area.currentLevel == area.startLevel)
             {
                 requirementPanel.SetActive(true);
@@ -441,7 +440,7 @@ namespace EFM
 
                                     itemRequirement.itemView.SetItemData(currentProduction.requirements[k].item);
 
-                                    if (HideoutController.instance.inventory.TryGetValue(currentProduction.requirements[k].item.H3ID, out int itemInventoryCount))
+                                    if (HideoutController.inventory.TryGetValue(currentProduction.requirements[k].item.H3ID, out int itemInventoryCount))
                                     {
                                         itemRequirement.amount.text = Mathf.Max(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                     }
@@ -531,7 +530,7 @@ namespace EFM
                                     }
                                     itemRequirement.amount.text = itemCount.ToString()+"\n(INSTALLED)";
 
-                                    if (HideoutController.instance.inventory.TryGetValue(currentProduction.requirements[0].item.H3ID, out int itemInventoryCount))
+                                    if (HideoutController.inventory.TryGetValue(currentProduction.requirements[0].item.H3ID, out int itemInventoryCount))
                                     {
                                         itemRequirementStash.amount.text = itemInventoryCount.ToString()+"\n(STASH)";
                                     }
@@ -587,7 +586,7 @@ namespace EFM
 
                                         itemRequirement.itemView.SetItemData(currentProduction.requirements[k].item);
 
-                                        if (HideoutController.instance.inventory.TryGetValue(currentProduction.requirements[k].item.H3ID, out int itemInventoryCount))
+                                        if (HideoutController.inventory.TryGetValue(currentProduction.requirements[k].item.H3ID, out int itemInventoryCount))
                                         {
                                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                         }
@@ -951,7 +950,7 @@ namespace EFM
 
                         itemRequirement.itemView.SetItemData(itemRequirements[i].item);
 
-                        if(HideoutController.instance.inventory.TryGetValue(itemRequirements[i].item.H3ID, out int itemInventoryCount))
+                        if(HideoutController.inventory.TryGetValue(itemRequirements[i].item.H3ID, out int itemInventoryCount))
                         {
                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         }
@@ -1113,7 +1112,7 @@ namespace EFM
 
                         itemRequirement.itemView.SetItemData(itemRequirements[i].item);
 
-                        if (HideoutController.instance.inventory.TryGetValue(itemRequirements[i].item.H3ID, out int itemInventoryCount))
+                        if (HideoutController.inventory.TryGetValue(itemRequirements[i].item.H3ID, out int itemInventoryCount))
                         {
                             itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         }

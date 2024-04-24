@@ -340,12 +340,12 @@ namespace EFM
             //PatchController.Verify(globalFixedUpdatePatchOriginal, harmony, true);
             //harmony.Patch(globalFixedUpdatePatchOriginal, null, new HarmonyMethod(globalFixedUpdatePatchPostfix));
 
-            //// PlayGrabSoundPatch
-            //MethodInfo playGrabSoundPatchOriginal = typeof(FVRInteractiveObject).GetMethod("PlayGrabSound", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo playGrabSoundPatchPrefix = typeof(PlayGrabSoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // PlayGrabSoundPatch
+            MethodInfo playGrabSoundPatchOriginal = typeof(FVRInteractiveObject).GetMethod("PlayGrabSound", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo playGrabSoundPatchPrefix = typeof(PlayGrabSoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(playGrabSoundPatchOriginal, harmony, true);
-            //harmony.Patch(playGrabSoundPatchOriginal, new HarmonyMethod(playGrabSoundPatchPrefix));
+            PatchController.Verify(playGrabSoundPatchOriginal, harmony, true);
+            harmony.Patch(playGrabSoundPatchOriginal, new HarmonyMethod(playGrabSoundPatchPrefix));
 
             //// PlayReleaseSoundPatch
             //MethodInfo playReleaseSoundPatchOriginal = typeof(FVRInteractiveObject).GetMethod("PlayReleaseSound", BindingFlags.Public | BindingFlags.Instance);
@@ -527,7 +527,6 @@ namespace EFM
                     Mod.securedLeftHandInteractable = Mod.leftHand.fvrHand.CurrentInteractable;
                     if (Mod.securedLeftHandInteractable != null)
                     {
-                        EndInteractionPatch.ignoreEndInteraction = true;
                         Mod.securedLeftHandInteractable.EndInteraction(Mod.leftHand.fvrHand);
                         if (Mod.securedLeftHandInteractable is FVRPhysicalObject && !(Mod.securedLeftHandInteractable as FVRPhysicalObject).m_isHardnessed)
                         {
@@ -538,7 +537,6 @@ namespace EFM
                     Mod.securedRightHandInteractable = Mod.rightHand.fvrHand.CurrentInteractable;
                     if (Mod.securedRightHandInteractable != null)
                     {
-                        EndInteractionPatch.ignoreEndInteraction = true;
                         Mod.securedRightHandInteractable.EndInteraction(Mod.rightHand.fvrHand);
                         if (Mod.securedRightHandInteractable is FVRPhysicalObject && !(Mod.securedRightHandInteractable as FVRPhysicalObject).m_isHardnessed)
                         {
@@ -776,237 +774,6 @@ namespace EFM
             }
 
             return MatchObjects.ToArray();
-        }
-    }
-
-    // Patches FVRInteractiveObject.EndInteraction so we know when we drop an item so we can set its parent to the items transform so it can be saved properly later
-    class EndInteractionPatch
-    {
-        cont from here // Check if anything in here must remain or can be moved to MeatovItem
-        public static bool ignoreEndInteraction; // Flag to be set to ignore endinteraction call because it is being handled elsewhere (see FireArmLoadMagPatch)
-
-        static void Postfix(FVRViveHand hand, ref FVRInteractiveObject __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (ignoreEndInteraction)
-            {
-                ignoreEndInteraction = false;
-                return;
-            }
-
-            // Just return if we declared the item as destroyed already, it would mean that we already managed the weight and item lists so we dont want this patch to do it
-            MeatovItem MI = __instance.GetComponent<MeatovItem>();
-            if (MI != null)
-            {
-                if (MI.destroyed)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                return; // No need to process Item that has neither
-            }
-
-            // Stop here if dropping in a quick belt slot or if this is a door
-            if ((__instance is FVRPhysicalObject && (__instance as FVRPhysicalObject).QuickbeltSlot != null))
-            {
-                // If the item is harnessed to the quickbelt slot, must scale it appropriately
-                if ((__instance as FVRPhysicalObject).m_isHardnessed)
-                {
-                    if ((__instance as FVRPhysicalObject).QuickbeltSlot is EquipmentSlot)
-                    {
-                        // Make equipment the size of its QBPoseOverride because by default the game only sets rotation
-                        if (__instance.QBPoseOverride != null)
-                        {
-                            __instance.transform.localScale = __instance.QBPoseOverride.localScale;
-                        }
-
-                        if (MI.open)
-                        {
-                            MI.ToggleMode(false);
-                        }
-                    }
-                }
-
-                // Check if area slot
-                if ((__instance as FVRPhysicalObject).QuickbeltSlot is AreaSlot)
-                {
-                    // Was on player
-                    MI.UpdateInventories();
-                    return;
-                }
-
-                // This is only relevant in the case where the QB slot is on a loose rig in base or raid
-                FVRPhysicalObject physObj = __instance as FVRPhysicalObject;
-                FVRQuickBeltSlot qbs = physObj.QuickbeltSlot;
-                if (qbs.transform.parent != null && qbs.transform.parent.parent != null && qbs.transform.parent.parent.parent != null)
-                {
-                    MeatovItem customItemWrapper = qbs.transform.parent.parent.parent.GetComponent<MeatovItem>();
-                    if (customItemWrapper != null)
-                    {
-                        if (MI != null)
-                        {
-                            // Update lists
-                            MI.UpdateInventories();
-                        }
-                        return;
-                    }
-                }
-
-                // Play drop sound if custom
-                if (MI != null && hand.CanMakeGrabReleaseSound && MI.itemSounds != null && MI.itemSounds[0] != null)
-                {
-                    AudioEvent audioEvent = new AudioEvent();
-                    audioEvent.Clips.Add(MI.itemSounds[0]);
-                    SM.PlayCoreSound(FVRPooledAudioType.GenericClose, audioEvent, hand.Input.Pos);
-                    hand.HandMadeGrabReleaseSound();
-                }
-                return;
-            }
-            else if (CheckIfDoorUpwards(__instance.gameObject, 3))
-            {
-                return;
-            }
-
-            if (__instance is FVRAlternateGrip)
-            {
-                FVRPhysicalObject primary = (__instance as FVRAlternateGrip).PrimaryObject;
-                if (primary.transform.parent == null)
-                {
-                    DropItem(hand, primary);
-                }
-            }
-            else if (__instance is FVRFireArmAttachment)
-            {
-                FVRFireArmAttachment asAttachment = (FVRFireArmAttachment)__instance;
-                if (asAttachment.Sensor.CurHoveredMount != null)
-                {
-                    MeatovItem attachmentParentCIW = asAttachment.Sensor.CurHoveredMount.MyObject.GetComponent<MeatovItem>();
-
-                    int newLocationIndex = -1;
-                    if (attachmentParentCIW != null)
-                    {
-                        newLocationIndex = attachmentParentCIW.locationIndex;
-                    }
-
-                    MI.UpdateInventories();
-                }
-                else
-                {
-                    DropItem(hand, asAttachment);
-                }
-            }
-            else if (__instance is FVRPhysicalObject)
-            {
-                FVRPhysicalObject primary = (__instance as FVRPhysicalObject);
-                if (primary.AltGrip == null)
-                {
-                    DropItem(hand, primary);
-                }
-            }
-        }
-
-        private static bool CheckIfDoorUpwards(GameObject go, int steps)
-        {
-            if (go.GetComponent<SideHingedDestructibleDoor>() != null ||
-               go.GetComponent<SideHingedDestructibleDoorHandle>() != null ||
-               go.GetComponent<SideHingedDestructibleDoorDeadBolt>() != null)
-            {
-                return true;
-            }
-            else if (steps == 0 || go.transform.parent == null)
-            {
-                return false;
-            }
-            else
-            {
-                return CheckIfDoorUpwards(go.transform.parent.gameObject, steps - 1);
-            }
-        }
-
-        private static void DropItem(FVRViveHand hand, FVRPhysicalObject primary)
-        {
-            Mod.LogInfo("Dropped Item " + primary.name + ":\n" + Environment.StackTrace);
-            MeatovItem collidingContainerWrapper = null;
-            TradeVolume collidingTradeVolume = null;
-            if (Mod.rightHand != null)
-            {
-                if (hand.IsThisTheRightHand)
-                {
-                    //collidingContainerWrapper = Mod.rightHand.collidingContainerWrapper;
-                    //collidingTradeVolume = Mod.rightHand.collidingVolume;
-                    Mod.LogInfo("\tfrom right hand, container null? " + (collidingContainerWrapper == null));
-                }
-                else // Left hand
-                {
-                    //collidingContainerWrapper = Mod.leftHand.collidingContainerWrapper;
-                    //collidingTradeVolume = Mod.leftHand.collidingVolume;
-                    Mod.LogInfo("\tfrom left hand, container null? " + (collidingContainerWrapper == null));
-                }
-            }
-
-            MeatovItem heldMI = primary.GetComponent<MeatovItem>();
-
-            // Remove from All if necessary
-            if (heldMI != null)
-            {
-                Mod.RemoveFromAll(primary, heldMI);
-            }
-
-            if (collidingContainerWrapper != null /*&& (hand.IsThisTheRightHand ? Mod.rightHand.hoverValid : Mod.leftHand.hoverValid)*/ && (heldMI == null || !heldMI.Equals(collidingContainerWrapper)))
-            {
-                Mod.LogInfo("\tChecking if item fits in container");
-                // Check if item fits in container
-                if (collidingContainerWrapper.AddItemToContainer(primary))
-                {
-                    if (collidingContainerWrapper.locationIndex == 1)
-                    {
-                        heldMI.UpdateInventories();
-                    }
-                    else if (collidingContainerWrapper.locationIndex == 2)
-                    {
-                        heldMI.UpdateInventories();
-                    }
-                }
-                else
-                {
-                    DropItemInWorld(primary, heldMI);
-                }
-            }
-            else if (collidingTradeVolume != null)
-            {
-                Mod.LogInfo("\tcolliding trade volume not null, adding to trade volume");
-                collidingTradeVolume.AddItem(primary);
-
-                //collidingTradeVolume.market.UpdateBasedOnItem(true, heldMI);
-
-                heldMI.UpdateInventories();
-            }
-            else
-            {
-                DropItemInWorld(primary, heldMI);
-            }
-        }
-
-        private static void DropItemInWorld(FVRPhysicalObject primary, MeatovItem heldCustomItemWrapper)
-        {
-            // Drop item in world
-            GameObject sceneRoot = SceneManager.GetActiveScene().GetRootGameObjects()[0];
-            HideoutController baseManager = sceneRoot.GetComponent<HideoutController>();
-            Raid_Manager raidManager = sceneRoot.GetComponent<Raid_Manager>();
-            if (baseManager != null)
-            {
-                heldCustomItemWrapper.UpdateInventories();
-            }
-            else if (raidManager != null)
-            {
-                heldCustomItemWrapper.UpdateInventories();
-            }
         }
     }
 
@@ -4849,8 +4616,6 @@ namespace EFM
             if (mag.m_hand != null)
             {
                 // TODO: Might have to do this for ammo when putting it into a mag?
-                EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the mag when inserting in into a firearm
-
                 MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
                 switch (fireArmMI.weaponClass)
                 {
@@ -5008,8 +4773,6 @@ namespace EFM
 
             if (clip.m_hand != null)
             {
-                EndInteractionPatch.ignoreEndInteraction = true; // To prevent EndInteraction from handling us dropping the clip
-
                 MeatovItem fireArmMI = __instance.GetComponent<MeatovItem>();
                 switch (fireArmMI.weaponClass)
                 {
@@ -5462,12 +5225,12 @@ namespace EFM
                 }
                 else
                 {
-                    MeatovItem CIW = __instance.GetComponent<MeatovItem>();
+                    MeatovItem MI = __instance.GetComponent<MeatovItem>();
                     //string[] soundCategories = new string[] { "drop", "pickup", "offline_use", "open", "use", "use_loop" };
-                    if (CIW != null && CIW.itemSounds != null && CIW.itemSounds[1] != null)
+                    if (MI != null && MI.itemSounds != null && MI.itemSounds[1] != null)
                     {
                         AudioEvent audioEvent = new AudioEvent();
-                        audioEvent.Clips.Add(CIW.itemSounds[1]);
+                        audioEvent.Clips.Add(MI.itemSounds[1]);
                         SM.PlayCoreSound(FVRPooledAudioType.GenericClose, audioEvent, hand.Input.Pos);
                         hand.HandMadeGrabReleaseSound();
                     }

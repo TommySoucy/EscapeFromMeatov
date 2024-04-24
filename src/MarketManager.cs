@@ -51,6 +51,7 @@ namespace EFM
         public GameObject buyShowcaseItemViewPrefab;
         public Text buyItemName;
         public PriceItemView buyItemView;
+        public Text buyItemCount;
         public Transform buyPricesContent;
         public GameObject buyPricePrefab;
         public GameObject buyDealButton;
@@ -92,7 +93,6 @@ namespace EFM
         public string cartItem;
         public int cartItemCount;
         public List<BarterPrice> prices;
-        public List<GameObject> buyPriceElements;
         public string ragfairCartItem;
         public int ragfairCartItemCount;
         public List<BarterPrice> ragfairPrices;
@@ -543,76 +543,36 @@ namespace EFM
                                 currentRow.gameObject.SetActive(true);
                             }
 
-                            Transform currentItemIcon = GameObject.Instantiate(buyShowcaseItemViewPrefab, currentRow).transform;
-                            currentItemIcon.gameObject.SetActive(true);
+                            Transform currentItemView = GameObject.Instantiate(buyShowcaseItemViewPrefab, currentRow).transform;
+                            currentItemView.gameObject.SetActive(true);
 
-                            // Setup ItemIcon
-                            Mod.LogInfo("Adding item assort " + currentBarter.itemData.H3ID);
-                            ItemIcon itemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
-                            itemIconScript.itemID = item.Key;
-                            itemIconScript.itemName = Mod.itemNames[item.Key];
-                            itemIconScript.description = Mod.itemDescriptions[item.Key];
-                            itemIconScript.weight = Mod.itemWeights[item.Key];
-                            itemIconScript.volume = Mod.itemVolumes[item.Key];
-
-                            if (Mod.itemIcons.ContainsKey(item.Key))
+                            // Setup ItemView
+                            ItemView itemView = currentItemView.GetComponent<ItemView>();
+                            int valueToUse = 0;
+                            int currencyToUse = 0;
+                            for (int k = 0; k < currentBarter.prices.Length; ++k)
                             {
-                                currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[item.Key];
+                                valueToUse += currentBarter.prices[k].count;
+                            }
+                            if (currentBarter.prices.Length > 1)
+                            {
+                                currencyToUse = 3; // Item trade icon
                             }
                             else
                             {
-                                AnvilManager.Run(Mod.SetVanillaIcon(item.Key, currentItemIcon.GetChild(2).GetComponent<Image>()));
+                                currencyToUse = Mod.ItemIDToCurrencyIndex(currentBarter.prices[0].itemData.H3ID);
                             }
-                            if (item.Value.stack >= 50000)
-                            {
-                                currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "A LOT";
-                            }
-                            else
-                            {
-                                currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = item.Value.stack.ToString();
-                            }
-
-                            // Write price to item icon and set correct currency icon
-                            int totalPriceCount = 0;
-                            Sprite currencySprite = null;
-                            bool barterSprite = false;
-                            foreach (AssortmentPriceData currentPrice in priceList)
-                            {
-                                totalPriceCount += currentPrice.count;
-                                if (!barterSprite)
-                                {
-                                    if (currentPrice.ID.Equals("201"))
-                                    {
-                                        currencySprite = HideoutController.dollarCurrencySprite;
-                                    }
-                                    else if (currentPrice.ID.Equals("202"))
-                                    {
-                                        currencySprite = HideoutController.euroCurrencySprite;
-                                    }
-                                    else if (currentPrice.ID.Equals("203"))
-                                    {
-                                        currencySprite = HideoutController.roubleCurrencySprite;
-                                    }
-                                    else
-                                    {
-                                        currencySprite = HideoutController.barterSprite;
-                                        barterSprite = true;
-                                    }
-                                }
-                            }
-                            totalPriceCount -= (int)(totalPriceCount * (Mod.skills[10].currentProgress / 10000) / 2); // -25% at elite
-                            currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
-                            currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = totalPriceCount.ToString();
+                            itemView.SetItemData(currentBarter.itemData, false, false, false, null, true, currencyToUse, valueToUse, false, false);
 
                             // Setup button
-                            PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<PointableButton>();
+                            PointableButton pointableButton = currentItemView.gameObject.AddComponent<PointableButton>();
                             pointableButton.SetButton();
-                            pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(item.Value, priceList, currentItemIcon.GetChild(2).GetComponent<Image>().sprite); });
+                            pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(currentBarter.itemData, currentBarter.prices); });
                             pointableButton.MaxPointingRange = 20;
                             pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
                             // Add the icon object to the list for that item
-                            item.Value.currentShowcaseElements.Add(currentItemIcon.gameObject);
+                            item.Value.currentShowcaseElements.Add(currentItemView.gameObject);
                         }
                     }
                 }
@@ -661,62 +621,8 @@ namespace EFM
                     upHoverScroll.gameObject.SetActive(false);
                 }
             }
-            // De/Activate buy deal button as necessary
-            bool canDeal = trader.standing >= 0;
-            for (int i = 0; i < prices.Count; ++i)
-            {
-                BarterPrice priceData = prices[i];
-                if (tradeVolumeInventory.ContainsKey(priceData.itemData.H3ID))
-                {
-                    // Find how many we have in trade inventory
-                    // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
-                    int matchingCountInInventory = 0;
-                    if (priceData.itemData.itemType == MeatovItem.ItemType.DogTag)
-                    {
-                        foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.itemData.H3ID])
-                        {
-                            MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
-                            if (priceCIW.dogtagLevel >= priceData.dogTagLevel) // No need to check USEC because true or false have different item IDs
-                            {
-                                ++matchingCountInInventory;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        matchingCountInInventory = priceData.count;
-                    }
-
-                    // If this is the item we are adding, make sure the requirement fulfilled icon is active
-                    if (matchingCountInInventory >= (priceData.count * cartItemCount))
-                    {
-                        Transform priceElement = buyPriceElements[i].transform;
-                        priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
-                        priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
-                    }
-                    else
-                    {
-                        canDeal = false;
-                        break;
-                    }
-                }
-                else
-                {
-                    canDeal = false;
-                    break;
-                }
-            }
-            Transform dealButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
-            if (canDeal)
-            {
-                dealButton.GetComponent<Collider>().enabled = true;
-                dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-            }
-            else
-            {
-                dealButton.GetComponent<Collider>().enabled = false;
-                dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
-            }
+            
+            TODO e: // Clear buy item, make it so when we call BuyItemclick with null item it clears it and puts a question mark icon ans such
 
             Mod.LogInfo("0");
             // Sell
@@ -3333,123 +3239,61 @@ namespace EFM
         //    // TODO: Will also need to check if level 15 then we also want to add player items to flea market
         //}
 
-        //public void OnBuyItemClick(AssortmentItem item, List<AssortmentPriceData> priceList, Sprite itemIcon)
-        //{
-        //    cartItem = item.ID;
-        //    cartItemCount = 1;
-        //    prices = priceList;
-        //    Mod.LogInfo("on buy item click called, with ID: " + item.ID);
-        //    string itemName = Mod.itemNames[item.ID];
-        //    Mod.LogInfo("Got item name: " + itemName);
+        public void OnBuyItemClick(MeatovItemData item, BarterPrice[] priceList)
+        {
+            cartItem = item.H3ID;
+            cartItemCount = 1;
+            prices = new List<BarterPrice>(priceList);
+            Mod.LogInfo("on buy item click called, with ID: " + item.H3ID);
+            Mod.LogInfo("Got item name: " + item.name);
 
-        //    Transform cartShowcase = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1);
-        //    cartShowcase.GetChild(0).GetComponent<Text>().text = itemName;
-        //    cartShowcase.GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = itemIcon;
-        //    cartShowcase.GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "1";
+            buyItemView.itemView.SetItemData(item);
+            buyItemView.itemName.text = item.name;
+            buyItemCount.text = "1";
 
-        //    // Setup ItemIcon
-        //    ItemIcon itemIconScript = cartShowcase.GetChild(1).gameObject.GetComponent<ItemIcon>();
-        //    if (itemIconScript == null)
-        //    {
-        //        itemIconScript = cartShowcase.GetChild(1).gameObject.AddComponent<ItemIcon>();
-        //    }
-        //    itemIconScript.itemID = item.ID;
-        //    itemIconScript.itemName = itemName;
-        //    itemIconScript.description = Mod.itemDescriptions[item.ID];
-        //    Mod.LogInfo("Got item description");
-        //    itemIconScript.weight = Mod.itemWeights[item.ID];
-        //    itemIconScript.volume = Mod.itemVolumes[item.ID];
+            while (buyPricesContent.childCount > 1)
+            {
+                Transform currentFirstChild = buyPricesContent.GetChild(1);
+                currentFirstChild.SetParent(null);
+                Destroy(currentFirstChild.gameObject);
+            }
 
-        //    Transform pricesParent = cartShowcase.GetChild(3).GetChild(0).GetChild(0);
-        //    GameObject priceTemplate = pricesParent.GetChild(0).gameObject;
-        //    float priceHeight = 0;
-        //    while (pricesParent.childCount > 1)
-        //    {
-        //        Transform currentFirstChild = pricesParent.GetChild(1);
-        //        currentFirstChild.SetParent(null);
-        //        Destroy(currentFirstChild.gameObject);
-        //    }
-        //    if (buyPriceElements == null)
-        //    {
-        //        buyPriceElements = new List<GameObject>();
-        //    }
-        //    else
-        //    {
-        //        buyPriceElements.Clear();
-        //    }
-        //    bool canDeal = true;
-        //    foreach (AssortmentPriceData price in priceList)
-        //    {
-        //        Mod.LogInfo("\tSetting price: " + price.ID);
-        //        priceHeight += 50;
-        //        Transform priceElement = Instantiate(priceTemplate, pricesParent).transform;
-        //        priceElement.gameObject.SetActive(true);
+            bool canDeal = true;
+            foreach (BarterPrice price in priceList)
+            {
+                Mod.LogInfo("\tSetting price: " + price.itemData.H3ID);
+                Transform priceElement = Instantiate(buyPricePrefab, buyPricesContent).transform;
+                priceElement.gameObject.SetActive(true);
+                PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
 
-        //        if (Mod.itemIcons.ContainsKey(price.ID))
-        //        {
-        //            priceElement.GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[price.ID];
-        //        }
-        //        else
-        //        {
-        //            AnvilManager.Run(Mod.SetVanillaIcon(price.ID, priceElement.GetChild(0).GetChild(2).GetComponent<Image>()));
-        //        }
-        //        priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = price.count.ToString();
-        //        string priceName = Mod.itemNames[price.ID];
-        //        Mod.LogInfo("\t\tGot name: " + priceName);
-        //        priceElement.GetChild(3).GetChild(0).GetComponent<Text>().text = priceName;
-        //        if (price.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-        //        {
-        //            priceElement.GetChild(0).GetChild(3).GetChild(7).GetChild(2).gameObject.SetActive(true);
-        //            priceElement.GetChild(0).GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = ">= lvl " + price.dogtagLevel;
-        //        }
-        //        buyPriceElements.Add(priceElement.gameObject);
+                currentPriceView.amount.text = price.count.ToString();
+                currentPriceView.itemName.text = price.itemData.name.ToString();
+                if (price.itemData.itemType == MeatovItem.ItemType.DogTag)
+                {
+                    currentPriceView.itemView.SetItemData(price.itemData, false, false, true, ">= lvl " + price.dogTagLevel);
+                }
+                else
+                {
+                    currentPriceView.itemView.SetItemData(price.itemData);
+                }
 
-        //        // Setup ItemIcon
-        //        ItemIcon priceIconScript = priceElement.gameObject.AddComponent<ItemIcon>();
-        //        priceIconScript.itemID = price.ID;
-        //        priceIconScript.itemName = priceName;
-        //        priceIconScript.description = Mod.itemDescriptions[price.ID];
-        //        Mod.LogInfo("\t\tGot description");
-        //        priceIconScript.weight = Mod.itemWeights[price.ID];
-        //        priceIconScript.volume = Mod.itemVolumes[price.ID];
+                if (Mod.GetItemCountInInventories(price.itemData.H3ID) >= price.count)
+                {
+                    currentPriceView.fulfilledIcon.SetActive(true);
+                    currentPriceView.unfulfilledIcon.SetActive(false);
+                }
+                else
+                {
+                    currentPriceView.fulfilledIcon.SetActive(false);
+                    currentPriceView.unfulfilledIcon.SetActive(true);
+                    canDeal = false;
+                }
 
-        //        if (tradeVolumeInventory.ContainsKey(price.ID) && tradeVolumeInventory[price.ID] >= price.count)
-        //        {
-        //            priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
-        //            priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
-        //        }
-        //        else
-        //        {
-        //            canDeal = false;
-        //        }
-        //    }
-        //    HoverScroll downHoverScroll = cartShowcase.GetChild(3).GetChild(3).GetComponent<HoverScroll>();
-        //    HoverScroll upHoverScroll = cartShowcase.GetChild(3).GetChild(2).GetComponent<HoverScroll>();
-        //    if (priceHeight > 60)
-        //    {
-        //        downHoverScroll.rate = 60 / (priceHeight - 60);
-        //        upHoverScroll.rate = 60 / (priceHeight - 60);
-        //        downHoverScroll.gameObject.SetActive(true);
-        //        upHoverScroll.gameObject.SetActive(false);
-        //    }
-        //    else
-        //    {
-        //        downHoverScroll.gameObject.SetActive(false);
-        //        upHoverScroll.gameObject.SetActive(false);
-        //    }
+                TODO: // Subscribe to market inventory changed event so we can update whether prices are fulfilled or not
+            }
 
-        //    Transform dealButton = cartShowcase.parent.GetChild(2).GetChild(0).GetChild(0);
-        //    if (canDeal)
-        //    {
-        //        dealButton.GetComponent<Collider>().enabled = true;
-        //        dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-        //    }
-        //    else
-        //    {
-        //        dealButton.GetComponent<Collider>().enabled = false;
-        //        dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
-        //    }
-        //}
+            buyDealButton.SetActive(canDeal);
+        }
 
         //public void OnBuyDealClick()
         //{
@@ -4248,7 +4092,7 @@ namespace EFM
         //                    }
 
         //                    CIW.stack -= amountToRemove;
-        //                    HideoutController.instance.inventory[CIW.H3ID] -= amountToRemove;
+        //                    HideoutController.inventory[CIW.H3ID] -= amountToRemove;
         //                    HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
         //                    amountToRemove = 0;
         //                }
