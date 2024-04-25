@@ -3347,6 +3347,7 @@ namespace EFM
             }
 
             // Add bought amount of item to trade volume at random pos and rot within it
+            cont from ehre
             SpawnItem(cartItem, cartItemCount);
 
             // Update amount of item in trader's assort
@@ -4085,126 +4086,55 @@ namespace EFM
         public void RemoveItemFromTrade(MeatovItemData itemData, int amount, int dogtaglevel = -1, bool foundInRaid = false)
         {
             // If we destroy items or remove from their stack, the item will update player, hideout, and parent volume inventories accordingly
-            // So in here we need to go through all items of given itemData and consume in priority: 
-            // only foundInRaid items if true
-            // lowest stack first
-            TODO e: // Before continuing here, implement FIR specific inventories for hideout, player, and volumes
+            // So in here we need to go through all items of given itemData and consume lowest stack first
             int amountToRemove = amount;
-            tradeVolume[itemData] -= amountToRemove;
-            List<GameObject> objectList = tradeVolumeInventoryObjects[itemData];
             while (amountToRemove > 0)
             {
-                GameObject currentItemObject = objectList[objectList.Count - 1];
-                MeatovItem CIW = currentItemObject.GetComponent<MeatovItem>();
-                if (CIW != null)
+                // Find next best item to consume
+                MeatovItem item = null;
+                Dictionary<string, List<MeatovItem>> inventoryItemsToUse = null;
+                if (foundInRaid)
                 {
-                    if (foundInRaid && !CIW.foundInRaid)
+                    inventoryItemsToUse = tradeVolume.FIRInventoryItems;
+                }
+                else
+                {
+                    inventoryItemsToUse = tradeVolume.inventoryItems;
+                }
+                if (inventoryItemsToUse.TryGetValue(itemData.H3ID, out List<MeatovItem> items))
+                {
+                    int lowestStack = -1;
+                    for (int i = 0; i < items.Count; ++i)
                     {
-                        continue;
-                    }
-
-                    int currentFIRItemObjectIndex = -1;
-                    List<GameObject> FIRObjectList = null;
-                    if (CIW.foundInRaid)
-                    {
-                        FIRObjectList = tradeVolumeFIRInventoryObjects[itemData];
-                        currentFIRItemObjectIndex = FIRObjectList.IndexOf(currentItemObject);
-                    }
-
-                    if (CIW.maxStack > 1)
-                    {
-                        int stack = CIW.stack;
-                        if (stack - amountToRemove <= 0)
+                        if (items[i].stack < lowestStack && (dogtaglevel == -1 || items[i].dogtagLevel >= dogtaglevel))
                         {
-                            amountToRemove -= stack;
-
-                            if (CIW.foundInRaid)
-                            {
-                                tradeVolumeFIRInventory[itemData] -= stack;
-                                FIRObjectList[currentFIRItemObjectIndex] = FIRObjectList[FIRObjectList.Count - 1];
-                                FIRObjectList.RemoveAt(FIRObjectList.Count - 1);
-                            }
-
-                            // Destroy item
-                            objectList.RemoveAt(objectList.Count - 1);
-                            HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
-                            CIW.destroyed = true;
-                            currentItemObject.transform.parent = null;
-                            Destroy(currentItemObject);
-                        }
-                        else // stack - amountToRemove > 0
-                        {
-                            if (CIW.foundInRaid)
-                            {
-                                tradeVolumeFIRInventory[itemData] -= stack;
-                            }
-
-                            CIW.stack -= amountToRemove;
-                            HideoutController.inventory[CIW.H3ID] -= amountToRemove;
-                            HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
-                            amountToRemove = 0;
-                        }
-                    }
-                    else // Doesnt have stack, its a single item
-                    {
-                        // If dogtag must only delete the ones that match the required level
-                        if (CIW.itemType == Mod.ItemType.DogTag)
-                        {
-                            if (CIW.dogtagLevel >= dogtaglevel)
-                            {
-                                --amountToRemove;
-
-                                if (CIW.foundInRaid)
-                                {
-                                    tradeVolumeFIRInventory[itemData] -= 1;
-                                    FIRObjectList[currentFIRItemObjectIndex] = FIRObjectList[FIRObjectList.Count - 1];
-                                    FIRObjectList.RemoveAt(FIRObjectList.Count - 1);
-                                }
-
-                                // Destroy item
-                                objectList.RemoveAt(objectList.Count - 1);
-                                HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
-                                CIW.destroyed = true;
-                                currentItemObject.transform.parent = null;
-                                Destroy(currentItemObject);
-                            }
-                        }
-                        else
-                        {
-                            --amountToRemove;
-
-                            if (CIW.foundInRaid)
-                            {
-                                tradeVolumeFIRInventory[itemData] -= 1;
-                                FIRObjectList[currentFIRItemObjectIndex] = FIRObjectList[FIRObjectList.Count - 1];
-                                FIRObjectList.RemoveAt(FIRObjectList.Count - 1);
-                            }
-
-                            // Destroy item
-                            objectList.RemoveAt(objectList.Count - 1);
-                            HideoutController.instance.RemoveFromBaseInventory(currentItemObject.transform, true);
-                            CIW.destroyed = true;
-                            currentItemObject.transform.parent = null;
-                            Destroy(currentItemObject);
+                            lowestStack = items[i].stack;
+                            item = items[i];
                         }
                     }
                 }
-            }
+                if(item == null)
+                {
+                    Mod.LogError("DEV: Market RemoveItemFromTrade did not find suitable FIR item for " + itemData.H3ID + " with " + amountToRemove + " amount left to remove");
+                    break;
+                }
 
-            // Remove this item from lists if dont have anymore in inventory
-            if (tradeVolumeInventory[itemData] == 0)
-            {
-                tradeVolumeInventory.Remove(itemData);
-                tradeVolumeInventoryObjects.Remove(itemData);
-                tradeVolumeFIRInventory.Remove(itemData);
-                tradeVolumeFIRInventoryObjects.Remove(itemData);
-                // TODO: In this case, we could just destroy all objects in tradeVolumeInventoryObjects[price.Key] right away without having to check stacks like in the while loop above
-            }
-
-            // Update area managers based on item we just removed
-            foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
-            {
-                areaManager.UpdateBasedOnItem(itemData);
+                // Consume
+                if(item.stack > amountToRemove)
+                {
+                    item.stack -= amountToRemove;
+                    break;
+                }
+                else if(item.stack < amountToRemove)
+                {
+                    amountToRemove -= item.stack;
+                    Destroy(item.gameObject);
+                }
+                else // item.stack == amountToRemove
+                {
+                    Destroy(item.gameObject);
+                    break;
+                }
             }
         }
 
