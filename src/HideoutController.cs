@@ -124,7 +124,9 @@ namespace EFM
         private int insuredSetIndex = 0;
         private float scavTimer;
         public static Dictionary<string, int> inventory;
+        public static Dictionary<string, int> FIRInventory;
         public Dictionary<string, List<MeatovItem>> inventoryItems;
+        public Dictionary<string, List<MeatovItem>> FIRInventoryItems;
         private Dictionary<int, int[]> fullPartConditions;
         private Dictionary<int, GameObject> medicalPartElements;
         private int totalMedicalTreatmentPrice;
@@ -1305,12 +1307,14 @@ namespace EFM
                 }
 
                 // Player items
-                TODO: // Load player Items
                 if (Mod.playerInventory == null)
                 {
                     Mod.playerInventory = new Dictionary<string, int>();
                     Mod.playerInventoryItems = new Dictionary<string, List<MeatovItem>>();
+                    Mod.playerFIRInventory = new Dictionary<string, int>();
+                    Mod.playerFIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
                 }
+                TODO: // Load player Items
             }
             else if (Mod.justFinishedRaid)
             {
@@ -1327,11 +1331,15 @@ namespace EFM
             {
                 inventory = new Dictionary<string, int>();
                 inventoryItems = new Dictionary<string, List<MeatovItem>>();
+                FIRInventory = new Dictionary<string, int>();
+                FIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
             }
             else
             {
                 inventory.Clear();
                 inventoryItems.Clear();
+                FIRInventory.Clear();
+                FIRInventoryItems.Clear();
             }
 
             TODO1: // Load hideout items
@@ -1624,6 +1632,25 @@ namespace EFM
                 {
                     Mod.LogError("DEV: Hideout AddToInventory stackonly with difference " + stackDifference + " for " + item.name + " did not find ID in playerInventory:\n" + Environment.StackTrace);
                 }
+
+                if (item.foundInRaid)
+                {
+                    if (FIRInventory.ContainsKey(item.H3ID))
+                    {
+                        FIRInventory[item.H3ID] += stackDifference;
+
+                        if (FIRInventory[item.H3ID] <= 0)
+                        {
+                            Mod.LogError("DEV: Hideout AddToInventory stackonly with difference " + stackDifference + " for " + item.name + " reached 0 count:\n" + Environment.StackTrace);
+                            FIRInventory.Remove(item.H3ID);
+                            FIRInventoryItems.Remove(item.H3ID);
+                        }
+                    }
+                    else
+                    {
+                        Mod.LogError("DEV: Hideout AddToInventory stackonly with difference " + stackDifference + " for " + item.name + " did not find ID in playerInventory:\n" + Environment.StackTrace);
+                    }
+                }
             }
             else
             {
@@ -1636,6 +1663,20 @@ namespace EFM
                 {
                     inventory.Add(item.H3ID, item.stack);
                     inventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                }
+
+                if (item.foundInRaid)
+                {
+                    if (FIRInventory.ContainsKey(item.H3ID))
+                    {
+                        FIRInventory[item.H3ID] += item.stack;
+                        FIRInventoryItems[item.H3ID].Add(item);
+                    }
+                    else
+                    {
+                        FIRInventory.Add(item.H3ID, item.stack);
+                        FIRInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
+                    }
                 }
 
                 if (item.itemType == MeatovItem.ItemType.AmmoBox)
@@ -1763,32 +1804,28 @@ namespace EFM
                 }
             }
 
-            // Check for more items that may be contained inside this one
-            // NOTE: Now handled by MeatovItem.UpdateInventories() and parent tracking system
-            //if (item != null)
-            //{
-            //    if (item.itemType == MeatovItem.ItemType.Backpack || item.itemType == MeatovItem.ItemType.Container || item.itemType == MeatovItem.ItemType.Pouch)
-            //    {
-            //        foreach (Transform innerItem in item.containerItemRoot)
-            //        {
-            //            AddToInventory(innerItem, updateTypeLists);
-            //        }
-            //    }
-            //    else if (item.itemType == MeatovItem.ItemType.Rig || item.itemType == MeatovItem.ItemType.ArmoredRig)
-            //    {
-            //        foreach (GameObject innerItem in item.itemsInSlots)
-            //        {
-            //            if (innerItem != null)
-            //            {
-            //                AddToInventory(innerItem.transform, updateTypeLists);
-            //            }
-            //        }
-            //    }
-            //}
-
             if(OnHideoutInventoryChanged != null)
             {
                 OnHideoutInventoryChanged();
+            }
+        }
+
+        public void AddToFIRInventory(MeatovItem item)
+        {
+            if (!item.foundInRaid)
+            {
+                return;
+            }
+
+            if (FIRInventory.ContainsKey(item.H3ID))
+            {
+                FIRInventory[item.H3ID] += item.stack;
+                FIRInventoryItems[item.H3ID].Add(item);
+            }
+            else
+            {
+                FIRInventory.Add(item.H3ID, item.stack);
+                FIRInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
             }
         }
 
@@ -1845,6 +1882,25 @@ namespace EFM
             {
                 inventory.Remove(item.H3ID);
                 inventoryItems.Remove(item.H3ID);
+            }
+
+            if (item.foundInRaid)
+            {
+                if (FIRInventory.ContainsKey(item.H3ID))
+                {
+                    FIRInventory[item.H3ID] -= item.stack;
+                    FIRInventoryItems[item.H3ID].Remove(item);
+                }
+                else
+                {
+                    Mod.LogError("Attempting to remove " + item.H3ID + " from hideout inventory but key was not found in it:\n" + Environment.StackTrace);
+                    return;
+                }
+                if (FIRInventory[item.H3ID] == 0)
+                {
+                    FIRInventory.Remove(item.H3ID);
+                    FIRInventoryItems.Remove(item.H3ID);
+                }
             }
 
             if (item.itemType == MeatovItem.ItemType.AmmoBox)
@@ -1966,32 +2022,33 @@ namespace EFM
                 }
             }
 
-            // Check for more items that may be contained inside this one
-            // NOTE: Now handled by MeatovItem.UpdateInventories() and parent tracking system
-            //if (item != null)
-            //{
-            //    if (item.itemType == MeatovItem.ItemType.Backpack || item.itemType == MeatovItem.ItemType.Container || item.itemType == MeatovItem.ItemType.Pouch)
-            //    {
-            //        foreach (Transform innerItem in item.containerItemRoot)
-            //        {
-            //            RemoveFromInventory(innerItem, updateTypeLists);
-            //        }
-            //    }
-            //    else if (item.itemType == MeatovItem.ItemType.Rig || item.itemType == MeatovItem.ItemType.ArmoredRig)
-            //    {
-            //        foreach (GameObject innerItem in item.itemsInSlots)
-            //        {
-            //            if (innerItem != null)
-            //            {
-            //                RemoveFromInventory(innerItem.transform, updateTypeLists);
-            //            }
-            //        }
-            //    }
-            //}
-
             if (OnHideoutInventoryChanged != null)
             {
                 OnHideoutInventoryChanged();
+            }
+        }
+
+        public void RemoveFromFIRInventory(MeatovItem item)
+        {
+            if (item.foundInRaid)
+            {
+                return;
+            }
+
+            if (FIRInventory.ContainsKey(item.H3ID))
+            {
+                FIRInventory[item.H3ID] -= item.stack;
+                FIRInventoryItems[item.H3ID].Remove(item);
+            }
+            else
+            {
+                Mod.LogError("Attempting to remove " + item.H3ID + " from hideout inventory but key was not found in it:\n" + Environment.StackTrace);
+                return;
+            }
+            if (FIRInventory[item.H3ID] == 0)
+            {
+                FIRInventory.Remove(item.H3ID);
+                FIRInventoryItems.Remove(item.H3ID);
             }
         }
 

@@ -141,8 +141,24 @@ namespace EFM
         public bool destroyed;
         [NonSerialized]
         public bool looted;
-        [NonSerialized]
-        public bool foundInRaid;
+        private bool _foundInRaid;
+        public bool foundInRaid
+        {
+            set
+            {
+                bool preValue = _foundInRaid;
+                _foundInRaid = value;
+                if(preValue != _foundInRaid)
+                {
+                    UpdateFIRStatus(preValue);
+                }
+            }
+
+            get
+            {
+                return _foundInRaid;
+            }
+        }
         private DescriptionPack descriptionPack;
         [NonSerialized]
         private long previousDescriptionTime;
@@ -490,14 +506,22 @@ namespace EFM
 
         public void UpdateInventoryStacks(int preStack)
         {
+            int difference = stack - preStack;
+
             // Add stack difference to inventory
             if (locationIndex == 0)
             {
-                Mod.AddToPlayerInventory(this, true, stack - preStack);
+                Mod.AddToPlayerInventory(this, true, difference);
             }
             else if (locationIndex == 1)
             {
-                HideoutController.instance.AddToInventory(this, true, stack - preStack);
+                HideoutController.instance.AddToInventory(this, true, difference);
+            }
+
+            // Update current parent volume inventory if we have one
+            if(parentVolume != null)
+            {
+                parentVolume.AdjustStack(this, difference);
             }
         }
 
@@ -1881,8 +1905,51 @@ namespace EFM
 				SetMode(2);
 			}
         }
-	
-		public DescriptionPack GetDescriptionPack()
+
+        public void UpdateFIRStatus(bool preValue)
+        {
+            // Note that when an item is spawned, this type of live data will not have been set yet
+            // This means that once we spawn an item, it will be added to necessary inventories
+            // but not FIR inventories, until we set the item's FIR status, at which point this method will
+            // be called and only then will we add it to FIR inventories
+            if (preValue)
+            {
+                // FIR status removed, must remove from FIR inventories
+                if (locationIndex == 0)
+                {
+                    Mod.RemoveFromPlayerFIRInventory(this);
+                }
+                else if (locationIndex == 1)
+                {
+                    HideoutController.instance.RemoveFromFIRInventory(this);
+                }
+
+                if(parentVolume != null)
+                {
+                    parentVolume.RemoveItemFIR(this);
+                }
+            }
+            else
+            {
+                // FIR status added, must add to FIR inventories
+                if (locationIndex == 0)
+                {
+                    Mod.AddToPlayerFIRInventory(this);
+                }
+                else if (locationIndex == 1)
+                {
+                    HideoutController.instance.AddToFIRInventory(this);
+                }
+
+                if (parentVolume != null)
+                {
+                    parentVolume.AddItemFIR(this);
+                }
+            }
+        }
+
+
+        public DescriptionPack GetDescriptionPack()
         {
 			if(itemType == ItemType.LootContainer)
             {
@@ -2307,6 +2374,22 @@ namespace EFM
             else if(locationIndex == 1)
             {
                 HideoutController.instance.RemoveFromInventory(this);
+            }
+
+            // Remove from parent
+            if (parent != null)
+            {
+                parent.children[childIndex] = parent.children[parent.children.Count - 1];
+                parent.children[childIndex].childIndex = childIndex;
+                parent.children.RemoveAt(parent.children.Count - 1);
+                parent = null;
+                childIndex = -1;
+            }
+
+            // Remove from parent volume
+            if (parentVolume != null)
+            {
+                parentVolume.RemoveItem(this);
             }
         }
 	}

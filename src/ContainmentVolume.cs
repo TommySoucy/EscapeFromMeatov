@@ -19,6 +19,10 @@ namespace EFM
         public Dictionary<string, int> inventory = new Dictionary<string, int>();
         [NonSerialized]
         public Dictionary<string, List<MeatovItem>> inventoryItems = new Dictionary<string, List<MeatovItem>>();
+        [NonSerialized]
+        public Dictionary<string, int> FIRInventory = new Dictionary<string, int>();
+        [NonSerialized]
+        public Dictionary<string, List<MeatovItem>> FIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
 
         public delegate void OnItemAddedDelegate(MeatovItem item);
         public event OnItemAddedDelegate OnItemAdded;
@@ -64,6 +68,26 @@ namespace EFM
                     inventoryItems.Add(item.H3ID, new List<MeatovItem>() { item });
                 }
 
+                if (item.foundInRaid)
+                {
+                    if (FIRInventory.TryGetValue(item.H3ID, out count))
+                    {
+                        FIRInventory[item.H3ID] = count + item.stack;
+                    }
+                    else
+                    {
+                        FIRInventory.Add(item.H3ID, item.stack);
+                    }
+                    if (FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems))
+                    {
+                        FIRItems.Add(item);
+                    }
+                    else
+                    {
+                        FIRInventoryItems.Add(item.H3ID, new List<MeatovItem>() { item });
+                    }
+                }
+
                 item.parentVolume = this;
 
                 OnItemAddedInvoke(item);
@@ -80,15 +104,81 @@ namespace EFM
                     inventoryItems.Remove(item.H3ID);
                 }
                 inventory[item.H3ID] -= item.stack;
-                if(inventory[item.H3ID] == 0)
+                if(inventory[item.H3ID] <= 0)
                 {
                     inventory.Remove(item.H3ID);
+                }
+
+                if (item.foundInRaid && FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems) && FIRItems.Remove(item))
+                {
+                    if (FIRInventoryItems.Count == 0)
+                    {
+                        FIRInventoryItems.Remove(item.H3ID);
+                    }
+                    FIRInventory[item.H3ID] -= item.stack;
+                    if (FIRInventory[item.H3ID] <= 0)
+                    {
+                        FIRInventory.Remove(item.H3ID);
+                    }
                 }
 
                 volume -= item.volumes[item.mode];
                 item.parentVolume = null;
 
                 OnItemRemovedInvoke(item);
+            }
+        }
+
+        public void AdjustStack(MeatovItem item, int difference)
+        {
+            if(inventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> items) && items.Contains(item))
+            {
+                inventory[item.H3ID] += difference;
+
+                if(item.foundInRaid && FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems) && FIRItems.Contains(item))
+                {
+                    FIRInventory[item.H3ID] += difference;
+                }
+            }
+        }
+
+        public void AddItemFIR(MeatovItem item)
+        {
+            if (item.foundInRaid)
+            {
+                int count = 0;
+                if (FIRInventory.TryGetValue(item.H3ID, out count))
+                {
+                    FIRInventory[item.H3ID] = count + item.stack;
+                }
+                else
+                {
+                    FIRInventory.Add(item.H3ID, item.stack);
+                }
+                if (FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems))
+                {
+                    FIRItems.Add(item);
+                }
+                else
+                {
+                    FIRInventoryItems.Add(item.H3ID, new List<MeatovItem>() { item });
+                }
+            }
+        }
+
+        public void RemoveItemFIR(MeatovItem item)
+        {
+            if (item.foundInRaid && FIRInventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> FIRItems) && FIRItems.Remove(item))
+            {
+                if (FIRInventoryItems.Count == 0)
+                {
+                    FIRInventoryItems.Remove(item.H3ID);
+                }
+                FIRInventory[item.H3ID] -= item.stack;
+                if (FIRInventory[item.H3ID] <= 0)
+                {
+                    FIRInventory.Remove(item.H3ID);
+                }
             }
         }
 
