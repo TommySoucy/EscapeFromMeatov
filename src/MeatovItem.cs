@@ -449,6 +449,26 @@ namespace EFM
                 }
             }
 
+            // Quantities/Contents gets set to max on awake and will be overriden as necessary
+            if(maxAmount > 0)
+            {
+                amount = maxAmount;
+            }
+            if(maxArmor > 0)
+            {
+                armor = maxArmor;
+            }
+            if(physObj is FVRFireArmMagazine)
+            {
+                FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
+                asMagazine.ReloadMagWithType(roundClass);
+            }
+            if(physObj is FVRFireArmClip)
+            {
+                FVRFireArmClip asClip = physObj as FVRFireArmClip;
+                asClip.ReloadClipWithType(roundClass);
+            }
+
             UpdateInventories();
 		}
 
@@ -813,6 +833,14 @@ namespace EFM
                         }
                         else
                         {
+                            // Cancel market amount choosing if active
+                            if(HideoutController.instance != null)
+                            {
+                                HideoutController.instance.marketManager.choosingBuyAmount = false;
+                                HideoutController.instance.marketManager.choosingRagfairBuyAmount = false;
+                                HideoutController.instance.marketManager.startedChoosingThisFrame = false;
+                            }
+
                             // Start splitting
                             Mod.stackSplitUI.SetActive(true);
                             Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
@@ -2390,6 +2418,12 @@ namespace EFM
             if (parentVolume != null)
             {
                 parentVolume.RemoveItem(this);
+            }
+
+            // Cancel split if necessary
+            if(Mod.splittingItem == this)
+            {
+                CancelSplit();
             }
         }
 	}

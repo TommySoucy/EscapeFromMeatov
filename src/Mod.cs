@@ -93,7 +93,6 @@ namespace EFM
         public static Dictionary<FireArmRoundType, Dictionary<string, int>> roundsByType; // TODO: should use the ID of the round, not the name
         public static Dictionary<MeatovItem.ItemRarity, List<string>> itemsByRarity;
         public static Dictionary<string, List<MeatovItemData>> itemsByParents;
-        public static List<string> usedRoundIDs;
         public static Dictionary<string, int> ammoBoxByAmmoID;
         public static Dictionary<string, int> requiredForQuest;
         public static Dictionary<string, List<DescriptionManager>> activeDescriptionsByItemID;
@@ -1682,7 +1681,6 @@ namespace EFM
             clipsByType = new Dictionary<FireArmClipType, Dictionary<string, int>>();
             roundsByType = new Dictionary<FireArmRoundType, Dictionary<string, int>>();
             activeDescriptionsByItemID = new Dictionary<string, List<DescriptionManager>>();
-            usedRoundIDs = new List<string>();
             ammoBoxByAmmoID = new Dictionary<string, int>();
             requiredForQuest = new Dictionary<string, int>();
             wishList = new List<string>();

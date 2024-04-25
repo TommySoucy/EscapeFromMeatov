@@ -1,5 +1,6 @@
 ﻿using FistVR;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -103,9 +104,9 @@ namespace EFM
         public int currentTotalInsurePrice = 0;
 
         private bool initButtonsSet;
-        private bool choosingBuyAmount;
-        private bool choosingRagfairBuyAmount;
-        private bool startedChoosingThisFrame;
+        public bool choosingBuyAmount;
+        public bool choosingRagfairBuyAmount;
+        public bool startedChoosingThisFrame;
         private Vector3 amountChoiceStartPosition;
         private Vector3 amountChoiceRightVector;
         private int chosenAmount;
@@ -609,45 +610,6 @@ namespace EFM
                             pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(currentBarter.itemData, currentBarter.prices); });
                         }
                     }
-                }
-
-                
-                // Setup buttons
-                if (!initButtonsSet)
-                {
-                    PointableButton pointableBuyAmountButton = traderDisplay.GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(1).gameObject.AddComponent<PointableButton>();
-                    pointableBuyAmountButton.SetButton();
-                    pointableBuyAmountButton.Button.onClick.AddListener(() => { OnBuyAmountClick(); });
-                    pointableBuyAmountButton.MaxPointingRange = 20;
-                    pointableBuyAmountButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-
-                    // Set hover scrolls
-                    HoverScroll newDownHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<HoverScroll>();
-                    HoverScroll newUpHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<HoverScroll>();
-                    newDownHoverScroll.MaxPointingRange = 30;
-                    newDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                    newDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
-                    newDownHoverScroll.other = newUpHoverScroll;
-                    newDownHoverScroll.up = false;
-                    newUpHoverScroll.MaxPointingRange = 30;
-                    newUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                    newUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
-                    newUpHoverScroll.other = newDownHoverScroll;
-                    newUpHoverScroll.up = true;
-                }
-                HoverScroll downHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
-                HoverScroll upHoverScroll = traderDisplay.GetChild(1).GetChild(3).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
-                if (buyShowCaseHeight > 150)
-                {
-                    downHoverScroll.rate = 150 / (buyShowCaseHeight - 150);
-                    upHoverScroll.rate = 150 / (buyShowCaseHeight - 150);
-                    downHoverScroll.gameObject.SetActive(true);
-                    upHoverScroll.gameObject.SetActive(false);
-                }
-                else
-                {
-                    downHoverScroll.gameObject.SetActive(false);
-                    upHoverScroll.gameObject.SetActive(false);
                 }
             }
             
@@ -3346,241 +3308,128 @@ namespace EFM
                 RemoveItemFromTrade(price.itemData, price.count * cartItemCount, price.dogTagLevel);
             }
 
-            // Add bought amount of item to trade volume at random pos and rot within it
-            cont from ehre
+            // Add bought amount of item to trade volume
             SpawnItem(cartItem, cartItemCount);
 
             // Update amount of item in trader's assort
-            Mod.traders[currentTraderIndex].assortmentByLevel[Mod.traders[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack -= cartItemCount;
+            //Mod.traders[currentTraderIndex].assortmentByLevel[Mod.traders[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack -= cartItemCount;
         }
 
-        //public IEnumerator SpawnVanillaItem(string ID, int count)
+        public IEnumerator SpawnVanillaItem(MeatovItemData itemData, int count)
+        {
+            yield return IM.OD[itemData.H3ID].GetGameObjectAsync();
+            GameObject itemPrefab = IM.OD[itemData.H3ID].GetGameObject();
+            if (itemPrefab == null)
+            {
+                Mod.LogError("Failed to get vanilla prefab for " + itemData.H3ID+" to spawn in market");
+                yield break;
+            }
+            FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
+            GameObject itemObject = null;
+            if (physObj is FVRFireArmRound && count > 1) // Multiple rounds, must spawn an ammobox
+            {
+                int countLeft = count;
+                float boxCountLeft = count / 120.0f;
+                while (boxCountLeft > 0)
+                {
+                    int amount = 0;
+                    if (countLeft > 30)
+                    {
+                        itemObject = GameObject.Instantiate(Mod.GetItemPrefab(716));
+
+                        if (countLeft <= 120)
+                        {
+                            amount = countLeft;
+                            countLeft = 0;
+                        }
+                        else
+                        {
+                            amount = 120;
+                            countLeft -= 120;
+                        }
+                    }
+                    else
+                    {
+                        itemObject = GameObject.Instantiate(Mod.GetItemPrefab(715));
+
+                        amount = countLeft;
+                        countLeft = 0;
+                    }
+
+                    MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+                    FVRFireArmMagazine asMagazine = meatovItem.physObj as FVRFireArmMagazine;
+                    FVRFireArmRound round = physObj as FVRFireArmRound;
+                    asMagazine.RoundType = round.RoundType;
+                    meatovItem.roundClass = round.RoundClass;
+                    for (int j = 0; j < amount; ++j)
+                    {
+                        asMagazine.AddRound(meatovItem.roundClass, false, false);
+                    }
+
+                    // Add item to tradevolume
+                    tradeVolume.AddItem(meatovItem);
+
+                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolume.activeVolume.transform.localScale.x / 2, tradeVolume.activeVolume.transform.localScale.x / 2),
+                                                                        UnityEngine.Random.Range(-tradeVolume.activeVolume.transform.localScale.y / 2, tradeVolume.activeVolume.transform.localScale.y / 2),
+                                                                        UnityEngine.Random.Range(-tradeVolume.activeVolume.transform.localScale.z / 2, tradeVolume.activeVolume.transform.localScale.z / 2));
+                    itemObject.transform.localRotation = UnityEngine.Random.rotation;
+
+                    boxCountLeft = countLeft / 120.0f;
+                }
+            }
+            else // Not a round, or just 1, spawn as normal
+            {
+                for (int i = 0; i < count; ++i)
+                {
+                    itemObject = GameObject.Instantiate(itemPrefab);
+
+                    MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+
+                    // Add item to tradevolume
+                    tradeVolume.AddItem(meatovItem);
+
+                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolume.activeVolume.transform.localScale.x / 2, tradeVolume.activeVolume.transform.localScale.x / 2),
+                                                                     UnityEngine.Random.Range(-tradeVolume.activeVolume.transform.localScale.y / 2, tradeVolume.activeVolume.transform.localScale.y / 2),
+                                                                     UnityEngine.Random.Range(-tradeVolume.activeVolume.transform.localScale.z / 2, tradeVolume.activeVolume.transform.localScale.z / 2));
+                    itemObject.transform.localRotation = UnityEngine.Random.rotation;
+                }
+            }
+
+            yield break;
+        }
+
+        public void OnBuyAmountClick()
+        {
+            // Cancel stack splitting if in progress
+            if (Mod.amountChoiceUIUp || Mod.splittingItem != null)
+            {
+                Mod.splittingItem.CancelSplit();
+            }
+
+            // Disable buy amount buttons until done choosing amount
+            buyDealButton.SetActive(false);
+
+            // Start choosing amount
+            Mod.stackSplitUI.SetActive(true);
+            Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
+            Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
+            amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
+            amountChoiceRightVector = Mod.rightHand.transform.right;
+            amountChoiceRightVector.y = 0;
+
+            choosingBuyAmount = true;
+            startedChoosingThisFrame = true;
+
+            // Set max buy amount, limit it to 360 otherwise scale is not large enough and its hard to specify an exact value
+            maxBuyAmount = 360;
+        }
+
+        //public void OnSellItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
         //{
-        //    yield return IM.OD[ID].GetGameObjectAsync();
-        //    GameObject itemPrefab = IM.OD[ID].GetGameObject();
-        //    if (itemPrefab == null)
-        //    {
-        //        Mod.LogWarning("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache...");
-
-        //        IM.OD[ID].RefreshCache();
-        //        itemPrefab = IM.OD[ID].GetGameObject();
-        //    }
-        //    if (itemPrefab == null)
-        //    {
-        //        Mod.LogError("Attempted to get vanilla prefab for " + ID + ", but the prefab had been destroyed, refreshing cache did nothing");
-        //        yield break;
-        //    }
-        //    MeatovItem prefabVID = itemPrefab.GetComponent<MeatovItem>();
-        //    Transform tradeVolumeBox = tradeVolume.transform.GetChild(0);
-        //    GameObject itemObject = null;
-        //    bool spawnedSmallBox = false;
-        //    bool spawnedBigBox = false;
-        //    if (Mod.usedRoundIDs.Contains(prefabVID.H3ID))
-        //    {
-        //        // Round, so must spawn an ammobox with specified stack amount if more than 1 instead of the stack of round
-        //        if (count > 1)
-        //        {
-        //            int countLeft = count;
-        //            float boxCountLeft = count / 120.0f;
-        //            while (boxCountLeft > 0)
-        //            {
-        //                int amount = 0;
-        //                if (countLeft > 30)
-        //                {
-        //                    itemObject = GameObject.Instantiate(Mod.itemPrefabs[716], tradeVolume.itemsRoot);
-        //                    if (tradeVolumeInventory.ContainsKey("716"))
-        //                    {
-        //                        tradeVolumeInventory["716"] += 1;
-        //                        tradeVolumeInventoryObjects["716"].Add(itemObject);
-        //                    }
-        //                    else
-        //                    {
-        //                        tradeVolumeInventory.Add("716", 1);
-        //                        tradeVolumeInventoryObjects.Add("716", new List<GameObject>() { itemObject });
-        //                    }
-        //                    HideoutController.instance.AddToBaseInventory(itemObject.transform, true);
-
-        //                    if (countLeft <= 120)
-        //                    {
-        //                        amount = countLeft;
-        //                        countLeft = 0;
-        //                    }
-        //                    else
-        //                    {
-        //                        amount = 120;
-        //                        countLeft -= 120;
-        //                    }
-
-        //                    spawnedBigBox = true;
-        //                }
-        //                else
-        //                {
-        //                    itemObject = GameObject.Instantiate(Mod.itemPrefabs[715], tradeVolume.itemsRoot);
-
-        //                    if (tradeVolumeInventory.ContainsKey("715"))
-        //                    {
-        //                        tradeVolumeInventory["715"] += 1;
-        //                        tradeVolumeInventoryObjects["715"].Add(itemObject);
-        //                    }
-        //                    else
-        //                    {
-        //                        tradeVolumeInventory.Add("715", 1);
-        //                        tradeVolumeInventoryObjects.Add("715", new List<GameObject>() { itemObject });
-        //                    }
-        //                    HideoutController.instance.AddToBaseInventory(itemObject.transform, true);
-
-        //                    amount = countLeft;
-        //                    countLeft = 0;
-
-        //                    spawnedSmallBox = true;
-        //                }
-
-        //                MeatovItem itemCIW = itemObject.GetComponent<MeatovItem>();
-        //                FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
-        //                FVRFireArmRound round = itemPrefab.GetComponentInChildren<FVRFireArmRound>();
-        //                asMagazine.RoundType = round.RoundType;
-        //                itemCIW.roundClass = round.RoundClass;
-        //                for (int j = 0; j < amount; ++j)
-        //                {
-        //                    asMagazine.AddRound(itemCIW.roundClass, false, false);
-        //                }
-
-        //                // Add item to tradevolume so it can set its reset cols and kinematic to true
-        //                tradeVolume.AddItem(itemCIW.physObj);
-
-        //                itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeBox.localScale.x / 2, tradeVolumeBox.localScale.x / 2),
-        //                                                                 UnityEngine.Random.Range(-tradeVolumeBox.localScale.y / 2, tradeVolumeBox.localScale.y / 2),
-        //                                                                 UnityEngine.Random.Range(-tradeVolumeBox.localScale.z / 2, tradeVolumeBox.localScale.z / 2));
-        //                itemObject.transform.localRotation = UnityEngine.Random.rotation;
-
-        //                BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, false);
-
-        //                boxCountLeft = countLeft / 120.0f;
-        //            }
-        //        }
-        //        else // Single round, spawn as normal
-        //        {
-        //            itemObject = GameObject.Instantiate(itemPrefab, tradeVolume.itemsRoot);
-
-        //            MeatovItem VID = itemObject.GetComponent<MeatovItem>();
-
-        //            // Add item to tradevolume so it can set its reset cols and kinematic to true
-        //            tradeVolume.AddItem(VID.physObj);
-
-        //            BeginInteractionPatch.SetItemLocationIndex(1, VID, false);
-
-        //            itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeBox.localScale.x / 2, tradeVolumeBox.localScale.x / 2),
-        //                                                             UnityEngine.Random.Range(-tradeVolumeBox.localScale.y / 2, tradeVolumeBox.localScale.y / 2),
-        //                                                             UnityEngine.Random.Range(-tradeVolumeBox.localScale.z / 2, tradeVolumeBox.localScale.z / 2));
-        //            itemObject.transform.localRotation = UnityEngine.Random.rotation;
-
-        //            if (tradeVolumeInventory.ContainsKey(VID.H3ID))
-        //            {
-        //                tradeVolumeInventory[VID.H3ID] += 1;
-        //                tradeVolumeInventoryObjects[VID.H3ID].Add(itemObject);
-        //            }
-        //            else
-        //            {
-        //                tradeVolumeInventory.Add(VID.H3ID, 1);
-        //                tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { itemObject });
-        //            }
-        //            HideoutController.instance.AddToBaseInventory(itemObject.transform, true);
-        //        }
-        //    }
-        //    else // Not a round, spawn as normal
-        //    {
-        //        for (int i = 0; i < count; ++i)
-        //        {
-        //            itemObject = GameObject.Instantiate(itemPrefab, tradeVolume.itemsRoot);
-
-        //            MeatovItem VID = itemObject.GetComponent<MeatovItem>();
-
-        //            // Add item to tradevolume so it can set its reset cols and kinematic to true
-        //            tradeVolume.AddItem(VID.physObj);
-
-        //            BeginInteractionPatch.SetItemLocationIndex(1, VID, false);
-
-        //            itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-tradeVolumeBox.localScale.x / 2, tradeVolumeBox.localScale.x / 2),
-        //                                                             UnityEngine.Random.Range(-tradeVolumeBox.localScale.y / 2, tradeVolumeBox.localScale.y / 2),
-        //                                                             UnityEngine.Random.Range(-tradeVolumeBox.localScale.z / 2, tradeVolumeBox.localScale.z / 2));
-        //            itemObject.transform.localRotation = UnityEngine.Random.rotation;
-
-
-        //            if (tradeVolumeInventory.ContainsKey(VID.H3ID))
-        //            {
-        //                tradeVolumeInventory[VID.H3ID] += 1;
-        //                tradeVolumeInventoryObjects[VID.H3ID].Add(itemObject);
-        //            }
-        //            else
-        //            {
-        //                tradeVolumeInventory.Add(VID.H3ID, 1);
-        //                tradeVolumeInventoryObjects.Add(VID.H3ID, new List<GameObject>() { itemObject });
-        //            }
-        //            HideoutController.instance.AddToBaseInventory(itemObject.transform, true);
-        //        }
-        //    }
-
-        //    // Update all areas based on the item
-        //    foreach (BaseAreaManager baseAreaManager in controller.baseAreaManagers)
-        //    {
-        //        if (spawnedSmallBox || spawnedBigBox)
-        //        {
-        //            if (spawnedSmallBox)
-        //            {
-        //                baseAreaManager.UpdateBasedOnItem("715");
-        //            }
-        //            if (spawnedBigBox)
-        //            {
-        //                baseAreaManager.UpdateBasedOnItem("716");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            baseAreaManager.UpdateBasedOnItem(ID);
-        //        }
-        //    }
-
-        //    // Refresh trader when done spawning items
-        //    SetTrader(currentTraderIndex, ID);
-
-        //    yield break;
+        //    // TODO: MAYBE DONT EVEN NEED THIS, WE JUST SELL EVERYTHING IN THE SELL SHOWCASE
+        //    // TODO: Set cart UI to this item
+        //    // de/activate deal! button depending on whether trader has enough money
         //}
-
-        //public void OnBuyAmountClick()
-        //{
-        //    // TODO: Check coordination between stack split and buy amount choosing. For now buy amount will replace stack split if splitting stack, but havent checked other way around
-
-        //    // Cancel stack splitting if in progress
-        //    if (Mod.amountChoiceUIUp || Mod.splittingItem != null)
-        //    {
-        //        Mod.splittingItem.CancelSplit();
-        //    }
-
-        //    // Disable buy amount buttons until done choosing amount
-        //    transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = false;
-        //    transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = false;
-
-        //    // Start splitting
-        //    Mod.stackSplitUI.SetActive(true);
-        //    Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
-        //    Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
-        //    amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
-        //    amountChoiceRightVector = Mod.rightHand.transform.right;
-        //    amountChoiceRightVector.y = 0;
-
-        //    choosingBuyAmount = true;
-        //    startedChoosingThisFrame = true;
-
-        //    // Set max buy amount, limit it to 360 otherwise scale is not large enough and its hard to specify an exact value
-        //    maxBuyAmount = Mathf.Min(360, Mod.traders[currentTraderIndex].assortmentByLevel[Mod.traders[currentTraderIndex].GetLoyaltyLevel()].itemsByID[cartItem].stack);
-        //}
-
-        ////public void OnSellItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
-        ////{
-        ////    // TODO: MAYBE DONT EVEN NEED THIS, WE JUST SELL EVERYTHING IN THE SELL SHOWCASE
-        ////    // TODO: Set cart UI to this item
-        ////    // de/activate deal! button depending on whether trader has enough money
-        ////}
 
         //public void OnSellDealClick()
         //{
@@ -4224,95 +4073,55 @@ namespace EFM
         //    }
         //}
 
-        //public void SpawnItem(string itemID, int amount)
-        //{
-        //    int amountToSpawn = amount;
-        //    if (int.TryParse(itemID, out int parseResult))
-        //    {
-        //        GameObject itemPrefab = Mod.itemPrefabs[parseResult];
-        //        MeatovItem prefabCIW = itemPrefab.GetComponent<MeatovItem>();
-        //        Transform tradeVolume = this.tradeVolume.transform.GetChild(0);
-        //        List<GameObject> objectsList = new List<GameObject>();
-        //        while (amountToSpawn > 0)
-        //        {
-        //            GameObject spawnedItem = Instantiate(itemPrefab, this.tradeVolume.itemsRoot);
-        //            objectsList.Add(spawnedItem);
-        //            float xSize = tradeVolume.localScale.x;
-        //            float ySize = tradeVolume.localScale.y;
-        //            float zSize = tradeVolume.localScale.z;
-        //            spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
-        //                                                              UnityEngine.Random.Range(-ySize / 2, ySize / 2),
-        //                                                              UnityEngine.Random.Range(-zSize / 2, zSize / 2));
-        //            spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
+        public void SpawnItem(MeatovItemData itemData, int amount)
+        {
+            int amountToSpawn = amount;
+            float xSize = tradeVolume.activeVolume.transform.localScale.x;
+            float ySize = tradeVolume.activeVolume.transform.localScale.y;
+            float zSize = tradeVolume.activeVolume.transform.localScale.z;
+            if (itemData.index == -1)
+            {
+                // Spawn vanilla item will handle the updating of proper elements
+                AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn));
+            }
+            else
+            {
+                GameObject itemPrefab = Mod.GetItemPrefab(itemData.index);
+                List<GameObject> objectsList = new List<GameObject>();
+                while (amountToSpawn > 0)
+                {
+                    GameObject spawnedItem = Instantiate(itemPrefab);
+                    MeatovItem meatovItem = spawnedItem.GetComponent<MeatovItem>();
+                    objectsList.Add(spawnedItem);
+                    spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
+                                                                      UnityEngine.Random.Range(-ySize / 2, ySize / 2),
+                                                                      UnityEngine.Random.Range(-zSize / 2, zSize / 2));
+                    spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
 
-        //            // Setup CIW
-        //            MeatovItem itemCIW = spawnedItem.GetComponent<MeatovItem>();
-        //            if (itemCIW.maxAmount > 0)
-        //            {
-        //                itemCIW.amount = itemCIW.maxAmount;
-        //            }
+                    // Set stack and remove amount to spawn
+                    if (meatovItem.maxStack > 1)
+                    {
+                        if (amountToSpawn > meatovItem.maxStack)
+                        {
+                            meatovItem.stack = meatovItem.maxStack;
+                            amountToSpawn -= meatovItem.maxStack;
+                        }
+                        else // amountToSpawn <= itemCIW.maxStack
+                        {
+                            meatovItem.stack = amountToSpawn;
+                            amountToSpawn = 0;
+                        }
+                    }
+                    else
+                    {
+                        --amountToSpawn;
+                    }
 
-        //            if (itemCIW.itemType == Mod.ItemType.AmmoBox)
-        //            {
-        //                FVRFireArmMagazine asMagazine = itemCIW.physObj as FVRFireArmMagazine;
-        //                for (int i = 0; i < itemCIW.maxAmount; ++i)
-        //                {
-        //                    asMagazine.AddRound(itemCIW.roundClass, false, false);
-        //                }
-        //            }
-
-        //            // Set stack and remove amount to spawn
-        //            if (itemCIW.maxStack > 1)
-        //            {
-        //                if (amountToSpawn > itemCIW.maxStack)
-        //                {
-        //                    itemCIW.stack = itemCIW.maxStack;
-        //                    amountToSpawn -= itemCIW.maxStack;
-        //                }
-        //                else // amountToSpawn <= itemCIW.maxStack
-        //                {
-        //                    itemCIW.stack = amountToSpawn;
-        //                    amountToSpawn = 0;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                --amountToSpawn;
-        //            }
-
-        //            // Add item to tradevolume so it can set its reset cols and kinematic to true
-        //            this.tradeVolume.AddItem(itemCIW.physObj);
-
-        //            HideoutController.instance.AddToBaseInventory(spawnedItem.transform, true);
-
-        //            BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, false);
-        //        }
-        //        if (tradeVolumeInventory.ContainsKey(cartItem))
-        //        {
-        //            tradeVolumeInventory[cartItem] += cartItemCount;
-        //            tradeVolumeInventoryObjects[cartItem].AddRange(objectsList);
-        //        }
-        //        else
-        //        {
-        //            tradeVolumeInventory.Add(cartItem, cartItemCount);
-        //            tradeVolumeInventoryObjects.Add(cartItem, objectsList);
-        //        }
-
-        //        // Set trader immediately because we spawned a custom item
-        //        SetTrader(currentTraderIndex, cartItem);
-
-        //        // Update area managers based on item we just added
-        //        foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
-        //        {
-        //            areaManager.UpdateBasedOnItem(cartItem);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        // Spawn vanilla item will handle the updating of proper elements
-        //        AnvilManager.Run(SpawnVanillaItem(itemID, amountToSpawn));
-        //    }
-        //}
+                    // Add item to tradevolume
+                    tradeVolume.AddItem(meatovItem);
+                }
+            }
+        }
 
         //public void OnTaskFinishClick(Task task)
         //{
