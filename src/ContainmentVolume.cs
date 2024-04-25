@@ -16,7 +16,9 @@ namespace EFM
         public GameObject activeVolume;
         public GameObject itemRoot;
         [NonSerialized]
-        public List<MeatovItem> items = new List<MeatovItem>();
+        public Dictionary<string, int> inventory = new Dictionary<string, int>();
+        [NonSerialized]
+        public Dictionary<string, List<MeatovItem>> inventoryItems = new Dictionary<string, List<MeatovItem>>();
 
         public delegate void OnItemAddedDelegate(MeatovItem item);
         public event OnItemAddedDelegate OnItemAdded;
@@ -43,7 +45,25 @@ namespace EFM
                 }
 
                 volume += item.volumes[item.mode];
-                items.Add(item);
+
+                int count = 0;
+                if(inventory.TryGetValue(item.H3ID, out count))
+                {
+                    inventory[item.H3ID] = count + item.stack;
+                }
+                else
+                {
+                    inventory.Add(item.H3ID, item.stack);
+                }
+                if(inventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> items))
+                {
+                    items.Add(item);
+                }
+                else
+                {
+                    inventoryItems.Add(item.H3ID, new List<MeatovItem>() { item });
+                }
+
                 item.parentVolume = this;
 
                 OnItemAddedInvoke(item);
@@ -53,8 +73,18 @@ namespace EFM
 
         public void RemoveItem(MeatovItem item)
         {
-            if (items.Remove(item))
+            if (inventoryItems.TryGetValue(item.H3ID, out List<MeatovItem> items) && items.Remove(item))
             {
+                if(inventoryItems.Count == 0)
+                {
+                    inventoryItems.Remove(item.H3ID);
+                }
+                inventory[item.H3ID] -= item.stack;
+                if(inventory[item.H3ID] == 0)
+                {
+                    inventory.Remove(item.H3ID);
+                }
+
                 volume -= item.volumes[item.mode];
                 item.parentVolume = null;
 

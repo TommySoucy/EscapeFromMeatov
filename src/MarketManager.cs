@@ -1,6 +1,7 @@
 ﻿using FistVR;
 using System;
 using System.Collections.Generic;
+using System.Security.Policy;
 using UnityEngine;
 using UnityEngine.UI;
 using static ECE.EasyColliderQuickHull;
@@ -51,6 +52,7 @@ namespace EFM
         public GameObject buyShowcaseItemViewPrefab;
         public Text buyItemName;
         public PriceItemView buyItemView;
+        public Dictionary<string, PriceItemView> buyItemPriceViewsByH3ID;
         public Text buyItemCount;
         public Transform buyPricesContent;
         public GameObject buyPricePrefab;
@@ -125,9 +127,12 @@ namespace EFM
         public void Start()
         {
             // Process items loaded in trade volume
-            for(int i=0; i < tradeVolume.items.Count; ++i)
+            foreach(KeyValuePair<string, List<MeatovItem>> itemEntry in tradeVolume.inventoryItems)
             {
-                OnItemAdded(tradeVolume.items[i]);
+                for (int i = 0; i < itemEntry.Value.Count; ++i)
+                {
+                    OnItemAdded(itemEntry.Value[i]);
+                }
             }
 
             // Subscribe to events
@@ -190,6 +195,20 @@ namespace EFM
             {
                 AddToInventory(item.children[i]);
             }
+
+            UpdateBuyPriceForItem(item);
+        }
+
+        public void UpdateBuyPriceForItem(MeatovItem item)
+        {
+            if (buyItemPriceViewsByH3ID.TryGetValue(item.H3ID, out PriceItemView itemView))
+            {
+                int count = 0;
+                tradeVolume.inventory.TryGetValue(item.H3ID, out count);
+                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + itemView.price.count.ToString();
+                itemView.fulfilledIcon.SetActive(count >= itemView.price.count);
+                itemView.fulfilledIcon.SetActive(count < itemView.price.count);
+            }
         }
 
         public void OnItemRemoved(MeatovItem item)
@@ -201,6 +220,8 @@ namespace EFM
             {
                 RemoveFromInventory(item.children[i]);
             }
+
+            UpdateBuyPriceForItem(item);
         }
 
         public void AddToInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
@@ -3258,6 +3279,15 @@ namespace EFM
                 Destroy(currentFirstChild.gameObject);
             }
 
+            if(buyItemPriceViewsByH3ID == null)
+            {
+                buyItemPriceViewsByH3ID = new Dictionary<string, PriceItemView>();
+            }
+            else
+            {
+                buyItemPriceViewsByH3ID.Clear();
+            }
+
             bool canDeal = true;
             foreach (BarterPrice price in priceList)
             {
@@ -3265,6 +3295,7 @@ namespace EFM
                 Transform priceElement = Instantiate(buyPricePrefab, buyPricesContent).transform;
                 priceElement.gameObject.SetActive(true);
                 PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
+                currentPriceView.price = price;
 
                 currentPriceView.amount.text = price.count.ToString();
                 currentPriceView.itemName.text = price.itemData.name.ToString();
@@ -3277,7 +3308,11 @@ namespace EFM
                     currentPriceView.itemView.SetItemData(price.itemData);
                 }
 
-                if (Mod.GetItemCountInInventories(price.itemData.H3ID) >= price.count)
+                int count = 0;
+                tradeVolume.inventory.TryGetValue(price.itemData.H3ID, out count);
+                currentPriceView.amount.text = Mathf.Min(price.count, count).ToString() + "/" + price.count.ToString();
+
+                if (count >= price.count)
                 {
                     currentPriceView.fulfilledIcon.SetActive(true);
                     currentPriceView.unfulfilledIcon.SetActive(false);
@@ -3289,7 +3324,7 @@ namespace EFM
                     canDeal = false;
                 }
 
-                TODO: // Subscribe to market inventory changed event so we can update whether prices are fulfilled or not
+                buyItemPriceViewsByH3ID.Add(price.itemData.H3ID, currentPriceView);
             }
 
             buyDealButton.SetActive(canDeal);
@@ -5149,6 +5184,12 @@ namespace EFM
         //    ragfairCartTransform.parent.GetChild(0).gameObject.SetActive(true);
         //    ragfairCartTransform.parent.GetChild(1).gameObject.SetActive(true);
         //}
+    
+        public void OnDestroy()
+        {
+            // Unsubscribe to events
+            tradeVolume.OnItemAdded -= OnItemAdded;
+            tradeVolume.OnItemRemoved -= OnItemRemoved;
+        }
     }
-
 }

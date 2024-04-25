@@ -5,5 +5,6 @@ namespace EFM
     public class PriceItemView : RequirementItemView
     {
         public Text itemName;
+        public BarterPrice price;
     }
 }
