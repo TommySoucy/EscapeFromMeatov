@@ -169,7 +169,9 @@ namespace EFM
         [NonSerialized]
         public DescriptionManager descriptionManager; // The current description manager displaying this item's description
         [NonSerialized]
-        public List<MarketItemView> marketItemViews;
+        public ItemView marketSellItemView;
+        [NonSerialized]
+        public ItemView marketInsureItemView;
         //public LeaveItemProcessor leaveItemProcessor;
 
         // Equipment

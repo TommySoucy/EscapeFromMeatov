@@ -27,6 +27,7 @@ namespace EFM
         public string name;
         public string description;
         public bool canSellOnRagfair;
+        public int value; // Roubles
         // Weapon/Ammo container
         public int compatibilityValue;  // 0: Does not need mag or round, 1: Needs mag, 2: Needs round, 3: Needs both, used by description to display list of compatibilities present in hideout
         public bool usesMags; // Could be clip
@@ -143,6 +144,10 @@ namespace EFM
             name = data["name"].ToString();
             description = data["description"].ToString();
             canSellOnRagfair = (bool)data["canSellOnRagfair"];
+            if(!Mod.itemValues.TryGetValue(tarkovID, out value))
+            {
+                Mod.LogError("DEV: Could not find value for item "+H3ID+" with tarkovID "+tarkovID);
+            }
 
             compatibilityValue = (int)data["compatibilityValue"];
             usesMags = (bool)data["usesMags"];

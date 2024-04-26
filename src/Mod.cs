@@ -9,9 +9,6 @@ using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
-using System.Collections;
-using System.Linq;
-using H3MP;
 
 namespace EFM
 {
@@ -101,7 +98,6 @@ namespace EFM
         public static Dictionary<int, List<Task>> tasksByTraderIndex;
         public static CategoryTreeNode itemCategories;
         public static Dictionary<string, List<string>> itemAncestors;
-        public static Dictionary<string, int> lowestBuyValueByItem;
         public static bool amountChoiceUIUp;
         public static MeatovItem splittingItem;
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
@@ -246,6 +242,7 @@ namespace EFM
         public static Sprite[] playerLevelIcons;
         public static AudioClip[] barbedWireClips;
         public static Sprite[] skillIcons;
+        public static Sprite questionMarkIcon;
 
         // DB
         public static JArray areasDB;
@@ -266,6 +263,7 @@ namespace EFM
         public static JArray lootContainerDB;
         public static JObject dynamicLootTable;
         public static JObject staticLootTable;
+        public static Dictionary<string, int> itemValues;
         public static MeatovItemData[] customItemData;
         public static Dictionary<string, MeatovItemData> vanillaItemData;
         public static Dictionary<string, JObject> lootContainersByName;
@@ -924,7 +922,11 @@ namespace EFM
 
         private void ParseDefaultItemData()
         {
-            JObject data = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
+
+            JObject data = JObject.Parse(File.ReadAllText(path + "/database/templates/prices.json"));
+            itemValues = data.ToObject<Dictionary<string, int>>();
+
+            data = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
 
             itemsByParents = new Dictionary<string, List<MeatovItemData>>();
 

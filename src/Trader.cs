@@ -425,7 +425,7 @@ namespace EFM
 
     public class LoyaltyLevel
     {
-        public float buyPriceCoef;
+        public float buyPriceCoef; // Percentage of item value to remove when selling to this trader at this level
         public float exchangePriceCoef;
         public float healPriceCoef;
         public float insurancePriceCoef; // This is written as string OR int in DB

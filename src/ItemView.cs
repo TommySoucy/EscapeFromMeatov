@@ -31,7 +31,7 @@ namespace EFM
         public GameObject toolIcon;
         public GameObject toolBorder;
 
-        public void SetItem(MeatovItem item)
+        public void SetItem(MeatovItem item, bool displayValue = false, int currencyIndex = 0, int valueOverride = -1)
         {
             this.item = item;
 
@@ -39,8 +39,9 @@ namespace EFM
             infoInsuredIcon.SetActive(item.insured);
             insuredBorder.SetActive(item.insured);
             infoCountText.text = item.maxAmount > 0 ? item.amount.ToString() : item.stack.ToString();
-            infoValueIcon.gameObject.SetActive(false);
-            infoValueText.gameObject.SetActive(false);
+            infoValueIcon.gameObject.SetActive(displayValue);
+            infoValueText.gameObject.SetActive(displayValue);
+            infoValueText.text = (valueOverride == -1 ? item.itemData.value : valueOverride).ToString();
             toolIcon.SetActive(false);
             toolBorder.SetActive(false);
 
@@ -53,46 +54,66 @@ namespace EFM
                                 bool hasValueOverride = false, int currencyIconIndexOverride = 0, int valueOverride = 0, 
                                 bool hasToolOveride = false, bool isToolOverride = false)
         {
-            if(this.itemData != null)
+            if (this.itemData != null)
             {
                 this.itemData.OnNeededForChanged -= OnNeededForChanged;
             }
-
             this.itemData = itemData;
 
-            // Set static data
-            Mod.SetIcon(itemData.H3ID, itemIcon);
-            infoSpecial.SetActive(itemData.itemType == MeatovItem.ItemType.Pouch);
-            if(itemData.GetCheckmark(out Color color))
+            if (itemData == null)
             {
-                infoNeededForCheckmark.gameObject.SetActive(true);
-                infoNeededForCheckmark.color = color;
+                itemIcon.sprite = Mod.questionMarkIcon;
+
+                infoSpecial.SetActive(false);
+                infoNeededForCheckmark.gameObject.SetActive(false);
+                infoFoundInRaidCheckmark.SetActive(false);
+                infoInsuredIcon.SetActive(false);
+                insuredBorder.SetActive(false);
+                infoCountText.text = "";
+                infoValueIcon.gameObject.SetActive(false);
+                infoValueText.gameObject.SetActive(false);
+                toolIcon.SetActive(false);
+                toolBorder.SetActive(false);
             }
             else
             {
-                infoNeededForCheckmark.gameObject.SetActive(true);
-            }
-            itemData.OnNeededForChanged += OnNeededForChanged;
+                // Set static data
+                Mod.SetIcon(itemData.H3ID, itemIcon);
+                infoSpecial.SetActive(itemData.itemType == MeatovItem.ItemType.Pouch);
+                if (itemData.GetCheckmark(out Color color))
+                {
+                    infoNeededForCheckmark.gameObject.SetActive(true);
+                    infoNeededForCheckmark.color = color;
+                }
+                else
+                {
+                    infoNeededForCheckmark.gameObject.SetActive(false);
+                }
+                itemData.OnNeededForChanged += OnNeededForChanged;
 
-            // Set overrides
-            if (hasInsuredOverride)
-            {
-                infoInsuredIcon.SetActive(insuredOverride);
-                insuredBorder.SetActive(insuredOverride);
-            }
-            if (hasCountOverride && countOverride != null)
-            {
-                infoCountText.text = countOverride;
-            }
-            if (hasValueOverride)
-            {
-                infoValueIcon.sprite = currencyIcons[currencyIconIndexOverride];
-                infoValueText.text = valueOverride.ToString();
-            }
-            if (hasToolOveride)
-            {
-                toolIcon.SetActive(isToolOverride);
-                toolBorder.SetActive(isToolOverride);
+                // Set overrides
+                if (hasInsuredOverride)
+                {
+                    infoInsuredIcon.SetActive(insuredOverride);
+                    insuredBorder.SetActive(insuredOverride);
+                }
+                if (hasCountOverride && countOverride != null)
+                {
+                    infoCountText.gameObject.SetActive(true);
+                    infoCountText.text = countOverride;
+                }
+                if (hasValueOverride)
+                {
+                    infoValueIcon.gameObject.SetActive(true);
+                    infoValueIcon.sprite = currencyIcons[currencyIconIndexOverride];
+                    infoValueText.gameObject.SetActive(true);
+                    infoValueText.text = valueOverride.ToString();
+                }
+                if (hasToolOveride)
+                {
+                    toolIcon.SetActive(isToolOverride);
+                    toolBorder.SetActive(isToolOverride);
+                }
             }
         }
 

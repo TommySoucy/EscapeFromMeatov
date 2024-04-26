@@ -98,8 +98,6 @@ namespace EFM
         public int ragfairCartItemCount;
         public List<BarterPrice> ragfairPrices;
         public List<GameObject> ragfairBuyPriceElements;
-        public Dictionary<string, GameObject> sellItemShowcaseElements;
-        public Dictionary<string, GameObject> insureItemShowcaseElements;
         public int currentTotalSellingPrice = 0;
         public int currentTotalInsurePrice = 0;
 
@@ -584,8 +582,8 @@ namespace EFM
                                 currentRow.gameObject.SetActive(true);
                             }
 
-                            Transform currentItemView = GameObject.Instantiate(buyShowcaseItemViewPrefab, currentRow).transform;
-                            currentItemView.gameObject.SetActive(true);
+                            GameObject currentItemView = GameObject.Instantiate(buyShowcaseItemViewPrefab, currentRow);
+                            currentItemView.SetActive(true);
 
                             // Setup ItemView
                             ItemView itemView = currentItemView.GetComponent<ItemView>();
@@ -606,182 +604,82 @@ namespace EFM
                             itemView.SetItemData(currentBarter.itemData, false, false, false, null, true, currencyToUse, valueToUse, false, false);
 
                             // Setup button
-                            PointableButton pointableButton = currentItemView.gameObject.GetComponent<PointableButton>();
+                            PointableButton pointableButton = currentItemView.GetComponent<PointableButton>();
                             pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(currentBarter.itemData, currentBarter.prices); });
                         }
                     }
                 }
             }
-            
-            TODO e: // Clear buy item, make it so when we call BuyItemclick with null item it clears it and puts a question mark icon ans such
+
+            OnBuyItemClick(null, null);
 
             Mod.LogInfo("0");
             // Sell
-            Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-            GameObject sellHorizontalCopy = sellHorizontalsParent.GetChild(0).gameObject;
-            float sellShowCaseHeight = 3; // Top padding
-                                          // Clear previous horizontals
-            Mod.LogInfo("0");
-            while (sellHorizontalsParent.childCount > 1)
+            while (sellShowcaseContent.childCount > 1)
             {
-                Transform currentFirstChild = sellHorizontalsParent.GetChild(1);
+                Transform currentFirstChild = sellShowcaseContent.GetChild(1);
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
             Mod.LogInfo("Adding all item involume to sell showcase");
             // Add all items in trade volume that are sellable at this trader to showcase
             int totalSellingPrice = 0;
-            if (sellItemShowcaseElements == null)
+            sellDealButton.SetActive(false);
+
+            foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
             {
-                sellItemShowcaseElements = new Dictionary<string, GameObject>();
-            }
-            else
-            {
-                sellItemShowcaseElements.Clear();
-            }
-            // Deactivate deal button by default
-            traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
-            traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
-            foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
-            {
-                Mod.LogInfo("\tAdding item from volume: " + itemTransform.name);
-                MeatovItem CIW = itemTransform.GetComponent<MeatovItem>();
-                List<MarketItemView> itemViewListToUse = null;
-                string itemID;
-                int itemValue;
-                bool custom = false;
-                if (CIW.marketItemViews == null)
+                for(int i=0; i< volumeItemEntry.Value.Count; ++i)
                 {
-                    CIW.marketItemViews = new List<MarketItemView>();
-                }
-                CIW.marketItemViews.Clear();
-                itemViewListToUse = CIW.marketItemViews;
+                    Mod.LogInfo("\tAdding item from volume: " + volumeItemEntry.Value[i].name);
+                    MeatovItem meatovItem = volumeItemEntry.Value[i];
 
-                itemID = CIW.H3ID;
-                custom = true;
-
-                itemValue = CIW.GetValue();
-
-                if (!Mod.IDDescribedInList(itemID, CIW.parents, new List<string>(trader.buyCategories), new List<string>(trader.buyBlacklist)))
-                {
-                    continue;
-                }
-
-                if (sellItemShowcaseElements != null && sellItemShowcaseElements.ContainsKey(itemID))
-                {
-                    Transform currentItemIcon = sellItemShowcaseElements[itemID].transform;
-                    MarketItemView marketItemView = currentItemIcon.GetComponent<MarketItemView>();
-                    int actualValue;
-                    if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
+                    // Check if this item can be sold to this trader
+                    if (!Mod.IDDescribedInList(meatovItem.H3ID, meatovItem.parents, new List<string>(trader.buyCategories), new List<string>(trader.buyBlacklist)))
                     {
-                        actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
-                    }
-                    else
-                    {
-                        // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
-                        actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
-                    }
-                    actualValue = Mod.traders[currentTraderIndex].currency == 0 ? actualValue : (int)Mathf.Max(actualValue * 0.008f, 1);
-                    marketItemView.value = marketItemView.value + actualValue;
-                    if (marketItemView.custom)
-                    {
-                        marketItemView.MI.Add(CIW);
-                        currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
-                    }
-                    currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.value.ToString();
-                    currentTotalSellingPrice += actualValue;
-
-                    // Setup itemIcon
-                    ItemIcon currentItemIconScript = currentItemIcon.GetComponent<ItemIcon>();
-                    currentItemIconScript.isPhysical = false;
-                    currentItemIconScript.itemID = itemID;
-                    currentItemIconScript.itemName = Mod.itemNames[itemID];
-                    currentItemIconScript.description = Mod.itemDescriptions[itemID];
-                    currentItemIconScript.weight = Mod.itemWeights[itemID];
-                    currentItemIconScript.volume = Mod.itemVolumes[itemID];
-                }
-                else
-                {
-                    sellShowCaseHeight = 3 + 24 * sellHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
-                    Transform currentHorizontal = sellHorizontalsParent.GetChild(sellHorizontalsParent.childCount - 1);
-                    if (sellHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
-                    {
-                        currentHorizontal = GameObject.Instantiate(sellHorizontalCopy, sellHorizontalsParent).transform;
-                        currentHorizontal.gameObject.SetActive(true);
-                    }
-                    else if (currentHorizontal.childCount == 7)
-                    {
-                        currentHorizontal = GameObject.Instantiate(sellHorizontalCopy, sellHorizontalsParent).transform;
-                        currentHorizontal.gameObject.SetActive(true);
-                        buyShowCaseHeight += 24; // horizontal
+                        continue;
                     }
 
-                    Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
-
-                    // Setup itemIcon
-                    ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
-                    currentItemIconScript.isPhysical = true;
-                    currentItemIconScript.isCustom = custom;
-                    currentItemIconScript.MI = CIW;
-
-                    currentItemIcon.gameObject.SetActive(true);
-                    sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
-                    Mod.SetIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>());
-                    MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
-                    marketItemView.custom = custom;
-                    marketItemView.MI = new List<MeatovItem>() { CIW };
-
-                    int actualValue;
-                    if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
+                    // Manage rows
+                    Transform currentRow = sellShowcaseContent.GetChild(sellShowcaseContent.childCount - 1);
+                    if (sellShowcaseContent.childCount == 1 || currentRow.childCount == 7) // If dont even have a single horizontal yet, add it
                     {
-                        actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
-                    }
-                    else
-                    {
-                        // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
-                        actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
+                        currentRow = GameObject.Instantiate(sellShowcaseRowPrefab, sellShowcaseContent).transform;
+                        currentRow.gameObject.SetActive(true);
                     }
 
-                    if (currentTraderIndex == 2)
+                    GameObject currentItemView = GameObject.Instantiate(sellShowcaseItemViewPrefab, currentRow);
+                    currentItemView.SetActive(true);
+
+                    // Setup ItemView
+                    ItemView itemView = currentItemView.GetComponent<ItemView>();
+                    int actualValue = meatovItem.itemData.value;
+
+                    // Apply exchange rate if necessary
+                    if(trader.currency == 1)
                     {
-                        actualValue = (int)(actualValue * 0.9f);
+                        actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
+                    }
+                    else if(trader.currency == 2)
+                    {
+                        actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
                     }
 
-                    // Write price to item icon and set correct currency icon
-                    Sprite currencySprite = null;
-                    //string currencyItemID = "";
-                    if (trader.currency == 0)
-                    {
-                        currencySprite = HideoutController.roubleCurrencySprite;
-                        //currencyItemID = "203";
-                    }
-                    else if (trader.currency == 1)
-                    {
-                        currencySprite = HideoutController.dollarCurrencySprite;
-                        actualValue = (int)Mathf.Max(actualValue * 0.008f, 1); // Adjust item value
-                                                                               //currencyItemID = "201";
-                    }
-                    marketItemView.value = actualValue;
+                    // Apply trader buy coefficient
+                    actualValue -= (int)(actualValue * (trader.levels[trader.level].buyPriceCoef / 100.0f));
+                    actualValue = Mathf.Max(actualValue, 1);
+
                     totalSellingPrice += actualValue;
-                    currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
-                    currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = actualValue.ToString();
 
-                    currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "1";
+                    itemView.SetItem(meatovItem, true, trader.currency, actualValue);
 
-                    //// Setup button
-                    //EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
-                    //pointableButton.SetButton();
-                    //pointableButton.Button.onClick.AddListener(() => { OnSellItemClick(currentItemIcon, itemValue, currencyItemID); });
-                    //pointableButton.MaxPointingRange = 20;
-                    //pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-
-                    // Add the icon object to the list for that item
-                    CIW.marketItemViews.Add(marketItemView);
+                    // Set the itemView for that item
+                    meatovItem.marketSellItemView = itemView;
                 }
-
-                // Activate deal button
-                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
-                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
+            }
+            // Activate deal button if necessary
+            if(totalSellingPrice > 0)
+            {
+                sellDealButton.SetActive(true);
             }
             Mod.LogInfo("0");
             // Setup selling price display
@@ -3233,23 +3131,8 @@ namespace EFM
         public void OnBuyItemClick(MeatovItemData item, BarterPrice[] priceList)
         {
             cartItem = item;
-            cartItemCount = 1;
-            buyPrices = new List<BarterPrice>(priceList);
-            Mod.LogInfo("on buy item click called, with ID: " + item.H3ID);
-            Mod.LogInfo("Got item name: " + item.name);
 
-            buyItemView.itemView.SetItemData(item);
-            buyItemView.itemName.text = item.name;
-            buyItemCount.text = "1";
-
-            while (buyPricesContent.childCount > 1)
-            {
-                Transform currentFirstChild = buyPricesContent.GetChild(1);
-                currentFirstChild.SetParent(null);
-                Destroy(currentFirstChild.gameObject);
-            }
-
-            if(buyItemPriceViewsByH3ID == null)
+            if (buyItemPriceViewsByH3ID == null)
             {
                 buyItemPriceViewsByH3ID = new Dictionary<string, PriceItemView>();
             }
@@ -3258,46 +3141,84 @@ namespace EFM
                 buyItemPriceViewsByH3ID.Clear();
             }
 
-            bool canDeal = true;
-            foreach (BarterPrice price in priceList)
+            if (item == null)
             {
-                Mod.LogInfo("\tSetting price: " + price.itemData.H3ID);
-                Transform priceElement = Instantiate(buyPricePrefab, buyPricesContent).transform;
-                priceElement.gameObject.SetActive(true);
-                PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
-                currentPriceView.price = price;
+                cartItemCount = -1;
+                buyPrices = null;
 
-                currentPriceView.amount.text = price.count.ToString();
-                currentPriceView.itemName.text = price.itemData.name.ToString();
-                if (price.itemData.itemType == MeatovItem.ItemType.DogTag)
+                buyItemView.itemView.SetItemData(null);
+                buyItemView.itemName.text = "";
+                buyItemCount.gameObject.SetActive(false);
+
+                while (buyPricesContent.childCount > 1)
                 {
-                    currentPriceView.itemView.SetItemData(price.itemData, false, false, true, ">= lvl " + price.dogTagLevel);
-                }
-                else
-                {
-                    currentPriceView.itemView.SetItemData(price.itemData);
+                    Transform currentFirstChild = buyPricesContent.GetChild(1);
+                    currentFirstChild.SetParent(null);
+                    Destroy(currentFirstChild.gameObject);
                 }
 
-                int count = 0;
-                tradeVolume.inventory.TryGetValue(price.itemData.H3ID, out count);
-                currentPriceView.amount.text = Mathf.Min(price.count, count).ToString() + "/" + price.count.ToString();
-
-                if (count >= price.count)
-                {
-                    currentPriceView.fulfilledIcon.SetActive(true);
-                    currentPriceView.unfulfilledIcon.SetActive(false);
-                }
-                else
-                {
-                    currentPriceView.fulfilledIcon.SetActive(false);
-                    currentPriceView.unfulfilledIcon.SetActive(true);
-                    canDeal = false;
-                }
-
-                buyItemPriceViewsByH3ID.Add(price.itemData.H3ID, currentPriceView);
+                buyDealButton.SetActive(false);
             }
+            else
+            {
+                cartItemCount = 1;
+                buyPrices = new List<BarterPrice>(priceList);
+                Mod.LogInfo("on buy item click called, with ID: " + item.H3ID);
+                Mod.LogInfo("Got item name: " + item.name);
 
-            buyDealButton.SetActive(canDeal);
+                buyItemView.itemView.SetItemData(item);
+                buyItemView.itemName.text = item.name;
+                buyItemCount.gameObject.SetActive(true);
+                buyItemCount.text = "1";
+
+                while (buyPricesContent.childCount > 1)
+                {
+                    Transform currentFirstChild = buyPricesContent.GetChild(1);
+                    currentFirstChild.SetParent(null);
+                    Destroy(currentFirstChild.gameObject);
+                }
+
+                bool canDeal = true;
+                foreach (BarterPrice price in priceList)
+                {
+                    Mod.LogInfo("\tSetting price: " + price.itemData.H3ID);
+                    Transform priceElement = Instantiate(buyPricePrefab, buyPricesContent).transform;
+                    priceElement.gameObject.SetActive(true);
+                    PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
+                    currentPriceView.price = price;
+
+                    currentPriceView.amount.text = price.count.ToString();
+                    currentPriceView.itemName.text = price.itemData.name.ToString();
+                    if (price.itemData.itemType == MeatovItem.ItemType.DogTag)
+                    {
+                        currentPriceView.itemView.SetItemData(price.itemData, false, false, true, ">= lvl " + price.dogTagLevel);
+                    }
+                    else
+                    {
+                        currentPriceView.itemView.SetItemData(price.itemData);
+                    }
+
+                    int count = 0;
+                    tradeVolume.inventory.TryGetValue(price.itemData.H3ID, out count);
+                    currentPriceView.amount.text = Mathf.Min(price.count, count).ToString() + "/" + price.count.ToString();
+
+                    if (count >= price.count)
+                    {
+                        currentPriceView.fulfilledIcon.SetActive(true);
+                        currentPriceView.unfulfilledIcon.SetActive(false);
+                    }
+                    else
+                    {
+                        currentPriceView.fulfilledIcon.SetActive(false);
+                        currentPriceView.unfulfilledIcon.SetActive(true);
+                        canDeal = false;
+                    }
+
+                    buyItemPriceViewsByH3ID.Add(price.itemData.H3ID, currentPriceView);
+                }
+
+                buyDealButton.SetActive(canDeal);
+            }
         }
 
         public void OnBuyDealClick()
@@ -3423,13 +3344,6 @@ namespace EFM
             // Set max buy amount, limit it to 360 otherwise scale is not large enough and its hard to specify an exact value
             maxBuyAmount = 360;
         }
-
-        //public void OnSellItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
-        //{
-        //    // TODO: MAYBE DONT EVEN NEED THIS, WE JUST SELL EVERYTHING IN THE SELL SHOWCASE
-        //    // TODO: Set cart UI to this item
-        //    // de/activate deal! button depending on whether trader has enough money
-        //}
 
         //public void OnSellDealClick()
         //{
