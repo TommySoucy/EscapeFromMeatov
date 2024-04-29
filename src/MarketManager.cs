@@ -431,7 +431,7 @@ namespace EFM
                             item.transform.GetChild(0).GetComponent<HorizontalLayoutGroup>().padding = new RectOffset((level + 1) * 10, 0, 0, 0);
                             item.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
 
-                            item.transform.GetChild(0).GetChild(2).GetComponent<Text>().text = Mod.itemNames[itemID.H3ID];
+                            item.transform.GetChild(0).GetChild(2).GetComponent<Text>().text = "itemname";
                             //item.transform.GetChild(0).GetChild(3).GetComponent<Text>().text = "(" + GetTotalItemSell(itemID.H3ID) + ")";
 
                             item.transform.GetChild(0).GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
@@ -634,7 +634,7 @@ namespace EFM
                     MeatovItem meatovItem = volumeItemEntry.Value[i];
 
                     // Check if this item can be sold to this trader
-                    if (!Mod.IDDescribedInList(meatovItem.H3ID, meatovItem.parents, new List<string>(trader.buyCategories), new List<string>(trader.buyBlacklist)))
+                    if (!trader.ItemSellable(meatovItem.itemData))
                     {
                         continue;
                     }
@@ -676,81 +676,35 @@ namespace EFM
                     meatovItem.marketSellItemView = itemView;
                 }
             }
+
             // Activate deal button if necessary
             if(totalSellingPrice > 0)
             {
                 sellDealButton.SetActive(true);
             }
+
             Mod.LogInfo("0");
             // Setup selling price display
-            string sellPriceItemID = "203";
-            string sellPriceItemName = "Rouble";
+            MeatovItemData currencyItemData;
             if (trader.currency == 0)
             {
-                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = sellPriceItemName;
-                Mod.SetIcon("203", traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>());
+                Mod.GetItemData("203", out currencyItemData);
             }
             else if (trader.currency == 1)
             {
-                sellPriceItemID = "201";
-                sellPriceItemName = Mod.itemNames["201"];
-                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = sellPriceItemName;
-                Mod.SetIcon("201", traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>());
+                Mod.GetItemData("201", out currencyItemData);
             }
-            ItemIcon traderSellPriceItemIcon = traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<ItemIcon>();
-            if (traderSellPriceItemIcon == null)
+            else // 2
             {
-                traderSellPriceItemIcon = traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).gameObject.AddComponent<ItemIcon>();
-                traderSellPriceItemIcon.itemID = sellPriceItemID;
-                traderSellPriceItemIcon.itemName = sellPriceItemName;
-                traderSellPriceItemIcon.description = Mod.itemDescriptions[sellPriceItemID];
-                traderSellPriceItemIcon.weight = Mod.itemWeights[sellPriceItemID];
-                traderSellPriceItemIcon.volume = Mod.itemVolumes[sellPriceItemID];
+                Mod.GetItemData("202", out currencyItemData);
             }
+            sellItemName.text = currencyItemData.name;
+            sellItemView.itemView.SetItemData(currencyItemData);
+            sellItemView.amount.text = totalSellingPrice.ToString();
+
             Mod.LogInfo("0");
-            traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = totalSellingPrice.ToString();
             currentTotalSellingPrice = totalSellingPrice;
-            Mod.LogInfo("0");
-            // Setup button
-            if (!initButtonsSet)
-            {
-                PointableButton pointableSellDealButton = traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<PointableButton>();
-                pointableSellDealButton.SetButton();
-                pointableSellDealButton.Button.onClick.AddListener(() => { OnSellDealClick(); });
-                pointableSellDealButton.MaxPointingRange = 20;
-                pointableSellDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
 
-                // Set hover scrolls
-                HoverScroll newSellDownHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<HoverScroll>();
-                HoverScroll newSellUpHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<HoverScroll>();
-                newSellDownHoverScroll.MaxPointingRange = 30;
-                newSellDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                newSellDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
-                newSellDownHoverScroll.other = newSellUpHoverScroll;
-                newSellDownHoverScroll.up = false;
-                newSellUpHoverScroll.MaxPointingRange = 30;
-                newSellUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                newSellUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
-                newSellUpHoverScroll.other = newSellDownHoverScroll;
-                newSellUpHoverScroll.up = true;
-            }
-            HoverScroll downSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
-            HoverScroll upSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
-            if (sellShowCaseHeight > 150)
-            {
-                downSellHoverScroll.rate = 150 / (sellShowCaseHeight - 150);
-                upSellHoverScroll.rate = 150 / (sellShowCaseHeight - 150);
-                downSellHoverScroll.gameObject.SetActive(true);
-                upSellHoverScroll.gameObject.SetActive(false);
-            }
-            else
-            {
-                downSellHoverScroll.gameObject.SetActive(false);
-                upSellHoverScroll.gameObject.SetActive(false);
-            }
-            Mod.LogInfo("0");
-
-            Mod.LogInfo("0");
             // Tasks
             Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
             GameObject taskTemplate = tasksParent.GetChild(0).gameObject;
@@ -3345,90 +3299,32 @@ namespace EFM
             maxBuyAmount = 360;
         }
 
-        //public void OnSellDealClick()
-        //{
-        //    // Remove all sellable items from trade volume
-        //    List<string> itemsToRemove = new List<string>();
-        //    foreach (KeyValuePair<string, int> item in tradeVolumeInventory)
-        //    {
-        //        if (Mod.traders[currentTraderIndex].ItemSellable(item.Key, Mod.itemAncestors[item.Key]))
-        //        {
-        //            foreach (GameObject itemObject in tradeVolumeInventoryObjects[item.Key])
-        //            {
-        //                // Destroy item
-        //                HideoutController.instance.RemoveFromBaseInventory(itemObject.transform, true);
-        //                // Unparent object before destroying so it doesnt get processed by settrader
-        //                itemObject.transform.parent = null;
-        //                Destroy(itemObject);
-        //            }
-        //            itemsToRemove.Add(item.Key);
-        //        }
+        public void OnSellDealClick()
+        {
+            // Remove all sellable items from trade volume
+            foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
+            {
+                for (int i = 0; i < volumeItemEntry.Value.Count; ++i)
+                {
+                    MeatovItem meatovItem = volumeItemEntry.Value[i];
 
-        //        // Update area managers based on item we just removed
-        //        foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
-        //        {
-        //            areaManager.UpdateBasedOnItem(item.Key);
-        //        }
-        //    }
-        //    foreach (string itemID in itemsToRemove)
-        //    {
-        //        tradeVolumeInventory.Remove(itemID);
-        //        tradeVolumeInventoryObjects.Remove(itemID);
-        //        tradeVolumeFIRInventory.Remove(itemID);
-        //        tradeVolumeFIRInventoryObjects.Remove(itemID);
-        //    }
+                    if (Mod.traders[currentTraderIndex].ItemSellable(meatovItem.itemData))
+                    {
+                        Destroy(meatovItem.gameObject);
+                    }
+                }
+            }
 
-        //    // Add sold for item to trade volume
-        //    int amountToSpawn = currentTotalSellingPrice;
-        //    int currencyID = Mod.traders[currentTraderIndex].currency == 0 ? 203 : 201; // Roubles, else USD
-        //    GameObject itemPrefab = Mod.itemPrefabs[currencyID];
-        //    MeatovItem prefabCIW = itemPrefab.GetComponent<MeatovItem>();
-        //    BoxCollider tradeVolumeCollider = tradeVolume.GetComponentInChildren<BoxCollider>();
-        //    List<GameObject> objectsList = new List<GameObject>();
-        //    while (amountToSpawn > 0)
-        //    {
-        //        GameObject spawnedItem = Instantiate(itemPrefab, tradeVolume.itemsRoot);
-        //        objectsList.Add(spawnedItem);
-        //        float xSize = tradeVolumeCollider.size.x;
-        //        float ySize = tradeVolumeCollider.size.y;
-        //        float zSize = tradeVolumeCollider.size.z;
-        //        spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
-        //                                                          UnityEngine.Random.Range(-ySize / 2, ySize / 2),
-        //                                                          UnityEngine.Random.Range(-zSize / 2, zSize / 2));
-        //        spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
+            // Add sold for item to trade volume
+            Trader trader = Mod.traders[currentTraderIndex];
+            string currencyID = trader.currency == 0 ? "203" : (trader.currency == 1 ? "201" : "202");
+            MeatovItemData currencyItemData;
+            Mod.GetItemData(currencyID, out currencyItemData);
+            SpawnItem(currencyItemData, currentTotalSellingPrice);
 
-        //        MeatovItem itemCIW = spawnedItem.GetComponent<MeatovItem>();
-        //        itemCIW.stack = Mathf.Min(amountToSpawn, prefabCIW.maxStack);
-        //        amountToSpawn -= prefabCIW.maxStack;
-
-        //        // Add item to tradevolume so it can set its reset cols and kinematic to true
-        //        tradeVolume.AddItem(itemCIW.physObj);
-
-        //        HideoutController.instance.AddToBaseInventory(spawnedItem.transform, true);
-
-        //        BeginInteractionPatch.SetItemLocationIndex(1, itemCIW, false);
-        //    }
-        //    string stringCurrencyID = currencyID.ToString();
-        //    if (tradeVolumeInventory.ContainsKey(stringCurrencyID))
-        //    {
-        //        tradeVolumeInventory[stringCurrencyID] += currentTotalSellingPrice;
-        //        tradeVolumeInventoryObjects[stringCurrencyID].AddRange(objectsList);
-        //    }
-        //    else
-        //    {
-        //        tradeVolumeInventory.Add(stringCurrencyID, currentTotalSellingPrice);
-        //        tradeVolumeInventoryObjects.Add(stringCurrencyID, objectsList);
-        //    }
-
-        //    // Update area managers based on item we just added
-        //    foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
-        //    {
-        //        areaManager.UpdateBasedOnItem(stringCurrencyID);
-        //    }
-
-        //    // Update the whole thing
-        //    SetTrader(currentTraderIndex);
-        //}
+            // Update the whole thing
+            SetTrader(currentTraderIndex);
+        }
 
         ////public void OnInsureItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
         ////{

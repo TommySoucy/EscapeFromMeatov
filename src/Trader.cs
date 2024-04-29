@@ -421,6 +421,11 @@ namespace EFM
                 OnTraderSalesSumChanged();
             }
         }
+
+        public bool ItemSellable(MeatovItemData itemData)
+        {
+            return !Mod.IDDescribedInList(itemData.H3ID, new List<string>(itemData.parents), new List<string>(buyCategories), new List<string>(buyBlacklist));
+        }
     }
 
     public class LoyaltyLevel

@@ -219,10 +219,6 @@ namespace EFM
         public static GameObject mainMenuPointable;
         public static Material quickSlotHoverMaterial;
         public static Material quickSlotConstantMaterial;
-        public static Dictionary<string, string> itemNames;
-        public static Dictionary<string, string> itemDescriptions;
-        public static Dictionary<string, int> itemWeights;
-        public static Dictionary<string, int> itemVolumes;
         public static GameObject doorLeftPrefab;
         public static GameObject doorRightPrefab;
         public static GameObject doorDoublePrefab;
