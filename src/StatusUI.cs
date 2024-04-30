@@ -121,7 +121,7 @@ namespace EFM
                 ++totalCount;
                 GameObject currentObjectiveElement = Instantiate(taskUI.objectivePrefab, taskUI.objectivesParent);
                 currentObjectiveElement.SetActive(true);
-                TaskObjectiveUI currentObjective = currentObjectiveElement.GetComponent<TaskObjectiveUI>();
+                TaskConditionUI currentObjective = currentObjectiveElement.GetComponent<TaskConditionUI>();
                 //currentCondition.statusListElement = currentObjective;
 
                 //currentObjective.text.text = currentCondition.text;

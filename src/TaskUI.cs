@@ -13,6 +13,7 @@ namespace EFM
 
         public Text taskName;
         public Text location;
+        public GameObject availableStatus;
         public GameObject activeStatus;
         public GameObject completeStatus;
         public Text percentage;
@@ -20,7 +21,7 @@ namespace EFM
         public GameObject full;
         public Text description;
         public RectTransform objectivesParent;
-        public GameObject objectivePrefab;
+        public GameObject conditionPrefab;
         public RectTransform rewardsParent;
         public GameObject rewardsHorizontalParent;
         public GameObject itemRewardPrefab;
@@ -32,7 +33,23 @@ namespace EFM
         {
             this.task = task;
 
+            // Short info
+            task.marketUI.taskName.text = task.name;
+            task.marketUI.location.text = task.location;
 
+            // Description
+            task.marketUI.description.text = task.description;
+
+            // Completion conditions
+            foreach (Condition currentCondition in task.finishConditions)
+            {
+                GameObject currentObjectiveElement = Instantiate(conditionPrefab, objectivesParent);
+                currentObjectiveElement.SetActive(true);
+                currentCondition.marketUI = currentObjectiveElement.GetComponent<TaskConditionUI>();
+
+                currentCondition.marketUI.SetCondition(currentCondition);
+            }
+            td
         }
 
         public void OnClicked()

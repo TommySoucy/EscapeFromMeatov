@@ -1,11 +1,7 @@
-﻿using Mono.Cecil.Mdb;
+﻿using FistVR;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.PerformanceData;
-using System.Linq;
 using Valve.Newtonsoft.Json.Linq;
-using static EFM.Task;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace EFM
 {
@@ -411,8 +407,8 @@ namespace EFM
         public bool visible;
 
         // Objects
-        public TaskObjectiveUI marketUI;
-        public TaskObjectiveUI playerUI;
+        public TaskConditionUI marketUI;
+        public TaskConditionUI playerUI;
 
         // Events
         public delegate void OnConditionFulfillmentChangedDelegate(Condition condition);
@@ -720,6 +716,64 @@ namespace EFM
                     weaponWeightCompareMethod = CompareMethodFromString(properties["weight"]["compareMethod"].ToString());
                     break;
             }
+        }
+
+        public bool WeaponAssemblyItemMatches(MeatovItem item)
+        {
+            if(conditionType != ConditionType.WeaponAssembly)
+            {
+                Mod.LogError("DEV: Condition WeaponAssemblyItemMatches called on non-weaponassembly condition: " + Environment.StackTrace);
+                return false;
+            }
+
+            // By now we know the weapon is in targetItems
+
+            // Contains items
+            if (!item.ContainsItems(containsItems))
+            {
+                return false;
+            }
+
+            // Has item from categories
+            if (!item.ContainsItemInCategories(hasItemFromCategories))
+            {
+                return false;
+            }
+
+            // Empty tactical slots
+            int emptyMountCount = item.GetEmptyMountCount();
+            if (!CompareInt(weaponEmptyTacticalSlotCompareMethod, emptyMountCount, weaponEmptyTacticalSlot))
+            {
+                return false;
+            }
+
+            // Mag capacity
+            int magCapacity = 0;
+            if(item.physObj is FVRFireArm)
+            {
+                FVRFireArm asFirearm = item.physObj as FVRFireArm;
+                if(asFirearm.Magazine != null)
+                {
+                    magCapacity = asFirearm.Magazine.m_capacity;
+                }
+                else if(asFirearm.Clip != null)
+                {
+                    magCapacity = asFirearm.Clip.m_capacity;
+                }
+            }
+            if (!CompareInt(weaponMagazineCapacityCompareMethod, magCapacity, weaponMagazineCapacity))
+            {
+                return false;
+            }
+
+            // Weight
+            float weight = item.GetCurrentWeight() / 1000.0f;
+            if (!CompareFloat(weaponWeightCompareMethod, weight, weaponWeight))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public void LoadData(JToken data)
@@ -1868,7 +1922,7 @@ namespace EFM
         public Skill skill;
         public int value;
 
-        public Reward(Task task, TaskState targetState, JToken data)
+        public Reward(Task task, Task.TaskState targetState, JToken data)
         {
             this.task = task;
             this.targetState = targetState;

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
+using static FistVR.ItemSpawnerCategoryDefinitions;
 
 namespace EFM
 {
@@ -2335,6 +2336,102 @@ namespace EFM
             }
 
             UpdateInventories();
+        }
+
+        public bool ContainsItem(MeatovItemData itemData)
+        {
+            if (H3ID.Equals(itemData.H3ID))
+            {
+                return true;
+            }
+
+            for(int i=0; i < children.Count; ++i)
+            {
+                if (children[i].ContainsItem(itemData))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool ContainsItems(List<MeatovItemData> itemDataList)
+        {
+            for(int i=0; i < itemDataList.Count; ++i)
+            {
+                if (!ContainsItem(itemDataList[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool ContainsItemInCategory(string category)
+        {
+            if (parents.Contains(category))
+            {
+                return true;
+            }
+
+            for (int i = 0; i < children.Count; ++i)
+            {
+                if (children[i].ContainsItemInCategory(category))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool ContainsItemInCategories(List<string> categoryList)
+        {
+            for(int i=0; i < categoryList.Count; ++i)
+            {
+                if (!ContainsItemInCategory(categoryList[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public int GetEmptyMountCount()
+        {
+            int total = 0;
+            if(physObj.AttachmentMounts != null)
+            {
+                for(int i=0; i < physObj.AttachmentMounts.Count; ++i)
+                {
+                    if (!physObj.AttachmentMounts[i].HasAttachmentsOnIt())
+                    {
+                        ++total;
+                    }
+                }
+            }
+
+            for(int i=0; i < children.Count; ++i)
+            {
+                total += children[i].GetEmptyMountCount();
+            }
+
+            return total;
+        }
+
+        public int GetCurrentWeight()
+        {
+            int total = weight;
+
+            for (int i = 0; i < children.Count; ++i)
+            {
+                total += children[i].GetCurrentWeight();
+            }
+
+            return total;
         }
 
         public void OnTransformParentChanged()

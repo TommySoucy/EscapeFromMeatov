@@ -131,7 +131,7 @@ namespace EFM
         private Dictionary<int, GameObject> medicalPartElements;
         private int totalMedicalTreatmentPrice;
         public MarketManager marketManager;
-        public static bool marketUI; // whether we are currently in market mode or in area UI mode
+        public static bool inMarket; // whether we are currently in market mode or in area UI mode
         public GCManager GCManager;
 
         public static float currentExperienceRate = 1;

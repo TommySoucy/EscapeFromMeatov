@@ -99,7 +99,7 @@
     <Compile Include="src\StatRewardView.cs" />
     <Compile Include="src\StatusUI.cs" />
     <Compile Include="src\Task.cs" />
-    <Compile Include="src\TaskObjectiveUI.cs" />
+    <Compile Include="src\TaskConditionUI.cs" />
     <Compile Include="src\TaskUI.cs" />
     <Compile Include="src\TimePanel.cs" />
     <Compile Include="src\Trader.cs" />

@@ -83,8 +83,6 @@ namespace EFM
         public Dictionary<string, int> FIRInventory;
         public Dictionary<string, List<MeatovItem>> FIRInventoryItems;
 
-        public List<Task> referencedTasks;
-        public List<Condition> referencedConditions;
         public TraderTab[] traderTabs;
         public TraderTab[] ragFairTabs;
         public Dictionary<string, GameObject> wishListItemViewsByID;
@@ -706,33 +704,11 @@ namespace EFM
             currentTotalSellingPrice = totalSellingPrice;
 
             // Tasks
-            Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-            GameObject taskTemplate = tasksParent.GetChild(0).gameObject;
-            float taskListHeight = 3; // Top padding
-                                      // Clear previous tasks
-            Mod.LogInfo("0");
-            while (tasksParent.childCount > 1)
+            while (tasksContent.childCount > 1)
             {
-                Transform currentFirstChild = tasksParent.GetChild(1);
+                Transform currentFirstChild = tasksContent.GetChild(1);
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
-            }
-            Mod.LogInfo("0");
-            if (referencedTasks != null)
-            {
-                foreach (Task referencedTask in referencedTasks)
-                {
-                    referencedTask.marketUI = null;
-                }
-                foreach (Condition referencedCondition in referencedConditions)
-                {
-                    referencedCondition.marketUI = null;
-                }
-            }
-            else
-            {
-                referencedTasks = new List<Task>();
-                referencedConditions = new List<Condition>();
             }
             Mod.LogInfo("0");
             // Add all of that trader's available and active tasks to the list
@@ -741,94 +717,14 @@ namespace EFM
                 Mod.LogInfo("Check if can add task " + task.name + " to task list, its state is: " + task.taskState);
                 if (task.taskState == Task.TaskState.Available)
                 {
-                    GameObject currentTaskElement = Instantiate(taskTemplate, tasksParent);
+                    GameObject currentTaskElement = Instantiate(taskPrefab, tasksContent);
                     currentTaskElement.SetActive(true);
-                    task.marketUI = currentTaskElement;
-                    taskListHeight += 29; // Task + Spacing
+                    task.marketUI = currentTaskElement.GetComponent<TaskUI>();
 
-                    // Short info
-                    Transform shortInfo = currentTaskElement.transform.GetChild(0);
-                    shortInfo.GetChild(0).GetChild(0).GetComponent<Text>().text = task.name;
-                    shortInfo.GetChild(1).GetChild(0).GetComponent<Text>().text = task.location;
+                    // Set task UI
+                    task.marketUI.SetTask(task);
 
-                    // Description
-                    Transform description = currentTaskElement.transform.GetChild(1);
-                    description.GetChild(0).GetComponent<Text>().text = task.description;
-                    // Objectives (conditions)
-                    Transform objectivesParent = description.GetChild(1).GetChild(1);
-                    GameObject objectiveTemplate = objectivesParent.GetChild(0).gameObject;
-                    foreach (Condition currentCondition in task.completionConditions)
-                    {
-                        GameObject currentObjectiveElement = Instantiate(objectiveTemplate, objectivesParent);
-                        currentObjectiveElement.SetActive(true);
-                        currentCondition.marketUI = currentObjectiveElement;
-
-                        Transform objectiveInfo = currentObjectiveElement.transform.GetChild(0).GetChild(0);
-                        objectiveInfo.GetChild(1).GetComponent<Text>().text = currentCondition.text;
-                        // Progress counter, only necessary if value > 1 and for specific condition types
-                        if (currentCondition.value > 1)
-                        {
-                            switch (currentCondition.conditionType)
-                            {
-                                case Condition.ConditionType.CounterCreator:
-                                    foreach (TaskCounterCondition counter in currentCondition.counters)
-                                    {
-                                        if (counter.counterConditionType == TaskCounterCondition.CounterConditionType.Kills)
-                                        {
-                                            objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
-                                            objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
-                                            objectiveInfo.GetChild(3).GetComponent<Text>().text = "0/" + currentCondition.value; // Activate progress counter
-                                            break;
-                                        }
-                                    }
-                                    break;
-                                case Condition.ConditionType.HandoverItem:
-                                case Condition.ConditionType.FindItem:
-                                case Condition.ConditionType.LeaveItemAtLocation:
-                                    objectiveInfo.GetChild(2).gameObject.SetActive(true); // Activate progress bar
-                                    objectiveInfo.GetChild(3).gameObject.SetActive(true); // Activate progress counter
-                                    objectiveInfo.GetChild(3).GetComponent<Text>().text = "0/" + currentCondition.value; // Activate progress counter
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-
-                        // Setup handover button if necessary
-                        if (currentCondition.conditionType == Condition.ConditionType.HandoverItem || currentCondition.conditionType == Condition.ConditionType.WeaponAssembly)
-                        {
-                            bool FIRInventoryContains = false;
-                            int total = 0;
-                            foreach (string item in currentCondition.items)
-                            {
-                                if (tradeVolumeFIRInventory.ContainsKey(item))
-                                {
-                                    FIRInventoryContains = true;
-                                    total += tradeVolumeFIRInventory[item];
-                                }
-                            }
-                            objectiveInfo.GetChild(5).gameObject.SetActive(FIRInventoryContains && total > 0);
-
-                            PointableButton pointableHandOverButton = objectiveInfo.GetChild(5).gameObject.AddComponent<PointableButton>();
-                            pointableHandOverButton.SetButton();
-                            pointableHandOverButton.Button.onClick.AddListener(() => { OnConditionHandOverClick(currentCondition, objectiveInfo.GetChild(5).gameObject, currentCondition.conditionType == Condition.ConditionType.HandoverItem); });
-                            pointableHandOverButton.MaxPointingRange = 10;
-                            pointableHandOverButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                        }
-
-                        // Disable condition gameObject if visibility conditions not met
-                        if (currentCondition.visibilityConditions != null && currentCondition.visibilityConditions.Count > 0)
-                        {
-                            foreach (Condition visibilityCondition in currentCondition.visibilityConditions)
-                            {
-                                if (!visibilityCondition.fulfilled)
-                                {
-                                    currentObjectiveElement.SetActive(false);
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    
                     // Initial equipment
                     if (task.startingEquipment != null && task.startingEquipment.Count > 0)
                     {
@@ -3796,27 +3692,6 @@ namespace EFM
                 }
             }
         }
-
-        //public void OnConditionHandOverClick(Condition condition, GameObject handOverButton, bool FIR)
-        //{
-        //    int totalLeft = condition.value;
-        //    foreach (string item in condition.items)
-        //    {
-        //        int actualAmount = Mathf.Min(totalLeft - condition.itemCount, tradeVolumeFIRInventory[item]);
-        //        RemoveItemFromTrade(item, actualAmount, condition.dogtagLevel, FIR);
-        //        condition.itemCount += actualAmount;
-        //        totalLeft -= actualAmount;
-
-        //        if (totalLeft == 0)
-        //        {
-        //            break;
-        //        }
-        //    }
-
-        //    Trader.UpdateConditionFulfillment(condition);
-
-        //    handOverButton.SetActive(false);
-        //}
 
         //public void GivePlayerRewards(List<TaskReward> rewards, string taskName = null)
         //{
