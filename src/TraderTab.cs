@@ -34,6 +34,7 @@ namespace EFM
             TODO: // Set in asset
 			if (!active)
 			{
+                TODO0: // Set selected in asset instead of using getchild
 				transform.GetChild(1).gameObject.SetActive(true);
 				page.SetActive(true);
 

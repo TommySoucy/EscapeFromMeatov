@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace EFM
@@ -22,8 +18,14 @@ namespace EFM
         public Text description;
         public RectTransform objectivesParent;
         public GameObject conditionPrefab;
+        public RectTransform initEquipParent;
+        public GameObject initEquipHorizontalPrefab;
+        public GameObject initEquipItemRewardPrefab;
+        public GameObject initEquipStatRewardPrefab;
+        public GameObject initEquipUnknownRewardPrefab;
+        public GameObject initEquipTraderRewardPrefab;
         public RectTransform rewardsParent;
-        public GameObject rewardsHorizontalParent;
+        public GameObject rewardsHorizontalPrefab;
         public GameObject itemRewardPrefab;
         public GameObject statRewardPrefab;
         public GameObject unknownRewardPrefab;
@@ -51,53 +53,47 @@ namespace EFM
             }
 
             // Initial equipment
-            if (task.startingEquipment != null && task.startingEquipment.Count > 0)
+            if (task.startRewards != null && task.startRewards.Count > 0)
             {
-                Transform initEquipParent = description.GetChild(2);
                 initEquipParent.gameObject.SetActive(true);
-                GameObject currentInitEquipHorizontalTemplate = initEquipParent.GetChild(1).gameObject;
-                Transform currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
-                foreach (TaskReward reward in task.startingEquipment)
+                Transform currentInitEquipHorizontal = Instantiate(initEquipHorizontalPrefab, initEquipParent).transform;
+                foreach (Reward reward in task.startRewards)
                 {
                     // Add new horizontal if necessary
                     if (currentInitEquipHorizontal.childCount == 6)
                     {
-                        currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
+                        currentInitEquipHorizontal = Instantiate(initEquipHorizontalPrefab, initEquipParent).transform;
                     }
-                    switch (reward.taskRewardType)
+                    switch (reward.rewardType)
                     {
-                        case TaskReward.TaskRewardType.Item:
-                            GameObject currentInitEquipItemElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
-                            if (Mod.itemIcons.ContainsKey(reward.itemIDs[0]))
+                        case Reward.RewardType.Item:
+                            GameObject currentInitEquipItemElement = Instantiate(initEquipItemRewardPrefab, currentInitEquipHorizontal);
+                            ItemRewardView itemRewardView = currentInitEquipItemElement.GetComponent<ItemRewardView>();
+                            if(reward.itemIDs.Count > 0)
                             {
-                                currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[reward.itemIDs[0]];
+                                itemRewardView.SetItem(reward.itemIDs[0]);
+                                if (reward.amount > 1)
+                                {
+                                    itemRewardView.count.gameObject.SetActive(true);
+                                    itemRewardView.count.text = reward.amount.ToString();
+                                }
+                                else
+                                {
+                                    itemRewardView.count.gameObject.SetActive(false);
+                                }
+                                itemRewardView.itemName.text = reward.itemIDs[0].name;
                             }
-                            else
+                            else // Missing item
                             {
-                                AnvilManager.Run(Mod.SetVanillaIcon(reward.itemIDs[0], currentInitEquipItemElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                itemRewardView.itemView.itemIcon.sprite = Mod.questionMarkIcon;
+                                itemRewardView.itemName.text = "Missing data for reward "+ reward.ID;
                             }
-                            if (reward.amount > 1)
-                            {
-                                currentInitEquipItemElement.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = reward.amount.ToString();
-                            }
-                            else
-                            {
-                                currentInitEquipItemElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
-                            }
-                            currentInitEquipItemElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[reward.itemIDs[0]];
-
-                            // Setup ItemIcon
-                            ItemIcon itemIconScript = currentInitEquipItemElement.transform.GetChild(0).gameObject.AddComponent<ItemIcon>();
-                            itemIconScript.itemID = reward.itemIDs[0];
-                            itemIconScript.itemName = Mod.itemNames[reward.itemIDs[0]];
-                            itemIconScript.description = Mod.itemDescriptions[reward.itemIDs[0]];
-                            itemIconScript.weight = Mod.itemWeights[reward.itemIDs[0]];
-                            itemIconScript.volume = Mod.itemVolumes[reward.itemIDs[0]];
                             break;
-                        case TaskReward.TaskRewardType.TraderUnlock:
-                            GameObject currentInitEquipTraderUnlockElement = Instantiate(currentInitEquipHorizontal.GetChild(3).gameObject, currentInitEquipHorizontal);
-                            currentInitEquipTraderUnlockElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = HideoutController.traderAvatars[reward.traderIndex];
-                            currentInitEquipTraderUnlockElement.transform.GetChild(1).GetComponent<Text>().text = "Unlock " + Mod.traders[reward.traderIndex].name;
+                        case Reward.RewardType.TraderUnlock:
+                            GameObject currentInitEquipTraderElement = Instantiate(initEquipTraderRewardPrefab, currentInitEquipHorizontal);
+                            TraderRewardView traderRewardView = currentInitEquipTraderElement.GetComponent<TraderRewardView>();
+                            traderRewardView.traderIcon.sprite = traderRewardView.traderIcons[reward.trader.index];
+                            traderRewardView.text.text = "Unlock " + reward.trader.name;
                             break;
                         case TaskReward.TaskRewardType.TraderStanding:
                             GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
@@ -243,7 +239,7 @@ namespace EFM
                         break;
                 }
             }
-            // TODO: Maybe have fail conditions and fail rewards sections
+            TODO:// Maybe have fail conditions and fail rewards sections
 
             // Setup buttons
             // ShortInfo

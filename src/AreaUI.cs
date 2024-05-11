@@ -1,7 +1,6 @@
-﻿using FistVR;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +14,11 @@ namespace EFM
         [NonSerialized]
         public bool onNextPage;
         public GameObject summary;
+        public Image summaryIcon;
+        public Text summaryName;
         public GameObject full;
+        public Image fullIcon;
+        public Text fullName;
         public AudioSource buttonClickSound;
         public Sprite[] statusSprites; // Locked, Unlocked, Constructing, Producing, ReadyToUpgrade, Upgrading, OutofFuel
         public Sprite[] borderSprites; // White, Green, Red
@@ -102,6 +105,15 @@ namespace EFM
             // Make sure both contents are inactive
             currentContent.gameObject.SetActive(false);
             futureContent.gameObject.SetActive(false);
+
+            // Main icons and area name
+            if(area.controller.areaIcons != null && area.controller.areaIcons.Length > 0)
+            {
+                summaryIcon.sprite = area.controller.areaIcons[area.index];
+                summaryName.text = area.controller.areaNames[area.index];
+                fullIcon.sprite = area.controller.areaIcons[area.index];
+                fullName.text = area.controller.areaNames[area.index];
+            }
 
             UpdateStatusTexts();
             UpdateStatusIcons();

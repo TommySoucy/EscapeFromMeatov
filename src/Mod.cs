@@ -94,7 +94,7 @@ namespace EFM
         public static Dictionary<string, int> requiredForQuest;
         public static Dictionary<string, List<DescriptionManager>> activeDescriptionsByItemID;
         public static List<AreaBonus> activeBonuses;
-        public static Trader[] traders;
+        public static Trader[] traders; // Prapor, Therapist, Fence, Skier, Peacekeeper, Mechanic, Ragman, Jaeger, Lightkeeper
         public static Dictionary<int, List<Task>> tasksByTraderIndex;
         public static CategoryTreeNode itemCategories;
         public static Dictionary<string, List<string>> itemAncestors;

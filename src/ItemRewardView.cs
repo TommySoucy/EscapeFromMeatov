@@ -5,16 +5,18 @@ namespace EFM
 {
     public class ItemRewardView : MonoBehaviour, IDescribable
     {
-        public MeatovItem item;
+        public MeatovItemData item;
 
-        public Image icon;
+        public ItemView itemView;
         public Text count;
         public Text itemName;
         public GameObject unlockIcon;
 
-        public void SetItem(MeatovItem item)
+        public void SetItem(MeatovItemData item)
         {
             this.item = item;
+
+            itemView.SetItemData(item);
         }
 
         public DescriptionPack GetDescriptionPack()

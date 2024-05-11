@@ -5,6 +5,8 @@ namespace EFM
     public class AreaController : MonoBehaviour
     {
         public Area[] areas;
+        public Sprite[] areaIcons;
+        public string[] areaNames;
 
         public void TogglePower()
         {

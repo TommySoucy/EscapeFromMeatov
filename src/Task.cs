@@ -345,6 +345,7 @@ namespace EFM
         public bool onlyFoundInRaid = false;
         public int dogtagLevel;
         public List<MeatovItemData> targetItems;
+        public List<string> targetItemIDs;
         public CompareMethod compareMethod = CompareMethod.GreaterEqual;
         public string zoneID;
         // CounterCreator
@@ -469,6 +470,7 @@ namespace EFM
                     dogtagLevel = (int)properties["dogtagLevel"];
                     List<string> handoverItemTargetItemIDs = properties["target"].ToObject<List<string>>();
                     targetItems = new List<MeatovItemData>();
+                    targetItemIDs = new List<string>();
                     for (int i = 0; i < handoverItemTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(handoverItemTargetItemIDs[i]);
@@ -476,12 +478,14 @@ namespace EFM
                         if (int.TryParse(itemID, out parsedIndex))
                         {
                             targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItemIDs.Add(itemID);
                         }
                         else
                         {
                             if(Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
                             {
                                 targetItems.Add(Mod.vanillaItemData[itemID]);
+                                targetItemIDs.Add(itemID);
                             }
                             else
                             {
@@ -503,6 +507,7 @@ namespace EFM
                     dogtagLevel = (int)properties["dogtagLevel"];
                     List<string> findItemTargetItemIDs = properties["target"].ToObject<List<string>>();
                     targetItems = new List<MeatovItemData>();
+                    targetItemIDs = new List<string>();
                     for (int i = 0; i < findItemTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(findItemTargetItemIDs[i]);
@@ -510,12 +515,14 @@ namespace EFM
                         if (int.TryParse(itemID, out parsedIndex))
                         {
                             targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItemIDs.Add(itemID);
                         }
                         else
                         {
                             if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
                             {
                                 targetItems.Add(Mod.vanillaItemData[itemID]);
+                                targetItemIDs.Add(itemID);
                             }
                             else
                             {
@@ -562,6 +569,7 @@ namespace EFM
                     dogtagLevel = (int)properties["dogtagLevel"];
                     List<string> leaveItemTargetItemIDs = properties["target"].ToObject<List<string>>();
                     targetItems = new List<MeatovItemData>();
+                    targetItemIDs = new List<string>();
                     for (int i = 0; i < leaveItemTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(leaveItemTargetItemIDs[i]);
@@ -569,12 +577,14 @@ namespace EFM
                         if (int.TryParse(itemID, out parsedIndex))
                         {
                             targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItemIDs.Add(itemID);
                         }
                         else
                         {
                             if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
                             {
                                 targetItems.Add(Mod.vanillaItemData[itemID]);
+                                targetItemIDs.Add(itemID);
                             }
                             else
                             {
@@ -589,6 +599,7 @@ namespace EFM
                     value = (int)properties["value"];
                     List<string> leaveBeaconTargetItemIDs = properties["target"].ToObject<List<string>>();
                     targetItems = new List<MeatovItemData>();
+                    targetItemIDs = new List<string>();
                     for (int i = 0; i < leaveBeaconTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(leaveBeaconTargetItemIDs[i]);
@@ -596,12 +607,14 @@ namespace EFM
                         if (int.TryParse(itemID, out parsedIndex))
                         {
                             targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItemIDs.Add(itemID);
                         }
                         else
                         {
                             if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
                             {
                                 targetItems.Add(Mod.vanillaItemData[itemID]);
+                                targetItemIDs.Add(itemID);
                             }
                             else
                             {
@@ -649,6 +662,7 @@ namespace EFM
                     value = (int)properties["value"];
                     List<string> weaponAssemblyTargetItemIDs = properties["target"].ToObject<List<string>>();
                     targetItems = new List<MeatovItemData>();
+                    targetItemIDs = new List<string>();
                     for (int i = 0; i < weaponAssemblyTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(weaponAssemblyTargetItemIDs[i]);
@@ -656,12 +670,14 @@ namespace EFM
                         if (int.TryParse(itemID, out parsedIndex))
                         {
                             targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItemIDs.Add(itemID);
                         }
                         else
                         {
                             if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
                             {
                                 targetItems.Add(Mod.vanillaItemData[itemID]);
+                                targetItemIDs.Add(itemID);
                             }
                             else
                             {
@@ -1886,7 +1902,7 @@ namespace EFM
     public class Reward
     {
         public Task task;
-        public TaskState targetState;
+        public Task.TaskState targetState;
 
         public enum RewardType
         {
@@ -1901,6 +1917,8 @@ namespace EFM
         }
         public RewardType rewardType;
 
+        public string ID;
+
         // Experience
         public int experience;
 
@@ -1914,7 +1932,7 @@ namespace EFM
         public List<Barter> barters;
 
         // Item
-        public List<string> itemIDs;
+        public List<MeatovItemData> itemIDs;
         public int amount;
         public bool foundInRaid = false;
 
@@ -1928,6 +1946,7 @@ namespace EFM
             this.targetState = targetState;
 
             rewardType = (RewardType)Enum.Parse(typeof(RewardType), data["type"].ToString());
+            ID = data["id"].ToString();
             switch (rewardType)
             {
                 case RewardType.Experience:
@@ -1940,10 +1959,26 @@ namespace EFM
                     break;
                 case RewardType.Item:
                     JArray itemsArray = data["items"] as JArray;
-                    itemIDs = new List<string>();
+                    itemIDs = new List<MeatovItemData>();
                     for (int i=0; i < itemsArray.Count; ++i)
                     {
-                        itemIDs.Add(Mod.TarkovIDtoH3ID(itemsArray[i]["_tpl"].ToString()));
+                        string itemID = Mod.TarkovIDtoH3ID(itemsArray[i]["_tpl"].ToString());
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            itemIDs.Add(Mod.customItemData[parsedIndex]);
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                itemIDs.Add(Mod.vanillaItemData[itemID]);
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
+                        }
                     }
                     amount = (int)data["value"];
                     if(data["findInRaid"] != null)
