@@ -89,6 +89,7 @@ namespace EFM
 
         public void AddTask(Task task)
         {
+            TODO: // Implement like we did for market
             // Make new task UI element
             float taskListHeight = 29 * (tasksParent.childCount - 1) + 29;
 
@@ -119,7 +120,7 @@ namespace EFM
                 //    ++completedCount;
                 //}
                 ++totalCount;
-                GameObject currentObjectiveElement = Instantiate(taskUI.objectivePrefab, taskUI.objectivesParent);
+                GameObject currentObjectiveElement = Instantiate(taskUI.conditionPrefab, taskUI.objectivesParent);
                 currentObjectiveElement.SetActive(true);
                 TaskConditionUI currentObjective = currentObjectiveElement.GetComponent<TaskConditionUI>();
                 //currentCondition.statusListElement = currentObjective;
