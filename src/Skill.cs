@@ -189,6 +189,9 @@ namespace EFM
         // AimDrills
         public static float weaponShotAction;
 
+        public int index;
+        public string displayName;
+
         public enum SkillType
         {
             // Used in SkillGroupLevelingBoost type bonuses
@@ -522,6 +525,144 @@ namespace EFM
                     return "Tactics";
                 default:
                     Mod.LogError("SkillIndexToName received index: " + index);
+                    return "";
+            }
+        }
+
+        public static string SkillIndexToDisplayName(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return "Endurance";
+                case 1:
+                    return "Strength";
+                case 2:
+                    return "Vitality";
+                case 3:
+                    return "Health";
+                case 4:
+                    return "Stress Resistance";
+                case 5:
+                    return "Metabolism";
+                case 6:
+                    return "Immunity";
+                case 7:
+                    return "Perception";
+                case 8:
+                    return "Intellect";
+                case 9:
+                    return "Attention";
+                case 10:
+                    return "Charisma";
+                case 11:
+                    return "Memory";
+                case 12:
+                    return "Pistols";
+                case 13:
+                    return "Revolvers";
+                case 14:
+                    return "SMG";
+                case 15:
+                    return "Assault";
+                case 16:
+                    return "Shotgun";
+                case 17:
+                    return "Sniper";
+                case 18:
+                    return "LMG";
+                case 19:
+                    return "HMG";
+                case 20:
+                    return "Launcher";
+                case 21:
+                    return "Attached Launcher";
+                case 22:
+                    return "Throwing";
+                case 23:
+                    return "Melee";
+                case 24:
+                    return "DMR";
+                case 25:
+                    return "Recoil Control";
+                case 26:
+                    return "Aim Drills";
+                case 27:
+                    return "Troubleshooting";
+                case 28:
+                    return "Surgery";
+                case 29:
+                    return "Covert Movement";
+                case 30:
+                    return "Search";
+                case 31:
+                    return "Mag Drills";
+                case 32:
+                    return "Sniping";
+                case 33:
+                    return "Prone Movement";
+                case 34:
+                    return "Field Medicine";
+                case 35:
+                    return "First Aid";
+                case 36:
+                    return "Light Vests";
+                case 37:
+                    return "Heavy Vests";
+                case 38:
+                    return "Weapon Modding";
+                case 39:
+                    return "Advanced Modding";
+                case 40:
+                    return "Night Ops";
+                case 41:
+                    return "Silent Ops";
+                case 42:
+                    return "Lockpicking";
+                case 43:
+                    return "Weapon Treatment";
+                case 44:
+                    return "Free Trading";
+                case 45:
+                    return "Auctions";
+                case 46:
+                    return "Weapon Cleaning";
+                case 47:
+                    return "Barter";
+                case 48:
+                    return "Shadow Connections";
+                case 49:
+                    return "Task Performance";
+                case 50:
+                    return "Crafting";
+                case 51:
+                    return "Hideout Management";
+                case 52:
+                    return "Weapon Switch";
+                case 53:
+                    return "Equipment Management";
+                case 54:
+                    return "AK Systems";
+                case 55:
+                    return "Assault Operations";
+                case 56:
+                    return "Authority";
+                case 57:
+                    return "Heavy Caliber";
+                case 58:
+                    return "Raw Power";
+                case 59:
+                    return "AR Systems";
+                case 60:
+                    return "Deep Weapon Modding";
+                case 61:
+                    return "Long Range Optics";
+                case 62:
+                    return "Negotiations";
+                case 63:
+                    return "Tactics";
+                default:
+                    Mod.LogError("SkillIndexToDisplayName received index: " + index);
                     return "";
             }
         }

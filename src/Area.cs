@@ -21,6 +21,7 @@ namespace EFM
         public Bonus[][] bonusesPerLevel;
         public List<List<Production>> productionsPerLevel;
         public Dictionary<string, Production> productionsByID;
+        public Dictionary<string, List<Production>> productionsByProductID;
         public bool hasReadyProduction;
 
         // Live
@@ -158,6 +159,7 @@ namespace EFM
             bonusesPerLevel = new Bonus[levels.Length][];
             productionsPerLevel = new List<List<Production>>();
             productionsByID = new Dictionary<string, Production>();
+            productionsByProductID = new Dictionary<string, Production>();
             for (int i=0; i < levels.Length; ++i)
             {
                 productionsPerLevel.Add(new List<Production>());
@@ -1254,6 +1256,15 @@ namespace EFM
                 limit = (int)data["productionLimitCount"];
                 time = (int)data["productionTime"];
                 requirementsArray = data["requirements"] as JArray;
+
+                if(area.productionsByProductID.TryGetValue(endProduct, out List<Production> productionList))
+                {
+                    productionList.Add(this);
+                }
+                else
+                {
+                    area.productionsByProductID.Add(endProduct, new List<Production>() { this });
+                }
             }
             progressBaseTime = time;
 

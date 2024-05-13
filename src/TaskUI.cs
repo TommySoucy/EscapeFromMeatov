@@ -95,45 +95,79 @@ namespace EFM
                             traderRewardView.traderIcon.sprite = traderRewardView.traderIcons[reward.trader.index];
                             traderRewardView.text.text = "Unlock " + reward.trader.name;
                             break;
-                        case TaskReward.TaskRewardType.TraderStanding:
-                            GameObject currentInitEquipStandingElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
-                            currentInitEquipStandingElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.standingSprite;
-                            currentInitEquipStandingElement.transform.GetChild(1).gameObject.SetActive(true);
-                            currentInitEquipStandingElement.transform.GetChild(1).GetComponent<Text>().text = Mod.traders[reward.traderIndex].name;
-                            currentInitEquipStandingElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.standing;
+                        case Reward.RewardType.TraderStanding:
+                            GameObject currentInitEquipStandingElement = Instantiate(initEquipStatRewardPrefab, currentInitEquipHorizontal);
+                            StatRewardView statStandingRewardView = currentInitEquipStandingElement.GetComponent<StatRewardView>();
+                            statStandingRewardView.icon.sprite = statStandingRewardView.sprites[1];
+                            statStandingRewardView.specificName.gameObject.SetActive(true);
+                            statStandingRewardView.specificName.text = reward.trader.name;
+                            statStandingRewardView.detailText.text = (reward.standing > 0 ? "+" : "") + reward.standing;
                             break;
-                        case TaskReward.TaskRewardType.Experience:
-                            GameObject currentInitEquipExperienceElement = Instantiate(currentInitEquipHorizontal.GetChild(1).gameObject, currentInitEquipHorizontal);
-                            currentInitEquipExperienceElement.transform.GetChild(0).GetComponent<Image>().sprite = HideoutController.experienceSprite;
-                            currentInitEquipExperienceElement.transform.GetChild(2).GetComponent<Text>().text = (reward.standing > 0 ? "+" : "-") + reward.experience;
+                        case Reward.RewardType.Experience:
+                            GameObject currentInitEquipExpElement = Instantiate(initEquipStatRewardPrefab, currentInitEquipHorizontal);
+                            StatRewardView statExpRewardView = currentInitEquipExpElement.GetComponent<StatRewardView>();
+                            statExpRewardView.icon.sprite = statExpRewardView.sprites[0];
+                            statExpRewardView.specificName.gameObject.SetActive(false);
+                            statExpRewardView.detailText.text = (reward.experience > 0 ? "+" : "") + reward.experience;
                             break;
-                        case TaskReward.TaskRewardType.AssortmentUnlock:
-                            foreach (string item in reward.itemIDs)
+                        case Reward.RewardType.AssortmentUnlock:
+                            GameObject currentInitEquipBarterElement = Instantiate(initEquipItemRewardPrefab, currentInitEquipHorizontal);
+                            ItemRewardView barterRewardView = currentInitEquipBarterElement.GetComponent<ItemRewardView>();
+                            if (reward.itemIDs.Count > 0)
                             {
-                                if (currentInitEquipHorizontal.childCount == 6)
+                                barterRewardView.SetItem(reward.itemIDs[0]);
+                                if (reward.amount > 1)
                                 {
-                                    currentInitEquipHorizontal = Instantiate(currentInitEquipHorizontalTemplate, initEquipParent).transform;
-                                }
-                                GameObject currentInitEquipAssortElement = Instantiate(currentInitEquipHorizontal.GetChild(0).gameObject, currentInitEquipHorizontal);
-                                if (Mod.itemIcons.ContainsKey(item))
-                                {
-                                    currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>().sprite = Mod.itemIcons[item];
+                                    barterRewardView.count.gameObject.SetActive(true);
+                                    barterRewardView.count.text = reward.amount.ToString();
                                 }
                                 else
                                 {
-                                    AnvilManager.Run(Mod.SetVanillaIcon(item, currentInitEquipAssortElement.transform.GetChild(0).GetChild(0).GetComponent<Image>()));
+                                    barterRewardView.count.gameObject.SetActive(false);
                                 }
-                                currentInitEquipAssortElement.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
-                                currentInitEquipAssortElement.transform.GetChild(2).GetComponent<Text>().text = Mod.itemNames[item];
-
-                                // Setup ItemIcon
-                                ItemIcon assortIconScript = currentInitEquipAssortElement.transform.GetChild(0).gameObject.AddComponent<ItemIcon>();
-                                assortIconScript.itemID = item;
-                                assortIconScript.itemName = Mod.itemNames[item];
-                                assortIconScript.description = Mod.itemDescriptions[item];
-                                assortIconScript.weight = Mod.itemWeights[item];
-                                assortIconScript.volume = Mod.itemVolumes[item];
+                                barterRewardView.itemName.text = reward.itemIDs[0].name;
                             }
+                            else // Missing item
+                            {
+                                barterRewardView.itemView.itemIcon.sprite = Mod.questionMarkIcon;
+                                barterRewardView.itemName.text = "Missing data for reward " + reward.ID;
+                            }
+                            barterRewardView.unlockIcon.SetActive(true);
+                            break;
+                        case Reward.RewardType.Skill:
+                            GameObject currentInitEquipSkillElement = Instantiate(initEquipStatRewardPrefab, currentInitEquipHorizontal);
+                            StatRewardView statSkillRewardView = currentInitEquipSkillElement.GetComponent<StatRewardView>();
+                            statSkillRewardView.icon.sprite = statSkillRewardView.sprites[2];
+                            statSkillRewardView.specificName.gameObject.SetActive(true);
+                            statSkillRewardView.specificName.text = reward.skill.displayName;
+                            statSkillRewardView.detailText.text = (reward.value > 0 ? "+" : "") + reward.value;
+                            break;
+                        case Reward.RewardType.ProductionScheme:
+                            GameObject currentInitEquipBarterElement = Instantiate(initEquipItemRewardPrefab, currentInitEquipHorizontal);
+                            ItemRewardView barterRewardView = currentInitEquipBarterElement.GetComponent<ItemRewardView>();
+                            if (reward.itemIDs.Count > 0)
+                            {
+                                barterRewardView.SetItem(reward.itemIDs[0]);
+                                if (reward.amount > 1)
+                                {
+                                    barterRewardView.count.gameObject.SetActive(true);
+                                    barterRewardView.count.text = reward.amount.ToString();
+                                }
+                                else
+                                {
+                                    barterRewardView.count.gameObject.SetActive(false);
+                                }
+                                barterRewardView.itemName.text = reward.itemIDs[0].name;
+                            }
+                            else // Missing item
+                            {
+                                barterRewardView.itemView.itemIcon.sprite = Mod.questionMarkIcon;
+                                barterRewardView.itemName.text = "Missing data for reward " + reward.ID;
+                            }
+                            barterRewardView.unlockIcon.SetActive(true);
+                            break;
+                        case Reward.RewardType.TraderStandingRestore:
+                            TODO:
                             break;
                         default:
                             break;

@@ -635,6 +635,8 @@ namespace EFM
             for(int i=0; i < skills.Length; ++i)
             {
                 skills[i] = new Skill();
+                skills[i].index = i;
+                skills[i].displayName = Skill.SkillIndexToDisplayName(i);
                 if (i >= 0 && i <= 6)
                 {
                     skills[i].skillType = Skill.SkillType.Physical;

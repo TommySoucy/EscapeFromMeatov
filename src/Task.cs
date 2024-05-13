@@ -1940,6 +1940,10 @@ namespace EFM
         public Skill skill;
         public int value;
 
+        // ProductionScheme
+        public int areaIndex;
+        public MeatovItemData productionProduct;
+
         public Reward(Task task, Task.TaskState targetState, JToken data)
         {
             this.task = task;
@@ -2016,8 +2020,29 @@ namespace EFM
                     value = (int)data["value"];
                     break;
                 case RewardType.ProductionScheme:
-                    // Note: This type of reward will be handled by the relevant production's QuestComplete 
-                    //       condition which will be handled as an unlock condition
+                    areaIndex = (int)data["traderId"]; // Note, in DB, traderID is used instead of areaType
+                    JArray productionItemsArray = data["items"] as JArray;
+                    if(productionItemsArray != null && productionItemsArray.Count > 0)
+                    {
+                        // Note that here we just take the first item in the array
+                        string itemID = Mod.TarkovIDtoH3ID(productionItemsArray[0]["_tpl"].ToString());
+                        int parsedIndex = -1;
+                        if (int.TryParse(itemID, out parsedIndex))
+                        {
+                            productionProduct = Mod.customItemData[parsedIndex];
+                        }
+                        else
+                        {
+                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
+                            {
+                                productionProduct = Mod.vanillaItemData[itemID];
+                            }
+                            else
+                            {
+                                Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemID + " for which we do not have data");
+                            }
+                        }
+                    }
                     break;
             }
         }
@@ -2046,8 +2071,10 @@ namespace EFM
                     skill.progress += value;
                     break;
                 case RewardType.ProductionScheme:
-                    TODO0: // Add production to area, see how the production is handled in DB, is it already in area production DB and we should prevent 
-                    //        adding it to UI if not unlocked? Or do we have to add it when awarded?
+                    // Note: This type of reward will be handled by the relevant production's QuestComplete 
+                    //       condition which will be handled as an unlock condition
+                    // Requirements of this type are subscribed to taskStateChanged event, upon which they will verify that this task 
+                    // has been completed and will award the production unlock by adding it to the area UI if the task is completed
                     break;
             }
         }

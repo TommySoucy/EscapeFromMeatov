@@ -32,7 +32,7 @@ namespace EFM
         public Dictionary<int, List<Barter>> bartersByLevel;
         public Dictionary<string, List<Barter>> bartersByItemID;
         public List<Task> tasks;
-        public Dictionary<string, bool> rewardBarters;
+        public Dictionary<string, bool> rewardBarters; // Bool is whether barters for this item are unlocked
 
         // Live data
         private int _level;
@@ -64,6 +64,7 @@ namespace EFM
                 }
             }
         }
+        public float standingToRestore;
         private int _salesSum;
         public int salesSum
         {
@@ -114,7 +115,7 @@ namespace EFM
                     break;
                 default:
                     Mod.LogError("DEV: Trader has unhandled currency string: " + currencyString);
-                    currency = 2; // Euro here because EUR is the only string im not sure of
+                    currency = 0;
                     break;
             }
             defaultUnlocked = (bool)Mod.traderBaseDB[index]["unlockedByDefault"];
@@ -300,6 +301,7 @@ namespace EFM
         {
             level = (int)data["level"];
             standing = (float)data["standing"];
+            standingToRestore = (float)data["standingToRestore"];
             unlocked = (bool)data["unlocked"];
             if (!unlocked)
             {
