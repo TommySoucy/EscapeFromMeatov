@@ -2,10 +2,9 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using static FistVR.ItemSpawnerCategoryDefinitions;
+using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
@@ -237,6 +236,7 @@ namespace EFM
 
         // Backpacks, Containers, Pouches
         [Header("Containers")]
+        public ContainerVolume containerVolume;
         public Transform containerItemRoot;
 		public GameObject mainContainer;
 		public Renderer[] mainContainerRenderers;
@@ -2432,6 +2432,87 @@ namespace EFM
             }
 
             return total;
+        }
+
+        public JObject Serialize()
+        {
+            JObject serialized = new JObject();
+
+            // Store ID, from which we can get all static data about this item
+            serialized["H3ID"] = H3ID;
+
+            // Store live state
+            serialized["insured"] = insured;
+            serialized["looted"] = looted;
+            serialized["foundInRaid"] = foundInRaid;
+            serialized["mode"] = mode;
+            serialized["broken"] = broken;
+            serialized["armor"] = armor;
+            serialized["open"] = open;
+            serialized["containingVolume"] = containingVolume;
+            serialized["cartridge"] = cartridge;
+            serialized["roundClass"] = (int)roundClass;
+            serialized["stack"] = stack;
+            serialized["amount"] = amount;
+            serialized["USEC"] = USEC;
+            serialized["dogtagLevel"] = dogtagLevel;
+            serialized["dogtagName"] = dogtagName;
+            if(itemType == ItemType.AmmoBox)
+            {
+                JArray ammo = new JArray();
+                FVRFireArmMagazine asMag = physObj as FVRFireArmMagazine;
+                for(int i=0; i < asMag.m_numRounds; ++i)
+                {
+                    ammo.Add((int)asMag.LoadedRounds[i].LR_Class);
+                }
+                serialized["ammo"] = ammo;
+            }
+
+            // Store children
+            // Custom types
+            JArray serializedChildren = new JArray();
+            switch (itemType)
+            {
+                case ItemType.Rig:
+                case ItemType.ArmoredRig:
+                    for(int i=0; i < itemsInSlots.Length; ++i)
+                    {
+                        if(itemsInSlots[i] != null)
+                        {
+                            JObject serializedChild = itemsInSlots[i].Serialize();
+                            serializedChild["slotIndex"] = i;
+                            serializedChildren.Add(serializedChild);
+                        }
+                    }
+                    break;
+                case ItemType.Backpack:
+                case ItemType.Container:
+                case ItemType.Pouch:
+                    foreach (KeyValuePair<string, List<MeatovItem>> containerChild in containerVolume.inventoryItems)
+                    {
+                        for(int i=0; i < containerChild.Value.Count; ++i)
+                        {
+                            if (containerChild.Value[i] != null)
+                            {
+                                JObject serializedChild = containerChild.Value[i].Serialize();
+                                serializedChild["slotIndex"] = i;
+                                serializedChildren.Add(serializedChild);
+                            }
+                        }
+                    }
+                    break;
+            }
+            // Vanilla types (Using vault system)
+            if (vanilla)
+            {
+                VaultFile vaultFile = new VaultFile();
+                VaultSystem.ScanObjectToVaultFile(vaultFile, physObj);
+                serialized["vanillaData"] = JObject.FromObject(vaultFile);
+            }
+            serialized["children"] = serializedChildren;
+
+            return serialized;
+            integreate thissave system and make load system
         }
 
         public void OnTransformParentChanged()

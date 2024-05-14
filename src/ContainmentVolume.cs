@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FistVR;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -180,6 +182,139 @@ namespace EFM
                     FIRInventory.Remove(item.H3ID);
                 }
             }
+        }
+
+        public void SpawnItem(MeatovItemData itemData, int amount)
+        {
+            int amountToSpawn = amount;
+            float xSize = activeVolume.transform.localScale.x;
+            float ySize = activeVolume.transform.localScale.y;
+            float zSize = activeVolume.transform.localScale.z;
+            if (itemData.index == -1)
+            {
+                // Spawn vanilla item will handle the updating of proper elements
+                AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn));
+            }
+            else
+            {
+                GameObject itemPrefab = Mod.GetItemPrefab(itemData.index);
+                List<GameObject> objectsList = new List<GameObject>();
+                while (amountToSpawn > 0)
+                {
+                    GameObject spawnedItem = Instantiate(itemPrefab);
+                    MeatovItem meatovItem = spawnedItem.GetComponent<MeatovItem>();
+                    objectsList.Add(spawnedItem);
+                    spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
+                                                                      UnityEngine.Random.Range(-ySize / 2, ySize / 2),
+                                                                      UnityEngine.Random.Range(-zSize / 2, zSize / 2));
+                    spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
+
+                    // Set stack and remove amount to spawn
+                    if (meatovItem.maxStack > 1)
+                    {
+                        if (amountToSpawn > meatovItem.maxStack)
+                        {
+                            meatovItem.stack = meatovItem.maxStack;
+                            amountToSpawn -= meatovItem.maxStack;
+                        }
+                        else // amountToSpawn <= itemCIW.maxStack
+                        {
+                            meatovItem.stack = amountToSpawn;
+                            amountToSpawn = 0;
+                        }
+                    }
+                    else
+                    {
+                        --amountToSpawn;
+                    }
+
+                    // Add item to volume
+                    AddItem(meatovItem);
+                }
+            }
+        }
+
+        public IEnumerator SpawnVanillaItem(MeatovItemData itemData, int count)
+        {
+            yield return IM.OD[itemData.H3ID].GetGameObjectAsync();
+            GameObject itemPrefab = IM.OD[itemData.H3ID].GetGameObject();
+            if (itemPrefab == null)
+            {
+                Mod.LogError("Failed to get vanilla prefab for " + itemData.H3ID + " to spawn in containment volume "+name);
+                yield break;
+            }
+            FVRPhysicalObject physObj = itemPrefab.GetComponent<FVRPhysicalObject>();
+            GameObject itemObject = null;
+            if (physObj is FVRFireArmRound && count > 1) // Multiple rounds, must spawn an ammobox
+            {
+                int countLeft = count;
+                float boxCountLeft = count / 120.0f;
+                while (boxCountLeft > 0)
+                {
+                    int amount = 0;
+                    if (countLeft > 30)
+                    {
+                        itemObject = GameObject.Instantiate(Mod.GetItemPrefab(716));
+
+                        if (countLeft <= 120)
+                        {
+                            amount = countLeft;
+                            countLeft = 0;
+                        }
+                        else
+                        {
+                            amount = 120;
+                            countLeft -= 120;
+                        }
+                    }
+                    else
+                    {
+                        itemObject = GameObject.Instantiate(Mod.GetItemPrefab(715));
+
+                        amount = countLeft;
+                        countLeft = 0;
+                    }
+
+                    MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+                    FVRFireArmMagazine asMagazine = meatovItem.physObj as FVRFireArmMagazine;
+                    FVRFireArmRound round = physObj as FVRFireArmRound;
+                    asMagazine.RoundType = round.RoundType;
+                    meatovItem.roundClass = round.RoundClass;
+                    for (int j = 0; j < amount; ++j)
+                    {
+                        asMagazine.AddRound(meatovItem.roundClass, false, false);
+                    }
+
+                    // Add item to volume
+                    AddItem(meatovItem);
+
+                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-activeVolume.transform.localScale.x / 2, activeVolume.transform.localScale.x / 2),
+                                                                        UnityEngine.Random.Range(-activeVolume.transform.localScale.y / 2, activeVolume.transform.localScale.y / 2),
+                                                                        UnityEngine.Random.Range(-activeVolume.transform.localScale.z / 2, activeVolume.transform.localScale.z / 2));
+                    itemObject.transform.localRotation = UnityEngine.Random.rotation;
+
+                    boxCountLeft = countLeft / 120.0f;
+                }
+            }
+            else // Not a round, or just 1, spawn as normal
+            {
+                for (int i = 0; i < count; ++i)
+                {
+                    itemObject = GameObject.Instantiate(itemPrefab);
+
+                    MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+
+                    // Add item to volume
+                    AddItem(meatovItem);
+
+                    itemObject.transform.localPosition = new Vector3(UnityEngine.Random.Range(-activeVolume.transform.localScale.x / 2, activeVolume.transform.localScale.x / 2),
+                                                                     UnityEngine.Random.Range(-activeVolume.transform.localScale.y / 2, activeVolume.transform.localScale.y / 2),
+                                                                     UnityEngine.Random.Range(-activeVolume.transform.localScale.z / 2, activeVolume.transform.localScale.z / 2));
+                    itemObject.transform.localRotation = UnityEngine.Random.rotation;
+                }
+            }
+
+            yield break;
         }
 
         public bool Offer(MeatovItem item)

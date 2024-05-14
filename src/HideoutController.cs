@@ -1307,6 +1307,7 @@ namespace EFM
                 }
 
                 // Player items
+                TODO: // Load player Items
                 if (Mod.playerInventory == null)
                 {
                     Mod.playerInventory = new Dictionary<string, int>();
@@ -1314,7 +1315,6 @@ namespace EFM
                     Mod.playerFIRInventory = new Dictionary<string, int>();
                     Mod.playerFIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
                 }
-                TODO: // Load player Items
             }
             else if (Mod.justFinishedRaid)
             {
