@@ -299,6 +299,22 @@ namespace EFM
 
         public void OnTaskStateChangedInvoke(Task task)
         {
+            // Destruction of the UI elements (Market and StatusUI) happens in the elements themselves
+            // when receiving the corersponding TaskStateChanged events
+            if (taskState == TaskState.Available
+                || taskState == TaskState.Active
+                || taskState == TaskState.Complete)
+            {
+                if(playerUI == null)
+                {
+                    StatusUI.instance.AddTask(this);
+                }
+                if(HideoutController.instance != null && HideoutController.instance.marketManager.currentTraderIndex == trader.index)
+                {
+                    HideoutController.instance.marketManager.AddTask(this);
+                }
+            }
+
             if(OnTaskStateChanged != null)
             {
                 OnTaskStateChanged(task);
@@ -414,6 +430,8 @@ namespace EFM
         // Events
         public delegate void OnConditionFulfillmentChangedDelegate(Condition condition);
         public event OnConditionFulfillmentChangedDelegate OnConditionFulfillmentChanged;
+        public delegate void OnConditionProgressChangedDelegate(Condition condition);
+        public event OnConditionProgressChangedDelegate OnConditionProgressChanged;
 
         public Condition(Task task, Task.TaskState targetState, JToken data)
         {
@@ -1949,6 +1967,8 @@ namespace EFM
             this.task = task;
             this.targetState = targetState;
 
+            task.OnTaskStateChanged += OnTaskStateChanged;
+
             rewardType = (RewardType)Enum.Parse(typeof(RewardType), data["type"].ToString());
             ID = data["id"].ToString();
             switch (rewardType)
@@ -2013,7 +2033,6 @@ namespace EFM
                             }
                         }
                     }
-                    task.OnTaskStateChanged += OnTaskStateChanged;
                     break;
                 case RewardType.Skill:
                     skill = Mod.skills[Skill.SkillNameToIndex(data["target"].ToString())];
@@ -2065,7 +2084,20 @@ namespace EFM
                     trader.unlocked = true;
                     break;
                 case RewardType.AssortmentUnlock:
-                    // Handled by OnTaskStateChanged
+                    // We do not save whether a reward has been awarded or not
+                    // For an Item reward for example, we spawn the item when awarded, and the
+                    // item gets saved in hideout inventory or on player. We do not have to save anything 
+                    // specific to the reward
+                    // For assort unlock though, instead of keeping track and saving which 
+                    // assorts have been unlocked, we just keep track of a live state.
+                    // This is what we need to update here
+                    for (int i = 0; i < barters.Count; ++i)
+                    {
+                        if (trader.rewardBarters.ContainsKey(barters[i].itemData.H3ID))
+                        {
+                            trader.rewardBarters[barters[i].itemData.H3ID] = true;
+                        }
+                    }
                     break;
                 case RewardType.Skill:
                     skill.progress += value;
@@ -2081,27 +2113,9 @@ namespace EFM
 
         public void OnTaskStateChanged(Task task)
         {
-            // We do not save whether a reward has been awarded or not
-            // For an Item reward for example, we spawn the item when awarded, and the
-            // item gets saved in hideout inventory or on player. We do not have to save anything 
-            // specific to the reward
-            // For assort unlock though, instead of keeping track and saving which 
-            // assorts have been unlocked, we just keep track of a live state.
-            // This is what we need to update here
             if(task.taskState == targetState)
             {
-                switch (rewardType)
-                {
-                    case RewardType.AssortmentUnlock:
-                        for(int i=0; i < barters.Count; ++i)
-                        {
-                            if (trader.rewardBarters.ContainsKey(barters[i].itemData.H3ID))
-                            {
-                                trader.rewardBarters[barters[i].itemData.H3ID] = true;
-                            }
-                        }
-                        break;
-                }
+                Award();
             }
         }
     }

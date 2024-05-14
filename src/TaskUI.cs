@@ -13,7 +13,10 @@ namespace EFM
         public GameObject activeStatus;
         public GameObject completeStatus;
         public Text percentage;
+        public GameObject progressBar;
         public RectTransform barFill;
+        public GameObject startButton;
+        public GameObject finishButton;
         public GameObject full;
         public Text description;
         public RectTransform objectivesParent;
@@ -39,7 +42,22 @@ namespace EFM
 
         public void SetTask(Task task)
         {
+            if(this.task != null)
+            {
+                this.task.OnTaskStateChanged -= OnTaskStateChanged;
+                for(int i=0; i < this.task.finishConditions.Count; ++i)
+                {
+                    this.task.finishConditions[i].OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
+                }
+            }
+
             this.task = task;
+
+            this.task.OnTaskStateChanged += OnTaskStateChanged;
+            for (int i = 0; i < this.task.finishConditions.Count; ++i)
+            {
+                this.task.finishConditions[i].OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+            }
 
             // Short info
             task.marketUI.taskName.text = task.name;
@@ -444,18 +462,9 @@ namespace EFM
                 }
             }
 
-            // Start
-            PointableButton pointableTaskStartButton = shortInfo.GetChild(6).gameObject.AddComponent<PointableButton>();
-            pointableTaskStartButton.SetButton();
-            pointableTaskStartButton.Button.onClick.AddListener(() => { OnTaskStartClick(task); });
-            pointableTaskStartButton.MaxPointingRange = 20;
-            pointableTaskStartButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-            // Finish
-            PointableButton pointableTaskFinishButton = shortInfo.GetChild(7).gameObject.AddComponent<PointableButton>();
-            pointableTaskFinishButton.SetButton();
-            pointableTaskFinishButton.Button.onClick.AddListener(() => { OnTaskFinishClick(task); });
-            pointableTaskFinishButton.MaxPointingRange = 20;
-            pointableTaskFinishButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+            // Set initial state specific UI
+            OnTaskStateChanged(this.task);
+            OnConditionFulfillmentChanged(null);
         }
 
         public void OnClicked()
@@ -469,69 +478,87 @@ namespace EFM
 
         public void OnStartClicked()
         {
-            //Set state of task to active
+            // Set state of task to active
+            // We do nothing else here, everything updates through OnTaskStateChanged event
+            // Which is invoked by the task.taskState property setter
             task.taskState = Task.TaskState.Active;
+        }
 
-            // Update market task list by making the shortinfo of the referenced task UI element in Task to show that it is active
-            task.marketUI.transform.GetChild(0).GetChild(2).gameObject.SetActive(true);
-            task.marketUI.transform.GetChild(0).GetChild(3).gameObject.SetActive(false);
-            task.marketUI.transform.GetChild(0).GetChild(5).gameObject.SetActive(true);
-            task.marketUI.transform.GetChild(0).GetChild(6).gameObject.SetActive(false);
+        public void OnFinishClicked()
+        {
+            // Set state of task to Success
+            // We do nothing else here, everything updates through OnTaskStateChanged event
+            // Which is invoked by the task.taskState property setter
+            task.taskState = Task.TaskState.Success;
+        }
 
-            // Update conditions that are dependent on this task being started, then update everything depending on those conditions
-            if (Trader.questConditionsByTask.ContainsKey(task.ID))
+        public void OnTaskStateChanged(Task task)
+        {
+            switch (task.taskState)
             {
-                foreach (Condition taskCondition in Trader.questConditionsByTask[task.ID])
+                case Task.TaskState.Locked:
+                case Task.TaskState.Success:
+                case Task.TaskState.Fail:
+                    Destroy(gameObject);
+                    break;
+                case Task.TaskState.Available:
+                    availableStatus.SetActive(true);
+                    activeStatus.SetActive(false);
+                    completeStatus.SetActive(false);
+
+                    startButton.SetActive(true);
+                    progressBar.SetActive(false);
+                    finishButton.SetActive(false);
+                    break;
+                case Task.TaskState.Active:
+                    availableStatus.SetActive(false);
+                    activeStatus.SetActive(true);
+                    completeStatus.SetActive(false);
+
+                    startButton.SetActive(false);
+                    progressBar.SetActive(true);
+                    OnConditionFulfillmentChanged(null);
+                    finishButton.SetActive(false);
+                    break;
+                case Task.TaskState.Complete:
+                    availableStatus.SetActive(false);
+                    activeStatus.SetActive(false);
+                    completeStatus.SetActive(true);
+
+                    startButton.SetActive(false);
+                    progressBar.SetActive(false);
+                    finishButton.SetActive(true);
+                    break;
+            }
+        }
+
+        public void OnConditionFulfillmentChanged(Condition condition)
+        {
+            if(task.taskState == Task.TaskState.Active)
+            {
+                int fulfilledCount = 0;
+                for (int i = 0; i < task.finishConditions.Count; ++i)
                 {
-                    // If the condition requires this task to be started
-                    if (taskCondition.value == 2)
+                    if (task.finishConditions[i].fulfilled)
                     {
-                        Trader.FulfillCondition(taskCondition);
+                        ++fulfilledCount;
                     }
                 }
+                float fraction = (float)fulfilledCount / (float)task.finishConditions.Count;
+                barFill.sizeDelta = new Vector2(60 * fraction, 6);
+                percentage.text = ((int)(100 * fraction)).ToString() + "%";
             }
+        }
 
-            // Add completion conditions to list if necessary
-            foreach (Condition condition in task.completionConditions)
+        public void OnDestroy()
+        {
+            if(task != null)
             {
-                if (condition.visible)
+                task.OnTaskStateChanged -= OnTaskStateChanged;
+                for (int i = 0; i < task.finishConditions.Count; ++i)
                 {
-                    if (condition.conditionType == Condition.ConditionType.CounterCreator)
-                    {
-                        foreach (TaskCounterCondition counterCondition in condition.counters)
-                        {
-                            if (Mod.taskCompletionCounterConditionsByType.ContainsKey(counterCondition.counterConditionType))
-                            {
-                                Mod.taskCompletionCounterConditionsByType[counterCondition.counterConditionType].Add(counterCondition);
-                            }
-                            else
-                            {
-                                List<TaskCounterCondition> newList = new List<TaskCounterCondition>();
-                                Mod.taskCompletionCounterConditionsByType.Add(counterCondition.counterConditionType, newList);
-                                newList.Add(counterCondition);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (Mod.taskCompletionConditionsByType.ContainsKey(condition.conditionType))
-                        {
-                            Mod.taskCompletionConditionsByType[condition.conditionType].Add(condition);
-                        }
-                        else
-                        {
-                            List<Condition> newList = new List<Condition>();
-                            Mod.taskCompletionConditionsByType.Add(condition.conditionType, newList);
-                            newList.Add(condition);
-                        }
-                    }
+                    task.finishConditions[i].OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
                 }
-            }
-
-            // Spawn intial equipment 
-            if (task.startingEquipment != null)
-            {
-                GivePlayerRewards(task.startingEquipment);
             }
         }
     }

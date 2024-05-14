@@ -81,7 +81,16 @@ namespace EFM
 
         public void SetCondition(Condition condition)
         {
+            if (this.condition != null)
+            {
+                this.condition.OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
+                this.condition.OnConditionProgressChanged -= OnConditionProgressChanged;
+            }
+
             this.condition = condition;
+
+            this.condition.OnConditionFulfillmentChanged += OnConditionFulfillmentChanged;
+            this.condition.OnConditionProgressChanged += OnConditionProgressChanged;
 
             text.text = condition.description;
             // Progress counter, only necessary if value > 1 and for specific condition types
@@ -134,6 +143,10 @@ namespace EFM
             }
 
             conditionSet = true;
+
+            // Init state UI
+            OnConditionFulfillmentChanged(this.condition);
+            OnConditionProgressChanged(this.condition);
         }
 
         public void OnTradeVolumeItemsChanged(MeatovItem item)
@@ -183,8 +196,35 @@ namespace EFM
             turnInButton.SetActive(needHandOverButton);
         }
 
+        public void OnConditionFulfillmentChanged(Condition condition)
+        {
+            doneIcon.SetActive(condition.fulfilled);
+        }
+
+        public void OnConditionProgressChanged(Condition condition)
+        {
+            if (condition.fulfilled || condition.value <= 1)
+            {
+                progressBar.SetActive(false);
+                counter.gameObject.SetActive(false);
+            }
+            else // !condition.fulfilled && condition.value > 1
+            {
+                progressBar.SetActive(true);
+                barFill.sizeDelta = new Vector2(60.0f * ((float)condition.count / (float)condition.value), 6);
+                counter.gameObject.SetActive(true);
+                counter.text = condition.count.ToString() + "/" + condition.value;
+            }
+        }
+
         public void OnDestroy()
         {
+            if (condition != null)
+            {
+                condition.OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
+                condition.OnConditionProgressChanged -= OnConditionProgressChanged;
+            }
+
             if (conditionSet && HideoutController.instance != null)
             {
                 HideoutController.instance.marketManager.tradeVolume.OnItemAdded -= OnTradeVolumeItemsChanged;
