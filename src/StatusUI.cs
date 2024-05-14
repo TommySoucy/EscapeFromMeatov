@@ -49,9 +49,6 @@ namespace EFM
         public Text extractionTimer;
         public SkillUI[] skillUIs;
 
-        public List<TaskUI> tasks = new List<TaskUI>();
-        public Dictionary<string, TaskUI> taskByID = new Dictionary<string, TaskUI>();
-
         [NonSerialized]
         public int mustUpdateTaskListHeight;
 
@@ -89,187 +86,13 @@ namespace EFM
 
         public void AddTask(Task task)
         {
-            TODO: // Implement like we did for market
-            // Make new task UI element
-            float taskListHeight = 29 * (tasksParent.childCount - 1) + 29;
+            // Instantiate task element
+            GameObject currentTaskElement = Instantiate(taskPrefab, tasksParent);
+            currentTaskElement.SetActive(true);
+            task.marketUI = currentTaskElement.GetComponent<TaskUI>();
 
-            GameObject taskUIObject = Instantiate(taskPrefab, tasksParent);
-            taskUIObject.SetActive(true);
-            TaskUI taskUI = taskUIObject.GetComponent<TaskUI>();
-            task.playerUI = taskUI;
-
-            // Short info
-            Transform shortInfo = taskUI.transform.GetChild(0);
-            shortInfo.GetChild(0).GetChild(0).GetComponent<Text>().text = task.name;
-            shortInfo.GetChild(1).GetChild(0).GetComponent<Text>().text = task.location;
-            if (task.taskState == Task.TaskState.Complete)
-            {
-                shortInfo.GetChild(2).gameObject.SetActive(true);
-                shortInfo.GetChild(3).gameObject.SetActive(false);
-            }
-
-            // Description
-            taskUI.description.text = task.description;
-            // Objectives (conditions)
-            int completedCount = 0;
-            int totalCount = 0;
-            foreach (Condition currentCondition in task.finishConditions)
-            {
-                //if (currentCondition.fulfilled)
-                //{
-                //    ++completedCount;
-                //}
-                ++totalCount;
-                GameObject currentObjectiveElement = Instantiate(taskUI.conditionPrefab, taskUI.objectivesParent);
-                currentObjectiveElement.SetActive(true);
-                TaskConditionUI currentObjective = currentObjectiveElement.GetComponent<TaskConditionUI>();
-                //currentCondition.statusListElement = currentObjective;
-
-                //currentObjective.text.text = currentCondition.text;
-                // Progress counter, only necessary if value > 1 and for specific condition types
-                if (currentCondition.value > 1)
-                {
-                    switch (currentCondition.conditionType)
-                    {
-                        case Condition.ConditionType.CounterCreator:
-                            //foreach (TaskCounterCondition counter in currentCondition.counters)
-                            //{
-                            //    if (counter.counterConditionType == TaskCounterCondition.CounterConditionType.Kills)
-                            //    {
-                            //        currentObjective.progressBar.SetActive(true); // Activate progress bar
-                            //        currentObjective.barFill.sizeDelta = new Vector2(((float)counter.killCount) / currentCondition.value * 60, 6);
-                            //        currentObjective.counter.gameObject.SetActive(true); // Activate progress counter
-                            //        currentObjective.counter.text = counter.killCount.ToString() + "/" + currentCondition.value;
-                            //        break;
-                            //    }
-                            //}
-                            break;
-                        case Condition.ConditionType.HandoverItem:
-                        case Condition.ConditionType.FindItem:
-                        case Condition.ConditionType.LeaveItemAtLocation:
-                            currentObjective.progressBar.SetActive(true); // Activate progress bar
-                            //currentObjective.barFill.sizeDelta = new Vector2(((float)currentCondition.itemCount) / currentCondition.value * 60, 6);
-                            //currentObjective.counter.gameObject.SetActive(true); // Activate progress counter
-                            //currentObjective.counter.text = currentCondition.itemCount.ToString() + "/" + currentCondition.value;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                // Disable condition gameObject if visibility conditions not met
-                if (currentCondition.visibilityConditions != null && currentCondition.visibilityConditions.Count > 0)
-                {
-                    //foreach (Condition visibilityCondition in currentCondition.visibilityConditions)
-                    //{
-                    //    if (!visibilityCondition.fulfilled)
-                    //    {
-                    //        currentObjectiveElement.SetActive(false);
-                    //        break;
-                    //    }
-                    //}
-                }
-            }
-            // Rewards
-            taskUI.rewardsParent.gameObject.SetActive(true);
-            Transform currentRewardHorizontal = Instantiate(taskUI.rewardsHorizontalParent, taskUI.rewardsParent).transform;
-            currentRewardHorizontal.gameObject.SetActive(true);
-            //foreach (TaskReward reward in task.successRewards)
-            //{
-            //    // Add new horizontal if necessary
-            //    if (currentRewardHorizontal.childCount == 2)
-            //    {
-            //        currentRewardHorizontal = Instantiate(taskUI.rewardsHorizontalParent, taskUI.rewardsParent).transform;
-            //        currentRewardHorizontal.gameObject.SetActive(true);
-            //    }
-            //    switch (reward.taskRewardType)
-            //    {
-            //        case TaskReward.TaskRewardType.Item:
-            //            GameObject currentRewardItemElement = Instantiate(taskUI.itemRewardPrefab, currentRewardHorizontal);
-            //            currentRewardItemElement.SetActive(true);
-            //            ItemRewardView itemRewardView = currentRewardItemElement.GetComponent<ItemRewardView>();
-            //            string randomReward = reward.itemIDs[UnityEngine.Random.Range(0, reward.itemIDs.Length)];
-            //            if (Mod.itemIcons.ContainsKey(randomReward))
-            //            {
-            //                itemRewardView.icon.sprite = Mod.itemIcons[randomReward];
-            //            }
-            //            else
-            //            {
-            //                AnvilManager.Run(Mod.SetVanillaIcon(randomReward, itemRewardView.icon));
-            //            }
-            //            if (reward.amount > 1)
-            //            {
-            //                itemRewardView.count.text = reward.amount.ToString();
-            //            }
-            //            else
-            //            {
-            //                itemRewardView.count.gameObject.SetActive(false);
-            //            }
-            //            string itemRewardName = Mod.itemNames[randomReward];
-            //            itemRewardView.itemName.text = itemRewardName;
-            //            break;
-            //        case TaskReward.TaskRewardType.TraderUnlock:
-            //            GameObject currentRewardTraderUnlockElement = Instantiate(taskUI.traderRewardPrefab, currentRewardHorizontal);
-            //            currentRewardTraderUnlockElement.SetActive(true);
-            //            TraderRewardView traderRewardView = currentRewardTraderUnlockElement.GetComponent<TraderRewardView>();
-            //            traderRewardView.traderIcon.sprite = traderRewardView.traderIcons[reward.traderIndex];
-            //            traderRewardView.text.text = "Unlock " + Mod.traderStatuses[reward.traderIndex].name;
-            //            break;
-            //        case TaskReward.TaskRewardType.TraderStanding:
-            //            GameObject currentRewardStandingElement = Instantiate(taskUI.statRewardPrefab, currentRewardHorizontal);
-            //            currentRewardStandingElement.SetActive(true);
-            //            StatRewardView statRewardView = currentRewardStandingElement.GetComponent<StatRewardView>();
-            //            statRewardView.icon.sprite = statRewardView.sprites[1];
-            //            statRewardView.specificName.gameObject.SetActive(true);
-            //            statRewardView.specificName.text = Mod.traderStatuses[reward.traderIndex].name;
-            //            statRewardView.detailText.text = (reward.standing > 0 ? "+" : "-") + reward.standing;
-            //            break;
-            //        case TaskReward.TaskRewardType.Experience:
-            //            GameObject currentRewardExperienceElement = Instantiate(taskUI.statRewardPrefab, currentRewardHorizontal);
-            //            currentRewardExperienceElement.SetActive(true);
-            //            StatRewardView expStatRewardView = currentRewardExperienceElement.GetComponent<StatRewardView>();
-            //            expStatRewardView.icon.sprite = HideoutController.experienceSprite;
-            //            expStatRewardView.detailText.text = (reward.experience > 0 ? "+" : "-") + reward.experience;
-            //            break;
-            //        case TaskReward.TaskRewardType.AssortmentUnlock:
-            //            foreach (string unlockReward in reward.itemIDs)
-            //            {
-            //                if (currentRewardHorizontal.childCount == 2)
-            //                {
-            //                    currentRewardHorizontal = Instantiate(taskUI.rewardsHorizontalParent, taskUI.rewardsParent).transform;
-            //                    currentRewardHorizontal.gameObject.SetActive(true);
-            //                }
-            //                GameObject currentRewardAssortElement = Instantiate(taskUI.itemRewardPrefab, currentRewardHorizontal);
-            //                currentRewardAssortElement.SetActive(true);
-            //                ItemRewardView unlockItemRewardView = currentRewardAssortElement.GetComponent<ItemRewardView>();
-            //                if (Mod.itemIcons.ContainsKey(unlockReward))
-            //                {
-            //                    unlockItemRewardView.icon.sprite = Mod.itemIcons[unlockReward];
-            //                }
-            //                else
-            //                {
-            //                    AnvilManager.Run(Mod.SetVanillaIcon(unlockReward, unlockItemRewardView.icon));
-            //                }
-            //                unlockItemRewardView.count.gameObject.SetActive(false);
-            //                string assortRewardName = Mod.itemNames[unlockReward];
-            //                unlockItemRewardView.itemName.text = assortRewardName;
-            //                unlockItemRewardView.unlockIcon.SetActive(true);
-            //            }
-            //            break;
-            //        default:
-            //            break;
-            //    }
-            //}
-            // TODO: Maybe have fail conditions and fail rewards sections
-
-            // Set total progress depending on conditions
-            float fractionCompletion = ((float)completedCount) / totalCount;
-            taskUI.percentage.text = String.Format("{0:0}%", fractionCompletion * 100);
-            taskUI.barFill.sizeDelta = new Vector2(fractionCompletion * 60, 6);
-
-            // Add to UI lists
-            tasks.Add(taskUI);
-            taskByID.Add(task.ID, taskUI);
+            // Set task UI
+            task.marketUI.SetTask(task);
         }
 
         public void UpdateTaskListHeight()

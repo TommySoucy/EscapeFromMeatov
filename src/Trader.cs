@@ -428,6 +428,11 @@ namespace EFM
         {
             return !Mod.IDDescribedInList(itemData.H3ID, new List<string>(itemData.parents), new List<string>(buyCategories), new List<string>(buyBlacklist));
         }
+
+        public bool ItemInsureable(MeatovItemData itemData)
+        {
+            return insuranceAvailable && !Mod.IDDescribedInList(itemData.H3ID, new List<string>(itemData.parents), new List<string>() { Mod.itemParentID }, new List<string>(insuranceExcluded));
+        }
     }
 
     public class LoyaltyLevel

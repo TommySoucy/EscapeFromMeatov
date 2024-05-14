@@ -21,6 +21,7 @@ namespace EFM
         public const string pluginVersion = "1.0.0";
 
         // Constants
+        public static readonly string itemParentID = "54009119af1c881c07000029";
         public static readonly float headshotDamageMultiplier = 1.2f;
         public static readonly float handDamageResist = 0.5f;
         //public static readonly float[] sizeVolumes = { 1, 2, 5, 30, 0, 50}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig

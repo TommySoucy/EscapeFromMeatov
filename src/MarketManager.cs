@@ -99,7 +99,6 @@ namespace EFM
         public int currentTotalSellingPrice = 0;
         public int currentTotalInsurePrice = 0;
 
-        private bool initButtonsSet;
         public bool choosingBuyAmount;
         public bool choosingRagfairBuyAmount;
         public bool startedChoosingThisFrame;
@@ -711,7 +710,7 @@ namespace EFM
                 Destroy(currentFirstChild.gameObject);
             }
             Mod.LogInfo("0");
-            // Add all of that trader's available and active tasks to the list
+            // Add all of this trader's available, active, and complete tasks to the list
             foreach (Task task in trader.tasks)
             {
                 Mod.LogInfo("Check if can add task " + task.name + " to task list, its state is: " + task.taskState);
@@ -727,291 +726,88 @@ namespace EFM
                 }
             }
             Mod.LogInfo("0");
-            // Setup hoverscrolls
-            if (!initButtonsSet)
-            {
-                HoverScroll newTaskDownHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(2).gameObject.AddComponent<HoverScroll>();
-                HoverScroll newTaskUpHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(3).gameObject.AddComponent<HoverScroll>();
-                newTaskDownHoverScroll.MaxPointingRange = 30;
-                newTaskDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                newTaskDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
-                newTaskDownHoverScroll.other = newTaskUpHoverScroll;
-                newTaskDownHoverScroll.up = false;
-                newTaskUpHoverScroll.MaxPointingRange = 30;
-                newTaskUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                newTaskUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
-                newTaskUpHoverScroll.other = newTaskDownHoverScroll;
-                newTaskUpHoverScroll.up = true;
-            }
-            HoverScroll downTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<HoverScroll>();
-            HoverScroll upTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(3).GetComponent<HoverScroll>();
-            if (taskListHeight > 145)
-            {
-                downTaskHoverScroll.rate = 145 / (taskListHeight - 145);
-                upTaskHoverScroll.rate = 145 / (taskListHeight - 145);
-                downTaskHoverScroll.gameObject.SetActive(true);
-                upTaskHoverScroll.gameObject.SetActive(false);
-            }
-            else
-            {
-                downTaskHoverScroll.gameObject.SetActive(false);
-                upTaskHoverScroll.gameObject.SetActive(false);
-            }
-            Mod.LogInfo("0");
 
             // Insure
-            Transform insureHorizontalsParent = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-            GameObject insureHorizontalCopy = insureHorizontalsParent.GetChild(0).gameObject;
-            float insureShowCaseHeight = 3; // Top padding
-            Mod.LogInfo("0");
-            // Clear previous horizontals
-            while (insureHorizontalsParent.childCount > 1)
+            while (insureShowcaseContent.childCount > 1)
             {
-                Transform currentFirstChild = insureHorizontalsParent.GetChild(1);
+                Transform currentFirstChild = insureShowcaseContent.GetChild(1);
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
-            Mod.LogInfo("0");
-            // Deactivate deal button by default
-            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
-            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
-            if ((bool)Mod.traderBaseDB[trader.index]["insurance"]["availability"])
+
+            Mod.LogInfo("Adding all item in volume to insure showcase");
+            // Add all items in trade volume that are insureable at this trader to showcase
+            int totalInsurePrice = 0;
+            insureDealButton.SetActive(false);
+
+            if (trader.insuranceAvailable)
             {
-                Mod.LogInfo("insurance available");
-                // Add all items in trade volume that are insureable at this trader to showcase
-                int totalInsurePrice = 0;
-                if (insureItemShowcaseElements == null)
+                foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
                 {
-                    insureItemShowcaseElements = new Dictionary<string, GameObject>();
-                }
-                else
-                {
-                    insureItemShowcaseElements.Clear();
-                }
-                foreach (Transform itemTransform in this.tradeVolume.itemsRoot)
-                {
-                    Mod.LogInfo("processing item " + itemTransform.name);
-                    MeatovItem CIW = itemTransform.GetComponent<MeatovItem>();
-                    List<MarketItemView> itemViewListToUse = null;
-                    string itemID;
-                    int itemInsureValue;
-                    bool custom = false;
-                    itemViewListToUse = CIW.marketItemViews;
-
-                    itemID = CIW.H3ID;
-                    custom = true;
-
-                    itemInsureValue = (int)Mathf.Max(CIW.GetInsuranceValue() * trader.insuranceRate, 1);
-
-                    if (CIW.insured || !trader.ItemInsureable(itemID, CIW.parents))
+                    for (int i = 0; i < volumeItemEntry.Value.Count; ++i)
                     {
-                        continue;
-                    }
+                        Mod.LogInfo("\tAdding item from volume: " + volumeItemEntry.Value[i].name);
+                        MeatovItem meatovItem = volumeItemEntry.Value[i];
 
-
-                    Mod.LogInfo("1");
-                    if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
-                    {
-                        Mod.LogInfo("2");
-                        Transform currentItemIcon = insureItemShowcaseElements[itemID].transform;
-                        Mod.LogInfo("2");
-                        MarketItemView marketItemView = currentItemIcon.GetComponent<MarketItemView>();
-                        Mod.LogInfo("2");
-                        int actualInsureValue = Mod.traders[currentTraderIndex].currency == 0 ? itemInsureValue : (int)Mathf.Max(itemInsureValue * 0.008f, 1);
-                        Mod.LogInfo("2");
-                        marketItemView.insureValue = marketItemView.insureValue + actualInsureValue;
-                        Mod.LogInfo("2");
-                        if (marketItemView.custom)
+                        // Check if this item can be insured by this trader
+                        if (meatovItem.insured || !trader.ItemInsureable(meatovItem.itemData))
                         {
-                            Mod.LogInfo("3");
-                            marketItemView.MI.Add(CIW);
-                            Mod.LogInfo("3");
-                            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
-                            Mod.LogInfo("3");
+                            continue;
                         }
-                        Mod.LogInfo("2");
-                        currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
-                        Mod.LogInfo("2");
-                        currentTotalInsurePrice += actualInsureValue;
 
-                        // Setup itemIcon
-                        ItemIcon currentItemIconScript = currentItemIcon.GetComponent<ItemIcon>();
-                        currentItemIconScript.isPhysical = false;
-                        currentItemIconScript.itemID = itemID;
-                        currentItemIconScript.itemName = Mod.itemNames[itemID];
-                        currentItemIconScript.description = Mod.itemDescriptions[itemID];
-                        currentItemIconScript.weight = Mod.itemWeights[itemID];
-                        currentItemIconScript.volume = Mod.itemVolumes[itemID];
-                    }
-                    else
-                    {
-                        Mod.LogInfo("5");
-                        Transform currentHorizontal = insureHorizontalsParent.GetChild(insureHorizontalsParent.childCount - 1);
-                        Mod.LogInfo("5");
-                        if (insureHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
+                        // Manage rows
+                        Transform currentRow = insureShowcaseContent.GetChild(insureShowcaseContent.childCount - 1);
+                        if (insureShowcaseContent.childCount == 1 || currentRow.childCount == 7) // If dont even have a single horizontal yet, add it
                         {
-                            currentHorizontal = GameObject.Instantiate(insureHorizontalCopy, insureHorizontalsParent).transform;
-                            currentHorizontal.gameObject.SetActive(true);
+                            currentRow = GameObject.Instantiate(insureShowcaseRowPrefab, insureShowcaseContent).transform;
+                            currentRow.gameObject.SetActive(true);
                         }
-                        else if (currentHorizontal.childCount == 7)
+
+                        GameObject currentItemView = GameObject.Instantiate(insureShowcaseItemViewPrefab, currentRow);
+                        currentItemView.SetActive(true);
+
+                        // Setup ItemView
+                        ItemView itemView = currentItemView.GetComponent<ItemView>();
+                        int actualValue = meatovItem.itemData.value;
+
+                        // Apply exchange rate if necessary
+                        if (trader.currency == 1)
                         {
-                            currentHorizontal = GameObject.Instantiate(insureHorizontalCopy, insureHorizontalsParent).transform;
-                            currentHorizontal.gameObject.SetActive(true);
-                            insureShowCaseHeight += 24; // horizontal
+                            actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
                         }
-                        Mod.LogInfo("5");
-
-                        Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
-
-                        // Setup itemIcon
-                        ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
-                        currentItemIconScript.isPhysical = true;
-                        currentItemIconScript.isCustom = custom;
-                        currentItemIconScript.MI = CIW;
-
-                        currentItemIcon.gameObject.SetActive(true);
-                        Mod.LogInfo("5");
-                        insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
-                        if (Mod.itemIcons.ContainsKey(itemID))
+                        else if (trader.currency == 2)
                         {
-                            currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
+                            actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
                         }
-                        else
-                        {
-                            AnvilManager.Run(Mod.SetVanillaIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>()));
-                        }
-                        MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
-                        marketItemView.custom = custom;
-                        marketItemView.MI = new List<MeatovItem>() { CIW };
 
-                        Mod.LogInfo("5");
-                        // Write price to item icon and set correct currency icon
-                        Sprite currencySprite = null;
-                        if (trader.currency == 0)
-                        {
-                            currencySprite = HideoutController.roubleCurrencySprite;
-                        }
-                        else if (trader.currency == 1)
-                        {
-                            currencySprite = HideoutController.dollarCurrencySprite;
-                            itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
-                        }
-                        Mod.LogInfo("5");
-                        marketItemView.insureValue = itemInsureValue;
-                        totalInsurePrice += itemInsureValue;
-                        currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
-                        currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemInsureValue.ToString();
+                        // Apply trader insure coefficient
+                        actualValue -= (int)(actualValue * (trader.levels[trader.level].insurancePriceCoef / 100.0f));
+                        actualValue = Mathf.Max(actualValue, 1);
 
-                        Mod.LogInfo("5");
-                        //// Setup button
-                        //EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
-                        //pointableButton.SetButton();
-                        //pointableButton.Button.onClick.AddListener(() => { OnInsureItemClick(currentItemIcon, itemValue, currencyItemID); });
-                        //pointableButton.MaxPointingRange = 20;
-                        //pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
+                        totalInsurePrice += actualValue;
 
-                        // Add the icon object to the list for that item
-                        CIW.marketItemViews.Add(marketItemView);
-                        Mod.LogInfo("5");
+                        itemView.SetItem(meatovItem, true, trader.currency, actualValue);
+
+                        // Set the itemView for that item
+                        meatovItem.marketInsureItemView = itemView;
                     }
                 }
-                string currencyItemID = "";
-                if (Mod.traders[currentTraderIndex].currency == 0)
-                {
-                    currencyItemID = "203";
-                }
-                else if (Mod.traders[currentTraderIndex].currency == 1)
-                {
-                    currencyItemID = "201";
-                }
-                // Activate deal button
-                if (tradeVolumeInventory.ContainsKey(currencyItemID) && tradeVolumeInventory[currencyItemID] >= currentTotalInsurePrice)
-                {
-                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
-                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
-                }
-                else
-                {
-                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
-                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
-                }
-                // Setup insure price display
-                Mod.LogInfo("1");
-                string insurePriceItemID = "203";
-                string insurePriceItemName = "Rouble";
-                if (trader.currency == 0)
-                {
-                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames["203"];
-                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons["203"];
-                }
-                else if (trader.currency == 1)
-                {
-                    insurePriceItemID = "201";
-                    insurePriceItemName = Mod.itemNames["201"];
-                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames["201"];
-                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons["201"];
-                }
-                ItemIcon traderInsurePriceItemIcon = traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<ItemIcon>();
-                if (traderInsurePriceItemIcon == null)
-                {
-                    traderInsurePriceItemIcon = traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).gameObject.AddComponent<ItemIcon>();
-                    traderInsurePriceItemIcon.itemID = insurePriceItemID;
-                    traderInsurePriceItemIcon.itemName = insurePriceItemName;
-                    traderInsurePriceItemIcon.description = Mod.itemDescriptions[insurePriceItemID];
-                    traderInsurePriceItemIcon.weight = Mod.itemWeights[insurePriceItemID];
-                    traderInsurePriceItemIcon.volume = Mod.itemVolumes[insurePriceItemID];
-                }
-                Mod.LogInfo("1");
-                traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = totalInsurePrice.ToString();
-                currentTotalInsurePrice = totalInsurePrice;
-                Mod.LogInfo("1");
-                // Setup button
-                if (!initButtonsSet)
-                {
-                    PointableButton pointableInsureDealButton = traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).gameObject.AddComponent<PointableButton>();
-                    pointableInsureDealButton.SetButton();
-                    pointableInsureDealButton.Button.onClick.AddListener(() => { OnInsureDealClick(); });
-                    pointableInsureDealButton.MaxPointingRange = 20;
-                    pointableInsureDealButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-
-                    // Setup hoverscrolls
-                    HoverScroll newInsureDownHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).gameObject.AddComponent<HoverScroll>();
-                    HoverScroll newInsureUpHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).gameObject.AddComponent<HoverScroll>();
-                    newInsureDownHoverScroll.MaxPointingRange = 30;
-                    newInsureDownHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                    newInsureDownHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
-                    newInsureDownHoverScroll.other = newInsureUpHoverScroll;
-                    newInsureDownHoverScroll.up = false;
-                    newInsureUpHoverScroll.MaxPointingRange = 30;
-                    newInsureUpHoverScroll.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-                    newInsureUpHoverScroll.scrollbar = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetComponent<Scrollbar>();
-                    newInsureUpHoverScroll.other = newInsureDownHoverScroll;
-                    newInsureUpHoverScroll.up = true;
-                }
-                Mod.LogInfo("1");
-                HoverScroll downInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
-                HoverScroll upInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
-                if (insureShowCaseHeight > 150)
-                {
-                    downInsureHoverScroll.rate = 150 / (insureShowCaseHeight - 150);
-                    upInsureHoverScroll.rate = 150 / (insureShowCaseHeight - 150);
-                    downInsureHoverScroll.gameObject.SetActive(true);
-                    upInsureHoverScroll.gameObject.SetActive(false);
-                }
-                else
-                {
-                    downInsureHoverScroll.gameObject.SetActive(false);
-                    upInsureHoverScroll.gameObject.SetActive(false);
-                }
-                Mod.LogInfo("1");
             }
-            else
+
+            // Activate deal button if necessary
+            if (totalInsurePrice > 0)
             {
-                insureItemShowcaseElements = null;
+                insureDealButton.SetActive(true);
             }
 
             Mod.LogInfo("0");
-            initButtonsSet = true;
+            // Setup insure price display
+            insureItemName.text = currencyItemData.name;
+            insureItemView.itemView.SetItemData(currencyItemData);
+            insureItemView.amount.text = totalInsurePrice.ToString();
+
+            Mod.LogInfo("0");
+            currentTotalInsurePrice = totalInsurePrice;
         }
 
         public void AddTask(Task task)
