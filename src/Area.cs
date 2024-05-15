@@ -45,6 +45,8 @@ namespace EFM
         public float upgradeTimeLeft; // Amount of seconds currently ongoing upgrade still has to go
         [NonSerialized]
         public List<Production> activeProductions = new List<Production>();
+        [NonSerialized]
+        public bool init;
 
         // Power
         public bool requiresPower;
@@ -140,6 +142,8 @@ namespace EFM
                 }
                 previousPowered = true;
             }
+
+            init = true;
         }
 
         public void LoadStaticData()
@@ -159,7 +163,7 @@ namespace EFM
             bonusesPerLevel = new Bonus[levels.Length][];
             productionsPerLevel = new List<List<Production>>();
             productionsByID = new Dictionary<string, Production>();
-            productionsByProductID = new Dictionary<string, Production>();
+            productionsByProductID = new Dictionary<string, List<Production>>();
             for (int i=0; i < levels.Length; ++i)
             {
                 productionsPerLevel.Add(new List<Production>());

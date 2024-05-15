@@ -2,12 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
-using static Valve.VR.SteamVR_TrackedObject;
 
 namespace EFM
 {
@@ -288,7 +287,7 @@ namespace EFM
                 {
                     // Autosave before starting the raid
                     Mod.saveSlotIndex = 5;
-                    SaveBase();
+                    Save();
 
                     // Reset player stats if scav raid
                     if (Mod.chosenCharIndex == 1)
@@ -1269,12 +1268,12 @@ namespace EFM
                 Mod.level = (int)loadedData["level"];
                 Mod.experience = (int)loadedData["experience"];
                 Mod.health = loadedData["health"].ToObject<float[]>();
+                Mod.currentHealthRates = loadedData["healthRates"].ToObject<float[]>();
+                Mod.currentNonLethalHealthRates = loadedData["nonLethalHealthRates"].ToObject<float[]>();
                 for (int i = 0; i < Mod.health.Length; ++i)
                 {
                     Mod.health[i] += Mathf.Min(Mod.currentHealthRates[i] * minutesSinceSave, Mod.currentMaxHealth[i]);
                 }
-                Mod.currentHealthRates = loadedData["healthRates"].ToObject<float[]>();
-                Mod.currentNonLethalHealthRates = loadedData["nonLethalHealthRates"].ToObject<float[]>();
                 Mod.currentMaxHealth = loadedData["maxHealth"].ToObject<float[]>();
                 Mod.currentMaxHydration = (float)loadedData["maxHydration"];
                 Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.defaultMaxHydration);
@@ -1307,7 +1306,6 @@ namespace EFM
                 }
 
                 // Player items
-                TODO: // Load player Items
                 if (Mod.playerInventory == null)
                 {
                     Mod.playerInventory = new Dictionary<string, int>();
@@ -1315,6 +1313,8 @@ namespace EFM
                     Mod.playerFIRInventory = new Dictionary<string, int>();
                     Mod.playerFIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
                 }
+
+                TODO: // Load player Items
             }
             else if (Mod.justFinishedRaid)
             {
@@ -1362,38 +1362,6 @@ namespace EFM
             //TraderStatus.fenceRestockTimer = (float)loadedData["fenceRestockTimer"] - secondsSinceSave;
 
             scavTimer = (float)((long)loadedData["scavTimer"] - secondsSinceSave);
-
-            // Instantiate items
-            //Transform itemsRoot = transform.GetChild(2);
-            //JArray loadedItems = (JArray)loadedData["items"];
-            //for (int i = 0; i < loadedItems.Count; ++i)
-            //{
-            //    JToken item = loadedItems[i];
-
-            //    // If just finished raid as PMC, skip any items that are on player since we want to keep what player found in raid
-            //    if (Mod.justFinishedRaid && Mod.chosenCharIndex == 0 && ((item["PhysicalObject"]["equipSlot"] != null && (int)item["PhysicalObject"]["equipSlot"] != -1) || (int)item["PhysicalObject"]["heldMode"] != 0 || (int)item["PhysicalObject"]["m_quickBeltSlot"] != -1 || item["pocketSlotIndex"] != null || item["isRightShoulder"] != null))
-            //    {
-            //        continue;
-            //    }
-
-            //    LoadSavedItem(itemsRoot, item);
-            //}
-
-            //// Load scav return items
-            //if (loadedData["scavReturnItems"] != null)
-            //{
-            //    Transform scavReturnNodeParent = transform.GetChild(1).GetChild(25);
-            //    JArray loadedScavReturnItems = (JArray)loadedData["scavReturnItems"];
-            //    for (int i = 0; i < loadedScavReturnItems.Count; ++i)
-            //    {
-            //        if (loadedScavReturnItems[i] == null || loadedScavReturnItems[i].Type == JTokenType.Null)
-            //        {
-            //            continue;
-            //        }
-
-            //        LoadSavedItem(scavReturnNodeParent.GetChild(i), loadedScavReturnItems[i]);
-            //    }
-            //}
 
             // Check for insuredSets
             //if (Mod.insuredItems == null)
@@ -1456,6 +1424,18 @@ namespace EFM
             foreach (KeyValuePair<string, MeatovItemData> vanillaItemDataEntry in Mod.vanillaItemData)
             {
                 vanillaItemDataEntry.Value.InitCheckmarkData();
+            }
+
+            // Load areas
+            for(int i=0; i < areaController.areas.Length; ++i)
+            {
+                // Dont load area live data if they are not init yet, because that would mean they don't yet have static data
+                if (!areaController.areas[i].init)
+                {
+                    break;
+                }
+                areaController.areas[i].LoadLiveData();
+                areaController.areas[i].UI.Init();
             }
         }
 
@@ -3203,7 +3183,7 @@ namespace EFM
             Mod.saveSlotIndex = slotIndex;
             saveConfirmTexts[slotIndex].SetActive(true);
             saveConfirmTexts[slotIndex].AddComponent<TimedDisabler>();
-            SaveBase();
+            Save();
         }
 
         public void OnLoadClicked()
@@ -3577,233 +3557,52 @@ namespace EFM
             GM.CurrentPlayerBody.ConfigureQuickbelt(-2); // -2 in order to destroy the objects on belt as well
         }
 
-        private void SaveBase()
+        private void Save()
         {
-            Mod.LogInfo("Saving base");
+            Mod.LogInfo("Saving hideout");
 
             // Write time
-            loadedData["time"] = GetTimeSeconds();
+            loadedData["time"] = DateTime.UtcNow.Ticks;
 
             // Write player status
-            loadedData["health"] = JArray.FromObject(Mod.health);
-            loadedData["hydration"] = Mod.hydration;
-            loadedData["maxHydration"] = Mod.defaultMaxHydration;
-            loadedData["energy"] = Mod.energy;
-            loadedData["maxEnergy"] = Mod.defaultMaxEnergy;
-            loadedData["stamina"] = Mod.stamina;
-            loadedData["maxStamina"] = Mod.maxStamina;
-            loadedData["weight"] = Mod.weight;
             loadedData["level"] = Mod.level;
             loadedData["experience"] = Mod.experience;
+            loadedData["health"] = JArray.FromObject(Mod.health);
+            loadedData["healthRates"] = JArray.FromObject(Mod.currentHealthRates);
+            loadedData["nonLethalHealthRates"] = JArray.FromObject(Mod.currentHealthRates);
+            loadedData["maxHealth"] = JArray.FromObject(Mod.currentMaxHealth);
+            loadedData["maxHydration"] = Mod.defaultMaxHydration;
+            loadedData["hydration"] = Mod.hydration;
+            loadedData["maxEnergy"] = Mod.defaultMaxEnergy;
+            loadedData["energy"] = Mod.energy;
+            loadedData["maxStamina"] = Mod.maxStamina;
+            loadedData["weight"] = Mod.weight;
             loadedData["totalRaidCount"] = Mod.totalRaidCount;
             loadedData["runThroughRaidCount"] = Mod.runThroughRaidCount;
             loadedData["survivedRaidCount"] = Mod.survivedRaidCount;
             loadedData["MIARaidCount"] = Mod.MIARaidCount;
             loadedData["KIARaidCount"] = Mod.KIARaidCount;
             loadedData["failedRaidCount"] = Mod.failedRaidCount;
-            //loadedData["fenceRestockTimer"] = TraderStatus.fenceRestockTimer;
             loadedData["scavTimer"] = scavTimer;
 
             // Write skills
-            loadedData["skills"] = new JArray();
+            JArray skillData = new JArray();
             for (int i = 0; i < 64; ++i)
             {
-                ((JArray)loadedData["skills"]).Add(new JObject());
+                skillData.Add(new JObject());
                 loadedData["skills"][i]["progress"] = Mod.skills[i].progress;
-                loadedData["skills"][i]["currentProgress"] = Mod.skills[i].currentProgress;
             }
+            loadedData["skills"] = new JArray();
 
-            // Write areas
-            JArray savedAreas = new JArray();
-            loadedData["areas"] = savedAreas;
-            //for (int i = 0; i < baseAreaManagers.Count; ++i)
-            //{
-            //    JToken currentSavedArea = new JObject();
-            //    currentSavedArea["level"] = baseAreaManagers[i].level;
-            //    currentSavedArea["constructing"] = baseAreaManagers[i].constructing;
-            //    currentSavedArea["constructTimer"] = baseAreaManagers[i].constructionTimer;
-            //    if (baseAreaManagers[i].slotItems != null)
-            //    {
-            //        JArray slots = new JArray();
-            //        currentSavedArea["slots"] = slots;
-            //        foreach (GameObject slotItem in baseAreaManagers[i].slotItems)
-            //        {
-            //            if (slotItem == null)
-            //            {
-            //                slots.Add(null);
-            //            }
-            //            else
-            //            {
-            //                SaveItem(slots, slotItem.transform);
-            //            }
-            //        }
-            //    }
-            //    if (baseAreaManagers[i].activeProductions != null)
-            //    {
-            //        currentSavedArea["productions"] = new JObject();
+            TODO: // Save player items (Checkout SaveItem method, where we already had stuff to handle if something was saved in hand for example)
 
-            //        foreach (KeyValuePair<string, AreaProduction> production in baseAreaManagers[i].activeProductions)
-            //        {
-            //            JObject currentProduction = new JObject();
-            //            currentProduction["timeLeft"] = production.Value.timeLeft;
-            //            currentProduction["productionCount"] = production.Value.productionCount;
-            //            currentProduction["count"] = production.Value.count;
+            TODO1: // Save hideout items (This includes area volumes and slots)
 
-            //            currentSavedArea["productions"][production.Value.ID] = currentProduction;
-            //        }
-            //    }
-            //    else if (baseAreaManagers[i].activeScavCaseProductions != null)
-            //    {
-            //        currentSavedArea["productions"] = new JArray();
+            TODO2: // Save scav return items
 
-            //        foreach (EFM_ScavCaseProduction production in baseAreaManagers[i].activeScavCaseProductions)
-            //        {
-            //            JObject currentProduction = new JObject();
-            //            currentProduction["timeLeft"] = production.timeLeft;
-            //            currentProduction["products"] = new JObject();
-            //            if (production.products.ContainsKey(Mod.ItemRarity.Common))
-            //            {
-            //                currentProduction["products"]["common"] = new JObject();
-            //                currentProduction["products"]["common"]["min"] = production.products[Mod.ItemRarity.Common].x;
-            //                currentProduction["products"]["common"]["max"] = production.products[Mod.ItemRarity.Common].y;
-            //            }
-            //            if (production.products.ContainsKey(Mod.ItemRarity.Rare))
-            //            {
-            //                currentProduction["products"]["rare"] = new JObject();
-            //                currentProduction["products"]["rare"]["min"] = production.products[Mod.ItemRarity.Rare].x;
-            //                currentProduction["products"]["rare"]["max"] = production.products[Mod.ItemRarity.Rare].y;
-            //            }
-            //            if (production.products.ContainsKey(Mod.ItemRarity.Superrare))
-            //            {
-            //                currentProduction["products"]["superrare"] = new JObject();
-            //                currentProduction["products"]["superrare"]["min"] = production.products[Mod.ItemRarity.Superrare].x;
-            //                currentProduction["products"]["superrare"]["max"] = production.products[Mod.ItemRarity.Superrare].y;
-            //            }
+            TODO3: // Save areas
 
-            //            (currentSavedArea["productions"] as JArray).Add(currentProduction);
-            //        }
-            //    }
-            //    savedAreas.Add(currentSavedArea);
-            //}
-
-            // Save trader statuses
-            JArray savedTraderStatuses = new JArray();
-            loadedData["traderStatuses"] = savedTraderStatuses;
-            for (int i = 0; i < 8; ++i)
-            {
-                JToken currentSavedTraderStatus = new JObject();
-                //currentSavedTraderStatus["id"] = Mod.traderStatuses[i].id;
-                //currentSavedTraderStatus["salesSum"] = Mod.traderStatuses[i].salesSum;
-                //currentSavedTraderStatus["standing"] = Mod.traderStatuses[i].standing;
-                //currentSavedTraderStatus["unlocked"] = Mod.traderStatuses[i].unlocked;
-
-                // Save tasks
-                // TODO: This saves literally all saveable data for tasks their conditions, and the conditions counters
-                // We could ommit tasks that dont have any data to save, like the ones that are still locked
-                // This makes trader init slower but would save on space. Check if necessary
-                currentSavedTraderStatus["tasks"] = new JObject();
-                //foreach (TraderTask traderTask in Mod.traderStatuses[i].tasks)
-                //{
-                //    JObject taskSaveData = new JObject();
-                //    currentSavedTraderStatus["tasks"][traderTask.ID] = taskSaveData;
-                //    taskSaveData["state"] = traderTask.taskState.ToString();
-                //    taskSaveData["conditions"] = new JObject();
-                //    foreach (TraderTaskCondition traderTaskCondition in traderTask.completionConditions)
-                //    {
-                //        JObject conditionSaveData = new JObject();
-                //        taskSaveData["conditions"][traderTaskCondition.ID] = conditionSaveData;
-                //        conditionSaveData["fulfilled"] = traderTaskCondition.fulfilled;
-                //        conditionSaveData["itemCount"] = traderTaskCondition.itemCount;
-                //        if (traderTaskCondition.counters != null)
-                //        {
-                //            conditionSaveData["counters"] = new JObject();
-                //            foreach (TraderTaskCounterCondition traderTaskCounterCondition in traderTaskCondition.counters)
-                //            {
-                //                JObject counterConditionSaveData = new JObject();
-                //                conditionSaveData["counters"][traderTaskCounterCondition.ID] = counterConditionSaveData;
-                //                counterConditionSaveData["killCount"] = traderTaskCounterCondition.killCount;
-                //                counterConditionSaveData["shotCount"] = traderTaskCounterCondition.shotCount;
-                //                counterConditionSaveData["completed"] = traderTaskCounterCondition.completed;
-                //            }
-                //        }
-                //    }
-                //}
-
-                //currentSavedTraderStatus["itemsToWaitForUnlock"] = JArray.FromObject(Mod.traderStatuses[i].itemsToWaitForUnlock);
-
-                savedTraderStatuses.Add(currentSavedTraderStatus);
-            }
-
-            // Reset save data item list
-            JArray saveItems = new JArray();
-            loadedData["items"] = saveItems;
-
-            // Reset save data item list
-            JArray scavSaveItems = new JArray();
-            loadedData["scavReturnItems"] = scavSaveItems;
-
-            // Save loose items
-            Transform itemsRoot = transform.GetChild(2);
-            for (int i = 0; i < itemsRoot.childCount; ++i)
-            {
-                SaveItem(saveItems, itemsRoot.GetChild(i));
-            }
-
-            // Save trade volume items
-            //for (int i = 0; i < marketManager.tradeVolume.itemsRoot.childCount; ++i)
-            //{
-            //    SaveItem(saveItems, marketManager.tradeVolume.itemsRoot.GetChild(i));
-            //}
-
-            // Save items in hands
-            FVRViveHand rightHand = GM.CurrentPlayerBody.RightHand.GetComponentInChildren<FVRViveHand>();
-            FVRViveHand leftHand = GM.CurrentPlayerBody.LeftHand.GetComponentInChildren<FVRViveHand>();
-            if (rightHand.CurrentInteractable != null)
-            {
-                SaveItem(saveItems, rightHand.CurrentInteractable.transform, rightHand);
-            }
-            if (leftHand.CurrentInteractable != null)
-            {
-                SaveItem(saveItems, leftHand.CurrentInteractable.transform, leftHand);
-            }
-
-            // Save equipment
-            foreach (EquipmentSlot equipSlot in StatusUI.instance.equipmentSlots)
-            {
-                if (equipSlot.CurObject != null)
-                {
-                    SaveItem(saveItems, equipSlot.CurObject.transform);
-                }
-            }
-
-            // Save pockets
-            foreach (FVRQuickBeltSlot pocketSlot in Mod.pocketSlots)
-            {
-                if (pocketSlot.CurObject != null)
-                {
-                    SaveItem(saveItems, pocketSlot.CurObject.transform);
-                }
-            }
-
-            // Save right shoulder
-            if (Mod.rightShoulderObject != null)
-            {
-                SaveItem(saveItems, Mod.rightShoulderObject.transform);
-            }
-
-            // Save scav raid return nodes
-            Transform scavReturnNodeParent = transform.GetChild(1).GetChild(25);
-            for (int i = 0; i < 15; ++i)
-            {
-                if (scavReturnNodeParent.GetChild(i).childCount > 0)
-                {
-                    SaveItem(scavSaveItems, scavReturnNodeParent.GetChild(i).GetChild(0));
-                }
-                else
-                {
-                    scavSaveItems.Add(null);
-                }
-            }
+            TODO4: // Save traders
 
             // Save insuredSets
             //Mod.insuredItems = new List<InsuredSet>();
@@ -3830,7 +3629,7 @@ namespace EFM
             }
 
             SaveDataToFile();
-            Mod.LogInfo("Saved base");
+            Mod.LogInfo("Saved hideout");
             UpdateLoadButtonList();
         }
 
@@ -4346,7 +4145,7 @@ namespace EFM
 
             // Save the base
             Mod.saveSlotIndex = 5;
-            SaveBase();
+            Save();
         }
 
         private void SaveDataToFile()

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
+using static RootMotion.FinalIK.GrounderQuadruped;
 
 namespace EFM
 {
@@ -232,7 +233,7 @@ namespace EFM
 		public Transform configurationRoot;
 		public List<RigSlot> rigSlots;
         [NonSerialized]
-		private int activeSlotsSetIndex;
+		private int activeSlotsSetIndex; // The index of the rigSlots in Mod.looseRigSlots when the rig is open
 
         // Backpacks, Containers, Pouches
         [Header("Containers")]
@@ -2441,7 +2442,7 @@ namespace EFM
             // Store ID, from which we can get all static data about this item
             serialized["H3ID"] = H3ID;
 
-            // Store live state
+            // Store live data
             serialized["insured"] = insured;
             serialized["looted"] = looted;
             serialized["foundInRaid"] = foundInRaid;
@@ -2495,7 +2496,12 @@ namespace EFM
                             if (containerChild.Value[i] != null)
                             {
                                 JObject serializedChild = containerChild.Value[i].Serialize();
-                                serializedChild["slotIndex"] = i;
+                                serializedChild["posX"] = containerChild.Value[i].transform.localPosition.x;
+                                serializedChild["posY"] = containerChild.Value[i].transform.localPosition.y;
+                                serializedChild["posZ"] = containerChild.Value[i].transform.localPosition.z;
+                                serializedChild["rotX"] = containerChild.Value[i].transform.localRotation.eulerAngles.x;
+                                serializedChild["rotY"] = containerChild.Value[i].transform.localRotation.eulerAngles.y;
+                                serializedChild["rotZ"] = containerChild.Value[i].transform.localRotation.eulerAngles.z;
                                 serializedChildren.Add(serializedChild);
                             }
                         }
@@ -2508,11 +2514,214 @@ namespace EFM
                 VaultFile vaultFile = new VaultFile();
                 VaultSystem.ScanObjectToVaultFile(vaultFile, physObj);
                 serialized["vanillaData"] = JObject.FromObject(vaultFile);
+                // Store all live meatov item data necessary for vanilla items in the entire hierarchy of this item, including this item's
+                serialized["vanillaCustomData"] = GetAllSerializedVanillaCustomData(); 
             }
             serialized["children"] = serializedChildren;
 
             return serialized;
-            integreate thissave system and make load system
+        }
+
+        public JObject GetAllSerializedVanillaCustomData()
+        {
+            JObject serialized = GetSerializedVanillaCustomData();
+            JArray children = new JArray();
+            List<FVRPhysicalObject> objs = physObj.GetContainedObjectsRecursively();
+            for(int i=0; i < objs.Count; ++i)
+            {
+                MeatovItem childItem = objs[i].GetComponent<MeatovItem>();
+                if(childItem != null)
+                {
+                    children.Add(childItem.GetSerializedVanillaCustomData());
+                }
+            }
+            serialized["children"] = children;
+
+            return serialized;
+        }
+
+        public JObject GetSerializedVanillaCustomData()
+        {
+            JObject serialized = new JObject();
+
+            serialized["insured"] = insured;
+            serialized["looted"] = looted;
+            serialized["foundInRaid"] = foundInRaid;
+
+            return serialized;
+        }
+
+        public static MeatovItem Deserialize(JToken serialized, VaultSystem.ReturnObjectListDelegate del = null)
+        {
+            if(serialized["H3ID"] == null)
+            {
+                Mod.LogError("Attempted to deserialize item but data missing H3ID property");
+                return null;
+            }
+
+            if (Mod.GetItemData(serialized["H3ID"].ToString(), out MeatovItemData itemData))
+            {
+                if(itemData.index == -1)
+                {
+                    VaultFile loadedVanillaData = serialized["vanillaData"].ToObject<VaultFile>();
+                    VaultSystem.SpawnVaultFile(loadedVanillaData, null, false, false, false, out string error, Vector3.zero, del, false);
+
+                    return null;
+                }
+                else
+                {
+                    GameObject itemPrefab = Mod.GetItemPrefab(itemData.index);
+                    GameObject itemInstance = Instantiate(itemPrefab);
+                    MeatovItem item = itemInstance.GetComponent<MeatovItem>();
+
+                    item.insured = (bool)serialized["insured"];
+                    item.looted = (bool)serialized["looted"];
+                    item.foundInRaid = (bool)serialized["foundInRaid"];
+                    item.mode = (int)serialized["mode"];
+                    item.broken = (bool)serialized["broken"];
+                    item.armor = (float)serialized["armor"];
+                    item.open = (bool)serialized["open"];
+                    item.containingVolume = (int)serialized["containingVolume"];
+                    item.cartridge = serialized["cartridge"].ToString();
+                    item.roundClass = (FireArmRoundClass)(int)serialized["roundClass"];
+                    item.stack = (int)serialized["stack"];
+                    item.amount = (int)serialized["amount"];
+                    item.USEC = (bool)serialized["USEC"];
+                    item.dogtagLevel = (int)serialized["dogtagLevel"];
+                    item.dogtagName = serialized["dogtagName"].ToString();
+                    if (itemData.itemType == ItemType.AmmoBox)
+                    {
+                        JArray ammo = serialized["ammo"] as JArray;
+                        FVRFireArmMagazine asMag = item.physObj as FVRFireArmMagazine;
+                        for (int i = 0; i < ammo.Count; ++i)
+                        {
+                            asMag.AddRound((FireArmRoundClass)(int)ammo[i], false, true);
+                        }
+                    }
+
+                    // Process children
+                    JArray children = serialized["children"] as JArray;
+                    switch (itemData.itemType)
+                    {
+                        case ItemType.Rig:
+                        case ItemType.ArmoredRig:
+                            for (int i = 0; i < children.Count; ++i)
+                            {
+                                int slotIndex = (int)children[i]["slotIndex"];
+
+                                if (children[i]["vanillaCustomData"] == null)
+                                {
+                                    MeatovItem childItem = Deserialize(children[i]);
+                                    if (childItem != null)
+                                    {
+                                        childItem.physObj.SetQuickBeltSlot(item.rigSlots[slotIndex]);
+                                        childItem.UpdateInventories();
+                                    }
+                                }
+                                else
+                                {
+                                    // Make a delegate, in case the deserialized child item is vanilla, so we place it in the correct QBS once spawned
+                                    JToken vanillaCustomData = children[i]["vanillaCustomData"];
+                                    VaultSystem.ReturnObjectListDelegate delact = objs =>
+                                    {
+                                        // Here, assume objs[0] is the root item
+                                        MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                                        if (meatovItem != null)
+                                        {
+                                            objs[0].SetQuickBeltSlot(item.rigSlots[slotIndex]);
+                                            meatovItem.UpdateInventories();
+
+                                            // Set live data
+                                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+                                            for(int j=1; j < objs.Count; ++j)
+                                            {
+                                                MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
+                                                if(childMeatovItem != null)
+                                                {
+                                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][j-1]["insured"];
+                                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
+                                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
+                                                }
+                                            }
+                                        }
+                                    }; 
+                                    
+                                    Deserialize(children[i], delact);
+                                }
+                            }
+                            break;
+                        case ItemType.Backpack:
+                        case ItemType.Container:
+                        case ItemType.Pouch:
+                            for (int i = 0; i < children.Count; ++i)
+                            {
+                                Vector3 localPos = new Vector3((float)children[i]["posX"], (float)children[i]["posY"], (float)children[i]["posX"]);
+                                Quaternion localRot = Quaternion.Euler((float)children[i]["rotX"], (float)children[i]["rotY"], (float)children[i]["rotX"]);
+
+                                if(children[i]["vanillaCustomData"] == null)
+                                {
+                                    MeatovItem childItem = Deserialize(children[i]);
+                                    if (childItem != null)
+                                    {
+                                        item.containerVolume.AddItem(childItem);
+                                        childItem.UpdateInventories();
+                                        childItem.transform.localPosition = localPos;
+                                        childItem.transform.localRotation = localRot;
+                                    }
+                                }
+                                else
+                                {
+                                    // Make a delegate, in case the deserialized child item is vanilla, so we place it correctly in the container volume once spawned
+                                    JToken vanillaCustomData = children[i]["vanillaCustomData"];
+                                    VaultSystem.ReturnObjectListDelegate delact = objs =>
+                                    {
+                                        // Here, assume objs[0] is the root item
+                                        MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                                        if (meatovItem != null)
+                                        {
+                                            item.containerVolume.AddItem(meatovItem);
+                                            meatovItem.UpdateInventories();
+                                            objs[0].transform.localPosition = localPos;
+                                            objs[0].transform.localRotation = localRot;
+
+                                            // Set live data
+                                            meatovItem.insured = (bool)vanillaCustomData["insured"];
+                                            meatovItem.looted = (bool)vanillaCustomData["looted"];
+                                            meatovItem.foundInRaid = (bool)vanillaCustomData["foundInRaid"];
+                                            for (int j = 1; j < objs.Count; ++j)
+                                            {
+                                                MeatovItem childMeatovItem = objs[j].GetComponent<MeatovItem>();
+                                                if (childMeatovItem != null)
+                                                {
+                                                    childMeatovItem.insured = (bool)vanillaCustomData["children"][j - 1]["insured"];
+                                                    childMeatovItem.looted = (bool)vanillaCustomData["children"][j - 1]["looted"];
+                                                    childMeatovItem.foundInRaid = (bool)vanillaCustomData["children"][j - 1]["foundInRaid"];
+                                                }
+                                            }
+                                        }
+                                    };
+
+                                    Deserialize(children[i], delact);
+                                }
+                            }
+                            break;
+                    }
+
+                    return item;
+                }
+            }
+            else
+            {
+                Mod.LogError("Attempted to deserialize item but could not get item data for H3ID: "+ serialized["H3ID"].ToString());
+                return null;
+            }
+        }
+
+        public void DeserializationDelegateMethod(List<FVRPhysicalObject> objs, Action<List<FVRPhysicalObject>> action = null)
+        {
+
         }
 
         public void OnTransformParentChanged()
