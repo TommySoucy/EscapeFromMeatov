@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,6 +26,7 @@ namespace EFM
         // Objects
         public Transform spawn;
         public AreaController areaController;
+        public Transform scavReturnNode;
 
         // UI
         public Button loadButton;
@@ -1430,6 +1430,7 @@ namespace EFM
             for(int i=0; i < areaController.areas.Length; ++i)
             {
                 // Dont load area live data if they are not init yet, because that would mean they don't yet have static data
+                // They will load their live data themselves on start
                 if (!areaController.areas[i].init)
                 {
                     break;
@@ -3594,15 +3595,172 @@ namespace EFM
             }
             loadedData["skills"] = new JArray();
 
-            TODO: // Save player items (Checkout SaveItem method, where we already had stuff to handle if something was saved in hand for example)
+            // Save player items
+            // Hands
+            // Don't want to save as hand item if item has quickbeltslot, which would mean it is harnessed
+            JObject serializedItem = null;
+            if(Mod.leftHand.heldItem != null && Mod.leftHand.heldItem.physObj.QuickbeltSlot == null)
+            {
+                serializedItem = Mod.leftHand.heldItem.Serialize();
+            }
+            loadedData["leftHand"] = serializedItem;
+            serializedItem = null;
+            if (Mod.rightHand.heldItem != null && Mod.rightHand.heldItem.physObj.QuickbeltSlot == null)
+            {
+                serializedItem = Mod.rightHand.heldItem.Serialize();
+            }
+            loadedData["rightHand"] = serializedItem;
+            // Equipment
+            for(int i=0; i< StatusUI.instance.equipmentSlots.Length; ++i)
+            {
+                FVRPhysicalObject physObj = StatusUI.instance.equipmentSlots[0].CurObject;
+                if(physObj == null)
+                {
+                    serializedItem = null;
+                }
+                else
+                {
+                    MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+                    serializedItem = meatovItem == null ? null : meatovItem.Serialize();
+                }
+                loadedData["equipment"+i] = serializedItem;
+            }
+            // QBS
+            for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++i)
+            {
+                FVRPhysicalObject physObj = GM.CurrentPlayerBody.QBSlots_Internal[0].CurObject;
+                if (physObj == null)
+                {
+                    serializedItem = null;
+                }
+                else
+                {
+                    MeatovItem meatovItem = physObj.GetComponent<MeatovItem>();
+                    serializedItem = meatovItem == null ? null : meatovItem.Serialize();
+                }
+                loadedData["slot" + i] = serializedItem;
+            }
 
-            TODO1: // Save hideout items (This includes area volumes and slots)
+            // Save hideout items
+            // Loose items
+            JArray looseItems = new JArray();
+            foreach (KeyValuePair<string, List<MeatovItem>> entry in inventoryItems)
+            {
+                for(int i=0; i < entry.Value.Count; ++i)
+                {
+                    // Item considered loose if no parent, not in volume, and not in slot
+                    if (entry.Value[i].parent == null && entry.Value[i].parentVolume == null && entry.Value[i].physObj.QuickbeltSlot == null)
+                    {
+                        JObject serialized = entry.Value[i].Serialize();
+                        serialized["posX"] = entry.Value[i].transform.position.x;
+                        serialized["posY"] = entry.Value[i].transform.position.y;
+                        serialized["posZ"] = entry.Value[i].transform.position.z;
+                        serialized["rotX"] = entry.Value[i].transform.rotation.eulerAngles.x;
+                        serialized["rotY"] = entry.Value[i].transform.rotation.eulerAngles.y;
+                        serialized["rotZ"] = entry.Value[i].transform.rotation.eulerAngles.z;
+                        looseItems.Add(serialized);
+                    }
+                }
+            }
+            loadedData["hideout"]["looseItems"] = looseItems;
+            // Trade volume
+            JArray tradeVolumeItems = new JArray();
+            foreach (KeyValuePair<string, List<MeatovItem>> entry in marketManager.tradeVolume.inventoryItems)
+            {
+                for (int i = 0; i < entry.Value.Count; ++i)
+                {
+                    // Only want to serialize root item so only consider inventory items without parent
+                    if (entry.Value[i].parent == null)
+                    {
+                        JObject serialized = entry.Value[i].Serialize();
+                        serialized["posX"] = entry.Value[i].transform.localPosition.x;
+                        serialized["posY"] = entry.Value[i].transform.localPosition.y;
+                        serialized["posZ"] = entry.Value[i].transform.localPosition.z;
+                        serialized["rotX"] = entry.Value[i].transform.localRotation.eulerAngles.x;
+                        serialized["rotY"] = entry.Value[i].transform.localRotation.eulerAngles.y;
+                        serialized["rotZ"] = entry.Value[i].transform.localRotation.eulerAngles.z;
+                        tradeVolumeItems.Add(serialized);
+                    }
+                }
+            }
+            loadedData["hideout"]["tradeVolumeItems"] = looseItems;
+            // Area items
+            JArray areas = new JArray();
+            for(int i=0; i < areaController.areas.Length; ++i)
+            {
+                JObject area = new JObject();
+                // Levels
+                JArray areaLevels = new JArray();
+                // Volumes
+                for(int j=0; j < areaController.areas[i].areaVolumesPerLevel.Length; ++j)
+                {
+                    JObject level = new JObject();
+                    JArray volumes = new JArray();
+                    for(int k=0; k< areaController.areas[i].areaVolumesPerLevel[j].Length; ++j)
+                    {
+                        JArray areaVolumeItems = new JArray();
+                        foreach (KeyValuePair<string, List<MeatovItem>> entry in areaController.areas[i].areaVolumesPerLevel[j][k].inventoryItems)
+                        {
+                            for (int l = 0; l < entry.Value.Count; ++l)
+                            {
+                                // Only want to serialize root item so only consider inventory items without parent
+                                if (entry.Value[l].parent == null)
+                                {
+                                    JObject serialized = entry.Value[l].Serialize();
+                                    serialized["posX"] = entry.Value[l].transform.localPosition.x;
+                                    serialized["posY"] = entry.Value[l].transform.localPosition.y;
+                                    serialized["posZ"] = entry.Value[l].transform.localPosition.z;
+                                    serialized["rotX"] = entry.Value[l].transform.localRotation.eulerAngles.x;
+                                    serialized["rotY"] = entry.Value[l].transform.localRotation.eulerAngles.y;
+                                    serialized["rotZ"] = entry.Value[l].transform.localRotation.eulerAngles.z;
+                                    areaVolumeItems.Add(serialized);
+                                }
+                            }
+                        }
+                        volumes.Add(areaVolumeItems);
+                    }
+                    level["volumes"] = volumes;
+                    areaLevels.Add(level);
+                }
+                // Slots
+                for (int j = 0; j < areaController.areas[i].areaSlotsPerLevel.Length; ++j)
+                {
+                    JObject level = new JObject();
+                    JArray slots = new JArray();
+                    for (int k = 0; k < areaController.areas[i].areaSlotsPerLevel[j].Length; ++j)
+                    {
+                        JObject serialized = null;
+                        if (areaController.areas[i].areaSlotsPerLevel[j][k].CurObject != null)
+                        {
+                            MeatovItem meatovItem = areaController.areas[i].areaSlotsPerLevel[j][k].CurObject.GetComponent<MeatovItem>();
+                            serializedItem = meatovItem == null ? null : meatovItem.Serialize();
+                        }
+                        slots.Add(serialized);
+                    }
+                    level["slots"] = slots;
+                    areaLevels.Add(level);
+                }
+                area["levels"] = areaLevels;
+                areas.Add(area);
+            }
+            loadedData["hideout"]["areas"] = areas;
+            // Scav return items
+            JArray scavReturnItemArr = new JArray();
+            MeatovItem[] scavReturnItems = scavReturnNode.GetComponentsInChildren<MeatovItem>();
+            for(int i = 0; i < scavReturnItems.Length; ++i)
+            {
+                // Only want to serialize root item so only consider inventory items without parent
+                if (scavReturnItems[i].parent == null)
+                {
+                    scavReturnItemArr.Add(scavReturnItems[i].Serialize());
+                }
+            }
+            loadedData["hideout"]["scavReturnItems"] = scavReturnItemArr;
 
-            TODO2: // Save scav return items
+            TODO4: // Save traders
 
             TODO3: // Save areas
 
-            TODO4: // Save traders
 
             // Save insuredSets
             //Mod.insuredItems = new List<InsuredSet>();
@@ -3628,494 +3786,11 @@ namespace EFM
                 savedExperiencetriggers.Add(JArray.FromObject(Mod.triggeredExplorationTriggers[i]));
             }
 
+            loadedData["whishlist"] = JArray.FromObject(Mod.wishList);
+
             SaveDataToFile();
             Mod.LogInfo("Saved hideout");
             UpdateLoadButtonList();
-        }
-
-        private void SaveItem(JArray listToAddTo, Transform item, FVRViveHand hand = null, int quickBeltSlotIndex = -1)
-        {
-            if (item == null)
-            {
-                return;
-            }
-
-            JToken savedItem = new JObject();
-            savedItem["PhysicalObject"] = new JObject();
-            savedItem["PhysicalObject"]["ObjectWrapper"] = new JObject();
-
-            // Get correct item is held and set heldMode
-            FVRPhysicalObject itemPhysicalObject = null;
-            if (hand != null)
-            {
-                if (hand.CurrentInteractable is FVRAlternateGrip)
-                {
-                    // Make sure this item isn't the same as held in right hand because we dont want an item saved twice, and will prioritize right hand
-                    if (hand.IsThisTheRightHand || hand.CurrentInteractable != hand.OtherHand.CurrentInteractable)
-                    {
-                        itemPhysicalObject = (hand.CurrentInteractable as FVRAlternateGrip).PrimaryObject;
-                        savedItem["PhysicalObject"]["heldMode"] = hand.IsThisTheRightHand ? 1 : 2;
-                    }
-                    else
-                    {
-                        itemPhysicalObject = item.GetComponentInChildren<FVRPhysicalObject>();
-                        savedItem["PhysicalObject"]["heldMode"] = 0;
-                    }
-                }
-                else
-                {
-                    if (hand.IsThisTheRightHand || hand.CurrentInteractable != hand.OtherHand.CurrentInteractable)
-                    {
-                        itemPhysicalObject = hand.CurrentInteractable as FVRPhysicalObject;
-                        savedItem["PhysicalObject"]["heldMode"] = hand.IsThisTheRightHand ? 1 : 2;
-                    }
-                    else
-                    {
-                        itemPhysicalObject = item.GetComponentInChildren<FVRPhysicalObject>();
-                        savedItem["PhysicalObject"]["heldMode"] = 0;
-                    }
-                }
-            }
-            else
-            {
-                itemPhysicalObject = item.GetComponentInChildren<FVRPhysicalObject>();
-                savedItem["PhysicalObject"]["heldMode"] = 0;
-            }
-
-            // Fill PhysicalObject
-            savedItem["PhysicalObject"]["positionX"] = item.localPosition.x;
-            savedItem["PhysicalObject"]["positionY"] = item.localPosition.y;
-            savedItem["PhysicalObject"]["positionZ"] = item.localPosition.z;
-            savedItem["PhysicalObject"]["rotationX"] = item.localRotation.eulerAngles.x;
-            savedItem["PhysicalObject"]["rotationY"] = item.localRotation.eulerAngles.y;
-            savedItem["PhysicalObject"]["rotationZ"] = item.localRotation.eulerAngles.z;
-            savedItem["PhysicalObject"]["m_isSpawnLock"] = itemPhysicalObject.m_isSpawnLock;
-            savedItem["PhysicalObject"]["m_isHarnessed"] = itemPhysicalObject.m_isHardnessed;
-            savedItem["PhysicalObject"]["IsKinematicLocked"] = itemPhysicalObject.IsKinematicLocked;
-            savedItem["PhysicalObject"]["IsInWater"] = itemPhysicalObject.IsInWater;
-            SaveAttachments(itemPhysicalObject, savedItem["PhysicalObject"]);
-            savedItem["PhysicalObject"]["m_quickBeltSlot"] = quickBeltSlotIndex;
-
-            // Fill ObjectWrapper
-            FVRObject itemObjectWrapper = itemPhysicalObject.ObjectWrapper;
-            savedItem["PhysicalObject"]["ObjectWrapper"]["ItemID"] = itemObjectWrapper.ItemID;
-
-            // Check if in pocket
-            for (int i = 0; i < 4; ++i)
-            {
-                if (Mod.itemsInPocketSlots[i] != null && Mod.itemsInPocketSlots[i].gameObject.Equals(item.gameObject))
-                {
-                    savedItem["pocketSlotIndex"] = i;
-                    break;
-                }
-            }
-
-            // Check if in tradeVolume
-            if (item.parent != null && item.parent.parent != null && item.parent.parent.GetComponent<ContainmentVolume>() != null)
-            {
-                savedItem["inTradeVolume"] = true;
-            }
-
-            // Firearm
-            if (itemPhysicalObject is FVRFireArm)
-            {
-                Mod.LogInfo("Saving firearm: " + itemPhysicalObject.name);
-                FVRFireArm firearmPhysicalObject = itemPhysicalObject as FVRFireArm;
-
-                // Save flagDict by converting it into two lists of string, one for keys and one for values
-                Dictionary<string, string> flagDict = firearmPhysicalObject.GetFlagDic();
-                if (flagDict != null && flagDict.Count > 0)
-                {
-                    JToken saveFlagDict = new JObject();
-                    savedItem["PhysicalObject"]["flagDict"] = saveFlagDict;
-                    foreach (KeyValuePair<string, string> flagDictEntry in flagDict)
-                    {
-                        saveFlagDict[flagDictEntry.Key] = flagDictEntry.Value;
-                    }
-                }
-
-                // Chambers
-                if (firearmPhysicalObject.GetChamberRoundList() != null && firearmPhysicalObject.GetChamberRoundList().Count > 0)
-                {
-                    JArray saveLoadedRounds = new JArray();
-                    savedItem["PhysicalObject"]["loadedRoundsInChambers"] = saveLoadedRounds;
-                    foreach (FireArmRoundClass round in firearmPhysicalObject.GetChamberRoundList())
-                    {
-                        saveLoadedRounds.Add((int)round);
-                    }
-                }
-
-                // Magazine/Clip
-                if (firearmPhysicalObject.UsesClips && firearmPhysicalObject.Clip != null)
-                {
-                    savedItem["PhysicalObject"]["ammoContainer"] = new JObject();
-                    savedItem["PhysicalObject"]["ammoContainer"]["itemID"] = firearmPhysicalObject.Clip.ObjectWrapper.ItemID;
-
-                    if (firearmPhysicalObject.Clip.HasARound())
-                    {
-                        JArray newLoadedRoundsInClip = new JArray();
-                        foreach (FVRFireArmClip.FVRLoadedRound round in firearmPhysicalObject.Clip.LoadedRounds)
-                        {
-                            if (round == null || round.LR_ObjectWrapper == null)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                newLoadedRoundsInClip.Add((int)round.LR_Class);
-                            }
-                        }
-                        savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInClip;
-                    }
-                }
-                else if (firearmPhysicalObject.UsesMagazines && firearmPhysicalObject.Magazine != null)
-                {
-                    savedItem["PhysicalObject"]["ammoContainer"] = new JObject();
-                    savedItem["PhysicalObject"]["ammoContainer"]["itemID"] = firearmPhysicalObject.Magazine.ObjectWrapper == null ? "InternalMag" : firearmPhysicalObject.Magazine.ObjectWrapper.ItemID;
-
-                    if (firearmPhysicalObject.Magazine.HasARound() && firearmPhysicalObject.Magazine.LoadedRounds != null)
-                    {
-                        JArray newLoadedRoundsInMag = new JArray();
-                        foreach (FVRLoadedRound round in firearmPhysicalObject.Magazine.LoadedRounds)
-                        {
-                            if (round == null || round.LR_ObjectWrapper == null)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                newLoadedRoundsInMag.Add((int)round.LR_Class);
-                            }
-                        }
-                        savedItem["PhysicalObject"]["ammoContainer"]["loadedRoundsInContainer"] = newLoadedRoundsInMag;
-                    }
-                }
-
-                // Save to shoulder if necessary
-                if (Mod.rightShoulderObject != null && Mod.rightShoulderObject.Equals(item.gameObject))
-                {
-                    savedItem["isRightShoulder"] = true;
-                }
-            }
-            else if (itemPhysicalObject is FVRFireArmMagazine)
-            {
-                FVRFireArmMagazine magPhysicalObject = (itemPhysicalObject as FVRFireArmMagazine);
-                if (magPhysicalObject.HasARound())
-                {
-                    JArray newLoadedRoundsInMag = new JArray();
-                    foreach (FVRLoadedRound round in magPhysicalObject.LoadedRounds)
-                    {
-                        if (round == null || round.LR_ObjectWrapper == null)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            newLoadedRoundsInMag.Add((int)round.LR_Class);
-                        }
-                    }
-                    savedItem["PhysicalObject"]["loadedRoundsInContainer"] = newLoadedRoundsInMag;
-                }
-            }
-            else if (itemPhysicalObject is FVRFireArmClip)
-            {
-                FVRFireArmClip clipPhysicalObject = (itemPhysicalObject as FVRFireArmClip);
-                if (clipPhysicalObject.HasARound())
-                {
-                    JArray newLoadedRoundsInClip = new JArray();
-                    foreach (FVRFireArmClip.FVRLoadedRound round in clipPhysicalObject.LoadedRounds)
-                    {
-                        if (round == null || round.LR_ObjectWrapper == null)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            newLoadedRoundsInClip.Add((int)round.LR_Class);
-                        }
-                    }
-                    savedItem["PhysicalObject"]["loadedRoundsInContainer"] = newLoadedRoundsInClip;
-                }
-            }
-            else if (itemPhysicalObject is Speedloader)
-            {
-                Speedloader SLPhysicalObject = (itemPhysicalObject as Speedloader);
-                if (SLPhysicalObject.Chambers != null)
-                {
-                    JArray newLoadedRoundsInSL = new JArray();
-                    foreach (SpeedloaderChamber chamber in SLPhysicalObject.Chambers)
-                    {
-                        if (chamber.IsLoaded)
-                        {
-                            if (chamber.IsSpent)
-                            {
-                                newLoadedRoundsInSL.Add((int)chamber.LoadedClass * -1 - 2); // negative means spent of class: value * -1 - 2
-                            }
-                            else
-                            {
-                                newLoadedRoundsInSL.Add((int)chamber.LoadedClass);
-                            }
-                        }
-                        else
-                        {
-                            newLoadedRoundsInSL.Add(-1); // -1 means not loaded
-                        }
-                    }
-                    savedItem["PhysicalObject"]["loadedRoundsInContainer"] = newLoadedRoundsInSL;
-                }
-            }
-
-            // Custom items
-            MeatovItem customItemWrapper = itemPhysicalObject.gameObject.GetComponentInChildren<MeatovItem>();
-            if (customItemWrapper != null)
-            {
-                savedItem["itemType"] = (int)customItemWrapper.itemType;
-                savedItem["PhysicalObject"]["equipSlot"] = -1;
-                savedItem["amount"] = customItemWrapper.amount;
-                savedItem["looted"] = customItemWrapper.looted;
-                savedItem["insured"] = customItemWrapper.insured;
-                savedItem["foundInRaid"] = customItemWrapper.foundInRaid;
-
-                // Armor
-                if (customItemWrapper.itemType == MeatovItem.ItemType.BodyArmor)
-                {
-                    // If this is an equipment piece we are currently wearing
-                    if (EquipmentSlot.currentArmor != null && EquipmentSlot.currentArmor.Equals(customItemWrapper))
-                    {
-                        // Find its equip slot index
-                        savedItem["PhysicalObject"]["equipSlot"] = 1;
-                    }
-                    savedItem["PhysicalObject"]["armor"] = customItemWrapper.armor;
-                    savedItem["PhysicalObject"]["maxArmor"] = customItemWrapper.maxArmor;
-                }
-
-                // Rig
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Rig)
-                {
-                    // If this is an equipment piece we are currently wearing
-                    if (EquipmentSlot.currentRig != null && EquipmentSlot.currentRig.Equals(customItemWrapper))
-                    {
-                        savedItem["PhysicalObject"]["equipSlot"] = 6;
-                    }
-                    if (savedItem["PhysicalObject"]["quickBeltSlotContents"] == null)
-                    {
-                        savedItem["PhysicalObject"]["quickBeltSlotContents"] = new JArray();
-                    }
-                    JArray saveQBContents = (JArray)savedItem["PhysicalObject"]["quickBeltSlotContents"];
-                    for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
-                    {
-                        if (customItemWrapper.itemsInSlots[i] == null)
-                        {
-                            saveQBContents.Add(null);
-                        }
-                        else
-                        {
-                            SaveItem(saveQBContents, customItemWrapper.itemsInSlots[i].transform, null, i);
-                        }
-                    }
-                }
-
-                // ArmoredRig
-                if (customItemWrapper.itemType == MeatovItem.ItemType.ArmoredRig)
-                {
-                    // If this is an equipment piece we are currently wearing
-                    if (EquipmentSlot.currentArmor != null && EquipmentSlot.currentArmor.Equals(customItemWrapper))
-                    {
-                        savedItem["PhysicalObject"]["equipSlot"] = 1;
-                    }
-                    if (savedItem["PhysicalObject"]["quickBeltSlotContents"] == null)
-                    {
-                        savedItem["PhysicalObject"]["quickBeltSlotContents"] = new JArray();
-                    }
-                    JArray saveQBContents = (JArray)savedItem["PhysicalObject"]["quickBeltSlotContents"];
-                    for (int i = 0; i < customItemWrapper.itemsInSlots.Length; ++i)
-                    {
-                        if (customItemWrapper.itemsInSlots[i] == null)
-                        {
-                            saveQBContents.Add(null);
-                        }
-                        else
-                        {
-                            SaveItem(saveQBContents, customItemWrapper.itemsInSlots[i].transform, null, i);
-                        }
-                    }
-                    savedItem["PhysicalObject"]["armor"] = customItemWrapper.armor;
-                    savedItem["PhysicalObject"]["maxArmor"] = customItemWrapper.maxArmor;
-                }
-
-                // Backpack
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Backpack)
-                {
-                    // If this is an equipment piece we are currently wearing
-                    if (EquipmentSlot.currentBackpack != null && EquipmentSlot.currentBackpack.Equals(customItemWrapper))
-                    {
-                        savedItem["PhysicalObject"]["equipSlot"] = 0;
-                    }
-                    if (savedItem["PhysicalObject"]["backpackContents"] == null)
-                    {
-                        savedItem["PhysicalObject"]["backpackContents"] = new JArray();
-                    }
-                    JArray saveBPContents = (JArray)savedItem["PhysicalObject"]["backpackContents"];
-                    for (int i = 0; i < customItemWrapper.containerItemRoot.childCount; ++i)
-                    {
-                        Mod.LogInfo("Item in backpack " + i + ": " + customItemWrapper.containerItemRoot.GetChild(i).name);
-                        SaveItem(saveBPContents, customItemWrapper.containerItemRoot.GetChild(i));
-                    }
-                }
-
-                // Container
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Container)
-                {
-                    if (savedItem["PhysicalObject"]["containerContents"] == null)
-                    {
-                        savedItem["PhysicalObject"]["containerContents"] = new JArray();
-                    }
-                    JArray saveContainerContents = (JArray)savedItem["PhysicalObject"]["containerContents"];
-                    for (int i = 0; i < customItemWrapper.containerItemRoot.childCount; ++i)
-                    {
-                        Mod.LogInfo("Item in container " + i + ": " + customItemWrapper.containerItemRoot.GetChild(i).name);
-                        SaveItem(saveContainerContents, customItemWrapper.containerItemRoot.GetChild(i));
-                    }
-                }
-
-                // Pouch
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Pouch)
-                {
-                    // If this is an equipment piece we are currently wearing
-                    if (EquipmentSlot.currentPouch != null && EquipmentSlot.currentPouch.Equals(customItemWrapper))
-                    {
-                        savedItem["PhysicalObject"]["equipSlot"] = 7;
-                    }
-                    if (savedItem["PhysicalObject"]["containerContents"] == null)
-                    {
-                        savedItem["PhysicalObject"]["containerContents"] = new JArray();
-                    }
-                    JArray savePouchContents = (JArray)savedItem["PhysicalObject"]["containerContents"];
-                    for (int i = 0; i < customItemWrapper.containerItemRoot.childCount; ++i)
-                    {
-                        Mod.LogInfo("Item in pouch " + i + ": " + customItemWrapper.containerItemRoot.GetChild(i).name);
-                        SaveItem(savePouchContents, customItemWrapper.containerItemRoot.GetChild(i));
-                    }
-                }
-
-                // Helmet
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Helmet)
-                {
-                    // If this is an equipment piece we are currently wearing
-                    if (EquipmentSlot.currentHeadwear != null && EquipmentSlot.currentHeadwear.Equals(customItemWrapper))
-                    {
-                        // Find its equip slot index
-                        savedItem["PhysicalObject"]["equipSlot"] = 3;
-                    }
-                    savedItem["PhysicalObject"]["armor"] = customItemWrapper.armor;
-                    savedItem["PhysicalObject"]["maxArmor"] = customItemWrapper.maxArmor;
-                }
-
-                // Earpiece
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Earpiece)
-                {
-                    // If this is an equipment piece we are currently wearing
-                    if (EquipmentSlot.currentEarpiece != null && EquipmentSlot.currentEarpiece.Equals(customItemWrapper))
-                    {
-                        // Find its equip slot index
-                        savedItem["PhysicalObject"]["equipSlot"] = 2;
-                    }
-                }
-
-                // FaceCover
-                if (customItemWrapper.itemType == MeatovItem.ItemType.FaceCover)
-                {
-                    // If this is an equipment piece we are currently wearing
-                    if (EquipmentSlot.currentFaceCover != null && EquipmentSlot.currentFaceCover.Equals(customItemWrapper))
-                    {
-                        // Find its equip slot index
-                        savedItem["PhysicalObject"]["equipSlot"] = 4;
-                    }
-                }
-
-                // Eyewear
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Eyewear)
-                {
-                    // If this is an equipment piece we are currently wearing
-                    if (EquipmentSlot.currentEyewear != null && EquipmentSlot.currentEyewear.Equals(customItemWrapper))
-                    {
-                        // Find its equip slot index
-                        savedItem["PhysicalObject"]["equipSlot"] = 5;
-                    }
-                }
-
-                // AmmoBox
-                //if (customItemWrapper.itemType == MeatovItem.ItemType.AmmoBox)
-                //{
-                //    Mod.LogInfo("Item is ammo box");
-                //}
-
-                // Money
-                if (customItemWrapper.itemType == MeatovItem.ItemType.Money)
-                {
-                    savedItem["stack"] = customItemWrapper.stack;
-                }
-
-                // Consumable
-                //if (customItemWrapper.itemType == MeatovItem.ItemType.Consumable)
-                //{
-                //    Mod.LogInfo("Item is Consumable");
-                //}
-
-                // Key
-                //if (customItemWrapper.itemType == MeatovItem.ItemType.Key)
-                //{
-                //    Mod.LogInfo("is Key");
-                //}
-
-                // Dogtag
-                if (customItemWrapper.itemType == MeatovItem.ItemType.DogTag)
-                {
-                    savedItem["dogtagName"] = customItemWrapper.dogtagName;
-                    savedItem["dogtagLevel"] = customItemWrapper.dogtagLevel;
-                }
-            }
-
-            listToAddTo.Add(savedItem);
-        }
-
-        private void SaveAttachments(FVRPhysicalObject physicalObject, JToken itemPhysicalObject)
-        {
-            // We want to save attachments curently physically present on physicalObject into the save data itemPhysicalObject
-            for (int i = 0; i < physicalObject.AttachmentMounts.Count; ++i)
-            {
-                for (int j = 0; j < physicalObject.AttachmentMounts[i].AttachmentsList.Count; ++j)
-                {
-                    JToken newPhysicalObject = new JObject();
-                    if (itemPhysicalObject["AttachmentsList"] == null)
-                    {
-                        itemPhysicalObject["AttachmentsList"] = new JArray();
-                    }
-                    ((JArray)itemPhysicalObject["AttachmentsList"]).Add(newPhysicalObject);
-
-                    FVRPhysicalObject currentPhysicalObject = physicalObject.AttachmentMounts[i].AttachmentsList[j];
-                    Transform currentTransform = currentPhysicalObject.transform;
-
-                    newPhysicalObject["ObjectWrapper"] = new JObject();
-
-                    // Fill PhysicalObject
-                    newPhysicalObject["positionX"] = currentTransform.localPosition.x;
-                    newPhysicalObject["positionY"] = currentTransform.localPosition.y;
-                    newPhysicalObject["positionZ"] = currentTransform.localPosition.z;
-                    newPhysicalObject["rotationX"] = currentTransform.localRotation.eulerAngles.x;
-                    newPhysicalObject["rotationY"] = currentTransform.localRotation.eulerAngles.y;
-                    newPhysicalObject["rotationZ"] = currentTransform.localRotation.eulerAngles.z;
-                    newPhysicalObject["m_isSpawnLock"] = currentPhysicalObject.m_isSpawnLock;
-                    newPhysicalObject["m_isHarnessed"] = currentPhysicalObject.m_isHardnessed;
-                    newPhysicalObject["IsKinematicLocked"] = currentPhysicalObject.IsKinematicLocked;
-                    newPhysicalObject["IsInWater"] = currentPhysicalObject.IsInWater;
-                    SaveAttachments(currentPhysicalObject, newPhysicalObject);
-                    newPhysicalObject["mountIndex"] = i;
-
-                    // Fill ObjectWrapper
-                    newPhysicalObject["ObjectWrapper"]["ItemID"] = currentPhysicalObject.ObjectWrapper.ItemID;
-                }
-            }
         }
 
         public void FinishRaid(FinishRaidState state)
