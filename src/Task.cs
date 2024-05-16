@@ -98,6 +98,30 @@ namespace EFM
             SetupRewards(failRewards, TaskState.Fail, questData.Value["rewards"]["Fail"] as JArray);
         }
 
+        public void Save(JToken data)
+        {
+            JObject conditions = new JObject();
+            for (int i = 0; i < startConditions.Count; ++i)
+            {
+                JObject condition = new JObject();
+                startConditions[i].Save(condition);
+                conditions[startConditions[i].ID] = condition;
+            }
+            for (int i = 0; i < finishConditions.Count; ++i)
+            {
+                JObject condition = new JObject();
+                finishConditions[i].Save(condition);
+                conditions[finishConditions[i].ID] = condition;
+            }
+            for (int i = 0; i < failConditions.Count; ++i)
+            {
+                JObject condition = new JObject();
+                failConditions[i].Save(condition);
+                conditions[failConditions[i].ID] = condition;
+            }
+            data["conditions"] = conditions;
+        }
+
         public void LoadData(JToken data)
         {
             if (data == null)
@@ -123,14 +147,13 @@ namespace EFM
                 }
                 for (int i = 0; i < finishConditions.Count; ++i)
                 {
-                    finishConditions[i].LoadData(data["conditions"][startConditions[i].ID]);
+                    finishConditions[i].LoadData(data["conditions"][finishConditions[i].ID]);
                 }
                 for (int i = 0; i < failConditions.Count; ++i)
                 {
-                    failConditions[i].LoadData(data["conditions"][startConditions[i].ID]);
+                    failConditions[i].LoadData(data["conditions"][failConditions[i].ID]);
                 }
             }
-
         }
 
         public void UpdateEventSubscription(TaskState from, TaskState to, bool onlyTo = false)
@@ -808,6 +831,11 @@ namespace EFM
             }
 
             return true;
+        }
+
+        public void Save(JToken data)
+        {
+            data["count"] = count;
         }
 
         public void LoadData(JToken data)

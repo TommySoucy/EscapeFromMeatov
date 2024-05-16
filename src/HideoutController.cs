@@ -3757,10 +3757,22 @@ namespace EFM
             }
             loadedData["hideout"]["scavReturnItems"] = scavReturnItemArr;
 
-            TODO4: // Save traders
+            // Save traders
+            JArray traders = new JArray();
+            for (int i=0; i < Mod.traders.Length; ++i)
+            {
+                JObject trader = new JObject();
+                Mod.traders[i].Save(trader);
+                traders.Add(trader);
+            }
+            loadedData["hideout"]["traders"] = traders;
 
-            TODO3: // Save areas
-
+            // Save areas
+            for (int i = 0; i < areaController.areas.Length; ++i)
+            {
+                // Note area array and object have already been added when saving area items above
+                areaController.areas[i].Save(areas[i]);
+            }
 
             // Save insuredSets
             //Mod.insuredItems = new List<InsuredSet>();

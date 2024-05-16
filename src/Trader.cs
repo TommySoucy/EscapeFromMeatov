@@ -297,6 +297,23 @@ namespace EFM
             }
         }
 
+        public void Save(JToken data)
+        {
+            data["level"] = level;
+            data["standing"] = standing;
+            data["standingToRestore"] = standingToRestore;
+            data["unlocked"] = unlocked;
+
+            JObject tasks = new JObject();
+            for (int i = 0; i < this.tasks.Count; ++i)
+            {
+                JObject task = new JObject();
+                this.tasks[i].Save(task);
+                tasks[this.tasks[i].ID] = task;
+            }
+            data["tasks"] = tasks;
+        }
+
         public void LoadData(JToken data)
         {
             level = (int)data["level"];

@@ -1,5 +1,4 @@
-﻿using FMOD;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
@@ -249,6 +248,26 @@ namespace EFM
                     productionsPerLevel[newProduction.areaLevel].Add(newProduction);
                 }
             }
+        }
+
+        public void Save(JToken data)
+        {
+            HideoutController.loadedData["hideout"]["powered"] = powered;
+            data["level"] = currentLevel;
+            data["upgrading"] = upgrading;
+            data["upgradeTimeLeft"] = upgradeTimeLeft;
+
+            JObject productions = new JObject();
+            for(int i=0; i < productionsPerLevel.Count; ++i)
+            {
+                for(int j=0; j < productionsPerLevel[i].Count; ++j)
+                {
+                    JObject production = new JObject();
+                    productionsPerLevel[i][j].Save(production);
+                    productions[productionsPerLevel[i][j].ID] = production;
+                }
+            }
+            data["productions"] = productions;
         }
 
         public void LoadLiveData()
@@ -1326,6 +1345,13 @@ namespace EFM
             {
                 area.hasReadyProduction = true;
             }
+        }
+
+        public void Save(JToken data)
+        {
+            data["inProduction"] = inProduction;
+            data["progress"] = progress;
+            data["readyCount"] = readyCount;
         }
 
         public void Update()
