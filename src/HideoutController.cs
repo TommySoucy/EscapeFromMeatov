@@ -1254,6 +1254,10 @@ namespace EFM
 
         public void ProcessData()
         {
+            // Note that when hideout is loaded the scene is loaded and this is the only time ProcessData is called
+            // If already in the scene, it will be reloaded
+            // Certain elements of the hideout, like Areas, load their own data, so we don't need to do it here
+
             // Clear other active slots since we shouldn't have any on load
             Mod.looseRigSlots.Clear();
 
@@ -1314,7 +1318,9 @@ namespace EFM
                     Mod.playerFIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
                 }
 
-                TODO: // Load player Items
+                // Note that status UI must have been instantiated and awoken before loading player Items
+                // This happens before call to ProcessData, on awake of hideoutcontroller
+                LoadPlayerItems();
             }
             else if (Mod.justFinishedRaid)
             {
@@ -1342,7 +1348,7 @@ namespace EFM
                 FIRInventoryItems.Clear();
             }
 
-            TODO1: // Load hideout items
+            LoadHideoutItems();
 
             // Load trader data
             JArray traderDataArray = loadedData["hideout"]["traders"] as JArray;
@@ -1427,16 +1433,247 @@ namespace EFM
             }
 
             // Load areas
-            for(int i=0; i < areaController.areas.Length; ++i)
+            // Areas get loaded on Aer.Start() which will always happen after process data, which happens in Awake()
+        }
+
+        public void LoadHideoutItems()
+        {
+            JArray looseItems = loadedData["hideout"]["looseItems"] as JArray;
+            for(int i=0; i < looseItems.Count; ++i)
             {
-                // Dont load area live data if they are not init yet, because that would mean they don't yet have static data
-                // They will load their live data themselves on start
-                if (!areaController.areas[i].init)
+                JToken looseItemData = looseItems[i];
+                VaultSystem.ReturnObjectListDelegate del = objs =>
                 {
-                    break;
+                    MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                    if (meatovItem != null)
+                    {
+                        meatovItem.transform.position = new Vector3((float)looseItemData["posX"],(float)looseItemData["posY"],(float)looseItemData["posZ"]);
+                        meatovItem.transform.rotation = Quaternion.Euler((float)looseItemData["rotX"], (float)looseItemData["rotY"], (float)looseItemData["rotZ"]);
+                    }
+                };
+
+                MeatovItem loadedItem = MeatovItem.Deserialize(looseItemData, del);
+
+                if (loadedItem != null)
+                {
+                    loadedItem.transform.position = new Vector3((float)looseItemData["posX"], (float)looseItemData["posY"], (float)looseItemData["posZ"]);
+                    loadedItem.transform.rotation = Quaternion.Euler((float)looseItemData["rotX"], (float)looseItemData["rotY"], (float)looseItemData["rotZ"]);
                 }
-                areaController.areas[i].LoadLiveData();
-                areaController.areas[i].UI.Init();
+            }
+            JArray tradeItems = loadedData["hideout"]["tradeVolumeItems"] as JArray;
+            for(int i=0; i < tradeItems.Count; ++i)
+            {
+                JToken tradeItemData = tradeItems[i];
+                VaultSystem.ReturnObjectListDelegate del = objs =>
+                {
+                    MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                    if (meatovItem != null)
+                    {
+                        marketManager.tradeVolume.AddItem(meatovItem);
+                        meatovItem.transform.localPosition = new Vector3((float)tradeItemData["posX"],(float)tradeItemData["posY"],(float)tradeItemData["posZ"]);
+                        meatovItem.transform.localRotation = Quaternion.Euler((float)tradeItemData["rotX"], (float)tradeItemData["rotY"], (float)tradeItemData["rotZ"]);
+                    }
+                };
+
+                MeatovItem loadedItem = MeatovItem.Deserialize(tradeItemData, del);
+
+                if (loadedItem != null)
+                {
+                    marketManager.tradeVolume.AddItem(loadedItem);
+                    loadedItem.transform.localPosition = new Vector3((float)tradeItemData["posX"], (float)tradeItemData["posY"], (float)tradeItemData["posZ"]);
+                    loadedItem.transform.localRotation = Quaternion.Euler((float)tradeItemData["rotX"], (float)tradeItemData["rotY"], (float)tradeItemData["rotZ"]);
+                }
+            }
+            JArray areaData = loadedData["hideout"]["areas"] as JArray;
+            for(int i=0; i < areaData.Count; ++i)
+            {
+                JToken area = areaData[i];
+                JArray areaLevels = area["levels"] as JArray;
+                for(int j = 0; j < areaLevels.Count; ++j)
+                {
+                    JToken level = area["levels"][j];
+                    JArray volumes = level["volumes"] as JArray;
+                    JArray slots = level["slots"] as JArray;
+                    for (int k = 0; k < volumes.Count; ++k)
+                    {
+                        JArray volumeItems = volumes[k] as JArray;
+                        for(int l=0; l < volumeItems.Count; ++l)
+                        {
+                            JToken volumeItemData = volumeItems[i];
+                            VaultSystem.ReturnObjectListDelegate del = objs =>
+                            {
+                                MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                                if (meatovItem != null)
+                                {
+                                    areaController.areas[i].areaVolumesPerLevel[j][k].AddItem(meatovItem);
+                                    meatovItem.transform.localPosition = new Vector3((float)volumeItemData["posX"], (float)volumeItemData["posY"], (float)volumeItemData["posZ"]);
+                                    meatovItem.transform.localRotation = Quaternion.Euler((float)volumeItemData["rotX"], (float)volumeItemData["rotY"], (float)volumeItemData["rotZ"]);
+                                }
+                            };
+
+                            MeatovItem loadedItem = MeatovItem.Deserialize(volumeItemData, del);
+
+                            if (loadedItem != null)
+                            {
+                                areaController.areas[i].areaVolumesPerLevel[j][k].AddItem(loadedItem);
+                                loadedItem.transform.localPosition = new Vector3((float)volumeItemData["posX"], (float)volumeItemData["posY"], (float)volumeItemData["posZ"]);
+                                loadedItem.transform.localRotation = Quaternion.Euler((float)volumeItemData["rotX"], (float)volumeItemData["rotY"], (float)volumeItemData["rotZ"]);
+                            }
+                        }
+                    }
+                    for (int k = 0; k < slots.Count; ++k)
+                    {
+                        JArray slotItems = slots[k] as JArray;
+                        for(int l=0; l < slotItems.Count; ++l)
+                        {
+                            JToken slotItemData = slotItems[i];
+                            VaultSystem.ReturnObjectListDelegate del = objs =>
+                            {
+                                MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                                if (meatovItem != null)
+                                {
+                                    objs[0].SetQuickBeltSlot(areaController.areas[i].areaSlotsPerLevel[j][k]);
+                                }
+                            };
+
+                            MeatovItem loadedItem = MeatovItem.Deserialize(slotItemData, del);
+
+                            if (loadedItem != null)
+                            {
+                                loadedItem.physObj.SetQuickBeltSlot(areaController.areas[i].areaSlotsPerLevel[j][k]);
+                            }
+                        }
+                    }
+                }
+            }
+            JArray scavItems = loadedData["hideout"]["scavReturnItems"] as JArray;
+            for (int i = 0; i < scavItems.Count; ++i)
+            {
+                JToken scavItemData = tradeItems[i];
+                VaultSystem.ReturnObjectListDelegate del = objs =>
+                {
+                    MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                    if (meatovItem != null)
+                    {
+                        meatovItem.transform.parent = scavReturnNode;
+                    }
+                };
+
+                MeatovItem loadedItem = MeatovItem.Deserialize(scavItemData, del);
+
+                if (loadedItem != null)
+                {
+                    loadedItem.transform.parent = scavReturnNode;
+                }
+            }
+        }
+
+        public void LoadPlayerItems()
+        {
+            if(loadedData["leftHand"] != null)
+            {
+                // In case item is vanilla, in which case we use the vault system to save it,
+                // we will only be getting the instantiated item later
+                // We must write a delegate in order to put it in the correct hand once we do
+                VaultSystem.ReturnObjectListDelegate del = objs =>
+                {
+                    // Here, assume objs[0] is the root item
+                    MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                    if (meatovItem != null)
+                    {
+                        Mod.leftHand.fvrHand.ForceSetInteractable(objs[0]);
+                        meatovItem.UpdateInventories();
+                    }
+                };
+
+                // In case item is custom, it will be returned right away and we can handle it here
+                MeatovItem loadedItem = MeatovItem.Deserialize(loadedData["leftHand"], del);
+
+                if(loadedItem != null)
+                {
+                    Mod.leftHand.fvrHand.ForceSetInteractable(loadedItem.physObj);
+                    loadedItem.UpdateInventories();
+                }
+            }
+            if(loadedData["rightHand"] != null)
+            {
+                VaultSystem.ReturnObjectListDelegate del = objs =>
+                {
+                    MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                    if (meatovItem != null)
+                    {
+                        Mod.rightHand.fvrHand.ForceSetInteractable(objs[0]);
+                        meatovItem.UpdateInventories();
+                    }
+                };
+
+                MeatovItem loadedItem = MeatovItem.Deserialize(loadedData["rightHand"], del);
+
+                if(loadedItem != null)
+                {
+                    Mod.rightHand.fvrHand.ForceSetInteractable(loadedItem.physObj);
+                    loadedItem.UpdateInventories();
+                }
+            }
+            // Note that we must load equipment before loading QBS items
+            // This is so that if we have a rig it will have been loaded
+            for (int i = 0; i < StatusUI.instance.equipmentSlots.Length; ++i)
+            {
+                if (loadedData["equipment"+i] != null)
+                {
+                    VaultSystem.ReturnObjectListDelegate del = objs =>
+                    {
+                        MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                        if (meatovItem != null)
+                        {
+                            objs[0].SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i]);
+                            meatovItem.UpdateInventories();
+                        }
+                    };
+
+                    MeatovItem loadedItem = MeatovItem.Deserialize(loadedData["equipment" + i], del);
+
+                    if (loadedItem != null)
+                    {
+                        loadedItem.physObj.SetQuickBeltSlot(StatusUI.instance.equipmentSlots[i]);
+                        loadedItem.UpdateInventories();
+                    }
+                }
+            }
+            // Get player body in case it wasn't set yet
+            FVRPlayerBody playerBodyToUse = null;
+            if (GM.CurrentPlayerBody == null)
+            {
+                Mod.LogInfo("DEV: PRELOADING OF PLAYERBODY WHEN LOADING PLAYER ITEMS WAS NEEDED!");
+                playerBodyToUse = FindObjectOfType<FVRPlayerBody>();
+            }
+            else
+            {
+                Mod.LogWarning("DEV: Preloading of playerbody when loading player items was not needed!");
+                playerBodyToUse = GM.CurrentPlayerBody;
+            }
+            for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++i)
+            {
+                if (loadedData["slot"+i] != null)
+                {
+                    VaultSystem.ReturnObjectListDelegate del = objs =>
+                    {
+                        MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                        if (meatovItem != null)
+                        {
+                            objs[0].SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i]);
+                            meatovItem.UpdateInventories();
+                        }
+                    };
+
+                    MeatovItem loadedItem = MeatovItem.Deserialize(loadedData["slot" + i], del);
+
+                    if (loadedItem != null)
+                    {
+                        loadedItem.physObj.SetQuickBeltSlot(GM.CurrentPlayerBody.QBSlots_Internal[i]);
+                        loadedItem.UpdateInventories();
+                    }
+                }
             }
         }
 
@@ -3558,7 +3795,7 @@ namespace EFM
             GM.CurrentPlayerBody.ConfigureQuickbelt(-2); // -2 in order to destroy the objects on belt as well
         }
 
-        private void Save()
+        public void Save()
         {
             Mod.LogInfo("Saving hideout");
 
@@ -3628,7 +3865,7 @@ namespace EFM
             // QBS
             for (int i = 0; i < GM.CurrentPlayerBody.QBSlots_Internal.Count; ++i)
             {
-                FVRPhysicalObject physObj = GM.CurrentPlayerBody.QBSlots_Internal[0].CurObject;
+                FVRPhysicalObject physObj = GM.CurrentPlayerBody.QBSlots_Internal[i].CurObject;
                 if (physObj == null)
                 {
                     serializedItem = null;
@@ -3692,11 +3929,12 @@ namespace EFM
                 // Levels
                 JArray areaLevels = new JArray();
                 // Volumes
-                for(int j=0; j < areaController.areas[i].areaVolumesPerLevel.Length; ++j)
+                for(int j=0; j < areaController.areas[i].levels.Length; ++j)
                 {
                     JObject level = new JObject();
                     JArray volumes = new JArray();
-                    for(int k=0; k< areaController.areas[i].areaVolumesPerLevel[j].Length; ++j)
+                    JArray slots = new JArray();
+                    for (int k=0; k< areaController.areas[i].areaVolumesPerLevel[j].Length; ++j)
                     {
                         JArray areaVolumeItems = new JArray();
                         foreach (KeyValuePair<string, List<MeatovItem>> entry in areaController.areas[i].areaVolumesPerLevel[j][k].inventoryItems)
@@ -3720,13 +3958,6 @@ namespace EFM
                         volumes.Add(areaVolumeItems);
                     }
                     level["volumes"] = volumes;
-                    areaLevels.Add(level);
-                }
-                // Slots
-                for (int j = 0; j < areaController.areas[i].areaSlotsPerLevel.Length; ++j)
-                {
-                    JObject level = new JObject();
-                    JArray slots = new JArray();
                     for (int k = 0; k < areaController.areas[i].areaSlotsPerLevel[j].Length; ++j)
                     {
                         JObject serialized = null;
