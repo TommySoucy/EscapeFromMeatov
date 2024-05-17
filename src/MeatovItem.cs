@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
-using static RootMotion.FinalIK.GrounderQuadruped;
 
 namespace EFM
 {
@@ -117,12 +116,13 @@ namespace EFM
 		public bool insured 
 		{
 			get { return _insured; }
-            set { 
-				_insured = value;
-				if (descriptionManager != null)
-				{
-					descriptionManager.SetDescriptionPack();
-				}
+            set {
+                bool preValue = _insured;
+                _insured = value;
+                if(preValue != _insured)
+                {
+                    OnInsuredChangedInvoke();
+                }
 			}
 		}
 		private int _currentWeight; // Includes attachments and ammo containers attached to this item
@@ -131,11 +131,12 @@ namespace EFM
 			get { return _currentWeight; }
 			set
 			{
+                int preValue = _currentWeight;
 				_currentWeight = value;
-				if (descriptionManager != null)
-				{
-					descriptionManager.SetDescriptionPack();
-				}
+                if(preValue != _currentWeight)
+                {
+                    OnCurrentWeightChangedInvoke();
+                }
 			}
         }
         [NonSerialized]
@@ -152,6 +153,7 @@ namespace EFM
                 if(preValue != _foundInRaid)
                 {
                     UpdateFIRStatus(preValue);
+                    OnFIRStatusChangedInvoke();
                 }
             }
 
@@ -185,11 +187,12 @@ namespace EFM
 		{
 			set
 			{
+                int preValue = _mode;
 				_mode = value;
-				if (descriptionManager != null)
-				{
-					descriptionManager.SetDescriptionPack();
-				}
+                if(preValue != _mode)
+                {
+                    OnModeChangedInvoke();
+                }
 			} 
 			get
             {
@@ -250,12 +253,13 @@ namespace EFM
 		{ 
 			get { return _containingVolume; }
 			set {
+                int preValue = _containingVolume;
 				_containingVolume = value;
-				if (descriptionManager != null)
-				{
-					descriptionManager.SetDescriptionPack();
-				}
-				volumeIndicatorText.text = (_containingVolume / Mod.volumePrecisionMultiplier).ToString() +"/"+(maxVolume / Mod.volumePrecisionMultiplier);
+                if(preValue != _containingVolume)
+                {
+                    volumeIndicatorText.text = (_containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
+                    OnContainingVolumeChangedInvoke();
+                }
 			}
 		}
         [Serializable]
@@ -283,11 +287,8 @@ namespace EFM
                 int preValue = _stack;
 				_stack = value;
 				UpdateStackModel();
-				if (descriptionManager != null)
-				{
-					descriptionManager.SetDescriptionPack();
-				}
                 UpdateInventoryStacks(preValue);
+                OnStackChangedInvoke();
 			}
 		}
 		public int maxStack;
@@ -309,12 +310,13 @@ namespace EFM
 			get { return _amount; } 
 			set
 			{
+                int preValue = _amount;
 				_amount = value;
-				if (descriptionManager != null)
-				{
-					descriptionManager.SetDescriptionPack();
+                if(preValue != _amount)
+                {
+                    OnAmountChangedInvoke();
                 }
-			} 
+            } 
 		}
 		public int maxAmount;
 
@@ -354,6 +356,22 @@ namespace EFM
         // Weapon
         [NonSerialized]
         public WeaponClass weaponClass;
+
+        // Events
+        public delegate void OnInsuredChangedDelegate();
+        public event OnInsuredChangedDelegate OnInsuredChanged;
+        public delegate void OnCurrentWeightChangedDelegate();
+        public event OnCurrentWeightChangedDelegate OnCurrentWeightChanged;
+        public delegate void OnFIRStatusChangedDelegate();
+        public event OnFIRStatusChangedDelegate OnFIRStatusChanged;
+        public delegate void OnModeChangedDelegate();
+        public event OnModeChangedDelegate OnModeChanged;
+        public delegate void OnContainingVolumeChangedDelegate();
+        public event OnContainingVolumeChangedDelegate OnContainingVolumeChanged;
+        public delegate void OnStackChangedDelegate();
+        public event OnStackChangedDelegate OnStackChanged;
+        public delegate void OnAmountChangedDelegate();
+        public event OnAmountChangedDelegate OnAmountChanged;
 
         public static void Setup(FVRPhysicalObject physicalObject)
         {
@@ -1774,13 +1792,13 @@ namespace EFM
 					SetMode(0);
 					SetContainerOpen(true, isRightHand);
 					volumeIndicator.SetActive(true);
-					volumeIndicatorText.text = (containingVolume / Mod.volumePrecisionMultiplier).ToString() + "/" + (maxVolume / Mod.volumePrecisionMultiplier);
+					volumeIndicatorText.text = (containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
 				}
 				else if (itemType == ItemType.Container || itemType == ItemType.Pouch)
 				{
 					SetContainerOpen(true, isRightHand);
 					volumeIndicator.SetActive(true);
-					volumeIndicatorText.text = (containingVolume / Mod.volumePrecisionMultiplier).ToString() + "/" + (maxVolume / Mod.volumePrecisionMultiplier);
+					volumeIndicatorText.text = (containingVolume / 1000f).ToString("0.00") + "/" + (maxVolume / 1000f).ToString("0.00");
 				}
 				else if(itemType == ItemType.LootContainer)
 				{
@@ -1849,11 +1867,6 @@ namespace EFM
 					models[i].SetActive(i == index);
 					interactiveSets[i].SetActive(i == index);
 				}
-			}
-
-			if (descriptionManager != null)
-			{
-				descriptionManager.SetDescriptionPack();
 			}
 		}
 
@@ -1983,197 +1996,10 @@ namespace EFM
 
         public DescriptionPack GetDescriptionPack()
         {
-			if(itemType == ItemType.LootContainer)
-            {
-				return descriptionPack;
-            }
+            DescriptionPack newPack = new DescriptionPack();
 
-            //descriptionPack.amount = (HideoutController.inventory.ContainsKey(H3ID) ? HideoutController.instance.inventory[H3ID] : 0) + (Mod.playerInventory.ContainsKey(H3ID) ? Mod.playerInventory[H3ID] : 0);
-			descriptionPack.amountRequired = 0;
-			for (int i=0; i < 22; ++i)
-			{
-				if (Mod.requiredPerArea[i] != null && Mod.requiredPerArea[i].ContainsKey(H3ID))
-				{
-					descriptionPack.amountRequired += Mod.requiredPerArea[i][H3ID];
-					descriptionPack.amountRequiredPerArea[i] = Mod.requiredPerArea[i][H3ID];
-                }
-                else
-				{
-					descriptionPack.amountRequiredPerArea[i] = 0;
-				}
-			}
-			descriptionPack.onWishlist = Mod.wishList.Contains(H3ID);
-			descriptionPack.insured = insured;
-
-			if (itemType == ItemType.Money)
-			{
-				descriptionPack.stack = stack;
-			}
-			else if(itemType == ItemType.Consumable)
-			{
-				if (maxAmount > 0)
-				{
-					descriptionPack.stack = amount;
-					descriptionPack.maxStack = maxAmount;
-                }
-			}
-			else if(itemType == ItemType.Backpack || itemType == ItemType.Container || itemType == ItemType.Pouch)
-			{
-				descriptionPack.containingVolume = containingVolume;
-				descriptionPack.maxVolume = maxVolume;
-			}
-			else if(itemType == ItemType.AmmoBox)
-			{
-				FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
-				descriptionPack.stack = asMagazine.m_numRounds;
-				descriptionPack.maxStack = asMagazine.m_capacity;
-				descriptionPack.containedAmmoClassesByType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, int>>();
-				foreach(FVRLoadedRound loadedRound in asMagazine.LoadedRounds)
-				{
-					if (loadedRound != null)
-					{
-						if (descriptionPack.containedAmmoClassesByType.ContainsKey(asMagazine.RoundType))
-						{
-							if (descriptionPack.containedAmmoClassesByType[asMagazine.RoundType].ContainsKey(loadedRound.LR_Class))
-							{
-								descriptionPack.containedAmmoClassesByType[asMagazine.RoundType][loadedRound.LR_Class] += 1;
-							}
-							else
-							{
-								descriptionPack.containedAmmoClassesByType[asMagazine.RoundType].Add(loadedRound.LR_Class, 1);
-							}
-						}
-						else
-						{
-							Dictionary<FireArmRoundClass, int> newDict = new Dictionary<FireArmRoundClass, int>();
-							newDict.Add(loadedRound.LR_Class, 1);
-							descriptionPack.containedAmmoClassesByType.Add(asMagazine.RoundType, newDict);
-						}
-					}
-				}
-            }
-			else if(itemType == ItemType.DogTag)
-			{
-				descriptionPack.stack = dogtagLevel;
-				descriptionPack.name = itemName + " ("+dogtagName+")";
-			}
-            else
-            {
-                if (compatibilityValue == 3 || compatibilityValue == 1)
-                {
-                    if (usesAmmoContainers)
-                    {
-                        if (usesMags)
-                        {
-                            if (Mod.magazinesByType.ContainsKey(magType))
-                            {
-                                descriptionPack.compatibleAmmoContainers = Mod.magazinesByType[magType];
-                            }
-                            else
-                            {
-                                descriptionPack.compatibleAmmoContainers = new Dictionary<string, int>();
-                            }
-                        }
-                        else
-                        {
-                            if (Mod.clipsByType.ContainsKey(clipType))
-                            {
-                                descriptionPack.compatibleAmmoContainers = Mod.clipsByType[clipType];
-                            }
-                            else
-                            {
-                                descriptionPack.compatibleAmmoContainers = new Dictionary<string, int>();
-                            }
-                        }
-                    }
-                }
-                if (compatibilityValue == 3 || compatibilityValue == 2)
-                {
-                    if (Mod.roundsByType.ContainsKey(roundType))
-                    {
-                        descriptionPack.compatibleAmmo = Mod.roundsByType[roundType];
-                    }
-                    else
-                    {
-                        descriptionPack.compatibleAmmo = new Dictionary<string, int>();
-                    }
-                }
-
-                if (physObj is FVRFireArmMagazine)
-                {
-                    FVRFireArmMagazine asMagazine = physObj as FVRFireArmMagazine;
-                    descriptionPack.containedAmmoClassesByType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, int>>();
-
-                    // Checking amount of ammo in mag only counts once per minute for a unique mag
-                    long currentTime = 0/*Mod.currentLocationIndex == 1 ? HideoutController.instance.GetTimeSeconds() : Mod.currentRaidManager.GetTimeSeconds();*/;
-                    if (currentTime - previousDescriptionTime > 60)
-                    {
-                        Mod.AddSkillExp(Skill.magazineCheckAction, 31);
-                    }
-                    previousDescriptionTime = currentTime;
-
-                    descriptionPack.stack = asMagazine.m_numRounds;
-                    descriptionPack.maxStack = asMagazine.m_capacity;
-                    foreach (FVRLoadedRound loadedRound in asMagazine.LoadedRounds)
-                    {
-                        if (loadedRound != null)
-                        {
-                            if (descriptionPack.containedAmmoClassesByType.ContainsKey(asMagazine.RoundType))
-                            {
-                                if (descriptionPack.containedAmmoClassesByType[asMagazine.RoundType].ContainsKey(loadedRound.LR_Class))
-                                {
-                                    descriptionPack.containedAmmoClassesByType[asMagazine.RoundType][loadedRound.LR_Class] += 1;
-                                }
-                                else
-                                {
-                                    descriptionPack.containedAmmoClassesByType[asMagazine.RoundType].Add(loadedRound.LR_Class, 1);
-                                }
-                            }
-                            else
-                            {
-                                Dictionary<FireArmRoundClass, int> newDict = new Dictionary<FireArmRoundClass, int>();
-                                newDict.Add(loadedRound.LR_Class, 1);
-                                descriptionPack.containedAmmoClassesByType.Add(asMagazine.RoundType, newDict);
-                            }
-                        }
-                    }
-                }
-                else if (physObj is FVRFireArmClip)
-                {
-                    FVRFireArmClip asClip = physObj as FVRFireArmClip;
-                    descriptionPack.containedAmmoClassesByType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, int>>();
-
-                    descriptionPack.stack = asClip.m_numRounds;
-                    descriptionPack.maxStack = asClip.m_capacity;
-                    foreach (FVRFireArmClip.FVRLoadedRound loadedRound in asClip.LoadedRounds)
-                    {
-                        if (loadedRound != null)
-                        {
-                            if (descriptionPack.containedAmmoClassesByType.ContainsKey(asClip.RoundType))
-                            {
-                                if (descriptionPack.containedAmmoClassesByType[asClip.RoundType].ContainsKey(loadedRound.LR_Class))
-                                {
-                                    descriptionPack.containedAmmoClassesByType[asClip.RoundType][loadedRound.LR_Class] += 1;
-                                }
-                                else
-                                {
-                                    descriptionPack.containedAmmoClassesByType[asClip.RoundType].Add(loadedRound.LR_Class, 1);
-                                }
-                            }
-                            else
-                            {
-                                Dictionary<FireArmRoundClass, int> newDict = new Dictionary<FireArmRoundClass, int>();
-                                newDict.Add(loadedRound.LR_Class, 1);
-                                descriptionPack.containedAmmoClassesByType.Add(asClip.RoundType, newDict);
-                            }
-                        }
-                    }
-                }
-            }
-			descriptionPack.weight = currentWeight;
-			descriptionPack.volume = volumes[mode];
-			descriptionPack.amountRequiredQuest = Mod.requiredForQuest.TryGetValue(H3ID, out int redForQuestValue) ? redForQuestValue : 0;
-			descriptionPack.foundInRaid = foundInRaid;
+            newPack.itemData = itemData;
+            newPack.item = this;
 
 			return descriptionPack;
         }
@@ -2719,9 +2545,60 @@ namespace EFM
             }
         }
 
-        public void DeserializationDelegateMethod(List<FVRPhysicalObject> objs, Action<List<FVRPhysicalObject>> action = null)
+        public void OnInsuredChangedInvoke()
         {
+            if(OnInsuredChanged != null)
+            {
+                OnInsuredChanged();
+            }
+        }
 
+        public void OnCurrentWeightChangedInvoke()
+        {
+            if(OnCurrentWeightChanged != null)
+            {
+                OnCurrentWeightChanged();
+            }
+        }
+
+        public void OnFIRStatusChangedInvoke()
+        {
+            if(OnFIRStatusChanged != null)
+            {
+                OnFIRStatusChanged();
+            }
+        }
+
+        public void OnModeChangedInvoke()
+        {
+            if(OnModeChanged != null)
+            {
+                OnModeChanged();
+            }
+        }
+
+        public void OnContainingVolumeChangedInvoke()
+        {
+            if(OnContainingVolumeChanged != null)
+            {
+                OnContainingVolumeChanged();
+            }
+        }
+
+        public void OnStackChangedInvoke()
+        {
+            if(OnStackChanged != null)
+            {
+                OnStackChanged();
+            }
+        }
+
+        public void OnAmountChangedInvoke()
+        {
+            if(OnAmountChanged != null)
+            {
+                OnAmountChanged();
+            }
         }
 
         public void OnTransformParentChanged()

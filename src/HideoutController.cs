@@ -1433,7 +1433,7 @@ namespace EFM
             }
 
             // Load areas
-            // Areas get loaded on Aer.Start() which will always happen after process data, which happens in Awake()
+            // Areas get loaded on Area.Start() which will always happen after process data, which happens in Awake()
         }
 
         public void LoadHideoutItems()

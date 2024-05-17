@@ -25,7 +25,6 @@ namespace EFM
         public static readonly float headshotDamageMultiplier = 1.2f;
         public static readonly float handDamageResist = 0.5f;
         //public static readonly float[] sizeVolumes = { 1, 2, 5, 30, 0, 50}; // 0: Small, 1: Medium, 2: Large, 3: Massive, 4: None, 5: CantCarryBig
-        public static readonly float volumePrecisionMultiplier = 1000; // Volumes are stored as floats but are processed as ints to avoid precision errors, this is how precise we should be when converting, this goes down to 10th of a mililiter
         public static int[] neededForPriorities = new int[] { 2, 3, 4, 0, 1 }; // Task, Area, Wishlist, Barter, Production
         public static Color[] neededForColors = new Color[] { Color.yellow, Color.red, Color.cyan, Color.magenta, Color.blue }; // Task, Area, Wishlist, Barter, Production
         public static Color neededForAreaFulfilledColor = Color.green;
@@ -93,7 +92,6 @@ namespace EFM
         public static Dictionary<string, List<MeatovItemData>> itemsByParents;
         public static Dictionary<string, int> ammoBoxByAmmoID;
         public static Dictionary<string, int> requiredForQuest;
-        public static Dictionary<string, List<DescriptionManager>> activeDescriptionsByItemID;
         public static List<AreaBonus> activeBonuses;
         public static Trader[] traders; // Prapor, Therapist, Fence, Skier, Peacekeeper, Mechanic, Ragman, Jaeger, Lightkeeper
         public static Dictionary<int, List<Task>> tasksByTraderIndex;
@@ -1681,7 +1679,6 @@ namespace EFM
             magazinesByType = new Dictionary<FireArmMagazineType, Dictionary<string, int>>();
             clipsByType = new Dictionary<FireArmClipType, Dictionary<string, int>>();
             roundsByType = new Dictionary<FireArmRoundType, Dictionary<string, int>>();
-            activeDescriptionsByItemID = new Dictionary<string, List<DescriptionManager>>();
             ammoBoxByAmmoID = new Dictionary<string, int>();
             requiredForQuest = new Dictionary<string, int>();
             wishList = new List<string>();

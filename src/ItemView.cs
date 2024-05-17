@@ -33,7 +33,22 @@ namespace EFM
 
         public void SetItem(MeatovItem item, bool displayValue = false, int currencyIndex = 0, int valueOverride = -1)
         {
+            if(this.item != null)
+            {
+                this.item.OnInsuredChanged -= OnInsuredChanged;
+                this.item.OnFIRStatusChanged -= OnFIRStatusChanged;
+                this.item.OnContainingVolumeChanged -= OnContainingVolumeChanged;
+                this.item.OnStackChanged -= OnStackChanged;
+                this.item.OnAmountChanged -= OnAmountChanged;
+            }
+
             this.item = item;
+
+            this.item.OnInsuredChanged += OnInsuredChanged;
+            this.item.OnFIRStatusChanged += OnFIRStatusChanged;
+            this.item.OnContainingVolumeChanged += OnContainingVolumeChanged;
+            this.item.OnStackChanged += OnStackChanged;
+            this.item.OnAmountChanged += OnAmountChanged;
 
             infoFoundInRaidCheckmark.SetActive(item.foundInRaid);
             infoInsuredIcon.SetActive(item.insured);
@@ -42,6 +57,25 @@ namespace EFM
             infoValueIcon.gameObject.SetActive(displayValue);
             infoValueText.gameObject.SetActive(displayValue);
             infoValueText.text = (valueOverride == -1 ? item.itemData.value : valueOverride).ToString();
+            if(item.itemType == MeatovItem.ItemType.Consumable)
+            {
+                infoCountText.gameObject.SetActive(true);
+                infoCountText.text = item.amount.ToString()+"/"+item.maxAmount;
+            }
+            else if(item.maxStack > 1)
+            {
+                infoCountText.gameObject.SetActive(true);
+                infoCountText.text = item.stack.ToString();
+            }
+            else if(item.maxVolume > 0)
+            {
+                infoCountText.gameObject.SetActive(true);
+                infoCountText.text = item.containingVolume.ToString() + "/" + item.maxVolume;
+            }
+            else
+            {
+                infoCountText.gameObject.SetActive(false);
+            }
             toolIcon.SetActive(false);
             toolBorder.SetActive(false);
 
@@ -57,6 +91,7 @@ namespace EFM
             if (this.itemData != null)
             {
                 this.itemData.OnNeededForChanged -= OnNeededForChanged;
+                this.itemData.OnMinimumUpgradeAmountChanged -= OnMinimumUpgradeAmountChanged;
             }
             this.itemData = itemData;
 
@@ -89,7 +124,9 @@ namespace EFM
                 {
                     infoNeededForCheckmark.gameObject.SetActive(false);
                 }
+
                 itemData.OnNeededForChanged += OnNeededForChanged;
+                itemData.OnMinimumUpgradeAmountChanged += OnMinimumUpgradeAmountChanged;
 
                 // Set overrides
                 if (hasInsuredOverride)
@@ -130,6 +167,11 @@ namespace EFM
 
         public void OnNeededForChanged(int index)
         {
+            OnMinimumUpgradeAmountChanged();
+        }
+
+        public void OnMinimumUpgradeAmountChanged()
+        {
             if (itemData.GetCheckmark(out Color color))
             {
                 infoNeededForCheckmark.gameObject.SetActive(true);
@@ -137,15 +179,54 @@ namespace EFM
             }
             else
             {
-                infoNeededForCheckmark.gameObject.SetActive(true);
+                infoNeededForCheckmark.gameObject.SetActive(false);
             }
+        }
+
+        public void OnInsuredChanged()
+        {
+            infoInsuredIcon.SetActive(item.insured);
+            insuredBorder.SetActive(item.insured);
+        }
+
+        public void OnFIRStatusChanged()
+        {
+            infoFoundInRaidCheckmark.SetActive(item.foundInRaid);
+        }
+
+        public void OnContainingVolumeChanged()
+        {
+            infoCountText.gameObject.SetActive(true);
+            infoCountText.text = item.containingVolume.ToString() + "/" + item.maxVolume;
+        }
+
+        public void OnStackChanged()
+        {
+            infoCountText.gameObject.SetActive(true);
+            infoCountText.text = item.stack.ToString();
+        }
+
+        public void OnAmountChanged()
+        {
+            infoCountText.gameObject.SetActive(true);
+            infoCountText.text = item.amount.ToString() + "/" + item.maxAmount;
         }
 
         public void OnDestroy()
         {
+            if (item != null)
+            {
+                item.OnInsuredChanged -= OnInsuredChanged;
+                item.OnFIRStatusChanged -= OnFIRStatusChanged;
+                item.OnContainingVolumeChanged -= OnContainingVolumeChanged;
+                item.OnStackChanged -= OnStackChanged;
+                item.OnAmountChanged -= OnAmountChanged;
+            }
+
             if (itemData != null)
             {
                 itemData.OnNeededForChanged -= OnNeededForChanged;
+                itemData.OnMinimumUpgradeAmountChanged -= OnMinimumUpgradeAmountChanged;
             }
         }
     }

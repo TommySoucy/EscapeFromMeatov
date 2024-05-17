@@ -82,6 +82,14 @@ namespace EFM
                 }
                 if(preValue != _onWishlist)
                 {
+                    if (preValue) // Was on wishlist, must remove
+                    {
+                        Mod.wishList.Remove(H3ID);
+                    }
+                    else // Was not on wishlist, must add
+                    {
+                        Mod.wishList.Add(H3ID);
+                    }
                     OnNeededForChangedInvoke(2);
                 }
             }
@@ -94,13 +102,54 @@ namespace EFM
         // Otherwise, only if we have enough for all upgrades requiring this item
         // For this, we need to keep track of the area uprade item requirement
         // requiring the least amount of this item
-        public int minimumUpgradeAmount;
+        private int _minimumUpgradeAmount;
+        public int minimumUpgradeAmount
+        {
+            set
+            {
+                int preValue = _minimumUpgradeAmount;
+                _minimumUpgradeAmount = value;
+                if (preValue != _minimumUpgradeAmount)
+                {
+                    OnMinimumUpgradeAmountChangedInvoke();
+                }
+            }
+            get { return _minimumUpgradeAmount; }
+        }
         public Dictionary<int, Dictionary<int, Dictionary<Production, int>>> neededForProductionByLevelByArea; // Productions for which Level in which Areas this item is needed
         public Dictionary<int, Dictionary<int, Dictionary<Production, int>>> neededForProductionByLevelByAreaCurrent; // Productions for which Level in which Areas this item is CURRENTLY needed (Depends on Mod.checkmarkFutureProductions)
         public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTrader; // Barters for which Level for which Trader this item is needed
         public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTraderCurrent; // Barters for which Level for which Trader this item is CURRENTLY needed (Depends on Mod.checkmarkFutureBarters)
         public Dictionary<Task, int> neededForTasks; // Tasks for which this item is needed
         public Dictionary<Task, int> neededForTasksCurrent; // Tasks for which this item is CURRENTLY needed (Depends on Mod.checkmarkFutureQuests)
+        private int _neededForAreaTotal;
+        public int neededForAreaTotal
+        {
+            set 
+            {
+                int preValue = _neededForAreaTotal;
+                _neededForAreaTotal = value;
+                if(preValue != _neededForAreaTotal)
+                {
+                    OnNeededForAreaTotalChangedInvoke();
+                }
+            }
+            get { return _neededForAreaTotal; }
+        }
+        private int _neededForTaskTotal;
+        public int neededForTaskTotal
+        {
+            set 
+            {
+                int preValue = _neededForTaskTotal;
+                _neededForTaskTotal = value;
+                if(preValue != _neededForTaskTotal)
+                {
+                    OnNeededForTaskTotalChangedInvoke();
+                }
+            }
+            get { return _neededForTaskTotal; }
+        }
 
         // Events
         public delegate void OnItemFoundDelegate();
@@ -111,6 +160,12 @@ namespace EFM
         public event OnItemUsedDelegate OnItemUsed;
         public delegate void OnNeededForChangedDelegate(int index);
         public event OnNeededForChangedDelegate OnNeededForChanged;
+        public delegate void OnMinimumUpgradeAmountChangedDelegate();
+        public event OnMinimumUpgradeAmountChangedDelegate OnMinimumUpgradeAmountChanged;
+        public delegate void OnNeededForAreaTotalChangedDelegate();
+        public event OnNeededForAreaTotalChangedDelegate OnNeededForAreaTotalChanged;
+        public delegate void OnNeededForTaskTotalChangedDelegate();
+        public event OnNeededForTaskTotalChangedDelegate OnNeededForTaskTotalChanged;
 
         public MeatovItemData(JToken data)
         {
@@ -355,6 +410,7 @@ namespace EFM
                                                 minimumUpgradeAmount = newCount;
                                             }
                                         }
+                                        neededForAreaTotal += newCount;
                                     }
                                 }
                             }
@@ -423,6 +479,7 @@ namespace EFM
                                                 minimumUpgradeAmount = 1;
                                             }
                                         }
+                                        ++neededForAreaTotal;
                                     }
                                 }
                             }
@@ -665,6 +722,7 @@ namespace EFM
                                         {
                                             neededForTasksCurrent.Add(taskEntry.Value, condition.value);
                                         }
+                                        neededForTaskTotal += condition.value;
                                     }
                                 }
 
@@ -713,6 +771,7 @@ namespace EFM
                                                 {
                                                     neededForTasksCurrent.Add(taskEntry.Value, condition.value);
                                                 }
+                                                neededForTaskTotal += condition.value;
                                             }
                                         }
 
@@ -757,6 +816,7 @@ namespace EFM
                                                 {
                                                     neededForTasksCurrent.Add(taskEntry.Value, condition.value);
                                                 }
+                                                neededForTaskTotal += condition.value;
                                             }
                                         }
 
@@ -798,6 +858,7 @@ namespace EFM
                                                     {
                                                         neededForTasksCurrent.Add(taskEntry.Value, condition.value);
                                                     }
+                                                    neededForTaskTotal += condition.value;
                                                 }
                                             }
 
@@ -823,8 +884,12 @@ namespace EFM
 
             if(task.taskState == Task.TaskState.Complete || task.taskState == Task.TaskState.Fail)
             {
-                if (neededForTasksCurrent.Remove(task))
+                int currentNeededCount = 0;
+                if (neededForTasksCurrent.TryGetValue(task, out currentNeededCount))
                 {
+                    neededForTasksCurrent.Remove(task);
+                    neededForTaskTotal -= currentNeededCount;
+
                     // This item was currently needed for this task, must update needed for state
                     neededFor[0] = neededForTasksCurrent.Count > 0;
                 }
@@ -836,7 +901,12 @@ namespace EFM
                 neededFor[0] = Mod.checkmarkFutureQuests;
                 if (!neededFor[0])
                 {
-                    neededForTasksCurrent.Remove(task);
+                    int currentNeededCount = 0;
+                    if (neededForTasksCurrent.TryGetValue(task, out currentNeededCount))
+                    {
+                        neededForTasksCurrent.Remove(task);
+                        neededForTaskTotal -= currentNeededCount;
+                    }
                 }
             }
             else // Changed to Active
@@ -848,6 +918,7 @@ namespace EFM
                 if (!neededForTasksCurrent.ContainsKey(task))
                 {
                     neededForTasksCurrent.Add(task, neededForTasks[task]);
+                    neededForTaskTotal += neededForTasks[task];
                 }
             }
 
@@ -865,6 +936,8 @@ namespace EFM
             // Note that here we assume level of an area can only ever go up and only by 1
             if (area.currentLevel == area.levels.Length - 1)
             {
+                neededForAreaTotal -= neededForLevelByAreaCurrent[area.index][area.currentLevel];
+
                 // Reached highest level, this item is not needed for this area anymore
                 area.OnAreaLevelChanged -= OnAreaLevelChanged;
 
@@ -877,10 +950,12 @@ namespace EFM
             }
             else
             {
+                neededForAreaTotal -= neededForLevelByAreaCurrent[area.index][area.currentLevel];
+
                 neededForLevelByAreaCurrent[area.index].Remove(area.currentLevel);
                 neededForProductionByLevelByAreaCurrent[area.index].Remove(area.currentLevel);
 
-                if(neededForLevelByAreaCurrent[area.index].Count == 0)
+                if (neededForLevelByAreaCurrent[area.index].Count == 0)
                 {
                     neededForLevelByAreaCurrent.Remove(area.index);
 
@@ -1043,6 +1118,11 @@ namespace EFM
             return false;
         }
 
+        public long GetCurrentNeededForTotal()
+        {
+            return neededForAreaTotal + neededForTaskTotal;
+        }
+
         public void OnItemFoundInvoke()
         {
             if(OnItemFound != null)
@@ -1072,6 +1152,30 @@ namespace EFM
             if(OnNeededForChanged != null)
             {
                 OnNeededForChanged(index);
+            }
+        }
+
+        public void OnMinimumUpgradeAmountChangedInvoke()
+        {
+            if(OnMinimumUpgradeAmountChanged != null)
+            {
+                OnMinimumUpgradeAmountChanged();
+            }
+        }
+
+        public void OnNeededForAreaTotalChangedInvoke()
+        {
+            if(OnNeededForAreaTotalChanged != null)
+            {
+                OnNeededForAreaTotalChanged();
+            }
+        }
+
+        public void OnNeededForTaskTotalChangedInvoke()
+        {
+            if(OnNeededForTaskTotalChanged != null)
+            {
+                OnNeededForTaskTotalChanged();
             }
         }
     }
