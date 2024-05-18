@@ -30,6 +30,8 @@ namespace EFM
         public event OnItemAddedDelegate OnItemAdded;
         public delegate void OnItemRemovedDelegate(MeatovItem item);
         public event OnItemRemovedDelegate OnItemRemoved;
+        public delegate void OnItemStackChangedDelegate(MeatovItem item, int difference);
+        public event OnItemStackChangedDelegate OnItemStackChanged;
 
         public bool AddItem(MeatovItem item)
         {
@@ -141,6 +143,8 @@ namespace EFM
                 {
                     FIRInventory[item.H3ID] += difference;
                 }
+
+                OnItemStackChangedInvoke(item, difference);
             }
         }
 
@@ -344,6 +348,14 @@ namespace EFM
             if(OnItemRemoved != null)
             {
                 OnItemRemoved(item);
+            }
+        }
+
+        public void OnItemStackChangedInvoke(MeatovItem item, int difference)
+        {
+            if(OnItemStackChanged != null)
+            {
+                OnItemStackChanged(item, difference);
             }
         }
     }

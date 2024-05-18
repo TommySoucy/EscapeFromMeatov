@@ -609,6 +609,68 @@ namespace EFM
                 }
             }
         }
+
+        public static string IndexToName(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return "Vents";
+                case 1:
+                    return "Security";
+                case 2:
+                    return "Lavatory";
+                case 3:
+                    return "Stash";
+                case 4:
+                    return "Generator";
+                case 5:
+                    return "Heating";
+                case 6:
+                    return "Water Collector";
+                case 7:
+                    return "Med Station";
+                case 8:
+                    return "Kitchen";
+                case 9:
+                    return "Rest Space";
+                case 10:
+                    return "Workbench";
+                case 11:
+                    return "Intelligence Center";
+                case 12:
+                    return "Shooting Range";
+                case 13:
+                    return "Library";
+                case 14:
+                    return "Scav Case";
+                case 15:
+                    return "Illumination";
+                case 16:
+                    return "Place Of Fame";
+                case 17:
+                    return "Air Filtering Unit";
+                case 18:
+                    return "Solar Power";
+                case 19:
+                    return "Booze Generator";
+                case 20:
+                    return "Bitcoin Farm";
+                case 21:
+                    return "Christmas Tree";
+                case 22:
+                    return "Leaking Wall";
+                case 23:
+                    return "Gym";
+                case 24:
+                    return "Weapon Stand";
+                case 25:
+                    return "Secondary Weapon Stand";
+                default:
+                    Mod.LogError("Area IndexToName called with invalid index: " + index);
+                    return "";
+            }
+        }
     }
 
     public class Requirement
