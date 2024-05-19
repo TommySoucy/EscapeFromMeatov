@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static FistVR.ClosedBoltCarrierWrap;
 
 namespace EFM
 {
@@ -187,6 +188,11 @@ namespace EFM
         }
 
         public void OnToggleBartersClicked()
+        {
+
+        }
+
+        public void OnToggleProductionsClicked()
         {
 
         }
@@ -491,6 +497,98 @@ namespace EFM
                     compatibleAmmoContainers.SetActive(false);
                     compatibleAmmo.SetActive(false);
                     break;
+            }
+        }
+
+        public void UpdateCompatibleAmmoContainersList()
+        {
+            // Clear current list
+            while (compatibleAmmoContainersParent.transform.childCount > 1)
+            {
+                Transform currentFirstChild = compatibleAmmoContainersParent.transform.GetChild(1);
+                currentFirstChild.SetParent(null);
+                Destroy(currentFirstChild.gameObject);
+            }
+
+            // Fill new list if necessary
+            if (IM.OD.TryGetValue(descriptionPack.itemData.H3ID, out FVRObject wrapper))
+            {
+                bool gotContainer = false;
+                if(wrapper.CompatibleMagazines != null)
+                {
+                    for (int i = 0; i < wrapper.CompatibleMagazines.Count; ++i)
+                    {
+                        if(Mod.GetItemData(wrapper.CompatibleMagazines[i].ItemID, out MeatovItemData itemData))
+                        {
+                            long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleMagazines[i].ItemID);
+                            GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
+                            ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                            entryUI.SetAmmoContainer(this, itemData.name, currentCount);
+                            gotContainer = true;
+                        }
+                    }
+                }
+                if(wrapper.CompatibleClips != null)
+                {
+                    for (int i = 0; i < wrapper.CompatibleClips.Count; ++i)
+                    {
+                        if (Mod.GetItemData(wrapper.CompatibleClips[i].ItemID, out MeatovItemData itemData))
+                        {
+                            long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleClips[i].ItemID);
+                            GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
+                            ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                            entryUI.SetAmmoContainer(this, itemData.name, currentCount);
+                            gotContainer = true;
+                        }
+                    }
+                }
+                if(wrapper.CompatibleSpeedLoaders != null)
+                {
+                    for (int i = 0; i < wrapper.CompatibleSpeedLoaders.Count; ++i)
+                    {
+                        if (Mod.GetItemData(wrapper.CompatibleSpeedLoaders[i].ItemID, out MeatovItemData itemData))
+                        {
+                            long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleSpeedLoaders[i].ItemID);
+                            GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
+                            ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                            entryUI.SetAmmoContainer(this, itemData.name, currentCount);
+                            gotContainer = true;
+                        }
+                    }
+                }
+                compatibleAmmoContainers.SetActive(gotContainer);
+            }
+            else
+            {
+                compatibleAmmoContainers.SetActive(false);
+            }
+        }
+
+        public void UpdateCompatibleAmmoList()
+        {
+            // Clear current list
+            while (compatibleAmmoParent.transform.childCount > 1)
+            {
+                Transform currentFirstChild = compatibleAmmoParent.transform.GetChild(1);
+                currentFirstChild.SetParent(null);
+                Destroy(currentFirstChild.gameObject);
+            }
+            cont from here
+            // Fill new list if necessary
+            if (IM.OD.TryGetValue(descriptionPack.itemData.H3ID, out FVRObject wrapper) && wrapper.CompatibleSingleRounds != null)
+            {
+                compatibleAmmo.SetActive(true);
+                for (int i = 0; i < wrapper.CompatibleSingleRounds.Count; ++i)
+                {
+                    long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleSingleRounds[i].ItemID);
+                    GameObject newEntry = Instantiate(compatibleAmmoEntryPrefab, compatibleAmmoParent.transform);
+                    ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                    entryUI.SetAmmo(this, descriptionPack.itemData.name, currentCount);
+                }
+            }
+            else
+            {
+                compatibleAmmoContainers.SetActive(false);
             }
         }
 

@@ -139,7 +139,7 @@ namespace EFM
         public static float currentDebuffEndDelay = 0;
         public static float currentScavCooldownTimer = 1;
         public static float currentInsuranceReturnTime = 1;
-        public static float currentRagfairCommission = 1; // TODO: Implement, dont forget to use EFM_Skill.skillBoostPercent
+        public static float currentRagfairCommission = 1;
         public static Dictionary<Skill.SkillType, float> currentSkillGroupLevelingBoosts;
 
         public delegate void OnHideoutInventoryChangedDelegate();
