@@ -120,8 +120,8 @@ namespace EFM
         public Dictionary<int, Dictionary<int, Dictionary<Production, int>>> neededForProductionByLevelByAreaCurrent; // Productions for which Level in which Areas this item is CURRENTLY needed (Depends on Mod.checkmarkFutureProductions)
         public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTrader; // Barters for which Level for which Trader this item is needed
         public Dictionary<int, Dictionary<int, Dictionary<Barter, int>>> neededForBarterByLevelByTraderCurrent; // Barters for which Level for which Trader this item is CURRENTLY needed (Depends on Mod.checkmarkFutureBarters)
-        public Dictionary<Task, int> neededForTasks; // Tasks for which this item is needed
-        public Dictionary<Task, int> neededForTasksCurrent; // Tasks for which this item is CURRENTLY needed (Depends on Mod.checkmarkFutureQuests)
+        public Dictionary<Task, KeyValuePair<int, bool>> neededForTasks; // Tasks for which this item is needed, amount (Key) and FIR only (value)
+        public Dictionary<Task, KeyValuePair<int, bool>> neededForTasksCurrent; // Tasks for which this item is CURRENTLY needed (Depends on Mod.checkmarkFutureQuests)
         private int _neededForAreaTotal;
         public int neededForAreaTotal
         {
@@ -322,8 +322,8 @@ namespace EFM
                 neededForLevelByArea = new Dictionary<int, Dictionary<int, int>>();
                 neededForProductionByLevelByArea = new Dictionary<int, Dictionary<int, Dictionary<Production, int>>>();
                 neededForBarterByLevelByTrader = new Dictionary<int, Dictionary<int, Dictionary<Barter, int>>>();
-                neededForTasks = new Dictionary<Task, int>();
-                neededForTasksCurrent = new Dictionary<Task, int>();
+                neededForTasks = new Dictionary<Task, KeyValuePair<int, bool>>();
+                neededForTasksCurrent = new Dictionary<Task, KeyValuePair<int, bool>>();
             }
             else
             {
@@ -691,14 +691,14 @@ namespace EFM
                         {
                             if (condition.targetItems[j] == this)
                             {
-                                int currentCount = 0;
+                                KeyValuePair<int, bool> currentCount;
                                 if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                 {
-                                    neededForTasks[taskEntry.Value] = currentCount + condition.value;
+                                    neededForTasks[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + condition.value, currentCount.Value);
                                 }
                                 else
                                 {
-                                    neededForTasks.Add(taskEntry.Value, condition.value);
+                                    neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                 }
 
                                 // Set initial needed for state
@@ -716,11 +716,11 @@ namespace EFM
                                     {
                                         if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
                                         {
-                                            neededForTasksCurrent[taskEntry.Value] = currentCount + condition.value;
+                                            neededForTasksCurrent[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + condition.value, currentCount.Value);
                                         }
                                         else
                                         {
-                                            neededForTasksCurrent.Add(taskEntry.Value, condition.value);
+                                            neededForTasksCurrent.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                         }
                                         neededForTaskTotal += condition.value;
                                     }
@@ -740,14 +740,14 @@ namespace EFM
                                 {
                                     if (condition.counters[j].useItemTargets[k] == this)
                                     {
-                                        int currentCount = 0;
+                                        KeyValuePair<int, bool> currentCount;
                                         if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                         {
-                                            neededForTasks[taskEntry.Value] = currentCount + condition.value;
+                                            neededForTasks[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + condition.value, currentCount.Value);
                                         }
                                         else
                                         {
-                                            neededForTasks.Add(taskEntry.Value, condition.value);
+                                            neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                         }
 
                                         // Set initial needed for state
@@ -765,11 +765,11 @@ namespace EFM
                                             {
                                                 if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
                                                 {
-                                                    neededForTasksCurrent[taskEntry.Value] = currentCount + condition.value;
+                                                    neededForTasksCurrent[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + condition.value, currentCount.Value);
                                                 }
                                                 else
                                                 {
-                                                    neededForTasksCurrent.Add(taskEntry.Value, condition.value);
+                                                    neededForTasksCurrent.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                                 }
                                                 neededForTaskTotal += condition.value;
                                             }
@@ -785,14 +785,14 @@ namespace EFM
                                 {
                                     if (condition.counters[j].equipmentWhitelists[k].Contains(H3ID))
                                     {
-                                        int currentCount = 0;
+                                        KeyValuePair<int, bool> currentCount;
                                         if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                         {
-                                            neededForTasks[taskEntry.Value] = currentCount + 1;
+                                            neededForTasks[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + 1, currentCount.Value);
                                         }
                                         else
                                         {
-                                            neededForTasks.Add(taskEntry.Value, 1);
+                                            neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(1, currentCount.Value));
                                         }
 
                                         // Set initial needed for state
@@ -810,11 +810,11 @@ namespace EFM
                                             {
                                                 if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
                                                 {
-                                                    neededForTasksCurrent[taskEntry.Value] = currentCount + condition.value;
+                                                    neededForTasksCurrent[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + condition.value, currentCount.Value);
                                                 }
                                                 else
                                                 {
-                                                    neededForTasksCurrent.Add(taskEntry.Value, condition.value);
+                                                    neededForTasksCurrent.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                                 }
                                                 neededForTaskTotal += condition.value;
                                             }
@@ -827,14 +827,14 @@ namespace EFM
                                     {
                                         if (condition.counters[j].equipmentWhitelists[k].Contains(parents[l]))
                                         {
-                                            int currentCount = 0;
+                                            KeyValuePair<int, bool> currentCount;
                                             if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                             {
-                                                neededForTasks[taskEntry.Value] = currentCount + 1;
+                                                neededForTasks[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + 1, currentCount.Value);
                                             }
                                             else
                                             {
-                                                neededForTasks.Add(taskEntry.Value, 1);
+                                                neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(1, currentCount.Value));
                                             }
 
                                             // Set initial needed for state
@@ -852,11 +852,11 @@ namespace EFM
                                                 {
                                                     if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
                                                     {
-                                                        neededForTasksCurrent[taskEntry.Value] = currentCount + condition.value;
+                                                        neededForTasksCurrent[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + condition.value, currentCount.Value);
                                                     }
                                                     else
                                                     {
-                                                        neededForTasksCurrent.Add(taskEntry.Value, condition.value);
+                                                        neededForTasksCurrent.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                                     }
                                                     neededForTaskTotal += condition.value;
                                                 }
@@ -884,11 +884,11 @@ namespace EFM
 
             if(task.taskState == Task.TaskState.Complete || task.taskState == Task.TaskState.Fail)
             {
-                int currentNeededCount = 0;
+                KeyValuePair<int, bool> currentNeededCount;
                 if (neededForTasksCurrent.TryGetValue(task, out currentNeededCount))
                 {
                     neededForTasksCurrent.Remove(task);
-                    neededForTaskTotal -= currentNeededCount;
+                    neededForTaskTotal -= currentNeededCount.Key;
 
                     // This item was currently needed for this task, must update needed for state
                     neededFor[0] = neededForTasksCurrent.Count > 0;
@@ -901,11 +901,11 @@ namespace EFM
                 neededFor[0] = Mod.checkmarkFutureQuests;
                 if (!neededFor[0])
                 {
-                    int currentNeededCount = 0;
+                    KeyValuePair<int, bool> currentNeededCount;
                     if (neededForTasksCurrent.TryGetValue(task, out currentNeededCount))
                     {
                         neededForTasksCurrent.Remove(task);
-                        neededForTaskTotal -= currentNeededCount;
+                        neededForTaskTotal -= currentNeededCount.Key;
                     }
                 }
             }
@@ -918,7 +918,7 @@ namespace EFM
                 if (!neededForTasksCurrent.ContainsKey(task))
                 {
                     neededForTasksCurrent.Add(task, neededForTasks[task]);
-                    neededForTaskTotal += neededForTasks[task];
+                    neededForTaskTotal += neededForTasks[task].Key;
                 }
             }
 

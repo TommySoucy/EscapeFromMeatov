@@ -35,11 +35,32 @@ namespace EFM
                 unfulfilledIcon.SetActive(true);
             }
             amount.text = currentCount.ToString() + "/" + neededCount;
-            entryName.text = owner.descriptionPack.itemData.name;
+            entryName.text = task.name;
+            entryName.color = Mod.neededForColors[0];
             entryInfo.text = task.trader.name;
         }
 
         public void SetAreaLevel(ItemDescriptionUI owner, int areaIndex, int level, long currentCount, int neededCount)
+        {
+            this.owner = owner;
+            if(currentCount >= neededCount)
+            {
+                fulfilledIcon.SetActive(true);
+                unfulfilledIcon.SetActive(false);
+                entryName.color = Mod.neededForAreaFulfilledColor;
+            }
+            else
+            {
+                fulfilledIcon.SetActive(false);
+                unfulfilledIcon.SetActive(true);
+                entryName.color = Mod.neededForColors[1];
+            }
+            amount.text = currentCount.ToString() + "/" + neededCount;
+            entryName.text = Area.IndexToName(areaIndex) + " lvl " + level;
+            entryInfo.gameObject.SetActive(false);
+        }
+
+        public void SetBarter(ItemDescriptionUI owner, Barter barter, int traderIndex, int level, long currentCount, int neededCount)
         {
             this.owner = owner;
             if(currentCount >= neededCount)
@@ -53,8 +74,31 @@ namespace EFM
                 unfulfilledIcon.SetActive(true);
             }
             amount.text = currentCount.ToString() + "/" + neededCount;
-            entryName.text = owner.descriptionPack.itemData.name;
-            entryInfo.text = Area.IndexToName(areaIndex)+" lvl "+ level;
+            entryName.text = barter.itemData.name;
+            entryName.color = Mod.neededForColors[3];
+            entryInfo.text = Mod.traders[traderIndex].name + " lvl " + level;
+        }
+
+        public void SetProduction(ItemDescriptionUI owner, Production production, int areaIndex, int level, long currentCount, int neededCount)
+        {
+            this.owner = owner;
+            if(currentCount >= neededCount)
+            {
+                fulfilledIcon.SetActive(true);
+                unfulfilledIcon.SetActive(false);
+            }
+            else
+            {
+                fulfilledIcon.SetActive(false);
+                unfulfilledIcon.SetActive(true);
+            }
+            amount.text = currentCount.ToString() + "/" + neededCount;
+            if(Mod.GetItemData(production.endProduct, out MeatovItemData itemData))
+            {
+                entryName.text = itemData.name;
+            }
+            entryName.color = Mod.neededForColors[4];
+            entryInfo.text = Area.IndexToName(areaIndex) + " lvl " + level;
         }
     }
 }

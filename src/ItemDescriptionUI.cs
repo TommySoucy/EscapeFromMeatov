@@ -13,7 +13,7 @@ namespace EFM
         public ItemView summaryItemView;
         public Text summaryName;
         public Text summaryNeededText;
-        public GameObject summaryWishlist;
+        public Text summaryWishlist;
         public Text summaryWeight;
         public Text summaryVolume;
 
@@ -25,25 +25,35 @@ namespace EFM
         public Text contentText;
         public GameObject neededForTitle;
         public GameObject neededForNone;
-        public GameObject neededForWishlist;
+        public Text neededForWishlist;
         public GameObject neededForAreas;
+        public Text neededForAreasTitle;
         public GameObject neededForAreasOpenIcon;
         public GameObject neededForAreasCloseIcon;
         public GameObject neededForAreasParent;
         public GameObject neededForAreasEntryPrefab;
         public Text neededForAreasTotal;
         public GameObject neededForQuests;
+        public Text neededForQuestsTitle;
         public GameObject neededForQuestsOpenIcon;
         public GameObject neededForQuestsCloseIcon;
         public GameObject neededForQuestsParent;
         public GameObject neededForQuestsEntryPrefab;
         public Text neededForQuestsTotal;
         public GameObject neededForBarters;
+        public Text neededForBartersTitle;
         public GameObject neededForBartersOpenIcon;
         public GameObject neededForBartersCloseIcon;
         public GameObject neededForBartersParent;
         public GameObject neededForBartersEntryPrefab;
         public Text neededForBartersTotal;
+        public GameObject neededForProductions;
+        public Text neededForProductionsTitle;
+        public GameObject neededForProductionsOpenIcon;
+        public GameObject neededForProductionsCloseIcon;
+        public GameObject neededForProductionsParent;
+        public GameObject neededForProductionsEntryPrefab;
+        public Text neededForProductionsTotal;
         public GameObject compatibleAmmoContainers;
         public GameObject compatibleAmmoContainersOpenIcon;
         public GameObject compatibleAmmoContainersCloseIcon;
@@ -83,6 +93,12 @@ namespace EFM
                 {
                     descriptionPack.item.OnCurrentWeightChanged -= OnPropertiesChanged;
                     descriptionPack.item.OnModeChanged -= OnPropertiesChanged;
+                    if (descriptionPack.item.containerVolume != null)
+                    {
+                        descriptionPack.item.containerVolume.OnItemAdded -= OnItemAdded;
+                        descriptionPack.item.containerVolume.OnItemRemoved -= OnItemRemoved;
+                        descriptionPack.item.containerVolume.OnItemStackChanged -= OnItemStackChanged;
+                    }
                 }
             }
 
@@ -95,6 +111,12 @@ namespace EFM
             {
                 descriptionPack.item.OnCurrentWeightChanged += OnPropertiesChanged;
                 descriptionPack.item.OnModeChanged += OnPropertiesChanged;
+                if(descriptionPack.item.containerVolume != null)
+                {
+                    descriptionPack.item.containerVolume.OnItemAdded += OnItemAdded;
+                    descriptionPack.item.containerVolume.OnItemRemoved += OnItemRemoved;
+                    descriptionPack.item.containerVolume.OnItemStackChanged += OnItemStackChanged;
+                }
             }
 
             // Summary
@@ -110,7 +132,8 @@ namespace EFM
             }
             summaryName.text = descriptionPack.itemData.name;
             summaryNeededText.text = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID).ToString()+"/"+descriptionPack.itemData.GetCurrentNeededForTotal();
-            summaryWishlist.SetActive(descriptionPack.itemData.onWishlist);
+            summaryWishlist.gameObject.SetActive(descriptionPack.itemData.onWishlist);
+            summaryWishlist.color = Mod.neededForColors[2];
 
             // Full
             if(descriptionPack.item != null)
@@ -134,6 +157,17 @@ namespace EFM
             needed |= UpdateNeededForAreas();
             needed |= UpdateNeededForBarter();
             needed |= UpdateNeededForProduction();
+            neededForQuestsTitle.color = Mod.neededForColors[0];
+            neededForQuestsTotal.color = Mod.neededForColors[0];
+            Color areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID) >= descriptionPack.itemData.minimumUpgradeAmount ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
+            neededForAreasTitle.color = areasColor;
+            neededForAreasTotal.color = areasColor;
+            neededForWishlist.color = Mod.neededForColors[2];
+            neededForBartersTitle.color = Mod.neededForColors[3];
+            neededForBartersTotal.color = Mod.neededForColors[3];
+            neededForProductionsTitle.color = Mod.neededForColors[4];
+            neededForProductionsTotal.color = Mod.neededForColors[4];
+            UpdateCompatibilityLists();
 
             // Common
             OnPropertiesChanged();
@@ -198,7 +232,6 @@ namespace EFM
 
         public void OnContentChanged()
         {
-            TODO e: // sub to containment volume itemadded/removed/stackchanged events
             string contentString = "";
             bool firstIt = true;
             foreach(KeyValuePair<string, int> contentEntry in descriptionPack.item.containerVolume.inventory)
@@ -221,6 +254,21 @@ namespace EFM
                 }
             }
             contentText.text = contentString;
+        }
+
+        public void OnItemAdded(MeatovItem item)
+        {
+            OnContentChanged();
+        }
+
+        public void OnItemRemoved(MeatovItem item)
+        {
+            OnContentChanged();
+        }
+
+        public void OnItemStackChanged(MeatovItem item, int difference)
+        {
+            OnContentChanged();
         }
 
         public void OnNeededForChanged(int index)
@@ -263,16 +311,16 @@ namespace EFM
             // Fill new list if necessary
             if (descriptionPack.itemData.neededForTasksCurrent.Count > 0)
             {
-                TODO e: // Must consider the tasks' FIR requirements
                 neededForQuests.SetActive(true);
                 int total = 0;
                 long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID);
-                foreach (KeyValuePair<Task, int> entry in descriptionPack.itemData.neededForTasksCurrent)
+                long currentFIRCount = Mod.GetFIRItemCountInInventories(descriptionPack.itemData.H3ID);
+                foreach (KeyValuePair<Task, KeyValuePair<int, bool>> entry in descriptionPack.itemData.neededForTasksCurrent) 
                 {
                     GameObject newEntry = Instantiate(neededForQuestsEntryPrefab, neededForQuestsParent.transform);
                     ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                    entryUI.SetTask(this, entry.Key, currentCount, entry.Value);
-                    total += entry.Value;
+                    entryUI.SetTask(this, entry.Key, entry.Value.Value ? currentFIRCount : currentCount, entry.Value.Key);
+                    total += entry.Value.Key;
                 }
                 neededForQuestsTotal.text = "Total: " + currentCount + "/" + total;
                 return true;
@@ -310,7 +358,7 @@ namespace EFM
                         total += entry.Value;
                     }
                 }
-                neededForQuestsTotal.text = "Total: " + currentCount + "/" + total;
+                neededForAreasTotal.text = "Total: " + currentCount + "/" + total;
                 return true;
             }
             else
@@ -324,14 +372,14 @@ namespace EFM
         {
             if (descriptionPack.itemData.onWishlist)
             {
-                summaryWishlist.SetActive(true);
-                neededForWishlist.SetActive(true);
+                summaryWishlist.gameObject.SetActive(true);
+                neededForWishlist.gameObject.SetActive(true);
                 return true;
             }
             else
             {
-                summaryWishlist.SetActive(false);
-                neededForWishlist.SetActive(false);
+                summaryWishlist.gameObject.SetActive(false);
+                neededForWishlist.gameObject.SetActive(false);
                 return false;
             }
         }
@@ -360,12 +408,12 @@ namespace EFM
                         {
                             GameObject newEntry = Instantiate(neededForBartersEntryPrefab, neededForBartersParent.transform);
                             ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                            entryUI.SetBarter(this, entry.Key, currentCount, entry.Value);
+                            entryUI.SetBarter(this, entry.Key, traderEntry.Key, traderLevelEntry.Key, currentCount, entry.Value);
                             total += entry.Value;
                         }
                     }
                 }
-                neededForQuestsTotal.text = "Total: " + currentCount + "/" + total;
+                neededForBartersTotal.text = "Total: " + currentCount + "/" + total;
                 return true;
             }
             else
@@ -377,7 +425,73 @@ namespace EFM
 
         public bool UpdateNeededForProduction()
         {
+            // Clear current list
+            while (neededForProductionsParent.transform.childCount > 1)
+            {
+                Transform currentFirstChild = neededForProductionsParent.transform.GetChild(1);
+                currentFirstChild.SetParent(null);
+                Destroy(currentFirstChild.gameObject);
+            }
 
+            // Fill new list if necessary
+            if (descriptionPack.itemData.neededForProductionByLevelByAreaCurrent.Count > 0)
+            {
+                neededForBarters.SetActive(true);
+                int total = 0;
+                long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID);
+                foreach (KeyValuePair<int, Dictionary<int, Dictionary<Production, int>>> areaEntry in descriptionPack.itemData.neededForProductionByLevelByAreaCurrent)
+                {
+                    foreach (KeyValuePair<int, Dictionary<Production, int>> areaLevelEntry in areaEntry.Value)
+                    {
+                        foreach (KeyValuePair<Production, int> entry in areaLevelEntry.Value)
+                        {
+                            GameObject newEntry = Instantiate(neededForProductionsEntryPrefab, neededForProductionsParent.transform);
+                            ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                            entryUI.SetProduction(this, entry.Key, areaEntry.Key, areaLevelEntry.Key, currentCount, entry.Value);
+                            total += entry.Value;
+                        }
+                    }
+                }
+                neededForProductionsTotal.text = "Total: " + currentCount + "/" + total;
+                return true;
+            }
+            else
+            {
+                neededForBarters.SetActive(false);
+                return false;
+            }
+        }
+
+        public void UpdateCompatibilityLists()
+        {
+            switch (descriptionPack.itemData.compatibilityValue)
+            {
+                case 0:
+                    compatibleAmmoContainers.SetActive(false);
+                    compatibleAmmo.SetActive(false);
+                    break;
+                case 1:
+                    compatibleAmmo.SetActive(false);
+                    compatibleAmmoContainers.SetActive(true);
+                    UpdateCompatibleAmmoContainersList();
+                    break;
+                case 2:
+                    compatibleAmmoContainers.SetActive(false);
+                    compatibleAmmo.SetActive(true);
+                    UpdateCompatibleAmmoList();
+                    break;
+                case 3:
+                    compatibleAmmoContainers.SetActive(true);
+                    compatibleAmmo.SetActive(true);
+                    UpdateCompatibleAmmoContainersList();
+                    UpdateCompatibleAmmoList();
+                    break;
+                default:
+                    Mod.LogError("Item data for "+descriptionPack.itemData.name + " has invalid compatibility value: " + descriptionPack.itemData.compatibilityValue);
+                    compatibleAmmoContainers.SetActive(false);
+                    compatibleAmmo.SetActive(false);
+                    break;
+            }
         }
 
         public void OnNeededForAreaTotalChanged()
@@ -417,6 +531,12 @@ namespace EFM
                 {
                     descriptionPack.item.OnCurrentWeightChanged -= OnPropertiesChanged;
                     descriptionPack.item.OnModeChanged -= OnPropertiesChanged;
+                    if (descriptionPack.item.containerVolume != null)
+                    {
+                        descriptionPack.item.containerVolume.OnItemAdded -= OnItemAdded;
+                        descriptionPack.item.containerVolume.OnItemRemoved -= OnItemRemoved;
+                        descriptionPack.item.containerVolume.OnItemStackChanged -= OnItemStackChanged;
+                    }
                 }
             }
         }
