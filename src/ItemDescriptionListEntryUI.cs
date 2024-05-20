@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using FistVR;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace EFM
@@ -12,6 +14,7 @@ namespace EFM
         public Text amount;
         public Text entryName;
         public Text entryInfo;
+        public Button button;
 
         public void OnFillClicked()
         {
@@ -99,6 +102,112 @@ namespace EFM
             }
             entryName.color = Mod.neededForColors[4];
             entryInfo.text = Area.IndexToName(areaIndex) + " lvl " + level;
+        }
+
+        public void SetAmmoContainer(ItemDescriptionUI owner, MeatovItem physicalItem, MeatovItemData containerData, int hideoutCount, int playerCount, bool isMag)
+        {
+            this.owner = owner;
+            fulfilledIcon.SetActive(false);
+            unfulfilledIcon.SetActive(false);
+            entryName.text = containerData.name;
+            if(physicalItem == null)
+            {
+                button.gameObject.SetActive(false);
+            }
+            else
+            {
+                button.gameObject.SetActive(true);
+                string containerID = containerData.H3ID;
+                bool mag = isMag;
+                button.onClick.AddListener(() => OnLoadAmmoContainerClicked(containerID, mag));
+            }
+            if (HideoutController.instance != null)
+            {
+                amount.text = "(" + (hideoutCount + playerCount) + ")";
+            }
+            else
+            {
+                amount.text = "(" + playerCount + ")";
+            }
+        }
+
+        public void OnLoadAmmoContainerClicked(string containerID, bool mag)
+        {
+            if (owner.descriptionPack.item != null)
+            {
+                if(owner.descriptionPack.item.physObj is FVRFireArm)
+                {
+                    FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
+                    if(asFA.Magazine != null || asFA.Clip != null)
+                    {
+                        return;
+                    }
+                }
+                else if(owner.descriptionPack.item.physObj is AttachableFirearmPhysicalObject)
+                {
+                    AttachableFirearmPhysicalObject asAFA = owner.descriptionPack.item.physObj as AttachableFirearmPhysicalObject;
+                    if (asAFA.FA.Magazine != null || asAFA.FA.Clip != null)
+                    {
+                        return;
+                    }
+                }
+                else // Not an item we can load ammo container in anyway
+                {
+                    Mod.LogError("Attempted to description ammo container load " + containerID + " into " + owner.descriptionPack.item.name + " which is not FVRFirearm nor AttachableFirearmPhysicalObject");
+                    return;
+                }
+            }
+            else // Should not have had load button, but item could have been destroyed since description creation
+            {
+                return;
+            }
+
+            if(Mod.playerInventoryItems.TryGetValue(containerID, out List<MeatovItem> containerList))
+            {
+                if (mag)
+                {
+                    for (int i = 0; i < containerList.Count; ++i)
+                    {
+                        FVRFireArmMagazine asMag = containerList[i].physObj as FVRFireArmMagazine;
+                        if (asMag != null && asMag.FireArm == null && asMag.AttachableFireArm == null)
+                        {
+                            if (owner.descriptionPack.item.physObj is FVRFireArm)
+                            {
+                                FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
+                                asFA.LoadMag(asMag);
+                            }
+                            else if (owner.descriptionPack.item.physObj is AttachableFirearmPhysicalObject)
+                            {
+                                AttachableFirearmPhysicalObject asAFA = owner.descriptionPack.item.physObj as AttachableFirearmPhysicalObject;
+                                asAFA.FA.LoadMag(asMag);
+                            }
+                            else // Can't load clip into attachable firearm
+                            {
+                                return;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < containerList.Count; ++i)
+                    {
+                        FVRFireArmClip asClip = containerList[i].physObj as FVRFireArmClip;
+                        if (asClip != null && asClip.FireArm == null)
+                        {
+                            if (owner.descriptionPack.item.physObj is FVRFireArm)
+                            {
+                                FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
+                                asFA.LoadClip(asClip);
+                            }
+                            else // Can't load clip into attachable firearm
+                            {
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

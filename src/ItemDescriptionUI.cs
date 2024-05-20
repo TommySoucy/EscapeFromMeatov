@@ -520,11 +520,41 @@ namespace EFM
                     {
                         if(Mod.GetItemData(wrapper.CompatibleMagazines[i].ItemID, out MeatovItemData itemData))
                         {
-                            long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleMagazines[i].ItemID);
-                            GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
-                            ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                            entryUI.SetAmmoContainer(this, itemData.name, currentCount);
-                            gotContainer = true;
+                            // Only consider mags not already loaded into a firearm
+                            // Note that we only consider mags in hideout if we are currently in hideout
+                            int hideoutCount = 0;
+                            if (HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(wrapper.CompatibleMagazines[i].ItemID, out List<MeatovItem> mags))
+                            {
+                                hideoutCount = mags.Count;
+                                for(int j=0; j < mags.Count; ++j)
+                                {
+                                    FVRFireArmMagazine asMag = mags[j].physObj as FVRFireArmMagazine;
+                                    if (asMag == null || asMag.FireArm != null || asMag.AttachableFireArm != null)
+                                    {
+                                        --hideoutCount;
+                                    }
+                                }
+                            }
+                            int playerCount = 0;
+                            if (Mod.playerInventoryItems.TryGetValue(wrapper.CompatibleMagazines[i].ItemID, out List<MeatovItem> playerMags))
+                            {
+                                playerCount = playerMags.Count;
+                                for (int j = 0; j < playerMags.Count; ++j)
+                                {
+                                    FVRFireArmMagazine asMag = playerMags[j].physObj as FVRFireArmMagazine;
+                                    if (asMag == null || asMag.FireArm != null || asMag.AttachableFireArm != null)
+                                    {
+                                        --playerCount;
+                                    }
+                                }
+                            }
+                            if(hideoutCount > 0 || playerCount > 0)
+                            {
+                                GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
+                                ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                                entryUI.SetAmmoContainer(this, descriptionPack.item, itemData, hideoutCount, playerCount, true);
+                                gotContainer = true;
+                            }
                         }
                     }
                 }
@@ -534,25 +564,41 @@ namespace EFM
                     {
                         if (Mod.GetItemData(wrapper.CompatibleClips[i].ItemID, out MeatovItemData itemData))
                         {
-                            long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleClips[i].ItemID);
-                            GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
-                            ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                            entryUI.SetAmmoContainer(this, itemData.name, currentCount);
-                            gotContainer = true;
-                        }
-                    }
-                }
-                if(wrapper.CompatibleSpeedLoaders != null)
-                {
-                    for (int i = 0; i < wrapper.CompatibleSpeedLoaders.Count; ++i)
-                    {
-                        if (Mod.GetItemData(wrapper.CompatibleSpeedLoaders[i].ItemID, out MeatovItemData itemData))
-                        {
-                            long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleSpeedLoaders[i].ItemID);
-                            GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
-                            ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                            entryUI.SetAmmoContainer(this, itemData.name, currentCount);
-                            gotContainer = true;
+                            // Only consider clips not already loaded into a firearm
+                            // Note that we only consider clips in hideout if we are currently in hideout
+                            int hideoutCount = 0;
+                            if (HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(wrapper.CompatibleClips[i].ItemID, out List<MeatovItem> clips))
+                            {
+                                hideoutCount = clips.Count;
+                                for (int j = 0; j < clips.Count; ++j)
+                                {
+                                    FVRFireArmClip asClip = clips[j].physObj as FVRFireArmClip;
+                                    if (asClip == null || asClip.FireArm != null)
+                                    {
+                                        --hideoutCount;
+                                    }
+                                }
+                            }
+                            int playerCount = 0;
+                            if (Mod.playerInventoryItems.TryGetValue(wrapper.CompatibleClips[i].ItemID, out List<MeatovItem> playerClips))
+                            {
+                                playerCount = playerClips.Count;
+                                for (int j = 0; j < playerClips.Count; ++j)
+                                {
+                                    FVRFireArmClip asClip = playerClips[j].physObj as FVRFireArmClip;
+                                    if (asClip == null || asClip.FireArm != null)
+                                    {
+                                        --playerCount;
+                                    }
+                                }
+                            }
+                            if (hideoutCount > 0 || playerCount > 0)
+                            {
+                                GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
+                                ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                                entryUI.SetAmmoContainer(this, descriptionPack.item, itemData, hideoutCount, playerCount, false);
+                                gotContainer = true;
+                            }
                         }
                     }
                 }
@@ -573,22 +619,29 @@ namespace EFM
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
-            cont from here
+
             // Fill new list if necessary
             if (IM.OD.TryGetValue(descriptionPack.itemData.H3ID, out FVRObject wrapper) && wrapper.CompatibleSingleRounds != null)
             {
-                compatibleAmmo.SetActive(true);
+                bool gotAmmo = false;
                 for (int i = 0; i < wrapper.CompatibleSingleRounds.Count; ++i)
                 {
-                    long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleSingleRounds[i].ItemID);
-                    GameObject newEntry = Instantiate(compatibleAmmoEntryPrefab, compatibleAmmoParent.transform);
-                    ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                    entryUI.SetAmmo(this, descriptionPack.itemData.name, currentCount);
+                    if (Mod.GetItemData(wrapper.CompatibleSingleRounds[i].ItemID, out MeatovItemData itemData))
+                    {
+                        TODO: // We also have to consider ammoboxes, should probably store hideout and player inventory of ammoboxes by round type (caliber) and class just to build these lists
+                        long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleSingleRounds[i].ItemID);
+                        
+                        GameObject newEntry = Instantiate(compatibleAmmoEntryPrefab, compatibleAmmoParent.transform);
+                        ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
+                        entryUI.SetAmmo(this, itemData, currentCount);
+                        gotAmmo = true;
+                    }
                 }
+                compatibleAmmo.SetActive(gotAmmo);
             }
             else
             {
-                compatibleAmmoContainers.SetActive(false);
+                compatibleAmmo.SetActive(false);
             }
         }
 
