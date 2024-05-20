@@ -80,7 +80,6 @@
     <Compile Include="src\Hand.cs" />
     <Compile Include="src\HideoutController.cs" />
     <Compile Include="src\HoverScroll.cs" />
-    <Compile Include="src\ItemIcon.cs" />
     <Compile Include="src\LootContainer.cs" />
     <Compile Include="src\LootContainerCover.cs" />
     <Compile Include="src\LootContainerSlider.cs" />

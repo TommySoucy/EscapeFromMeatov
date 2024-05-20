@@ -168,7 +168,7 @@ namespace EFM
         [NonSerialized]
         public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
         [NonSerialized]
-        public int locationIndex = -1; // 0: Player inventory, 1: Base, 2: Raid
+        public int locationIndex = -1; // 0: Player inventory, 1: Hideout, 2: Raid
         [NonSerialized]
         public DescriptionManager descriptionManager; // The current description manager displaying this item's description
         [NonSerialized]

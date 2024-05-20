@@ -175,13 +175,15 @@ namespace EFM
                             {
                                 FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
                                 asFA.LoadMag(asMag);
+                                break;
                             }
                             else if (owner.descriptionPack.item.physObj is AttachableFirearmPhysicalObject)
                             {
                                 AttachableFirearmPhysicalObject asAFA = owner.descriptionPack.item.physObj as AttachableFirearmPhysicalObject;
                                 asAFA.FA.LoadMag(asMag);
+                                break;
                             }
-                            else // Can't load clip into attachable firearm
+                            else
                             {
                                 return;
                             }
@@ -199,6 +201,7 @@ namespace EFM
                             {
                                 FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
                                 asFA.LoadClip(asClip);
+                                break;
                             }
                             else // Can't load clip into attachable firearm
                             {

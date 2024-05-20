@@ -270,6 +270,7 @@ namespace EFM
             //PatchController.Verify(fireArmEjectClipPatchOriginal, harmony, true);
             //harmony.Patch(fireArmEjectClipPatchOriginal, new HarmonyMethod(fireArmEjectClipPatchPrefix), new HarmonyMethod(fireArmEjectClipPatchPostfix));
 
+            TODO e:// Make addround and removeround patches to track ammo that goes in an out of ammo boxes since we'll need that for descriptions
             //// MagAddRoundPatch
             //MethodInfo magAddRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool) }, null);
             //MethodInfo magAddRoundPatchPrefix = typeof(MagAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -3023,36 +3024,36 @@ namespace EFM
                             IDescribable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
-                                if (manager.descriptionPack.isPhysical)
-                                {
-                                    describableToUse = manager.descriptionPack.MI;
-                                }
-                                else
-                                {
-                                    describableToUse = manager.descriptionPack.nonPhysDescribable;
-                                }
+                                //if (manager.descriptionPack.isPhysical)
+                                //{
+                                //    describableToUse = manager.descriptionPack.MI;
+                                //}
+                                //else
+                                //{
+                                //    describableToUse = manager.descriptionPack.nonPhysDescribable;
+                                //}
 
-                                // If not already displayed
-                                if (!describable.Equals(describableToUse))
-                                {
-                                    // Update the display to the description of the new item we are pointing at
-                                    manager.SetDescriptionPack(describable.GetDescriptionPack());
-                                }
+                                //// If not already displayed
+                                //if (!describable.Equals(describableToUse))
+                                //{
+                                //    // Update the display to the description of the new item we are pointing at
+                                //    manager.SetDescriptionPack(describable.GetDescriptionPack());
+                                //}
                             }
                             else
                             {
                                 // Set description pack
-                                manager.SetDescriptionPack(describable.GetDescriptionPack());
+                                //manager.SetDescriptionPack(describable.GetDescriptionPack());
                             }
 
-                            if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
-                            {
-                                manager.gameObject.SetActive(false);
-                            }
-                            else
-                            {
-                                manager.gameObject.SetActive(true);
-                            }
+                            //if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
+                            //{
+                            //    manager.gameObject.SetActive(false);
+                            //}
+                            //else
+                            //{
+                            //    manager.gameObject.SetActive(true);
+                            //}
                         }
                     }
                 }
@@ -3095,7 +3096,7 @@ namespace EFM
                 // If displayed, open fully and replace this hand's with new description
                 if (manager.gameObject.activeSelf)
                 {
-                    manager.OpenFull();
+                    //manager.OpenFull();
 
                     if (__instance.IsThisTheRightHand)
                     {
@@ -3169,36 +3170,36 @@ namespace EFM
                             IDescribable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
-                                if (manager.descriptionPack.isPhysical)
-                                {
-                                    describableToUse = manager.descriptionPack.MI;
-                                }
-                                else
-                                {
-                                    describableToUse = manager.descriptionPack.nonPhysDescribable;
-                                }
+                                //if (manager.descriptionPack.isPhysical)
+                                //{
+                                //    describableToUse = manager.descriptionPack.MI;
+                                //}
+                                //else
+                                //{
+                                //    describableToUse = manager.descriptionPack.nonPhysDescribable;
+                                //}
 
-                                // If not already displayed
-                                if (!describable.Equals(describableToUse))
-                                {
-                                    // Update the display to the description of the new item we are pointing at
-                                    manager.SetDescriptionPack(describable.GetDescriptionPack());
-                                }
+                                //// If not already displayed
+                                //if (!describable.Equals(describableToUse))
+                                //{
+                                //    // Update the display to the description of the new item we are pointing at
+                                //    manager.SetDescriptionPack(describable.GetDescriptionPack());
+                                //}
                             }
                             else
                             {
                                 // Set description pack
-                                manager.SetDescriptionPack(describable.GetDescriptionPack());
+                                //manager.SetDescriptionPack(describable.GetDescriptionPack());
                             }
 
-                            if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
-                            {
-                                manager.gameObject.SetActive(false);
-                            }
-                            else
-                            {
-                                manager.gameObject.SetActive(true);
-                            }
+                            //if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
+                            //{
+                            //    manager.gameObject.SetActive(false);
+                            //}
+                            //else
+                            //{
+                            //    manager.gameObject.SetActive(true);
+                            //}
                         }
 
                         if (!__instance.BlueLaser.activeSelf)
@@ -3238,36 +3239,36 @@ namespace EFM
                             IDescribable describableToUse = null;
                             if (manager.descriptionPack != null)
                             {
-                                if (manager.descriptionPack.isPhysical)
-                                {
-                                    describableToUse = manager.descriptionPack.MI;
-                                }
-                                else
-                                {
-                                    describableToUse = manager.descriptionPack.nonPhysDescribable;
-                                }
+                                //if (manager.descriptionPack.isPhysical)
+                                //{
+                                //    describableToUse = manager.descriptionPack.MI;
+                                //}
+                                //else
+                                //{
+                                //    describableToUse = manager.descriptionPack.nonPhysDescribable;
+                                //}
 
-                                // If not already displayed
-                                if (!nonGrabbableDescribable.Equals(describableToUse))
-                                {
-                                    // Update the display to the description of the new item we are pointing at
-                                    manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
-                                }
+                                //// If not already displayed
+                                //if (!nonGrabbableDescribable.Equals(describableToUse))
+                                //{
+                                //    // Update the display to the description of the new item we are pointing at
+                                //    manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
+                                //}
                             }
                             else
                             {
                                 // Set description pack
-                                manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
+                                //manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
                             }
 
-                            if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
-                            {
-                                manager.gameObject.SetActive(false);
-                            }
-                            else
-                            {
-                                manager.gameObject.SetActive(true);
-                            }
+                            //if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
+                            //{
+                            //    manager.gameObject.SetActive(false);
+                            //}
+                            //else
+                            //{
+                            //    manager.gameObject.SetActive(true);
+                            //}
                         }
 
                         if (!__instance.BlueLaser.activeSelf)
@@ -4859,12 +4860,10 @@ namespace EFM
         }
     }
 
-    // Patches FVRFirearmMagazine.AddRound(Round) to keep track of weight and amount in ammoboxes
+    // Patches FVRFirearmMagazine.AddRound(Round) to track ammo in ammo boxes
     class MagAddRoundPatch
     {
-        static bool addedRound = false;
-
-        static void Prefix(ref FVRFireArmMagazine __instance)
+        static void Prefix(FVRFireArmMagazine __instance, FVRFireArmRound round)
         {
             if (!Mod.inMeatovScene)
             {
@@ -4873,47 +4872,64 @@ namespace EFM
 
             if (__instance.m_numRounds < __instance.m_capacity)
             {
-                addedRound = true;
-            }
-        }
+                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
+                if(ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
+                {
+                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                    if (ammoBox.locationIndex == 0) // Player
+                    {
+                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else if(ammoBox.locationIndex == 1) // Hideout
+                    {
+                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else // Raid
+                    {
+                        return;
+                    }
 
-        static void Postfix(ref FVRFireArmMagazine __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            Mod.AddSkillExp(Skill.raidLoadedAmmoAction, 31);
-
-            if (addedRound)
-            {
-                addedRound = false;
-
-                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-                // locationIndex so we know when to add/remove weight from player also
-                //EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                //EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
-
-                //if (VID != null)
-                //{
-                //    VID.currentWeight += 15;
-                //}
-                //else if(CIW != null)
-                //{
-                //    CIW.currentWeight += 15;
-                //    CIW.amount += 1;
-                //}
+                    if(dictToUse != null)
+                    {
+                        if (dictToUse.TryGetValue(__instance.RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> midDict))
+                        {
+                            if (midDict.TryGetValue(round.RoundClass, out Dictionary<MeatovItem, int> boxDict))
+                            {
+                                int count = 0;
+                                if (boxDict.TryGetValue(ammoBox, out count))
+                                {
+                                    ++boxDict[ammoBox];
+                                }
+                                else
+                                {
+                                    boxDict.Add(ammoBox, 1);
+                                }
+                            }
+                            else
+                            {
+                                Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                                newBoxDict.Add(ammoBox, 1);
+                                midDict.Add(round.RoundClass, newBoxDict);
+                            }
+                        }
+                        else
+                        {
+                            Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                            newBoxDict.Add(ammoBox, 1);
+                            Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> newMidDict = new Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>();
+                            newMidDict.Add(round.RoundClass, newBoxDict);
+                            dictToUse.Add(__instance.RoundType, newMidDict);
+                        }
+                    }
+                }
             }
         }
     }
 
-    // Patches FVRFirearmMagazine.AddRound(Class) to keep track of weight and amount in ammoboxes
+    // Patches FVRFirearmMagazine.AddRound(Class) to track ammo in ammo boxes
     class MagAddRoundClassPatch
     {
-        static bool addedRound = false;
-
-        static void Prefix(ref FVRFireArmMagazine __instance)
+        static void Prefix(FVRFireArmMagazine __instance)
         {
             if (!Mod.inMeatovScene)
             {
@@ -4922,35 +4938,7 @@ namespace EFM
 
             if (__instance.m_numRounds < __instance.m_capacity)
             {
-                addedRound = true;
-            }
-        }
-
-        static void Postfix(ref FVRFireArmMagazine __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (addedRound)
-            {
-                addedRound = false;
-
-                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-                // locationIndex so we know when to add/remove weight from player also
-                //EFM_VanillaItemDescriptor VID = __instance.GetComponent<EFM_VanillaItemDescriptor>();
-                //EFM_CustomItemWrapper CIW = __instance.GetComponent<EFM_CustomItemWrapper>();
-
-                //if (VID != null)
-                //{
-                //    VID.currentWeight += 15;
-                //}
-                //else if (CIW != null)
-                //{
-                //    CIW.currentWeight += 15;
-                //    CIW.amount += 1;
-                //}
+                Cont from here // Finish this here with teh same as we did with other addround above and then go do remove round, make surewe apply patches once we are done
             }
         }
     }
