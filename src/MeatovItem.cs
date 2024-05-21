@@ -162,15 +162,10 @@ namespace EFM
                 return _foundInRaid;
             }
         }
-        private DescriptionPack descriptionPack;
-        [NonSerialized]
-        private long previousDescriptionTime;
         [NonSerialized]
         public bool takeCurrentLocation = true; // This dictates whether this item should take the current global location index or if it should wait to be set manually
         [NonSerialized]
         public int locationIndex = -1; // 0: Player inventory, 1: Hideout, 2: Raid
-        [NonSerialized]
-        public DescriptionManager descriptionManager; // The current description manager displaying this item's description
         [NonSerialized]
         public ItemView marketSellItemView;
         [NonSerialized]
@@ -2001,7 +1996,7 @@ namespace EFM
             newPack.itemData = itemData;
             newPack.item = this;
 
-			return descriptionPack;
+			return newPack;
         }
 
 		public int GetValue()
@@ -2018,11 +2013,6 @@ namespace EFM
 
 			// TODO: WE DONT CHECK FOR INSUREABILITY HERE FOR THIS OBJECT, BUT WE MUST FOR SUB OBJECTS WHEN WE IMPLEMENT THAT
 			// TODO: Maybe add all values of sub items attached to this one too but will have to adapt  market for it, for example, when we insure, we only ensure the root item not sub items
-		}
-
-        public void SetDescriptionManager(DescriptionManager descriptionManager)
-        {
-			this.descriptionManager = descriptionManager;
 		}
 
 		public void Highlight(Color color)

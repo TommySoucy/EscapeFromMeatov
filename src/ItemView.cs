@@ -156,13 +156,12 @@ namespace EFM
 
         public DescriptionPack GetDescriptionPack()
         {
-            // TODO
-            return new DescriptionPack();
-        }
+            DescriptionPack newPack = new DescriptionPack();
 
-        public void SetDescriptionManager(DescriptionManager descriptionManager)
-        {
-            // TODO
+            newPack.itemData = itemData;
+            newPack.item = item; // Note that item could be null
+
+            return newPack;
         }
 
         public void OnNeededForChanged(int index)

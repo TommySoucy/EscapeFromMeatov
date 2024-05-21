@@ -3,8 +3,6 @@
     public interface IDescribable
     {
         DescriptionPack GetDescriptionPack();
-
-        void SetDescriptionManager(DescriptionManager descriptionManager);
     }
 
     public class DescriptionPack
