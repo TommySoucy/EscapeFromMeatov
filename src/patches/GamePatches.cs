@@ -142,12 +142,12 @@ namespace EFM
             PatchController.Verify(interactiveSetAllCollidersToLayerOriginal, harmony, true);
             harmony.Patch(interactiveSetAllCollidersToLayerOriginal, new HarmonyMethod(interactiveSetAllCollidersToLayerPrefix));
 
-            //// HandUpdatePatch
-            //MethodInfo handUpdatePatchOriginal = typeof(FVRViveHand).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
-            //MethodInfo handUpdatePatchPrefix = typeof(HandUpdatePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // HandUpdatePatch
+            MethodInfo handUpdatePatchOriginal = typeof(FVRViveHand).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo handUpdatePatchPrefix = typeof(HandUpdatePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(handUpdatePatchOriginal, harmony, true);
-            //harmony.Patch(handUpdatePatchOriginal, new HarmonyMethod(handUpdatePatchPrefix));
+            PatchController.Verify(handUpdatePatchOriginal, harmony, true);
+            harmony.Patch(handUpdatePatchOriginal, new HarmonyMethod(handUpdatePatchPrefix));
 
             //// MagazineUpdateInteractionPatch
             //MethodInfo magazineUpdateInteractionPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("UpdateInteraction", BindingFlags.Public | BindingFlags.Instance);
@@ -2751,168 +2751,111 @@ namespace EFM
         }
     }
 
-    // Patches FVRViveHand.Update to change the grab laser input
-    // This completely replaces the original
+    // Patches FVRViveHand.Update to add description input
+    // Completely replaces the original
     class HandUpdatePatch
     {
-        public static bool fullDescDirectionDown = false; // The direction in which to slide finger on touchpad to open full description for index and oculus
-
-        static bool leftTouchWithinDescRange;
-        static bool rightTouchWithinDescRange;
-        static float rightPreviousFrameTPAxisY;
-        static float leftPreviousFrameTPAxisY;
-
-        //flag2 = __instance.Input.TouchpadTouched && __instance.Input.TouchpadAxes.magnitude < 0.2f;
-        static bool Prefix(ref FVRViveHand.HandInitializationState ___m_initState, ref FVRPhysicalObject ___m_selectedObj,
-                           ref float ___m_reset, ref bool ___m_isObjectInTransit, ref bool ___m_hasOverrider, ref InputOverrider ___m_overrider,
-                           ref bool ___m_touchSphereMatInteractable, ref bool ___m_touchSphereMatInteractablePalm,
-                           ref bool ___m_isClosestInteractableInPalm, ref FVRViveHand.HandState ___m_state, ref RaycastHit ___m_pointingHit,
-                           ref bool ___m_isWristMenuActive, ref RaycastHit ___m_grabHit, ref Collider[] ___m_rawGrabCols,
-                           ref FVRPhysicalObject ___m_grabityHoveredObject, ref float ___m_timeSinceLastGripButtonDown, ref float ___m_timeGripButtonHasBeenHeld,
-                           ref bool ___m_canMadeGrabReleaseSoundThisFrame, ref FVRViveHand __instance)
+        static bool Prefix(FVRViveHand __instance)
         {
             if (!Mod.inMeatovScene)
             {
                 return true;
             }
 
-            if (___m_initState == FVRViveHand.HandInitializationState.Uninitialized)
+
+            if (__instance.m_initState == FVRViveHand.HandInitializationState.Uninitialized)
             {
                 return false;
             }
-
-            if (___m_selectedObj != null && ___m_selectedObj.IsHeld)
+            if (__instance.m_selectedObj != null && __instance.m_selectedObj.IsHeld)
             {
-                ___m_selectedObj = null;
-                ___m_reset = 0f;
-                ___m_isObjectInTransit = false;
+                __instance.m_selectedObj = null;
+                __instance.m_reset = 0f;
+                __instance.m_isObjectInTransit = false;
             }
-            if (___m_reset >= 0f && ___m_isObjectInTransit)
+            if (__instance.m_reset >= 0f && __instance.m_isObjectInTransit)
             {
-                if (___m_selectedObj != null && Vector3.Distance(___m_selectedObj.transform.position, __instance.transform.position) < 0.4f)
+                if (__instance.m_selectedObj != null && Vector3.Distance(__instance.m_selectedObj.transform.position, __instance.transform.position) < 0.4f)
                 {
-                    Vector3 b = __instance.transform.position - ___m_selectedObj.transform.position;
-                    Vector3 vector = Vector3.Lerp(___m_selectedObj.RootRigidbody.velocity, b, Time.deltaTime * 2f);
-                    ___m_selectedObj.RootRigidbody.velocity = Vector3.ClampMagnitude(vector, ___m_selectedObj.RootRigidbody.velocity.magnitude);
-                    ___m_selectedObj.RootRigidbody.velocity = vector;
-                    ___m_selectedObj.RootRigidbody.drag = 1f;
-                    ___m_selectedObj.RootRigidbody.angularDrag = 8f;
-                    ___m_reset -= Time.deltaTime * 0.4f;
+                    Vector3 b = __instance.transform.position - __instance.m_selectedObj.transform.position;
+                    Vector3 vector = Vector3.Lerp(__instance.m_selectedObj.RootRigidbody.velocity, b, Time.deltaTime * 2f);
+                    __instance.m_selectedObj.RootRigidbody.velocity = Vector3.ClampMagnitude(vector, __instance.m_selectedObj.RootRigidbody.velocity.magnitude);
+                    __instance.m_selectedObj.RootRigidbody.velocity = vector;
+                    __instance.m_selectedObj.RootRigidbody.drag = 1f;
+                    __instance.m_selectedObj.RootRigidbody.angularDrag = 8f;
+                    __instance.m_reset -= Time.deltaTime * 0.4f;
                 }
                 else
                 {
-                    ___m_reset -= Time.deltaTime;
+                    __instance.m_reset -= Time.deltaTime;
                 }
-                if (___m_reset <= 0f)
+                if (__instance.m_reset <= 0f)
                 {
-                    ___m_isObjectInTransit = false;
-                    if (___m_selectedObj != null)
+                    __instance.m_isObjectInTransit = false;
+                    if (__instance.m_selectedObj != null)
                     {
-                        ___m_selectedObj.RecoverDrag();
-                        ___m_selectedObj = null;
+                        __instance.m_selectedObj.RecoverDrag();
+                        __instance.m_selectedObj = null;
                     }
                 }
             }
-
-            typeof(FVRViveHand).GetMethod("HapticBuzzUpdate", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
-            typeof(FVRViveHand).GetMethod("TestQuickBeltDistances", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
+            __instance.HapticBuzzUpdate();
+            __instance.TestQuickBeltDistances();
             __instance.PollInput();
-
-            // If started touching this frame
-            if (__instance.Input.TouchpadTouchDown)
+            if (__instance.m_hasOverrider && __instance.m_overrider != null)
             {
-                // Store whether we are in range for description so that we can only activate description if we STARTED touching within the range
-                if (__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR)
-                {
-                    if (__instance.IsThisTheRightHand)
-                    {
-                        rightTouchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.3f;
-                    }
-                    else
-                    {
-                        leftTouchWithinDescRange = __instance.Input.TouchpadAxes.magnitude < 0.3f;
-                    }
-                }
-                else if (__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus)
-                {
-                    if (__instance.IsThisTheRightHand)
-                    {
-                        rightTouchWithinDescRange = fullDescDirectionDown ? __instance.Input.TouchpadAxes.y >= 0 : __instance.Input.TouchpadAxes.y <= 0;
-                    }
-                    else
-                    {
-                        leftTouchWithinDescRange = fullDescDirectionDown ? __instance.Input.TouchpadAxes.y >= 0 : __instance.Input.TouchpadAxes.y <= 0;
-                    }
-                }
-            }
-            else if (__instance.Input.TouchpadTouchUp ||
-                    ((__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR) && __instance.Input.TouchpadAxes.magnitude >= 0.3f) ||
-                    ((__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) && fullDescDirectionDown ? __instance.Input.TouchpadAxes.y < 0 : __instance.Input.TouchpadAxes.y > 0))
-            {
-                if (__instance.IsThisTheRightHand)
-                {
-                    rightTouchWithinDescRange = false;
-                }
-                else
-                {
-                    leftTouchWithinDescRange = false;
-                }
-            }
-
-            if (___m_hasOverrider && ___m_overrider != null)
-            {
-                ___m_overrider.Process(ref __instance.Input);
+                __instance.m_overrider.Process(ref __instance.Input);
             }
             else
             {
-                ___m_hasOverrider = false;
+                __instance.m_hasOverrider = false;
             }
-            //if (!(__instance.m_currentInteractable != null) || __instance.Input.TriggerPressed)
-            //{
-            //}
+            if (!(__instance.m_currentInteractable != null) || __instance.Input.TriggerPressed)
+            {
+            }
             if (__instance.ClosestPossibleInteractable != null && !__instance.ClosestPossibleInteractable.IsInteractable())
             {
                 __instance.ClosestPossibleInteractable = null;
             }
             if (__instance.ClosestPossibleInteractable == null)
             {
-                if (___m_touchSphereMatInteractable)
+                if (__instance.m_touchSphereMatInteractable)
                 {
-                    ___m_touchSphereMatInteractable = false;
+                    __instance.m_touchSphereMatInteractable = false;
                     __instance.TouchSphere.material = __instance.TouchSphereMat_NoInteractable;
                 }
-                if (___m_touchSphereMatInteractablePalm)
+                if (__instance.m_touchSphereMatInteractablePalm)
                 {
-                    ___m_touchSphereMatInteractablePalm = false;
+                    __instance.m_touchSphereMatInteractablePalm = false;
                     __instance.TouchSphere_Palm.material = __instance.TouchSphereMat_NoInteractable;
                 }
             }
-            else if (!___m_touchSphereMatInteractable && !___m_isClosestInteractableInPalm)
+            else if (!__instance.m_touchSphereMatInteractable && !__instance.m_isClosestInteractableInPalm)
             {
-                ___m_touchSphereMatInteractable = true;
+                __instance.m_touchSphereMatInteractable = true;
                 __instance.TouchSphere.material = __instance.TouchSpheteMat_Interactable;
-                ___m_touchSphereMatInteractablePalm = false;
+                __instance.m_touchSphereMatInteractablePalm = false;
                 __instance.TouchSphere_Palm.material = __instance.TouchSphereMat_NoInteractable;
             }
-            else if (!___m_touchSphereMatInteractablePalm && ___m_isClosestInteractableInPalm)
+            else if (!__instance.m_touchSphereMatInteractablePalm && __instance.m_isClosestInteractableInPalm)
             {
-                ___m_touchSphereMatInteractablePalm = true;
+                __instance.m_touchSphereMatInteractablePalm = true;
                 __instance.TouchSphere_Palm.material = __instance.TouchSpheteMat_Interactable;
-                ___m_touchSphereMatInteractable = false;
+                __instance.m_touchSphereMatInteractable = false;
                 __instance.TouchSphere.material = __instance.TouchSphereMat_NoInteractable;
             }
             float d = 1f / GM.CurrentPlayerBody.transform.localScale.x;
-            if (___m_state == FVRViveHand.HandState.Empty && !__instance.Input.BYButtonPressed && !__instance.Input.TouchpadPressed && __instance.ClosestPossibleInteractable == null && __instance.CurrentHoveredQuickbeltSlot == null && __instance.CurrentInteractable == null && !___m_isWristMenuActive)
+            if (__instance.m_state == FVRViveHand.HandState.Empty && !__instance.Input.BYButtonPressed && !__instance.Input.TouchpadPressed && __instance.ClosestPossibleInteractable == null && __instance.CurrentHoveredQuickbeltSlot == null && __instance.CurrentInteractable == null && !__instance.m_isWristMenuActive)
             {
-                if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out ___m_pointingHit, GM.CurrentSceneSettings.MaxPointingDistance, __instance.PointingLayerMask, QueryTriggerInteraction.Collide) && ___m_pointingHit.collider.gameObject.GetComponent<FVRPointable>())
+                if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out __instance.m_pointingHit, GM.CurrentSceneSettings.MaxPointingDistance, __instance.PointingLayerMask, QueryTriggerInteraction.Collide) && __instance.m_pointingHit.collider.gameObject.GetComponent<FVRPointable>())
                 {
-                    FVRPointable component = ___m_pointingHit.collider.gameObject.GetComponent<FVRPointable>();
-                    if (___m_pointingHit.distance <= component.MaxPointingRange)
+                    FVRPointable component = __instance.m_pointingHit.collider.gameObject.GetComponent<FVRPointable>();
+                    if (__instance.m_pointingHit.distance <= component.MaxPointingRange)
                     {
                         __instance.CurrentPointable = component;
                         __instance.PointingLaser.position = __instance.Input.OneEuroPointingPos;
                         __instance.PointingLaser.rotation = __instance.Input.OneEuroPointRotation;
-                        __instance.PointingLaser.localScale = new Vector3(0.002f, 0.002f, ___m_pointingHit.distance) * d;
+                        __instance.PointingLaser.localScale = new Vector3(0.002f, 0.002f, __instance.m_pointingHit.distance) * d;
                     }
                     else
                     {
@@ -2928,215 +2871,80 @@ namespace EFM
             {
                 __instance.CurrentPointable = null;
             }
-
-            // Might have to cancel movement if touching TP for description
-            // Should only be applicable with Vive since movement and description share the touchpad
-            if (__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR)
-            {
-                if (!(__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange))
-                {
-                    __instance.MovementManager.UpdateMovementWithHand(__instance);
-                }
-                else // Started touching within desc range, want to stop movement, sprinting, and smooth turning
-                {
-                    typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
-                    typeof(FVRMovementManager).GetField("m_isTwinStickSmoothTurningCounterClockwise", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
-                    typeof(FVRMovementManager).GetField("m_sprintingEngaged", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, false);
-                    typeof(FVRMovementManager).GetField("m_smoothLocoVelocity", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(GM.CurrentMovementManager, Vector3.zero);
-                }
-            }
-            else // Any other controller, or any that has enough buttons to have description AND movement at the same time, we should update movement
-            {
-                __instance.MovementManager.UpdateMovementWithHand(__instance);
-            }
-
-            // Keep a reference to touchpad touch inputs so we can still use descriptions after touchpad input has been flushed
-            bool touchpadTouched = __instance.Input.TouchpadTouched;
-            float touchpadAxisMagnitude = __instance.Input.TouchpadAxes.magnitude;
-            float touchpadAxisY = __instance.Input.TouchpadAxes.y;
-            bool touchpadDown = __instance.Input.TouchpadDown;
-
+            __instance.MovementManager.UpdateMovementWithHand(__instance);
             if (__instance.MovementManager.ShouldFlushTouchpad(__instance))
             {
-                typeof(FVRViveHand).GetMethod("FlushTouchpadData", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
+                __instance.FlushTouchpadData();
             }
-            bool flag = false;
-            bool flag2 = false;
-            bool fullDescInput = false;
-            if (__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) // Usually we would check if streamlined here, but in meatov, it will always be streamlined if index
+
+            ////////////////////////////////////////////////////////////////////////////
+            // Start patch
+            bool flag;
+            bool flag2;
+            bool descriptionInput = false;
+            if (__instance.IsInStreamlinedMode)
             {
                 flag = __instance.Input.BYButtonDown;
+                flag2 = __instance.Input.BYButtonPressed;
 
-                // Want grab laser if the default BYButtonPressed (vanilla) (TODO: On main hand, right for now) OR if the description is touched
-                flag2 = __instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange;
+                // This should work for both Index and Oculus, the only two CModes that can use streamlined
+                descriptionInput = __instance.Input.TouchpadTouched && __instance.Input.TouchpadAxes.y < 0;
+            }
+            else
+            {
+                flag = __instance.Input.TouchpadDown;
+                flag2 = __instance.Input.TouchpadPressed;
 
-                // Check if we move touch from bottom (touch range) to top of touch pad this frame
-                fullDescInput = touchpadTouched && (fullDescDirectionDown ? touchpadAxisY < 0 : touchpadAxisY > 0) && (__instance.IsThisTheRightHand ? (fullDescDirectionDown ? rightPreviousFrameTPAxisY >= 0 : rightPreviousFrameTPAxisY <= 0) : (fullDescDirectionDown ? leftPreviousFrameTPAxisY >= 0 : leftPreviousFrameTPAxisY <= 0));
-                if (__instance.IsThisTheRightHand)
+                // As it stands, Vive and WMR will not have a dedicated description input
+                // To get a description of an item with those controllers, the item must not be held, and instead pointed with grab laser
+                switch (__instance.CMode)
                 {
-                    rightPreviousFrameTPAxisY = touchpadAxisY;
-                }
-                else
-                {
-                    leftPreviousFrameTPAxisY = touchpadAxisY;
+                    case ControlMode.Index:
+                    case ControlMode.Oculus:
+                        descriptionInput = __instance.Input.AXButtonPressed;
+                        break;
+                    case ControlMode.Vive:
+                    case ControlMode.WMR:
+                        descriptionInput = false;
+                        break;
                 }
             }
-            else if (__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR)
+            if (__instance.m_state == FVRViveHand.HandState.Empty && __instance.CurrentHoveredQuickbeltSlot == null)
             {
-                flag = touchpadDown;
-
-                // Here check if only touched and within center of touchpad for grab laser input
-                flag2 = touchpadTouched && touchpadAxisMagnitude < 0.3f;
-                //Mod.LogInfo("Flag2: " + flag2 + " from touched: " + __instance.Input.TouchpadTouched + " and magnitude: " + __instance.Input.TouchpadAxes.magnitude);
-
-                // Check if we started pressing the center of touchpad this frame
-                fullDescInput = touchpadDown && touchpadAxisMagnitude < 0.3f;
-            }
-
-            if (flag2)
-            {
-                if (___m_state == FVRViveHand.HandState.GripInteracting)
-                {
-                    // Only display description if started touching within desc range, and also check if descriptions have been init yet
-                    // Because this will also be checked in meatov menu, the patch will run, but they havent been init yet at that point
-                    if ((__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange) && Mod.rightDescriptionManager != null)
-                    {
-                        IDescribable describable = __instance.CurrentInteractable.GetComponent<IDescribable>();
-                        if (describable != null)
-                        {
-                            // Get the description currently on this hand
-                            DescriptionManager manager = null;
-                            if (__instance.IsThisTheRightHand)
-                            {
-                                manager = Mod.rightDescriptionManager;
-                            }
-                            else
-                            {
-                                manager = Mod.leftDescriptionManager;
-                            }
-
-                            // Get item and check if the one we are pointing at is already being described
-                            IDescribable describableToUse = null;
-                            if (manager.descriptionPack != null)
-                            {
-                                //if (manager.descriptionPack.isPhysical)
-                                //{
-                                //    describableToUse = manager.descriptionPack.MI;
-                                //}
-                                //else
-                                //{
-                                //    describableToUse = manager.descriptionPack.nonPhysDescribable;
-                                //}
-
-                                //// If not already displayed
-                                //if (!describable.Equals(describableToUse))
-                                //{
-                                //    // Update the display to the description of the new item we are pointing at
-                                //    manager.SetDescriptionPack(describable.GetDescriptionPack());
-                                //}
-                            }
-                            else
-                            {
-                                // Set description pack
-                                //manager.SetDescriptionPack(describable.GetDescriptionPack());
-                            }
-
-                            //if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
-                            //{
-                            //    manager.gameObject.SetActive(false);
-                            //}
-                            //else
-                            //{
-                            //    manager.gameObject.SetActive(true);
-                            //}
-                        }
-                    }
-                }
-            }
-            else if (!((__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) && fullDescInput)) // Dont want to disable if we arent in desc range but we have full desc input
-            {
-                if (Mod.rightDescriptionManager != null)
-                {
-                    // Get the description currently on this hand
-                    DescriptionManager manager = null;
-                    if (__instance.IsThisTheRightHand)
-                    {
-                        manager = Mod.rightDescriptionManager;
-                    }
-                    else
-                    {
-                        manager = Mod.leftDescriptionManager;
-                    }
-
-                    // Make sure it is not displayed
-                    if (manager.gameObject.activeSelf)
-                    {
-                        manager.gameObject.SetActive(false);
-                    }
-                }
-            }
-            if (fullDescInput && Mod.rightDescriptionManager != null)
-            {
-                // Get the description currently on this hand
-                DescriptionManager manager = null;
-                if (__instance.IsThisTheRightHand)
-                {
-                    manager = Mod.rightDescriptionManager;
-                }
-                else
-                {
-                    manager = Mod.leftDescriptionManager;
-                }
-
-                // If displayed, open fully and replace this hand's with new description
-                if (manager.gameObject.activeSelf)
-                {
-                    //manager.OpenFull();
-
-                    if (__instance.IsThisTheRightHand)
-                    {
-                        Mod.rightDescriptionUI = GameObject.Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.RightHand);
-                        Mod.rightDescriptionManager = Mod.rightDescriptionUI.AddComponent<DescriptionManager>();
-                        Mod.rightDescriptionManager.Init();
-                    }
-                    else
-                    {
-                        Mod.leftDescriptionUI = GameObject.Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
-                        Mod.leftDescriptionManager = Mod.leftDescriptionUI.AddComponent<DescriptionManager>();
-                        Mod.leftDescriptionManager.Init();
-                    }
-                }
-            }
-            if (___m_state == FVRViveHand.HandState.Empty && __instance.CurrentHoveredQuickbeltSlot == null)
-            {
-                // Dont have the grab laser if we didnt start touching the touchpad within desc range
-                if (((__instance.CMode == ControlMode.Index || __instance.CMode == ControlMode.Oculus) && flag2) ||
-                    ((__instance.CMode == ControlMode.Vive || __instance.CMode == ControlMode.WMR) && flag2 && (__instance.IsThisTheRightHand ? rightTouchWithinDescRange : leftTouchWithinDescRange)))
+                if (flag2 || descriptionInput)
                 {
                     if (!__instance.GrabLaser.gameObject.activeSelf)
                     {
                         __instance.GrabLaser.gameObject.SetActive(true);
                     }
                     bool flag3 = false;
-                    bool pointNonGrabbableDescribable = false;
                     FVRPhysicalObject fvrphysicalObject = null;
-                    IDescribable nonGrabbableDescribable = null;
-                    if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out ___m_grabHit, 3f, __instance.GrabLaserMask, QueryTriggerInteraction.Collide))
+                    IDescribable describable = null;
+                    if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out __instance.m_grabHit, 3f, __instance.GrabLaserMask, QueryTriggerInteraction.Collide))
                     {
-                        if (___m_grabHit.collider.attachedRigidbody != null && ___m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<FVRPhysicalObject>())
+                        if (__instance.m_grabHit.collider.attachedRigidbody != null && __instance.m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<FVRPhysicalObject>())
                         {
-                            fvrphysicalObject = ___m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<FVRPhysicalObject>();
+                            fvrphysicalObject = __instance.m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<FVRPhysicalObject>();
                             if (fvrphysicalObject != null && !fvrphysicalObject.IsHeld && fvrphysicalObject.IsDistantGrabbable())
                             {
                                 flag3 = true;
                             }
+
+                            // Also check if hit object is describable and if it is, set description
+                            describable = __instance.m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<IDescribable>();
+                            if (describable != null)
+                            {
+                                if (__instance.IsThisTheRightHand)
+                                {
+                                    Mod.rightHand.SetDescribable(describable);
+                                }
+                                else
+                                {
+                                    Mod.leftHand.SetDescribable(describable);
+                                }
+                            }
                         }
-                        else if (___m_grabHit.collider.GetComponent<IDescribable>() != null)
-                        {
-                            nonGrabbableDescribable = ___m_grabHit.collider.GetComponent<IDescribable>();
-                            pointNonGrabbableDescribable = true;
-                        }
-                        __instance.GrabLaser.localScale = new Vector3(0.004f, 0.004f, ___m_grabHit.distance) * d;
+                        __instance.GrabLaser.localScale = new Vector3(0.004f, 0.004f, __instance.m_grabHit.distance) * d;
                     }
                     else
                     {
@@ -3146,57 +2954,6 @@ namespace EFM
                     __instance.GrabLaser.rotation = __instance.Input.OneEuroPointRotation;
                     if (flag3)
                     {
-                        // Display summary description of object if describable and if not already displayed
-                        IDescribable describable = fvrphysicalObject.GetComponent<IDescribable>();
-                        if (describable != null && Mod.rightDescriptionManager != null)
-                        {
-                            // Get the description currently on this hand
-                            DescriptionManager manager = null;
-                            if (__instance.IsThisTheRightHand)
-                            {
-                                manager = Mod.rightDescriptionManager;
-                            }
-                            else
-                            {
-                                manager = Mod.leftDescriptionManager;
-                            }
-
-                            // Get item and check if the one we are pointing at is already being described
-                            IDescribable describableToUse = null;
-                            if (manager.descriptionPack != null)
-                            {
-                                //if (manager.descriptionPack.isPhysical)
-                                //{
-                                //    describableToUse = manager.descriptionPack.MI;
-                                //}
-                                //else
-                                //{
-                                //    describableToUse = manager.descriptionPack.nonPhysDescribable;
-                                //}
-
-                                //// If not already displayed
-                                //if (!describable.Equals(describableToUse))
-                                //{
-                                //    // Update the display to the description of the new item we are pointing at
-                                //    manager.SetDescriptionPack(describable.GetDescriptionPack());
-                                //}
-                            }
-                            else
-                            {
-                                // Set description pack
-                                //manager.SetDescriptionPack(describable.GetDescriptionPack());
-                            }
-
-                            //if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
-                            //{
-                            //    manager.gameObject.SetActive(false);
-                            //}
-                            //else
-                            //{
-                            //    manager.gameObject.SetActive(true);
-                            //}
-                        }
-
                         if (!__instance.BlueLaser.activeSelf)
                         {
                             __instance.BlueLaser.SetActive(true);
@@ -3214,87 +2971,8 @@ namespace EFM
                             }
                         }
                     }
-                    else if (pointNonGrabbableDescribable)
-                    {
-                        // Display summary description of object if describable and if not already displayed
-                        if (nonGrabbableDescribable != null && Mod.rightDescriptionManager != null)
-                        {
-                            // Get the description currently on this hand
-                            DescriptionManager manager = null;
-                            if (__instance.IsThisTheRightHand)
-                            {
-                                manager = Mod.rightDescriptionManager;
-                            }
-                            else
-                            {
-                                manager = Mod.leftDescriptionManager;
-                            }
-
-                            // Get item and check if the one we are pointing at is already being described
-                            IDescribable describableToUse = null;
-                            if (manager.descriptionPack != null)
-                            {
-                                //if (manager.descriptionPack.isPhysical)
-                                //{
-                                //    describableToUse = manager.descriptionPack.MI;
-                                //}
-                                //else
-                                //{
-                                //    describableToUse = manager.descriptionPack.nonPhysDescribable;
-                                //}
-
-                                //// If not already displayed
-                                //if (!nonGrabbableDescribable.Equals(describableToUse))
-                                //{
-                                //    // Update the display to the description of the new item we are pointing at
-                                //    manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
-                                //}
-                            }
-                            else
-                            {
-                                // Set description pack
-                                //manager.SetDescriptionPack(nonGrabbableDescribable.GetDescriptionPack());
-                            }
-
-                            //if (manager.descriptionPack.itemType == MeatovItem.ItemType.LootContainer)
-                            //{
-                            //    manager.gameObject.SetActive(false);
-                            //}
-                            //else
-                            //{
-                            //    manager.gameObject.SetActive(true);
-                            //}
-                        }
-
-                        if (!__instance.BlueLaser.activeSelf)
-                        {
-                            __instance.BlueLaser.SetActive(true);
-                        }
-                        if (__instance.RedLaser.activeSelf)
-                        {
-                            __instance.RedLaser.SetActive(false);
-                        }
-                    }
                     else
                     {
-                        if (Mod.rightDescriptionManager != null)
-                        {
-                            // Hide summary description of object
-                            DescriptionManager manager = null;
-                            if (__instance.IsThisTheRightHand)
-                            {
-                                manager = Mod.rightDescriptionManager;
-                            }
-                            else
-                            {
-                                manager = Mod.leftDescriptionManager;
-                            }
-                            if (manager.gameObject.activeSelf)
-                            {
-                                manager.gameObject.SetActive(false);
-                            }
-                        }
-
                         if (__instance.BlueLaser.activeSelf)
                         {
                             __instance.BlueLaser.SetActive(false);
@@ -3304,17 +2982,61 @@ namespace EFM
                             __instance.RedLaser.SetActive(true);
                         }
                     }
+
+                    // Update description visibility
+                    if (__instance.IsThisTheRightHand)
+                    {
+                        if(Mod.rightHand.description != null && Mod.rightHand.description.gameObject.activeSelf != (describable != null))
+                        {
+                            Mod.rightHand.description.gameObject.SetActive(describable != null);
+                        }
+                    }
+                    else
+                    {
+                        if (Mod.leftHand.description != null && Mod.leftHand.description.gameObject.activeSelf != (describable != null))
+                        {
+                            Mod.leftHand.description.gameObject.SetActive(describable != null);
+                        }
+                    }
                 }
                 else if (__instance.GrabLaser.gameObject.activeSelf)
                 {
                     __instance.GrabLaser.gameObject.SetActive(false);
                 }
             }
-            else if (__instance.GrabLaser.gameObject.activeSelf)
+            else
             {
-                __instance.GrabLaser.gameObject.SetActive(false);
+                if (__instance.GrabLaser.gameObject.activeSelf)
+                {
+                    __instance.GrabLaser.gameObject.SetActive(false);
+                }
+
+                // If hand is holding something, we want to activate description if have description input
+                Hand hand = __instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand;
+                if (__instance.m_state == FVRViveHand.HandState.GripInteracting)
+                {
+                    if (descriptionInput)
+                    {
+                        if (hand.heldItem != null)
+                        {
+                            hand.SetDescribable(hand.heldItem);
+                            if (!hand.description.gameObject.activeSelf)
+                            {
+                                hand.description.gameObject.SetActive(true);
+                            }
+                        }
+                    }
+                    else if(hand.description != null && hand.description.gameObject.activeSelf)
+                    {
+                        hand.description.gameObject.SetActive(false);
+                    }
+                }
+                else if (hand.description != null && hand.description.gameObject.activeSelf) // Not holding anything, no grab laser, deactivate description
+                {
+                    hand.description.gameObject.SetActive(false);
+                }
             }
-            if (__instance.Mode == FVRViveHand.HandMode.Neutral && ___m_state == FVRViveHand.HandState.Empty && flag)
+            if (__instance.Mode == FVRViveHand.HandMode.Neutral && __instance.m_state == FVRViveHand.HandState.Empty && flag)
             {
                 bool isSpawnLockingEnabled = GM.CurrentSceneSettings.IsSpawnLockingEnabled;
                 if (__instance.ClosestPossibleInteractable != null && __instance.ClosestPossibleInteractable is FVRPhysicalObject)
@@ -3334,10 +3056,10 @@ namespace EFM
                     }
                 }
             }
-            typeof(FVRViveHand).GetMethod("UpdateGrabityDisplay", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
+            __instance.UpdateGrabityDisplay();
             if (__instance.Mode == FVRViveHand.HandMode.Neutral)
             {
-                if (___m_state == FVRViveHand.HandState.Empty)
+                if (__instance.m_state == FVRViveHand.HandState.Empty)
                 {
                     bool flag4 = false;
                     if (__instance.Input.IsGrabDown)
@@ -3345,28 +3067,15 @@ namespace EFM
                         if (__instance.CurrentHoveredQuickbeltSlot != null && __instance.CurrentHoveredQuickbeltSlot.CurObject != null)
                         {
                             __instance.CurrentInteractable = __instance.CurrentHoveredQuickbeltSlot.CurObject;
-                            ___m_state = FVRViveHand.HandState.GripInteracting;
+                            __instance.m_state = FVRViveHand.HandState.GripInteracting;
                             __instance.CurrentInteractable.BeginInteraction(__instance);
                             __instance.Buzz(__instance.Buzzer.Buzz_BeginInteraction);
-                            flag4 = true;
-                        }
-                        else if (__instance.CurrentHoveredQuickbeltSlot != null &&
-                                 __instance.CurrentHoveredQuickbeltSlot is ShoulderStorage &&
-                                 !(__instance.CurrentHoveredQuickbeltSlot as ShoulderStorage).right &&
-                                 StatusUI.instance.equipmentSlots[0].CurObject != null)
-                        {
-                            // If we are hovering over left shoulder slot and backpack slot is not empty we want to grab backpack
-                            __instance.CurrentInteractable = StatusUI.instance.equipmentSlots[0].CurObject;
-                            ___m_state = FVRViveHand.HandState.GripInteracting;
-                            __instance.CurrentInteractable.BeginInteraction(__instance);
-                            __instance.Buzz(__instance.Buzzer.Buzz_BeginInteraction);
-                            Mod.leftShoulderObject = null;
                             flag4 = true;
                         }
                         else if (__instance.ClosestPossibleInteractable != null && !__instance.ClosestPossibleInteractable.IsSimpleInteract)
                         {
                             __instance.CurrentInteractable = __instance.ClosestPossibleInteractable;
-                            ___m_state = FVRViveHand.HandState.GripInteracting;
+                            __instance.m_state = FVRViveHand.HandState.GripInteracting;
                             __instance.CurrentInteractable.BeginInteraction(__instance);
                             __instance.Buzz(__instance.Buzzer.Buzz_BeginInteraction);
                             flag4 = true;
@@ -3387,21 +3096,21 @@ namespace EFM
                     bool flag6 = false;
                     if (!flag4 && !flag5 && __instance.Input.IsGrabDown)
                     {
-                        ___m_rawGrabCols = Physics.OverlapSphere(__instance.transform.position, 0.01f, __instance.LM_RawGrab, QueryTriggerInteraction.Ignore);
-                        if (___m_rawGrabCols.Length > 0)
+                        __instance.m_rawGrabCols = Physics.OverlapSphere(__instance.transform.position, 0.01f, __instance.LM_RawGrab, QueryTriggerInteraction.Ignore);
+                        if (__instance.m_rawGrabCols.Length > 0)
                         {
-                            for (int i = 0; i < ___m_rawGrabCols.Length; i++)
+                            for (int i = 0; i < __instance.m_rawGrabCols.Length; i++)
                             {
-                                if (!(___m_rawGrabCols[i].attachedRigidbody == null))
+                                if (!(__instance.m_rawGrabCols[i].attachedRigidbody == null))
                                 {
-                                    if (___m_rawGrabCols[i].attachedRigidbody.gameObject.CompareTag("RawGrab"))
+                                    if (__instance.m_rawGrabCols[i].attachedRigidbody.gameObject.CompareTag("RawGrab"))
                                     {
-                                        FVRInteractiveObject component2 = ___m_rawGrabCols[i].attachedRigidbody.gameObject.GetComponent<FVRInteractiveObject>();
+                                        FVRInteractiveObject component2 = __instance.m_rawGrabCols[i].attachedRigidbody.gameObject.GetComponent<FVRInteractiveObject>();
                                         if (component2 != null && component2.IsInteractable())
                                         {
                                             flag6 = true;
                                             __instance.CurrentInteractable = component2;
-                                            ___m_state = FVRViveHand.HandState.GripInteracting;
+                                            __instance.m_state = FVRViveHand.HandState.GripInteracting;
                                             __instance.CurrentInteractable.BeginInteraction(__instance);
                                             __instance.Buzz(__instance.Buzzer.Buzz_BeginInteraction);
                                         }
@@ -3412,13 +3121,13 @@ namespace EFM
                     }
                     if (GM.Options.ControlOptions.WIPGrabbityState == ControlOptions.WIPGrabbity.Enabled && !flag4 && !flag5 && !flag6)
                     {
-                        if (___m_selectedObj == null)
+                        if (__instance.m_selectedObj == null)
                         {
-                            typeof(FVRViveHand).GetMethod("CastToFindHover", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
+                            __instance.CastToFindHover();
                         }
                         else
                         {
-                            typeof(FVRViveHand).GetMethod("SetGrabbityHovered", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { null });
+                            __instance.SetGrabbityHovered(null);
                         }
                         bool flag7;
                         bool flag8;
@@ -3432,51 +3141,51 @@ namespace EFM
                             flag7 = __instance.Input.TriggerDown;
                             flag8 = __instance.Input.TriggerUp;
                         }
-                        if (flag7 && ___m_grabityHoveredObject != null && ___m_selectedObj == null)
+                        if (flag7 && __instance.m_grabityHoveredObject != null && __instance.m_selectedObj == null)
                         {
-                            typeof(FVRViveHand).GetMethod("CastToGrab", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, null);
+                            __instance.CastToGrab();
                         }
-                        if (flag8 && !___m_isObjectInTransit)
+                        if (flag8 && !__instance.m_isObjectInTransit)
                         {
-                            ___m_selectedObj = null;
+                            __instance.m_selectedObj = null;
                         }
-                        if (___m_selectedObj != null && !___m_isObjectInTransit)
+                        if (__instance.m_selectedObj != null && !__instance.m_isObjectInTransit)
                         {
                             float num = 3.5f;
                             if (Mathf.Abs(__instance.Input.VelAngularLocal.x) > num || Mathf.Abs(__instance.Input.VelAngularLocal.y) > num)
                             {
-                                typeof(FVRViveHand).GetMethod("BeginFlick", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { ___m_selectedObj });
+                                __instance.BeginFlick(__instance.m_selectedObj);
                             }
                         }
                     }
                     else
                     {
-                        typeof(FVRViveHand).GetMethod("SetGrabbityHovered", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { null });
+                        __instance.SetGrabbityHovered(null);
                     }
-                    if (GM.Options.ControlOptions.WIPGrabbityState == ControlOptions.WIPGrabbity.Enabled && !flag4 && !flag5 && __instance.Input.IsGrabDown && ___m_isObjectInTransit && ___m_selectedObj != null)
+                    if (GM.Options.ControlOptions.WIPGrabbityState == ControlOptions.WIPGrabbity.Enabled && !flag4 && !flag5 && __instance.Input.IsGrabDown && __instance.m_isObjectInTransit && __instance.m_selectedObj != null)
                     {
-                        float num2 = Vector3.Distance(__instance.transform.position, ___m_selectedObj.transform.position);
+                        float num2 = Vector3.Distance(__instance.transform.position, __instance.m_selectedObj.transform.position);
                         if (num2 < 0.5f)
                         {
-                            if (___m_selectedObj.UseGripRotInterp)
+                            if (__instance.m_selectedObj.UseGripRotInterp)
                             {
-                                __instance.CurrentInteractable = ___m_selectedObj;
+                                __instance.CurrentInteractable = __instance.m_selectedObj;
                                 __instance.CurrentInteractable.BeginInteraction(__instance);
-                                ___m_state = FVRViveHand.HandState.GripInteracting;
+                                __instance.m_state = FVRViveHand.HandState.GripInteracting;
                             }
                             else
                             {
-                                __instance.RetrieveObject(___m_selectedObj);
+                                __instance.RetrieveObject(__instance.m_selectedObj);
                             }
-                            ___m_selectedObj = null;
-                            ___m_isObjectInTransit = false;
-                            typeof(FVRViveHand).GetMethod("SetGrabbityHovered", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { null });
+                            __instance.m_selectedObj = null;
+                            __instance.m_isObjectInTransit = false;
+                            __instance.SetGrabbityHovered(null);
                         }
                     }
                 }
-                else if (___m_state == FVRViveHand.HandState.GripInteracting)
+                else if (__instance.m_state == FVRViveHand.HandState.GripInteracting)
                 {
-                    typeof(FVRViveHand).GetMethod("SetGrabbityHovered", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { null });
+                    __instance.SetGrabbityHovered(null);
                     bool flag9 = false;
                     if (__instance.CurrentInteractable != null)
                     {
@@ -3507,13 +3216,13 @@ namespace EFM
                                     {
                                         if (gripButtonDropStyle == ControlOptions.ButtonControlStyle.DoubleClick)
                                         {
-                                            if (!__instance.Input.TriggerPressed && __instance.Input.GripDown && ___m_timeSinceLastGripButtonDown > 0.05f && ___m_timeSinceLastGripButtonDown < 0.4f)
+                                            if (!__instance.Input.TriggerPressed && __instance.Input.GripDown && __instance.m_timeSinceLastGripButtonDown > 0.05f && __instance.m_timeSinceLastGripButtonDown < 0.4f)
                                             {
                                                 flag9 = true;
                                             }
                                         }
                                     }
-                                    else if (!__instance.Input.TriggerPressed && ___m_timeGripButtonHasBeenHeld > 1f)
+                                    else if (!__instance.Input.TriggerPressed && __instance.m_timeGripButtonHasBeenHeld > 1f)
                                     {
                                         flag9 = true;
                                     }
@@ -3530,14 +3239,8 @@ namespace EFM
                         }
                         if (flag9)
                         {
-                            if (__instance.CurrentInteractable is FVRPhysicalObject && ((FVRPhysicalObject)__instance.CurrentInteractable).QuickbeltSlot == null &&
-                                !((FVRPhysicalObject)__instance.CurrentInteractable).IsPivotLocked && __instance.CurrentHoveredQuickbeltSlot != null &&
-                                __instance.CurrentHoveredQuickbeltSlot.GetAffixedTo() != (FVRPhysicalObject)__instance.CurrentInteractable &&
-                                __instance.CurrentHoveredQuickbeltSlot.HeldObject == null &&
-                                ((FVRPhysicalObject)__instance.CurrentInteractable).QBSlotType == __instance.CurrentHoveredQuickbeltSlot.Type &&
-                                __instance.CurrentHoveredQuickbeltSlot.SizeLimit >= ((FVRPhysicalObject)__instance.CurrentInteractable).Size)
+                            if (__instance.CurrentInteractable is FVRPhysicalObject && ((FVRPhysicalObject)__instance.CurrentInteractable).QuickbeltSlot == null && !((FVRPhysicalObject)__instance.CurrentInteractable).IsPivotLocked && __instance.CurrentHoveredQuickbeltSlot != null && __instance.CurrentHoveredQuickbeltSlot.GetAffixedTo() != (FVRPhysicalObject)__instance.CurrentInteractable && __instance.CurrentHoveredQuickbeltSlot.HeldObject == null && ((FVRPhysicalObject)__instance.CurrentInteractable).QBSlotType == __instance.CurrentHoveredQuickbeltSlot.Type && __instance.CurrentHoveredQuickbeltSlot.SizeLimit >= ((FVRPhysicalObject)__instance.CurrentInteractable).Size)
                             {
-                                // Note: This will call set quick belt slot twice, this is by vanilla design and is not a bug
                                 ((FVRPhysicalObject)__instance.CurrentInteractable).EndInteractionIntoInventorySlot(__instance, __instance.CurrentHoveredQuickbeltSlot);
                             }
                             else
@@ -3545,7 +3248,7 @@ namespace EFM
                                 __instance.CurrentInteractable.EndInteraction(__instance);
                             }
                             __instance.CurrentInteractable = null;
-                            ___m_state = FVRViveHand.HandState.Empty;
+                            __instance.m_state = FVRViveHand.HandState.Empty;
                         }
                         else
                         {
@@ -3554,20 +3257,20 @@ namespace EFM
                     }
                     else
                     {
-                        ___m_state = FVRViveHand.HandState.Empty;
+                        __instance.m_state = FVRViveHand.HandState.Empty;
                     }
                 }
             }
             if (__instance.Input.GripPressed)
             {
-                ___m_timeSinceLastGripButtonDown = 0f;
-                ___m_timeGripButtonHasBeenHeld += Time.deltaTime;
+                __instance.m_timeSinceLastGripButtonDown = 0f;
+                __instance.m_timeGripButtonHasBeenHeld += Time.deltaTime;
             }
             else
             {
-                ___m_timeGripButtonHasBeenHeld = 0f;
+                __instance.m_timeGripButtonHasBeenHeld = 0f;
             }
-            ___m_canMadeGrabReleaseSoundThisFrame = true;
+            __instance.m_canMadeGrabReleaseSoundThisFrame = true;
 
             return false;
         }

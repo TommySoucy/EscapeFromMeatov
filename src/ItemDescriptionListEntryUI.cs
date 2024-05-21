@@ -16,6 +16,8 @@ namespace EFM
         public Text entryInfo;
         public Button button;
 
+        private int entryCount;
+
         public void SetTask(ItemDescriptionUI owner, Task task, long currentCount, int neededCount)
         {
             // Note that an entry like this one does not subscribe to events to update its amount in realtime
@@ -116,14 +118,8 @@ namespace EFM
                 bool mag = isMag;
                 button.onClick.AddListener(() => OnLoadAmmoContainerClicked(containerID, mag));
             }
-            if (HideoutController.instance != null)
-            {
-                amount.text = "(" + (hideoutCount + playerCount) + ")";
-            }
-            else
-            {
-                amount.text = "(" + playerCount + ")";
-            }
+            entryCount = hideoutCount + playerCount;
+            amount.text = "(" + entryCount + ")";
         }
 
         public void SetAmmo(ItemDescriptionUI owner, MeatovItemData roundData, int hideoutCount, int playerCount, int ammoBoxCount)
@@ -142,7 +138,8 @@ namespace EFM
                 MeatovItemData roundDataToUse = roundData;
                 button.onClick.AddListener(() => OnFillRoundsClicked(roundDataToUse));
             }
-            amount.text = "(" + (hideoutCount + playerCount + ammoBoxCount) + ")";
+            entryCount = hideoutCount + playerCount + ammoBoxCount;
+            amount.text = "(" + entryCount + ")";
         }
 
         public void OnFillRoundsClicked(MeatovItemData roundData)
@@ -226,6 +223,7 @@ namespace EFM
                     for (int i = roundList.Count-1; i >= 0 && countLeft > 0; --i)
                     {
                         asMag.AddRound(roundList[i].physObj as FVRFireArmRound, false, true, false);
+                        --entryCount;
                         --countLeft;
                     }
                 }
@@ -234,6 +232,7 @@ namespace EFM
                     for (int i = roundList.Count - 1; i >= 0 && countLeft > 0; --i)
                     {
                         asClip.AddRound(roundList[i].physObj as FVRFireArmRound, false, true, false);
+                        --entryCount;
                         --countLeft;
                     }
                 }
@@ -248,6 +247,7 @@ namespace EFM
                             {
                                 asSL.Chambers[j].Load(roundList[i].roundClass);
                                 Destroy(roundList[i].gameObject);
+                                --entryCount;
                                 --countLeft;
                                 found = true;
                                 break;
@@ -262,7 +262,14 @@ namespace EFM
 
                 if (countLeft == 0)
                 {
-                    owner.UpdateCompatibleAmmoList();
+                    if(entryCount <= 0)
+                    {
+                        Destroy(gameObject);
+                    }
+                    else
+                    {
+                        amount.text = "(" + entryCount + ")";
+                    }
                     return;
                 }
             }
@@ -276,6 +283,7 @@ namespace EFM
                     for (int i = hideoutRoundList.Count-1; i >= 0 && countLeft > 0; --i)
                     {
                         asMag.AddRound(hideoutRoundList[i].physObj as FVRFireArmRound, false, true, false);
+                        --entryCount;
                         --countLeft;
                     }
                 }
@@ -284,6 +292,7 @@ namespace EFM
                     for (int i = hideoutRoundList.Count - 1; i >= 0 && countLeft > 0; --i)
                     {
                         asClip.AddRound(hideoutRoundList[i].physObj as FVRFireArmRound, false, true, false);
+                        --entryCount;
                         --countLeft;
                     }
                 }
@@ -298,6 +307,7 @@ namespace EFM
                             {
                                 asSL.Chambers[j].Load(hideoutRoundList[i].roundClass);
                                 Destroy(hideoutRoundList[i].gameObject);
+                                --entryCount;
                                 --countLeft;
                                 found = true;
                                 break;
@@ -312,7 +322,14 @@ namespace EFM
 
                 if (countLeft == 0)
                 {
-                    owner.UpdateCompatibleAmmoList();
+                    if (entryCount <= 0)
+                    {
+                        Destroy(gameObject);
+                    }
+                    else
+                    {
+                        amount.text = "(" + entryCount + ")";
+                    }
                     return;
                 }
             }
@@ -335,6 +352,7 @@ namespace EFM
                             if (lr.LR_Class == roundData.roundClass)
                             {
                                 asMag.AddRound(roundData.roundClass, false, true);
+                                --entryCount;
                                 --countLeft;
 
                                 // Remove the correct round
@@ -361,6 +379,7 @@ namespace EFM
                             if (lr.LR_Class == roundData.roundClass)
                             {
                                 asClip.AddRound(roundData.roundClass, false, true);
+                                --entryCount;
                                 --countLeft;
 
                                 boxMag.LoadedRounds[i] = boxMag.LoadedRounds[boxMag.m_numRounds - 1];
@@ -388,6 +407,7 @@ namespace EFM
                                     if (!asSL.Chambers[j].IsLoaded)
                                     {
                                         asSL.Chambers[j].Load(roundData.roundClass);
+                                        --entryCount;
                                         --countLeft;
                                         found = true;
                                         break;
@@ -426,7 +446,14 @@ namespace EFM
                             }
                         }
 
-                        owner.UpdateCompatibleAmmoList();
+                        if (entryCount <= 0)
+                        {
+                            Destroy(gameObject);
+                        }
+                        else
+                        {
+                            amount.text = "(" + entryCount + ")";
+                        }
 
                         return;
                     }
@@ -463,6 +490,7 @@ namespace EFM
                             if (lr.LR_Class == roundData.roundClass)
                             {
                                 asMag.AddRound(roundData.roundClass, false, true);
+                                --entryCount;
                                 --countLeft;
 
                                 boxMag.LoadedRounds[i] = boxMag.LoadedRounds[boxMag.m_numRounds - 1];
@@ -485,6 +513,7 @@ namespace EFM
                             if (lr.LR_Class == roundData.roundClass)
                             {
                                 asClip.AddRound(roundData.roundClass, false, true);
+                                --entryCount;
                                 --countLeft;
 
                                 boxMag.LoadedRounds[i] = boxMag.LoadedRounds[boxMag.m_numRounds - 1];
@@ -512,6 +541,7 @@ namespace EFM
                                     if (!asSL.Chambers[j].IsLoaded)
                                     {
                                         asSL.Chambers[j].Load(roundData.roundClass);
+                                        --entryCount;
                                         --countLeft;
                                         found = true;
                                         break;
@@ -550,7 +580,14 @@ namespace EFM
                             }
                         }
 
-                        owner.UpdateCompatibleAmmoList();
+                        if (entryCount <= 0)
+                        {
+                            Destroy(gameObject);
+                        }
+                        else
+                        {
+                            amount.text = "(" + entryCount + ")";
+                        }
 
                         return;
                     }
@@ -616,6 +653,7 @@ namespace EFM
                             {
                                 FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
                                 asFA.LoadMag(asMag);
+                                --entryCount;
                                 loaded = true;
                                 break;
                             }
@@ -623,6 +661,7 @@ namespace EFM
                             {
                                 AttachableFirearmPhysicalObject asAFA = owner.descriptionPack.item.physObj as AttachableFirearmPhysicalObject;
                                 asAFA.FA.LoadMag(asMag);
+                                --entryCount;
                                 loaded = true;
                                 break;
                             }
@@ -644,6 +683,7 @@ namespace EFM
                             {
                                 FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
                                 asFA.LoadClip(asClip);
+                                --entryCount;
                                 loaded = true;
                                 break;
                             }
@@ -669,6 +709,7 @@ namespace EFM
                             {
                                 FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
                                 asFA.LoadMag(asMag);
+                                --entryCount;
                                 loaded = true;
                                 break;
                             }
@@ -676,6 +717,7 @@ namespace EFM
                             {
                                 AttachableFirearmPhysicalObject asAFA = owner.descriptionPack.item.physObj as AttachableFirearmPhysicalObject;
                                 asAFA.FA.LoadMag(asMag);
+                                --entryCount;
                                 loaded = true;
                                 break;
                             }
@@ -697,6 +739,7 @@ namespace EFM
                             {
                                 FVRFireArm asFA = owner.descriptionPack.item.physObj as FVRFireArm;
                                 asFA.LoadClip(asClip);
+                                --entryCount;
                                 loaded = true;
                                 break;
                             }
@@ -709,7 +752,14 @@ namespace EFM
                 }
             }
 
-            owner.UpdateCompatibleAmmoContainersList();
+            if (entryCount <= 0)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                amount.text = "(" + entryCount + ")";
+            }
         }
     }
 }

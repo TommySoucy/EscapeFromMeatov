@@ -69,7 +69,6 @@
     <Compile Include="src\MeatovItem.cs" />
     <Compile Include="src\DamageVolume.cs" />
     <Compile Include="src\IDescribable.cs" />
-    <Compile Include="src\DescriptionManager.cs" />
     <Compile Include="src\DestroyTimer.cs" />
     <Compile Include="src\DoorLockChecker.cs" />
     <Compile Include="src\DoorWrapper.cs" />

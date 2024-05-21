@@ -168,10 +168,6 @@ namespace EFM
         public static Text extractionUIText;
         public static GameObject extractionLimitUI;
         public static Text extractionLimitUIText;
-        public static GameObject leftDescriptionUI;
-        public static DescriptionManager leftDescriptionManager;
-        public static GameObject rightDescriptionUI;
-        public static DescriptionManager rightDescriptionManager;
         public static GameObject staminaBarUI;
         public static int totalRaidCount;
         public static int runThroughRaidCount;

@@ -1,7 +1,5 @@
 ﻿using FistVR;
-using System.Collections.Generic;
 using UnityEngine;
-using Valve.VR.InteractionSystem;
 
 namespace EFM
 {
@@ -20,6 +18,9 @@ namespace EFM
         public bool hasScript;
         public MeatovItem heldItem;
         public bool updateInteractionSphere;
+
+        public ItemDescriptionUI description;
+        public IDescribable currentDescribable;
 
         private void Awake()
         {
@@ -151,6 +152,22 @@ namespace EFM
                 collidingVolume = null;
                 volumeCollider = null;
             }
+        }
+
+        public void SetDescribable(IDescribable decribable)
+        {
+            if(currentDescribable == decribable)
+            {
+                return;
+            }
+
+            if (description == null)
+            {
+                description = Instantiate(Mod.itemDescriptionUIPrefab, transform).GetComponent<ItemDescriptionUI>();
+                description.hand = this;
+            }
+
+            description.SetDescriptionPack(decribable.GetDescriptionPack());
         }
     }
 }

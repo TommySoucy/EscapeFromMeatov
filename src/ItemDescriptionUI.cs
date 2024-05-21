@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static FistVR.ClosedBoltCarrierWrap;
 
 namespace EFM
 {
     public class ItemDescriptionUI : MonoBehaviour
     {
         public DescriptionPack descriptionPack;
+        public Hand hand;
 
         public GameObject summary;
         public ItemView summaryItemView;
@@ -213,6 +213,8 @@ namespace EFM
             summary.SetActive(false);
             full.SetActive(true);
             transform.parent = null;
+            hand.description = null;
+            hand = null;
         }
 
         public void OnWishlistClicked()
