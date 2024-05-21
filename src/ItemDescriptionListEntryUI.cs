@@ -228,10 +228,6 @@ namespace EFM
                         asMag.AddRound(roundList[i].physObj as FVRFireArmRound, false, true, false);
                         --countLeft;
                     }
-                    if(countLeft == 0)
-                    {
-                        return;
-                    }
                 }
                 else if(typeIndex == 1)
                 {
@@ -239,10 +235,6 @@ namespace EFM
                     {
                         asClip.AddRound(roundList[i].physObj as FVRFireArmRound, false, true, false);
                         --countLeft;
-                    }
-                    if (countLeft == 0)
-                    {
-                        return;
                     }
                 }
                 else if(typeIndex == 2)
@@ -266,10 +258,12 @@ namespace EFM
                             break;
                         }
                     }
-                    if (countLeft == 0)
-                    {
-                        return;
-                    }
+                }
+
+                if (countLeft == 0)
+                {
+                    owner.UpdateCompatibleAmmoList();
+                    return;
                 }
             }
 
@@ -284,10 +278,6 @@ namespace EFM
                         asMag.AddRound(hideoutRoundList[i].physObj as FVRFireArmRound, false, true, false);
                         --countLeft;
                     }
-                    if(countLeft == 0)
-                    {
-                        return;
-                    }
                 }
                 else if(typeIndex == 1)
                 {
@@ -295,10 +285,6 @@ namespace EFM
                     {
                         asClip.AddRound(hideoutRoundList[i].physObj as FVRFireArmRound, false, true, false);
                         --countLeft;
-                    }
-                    if (countLeft == 0)
-                    {
-                        return;
                     }
                 }
                 else if(typeIndex == 2)
@@ -322,10 +308,12 @@ namespace EFM
                             break;
                         }
                     }
-                    if (countLeft == 0)
-                    {
-                        return;
-                    }
+                }
+
+                if (countLeft == 0)
+                {
+                    owner.UpdateCompatibleAmmoList();
+                    return;
                 }
             }
 
@@ -437,6 +425,9 @@ namespace EFM
                                 }
                             }
                         }
+
+                        owner.UpdateCompatibleAmmoList();
+
                         return;
                     }
                 }
@@ -558,6 +549,9 @@ namespace EFM
                                 }
                             }
                         }
+
+                        owner.UpdateCompatibleAmmoList();
+
                         return;
                     }
                 }
@@ -714,6 +708,8 @@ namespace EFM
                     }
                 }
             }
+
+            owner.UpdateCompatibleAmmoContainersList();
         }
     }
 }
