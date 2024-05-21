@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace EFM
 {
-    public class ItemRewardView : MonoBehaviour, IDescribable
+    public class ItemRewardView : MonoBehaviour
     {
         public MeatovItemData item;
 
@@ -17,16 +17,6 @@ namespace EFM
             this.item = item;
 
             itemView.SetItemData(item);
-        }
-
-        public DescriptionPack GetDescriptionPack()
-        {
-            return item.GetDescriptionPack();
-        }
-
-        public void SetDescriptionManager(DescriptionManager descriptionManager)
-        {
-            // TODO
         }
     }
 }

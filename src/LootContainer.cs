@@ -85,40 +85,40 @@ namespace EFM
                 else
 				{
 					// If loose round stack, spawn generic ammo box instead
-					if (Mod.usedRoundIDs.Contains(itemID))
-					{
-						int stackSize = UnityEngine.Random.Range(15, 120);
-						int actualItemID;
-						if(stackSize <= 30)
-						{
-							actualItemID = 715;
-                        }
-                        else
-						{
-							actualItemID = 716;
-						}
+					//if (Mod.usedRoundIDs.Contains(itemID))
+					//{
+					//	int stackSize = UnityEngine.Random.Range(15, 120);
+					//	int actualItemID;
+					//	if(stackSize <= 30)
+					//	{
+					//		actualItemID = 715;
+     //                   }
+     //                   else
+					//	{
+					//		actualItemID = 716;
+					//	}
 
-						//if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity))
-						//{
-						//	++successfulAttempts;
+					//	//if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity))
+					//	//{
+					//	//	++successfulAttempts;
 
-						//	customIDs.Add(actualItemID);
+					//	//	customIDs.Add(actualItemID);
 
-						//	stackSizes.Add(stackSize);
-						//	FVRFireArmRound roundScript = IM.OD[itemID].GetGameObject().GetComponent<FVRFireArmRound>();
-						//	roundClasses.Add(roundScript.RoundClass);
-						//	roundTypes.Add(roundScript.RoundType);
-						//}
-					}
-                    else
-					{
-						//if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity) / 100)
-						//{
-						//	++successfulAttempts;
+					//	//	stackSizes.Add(stackSize);
+					//	//	FVRFireArmRound roundScript = IM.OD[itemID].GetGameObject().GetComponent<FVRFireArmRound>();
+					//	//	roundClasses.Add(roundScript.RoundClass);
+					//	//	roundTypes.Add(roundScript.RoundType);
+					//	//}
+					//}
+     //               else
+					//{
+					//	//if (UnityEngine.Random.value <= Mod.GetRaritySpawnChanceMultiplier(prefabVID.rarity) / 100)
+					//	//{
+					//	//	++successfulAttempts;
 
-						//	vanillaIDs.Add(itemID);
-						//}
-					}
+					//	//	vanillaIDs.Add(itemID);
+					//	//}
+					//}
 				}
 
 				// Limit successful item spawn count to number of cells in container
