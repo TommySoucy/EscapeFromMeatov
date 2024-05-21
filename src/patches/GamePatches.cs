@@ -13,6 +13,7 @@ using H3MP.Patches;
 using H3MP.Scripts;
 using System.Net.Mail;
 using static FistVR.SosigInventory;
+using FFmpeg.AutoGen;
 
 namespace EFM
 {
@@ -192,29 +193,26 @@ namespace EFM
             //PatchController.Verify(chamberSetRoundGivenPatchOriginal, harmony, true);
             //harmony.Patch(chamberSetRoundGivenPatchOriginal, new HarmonyMethod(chamberSetRoundGivenPatchPrefix));
 
-            //// MagRemoveRoundPatch
-            //MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
-            //MethodInfo magRemoveRoundPatchPrefix = typeof(MagRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo magRemoveRoundPatchPostfix = typeof(MagRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // MagRemoveRoundPatch
+            MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
+            MethodInfo magRemoveRoundPatchPrefix = typeof(MagRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(magRemoveRoundPatchOriginal, harmony, true);
-            //harmony.Patch(magRemoveRoundPatchOriginal, new HarmonyMethod(magRemoveRoundPatchPrefix), new HarmonyMethod(magRemoveRoundPatchPostfix));
+            PatchController.Verify(magRemoveRoundPatchOriginal, harmony, true);
+            harmony.Patch(magRemoveRoundPatchOriginal, new HarmonyMethod(magRemoveRoundPatchPrefix));
 
-            //// MagRemoveRoundBoolPatch
-            //MethodInfo magRemoveRoundBoolPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
-            //MethodInfo magRemoveRoundBoolPatchPrefix = typeof(MagRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo magRemoveRoundBoolPatchPostfix = typeof(MagRemoveRoundBoolPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // MagRemoveRoundBoolPatch
+            MethodInfo magRemoveRoundBoolPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
+            MethodInfo magRemoveRoundBoolPatchPrefix = typeof(MagRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(magRemoveRoundBoolPatchOriginal, harmony, true);
-            //harmony.Patch(magRemoveRoundBoolPatchOriginal, new HarmonyMethod(magRemoveRoundBoolPatchPrefix), new HarmonyMethod(magRemoveRoundBoolPatchPostfix));
+            PatchController.Verify(magRemoveRoundBoolPatchOriginal, harmony, true);
+            harmony.Patch(magRemoveRoundBoolPatchOriginal, new HarmonyMethod(magRemoveRoundBoolPatchPrefix));
 
-            //// MagRemoveRoundIntPatch
-            //MethodInfo magRemoveRoundIntPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(int) }, null);
-            //MethodInfo magRemoveRoundIntPatchPrefix = typeof(MagRemoveRoundIntPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo magRemoveRoundIntPatchPostfix = typeof(MagRemoveRoundIntPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // MagRemoveRoundIntPatch
+            MethodInfo magRemoveRoundIntPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(int) }, null);
+            MethodInfo magRemoveRoundIntPatchPrefix = typeof(MagRemoveRoundIntPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(magRemoveRoundIntPatchOriginal, harmony, true);
-            //harmony.Patch(magRemoveRoundIntPatchOriginal, new HarmonyMethod(magRemoveRoundIntPatchPrefix), new HarmonyMethod(magRemoveRoundIntPatchPostfix));
+            PatchController.Verify(magRemoveRoundIntPatchOriginal, harmony, true);
+            harmony.Patch(magRemoveRoundIntPatchOriginal, new HarmonyMethod(magRemoveRoundIntPatchPrefix));
 
             //// ClipRemoveRoundPatch
             //MethodInfo clipRemoveRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
@@ -270,22 +268,19 @@ namespace EFM
             //PatchController.Verify(fireArmEjectClipPatchOriginal, harmony, true);
             //harmony.Patch(fireArmEjectClipPatchOriginal, new HarmonyMethod(fireArmEjectClipPatchPrefix), new HarmonyMethod(fireArmEjectClipPatchPostfix));
 
-            TODO e:// Make addround and removeround patches to track ammo that goes in an out of ammo boxes since we'll need that for descriptions
-            //// MagAddRoundPatch
-            //MethodInfo magAddRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool) }, null);
-            //MethodInfo magAddRoundPatchPrefix = typeof(MagAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo magAddRoundPatchPostfix = typeof(MagAddRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // MagAddRoundPatch
+            MethodInfo magAddRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool) }, null);
+            MethodInfo magAddRoundPatchPrefix = typeof(MagAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(magAddRoundPatchOriginal, harmony, true);
-            //harmony.Patch(magAddRoundPatchOriginal, new HarmonyMethod(magAddRoundPatchPrefix), new HarmonyMethod(magAddRoundPatchPostfix));
+            PatchController.Verify(magAddRoundPatchOriginal, harmony, true);
+            harmony.Patch(magAddRoundPatchOriginal, new HarmonyMethod(magAddRoundPatchPrefix));
 
-            //// MagAddRoundClassPatch
-            //MethodInfo magAddRoundClassPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
-            //MethodInfo magAddRoundClassPatchPrefix = typeof(MagAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo magAddRoundClassPatchPostfix = typeof(MagAddRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // MagAddRoundClassPatch
+            MethodInfo magAddRoundClassPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
+            MethodInfo magAddRoundClassPatchPrefix = typeof(MagAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(magAddRoundClassPatchOriginal, harmony, true);
-            //harmony.Patch(magAddRoundClassPatchOriginal, new HarmonyMethod(magAddRoundClassPatchPrefix), new HarmonyMethod(magAddRoundClassPatchPostfix));
+            PatchController.Verify(magAddRoundClassPatchOriginal, harmony, true);
+            harmony.Patch(magAddRoundClassPatchOriginal, new HarmonyMethod(magAddRoundClassPatchPrefix));
 
             //// ClipAddRoundPatch
             //MethodInfo clipAddRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool) }, null);
@@ -4303,186 +4298,147 @@ namespace EFM
         }
     }
 
-    // Patches FVRFireArmMagazine.RemoveRound() to keep track of weight of ammo in mag
+    // Patches FVRFireArmMagazine.RemoveRound() to track ammo box ammo
     class MagRemoveRoundPatch
     {
-        static int preNumRounds = 0;
-
-        static void Prefix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
+        static void Prefix(FVRFireArmMagazine __instance)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-            preNumRounds = ___m_numRounds;
-        }
-
-        static void Postfix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
-        {
-            if (!Mod.inMeatovScene)
+            if(__instance.m_numRounds > 0)
             {
-                return;
-            }
-
-            int postNumRounds = ___m_numRounds;
-
-            if (__instance.m_hand != null)
-            {
-                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
-            }
-
-
-            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-            // locationIndex so we know when to add/remove weight from player also
-            MeatovItem MI = __instance.GetComponent<MeatovItem>();
-            if (MI != null)
-            {
-                if (postNumRounds == 0)
+                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
+                if (ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
                 {
-                    if (MI.H3ID.Equals("715") || MI.H3ID.Equals("716"))
+                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                    if (ammoBox.locationIndex == 0) // Player
                     {
-                        __instance.ForceBreakInteraction();
-                        GameObject.Destroy(MI.gameObject);
+                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
                     }
-                    else
+                    else if (ammoBox.locationIndex == 1) // Hideout
                     {
-                        //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                        MI.amount -= (preNumRounds - postNumRounds);
+                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else // Raid
+                    {
+                        return;
+                    }
+
+                    FVRLoadedRound lr = __instance.LoadedRounds[__instance.m_numRounds - 1];
+                    --dictToUse[__instance.RoundType][lr.LR_Class][ammoBox];
+                    if (dictToUse[__instance.RoundType][lr.LR_Class][ammoBox] == 0)
+                    {
+                        dictToUse[__instance.RoundType][lr.LR_Class].Remove(ammoBox);
+                        if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
+                        {
+                            dictToUse[__instance.RoundType].Remove(lr.LR_Class);
+                            if (dictToUse[__instance.RoundType].Count == 0)
+                            {
+                                dictToUse.Remove(__instance.RoundType);
+                            }
+                        }
                     }
                 }
-                else
-                {
-                    //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                    MI.amount -= (preNumRounds - postNumRounds);
-                }
-            }
-            else
-            {
-                Mod.LogError("MagRemoveRoundPatch postfix: Mag " + __instance.name + " has no VID nor CIW");
             }
         }
     }
 
-    // Patches FVRFireArmMagazine.RemoveRound(bool) to keep track of weight of ammo in mag
+    // Patches FVRFireArmMagazine.RemoveRound(bool) to track ammo box ammo
     // TODO: See if this could be used to do what we do in MagazineUpdateInteractionPatch instead
     class MagRemoveRoundBoolPatch
     {
-        static int preNumRounds = 0;
-
-        static void Prefix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
+        static void Prefix(FVRFireArmMagazine __instance)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-            preNumRounds = ___m_numRounds;
-        }
-
-        static void Postfix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
-        {
-            if (!Mod.inMeatovScene)
+            if (__instance.m_numRounds > 0)
             {
-                return;
-            }
-
-            int postNumRounds = ___m_numRounds;
-
-            if (__instance.m_hand != null)
-            {
-                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
-            }
-
-
-            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-            // locationIndex so we know when to add/remove weight from player also
-            MeatovItem MI = __instance.GetComponent<MeatovItem>();
-            if (MI != null)
-            {
-                if (postNumRounds == 0)
+                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
+                if (ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
                 {
-                    if (MI.H3ID.Equals("715") || MI.H3ID.Equals("716"))
+                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                    if (ammoBox.locationIndex == 0) // Player
                     {
-                        __instance.ForceBreakInteraction();
-                        GameObject.Destroy(MI.gameObject);
+                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
                     }
-                    else
+                    else if (ammoBox.locationIndex == 1) // Hideout
                     {
-                        //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                        MI.amount -= (preNumRounds - postNumRounds);
+                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else // Raid
+                    {
+                        return;
+                    }
+
+                    FVRLoadedRound lr = __instance.LoadedRounds[__instance.m_numRounds - 1];
+                    --dictToUse[__instance.RoundType][lr.LR_Class][ammoBox];
+                    if (dictToUse[__instance.RoundType][lr.LR_Class][ammoBox] == 0)
+                    {
+                        dictToUse[__instance.RoundType][lr.LR_Class].Remove(ammoBox);
+                        if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
+                        {
+                            dictToUse[__instance.RoundType].Remove(lr.LR_Class);
+                            if (dictToUse[__instance.RoundType].Count == 0)
+                            {
+                                dictToUse.Remove(__instance.RoundType);
+                            }
+                        }
                     }
                 }
-                else
-                {
-                    //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                    MI.amount -= (preNumRounds - postNumRounds);
-                }
-            }
-            else
-            {
-                Mod.LogError("MagRemoveRoundBoolPatch postfix: Mag " + __instance.name + " has no VID nor CIW");
             }
         }
     }
 
-    // Patches FVRFireArmMagazine.RemoveRound(int) to keep track of weight of ammo in mag
+    // Patches FVRFireArmMagazine.RemoveRound(int) to track ammo box ammo
     class MagRemoveRoundIntPatch
     {
-        static int preNumRounds = 0;
-
-        static void Prefix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
+        static void Prefix(FVRFireArmMagazine __instance)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-            preNumRounds = ___m_numRounds;
-        }
-
-        static void Postfix(int ___m_numRounds, ref FVRFireArmMagazine __instance)
-        {
-            if (!Mod.inMeatovScene)
+            if (__instance.m_numRounds > 0)
             {
-                return;
-            }
-
-            int postNumRounds = ___m_numRounds;
-
-            if (__instance.m_hand != null)
-            {
-                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
-            }
-
-
-            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-            // locationIndex so we know when to add/remove weight from player also
-            MeatovItem MI = __instance.GetComponent<MeatovItem>();
-            if (MI != null)
-            {
-                if (postNumRounds == 0)
+                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
+                if (ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
                 {
-                    if (MI.H3ID.Equals("715") || MI.H3ID.Equals("716"))
+                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                    if (ammoBox.locationIndex == 0) // Player
                     {
-                        __instance.ForceBreakInteraction();
-                        GameObject.Destroy(MI.gameObject);
+                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
                     }
-                    else
+                    else if (ammoBox.locationIndex == 1) // Hideout
                     {
-                        //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                        MI.amount -= (preNumRounds - postNumRounds);
+                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else // Raid
+                    {
+                        return;
+                    }
+
+                    FVRLoadedRound lr = __instance.LoadedRounds[__instance.m_numRounds - 1];
+                    --dictToUse[__instance.RoundType][lr.LR_Class][ammoBox];
+                    if (dictToUse[__instance.RoundType][lr.LR_Class][ammoBox] == 0)
+                    {
+                        dictToUse[__instance.RoundType][lr.LR_Class].Remove(ammoBox);
+                        if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
+                        {
+                            dictToUse[__instance.RoundType].Remove(lr.LR_Class);
+                            if (dictToUse[__instance.RoundType].Count == 0)
+                            {
+                                dictToUse.Remove(__instance.RoundType);
+                            }
+                        }
                     }
                 }
-                else
-                {
-                    //CIW.currentWeight -= 15 * (preNumRounds - postNumRounds);
-                    MI.amount -= (preNumRounds - postNumRounds);
-                }
-            }
-            else
-            {
-                Mod.LogError("MagRemoveRoundIntPatch postfix: Mag " + __instance.name + " has no VID nor CIW");
             }
         }
     }
@@ -4929,7 +4885,7 @@ namespace EFM
     // Patches FVRFirearmMagazine.AddRound(Class) to track ammo in ammo boxes
     class MagAddRoundClassPatch
     {
-        static void Prefix(FVRFireArmMagazine __instance)
+        static void Prefix(FVRFireArmMagazine __instance, FireArmRoundClass rClass)
         {
             if (!Mod.inMeatovScene)
             {
@@ -4938,7 +4894,56 @@ namespace EFM
 
             if (__instance.m_numRounds < __instance.m_capacity)
             {
-                Cont from here // Finish this here with teh same as we did with other addround above and then go do remove round, make surewe apply patches once we are done
+                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
+                if (ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
+                {
+                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                    if (ammoBox.locationIndex == 0) // Player
+                    {
+                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else if (ammoBox.locationIndex == 1) // Hideout
+                    {
+                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else // Raid
+                    {
+                        return;
+                    }
+
+                    if (dictToUse != null)
+                    {
+                        if (dictToUse.TryGetValue(__instance.RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> midDict))
+                        {
+                            if (midDict.TryGetValue(rClass, out Dictionary<MeatovItem, int> boxDict))
+                            {
+                                int count = 0;
+                                if (boxDict.TryGetValue(ammoBox, out count))
+                                {
+                                    ++boxDict[ammoBox];
+                                }
+                                else
+                                {
+                                    boxDict.Add(ammoBox, 1);
+                                }
+                            }
+                            else
+                            {
+                                Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                                newBoxDict.Add(ammoBox, 1);
+                                midDict.Add(rClass, newBoxDict);
+                            }
+                        }
+                        else
+                        {
+                            Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                            newBoxDict.Add(ammoBox, 1);
+                            Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> newMidDict = new Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>();
+                            newMidDict.Add(rClass, newBoxDict);
+                            dictToUse.Add(__instance.RoundType, newMidDict);
+                        }
+                    }
+                }
             }
         }
     }
