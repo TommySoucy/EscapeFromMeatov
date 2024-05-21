@@ -552,7 +552,7 @@ namespace EFM
                             {
                                 GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
                                 ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                                entryUI.SetAmmoContainer(this, descriptionPack.item, itemData, hideoutCount, playerCount, true);
+                                entryUI.SetAmmoContainer(this, itemData, hideoutCount, playerCount, true);
                                 gotContainer = true;
                             }
                         }
@@ -596,7 +596,7 @@ namespace EFM
                             {
                                 GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
                                 ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                                entryUI.SetAmmoContainer(this, descriptionPack.item, itemData, hideoutCount, playerCount, false);
+                                entryUI.SetAmmoContainer(this, itemData, hideoutCount, playerCount, false);
                                 gotContainer = true;
                             }
                         }
@@ -628,12 +628,46 @@ namespace EFM
                 {
                     if (Mod.GetItemData(wrapper.CompatibleSingleRounds[i].ItemID, out MeatovItemData itemData))
                     {
-                        TODO: // We also have to consider ammoboxes, should probably store hideout and player inventory of ammoboxes by round type (caliber) and class just to build these lists
-                        long currentCount = Mod.GetItemCountInInventories(wrapper.CompatibleSingleRounds[i].ItemID);
-                        
+                        int hideoutCount = 0;
+                        if (HideoutController.instance != null && HideoutController.instance.inventoryItems.TryGetValue(wrapper.CompatibleSingleRounds[i].ItemID, out List<MeatovItem> rounds))
+                        {
+                            hideoutCount = rounds.Count;
+                            for (int j = 0; j < rounds.Count; ++j)
+                            {
+                                FVRFireArmRound asRound = rounds[j].physObj as FVRFireArmRound;
+                                if (asRound == null)
+                                {
+                                    --hideoutCount;
+                                }
+                            }
+                        }
+                        int playerCount = 0;
+                        if (Mod.playerInventoryItems.TryGetValue(wrapper.CompatibleSingleRounds[i].ItemID, out List<MeatovItem> playerRounds))
+                        {
+                            playerCount = playerRounds.Count;
+                            for (int j = 0; j < playerRounds.Count; ++j)
+                            {
+                                FVRFireArmRound asRound = playerRounds[j].physObj as FVRFireArmRound;
+                                if (asRound == null)
+                                {
+                                    --playerCount;
+                                }
+                            }
+                        }
+                        int ammoBoxCount = 0;
+                        if (Mod.ammoBoxesByRoundClassByRoundType.TryGetValue(wrapper.CompatibleSingleRounds[i].RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> roundClasses))
+                        {
+                            if(roundClasses.TryGetValue(itemData.roundClass, out Dictionary<MeatovItem, int> ammoBoxes))
+                            {
+                                foreach(KeyValuePair<MeatovItem, int> ammoBoxEntry in ammoBoxes)
+                                {
+                                    ammoBoxCount += ammoBoxEntry.Value;
+                                }
+                            }
+                        }
                         GameObject newEntry = Instantiate(compatibleAmmoEntryPrefab, compatibleAmmoParent.transform);
                         ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
-                        entryUI.SetAmmo(this, itemData, currentCount);
+                        entryUI.SetAmmo(this, itemData, hideoutCount, playerCount, ammoBoxCount);
                         gotAmmo = true;
                     }
                 }
