@@ -15,6 +15,8 @@ namespace EFM
         public Sprite[] levelSprites;
         public Image levelIcon;
         public Text level;
+        public RectTransform expBarFill;
+        public Text experienceText;
         public Image[] partImages; // Head, Thorax, Stomach, LeftArm, RightArm, LeftLeg, RightLeg
         public GameObject[] effectIcons; // Contusion, Toxin, Painkiller, Tremor, TunnelVision, Dehydration, Encumbered, Overencumbered, Fatigue, OverweightFatigue
         public Text[] partHealth;  // Head, Thorax, Stomach, LeftArm, RightArm, LeftLeg, RightLeg
@@ -58,9 +60,27 @@ namespace EFM
             instance = this;
 
             Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
+            Mod.OnPartHealthChanged += OnPartHealthChanged;
+            Mod.OnPlayerWeightChanged += OnPlayerWeightChanged;
+            Mod.OnPlayerExperienceChanged += OnPlayerExperienceChanged;
+
+            // Initialize UI
+            Init();
 
             // Ensure disabled by default
             Close();
+        }
+
+        public void Init()
+        {
+            OnPlayerLevelChanged();
+            OnPlayerExperienceChanged();
+            for(int i = 0; i < partImages.Length; ++i)
+            {
+                OnPartHealthChanged(i);
+            }
+            OnPlayerWeightChanged();
+            cont from ehre
         }
 
         public void Update()
@@ -71,21 +91,11 @@ namespace EFM
             }
 
             UpdateStamina();
-
-            TODO: // Make this work with hoverscroll processor
-            if (mustUpdateTaskListHeight == 0)
-            {
-                UpdateTaskListHeight();
-                --mustUpdateTaskListHeight;
-            }
-            else if (mustUpdateTaskListHeight > 0)
-            {
-                --mustUpdateTaskListHeight;
-            }
         }
 
         public void AddTask(Task task)
         {
+            TODO: // Make sure task UI doesn't have the start, finish, and condition handin buttons if in the status UI
             // Instantiate task element
             GameObject currentTaskElement = Instantiate(taskPrefab, tasksParent);
             currentTaskElement.SetActive(true);
@@ -121,6 +131,47 @@ namespace EFM
             level.text = Mod.level.ToString();
         }
 
+        public void OnPlayerExperienceChanged()
+        {
+            experienceText.text = Mod.experience.ToString() + "/" + (Mod.level >= Mod.XPPerLevel.Length ? "INFINITY" : Mod.XPPerLevel[Mod.level].ToString());
+            expBarFill.sizeDelta = new Vector2(Mod.level >= Mod.XPPerLevel.Length ? 0 : Mod.level / (float)Mod.XPPerLevel[Mod.level] * 100f, 4.73f);
+        }
+
+        public void OnPartHealthChanged(int index)
+        {
+            partImages[index].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(index) / Mod.currentMaxHealth[index]);
+            partHealth[index].text = ((int)Mod.GetHealth(index)).ToString() + "/" + ((int)Mod.currentMaxHealth[index]);
+        }
+
+        public void OnPlayerWeightChanged()
+        {
+            weight.text = String.Format("{0:0.#}", Mod.weight / 1000.0f) + "/ " + String.Format("{0:0.#}", Mod.currentWeightLimit / 1000.0f);
+            if (Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100.0f * 20) // Current weight limit + 20%
+            {
+                weight.color = Color.red;
+
+                // Enable hard overweight icon, disable overweight icon
+                effectIcons[6].SetActive(false);
+                effectIcons[7].SetActive(true);
+            }
+            else if (Mod.weight > Mod.currentWeightLimit)
+            {
+                weight.color = Color.yellow;
+
+                // Enable overweight icon, disable hard overweight icon
+                effectIcons[6].SetActive(true);
+                effectIcons[7].SetActive(false);
+            }
+            else
+            {
+                weight.color = Color.white;
+
+                // Disable overweight icons
+                effectIcons[6].SetActive(false);
+                effectIcons[7].SetActive(false);
+            }
+        }
+
         public void SetExtractionLimitTimer(float raidTimeLeft)
         {
             extractionTimer.text = Mod.FormatTimeString(raidTimeLeft);
@@ -135,17 +186,17 @@ namespace EFM
 
             if (Mod.skills[skillIndex].increasing)
             {
-                skillUI.progressing.SetActive(true);
+                skillUI.increasing.SetActive(true);
                 skillUI.diminishingReturns.SetActive(false);
             }
             else if (Mod.skills[skillIndex].dimishingReturns)
             {
-                skillUI.progressing.SetActive(false);
+                skillUI.increasing.SetActive(false);
                 skillUI.diminishingReturns.SetActive(true);
             }
             else
             {
-                skillUI.progressing.SetActive(false);
+                skillUI.increasing.SetActive(false);
                 skillUI.diminishingReturns.SetActive(false);
             }
         }
@@ -251,35 +302,6 @@ namespace EFM
             }
         }
 
-        public void UpdateWeight()
-        {
-            weight.text = String.Format("{0:0.#}", Mod.weight / 1000.0f) + "/ " + String.Format("{0:0.#}", Mod.currentWeightLimit / 1000.0f);
-            if (Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100.0f * 20) // Current weight limit + 20%
-            {
-                weight.color = Color.red;
-
-                // Enable hard overweight icon, disable overweight icon
-                effectIcons[6].SetActive(false);
-                effectIcons[7].SetActive(true);
-            }
-            else if (Mod.weight > Mod.currentWeightLimit)
-            {
-                weight.color = Color.yellow;
-
-                // Enable overweight icon, disable hard overweight icon
-                effectIcons[6].SetActive(true);
-                effectIcons[7].SetActive(false);
-            }
-            else
-            {
-                weight.color = Color.white;
-
-                // Disable overweight icons
-                effectIcons[6].SetActive(false);
-                effectIcons[7].SetActive(false);
-            }
-        }
-
         public void AddNotification(string text)
         {
             notificationAudio.Play();
@@ -349,6 +371,9 @@ namespace EFM
         public void OnDestroy()
         {
             Mod.OnPlayerLevelChanged -= OnPlayerLevelChanged;
+            Mod.OnPartHealthChanged -= OnPartHealthChanged;
+            Mod.OnPlayerWeightChanged -= OnPlayerWeightChanged;
+            Mod.OnPlayerExperienceChanged -= OnPlayerExperienceChanged;
         }
 
         [Serializable]

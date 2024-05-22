@@ -109,19 +109,50 @@ namespace EFM
         public static int level 
         {
             get { return _level; }
-            set { _level = value; OnPlayerLevelChangedInvoke(); }
+            set 
+            {
+                int preValue = _level;
+                _level = value; 
+                if(preValue != _level)
+                {
+                    OnPlayerLevelChangedInvoke();
+                }
+            }
         }
-        private static int _experience = 0;
+        private static int _experience;
         public static int experience
         {
             get { return _experience; }
-            set { _experience = value; OnPlayerExperienceChangedInvoke(); }
+            set
+            {
+                int preValue = _experience;
+                _experience = value;
+                if (level >= XPPerLevel.Length)
+                {
+                    return;
+                }
+                while (_experience >= XPPerLevel[level])
+                {
+                    _experience -= XPPerLevel[level];
+                    ++level;
+                    preValue = -1; // To force call OnPlayerExperienceChangedInvoke
+
+                    if (level >= XPPerLevel.Length)
+                    {
+                        break;
+                    }
+                }
+                if (preValue != _experience)
+                {
+                    OnPlayerExperienceChangedInvoke();
+                }
+            }
         }
         public static bool dead;
         // Parts arrays: 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
         public static float[] defaultMaxHealth;
         public static float[] currentMaxHealth;
-        public static float[] health; 
+        private static float[] health; 
         public static float[] currentHealthRates;
         public static float[] currentNonLethalHealthRates;
         public static float energy;
@@ -180,8 +211,12 @@ namespace EFM
         {
             set
             {
+                int preValue = _weight;
                 _weight = value;
-                StatusUI.instance.UpdateWeight();
+                if(_weight != preValue)
+                {
+                    OnPlayerWeightChangedInvoke();
+                }
             }
             get
             {
@@ -193,8 +228,12 @@ namespace EFM
         {
             set
             {
+                int preValue = _currentWeightLimit;
                 _currentWeightLimit = value;
-                StatusUI.instance.UpdateWeight();
+                if (_weight != preValue)
+                {
+                    OnPlayerWeightChangedInvoke();
+                }
             }
             get
             {
@@ -244,7 +283,7 @@ namespace EFM
         public static JObject[] traderQuestAssortDB;
         public static JObject globalDB;
         public static JObject questDB;
-        public static JArray XPPerLevel;
+        public static int[] XPPerLevel;
         public static JObject[] locationsLootDB;
         public static JObject[] locationsBaseDB;
         public static JArray lootContainerDB;
@@ -268,8 +307,12 @@ namespace EFM
         // Events
         public delegate void OnPlayerLevelChangedDelegate();
         public static event OnPlayerLevelChangedDelegate OnPlayerLevelChanged;
+        public delegate void OnPartHealthChangedDelegate(int index);
+        public static event OnPartHealthChangedDelegate OnPartHealthChanged;
         public delegate void OnPlayerExperienceChangedDelegate();
         public static event OnPlayerExperienceChangedDelegate OnPlayerExperienceChanged;
+        public delegate void OnPlayerWeightChangedDelegate();
+        public static event OnPlayerWeightChangedDelegate OnPlayerWeightChanged;
         public delegate void OnKillDelegate(KillData killData);
         public static event OnKillDelegate OnKill;
         public delegate void OnShotDelegate(ShotData shotData);
@@ -480,11 +523,42 @@ namespace EFM
 #endif
         }
 
+        public static float GetHealth(int index)
+        {
+            return health[index];
+        }
+
+        public void SetHealth(int index, float value)
+        {
+            float preValue = health[index];
+            health[index] = value;
+            if (value != preValue)
+            {
+                OnPartHealthChangedInvoke(index);
+            }
+        }
+
         public static void OnPlayerLevelChangedInvoke()
         {
             if(OnPlayerLevelChanged != null)
             {
                 OnPlayerLevelChanged();
+            }
+        }
+
+        public static void OnPartHealthChangedInvoke(int index)
+        {
+            if(OnPartHealthChanged != null)
+            {
+                OnPartHealthChanged(index);
+            }
+        }
+
+        public static void OnPlayerWeightChangedInvoke()
+        {
+            if(OnPlayerWeightChanged != null)
+            {
+                OnPlayerWeightChanged();
             }
         }
 
@@ -687,7 +761,12 @@ namespace EFM
 
             //MovementManagerUpdatePatch.damagePerMeter = (float)Mod.globalDB["config"]["Health"]["Falling"]["DamagePerMeter"];
             //MovementManagerUpdatePatch.safeHeight = (float)Mod.globalDB["config"]["Health"]["Falling"]["SafeHeight"];
-            //XPPerLevel = (JArray)globalDB["config"]["exp"]["level"]["exp_table"];
+            JArray xpTable = globalDB["config"]["exp"]["level"]["exp_table"] as JArray;
+            XPPerLevel = new int[xpTable.Count];
+            for(int i=0; i< xpTable.Count; ++i)
+            {
+                XPPerLevel[i] = (int)xpTable[i]["exp"];
+            }
             //locationsLootDB = new JObject[12];
             //locationsBaseDB = new JObject[12];
             //string[] locationBaseFiles = Directory.GetFiles(Mod.path + "/database/locations/base");

@@ -211,22 +211,77 @@ namespace EFM
             get { return _progress; }
             set
             {
-                int preLevel = (int)(_progress / 100);
+                float prevalue = _progress;
+                int preLevel = (int)((_progress + _currentProgress) / 100);
                 _progress = value;
-                if (preLevel != (int)(_progress / 100))
+                if (prevalue != _progress)
+                {
+                    OnProgressChangedInvoke();
+                }
+                if (preLevel != (int)((_progress + _currentProgress) / 100))
                 {
                     OnSkillLevelChangedInvoke();
                 }
             }
         }
-        public float currentProgress; // Affected by effects, this is the one we should check while in raid
+        private float _currentProgress; // Affected by effects, the additional progress
+        public float currentProgress
+        {
+            get { return _currentProgress; }
+            set
+            {
+                float prevalue = _currentProgress;
+                int preLevel = (int)((_progress + _currentProgress) / 100);
+                _currentProgress = value;
+                if (prevalue != _currentProgress)
+                {
+                    OnProgressChangedInvoke();
+                }
+                if (preLevel != (int)((_progress + _currentProgress) / 100))
+                {
+                    OnSkillLevelChangedInvoke();
+                }
+            }
+        }
 
-        public bool increasing;
-        public bool dimishingReturns;
+        private bool _increasing;
+        public bool increasing
+        {
+            get { return _increasing; }
+            set
+            {
+                bool prevalue = _increasing;
+                _increasing = value;
+                if (prevalue != _increasing)
+                {
+                    OnIncreasingChangedInvoke();
+                }
+            }
+        }
+        private bool _dimishingReturns;
+        public bool dimishingReturns
+        {
+            get { return _dimishingReturns; }
+            set
+            {
+                bool prevalue = _dimishingReturns;
+                _dimishingReturns = value;
+                if (prevalue != _dimishingReturns)
+                {
+                    OnDiminishingReturnsChangedInvoke();
+                }
+            }
+        }
         public float raidProgress;
 
         public delegate void OnSkillLevelChangedDelegate();
         public event OnSkillLevelChangedDelegate OnSkillLevelChanged;
+        public delegate void OnProgressChangedDelegate();
+        public event OnProgressChangedDelegate OnProgressChanged;
+        public delegate void OnDiminishingReturnsChangedDelegate();
+        public event OnDiminishingReturnsChangedDelegate OnDiminishingReturnsChanged;
+        public delegate void OnIncreasingChangedDelegate();
+        public event OnIncreasingChangedDelegate OnIncreasingChanged;
 
         public int GetLevel()
         {
@@ -672,6 +727,30 @@ namespace EFM
             if(OnSkillLevelChanged != null)
             {
                 OnSkillLevelChanged();
+            }
+        }
+
+        public void OnProgressChangedInvoke()
+        {
+            if(OnProgressChanged != null)
+            {
+                OnProgressChanged();
+            }
+        }
+
+        public void OnIncreasingChangedInvoke()
+        {
+            if(OnIncreasingChanged != null)
+            {
+                OnIncreasingChanged();
+            }
+        }
+
+        public void OnDiminishingReturnsChangedInvoke()
+        {
+            if(OnDiminishingReturnsChanged != null)
+            {
+                OnDiminishingReturnsChanged();
             }
         }
     }
