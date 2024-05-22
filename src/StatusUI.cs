@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static EFM.Task;
 
 namespace EFM
 {
@@ -89,6 +90,25 @@ namespace EFM
             OnEnergyChanged();
             OnHydrationRateChanged();
             OnEnergyRateChanged();
+            for (int i = 0; i < Mod.GetHealthCount(); ++i) 
+            {
+                OnHealthRateChanged(i);
+            }
+
+            foreach(KeyValuePair<int, List<Task>> traderTasksEntry in Mod.tasksByTraderIndex)
+            {
+                for(int i=0; i < traderTasksEntry.Value.Count; ++i)
+                {
+                    Task task = traderTasksEntry.Value[i];
+                    if (task.playerUI == null
+                        && (task.taskState == TaskState.Available
+                        || task.taskState == TaskState.Active
+                        || task.taskState == TaskState.Complete))
+                    {
+                        AddTask(task);
+                    }
+                }
+            }
         }
 
         public void Update()
@@ -103,11 +123,11 @@ namespace EFM
 
         public void AddTask(Task task)
         {
-            TODO: // Make sure task UI doesn't have the start, finish, and condition handin buttons if in the status UI
+            TODO e: // Make sure task UI handles updates properly if it is status UI because missing buttons and such
             // Instantiate task element
             GameObject currentTaskElement = Instantiate(taskPrefab, tasksParent);
             currentTaskElement.SetActive(true);
-            task.marketUI = currentTaskElement.GetComponent<TaskUI>();
+            task.playerUI = currentTaskElement.GetComponent<TaskUI>();
 
             // Set task UI
             task.marketUI.SetTask(task);

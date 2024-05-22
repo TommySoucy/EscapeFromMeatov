@@ -332,7 +332,7 @@ namespace EFM
                 {
                     StatusUI.instance.AddTask(this);
                 }
-                if(HideoutController.instance != null && HideoutController.instance.marketManager.currentTraderIndex == trader.index)
+                if(marketUI == null && HideoutController.instance != null && HideoutController.instance.marketManager.currentTraderIndex == trader.index)
                 {
                     HideoutController.instance.marketManager.AddTask(this);
                 }
