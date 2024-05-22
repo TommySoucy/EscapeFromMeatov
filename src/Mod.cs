@@ -153,18 +153,82 @@ namespace EFM
         public static float[] defaultMaxHealth;
         public static float[] currentMaxHealth;
         private static float[] health; 
-        public static float[] currentHealthRates;
-        public static float[] currentNonLethalHealthRates;
-        public static float energy;
+        private static float[] currentHealthRates;
+        private static float[] currentNonLethalHealthRates;
+        private static float _energy;
+        public static float energy
+        {
+            set
+            {
+                float preValue = _energy;
+                _energy = value;
+                if ((int)preValue != (int)_energy)
+                {
+                    OnEnergyChangedInvoke();
+                }
+            }
+            get
+            {
+                return _energy;
+            }
+        }
         public static float defaultMaxEnergy;
         public static float currentMaxEnergy;
-        public static float hydration;
+        private static float _hydration;
+        public static float hydration
+        {
+            set 
+            {
+                float preValue = _hydration;
+                _hydration = value;
+                if((int)preValue != (int)_hydration)
+                {
+                    OnHydrationChangedInvoke();
+                }
+            }
+            get
+            {
+                return _hydration;
+            }
+        }
         public static float defaultMaxHydration;
         public static float currentMaxHydration;
         public static readonly float raidEnergyRate = -3.2f; // TODO: Move this to RaidController and set it on LoadDB globals>config>Health>Effects>Existence
         public static readonly float raidHydrationRate = -2.6f; // TODO: Move this to RaidController and set it on LoadDB globals>config>Health>Effects>Existence
-        public static float currentEnergyRate;
-        public static float currentHydrationRate;
+        private static float _currentEnergyRate;
+        public static float currentEnergyRate
+        {
+            set
+            {
+                float preValue = _currentEnergyRate;
+                _currentEnergyRate = value;
+                if(preValue != _currentEnergyRate)
+                {
+                    OnEnergyRateChangedInvoke();
+                }
+            }
+            get
+            {
+                return _currentEnergyRate;
+            }
+        }
+        private static float _currentHydrationRate;
+        public static float currentHydrationRate
+        {
+            set
+            {
+                float preValue = _currentHydrationRate;
+                _currentHydrationRate = value;
+                if (preValue != _currentHydrationRate)
+                {
+                    OnHydrationRateChangedInvoke();
+                }
+            }
+            get
+            {
+                return _currentEnergyRate;
+            }
+        }
         public static Dictionary<string, int> playerInventory;
         public static Dictionary<string, List<MeatovItem>> playerInventoryItems;
         public static Dictionary<string, int> playerFIRInventory;
@@ -311,6 +375,16 @@ namespace EFM
         public static event OnPartHealthChangedDelegate OnPartHealthChanged;
         public delegate void OnPlayerExperienceChangedDelegate();
         public static event OnPlayerExperienceChangedDelegate OnPlayerExperienceChanged;
+        public delegate void OnHydrationChangedDelegate();
+        public static event OnHydrationChangedDelegate OnHydrationChanged;
+        public delegate void OnEnergyChangedDelegate();
+        public static event OnEnergyChangedDelegate OnEnergyChanged;
+        public delegate void OnHydrationRateChangedDelegate();
+        public static event OnHydrationRateChangedDelegate OnHydrationRateChanged;
+        public delegate void OnEnergyRateChangedDelegate();
+        public static event OnEnergyRateChangedDelegate OnEnergyRateChanged;
+        public delegate void OnHealthRateChangedDelegate(int index);
+        public static event OnHealthRateChangedDelegate OnHealthRateChanged;
         public delegate void OnPlayerWeightChangedDelegate();
         public static event OnPlayerWeightChangedDelegate OnPlayerWeightChanged;
         public delegate void OnKillDelegate(KillData killData);
@@ -523,6 +597,11 @@ namespace EFM
 #endif
         }
 
+        public static float GetHealthCount()
+        {
+            return health.Length;
+        }
+
         public static float GetHealth(int index)
         {
             return health[index];
@@ -535,6 +614,36 @@ namespace EFM
             if (value != preValue)
             {
                 OnPartHealthChangedInvoke(index);
+            }
+        }
+
+        public static float GetHealthRate(int index)
+        {
+            return currentHealthRates[index];
+        }
+
+        public void SetHealthRate(int index, float value)
+        {
+            float preValue = currentHealthRates[index];
+            currentHealthRates[index] = value;
+            if (value != preValue)
+            {
+                OnHealthRateChangedInvoke(index);
+            }
+        }
+
+        public static float GetNonLethalHealthRate(int index)
+        {
+            return currentNonLethalHealthRates[index];
+        }
+
+        public void SetNonLethalHealthRate(int index, float value)
+        {
+            float preValue = currentNonLethalHealthRates[index];
+            currentNonLethalHealthRates[index] = value;
+            if (value != preValue)
+            {
+                OnHealthRateChangedInvoke(index);
             }
         }
 
@@ -554,6 +663,14 @@ namespace EFM
             }
         }
 
+        public static void OnHealthRateChangedInvoke(int index)
+        {
+            if(OnHealthRateChanged != null)
+            {
+                OnHealthRateChanged(index);
+            }
+        }
+
         public static void OnPlayerWeightChangedInvoke()
         {
             if(OnPlayerWeightChanged != null)
@@ -567,6 +684,38 @@ namespace EFM
             if(OnPlayerExperienceChanged != null)
             {
                 OnPlayerExperienceChanged();
+            }
+        }
+
+        public static void OnEnergyChangedInvoke()
+        {
+            if(OnEnergyChanged != null)
+            {
+                OnEnergyChanged();
+            }
+        }
+
+        public static void OnHydrationChangedInvoke()
+        {
+            if(OnHydrationChanged != null)
+            {
+                OnHydrationChanged();
+            }
+        }
+
+        public static void OnHydrationRateChangedInvoke()
+        {
+            if(OnHydrationRateChanged != null)
+            {
+                OnHydrationRateChanged();
+            }
+        }
+
+        public static void OnEnergyRateChangedInvoke()
+        {
+            if(OnEnergyRateChanged != null)
+            {
+                OnEnergyRateChanged();
             }
         }
 

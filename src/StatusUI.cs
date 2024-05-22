@@ -63,6 +63,11 @@ namespace EFM
             Mod.OnPartHealthChanged += OnPartHealthChanged;
             Mod.OnPlayerWeightChanged += OnPlayerWeightChanged;
             Mod.OnPlayerExperienceChanged += OnPlayerExperienceChanged;
+            Mod.OnHydrationChanged += OnHydrationChanged;
+            Mod.OnEnergyChanged += OnEnergyChanged;
+            Mod.OnHydrationRateChanged += OnHydrationRateChanged;
+            Mod.OnEnergyRateChanged += OnEnergyRateChanged;
+            Mod.OnHealthRateChanged += OnHealthRateChanged;
 
             // Initialize UI
             Init();
@@ -80,7 +85,10 @@ namespace EFM
                 OnPartHealthChanged(i);
             }
             OnPlayerWeightChanged();
-            cont from ehre
+            OnHydrationChanged();
+            OnEnergyChanged();
+            OnHydrationRateChanged();
+            OnEnergyRateChanged();
         }
 
         public void Update()
@@ -135,6 +143,62 @@ namespace EFM
         {
             experienceText.text = Mod.experience.ToString() + "/" + (Mod.level >= Mod.XPPerLevel.Length ? "INFINITY" : Mod.XPPerLevel[Mod.level].ToString());
             expBarFill.sizeDelta = new Vector2(Mod.level >= Mod.XPPerLevel.Length ? 0 : Mod.level / (float)Mod.XPPerLevel[Mod.level] * 100f, 4.73f);
+        }
+
+        public void OnHydrationChanged()
+        {
+            hydration.text = ((int)Mod.hydration).ToString() +"/"+(int)Mod.currentMaxHydration;
+        }
+
+        public void OnEnergyChanged()
+        {
+            energy.text = ((int)Mod.energy).ToString() +"/"+(int)Mod.currentMaxEnergy;
+        }
+
+        public void OnHydrationRateChanged()
+        {
+            if(Mod.currentHydrationRate == 0)
+            {
+                hydrationDelta.gameObject.SetActive(false);
+            }
+            else
+            {
+                hydrationDelta.gameObject.SetActive(true);
+                hydrationDelta.text = String.Format((Mod.currentHydrationRate < 0 ? "" : "+") + "{0:0.##}", Mod.currentHydrationRate);
+            }
+        }
+
+        public void OnEnergyRateChanged()
+        {
+            if(Mod.currentEnergyRate == 0)
+            {
+                energyDelta.gameObject.SetActive(false);
+            }
+            else
+            {
+                energyDelta.gameObject.SetActive(true);
+                energyDelta.text = String.Format((Mod.currentEnergyRate < 0 ? "" : "+") + "{0:0.##}", Mod.currentEnergyRate);
+            }
+        }
+
+        public void OnHealthRateChanged(int index)
+        {
+            float total = 0;
+            for(int i=0; i < Mod.GetHealthCount(); ++i)
+            {
+                total += Mod.GetHealthRate(i);
+                total += Mod.GetNonLethalHealthRate(i);
+            }
+
+            if(total == 0)
+            {
+                healthDelta.gameObject.SetActive(false);
+            }
+            else
+            {
+                healthDelta.gameObject.SetActive(true);
+                healthDelta.text = String.Format((total < 0 ? "" : "+") + "{0:0.##}", total);
+            }
         }
 
         public void OnPartHealthChanged(int index)
@@ -374,6 +438,11 @@ namespace EFM
             Mod.OnPartHealthChanged -= OnPartHealthChanged;
             Mod.OnPlayerWeightChanged -= OnPlayerWeightChanged;
             Mod.OnPlayerExperienceChanged -= OnPlayerExperienceChanged;
+            Mod.OnHydrationChanged -= OnHydrationChanged;
+            Mod.OnEnergyChanged -= OnEnergyChanged;
+            Mod.OnHydrationRateChanged -= OnHydrationRateChanged;
+            Mod.OnEnergyRateChanged -= OnEnergyRateChanged;
+            Mod.OnHealthRateChanged -= OnHealthRateChanged;
         }
 
         [Serializable]
