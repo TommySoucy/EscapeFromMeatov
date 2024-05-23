@@ -37,11 +37,12 @@ namespace EFM
         public GameObject tasksView;
         public RectTransform tasksParent;
         public GameObject taskPrefab;
-        public HoverScroll tasksDownHoverScroll;
-        public HoverScroll tasksUpHoverScroll;
         public GameObject infoClosedIcon;
         public GameObject infoOpenIcon;
         public GameObject infoView;
+        public RectTransform skillsParent;
+        public GameObject skillPairPrefab;
+        public GameObject skillPrefab;
         public Text infoKills;
         public Text infoDeaths;
         public Text infoRaids;
@@ -75,6 +76,13 @@ namespace EFM
             Mod.OnHydrationRateChanged += OnHydrationRateChanged;
             Mod.OnEnergyRateChanged += OnEnergyRateChanged;
             Mod.OnHealthRateChanged += OnHealthRateChanged;
+            Mod.OnKillCountChanged += OnKillCountChanged;
+            Mod.OnDeathCountChanged += OnDeathCountChanged;
+            Mod.OnRaidCountChanged += OnRaidCountChanged;
+            Mod.OnSurvivedRaidCountChanged += OnSurvivedRaidCountChanged;
+            Mod.OnRunthroughRaidCountChanged += OnRunthroughRaidCountChanged;
+            Mod.OnMIARaidCountChanged += OnMIARaidCountChanged;
+            Mod.OnKIARaidCountChanged += OnKIARaidCountChanged;
 
             // Initialize UI
             Init();
@@ -100,8 +108,15 @@ namespace EFM
             {
                 OnHealthRateChanged(i);
             }
+            OnKillCountChanged();
+            OnDeathCountChanged();
+            OnRaidCountChanged();
+            OnSurvivedRaidCountChanged();
+            OnRunthroughRaidCountChanged();
+            OnMIARaidCountChanged();
+            OnKIARaidCountChanged();
 
-            foreach(KeyValuePair<int, List<Task>> traderTasksEntry in Mod.tasksByTraderIndex)
+            foreach (KeyValuePair<int, List<Task>> traderTasksEntry in Mod.tasksByTraderIndex)
             {
                 for(int i=0; i < traderTasksEntry.Value.Count; ++i)
                 {
@@ -114,6 +129,18 @@ namespace EFM
                         AddTask(task);
                     }
                 }
+            }
+
+            Transform currentPair = null;
+            for(int i =0; i < Mod.skills.Length; ++i)
+            {
+                if (currentPair == null || currentPair.childCount == 3)
+                {
+                    currentPair = Instantiate(skillPairPrefab, skillsParent).transform;
+                }
+
+                SkillUI skillUI = Instantiate(skillPrefab, currentPair).GetComponent<SkillUI>();
+                skillUI.SetSkill(Mod.skills[i]);
             }
         }
 
@@ -250,6 +277,41 @@ namespace EFM
                 effectIcons[6].SetActive(false);
                 effectIcons[7].SetActive(false);
             }
+        }
+
+        public void OnKillCountChanged()
+        {
+            infoKills.text = "Kills: " + Mod.totalKillCount;
+        }
+
+        public void OnDeathCountChanged()
+        {
+            infoDeaths.text = "Deaths: " + Mod.totalDeathCount;
+        }
+
+        public void OnRaidCountChanged()
+        {
+            infoRaids.text = "Raids: " + Mod.totalRaidCount;
+        }
+
+        public void OnSurvivedRaidCountChanged()
+        {
+            infoSurvived.text = "Survived: " + Mod.survivedRaidCount;
+        }
+
+        public void OnRunthroughRaidCountChanged()
+        {
+            infoRunthrough.text = "Runthrough: " + Mod.runthroughRaidCount;
+        }
+
+        public void OnMIARaidCountChanged()
+        {
+            infoMIA.text = "MIA: " + Mod.MIARaidCount;
+        }
+
+        public void OnKIARaidCountChanged()
+        {
+            infoKIA.text = "KIA: " + Mod.KIARaidCount;
         }
 
         public void SetExtractionLimitTimer(float raidTimeLeft)
@@ -459,6 +521,13 @@ namespace EFM
             Mod.OnHydrationRateChanged -= OnHydrationRateChanged;
             Mod.OnEnergyRateChanged -= OnEnergyRateChanged;
             Mod.OnHealthRateChanged -= OnHealthRateChanged;
+            Mod.OnKillCountChanged -= OnKillCountChanged;
+            Mod.OnDeathCountChanged -= OnDeathCountChanged;
+            Mod.OnRaidCountChanged -= OnRaidCountChanged;
+            Mod.OnSurvivedRaidCountChanged -= OnSurvivedRaidCountChanged;
+            Mod.OnRunthroughRaidCountChanged -= OnRunthroughRaidCountChanged;
+            Mod.OnMIARaidCountChanged -= OnMIARaidCountChanged;
+            Mod.OnKIARaidCountChanged -= OnKIARaidCountChanged;
         }
 
         [Serializable]

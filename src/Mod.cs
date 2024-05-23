@@ -264,11 +264,125 @@ namespace EFM
         public static GameObject extractionLimitUI;
         public static Text extractionLimitUIText;
         public static GameObject staminaBarUI;
-        public static int totalRaidCount;
-        public static int runThroughRaidCount;
-        public static int survivedRaidCount;
-        public static int MIARaidCount;
-        public static int KIARaidCount;
+        private static int _totalKillCount;
+        public static int totalKillCount
+        {
+            set
+            {
+                int preValue = _totalKillCount;
+                _totalKillCount = value;
+                if(preValue != _totalKillCount)
+                {
+                    OnKillCountChangedInvoke();
+                }
+            }
+            get
+            {
+                return _totalKillCount;
+            }
+        }
+        private static int _totalDeathCount;
+        public static int totalDeathCount
+        {
+            set
+            {
+                int preValue = _totalDeathCount;
+                _totalDeathCount = value;
+                if (preValue != _totalDeathCount)
+                {
+                    OnDeathCountChangedInvoke();
+                }
+            }
+            get
+            {
+                return _totalDeathCount;
+            }
+        }
+        private static int _totalRaidCount;
+        public static int totalRaidCount
+        {
+            set
+            {
+                int preValue = _totalRaidCount;
+                _totalRaidCount = value;
+                if (preValue != _totalRaidCount)
+                {
+                    OnRaidCountChangedInvoke();
+                }
+            }
+            get
+            {
+                return _totalRaidCount;
+            }
+        }
+        private static int _runthroughRaidCount;
+        public static int runthroughRaidCount
+        {
+            set
+            {
+                int preValue = _runthroughRaidCount;
+                _runthroughRaidCount = value;
+                if (preValue != _runthroughRaidCount)
+                {
+                    OnRunthroughRaidCountChangedInvoke();
+                }
+            }
+            get
+            {
+                return _runthroughRaidCount;
+            }
+        }
+        private static int _survivedRaidCount;
+        public static int survivedRaidCount
+        {
+            set
+            {
+                int preValue = _survivedRaidCount;
+                _survivedRaidCount = value;
+                if (preValue != _survivedRaidCount)
+                {
+                    OnSurvivedRaidCountChangedInvoke();
+                }
+            }
+            get
+            {
+                return _survivedRaidCount;
+            }
+        }
+        private static int _MIARaidCount;
+        public static int MIARaidCount
+        {
+            set
+            {
+                int preValue = _MIARaidCount;
+                _MIARaidCount = value;
+                if (preValue != _MIARaidCount)
+                {
+                    OnMIARaidCountChangedInvoke();
+                }
+            }
+            get
+            {
+                return _MIARaidCount;
+            }
+        }
+        private static int _KIARaidCount;
+        public static int KIARaidCount
+        {
+            set
+            {
+                int preValue = _KIARaidCount;
+                _KIARaidCount = value;
+                if (preValue != _KIARaidCount)
+                {
+                    OnKIARaidCountChangedInvoke();
+                }
+            }
+            get
+            {
+                return _KIARaidCount;
+            }
+        }
         public static int failedRaidCount;
         private static int _weight = 0;
         public static int weight
@@ -387,6 +501,20 @@ namespace EFM
         public static event OnHealthRateChangedDelegate OnHealthRateChanged;
         public delegate void OnPlayerWeightChangedDelegate();
         public static event OnPlayerWeightChangedDelegate OnPlayerWeightChanged;
+        public delegate void OnKillCountChangedDelegate();
+        public static event OnKillCountChangedDelegate OnKillCountChanged;
+        public delegate void OnDeathCountChangedDelegate();
+        public static event OnDeathCountChangedDelegate OnDeathCountChanged;
+        public delegate void OnRaidCountChangedDelegate();
+        public static event OnRaidCountChangedDelegate OnRaidCountChanged;
+        public delegate void OnRunthroughRaidCountChangedDelegate();
+        public static event OnRunthroughRaidCountChangedDelegate OnRunthroughRaidCountChanged;
+        public delegate void OnSurvivedRaidCountChangedDelegate();
+        public static event OnSurvivedRaidCountChangedDelegate OnSurvivedRaidCountChanged;
+        public delegate void OnMIARaidCountChangedDelegate();
+        public static event OnMIARaidCountChangedDelegate OnMIARaidCountChanged;
+        public delegate void OnKIARaidCountChangedDelegate();
+        public static event OnKIARaidCountChangedDelegate OnKIARaidCountChanged;
         public delegate void OnKillDelegate(KillData killData);
         public static event OnKillDelegate OnKill;
         public delegate void OnShotDelegate(ShotData shotData);
@@ -789,6 +917,62 @@ namespace EFM
             if(OnFlareLaunched != null)
             {
                 OnFlareLaunched(placeID);
+            }
+        }
+
+        public static void OnKillCountChangedInvoke()
+        {
+            if(OnKillCountChanged != null)
+            {
+                OnKillCountChanged();
+            }
+        }
+
+        public static void OnDeathCountChangedInvoke()
+        {
+            if(OnDeathCountChanged != null)
+            {
+                OnDeathCountChanged();
+            }
+        }
+
+        public static void OnRaidCountChangedInvoke()
+        {
+            if(OnRaidCountChanged != null)
+            {
+                OnRaidCountChanged();
+            }
+        }
+
+        public static void OnRunthroughRaidCountChangedInvoke()
+        {
+            if(OnRunthroughRaidCountChanged != null)
+            {
+                OnRunthroughRaidCountChanged();
+            }
+        }
+
+        public static void OnSurvivedRaidCountChangedInvoke()
+        {
+            if(OnSurvivedRaidCountChanged != null)
+            {
+                OnSurvivedRaidCountChanged();
+            }
+        }
+
+        public static void OnMIARaidCountChangedInvoke()
+        {
+            if(OnMIARaidCountChanged != null)
+            {
+                OnMIARaidCountChanged();
+            }
+        }
+
+        public static void OnKIARaidCountChangedInvoke()
+        {
+            if(OnKIARaidCountChanged != null)
+            {
+                OnKIARaidCountChanged();
             }
         }
 

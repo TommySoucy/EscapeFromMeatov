@@ -1289,8 +1289,10 @@ namespace EFM
                 Mod.maxStamina = (float)loadedData["maxStamina"];
                 Mod.stamina = Mod.maxStamina;
                 Mod.weight = (int)loadedData["weight"];
+                Mod.totalKillCount = (int)loadedData["totalKillCount"];
+                Mod.totalDeathCount = (int)loadedData["totalDeathCount"];
                 Mod.totalRaidCount = (int)loadedData["totalRaidCount"];
-                Mod.runThroughRaidCount = (int)loadedData["runThroughRaidCount"];
+                Mod.runthroughRaidCount = (int)loadedData["runthroughRaidCount"];
                 Mod.survivedRaidCount = (int)loadedData["survivedRaidCount"];
                 Mod.MIARaidCount = (int)loadedData["MIARaidCount"];
                 Mod.KIARaidCount = (int)loadedData["KIARaidCount"];
@@ -3644,7 +3646,7 @@ namespace EFM
             loadedData["maxStamina"] = Mod.maxStamina;
             loadedData["weight"] = Mod.weight;
             loadedData["totalRaidCount"] = Mod.totalRaidCount;
-            loadedData["runThroughRaidCount"] = Mod.runThroughRaidCount;
+            loadedData["runthroughRaidCount"] = Mod.runthroughRaidCount;
             loadedData["survivedRaidCount"] = Mod.survivedRaidCount;
             loadedData["MIARaidCount"] = Mod.MIARaidCount;
             loadedData["KIARaidCount"] = Mod.KIARaidCount;
@@ -3871,7 +3873,7 @@ namespace EFM
             switch (state)
             {
                 case FinishRaidState.RunThrough:
-                    ++Mod.runThroughRaidCount;
+                    ++Mod.runthroughRaidCount;
                     ++Mod.survivedRaidCount;
                     break;
                 case FinishRaidState.Survived:
