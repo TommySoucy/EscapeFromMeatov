@@ -447,8 +447,7 @@ namespace EFM
         public bool visible;
 
         // Objects
-        public TaskConditionUI marketUI;
-        public TaskConditionUI playerUI;
+        public TaskConditionUI UI;
 
         // Events
         public delegate void OnConditionFulfillmentChangedDelegate(Condition condition);

@@ -183,7 +183,7 @@ namespace EFM
                             {
                                 for (int i = 0; i < 7; ++i)
                                 {
-                                    Mod.currentHealthRates[i] -= (4.4f * effectCaused.value) / 60 / 7;
+                                    Mod.SetHealthRate(i, Mod.GetHealthRate(i) - (4.4f * effectCaused.value) / 60 / 7);
                                 }
                             }
                             //else In raid map, no need to do anything, raid manager will disable effects itself

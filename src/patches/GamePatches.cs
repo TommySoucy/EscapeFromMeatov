@@ -1623,7 +1623,7 @@ namespace EFM
                 if (hitbox.Type == FVRPlayerHitbox.PlayerHitBoxType.Head)
                 {
                     Mod.LogInfo("\tTo Head");
-                    if (Mod.health[0] <= 0)
+                    if (Mod.GetHealth(0) <= 0)
                     {
                         Mod.LogInfo("\t\tHealth 0, killing player");
                         //Mod.currentRaidManager.KillPlayer();
@@ -1691,7 +1691,7 @@ namespace EFM
                     if (partChance >= 0 && partChance <= thoraxChance)
                     {
                         Mod.LogInfo("\tTo thorax");
-                        if (Mod.health[1] <= 0)
+                        if (Mod.GetHealth(1) <= 0)
                         {
                             Mod.LogInfo("\t\tHealth 0, killing player");
                             //Mod.currentRaidManager.KillPlayer();
@@ -2036,7 +2036,7 @@ namespace EFM
                 switch (actualPartIndex)
                 {
                     case 0: // Head
-                        if (Mod.health[0] <= 0)
+                        if (Mod.GetHealth(0) <= 0)
                         {
                             //Mod.currentRaidManager.KillPlayer();
                         }
@@ -2080,7 +2080,7 @@ namespace EFM
                         }
                         break;
                     case 1: // Thorax
-                        if (Mod.health[1] <= 0)
+                        if (Mod.GetHealth(1) <= 0)
                         {
                             //Mod.currentRaidManager.KillPlayer();
                         }
@@ -2272,19 +2272,19 @@ namespace EFM
                 float actualTotalDamage = 0;
                 if (partIndex >= 2)
                 {
-                    if (Mod.health[partIndex] <= 0)
+                    if (Mod.GetHealth(partIndex) <= 0)
                     {
-                        for (int i = 0; i < Mod.health.Length; ++i)
+                        for (int i = 0; i < Mod.GetHealthCount(); ++i)
                         {
                             if (i != partIndex)
                             {
-                                float actualDamage = Mathf.Min(totalDamage / 6 * destroyedMultiplier[partIndex], Mod.health[i]);
-                                Mod.health[i] = Mathf.Clamp(Mod.health[i] - actualDamage, 0, Mod.currentMaxHealth[i]);
+                                float actualDamage = Mathf.Min(totalDamage / 6 * destroyedMultiplier[partIndex], Mod.GetHealth(i));
+                                Mod.SetHealth(i, Mathf.Clamp(Mod.GetHealth(i) - actualDamage, 0, Mod.currentMaxHealth[i]));
                                 actualTotalDamage += actualDamage;
 
                                 if (i == 0 || i == 1)
                                 {
-                                    if (Mod.health[0] <= 0 || Mod.health[1] <= 0)
+                                    if (Mod.GetHealth(0) <= 0 || Mod.GetHealth(1) <= 0)
                                     {
                                         //Mod.currentRaidManager.KillPlayer();
                                         return true;
@@ -2296,10 +2296,10 @@ namespace EFM
                     else
                     {
                         actualTotalDamage = totalDamage;
-                        Mod.health[partIndex] = Mathf.Clamp(Mod.health[partIndex] - totalDamage, 0, Mod.currentMaxHealth[partIndex]);
+                        Mod.SetHealth(partIndex, Mathf.Clamp(Mod.GetHealth(partIndex) - totalDamage, 0, Mod.currentMaxHealth[partIndex]));
                     }
                 }
-                else if (Mod.health[partIndex] <= 0) // Part is head or thorax, destroyed
+                else if (Mod.GetHealth(partIndex) <= 0) // Part is head or thorax, destroyed
                 {
                     //Mod.currentRaidManager.KillPlayer();
                     return true;
@@ -2307,7 +2307,7 @@ namespace EFM
                 else // Part is head or thorax, not yet destroyed
                 {
                     actualTotalDamage = totalDamage;
-                    Mod.health[partIndex] = Mathf.Clamp(Mod.health[partIndex] - totalDamage, 0, Mod.currentMaxHealth[partIndex]);
+                    Mod.SetHealth(partIndex, Mathf.Clamp(Mod.GetHealth(partIndex) - totalDamage, 0, Mod.currentMaxHealth[partIndex]));
                 }
                 GM.CurrentSceneSettings.OnPlayerTookDamage(actualTotalDamage / 440f);
             }
@@ -5357,9 +5357,9 @@ namespace EFM
             float amountHealed = Mathf.Max(___m_startingHealth * f, ___m_startingHealth - __instance.Health);
             for (int i = 0; i < 7; ++i)
             {
-                if (Mod.health[i] != 0)
+                if (Mod.GetHealth(i) != 0)
                 {
-                    Mod.health[i] = Mathf.Clamp(Mod.health[i] + amountHealed / 7, Mod.health[i], Mod.currentMaxHealth[i]);
+                    Mod.SetHealth(i, Mathf.Clamp(Mod.GetHealth(i) + amountHealed / 7, Mod.GetHealth(i), Mod.currentMaxHealth[i]));
                 }
             }
         }

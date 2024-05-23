@@ -6,6 +6,7 @@ namespace EFM
     public class TaskUI : MonoBehaviour
     {
         public Task task;
+        public bool market; // Whether this TaskUI is for market or StatusUI
 
         public Text taskName;
         public Text location;
@@ -40,8 +41,10 @@ namespace EFM
         public GameObject failUnknownRewardPrefab;
         public GameObject failTraderRewardPrefab;
 
-        public void SetTask(Task task)
+        public void SetTask(Task task, bool market)
         {
+            this.market = market;
+
             if(this.task != null)
             {
                 this.task.OnTaskStateChanged -= OnTaskStateChanged;
@@ -60,20 +63,20 @@ namespace EFM
             }
 
             // Short info
-            task.marketUI.taskName.text = task.name;
-            task.marketUI.location.text = task.location;
+            taskName.text = task.name;
+            location.text = task.location;
 
             // Description
-            task.marketUI.description.text = task.description;
+            description.text = task.description;
 
             // Completion conditions
             foreach (Condition currentCondition in task.finishConditions)
             {
                 GameObject currentObjectiveElement = Instantiate(conditionPrefab, objectivesParent);
                 currentObjectiveElement.SetActive(true);
-                currentCondition.marketUI = currentObjectiveElement.GetComponent<TaskConditionUI>();
+                currentCondition.UI = currentObjectiveElement.GetComponent<TaskConditionUI>();
 
-                currentCondition.marketUI.SetCondition(currentCondition);
+                currentCondition.UI.SetCondition(currentCondition, market);
             }
 
             // Initial equipment
@@ -502,6 +505,11 @@ namespace EFM
                     Destroy(gameObject);
                     break;
                 case Task.TaskState.Available:
+                    if (!market)
+                    {
+                        Destroy(gameObject);
+                        return;
+                    }
                     availableStatus.SetActive(true);
                     activeStatus.SetActive(false);
                     completeStatus.SetActive(false);
@@ -511,23 +519,27 @@ namespace EFM
                     finishButton.SetActive(false);
                     break;
                 case Task.TaskState.Active:
-                    availableStatus.SetActive(false);
+                    if (market)
+                    {
+                        availableStatus.SetActive(false);
+                        startButton.SetActive(false);
+                        finishButton.SetActive(false);
+                    }
                     activeStatus.SetActive(true);
                     completeStatus.SetActive(false);
-
-                    startButton.SetActive(false);
-                    progressBar.SetActive(true);
                     OnConditionFulfillmentChanged(null);
-                    finishButton.SetActive(false);
+                    progressBar.SetActive(true);
                     break;
                 case Task.TaskState.Complete:
-                    availableStatus.SetActive(false);
+                    if (market)
+                    {
+                        availableStatus.SetActive(false);
+                        startButton.SetActive(false);
+                        progressBar.SetActive(false);
+                        finishButton.SetActive(true);
+                    }
                     activeStatus.SetActive(false);
                     completeStatus.SetActive(true);
-
-                    startButton.SetActive(false);
-                    progressBar.SetActive(false);
-                    finishButton.SetActive(true);
                     break;
             }
         }

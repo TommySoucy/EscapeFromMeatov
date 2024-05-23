@@ -607,7 +607,12 @@ namespace EFM
             return health[index];
         }
 
-        public void SetHealth(int index, float value)
+        public static float[] GetHealthArray()
+        {
+            return health;
+        }
+
+        public static void SetHealth(int index, float value)
         {
             float preValue = health[index];
             health[index] = value;
@@ -617,12 +622,23 @@ namespace EFM
             }
         }
 
+        public static void SetHealthArray(float[] value)
+        {
+            health = value;
+            OnPartHealthChangedInvoke(-1);
+        }
+
         public static float GetHealthRate(int index)
         {
             return currentHealthRates[index];
         }
 
-        public void SetHealthRate(int index, float value)
+        public static float[] GetHealthRateArray()
+        {
+            return currentHealthRates;
+        }
+
+        public static void SetHealthRate(int index, float value)
         {
             float preValue = currentHealthRates[index];
             currentHealthRates[index] = value;
@@ -632,12 +648,23 @@ namespace EFM
             }
         }
 
+        public static void SetHealthRateArray(float[] value)
+        {
+            currentHealthRates = value;
+            OnHealthRateChangedInvoke(-1);
+        }
+
         public static float GetNonLethalHealthRate(int index)
         {
             return currentNonLethalHealthRates[index];
         }
 
-        public void SetNonLethalHealthRate(int index, float value)
+        public static float[] GetNonLethalHealthRateArray()
+        {
+            return currentNonLethalHealthRates;
+        }
+
+        public static void SetNonLethalHealthRate(int index, float value)
         {
             float preValue = currentNonLethalHealthRates[index];
             currentNonLethalHealthRates[index] = value;
@@ -645,6 +672,12 @@ namespace EFM
             {
                 OnHealthRateChangedInvoke(index);
             }
+        }
+
+        public static void SetNonLethalHealthRateArray(float[] value)
+        {
+            currentNonLethalHealthRates = value;
+            OnHealthRateChangedInvoke(-1);
         }
 
         public static void OnPlayerLevelChangedInvoke()
@@ -1472,12 +1505,12 @@ namespace EFM
             xp = (int)(xp * (HideoutController.currentExperienceRate + HideoutController.currentExperienceRate * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)));
 
             experience += xp;
-            int XPForNextLevel = (int)XPPerLevel[level]["exp"]; // XP for current level would be at level - 1
+            int XPForNextLevel = XPPerLevel[level];
             while (experience >= XPForNextLevel)
             {
                 ++level;
                 experience -= XPForNextLevel;
-                XPForNextLevel = (int)XPPerLevel[level]["exp"];
+                XPForNextLevel = XPPerLevel[level];
             }
 
             if (type == 1)

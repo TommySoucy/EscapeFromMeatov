@@ -6,6 +6,7 @@ namespace EFM
 {
     public class TaskConditionUI : MonoBehaviour
     {
+        public bool market;
         public Condition condition;
         public Text text;
         public GameObject progressBar;
@@ -79,8 +80,10 @@ namespace EFM
             condition.UpdateFulfillment();
         }
 
-        public void SetCondition(Condition condition)
+        public void SetCondition(Condition condition, bool market)
         {
+            this.market = market;
+
             if (this.condition != null)
             {
                 this.condition.OnConditionFulfillmentChanged -= OnConditionFulfillmentChanged;
@@ -93,41 +96,41 @@ namespace EFM
             this.condition.OnConditionProgressChanged += OnConditionProgressChanged;
 
             text.text = condition.description;
-            // Progress counter, only necessary if value > 1 and for specific condition types
-            if (condition.value > 1)
+            switch (condition.conditionType)
             {
-                switch (condition.conditionType)
-                {
-                    case Condition.ConditionType.CounterCreator:
-                        foreach (ConditionCounter counter in condition.counters)
+                case Condition.ConditionType.CounterCreator:
+                    foreach (ConditionCounter counter in condition.counters)
+                    {
+                        if (counter.counterCreatorConditionType == ConditionCounter.CounterCreatorConditionType.Kills)
                         {
-                            if (counter.counterCreatorConditionType == ConditionCounter.CounterCreatorConditionType.Kills)
-                            {
-                                progressBar.SetActive(true);
-                                this.counter.gameObject.SetActive(true);
-                                this.counter.text = "0/" + condition.value; // Activate progress counter
-                                break;
-                            }
+                            progressBar.SetActive(true);
+                            this.counter.gameObject.SetActive(true);
+                            this.counter.text = "0/" + condition.value; // Activate progress counter
+                            break;
                         }
-                        break;
-                    case Condition.ConditionType.HandoverItem:
-                    case Condition.ConditionType.FindItem:
-                    case Condition.ConditionType.LeaveItemAtLocation:
-                        progressBar.SetActive(true);
-                        counter.gameObject.SetActive(true);
-                        counter.text = "0/" + condition.value; // Activate progress counter
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    break;
+                case Condition.ConditionType.HandoverItem:
+                case Condition.ConditionType.WeaponAssembly:
+                    UpdateTurnInButton();
+                    if (market && HideoutController.instance != null)
+                    {
+                        HideoutController.instance.marketManager.tradeVolume.OnItemAdded += OnTradeVolumeItemsChanged;
+                        HideoutController.instance.marketManager.tradeVolume.OnItemRemoved += OnTradeVolumeItemsChanged;
+                    }
+                    progressBar.SetActive(true);
+                    counter.gameObject.SetActive(true);
+                    counter.text = "0/" + condition.value; // Activate progress counter
+                    break;
+                case Condition.ConditionType.FindItem:
+                case Condition.ConditionType.LeaveItemAtLocation:
+                    progressBar.SetActive(true);
+                    counter.gameObject.SetActive(true);
+                    counter.text = "0/" + condition.value; // Activate progress counter
+                    break;
+                default:
+                    break;
             }
-
-            // Setup handover button if necessary
-            UpdateTurnInButton();
-
-            // Subscribe to necessary events
-            HideoutController.instance.marketManager.tradeVolume.OnItemAdded += OnTradeVolumeItemsChanged;
-            HideoutController.instance.marketManager.tradeVolume.OnItemRemoved += OnTradeVolumeItemsChanged;
 
             // Disable condition gameObject if visibility conditions not met
             if (condition.visibilityConditions != null && condition.visibilityConditions.Count > 0)
@@ -159,6 +162,12 @@ namespace EFM
 
         public void UpdateTurnInButton()
         {
+            if(turnInButton == null)
+            {
+                Mod.LogError("UpdateTurnInButton called on conditionUI but turnin button is null, ID: "+condition.ID);
+                return;
+            }
+
             bool needHandOverButton = false;
             int totalLeft = condition.value - condition.count;
             if (condition.conditionType == Condition.ConditionType.HandoverItem && totalLeft > 0)
@@ -225,7 +234,8 @@ namespace EFM
                 condition.OnConditionProgressChanged -= OnConditionProgressChanged;
             }
 
-            if (conditionSet && HideoutController.instance != null)
+            if (conditionSet && market && HideoutController.instance != null 
+                && (condition.conditionType == Condition.ConditionType.HandoverItem || condition.conditionType == Condition.ConditionType.WeaponAssembly))
             {
                 HideoutController.instance.marketManager.tradeVolume.OnItemAdded -= OnTradeVolumeItemsChanged;
                 HideoutController.instance.marketManager.tradeVolume.OnItemRemoved -= OnTradeVolumeItemsChanged;

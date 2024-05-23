@@ -88,14 +88,14 @@ namespace EFM
                                 {
                                     for (int k = 0; k < 7; ++k)
                                     {
-                                        Mod.currentNonLethalHealthRates[k] -= causedEffect.value;
+                                        Mod.SetNonLethalHealthRate(k, Mod.GetNonLethalHealthRate(k) - causedEffect.value);
                                     }
                                 }
                                 else
                                 {
                                     for (int k = 0; k < 7; ++k)
                                     {
-                                        Mod.currentHealthRates[k] -= causedEffect.value;
+                                        Mod.SetHealthRate(k, Mod.GetHealthRate(k) - causedEffect.value);
                                     }
                                 }
                             }
@@ -103,11 +103,11 @@ namespace EFM
                             {
                                 if (causedEffect.nonLethal)
                                 {
-                                    Mod.currentNonLethalHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                    Mod.SetNonLethalHealthRate(causedEffect.partIndex, Mod.GetNonLethalHealthRate(causedEffect.partIndex) - causedEffect.value);
                                 }
                                 else
                                 {
-                                    Mod.currentHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                    Mod.SetHealthRate(causedEffect.partIndex, Mod.GetHealthRate(causedEffect.partIndex) - causedEffect.value);
                                 }
                             }
                         }
@@ -141,14 +141,14 @@ namespace EFM
                                 {
                                     for (int k = 0; k < 7; ++k)
                                     {
-                                        Mod.currentNonLethalHealthRates[k] -= causedEffect.value;
+                                        Mod.SetNonLethalHealthRate(k, Mod.GetNonLethalHealthRate(k) - causedEffect.value);
                                     }
                                 }
                                 else
                                 {
                                     for (int k = 0; k < 7; ++k)
                                     {
-                                        Mod.currentHealthRates[k] -= causedEffect.value;
+                                        Mod.SetHealthRate(k, Mod.GetHealthRate(k) - causedEffect.value);
                                     }
                                 }
                             }
@@ -156,11 +156,11 @@ namespace EFM
                             {
                                 if (causedEffect.nonLethal)
                                 {
-                                    Mod.currentNonLethalHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                    Mod.SetNonLethalHealthRate(causedEffect.partIndex, Mod.GetNonLethalHealthRate(causedEffect.partIndex) - causedEffect.value);
                                 }
                                 else
                                 {
-                                    Mod.currentHealthRates[causedEffect.partIndex] -= causedEffect.value;
+                                    Mod.SetHealthRate(causedEffect.partIndex, Mod.GetHealthRate(causedEffect.partIndex) - causedEffect.value);
                                 }
                             }
                         }
@@ -267,17 +267,33 @@ namespace EFM
                     break;
                 case Effect.EffectType.HealthRate:
                     Mod.LogInfo("\t\tRemoving");
-                    float[] arrayToUse = effectToRemove.nonLethal ? Mod.currentNonLethalHealthRates : Mod.currentHealthRates;
-                    if (effectToRemove.partIndex == -1)
+                    if (effectToRemove.nonLethal)
                     {
-                        for (int i = 0; i < 7; ++i)
+                        if (effectToRemove.partIndex == -1)
                         {
-                            arrayToUse[i] -= effectToRemove.value;
+                            for (int i = 0; i < 7; ++i)
+                            {
+                                Mod.SetNonLethalHealthRate(i, Mod.GetNonLethalHealthRate(i) - effectToRemove.value);
+                            }
+                        }
+                        else
+                        {
+                            Mod.SetNonLethalHealthRate(effectToRemove.partIndex, Mod.GetNonLethalHealthRate(effectToRemove.partIndex) - effectToRemove.value);
                         }
                     }
                     else
                     {
-                        arrayToUse[effectToRemove.partIndex] -= effectToRemove.value;
+                        if (effectToRemove.partIndex == -1)
+                        {
+                            for (int i = 0; i < 7; ++i)
+                            {
+                                Mod.SetHealthRate(i, Mod.GetHealthRate(i) - effectToRemove.value);
+                            }
+                        }
+                        else
+                        {
+                            Mod.SetHealthRate(effectToRemove.partIndex, Mod.GetHealthRate(effectToRemove.partIndex) - effectToRemove.value);
+                        }
                     }
                     Mod.LogInfo("\t\tRemoved");
                     break;
@@ -366,19 +382,35 @@ namespace EFM
                     // Remove all effects caused by this toxin
                     foreach (Effect causedEffect in effectToRemove.caused)
                     {
-                        float[] currentArrayToUse = causedEffect.nonLethal ? Mod.currentNonLethalHealthRates : Mod.currentHealthRates;
                         if (causedEffect.effectType == Effect.EffectType.HealthRate)
                         {
-                            if (causedEffect.partIndex == -1)
+                            if (effectToRemove.nonLethal)
                             {
-                                for (int i = 0; i < 7; ++i)
+                                if (effectToRemove.partIndex == -1)
                                 {
-                                    currentArrayToUse[i] -= causedEffect.value;
+                                    for (int i = 0; i < 7; ++i)
+                                    {
+                                        Mod.SetNonLethalHealthRate(i, Mod.GetNonLethalHealthRate(i) - effectToRemove.value);
+                                    }
+                                }
+                                else
+                                {
+                                    Mod.SetNonLethalHealthRate(effectToRemove.partIndex, Mod.GetNonLethalHealthRate(effectToRemove.partIndex) - effectToRemove.value);
                                 }
                             }
                             else
                             {
-                                currentArrayToUse[causedEffect.partIndex] -= causedEffect.value;
+                                if (effectToRemove.partIndex == -1)
+                                {
+                                    for (int i = 0; i < 7; ++i)
+                                    {
+                                        Mod.SetHealthRate(i, Mod.GetHealthRate(i) - effectToRemove.value);
+                                    }
+                                }
+                                else
+                                {
+                                    Mod.SetHealthRate(effectToRemove.partIndex, Mod.GetHealthRate(effectToRemove.partIndex) - effectToRemove.value);
+                                }
                             }
                         }
                         // Could go two layers deep

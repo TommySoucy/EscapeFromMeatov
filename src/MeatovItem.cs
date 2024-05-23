@@ -1008,12 +1008,14 @@ namespace EFM
 									Mod.LogInfo("\t\t\t\tNo part targetted, finding best...");
 									int leastIndex = -1;
 									float leastAmount = 1000;
-									for (int i = 0; i < Mod.health.Length; ++i)
+									for (int i = 0; i < Mod.GetHealthCount(); ++i)
 									{
-										if (Mod.health[i] < Mod.currentMaxHealth[i] && Mod.health[i] < leastAmount)
+                                        float health = Mod.GetHealth(i);
+
+                                        if (health < Mod.currentMaxHealth[i] && health < leastAmount)
 										{
 											leastIndex = i;
-											leastAmount = Mod.health[i];
+											leastAmount = Mod.GetHealth(i);
 										}
 									}
 									if (leastIndex >= 0)
@@ -1024,11 +1026,12 @@ namespace EFM
 								}
 
 								if (partIndex != -1)
-								{
-									Mod.LogInfo("\t\t\t\tApplying "+actualAmountConsumed+" to "+partIndex+", which has "+ Mod.health[partIndex]+" health");
-									actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
-									Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
-									Mod.LogInfo("\t\t\t\tAfter healing: "+ Mod.health[partIndex]);
+                                {
+                                    float health = Mod.GetHealth(partIndex);
+                                    Mod.LogInfo("\t\t\t\tApplying "+actualAmountConsumed+" to "+partIndex+", which has "+ health + " health");
+									actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - health));
+                                    Mod.SetHealth(partIndex, Mathf.Min(Mod.currentMaxHealth[partIndex], health + actualAmountConsumed));
+									Mod.LogInfo("\t\t\t\tAfter healing: "+ health);
 								}
 								// else, no target part and all parts are at max health
 
@@ -1065,12 +1068,13 @@ namespace EFM
 								{
 									int leastIndex = -1;
 									float leastAmount = 1000;
-									for (int i = 0; i < Mod.health.Length; ++i)
-									{
-										if (Mod.health[i] < Mod.currentMaxHealth[i] && Mod.health[i] < leastAmount)
+                                    for (int i = 0; i < Mod.GetHealthCount(); ++i)
+                                    {
+                                        float health = Mod.GetHealth(i);
+                                        if (health < Mod.currentMaxHealth[i] && health < leastAmount)
 										{
 											leastIndex = i;
-											leastAmount = Mod.health[i];
+											leastAmount = health;
 										}
 									}
 									if (leastIndex >= 0)
@@ -1080,16 +1084,17 @@ namespace EFM
 								}
 
 								if (partIndex != -1)
-								{
-									if (Mod.currentLocationIndex == 1) // In hideout, take base max health
+                                {
+                                    float health = Mod.GetHealth(partIndex);
+                                    if (Mod.currentLocationIndex == 1) // In hideout, take base max health
 									{
-										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
-										Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
+										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - health));
+                                        Mod.SetHealth(partIndex, Mathf.Min(Mod.currentMaxHealth[partIndex], health + actualAmountConsumed));
 									}
 									else // In raid, take raid max health
 									{
-										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]));
-										Mod.health[partIndex] = Mathf.Min(Mod.currentMaxHealth[partIndex], Mod.health[partIndex] + actualAmountConsumed);
+										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - health));
+                                        Mod.SetHealth(partIndex, Mathf.Min(Mod.currentMaxHealth[partIndex], health + actualAmountConsumed));
 									}
 								}
 								// else, no target part and all parts are at max health
@@ -1550,7 +1555,7 @@ namespace EFM
 								Effect.RemoveEffectAt(highest);
 								amount -= consumeEffect.cost;
 								++appliedEffectCount;
-								Mod.health[lowestPartIndex] = 1;
+                                Mod.SetHealth(lowestPartIndex, 1);
 								if(Mod.currentLocationIndex == 2)
                                 {
 									Mod.currentMaxHealth[lowestPartIndex] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
@@ -1599,7 +1604,7 @@ namespace EFM
 								Effect.RemoveEffectAt(index);
 								amount -= consumeEffect.cost;
 								++appliedEffectCount;
-								Mod.health[targettedPart] = 1;
+                                Mod.SetHealth(targettedPart, 1);
 								if (Mod.currentLocationIndex == 2)
 								{
 									Mod.currentMaxHealth[targettedPart] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);

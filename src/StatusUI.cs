@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static EFM.Task;
 
 namespace EFM
 {
@@ -43,6 +42,13 @@ namespace EFM
         public GameObject infoClosedIcon;
         public GameObject infoOpenIcon;
         public GameObject infoView;
+        public Text infoKills;
+        public Text infoDeaths;
+        public Text infoRaids;
+        public Text infoSurvived;
+        public Text infoRunthrough;
+        public Text infoMIA;
+        public Text infoKIA;
         public HoverScroll infoDownHoverScroll;
         public HoverScroll infoUpHoverScroll;
         public AudioSource clickAudio;
@@ -101,9 +107,9 @@ namespace EFM
                 {
                     Task task = traderTasksEntry.Value[i];
                     if (task.playerUI == null
-                        && (task.taskState == TaskState.Available
-                        || task.taskState == TaskState.Active
-                        || task.taskState == TaskState.Complete))
+                        && (task.taskState == Task.TaskState.Available
+                        || task.taskState == Task.TaskState.Active
+                        || task.taskState == Task.TaskState.Complete))
                     {
                         AddTask(task);
                     }
@@ -123,34 +129,13 @@ namespace EFM
 
         public void AddTask(Task task)
         {
-            TODO e: // Make sure task UI handles updates properly if it is status UI because missing buttons and such
             // Instantiate task element
             GameObject currentTaskElement = Instantiate(taskPrefab, tasksParent);
             currentTaskElement.SetActive(true);
             task.playerUI = currentTaskElement.GetComponent<TaskUI>();
 
             // Set task UI
-            task.marketUI.SetTask(task);
-        }
-
-        public void UpdateTaskListHeight()
-        {
-            // We should always wait until 1 frame after setting the UI before calling this because
-            // tasksParent.sizeDelta.y only get updated the frame after any changes
-            // 250 is the height we see in the view
-            if (tasksParent.sizeDelta.y > 250)
-            {
-                tasksDownHoverScroll.rate = 1 / (tasksParent.sizeDelta.y / 250);
-                tasksUpHoverScroll.rate = tasksDownHoverScroll.rate;
-                tasksDownHoverScroll.scrollbar.value = 1; // Put it back to the top
-                tasksDownHoverScroll.gameObject.SetActive(true);
-                tasksUpHoverScroll.gameObject.SetActive(false);
-            }
-            else
-            {
-                tasksDownHoverScroll.gameObject.SetActive(false);
-                tasksUpHoverScroll.gameObject.SetActive(false);
-            }
+            task.playerUI.SetTask(task, false);
         }
 
         public void OnPlayerLevelChanged()
@@ -223,8 +208,19 @@ namespace EFM
 
         public void OnPartHealthChanged(int index)
         {
-            partImages[index].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(index) / Mod.currentMaxHealth[index]);
-            partHealth[index].text = ((int)Mod.GetHealth(index)).ToString() + "/" + ((int)Mod.currentMaxHealth[index]);
+            if (index == -1)
+            {
+                for(int i=0; i < Mod.GetHealthCount(); ++i)
+                {
+                    partImages[i].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(i) / Mod.currentMaxHealth[i]);
+                    partHealth[i].text = ((int)Mod.GetHealth(i)).ToString() + "/" + ((int)Mod.currentMaxHealth[i]);
+                }
+            }
+            else
+            {
+                partImages[index].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(index) / Mod.currentMaxHealth[index]);
+                partHealth[index].text = ((int)Mod.GetHealth(index)).ToString() + "/" + ((int)Mod.currentMaxHealth[index]);
+            }
         }
 
         public void OnPlayerWeightChanged()

@@ -852,7 +852,7 @@ namespace EFM
             task.marketUI = currentTaskElement.GetComponent<TaskUI>();
 
             // Set task UI
-            task.marketUI.SetTask(task);
+            task.marketUI.SetTask(task, true);
         }
 
         //public void UpdateTaskListHeight()

@@ -210,9 +210,9 @@ namespace EFM
                 // Set any parts health to 1 if they are at 0
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (Mod.health[i] == 0)
+                    if (Mod.GetHealth(i) == 0)
                     {
-                        Mod.health[i] = 1;
+                        Mod.SetHealth(i, 1);
                     }
                 }
 
@@ -297,9 +297,9 @@ namespace EFM
                     {
                         // TODO: Maybe make these somewhat random? The scav may not have max energy and hydration for example
                         Effect.RemoveEffects();
-                        for (int i = 0; i < Mod.health.Length; ++i)
+                        for (int i = 0; i < Mod.GetHealthCount(); ++i)
                         {
-                            Mod.health[i] = Mod.defaultMaxHealth[i];
+                            Mod.SetHealth(i, Mod.defaultMaxHealth[i]);
                         }
                         Mod.energy = Mod.defaultMaxEnergy;
                         Mod.hydration = Mod.defaultMaxHydration;
@@ -1274,12 +1274,12 @@ namespace EFM
             {
                 Mod.level = (int)loadedData["level"];
                 Mod.experience = (int)loadedData["experience"];
-                Mod.health = loadedData["health"].ToObject<float[]>();
-                Mod.currentHealthRates = loadedData["healthRates"].ToObject<float[]>();
-                Mod.currentNonLethalHealthRates = loadedData["nonLethalHealthRates"].ToObject<float[]>();
-                for (int i = 0; i < Mod.health.Length; ++i)
+                Mod.SetHealthArray(loadedData["health"].ToObject<float[]>());
+                Mod.SetHealthRateArray(loadedData["healthRates"].ToObject<float[]>());
+                Mod.SetNonLethalHealthRateArray(loadedData["nonLethalHealthRates"].ToObject<float[]>());
+                for (int i = 0; i < Mod.GetHealthCount(); ++i)
                 {
-                    Mod.health[i] += Mathf.Min(Mod.currentHealthRates[i] * minutesSinceSave, Mod.currentMaxHealth[i]);
+                    Mod.SetHealth(i, Mod.GetHealth(i) + Mathf.Min(Mod.GetHealthRate(i) * minutesSinceSave, Mod.currentMaxHealth[i]));
                 }
                 Mod.currentMaxHealth = loadedData["maxHealth"].ToObject<float[]>();
                 Mod.currentMaxHydration = (float)loadedData["maxHydration"];
@@ -2733,9 +2733,9 @@ namespace EFM
                     int raidResultExp = 0; // TODO: Add bonus for how long we survived
                     if (Mod.raidState == FinishRaidState.KIA || Mod.raidState == FinishRaidState.MIA)
                     {
-                        for (int i = 0; i < Mod.health.Length; ++i)
+                        for (int i = 0; i < Mod.GetHealthCount(); ++i)
                         {
-                            Mod.health[i] = 0.3f * Mod.currentMaxHealth[i];
+                            Mod.SetHealth(i, 0.3f * Mod.currentMaxHealth[i]);
                         }
 
                         Mod.hydration = 0.3f * Mod.defaultMaxHydration;
@@ -2770,7 +2770,7 @@ namespace EFM
                     int expForNextLevel = 0;
                     for (int i = 0; i < Mod.level; ++i)
                     {
-                        expForNextLevel += (int)Mod.XPPerLevel[Mod.level]["exp"];
+                        expForNextLevel += Mod.XPPerLevel[Mod.level];
                     }
                     raidReportScreen.GetChild(2).GetChild(1).GetChild(1).GetComponent<Image>().rectTransform.sizeDelta = new Vector2(450 * (Mod.experience / (float)expForNextLevel), 12.8f);
                     raidReportScreen.GetChild(2).GetChild(1).GetChild(2).GetComponent<Text>().text = Mod.experience.ToString() + "/" + expForNextLevel;
@@ -2912,18 +2912,18 @@ namespace EFM
                     {
                         // Set part color
                         medicalScreenPartImages[partIndex] = medicalScreenPartImagesParent.GetChild(partIndex);
-                        if (Mod.health[partIndex] == 0)
+                        if (Mod.GetHealth(partIndex) == 0)
                         {
                             medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.black;
                         }
                         else
                         {
-                            medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.Lerp(Color.red, Color.white, Mod.health[partIndex] / Mod.currentMaxHealth[partIndex]);
+                            medicalScreenPartImages[partIndex].GetComponent<Image>().color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(partIndex) / Mod.currentMaxHealth[partIndex]);
                         }
 
                         // Set part info
                         medicalScreenPartHealthTexts[partIndex] = partInfoParent.GetChild(partIndex).GetChild(1).GetComponent<Text>();
-                        medicalScreenPartHealthTexts[partIndex].text = String.Format("{0:0}", Mod.health[partIndex]) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[partIndex]);
+                        medicalScreenPartHealthTexts[partIndex].text = String.Format("{0:0}", Mod.GetHealth(partIndex)) + "/" + String.Format("{0:0}", Mod.currentMaxHealth[partIndex]);
                         if (partConditions.ContainsKey(partIndex))
                         {
                             for (int i = 0; i < partConditions[partIndex].Length; ++i)
@@ -2932,7 +2932,7 @@ namespace EFM
                             }
                         }
 
-                        if (partConditions.ContainsKey(partIndex) || Mod.health[partIndex] < Mod.currentMaxHealth[partIndex])
+                        if (partConditions.ContainsKey(partIndex) || Mod.GetHealth(partIndex) < Mod.currentMaxHealth[partIndex])
                         {
                             fullPartConditions.Add(partIndex, new int[5]);
 
@@ -2955,9 +2955,9 @@ namespace EFM
 
                             // Process health and destroyed
                             int partTotalCost = 0;
-                            if (Mod.health[partIndex] < Mod.currentMaxHealth[partIndex])
+                            if (Mod.GetHealth(partIndex) < Mod.currentMaxHealth[partIndex])
                             {
-                                if (Mod.health[partIndex] <= 0)
+                                if (Mod.GetHealth(partIndex) <= 0)
                                 {
                                     int cost = (int)(breakPartPrice + healthPrice * Mod.currentMaxHealth[partIndex]);
                                     fullPartConditions[partIndex][4] = cost;
@@ -2975,7 +2975,7 @@ namespace EFM
                                 }
                                 else // Not destroyed but damaged
                                 {
-                                    int hpToHeal = (int)(Mod.currentMaxHealth[partIndex] - Mod.health[partIndex]);
+                                    int hpToHeal = (int)(Mod.currentMaxHealth[partIndex] - Mod.GetHealth(partIndex));
                                     int cost = healthPrice * hpToHeal;
                                     fullPartConditions[partIndex][0] = cost;
                                     totalMedicalTreatmentPrice += cost;
@@ -3034,9 +3034,9 @@ namespace EFM
 
                     // Set total health
                     float totalHealth = 0;
-                    foreach (float partHealth in Mod.health)
+                    for (int i = 0; i < Mod.GetHealthCount(); ++i) 
                     {
-                        totalHealth += partHealth;
+                        totalHealth += Mod.GetHealth(i);
                     }
                     medicalScreenTotalHealthText = medicalScreen.GetChild(4).GetChild(2).GetChild(1).GetComponent<Text>();
                     medicalScreenTotalHealthText.text = totalHealth.ToString() + "/440";
@@ -3490,7 +3490,7 @@ namespace EFM
                         {
                             if (i == 0) // Health
                             {
-                                Mod.health[partElement.Key] = Mod.currentMaxHealth[partElement.Key];
+                                Mod.SetHealth(partElement.Key, Mod.currentMaxHealth[partElement.Key]);
 
                                 // Update display
                                 transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(0).GetChild(partElement.Key).GetComponent<Image>().color = Color.white;
@@ -3521,7 +3521,7 @@ namespace EFM
                             {
                                 Effect.RemoveEffects(false, Effect.EffectType.DestroyedPart, partElement.Key);
 
-                                Mod.health[partElement.Key] = Mod.currentMaxHealth[partElement.Key];
+                                Mod.SetHealth(partElement.Key, Mod.currentMaxHealth[partElement.Key]);
 
                                 // Update display
                                 transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(0).GetChild(partElement.Key).GetComponent<Image>().color = Color.white;
@@ -3633,9 +3633,9 @@ namespace EFM
             // Write player status
             loadedData["level"] = Mod.level;
             loadedData["experience"] = Mod.experience;
-            loadedData["health"] = JArray.FromObject(Mod.health);
-            loadedData["healthRates"] = JArray.FromObject(Mod.currentHealthRates);
-            loadedData["nonLethalHealthRates"] = JArray.FromObject(Mod.currentHealthRates);
+            loadedData["health"] = JArray.FromObject(Mod.GetHealthArray());
+            loadedData["healthRates"] = JArray.FromObject(Mod.GetHealthRateArray());
+            loadedData["nonLethalHealthRates"] = JArray.FromObject(Mod.GetNonLethalHealthRateArray());
             loadedData["maxHealth"] = JArray.FromObject(Mod.currentMaxHealth);
             loadedData["maxHydration"] = Mod.defaultMaxHydration;
             loadedData["hydration"] = Mod.hydration;
