@@ -2,6 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -89,6 +91,7 @@ namespace EFM
         public Dictionary<string, List<GameObject>> ragFairItemBuyViewsByID;
 
         public int currentTraderIndex;
+        public MeatovItemData currencyItemData;
         public MeatovItemData cartItem;
         public int cartItemCount;
         public List<BarterPrice> buyPrices;
@@ -121,11 +124,11 @@ namespace EFM
         public void Start()
         {
             // Process items loaded in trade volume
-            foreach(KeyValuePair<string, List<MeatovItem>> itemEntry in tradeVolume.inventoryItems)
+            foreach (KeyValuePair<string, List<MeatovItem>> itemEntry in tradeVolume.inventoryItems)
             {
                 for (int i = 0; i < itemEntry.Value.Count; ++i)
                 {
-                    OnItemAdded(itemEntry.Value[i]);
+                    OnItemAdded(itemEntry.Value[i], false);
                 }
             }
 
@@ -180,7 +183,7 @@ namespace EFM
             }
         }
 
-        public void OnItemAdded(MeatovItem item)
+        public void OnItemAdded(MeatovItem item, bool processUI = true)
         {
             AddToInventory(item);
 
@@ -190,7 +193,121 @@ namespace EFM
                 AddToInventory(item.children[i]);
             }
 
-            UpdateBuyPriceForItem(item);
+            if (processUI)
+            {
+                UpdateBuyPriceForItem(item);
+                AddSellItem(item);
+                AddInsureItem(item);
+                UpdateInsurePriceForItem(item);
+            }
+        }
+
+        public void AddInsureItem(MeatovItem item)
+        {
+            Trader trader = Mod.traders[currentTraderIndex];
+
+            // Check if this item can be insured by this trader
+            if (item.insured || !trader.ItemInsureable(item.itemData))
+            {
+                return;
+            }
+
+            // Manage rows
+            Transform currentRow = insureShowcaseContent.GetChild(insureShowcaseContent.childCount - 1);
+            if (insureShowcaseContent.childCount == 1 || currentRow.childCount == 7) // If dont even have a single horizontal yet, add it
+            {
+                currentRow = GameObject.Instantiate(insureShowcaseRowPrefab, insureShowcaseContent).transform;
+                currentRow.gameObject.SetActive(true);
+            }
+
+            GameObject currentItemView = GameObject.Instantiate(insureShowcaseItemViewPrefab, currentRow);
+            currentItemView.SetActive(true);
+
+            // Setup ItemView
+            ItemView itemView = currentItemView.GetComponent<ItemView>();
+            int actualValue = item.itemData.value;
+
+            // Apply exchange rate if necessary
+            if (trader.currency == 1)
+            {
+                actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
+            }
+            else if (trader.currency == 2)
+            {
+                actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
+            }
+
+            // Apply trader insure coefficient
+            actualValue -= (int)(actualValue * (trader.levels[trader.level].insurancePriceCoef / 100.0f));
+            actualValue = Mathf.Max(actualValue, 1);
+
+
+            itemView.SetItem(item, true, trader.currency, actualValue);
+
+            // Set the itemView for that item
+            item.marketInsureItemView = itemView;
+
+            // Update price
+            currentTotalInsurePrice += actualValue;
+            if (currentTotalInsurePrice > 0)
+            {
+                TODO e: // This is only true if price is fulfilled 
+                insureDealButton.SetActive(true);
+            }
+            insureItemView.amount.text = currentTotalInsurePrice.ToString();
+        }
+
+        public void AddSellItem(MeatovItem item)
+        {
+            Trader trader = Mod.traders[currentTraderIndex];
+
+            // Check if this item can be sold to this trader
+            if (!trader.ItemSellable(item.itemData))
+            {
+                return;
+            }
+
+            // Manage rows
+            Transform currentRow = sellShowcaseContent.GetChild(sellShowcaseContent.childCount - 1);
+            if (sellShowcaseContent.childCount == 1 || currentRow.childCount == 7) // If dont even have a single horizontal yet, add it
+            {
+                currentRow = GameObject.Instantiate(sellShowcaseRowPrefab, sellShowcaseContent).transform;
+                currentRow.gameObject.SetActive(true);
+            }
+
+            GameObject currentItemView = GameObject.Instantiate(sellShowcaseItemViewPrefab, currentRow);
+            currentItemView.SetActive(true);
+
+            // Setup ItemView
+            ItemView itemView = currentItemView.GetComponent<ItemView>();
+            int actualValue = item.itemData.value;
+
+            // Apply exchange rate if necessary
+            if (trader.currency == 1)
+            {
+                actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
+            }
+            else if (trader.currency == 2)
+            {
+                actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
+            }
+
+            // Apply trader buy coefficient
+            actualValue -= (int)(actualValue * (trader.levels[trader.level].buyPriceCoef / 100.0f));
+            actualValue = Mathf.Max(actualValue, 1);
+
+            itemView.SetItem(item, true, trader.currency, actualValue);
+
+            // Set the itemView for that item
+            item.marketSellItemView = itemView;
+
+            // Update price
+            currentTotalSellingPrice += actualValue;
+            if (currentTotalSellingPrice > 0)
+            {
+                sellDealButton.SetActive(true);
+            }
+            sellItemView.amount.text = currentTotalSellingPrice.ToString();
         }
 
         public void UpdateBuyPriceForItem(MeatovItem item)
@@ -201,7 +318,7 @@ namespace EFM
                 int count = 0;
                 tradeVolume.inventory.TryGetValue(item.H3ID, out count);
                 itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + itemView.price.count.ToString();
-                if(count >= itemView.price.count)
+                if (count >= itemView.price.count)
                 {
                     itemView.fulfilledIcon.SetActive(true);
                     itemView.unfulfilledIcon.SetActive(false);
@@ -209,7 +326,40 @@ namespace EFM
                     {
                         // Newly fulfilled, we might now be able to buy, check if all prices fulfilled
                         bool allFulfilled = true;
-                        for(int i = 0; i < buyPrices.Count; ++i)
+                        for (int i = 0; i < buyPrices.Count; ++i)
+                        {
+                            int currentCount = 0;
+                            allFulfilled |= tradeVolume.inventory.TryGetValue(buyPrices[i].itemData.H3ID, out currentCount) && currentCount >= buyPrices[i].count;
+                        }
+                        buyDealButton.SetActive(allFulfilled);
+                    }
+                }
+                else
+                {
+                    itemView.fulfilledIcon.SetActive(false);
+                    itemView.unfulfilledIcon.SetActive(true);
+                    buyDealButton.SetActive(false);
+                }
+            }
+        }
+
+        public void UpdateInsurePriceForItem(MeatovItem item)
+        {
+            if (currencyItemData == item.itemData)
+            {
+                cont from here,// need to add insured price fulfilled icons and make sure the text scales properly in asset
+                int count = 0;
+                tradeVolume.inventory.TryGetValue(item.H3ID, out count);
+                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + itemView.price.count.ToString();
+                if (count >= itemView.price.count)
+                {
+                    insurePriceFulfilledIcon.SetActive(true);
+                    insurePriceUnfulfilledIcon.SetActive(false);
+                    if (!prefulfilled)
+                    {
+                        // Newly fulfilled, we might now be able to buy, check if all prices fulfilled
+                        bool allFulfilled = true;
+                        for (int i = 0; i < buyPrices.Count; ++i)
                         {
                             int currentCount = 0;
                             allFulfilled |= tradeVolume.inventory.TryGetValue(buyPrices[i].itemData.H3ID, out currentCount) && currentCount >= buyPrices[i].count;
@@ -358,6 +508,11 @@ namespace EFM
             OnItemRemovedFromTradeInventoryInvoke(item);
         }
 
+        public void OnTraderClicked(int index)
+        {
+            SetTrader(index);
+        }
+
         private void TakeInput()
         {
             if (choosingBuyAmount || choosingRagfairBuyAmount)
@@ -483,6 +638,18 @@ namespace EFM
             Mod.LogInfo("set trader called with index: " + index);
             currentTraderIndex = index;
             Trader trader = Mod.traders[index];
+            if (trader.currency == 0)
+            {
+                Mod.GetItemData("203", out currencyItemData);
+            }
+            else if (trader.currency == 1)
+            {
+                Mod.GetItemData("201", out currencyItemData);
+            }
+            else // 2
+            {
+                Mod.GetItemData("202", out currencyItemData);
+            }
 
             Mod.LogInfo("0");
             // Top
@@ -646,15 +813,21 @@ namespace EFM
 
             Mod.LogInfo("0");
             // Sell
+            // Setup selling price display
+            sellItemName.text = currencyItemData.name;
+            sellItemView.itemView.SetItemData(currencyItemData);
+            Mod.LogInfo("0");
+
+            // Reset showcase
             while (sellShowcaseContent.childCount > 1)
             {
                 Transform currentFirstChild = sellShowcaseContent.GetChild(1);
                 currentFirstChild.SetParent(null);
                 Destroy(currentFirstChild.gameObject);
             }
-            Mod.LogInfo("Adding all item involume to sell showcase");
+            Mod.LogInfo("Adding all sellable item in volume to sell showcase");
+
             // Add all items in trade volume that are sellable at this trader to showcase
-            int totalSellingPrice = 0;
             sellDealButton.SetActive(false);
 
             foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
@@ -662,79 +835,10 @@ namespace EFM
                 for(int i=0; i< volumeItemEntry.Value.Count; ++i)
                 {
                     Mod.LogInfo("\tAdding item from volume: " + volumeItemEntry.Value[i].name);
-                    MeatovItem meatovItem = volumeItemEntry.Value[i];
-
-                    // Check if this item can be sold to this trader
-                    if (!trader.ItemSellable(meatovItem.itemData))
-                    {
-                        continue;
-                    }
-
-                    // Manage rows
-                    Transform currentRow = sellShowcaseContent.GetChild(sellShowcaseContent.childCount - 1);
-                    if (sellShowcaseContent.childCount == 1 || currentRow.childCount == 7) // If dont even have a single horizontal yet, add it
-                    {
-                        currentRow = GameObject.Instantiate(sellShowcaseRowPrefab, sellShowcaseContent).transform;
-                        currentRow.gameObject.SetActive(true);
-                    }
-
-                    GameObject currentItemView = GameObject.Instantiate(sellShowcaseItemViewPrefab, currentRow);
-                    currentItemView.SetActive(true);
-
-                    // Setup ItemView
-                    ItemView itemView = currentItemView.GetComponent<ItemView>();
-                    int actualValue = meatovItem.itemData.value;
-
-                    // Apply exchange rate if necessary
-                    if(trader.currency == 1)
-                    {
-                        actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
-                    }
-                    else if(trader.currency == 2)
-                    {
-                        actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
-                    }
-
-                    // Apply trader buy coefficient
-                    actualValue -= (int)(actualValue * (trader.levels[trader.level].buyPriceCoef / 100.0f));
-                    actualValue = Mathf.Max(actualValue, 1);
-
-                    totalSellingPrice += actualValue;
-
-                    itemView.SetItem(meatovItem, true, trader.currency, actualValue);
-
-                    // Set the itemView for that item
-                    meatovItem.marketSellItemView = itemView;
+                    AddSellItem(volumeItemEntry.Value[i]);
                 }
             }
-
-            // Activate deal button if necessary
-            if(totalSellingPrice > 0)
-            {
-                sellDealButton.SetActive(true);
-            }
-
             Mod.LogInfo("0");
-            // Setup selling price display
-            MeatovItemData currencyItemData;
-            if (trader.currency == 0)
-            {
-                Mod.GetItemData("203", out currencyItemData);
-            }
-            else if (trader.currency == 1)
-            {
-                Mod.GetItemData("201", out currencyItemData);
-            }
-            else // 2
-            {
-                Mod.GetItemData("202", out currencyItemData);
-            }
-            sellItemName.text = currencyItemData.name;
-            sellItemView.itemView.SetItemData(currencyItemData);
-            sellItemView.amount.text = totalSellingPrice.ToString();
-
-            Mod.LogInfo("0");
-            currentTotalSellingPrice = totalSellingPrice;
 
             // Tasks
             while (tasksContent.childCount > 1)
@@ -762,6 +866,11 @@ namespace EFM
             Mod.LogInfo("0");
 
             // Insure
+            // Setup insure price display
+            insureItemName.text = currencyItemData.name;
+            insureItemView.itemView.SetItemData(currencyItemData);
+
+            // Reset showcase
             while (insureShowcaseContent.childCount > 1)
             {
                 Transform currentFirstChild = insureShowcaseContent.GetChild(1);
@@ -771,7 +880,6 @@ namespace EFM
 
             Mod.LogInfo("Adding all item in volume to insure showcase");
             // Add all items in trade volume that are insureable at this trader to showcase
-            int totalInsurePrice = 0;
             insureDealButton.SetActive(false);
 
             if (trader.insuranceAvailable)
@@ -781,67 +889,12 @@ namespace EFM
                     for (int i = 0; i < volumeItemEntry.Value.Count; ++i)
                     {
                         Mod.LogInfo("\tAdding item from volume: " + volumeItemEntry.Value[i].name);
-                        MeatovItem meatovItem = volumeItemEntry.Value[i];
-
-                        // Check if this item can be insured by this trader
-                        if (meatovItem.insured || !trader.ItemInsureable(meatovItem.itemData))
-                        {
-                            continue;
-                        }
-
-                        // Manage rows
-                        Transform currentRow = insureShowcaseContent.GetChild(insureShowcaseContent.childCount - 1);
-                        if (insureShowcaseContent.childCount == 1 || currentRow.childCount == 7) // If dont even have a single horizontal yet, add it
-                        {
-                            currentRow = GameObject.Instantiate(insureShowcaseRowPrefab, insureShowcaseContent).transform;
-                            currentRow.gameObject.SetActive(true);
-                        }
-
-                        GameObject currentItemView = GameObject.Instantiate(insureShowcaseItemViewPrefab, currentRow);
-                        currentItemView.SetActive(true);
-
-                        // Setup ItemView
-                        ItemView itemView = currentItemView.GetComponent<ItemView>();
-                        int actualValue = meatovItem.itemData.value;
-
-                        // Apply exchange rate if necessary
-                        if (trader.currency == 1)
-                        {
-                            actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
-                        }
-                        else if (trader.currency == 2)
-                        {
-                            actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
-                        }
-
-                        // Apply trader insure coefficient
-                        actualValue -= (int)(actualValue * (trader.levels[trader.level].insurancePriceCoef / 100.0f));
-                        actualValue = Mathf.Max(actualValue, 1);
-
-                        totalInsurePrice += actualValue;
-
-                        itemView.SetItem(meatovItem, true, trader.currency, actualValue);
-
-                        // Set the itemView for that item
-                        meatovItem.marketInsureItemView = itemView;
+                        AddInsureItem(volumeItemEntry.Value[i]);
                     }
                 }
             }
 
-            // Activate deal button if necessary
-            if (totalInsurePrice > 0)
-            {
-                insureDealButton.SetActive(true);
-            }
-
             Mod.LogInfo("0");
-            // Setup insure price display
-            insureItemName.text = currencyItemData.name;
-            insureItemView.itemView.SetItemData(currencyItemData);
-            insureItemView.amount.text = totalInsurePrice.ToString();
-
-            Mod.LogInfo("0");
-            currentTotalInsurePrice = totalInsurePrice;
         }
 
         public void AddTask(Task task)
@@ -2220,36 +2273,35 @@ namespace EFM
             SetTrader(currentTraderIndex);
         }
 
+        public void OnInsureDealClick()
+        {
+            // Insure all insureable items in trade volume
+            foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
+            {
+                for (int i = 0; i < volumeItemEntry.Value.Count; ++i)
+                {
+                    MeatovItem meatovItem = volumeItemEntry.Value[i];
+
+                    if (Mod.traders[currentTraderIndex].ItemInsureable(meatovItem.itemData))
+                    {
+                        meatovItem.insured = true;
+                    }
+                }
+            }
+
+            // Remove insurance price from trade volume
+            RemoveItemFromTrade(price.itemData, price.count);
+
+            // Update the whole thing
+            SetTrader(currentTraderIndex);
+        }
+
         ////public void OnInsureItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
         ////{
         ////    // TODO: MAYBE DONT EVEN NEED THIS, WE JUST INSURE EVERYTHING IN THE INSURE SHOWCASE
         ////    // TODO: Set cart UI to this item
         ////    // de/activate deal! button depending on whether trade volume has enough money
         ////}
-
-        //public void OnInsureDealClick()
-        //{
-        //    // Set all insureable items in trade volume as insured
-        //    foreach (KeyValuePair<string, int> item in tradeVolumeInventory)
-        //    {
-        //        if (Mod.traders[currentTraderIndex].ItemInsureable(item.Key, Mod.itemAncestors[item.Key]))
-        //        {
-        //            foreach (GameObject itemObject in tradeVolumeInventoryObjects[item.Key])
-        //            {
-        //                MeatovItem CIW = itemObject.GetComponent<MeatovItem>();
-        //                CIW.insured = true;
-        //            }
-        //        }
-        //    }
-
-        //    // Remove price from trade volume
-        //    int amountToRemove = currentTotalInsurePrice;
-        //    string currencyID = Mod.traders[currentTraderIndex].currency == 0 ? "203" : "201"; // Roubles, else USD
-        //    RemoveItemFromTrade(currencyID, amountToRemove);
-
-        //    // Update trader UI
-        //    SetTrader(currentTraderIndex);
-        //}
 
         //public void OnTaskShortInfoClick(GameObject description)
         //{

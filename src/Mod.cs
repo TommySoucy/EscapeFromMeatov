@@ -1775,8 +1775,6 @@ namespace EFM
                 float memoryAmount = Skill.memorySkillProgress / Skill.anySkillUp * actualAmountToAdd;
                 Mod.skills[11].progress += memoryAmount;
                 Mod.skills[11].currentProgress += memoryAmount;
-
-                StatusUI.instance.UpdateSkillUI(11);
             }
 
             float postLevel = (int)(skill.progress / 100);
@@ -1811,8 +1809,6 @@ namespace EFM
                         Mod.skills[3].increasing = true;
                     }
                 }
-
-                StatusUI.instance.UpdateSkillUI(3);
             }
             else if (skillIndex == 1)
             {
@@ -1836,8 +1832,6 @@ namespace EFM
                         Mod.skills[3].increasing = true;
                     }
                 }
-
-                StatusUI.instance.UpdateSkillUI(3);
             }
             else if (skillIndex == 2)
             {
@@ -1858,8 +1852,6 @@ namespace EFM
                         Mod.skills[3].increasing = true;
                     }
                 }
-
-                StatusUI.instance.UpdateSkillUI(3);
             }
             else if (skillIndex == 7)
             {
@@ -1880,8 +1872,6 @@ namespace EFM
                         Mod.skills[10].increasing = true;
                     }
                 }
-
-                StatusUI.instance.UpdateSkillUI(10);
             }
             else if (skillIndex == 8)
             {
@@ -1902,8 +1892,6 @@ namespace EFM
                         Mod.skills[10].increasing = true;
                     }
                 }
-
-                StatusUI.instance.UpdateSkillUI(10);
             }
             else if (skillIndex == 9)
             {
@@ -1924,13 +1912,10 @@ namespace EFM
                         Mod.skills[10].increasing = true;
                     }
                 }
-
-                StatusUI.instance.UpdateSkillUI(10);
             }
 
             if (intPreProgress < (int)skill.progress)
             {
-                StatusUI.instance.UpdateSkillUI(skillIndex);
             }
         }
 

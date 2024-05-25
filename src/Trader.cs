@@ -380,6 +380,33 @@ namespace EFM
             }
         }
 
+        public static string IndexToName(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return "Prapor";
+                case 1:
+                    return "Therapist";
+                case 2:
+                    return "Fence";
+                case 3:
+                    return "Skier";
+                case 4:
+                    return "Peacekeeper";
+                case 5:
+                    return "Mechanic";
+                case 6:
+                    return "Ragman";
+                case 7:
+                    return "Jaeger";
+                case 8:
+                    return "Lightkeeper";
+                default:
+                    return "";
+            }
+        }
+
         public static string LevelToRoman(int level)
         {
             // +1 because level is 0 based

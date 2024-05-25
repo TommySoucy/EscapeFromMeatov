@@ -1,4 +1,5 @@
 ﻿using FistVR;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +9,7 @@ namespace EFM
     public class ItemDescriptionUI : MonoBehaviour
     {
         public DescriptionPack descriptionPack;
+        [NonSerialized]
         public Hand hand;
 
         public GameObject summary;

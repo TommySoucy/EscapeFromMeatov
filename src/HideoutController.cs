@@ -148,6 +148,9 @@ namespace EFM
 
         public override void Awake()
         {
+            TODO: // Make Some kind of processor for moving UI elements with colliders, like all the item views, to disable the collider if not visible
+            // Or do like we did for trader market, make sure the non visible UI colliders won't overlap over other non moving UI colliders
+
             base.Awake();
 
             instance = this;
