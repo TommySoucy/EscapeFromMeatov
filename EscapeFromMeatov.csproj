@@ -85,6 +85,8 @@
     <Compile Include="src\MeatovItemData.cs" />
     <Compile Include="src\PriceItemView.cs" />
     <Compile Include="src\ProductionView.cs" />
+    <Compile Include="src\RagFairBuyItemView.cs" />
+    <Compile Include="src\RagFairCategory.cs" />
     <Compile Include="src\RequirementItemView.cs" />
     <Compile Include="src\ResultItemView.cs" />
     <Compile Include="src\RigSlot.cs" />

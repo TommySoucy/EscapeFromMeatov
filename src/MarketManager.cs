@@ -79,7 +79,18 @@ namespace EFM
         public GameObject insurePriceFulfilled;
         public GameObject insurePriceUnfulfilled;
 
+        public Transform ragFairBuyCategoriesParent;
+        public GameObject ragFairBuyCategoryPrefab;
+        public Transform ragFairBuyItemParent;
+        public GameObject ragFairBuyItemPrefab;
+        public PriceItemView ragFairBuyItemView;
+        public Transform ragFairBuyPricesParent;
+        public GameObject ragFairBuyPricePrefab;
+        public GameObject ragFairBuyDealButton;
         public Collider ragFairBuyAmountButtonCollider;
+
+        private GameObject currentActiveCategory;
+        private GameObject currentActiveItemSelector;
 
         // Live data
         [NonSerialized]
@@ -113,9 +124,6 @@ namespace EFM
         private Vector3 amountChoiceRightVector;
         private int chosenAmount;
         private int maxBuyAmount;
-
-        private GameObject currentActiveCategory;
-        private GameObject currentActiveItemSelector;
 
         // Events
         public delegate void OnItemAddedToTradeInventoryDelegate(MeatovItem item);
@@ -194,6 +202,7 @@ namespace EFM
 
         public void OnItemAdded(MeatovItem item, bool processUI = true)
         {
+            cotn from ehre// next step if setting up UI for rag fair selling, probably need to figure out how we want to make it work first
             AddToInventory(item);
 
             // Update children
@@ -206,8 +215,10 @@ namespace EFM
             {
                 UpdateBuyPriceForItem(item.itemData);
                 AddSellItem(item);
+                AddRagFairSellItem(item);
                 AddInsureItem(item);
                 UpdateInsurePriceForItem(item.itemData);
+                UpdateRagFairBuyPriceForItem(item.itemData);
             }
         }
 
@@ -508,6 +519,42 @@ namespace EFM
         public void OnTraderClicked(int index)
         {
             SetTrader(index);
+        }
+
+        public void OnRagFairBuyCancelClicked()
+        {
+            TODO: // Implement
+            Mod.LogInfo("");
+        }
+
+        public void OnRagFairBuyDealClicked()
+        {
+            TODO: // Implement
+            Mod.LogInfo("");
+        }
+
+        public void OnRagFairBuyAmountClicked()
+        {
+            TODO: // Implement
+            Mod.LogInfo("");
+        }
+
+        public void OnRagFairBuyItemClicked(MeatovItemData item, BarterPrice[] priceList)
+        {
+            TODO: // Implement
+            Mod.LogInfo("");
+        }
+
+        public void AddRagFairSellItem(MeatovItem item)
+        {
+            TODO: // Implement
+            Mod.LogInfo("");
+        }
+
+        public void UpdateRagFairBuyPriceForItem(MeatovItemData item)
+        {
+            TODO: // Implement
+            Mod.LogInfo("");
         }
 
         private void TakeInput()
