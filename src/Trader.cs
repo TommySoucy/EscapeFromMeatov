@@ -1,5 +1,4 @@
-﻿using Mono.Cecil;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -96,6 +95,8 @@ namespace EFM
         {
             this.index = index;
             this.ID = ID;
+
+            Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
 
             tasks = new List<Task>();
             rewardBarters = new Dictionary<string, bool>();
@@ -295,6 +296,11 @@ namespace EFM
                     }
                 }
             }
+        }
+
+        public void OnPlayerLevelChanged()
+        {
+            UpdateLevel();
         }
 
         public void Save(JToken data)
@@ -507,6 +513,7 @@ namespace EFM
     {
         public MeatovItemData itemData;
         public int count;
+        public PriceItemView priceItemView;
 
         // DogTag specific
         public int dogTagLevel;

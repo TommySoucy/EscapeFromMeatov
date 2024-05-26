@@ -58,7 +58,7 @@ namespace EFM
         public Transform buyPricesContent;
         public GameObject buyPricePrefab;
         public GameObject buyDealButton;
-        public GameObject buyCancelButton;
+        public Collider buyAmountButtonCollider;
 
         public Transform sellShowcaseContent;
         public GameObject sellShowcaseRowPrefab;
@@ -76,8 +76,13 @@ namespace EFM
         public Text insureItemName;
         public PriceItemView insureItemView;
         public GameObject insureDealButton;
+        public GameObject insurePriceFulfilled;
+        public GameObject insurePriceUnfulfilled;
+
+        public Collider ragFairBuyAmountButtonCollider;
 
         // Live data
+        [NonSerialized]
         public float fenceRestockTimer;
 
         public Dictionary<string, int> inventory;
@@ -85,7 +90,6 @@ namespace EFM
         public Dictionary<string, int> FIRInventory;
         public Dictionary<string, List<MeatovItem>> FIRInventoryItems;
 
-        public TraderTab[] traderTabs;
         public TraderTab[] ragFairTabs;
         public Dictionary<string, GameObject> wishListItemViewsByID;
         public Dictionary<string, List<GameObject>> ragFairItemBuyViewsByID;
@@ -133,7 +137,7 @@ namespace EFM
             }
 
             // Subscribe to events
-            tradeVolume.OnItemAdded += OnItemAdded;
+            tradeVolume.OnItemAdded += OnTradeVolumeItemAdded;
             tradeVolume.OnItemRemoved += OnItemRemoved;
             
             // Set default trader
@@ -178,9 +182,14 @@ namespace EFM
                 fenceRestockTimer = Convert.ToSingle((DateTime.Today.ToUniversalTime().AddHours(24) - DateTime.UtcNow).TotalSeconds);
                 if (currentTraderIndex == 2)
                 {
-                    //SetTrader(2);
+                    SetTrader(2);
                 }
             }
+        }
+
+        public void OnTradeVolumeItemAdded(MeatovItem item)
+        {
+            OnItemAdded(item);
         }
 
         public void OnItemAdded(MeatovItem item, bool processUI = true)
@@ -195,10 +204,10 @@ namespace EFM
 
             if (processUI)
             {
-                UpdateBuyPriceForItem(item);
+                UpdateBuyPriceForItem(item.itemData);
                 AddSellItem(item);
                 AddInsureItem(item);
-                UpdateInsurePriceForItem(item);
+                UpdateInsurePriceForItem(item.itemData);
             }
         }
 
@@ -251,8 +260,7 @@ namespace EFM
             currentTotalInsurePrice += actualValue;
             if (currentTotalInsurePrice > 0)
             {
-                TODO e: // This is only true if price is fulfilled 
-                insureDealButton.SetActive(true);
+                UpdateInsurePriceForItem(currencyItemData);
             }
             insureItemView.amount.text = currentTotalInsurePrice.ToString();
         }
@@ -310,13 +318,13 @@ namespace EFM
             sellItemView.amount.text = currentTotalSellingPrice.ToString();
         }
 
-        public void UpdateBuyPriceForItem(MeatovItem item)
+        public void UpdateBuyPriceForItem(MeatovItemData itemData)
         {
-            if (buyItemPriceViewsByH3ID.TryGetValue(item.H3ID, out PriceItemView itemView))
+            if (buyItemPriceViewsByH3ID.TryGetValue(itemData.H3ID, out PriceItemView itemView))
             {
                 bool prefulfilled = itemView.fulfilledIcon.activeSelf;
                 int count = 0;
-                tradeVolume.inventory.TryGetValue(item.H3ID, out count);
+                tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
                 itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + itemView.price.count.ToString();
                 if (count >= itemView.price.count)
                 {
@@ -343,34 +351,23 @@ namespace EFM
             }
         }
 
-        public void UpdateInsurePriceForItem(MeatovItem item)
+        public void UpdateInsurePriceForItem(MeatovItemData itemData)
         {
-            if (currencyItemData == item.itemData)
+            if (currencyItemData == itemData)
             {
-                cont from here,// need to add insured price fulfilled icons and make sure the text scales properly in asset
                 int count = 0;
-                tradeVolume.inventory.TryGetValue(item.H3ID, out count);
-                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + itemView.price.count.ToString();
-                if (count >= itemView.price.count)
+                tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
+                insureItemView.amount.text = count.ToString() + "/" + currentTotalInsurePrice.ToString();
+                if (count >= currentTotalInsurePrice)
                 {
-                    insurePriceFulfilledIcon.SetActive(true);
-                    insurePriceUnfulfilledIcon.SetActive(false);
-                    if (!prefulfilled)
-                    {
-                        // Newly fulfilled, we might now be able to buy, check if all prices fulfilled
-                        bool allFulfilled = true;
-                        for (int i = 0; i < buyPrices.Count; ++i)
-                        {
-                            int currentCount = 0;
-                            allFulfilled |= tradeVolume.inventory.TryGetValue(buyPrices[i].itemData.H3ID, out currentCount) && currentCount >= buyPrices[i].count;
-                        }
-                        buyDealButton.SetActive(allFulfilled);
-                    }
+                    insurePriceFulfilled.SetActive(true);
+                    insurePriceUnfulfilled.SetActive(false);
+                    buyDealButton.SetActive(true);
                 }
                 else
                 {
-                    itemView.fulfilledIcon.SetActive(false);
-                    itemView.unfulfilledIcon.SetActive(true);
+                    insurePriceFulfilled.SetActive(false);
+                    insurePriceUnfulfilled.SetActive(true);
                     buyDealButton.SetActive(false);
                 }
             }
@@ -386,7 +383,7 @@ namespace EFM
                 RemoveFromInventory(item.children[i]);
             }
 
-            UpdateBuyPriceForItem(item);
+            UpdateBuyPriceForItem(item.itemData);
         }
 
         public void AddToInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
@@ -518,7 +515,6 @@ namespace EFM
             if (choosingBuyAmount || choosingRagfairBuyAmount)
             {
                 FVRViveHand hand = Mod.rightHand.fvrHand;
-                Transform cartShowcase;
                 string countString;
                 if (startedChoosingThisFrame)
                 {
@@ -531,58 +527,31 @@ namespace EFM
                     if (choosingBuyAmount)
                     {
                         cartItemCount = chosenAmount;
-                        cartShowcase = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1);
                         countString = cartItemCount.ToString();
                         pricesToUse = buyPrices;
                     }
                     else
                     {
                         ragfairCartItemCount = chosenAmount;
-                        cartShowcase = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(1);
                         countString = ragfairCartItemCount.ToString();
                         pricesToUse = ragfairPrices;
                     }
                     Mod.stackSplitUI.SetActive(false);
 
                     // Change amount and price on UI
-                    cartShowcase.GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = countString;
+                    buyItemCount.text = countString;
 
-                    Transform pricesParent = cartShowcase.GetChild(3).GetChild(0).GetChild(0);
-                    int priceElementIndex = 1;
-                    bool canDeal = true;
                     foreach (BarterPrice price in pricesToUse)
                     {
-                        Transform priceElement = pricesParent.GetChild(priceElementIndex++).transform;
-                        priceElement.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = (price.count * cartItemCount).ToString();
+                        PriceItemView currentView = price.priceItemView;
+                        currentView.amount.text = (price.count * cartItemCount).ToString();
 
-                        if (inventory.ContainsKey(price.itemData.H3ID) && inventory[price.itemData.H3ID] >= price.count)
-                        {
-                            priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
-                            priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
-                        }
-                        else
-                        {
-                            priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
-                            priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
-                            canDeal = false;
-                        }
-                    }
-
-                    Transform dealButton = cartShowcase.parent.GetChild(2).GetChild(0).GetChild(0);
-                    if (canDeal)
-                    {
-                        dealButton.GetComponent<Collider>().enabled = true;
-                        dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-                    }
-                    else
-                    {
-                        dealButton.GetComponent<Collider>().enabled = false;
-                        dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
+                        UpdateBuyPriceForItem(price.itemData);
                     }
 
                     // Reenable buy amount buttons
-                    transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = true;
-                    transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(1).GetChild(1).GetComponent<Collider>().enabled = true;
+                    buyAmountButtonCollider.enabled = true;
+                    ragFairBuyAmountButtonCollider.enabled = true;
 
                     choosingBuyAmount = false;
                     choosingRagfairBuyAmount = false;
@@ -908,1210 +877,6 @@ namespace EFM
             task.marketUI.SetTask(task, true);
         }
 
-        //public void UpdateTaskListHeight()
-        //{
-        //    Mod.LogInfo("UpdateTaskListHeight called");
-        //    Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
-        //    Mod.LogInfo("got trader display");
-        //    HoverScroll downTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<HoverScroll>();
-        //    HoverScroll upTaskHoverScroll = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(3).GetComponent<HoverScroll>();
-        //    Mod.LogInfo("got hoverscrolls");
-        //    Transform tasksParent = traderDisplay.GetChild(1).GetChild(1).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-        //    Mod.LogInfo("got task parents");
-        //    float taskListHeight = 3 + 29 * (tasksParent.childCount - 1);
-
-        //    // Also need to add height of open descriptions
-        //    for (int i = 1; i < tasksParent.childCount; ++i)
-        //    {
-        //        Mod.LogInfo("\tGetting task " + i);
-        //        GameObject description = tasksParent.GetChild(i).GetChild(1).gameObject;
-        //        Mod.LogInfo("\tgot description");
-        //        if (description.activeSelf)
-        //        {
-        //            // This here is why we update a frame after we need to update
-        //            // Because sizeDelta is only updated the frame after any change to the UI
-        //            // Since this may be the first time we activated the task's desciption,
-        //            // we must wait to the frame after to get the size
-        //            taskListHeight += description.GetComponent<RectTransform>().sizeDelta.y;
-        //        }
-        //    }
-        //    Mod.LogInfo("done adding desc heights, total: " + taskListHeight);
-
-        //    if (taskListHeight > 145)
-        //    {
-        //        downTaskHoverScroll.rate = 145 / (taskListHeight - 145);
-        //        upTaskHoverScroll.rate = 145 / (taskListHeight - 145);
-        //        downTaskHoverScroll.gameObject.SetActive(true);
-        //        upTaskHoverScroll.gameObject.SetActive(false);
-        //    }
-        //    else
-        //    {
-        //        downTaskHoverScroll.gameObject.SetActive(false);
-        //        upTaskHoverScroll.gameObject.SetActive(false);
-        //    }
-        //}
-
-        //public void UpdateBasedOnItem(bool added, MeatovItem CIW)
-        //{
-        //    string itemID = CIW.H3ID;
-        //    int itemValue = CIW.GetValue();
-        //    int itemInsureValue = (int)Mathf.Max(CIW.GetInsuranceValue() * Mod.traders[currentTraderIndex].insuranceRate, 1);
-
-        //    Mod.LogInfo("UpdateBasedOnItem called");
-        //    if (added)
-        //    {
-        //        Mod.LogInfo("Added");
-        //        // Add to trade volume inventory
-        //        Mod.LogInfo("custom");
-        //        if (tradeVolumeInventory == null)
-        //        {
-        //            tradeVolumeInventory = new Dictionary<string, int>();
-        //            tradeVolumeInventoryObjects = new Dictionary<string, List<GameObject>>();
-        //            tradeVolumeFIRInventory = new Dictionary<string, int>();
-        //            tradeVolumeFIRInventoryObjects = new Dictionary<string, List<GameObject>>();
-        //        }
-        //        if (tradeVolumeInventory.ContainsKey(CIW.H3ID))
-        //        {
-        //            tradeVolumeInventory[CIW.H3ID] += CIW.maxStack > 1 ? CIW.stack : 1;
-        //            tradeVolumeInventoryObjects[CIW.H3ID].Add(CIW.gameObject);
-        //        }
-        //        else
-        //        {
-        //            tradeVolumeInventory.Add(CIW.H3ID, CIW.maxStack > 1 ? CIW.stack : 1);
-        //            tradeVolumeInventoryObjects.Add(CIW.H3ID, new List<GameObject>() { CIW.gameObject });
-        //        }
-        //        if (CIW.foundInRaid)
-        //        {
-        //            if (tradeVolumeFIRInventory.ContainsKey(CIW.H3ID))
-        //            {
-        //                tradeVolumeFIRInventory[CIW.H3ID] += CIW.maxStack > 1 ? CIW.stack : 1;
-        //                tradeVolumeFIRInventoryObjects[CIW.H3ID].Add(CIW.gameObject);
-        //            }
-        //            else
-        //            {
-        //                tradeVolumeFIRInventory.Add(CIW.H3ID, CIW.maxStack > 1 ? CIW.stack : 1);
-        //                tradeVolumeFIRInventoryObjects.Add(CIW.H3ID, new List<GameObject>() { CIW.gameObject });
-        //            }
-        //        }
-
-        //        // IN BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
-        //        Mod.LogInfo("trader buy");
-        //        if (prices != null)
-        //        {
-        //            bool foundID = false;
-        //            AssortmentPriceData foundPriceData = null;
-        //            foreach (AssortmentPriceData otherAssortPriceData in prices)
-        //            {
-        //                if (otherAssortPriceData.ID.Equals(itemID))
-        //                {
-        //                    foundPriceData = otherAssortPriceData;
-        //                    foundID = true;
-        //                    break;
-        //                }
-        //            }
-        //            bool matchesType = false;
-        //            if (foundID && foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-        //            {
-        //                matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
-        //            }
-        //            else
-        //            {
-        //                matchesType = true;
-        //            }
-        //            if (foundID && matchesType)
-        //            {
-
-        //                Mod.LogInfo("Updating prices");
-        //                // Go through each price because need to check if all are fulfilled anyway
-        //                bool canDeal = true;
-        //                for (int i = 0; i < prices.Count; ++i)
-        //                {
-        //                    AssortmentPriceData priceData = prices[i];
-        //                    if (tradeVolumeInventory.ContainsKey(priceData.ID))
-        //                    {
-        //                        // Find how many we have in trade inventory
-        //                        // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
-        //                        int matchingCountInInventory = 0;
-        //                        if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-        //                        {
-        //                            foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
-        //                            {
-        //                                MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
-        //                                if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
-        //                                {
-        //                                    ++matchingCountInInventory;
-        //                                }
-        //                            }
-        //                        }
-        //                        else
-        //                        {
-        //                            matchingCountInInventory = priceData.count;
-        //                        }
-
-        //                        // If this is the item we are adding, make sure the requirement fulfilled icon is active
-        //                        if (matchingCountInInventory >= (priceData.count * cartItemCount))
-        //                        {
-        //                            if (priceData.ID.Equals(itemID))
-        //                            {
-        //                                Transform priceElement = buyPriceElements[i].transform;
-        //                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
-        //                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
-        //                            }
-        //                        }
-        //                        else
-        //                        {
-        //                            canDeal = false;
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        // If this is the item we are adding, no need to make sure the unfulfilled icon is active we cause we are adding it to the inventory
-        //                        // So for sure if not fulfilled now, the icon is already set to unfulfilled
-        //                        canDeal = false;
-        //                    }
-        //                }
-        //                Transform dealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
-        //                if (canDeal)
-        //                {
-        //                    dealButton.GetComponent<Collider>().enabled = true;
-        //                    dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    dealButton.GetComponent<Collider>().enabled = false;
-        //                    dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
-        //                }
-        //            }
-        //        }
-
-        //        Mod.LogInfo("rag buy");
-        //        // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icons and activate deal! button if necessary
-        //        if (ragfairPrices != null)
-        //        {
-        //            bool foundID = false;
-        //            AssortmentPriceData foundPriceData = null;
-        //            foreach (AssortmentPriceData otherAssortPriceData in ragfairPrices)
-        //            {
-        //                if (otherAssortPriceData.ID.Equals(itemID))
-        //                {
-        //                    foundPriceData = otherAssortPriceData;
-        //                    foundID = true;
-        //                    break;
-        //                }
-        //            }
-        //            bool matchesType = false;
-        //            if (foundID && foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-        //            {
-        //                matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
-        //            }
-        //            else
-        //            {
-        //                matchesType = true;
-        //            }
-        //            if (foundID && matchesType)
-        //            {
-
-        //                Mod.LogInfo("updating rag buy prices");
-        //                // Go through each price because need to check if all are fulfilled anyway
-        //                bool canDeal = true;
-        //                for (int i = 0; i < ragfairPrices.Count; ++i)
-        //                {
-        //                    AssortmentPriceData priceData = ragfairPrices[i];
-        //                    if (tradeVolumeInventory.ContainsKey(priceData.ID))
-        //                    {
-        //                        // Find how many we have in trade inventory
-        //                        // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
-        //                        int matchingCountInInventory = 0;
-        //                        if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-        //                        {
-        //                            foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
-        //                            {
-        //                                MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
-        //                                if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
-        //                                {
-        //                                    ++matchingCountInInventory;
-        //                                }
-        //                            }
-        //                        }
-        //                        else
-        //                        {
-        //                            matchingCountInInventory = priceData.count;
-        //                        }
-
-        //                        // If this is the item we are adding, make sure the requirement fulfilled icon is active
-        //                        if (matchingCountInInventory >= (priceData.count * ragfairCartItemCount))
-        //                        {
-        //                            if (priceData.ID.Equals(itemID))
-        //                            {
-        //                                Transform priceElement = ragfairBuyPriceElements[i].transform;
-        //                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(true);
-        //                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(false);
-        //                            }
-        //                        }
-        //                        else
-        //                        {
-        //                            canDeal = false;
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        // If this is the item we are adding, no need to make sure the unfulfilled icon is active we cause we are adding it to the inventory
-        //                        // So for sure if not fulfilled now, the icon is already set to unfulfilled
-        //                        canDeal = false;
-        //                    }
-        //                }
-        //                Transform dealButton = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(2).GetChild(0).GetChild(0);
-        //                if (canDeal)
-        //                {
-        //                    dealButton.GetComponent<Collider>().enabled = true;
-        //                    dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    dealButton.GetComponent<Collider>().enabled = false;
-        //                    dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
-        //                }
-        //            }
-        //        }
-
-        //        Mod.LogInfo("trader sell");
-        //        // IN SELL, check if item is already in showcase, if it is, increment count, if not, add a new entry, update price under FOR, make sure deal! button is activated if item is a sellable item
-        //        if (Mod.traders[currentTraderIndex].ItemSellable(itemID, Mod.itemAncestors[itemID]))
-        //        {
-        //            Mod.LogInfo("updating sell showcase");
-        //            Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
-        //            if (sellItemShowcaseElements != null && sellItemShowcaseElements.ContainsKey(itemID))
-        //            {
-        //                Transform currentItemIcon = sellItemShowcaseElements[itemID].transform;
-        //                MarketItemView marketItemView = currentItemIcon.GetComponent<MarketItemView>();
-        //                int actualValue;
-        //                if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
-        //                {
-        //                    actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
-        //                }
-        //                else
-        //                {
-        //                    // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
-        //                    actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
-        //                }
-        //                actualValue = Mod.traders[currentTraderIndex].currency == 0 ? actualValue : (int)Mathf.Max(actualValue * 0.008f, 1);
-        //                marketItemView.value = marketItemView.value + actualValue;
-        //                if (marketItemView.custom)
-        //                {
-        //                    marketItemView.MI.Add(CIW);
-        //                    currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
-        //                }
-        //                currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.value.ToString();
-        //                currentTotalSellingPrice += actualValue;
-
-        //                // Setup itemIcon
-        //                ItemIcon currentItemIconScript = currentItemIcon.GetComponent<ItemIcon>();
-        //                currentItemIconScript.isPhysical = false;
-        //                currentItemIconScript.itemID = itemID;
-        //                currentItemIconScript.itemName = Mod.itemNames[itemID];
-        //                currentItemIconScript.description = Mod.itemDescriptions[itemID];
-        //                currentItemIconScript.weight = Mod.itemWeights[itemID];
-        //                currentItemIconScript.volume = Mod.itemVolumes[itemID];
-        //            }
-        //            else
-        //            {
-        //                Mod.LogInfo("adding new sell entry");
-        //                // Add a new sell item entry
-        //                Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-        //                GameObject sellHorizontalCopy = sellHorizontalsParent.GetChild(0).gameObject;
-
-        //                Mod.LogInfo("0");
-        //                float sellShowCaseHeight = 3 + 24 * sellHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
-        //                Transform currentHorizontal = sellHorizontalsParent.GetChild(sellHorizontalsParent.childCount - 1);
-        //                if (sellHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
-        //                {
-        //                    currentHorizontal = GameObject.Instantiate(sellHorizontalCopy, sellHorizontalsParent).transform;
-        //                    currentHorizontal.gameObject.SetActive(true);
-        //                }
-        //                else if (currentHorizontal.childCount == 7) // If last horizontal has max number of entries already, create a new one
-        //                {
-        //                    currentHorizontal = GameObject.Instantiate(sellHorizontalCopy, sellHorizontalsParent).transform;
-        //                    currentHorizontal.gameObject.SetActive(true);
-        //                    sellShowCaseHeight += 24; // horizontal
-        //                }
-        //                Mod.LogInfo("0");
-
-        //                Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
-
-        //                // Setup itemIcon
-        //                ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
-        //                currentItemIconScript.isPhysical = true;
-        //                currentItemIconScript.MI = CIW;
-
-        //                currentItemIcon.gameObject.SetActive(true);
-        //                Mod.LogInfo("0");
-        //                sellItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
-        //                if (Mod.itemIcons.ContainsKey(itemID))
-        //                {
-        //                    currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
-        //                }
-        //                else
-        //                {
-        //                    AnvilManager.Run(Mod.SetVanillaIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>()));
-        //                }
-        //                Mod.LogInfo("0");
-        //                MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
-        //                marketItemView.MI = new List<MeatovItem>() { CIW };
-
-        //                Mod.LogInfo("0");
-        //                // Write price to item icon and set correct currency icon
-        //                Sprite currencySprite = null;
-        //                string currencyItemID = "";
-        //                int actualValue;
-        //                if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
-        //                {
-        //                    actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
-        //                }
-        //                else
-        //                {
-        //                    // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
-        //                    actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
-        //                }
-
-        //                if (currentTraderIndex == 2)
-        //                {
-        //                    actualValue = (int)(actualValue * 0.9f);
-        //                }
-
-        //                if (Mod.traders[currentTraderIndex].currency == 0)
-        //                {
-        //                    currencySprite = HideoutController.roubleCurrencySprite;
-        //                    currencyItemID = "203";
-        //                }
-        //                else if (Mod.traders[currentTraderIndex].currency == 1)
-        //                {
-        //                    currencySprite = HideoutController.dollarCurrencySprite;
-        //                    actualValue = (int)Mathf.Max(actualValue * 0.008f, 1); // Adjust item value
-        //                    currencyItemID = "201";
-        //                }
-        //                Mod.LogInfo("0");
-        //                marketItemView.value = actualValue;
-        //                currentTotalSellingPrice += actualValue;
-        //                currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
-        //                currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = actualValue.ToString();
-
-        //                Mod.LogInfo("0");
-        //                // Set count text
-        //                currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "1";
-
-        //                //// Setup button
-        //                //EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
-        //                //pointableButton.SetButton();
-        //                //pointableButton.Button.onClick.AddListener(() => { OnSellItemClick(currentItemIcon, itemValue, currencyItemID); });
-        //                //pointableButton.MaxPointingRange = 20;
-        //                //pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-
-        //                Mod.LogInfo("0");
-        //                // Add the icon object to the list for that item
-        //                CIW.marketItemViews.Add(marketItemView);
-
-        //                Mod.LogInfo("0");
-        //                // Update total selling price
-        //                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames[currencyItemID];
-        //                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currencyItemID];
-
-        //                // Activate deal button
-        //                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
-        //                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
-
-        //                Mod.LogInfo("0");
-        //                // Update hoverscrolls
-        //                HoverScroll downSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
-        //                HoverScroll upSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
-        //                if (sellShowCaseHeight > 150)
-        //                {
-        //                    downSellHoverScroll.rate = 150 / (sellShowCaseHeight - 150);
-        //                    upSellHoverScroll.rate = 150 / (sellShowCaseHeight - 150);
-        //                    downSellHoverScroll.gameObject.SetActive(true);
-        //                    upSellHoverScroll.gameObject.SetActive(false);
-        //                }
-        //                else
-        //                {
-        //                    downSellHoverScroll.gameObject.SetActive(false);
-        //                    upSellHoverScroll.gameObject.SetActive(false);
-        //                }
-        //                Mod.LogInfo("0");
-        //            }
-        //            traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalSellingPrice.ToString();
-        //        }
-
-        //        Mod.LogInfo("trader tasks");
-        //        // IN TASKS, for each item requirement of each task, activate TURN IN buttons accordingly
-        //        if (Trader.conditionsByItem.ContainsKey(itemID))
-        //        {
-        //            Mod.LogInfo("updating task conditions with this item");
-        //            foreach (Condition condition in Trader.conditionsByItem[itemID])
-        //            {
-        //                if (!condition.fulfilled && condition.marketUI != null)
-        //                {
-        //                    if ((CIW.foundInRaid) && condition.conditionType == Condition.ConditionType.HandoverItem)
-        //                    {
-        //                        condition.marketUI.transform.GetChild(0).GetChild(0).GetChild(5).gameObject.SetActive(true);
-        //                    }
-        //                    else if (condition.conditionType == Condition.ConditionType.WeaponAssembly)
-        //                    {
-        //                        // Make sure all requirements are fulfilled, set them as fulfilled by default if they werent a requirement to begin with
-        //                        bool[] typesFulfilled = condition.targetAttachmentTypes.Count == 0 ? new bool[] { true } : new bool[condition.targetAttachmentTypes.Count];
-        //                        bool[] attachmentsFulfilled = condition.targetAttachments.Count == 0 ? new bool[] { true } : new bool[condition.targetAttachments.Count];
-        //                        bool supressedFulfilled = !condition.suppressed || (CIW.physObj as FVRFireArm).IsSuppressed();
-        //                        bool brakedFulfilled = !condition.braked || (CIW.physObj as FVRFireArm).IsBraked();
-
-        //                        // Only care to check everything if braked and supressed are both fulfilled
-        //                        if (supressedFulfilled && brakedFulfilled)
-        //                        {
-        //                            // WeaponAssembly items must be vanilla
-        //                            FVRPhysicalObject[] physObjs = CIW.GetComponentsInChildren<FVRPhysicalObject>();
-        //                            foreach (FVRPhysicalObject physObj in physObjs)
-        //                            {
-        //                                string attachmentID = physObj.ObjectWrapper.ItemID;
-
-        //                                // Check types
-        //                                for (int i = 0; i < condition.targetAttachmentTypes.Count; ++i)
-        //                                {
-        //                                    if (!typesFulfilled[i])
-        //                                    {
-        //                                        // Format list
-        //                                        List<string> actualAttachments = new List<string>();
-        //                                        foreach (string attachmentTypeID in condition.targetAttachmentTypes[i])
-        //                                        {
-        //                                            if (Mod.itemsByParents.TryGetValue(attachmentTypeID, out List<string> items))
-        //                                            {
-        //                                                actualAttachments.AddRange(items);
-        //                                            }
-        //                                            else
-        //                                            {
-        //                                                actualAttachments.Add(attachmentTypeID);
-        //                                            }
-        //                                        }
-
-        //                                        // Check list
-        //                                        if (actualAttachments.Contains(attachmentID))
-        //                                        {
-        //                                            typesFulfilled[i] = true;
-        //                                        }
-        //                                    }
-        //                                }
-
-        //                                // Check specific attachments
-        //                                for (int i = 0; i < condition.targetAttachments.Count; ++i)
-        //                                {
-        //                                    if (!attachmentsFulfilled[i])
-        //                                    {
-        //                                        if (condition.targetAttachments[i].Equals(attachmentID))
-        //                                        {
-        //                                            attachmentsFulfilled[i] = true;
-        //                                        }
-        //                                    }
-        //                                }
-        //                            }
-
-        //                            if (!typesFulfilled.Contains(false) && !attachmentsFulfilled.Contains(false) && supressedFulfilled && brakedFulfilled)
-        //                            {
-        //                                condition.marketUI.transform.GetChild(0).GetChild(0).GetChild(5).gameObject.SetActive(true);
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-
-        //        Mod.LogInfo("trader insure");
-        //        // IN INSURE, check if item already in showcase, if it is, increment count, if not, add a new entry, update price, make sure deal! button is activated, check if item is price, update accordingly
-        //        bool itemInsureable = Mod.traders[currentTraderIndex].ItemInsureable(itemID, Mod.itemAncestors[itemID]);
-
-        //        if ((!CIW.insured) && itemInsureable)
-        //        {
-        //            Mod.LogInfo("update insure showcase");
-        //            Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
-        //            if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
-        //            {
-        //                Transform currentItemIcon = insureItemShowcaseElements[itemID].transform;
-        //                MarketItemView marketItemView = currentItemIcon.GetComponent<MarketItemView>();
-        //                int actualInsureValue = itemInsureValue;
-        //                string currencyItemID = "";
-        //                if (Mod.traders[currentTraderIndex].currency == 0)
-        //                {
-        //                    currencyItemID = "203";
-        //                }
-        //                else if (Mod.traders[currentTraderIndex].currency == 1)
-        //                {
-        //                    itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
-        //                    currencyItemID = "201";
-        //                }
-        //                marketItemView.insureValue = marketItemView.insureValue + actualInsureValue;
-        //                if (marketItemView.custom)
-        //                {
-        //                    marketItemView.MI.Add(CIW);
-        //                    currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
-        //                }
-        //                currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
-        //                currentTotalInsurePrice += actualInsureValue;
-
-        //                // Activate deal button
-        //                if (tradeVolumeInventory.ContainsKey(currencyItemID) && tradeVolumeInventory[currencyItemID] >= currentTotalInsurePrice)
-        //                {
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
-        //                }
-
-        //                // Setup itemIcon
-        //                ItemIcon currentItemIconScript = currentItemIcon.GetComponent<ItemIcon>();
-        //                currentItemIconScript.isPhysical = false;
-        //                currentItemIconScript.itemID = itemID;
-        //                currentItemIconScript.itemName = Mod.itemNames[itemID];
-        //                currentItemIconScript.description = Mod.itemDescriptions[itemID];
-        //                currentItemIconScript.weight = Mod.itemWeights[itemID];
-        //                currentItemIconScript.volume = Mod.itemVolumes[itemID];
-        //            }
-        //            else
-        //            {
-        //                Mod.LogInfo("adding new insure entry");
-        //                // Add a new insure item entry
-        //                Transform insureHorizontalsParent = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-        //                GameObject insureHorizontalCopy = insureHorizontalsParent.GetChild(0).gameObject;
-
-        //                Mod.LogInfo("0");
-        //                float insureShowCaseHeight = 3 + 24 * insureHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
-        //                Transform currentHorizontal = insureHorizontalsParent.GetChild(insureHorizontalsParent.childCount - 1);
-        //                if (insureHorizontalsParent.childCount == 1) // If dont even have a single horizontal yet, add it
-        //                {
-        //                    currentHorizontal = GameObject.Instantiate(insureHorizontalCopy, insureHorizontalsParent).transform;
-        //                    currentHorizontal.gameObject.SetActive(true);
-        //                }
-        //                else if (currentHorizontal.childCount == 7) // If last horizontal is full
-        //                {
-        //                    currentHorizontal = GameObject.Instantiate(insureHorizontalCopy, insureHorizontalsParent).transform;
-        //                    currentHorizontal.gameObject.SetActive(true);
-        //                    insureShowCaseHeight += 24; // horizontal
-        //                }
-        //                Mod.LogInfo("0");
-
-        //                Transform currentItemIcon = GameObject.Instantiate(currentHorizontal.transform.GetChild(0), currentHorizontal).transform;
-
-        //                // Setup itemIcon
-        //                ItemIcon currentItemIconScript = currentItemIcon.gameObject.AddComponent<ItemIcon>();
-        //                currentItemIconScript.isPhysical = true;
-        //                currentItemIconScript.MI = CIW;
-
-        //                currentItemIcon.gameObject.SetActive(true);
-        //                Mod.LogInfo("0");
-        //                insureItemShowcaseElements.Add(itemID, currentItemIcon.gameObject);
-        //                if (Mod.itemIcons.ContainsKey(itemID))
-        //                {
-        //                    currentItemIcon.GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[itemID];
-        //                }
-        //                else
-        //                {
-        //                    AnvilManager.Run(Mod.SetVanillaIcon(itemID, currentItemIcon.GetChild(2).GetComponent<Image>()));
-        //                }
-        //                Mod.LogInfo("0");
-        //                MarketItemView marketItemView = currentItemIcon.gameObject.AddComponent<MarketItemView>();
-        //                marketItemView.MI = new List<MeatovItem>() { CIW };
-
-        //                Mod.LogInfo("0");
-        //                // Write price to item icon and set correct currency icon
-        //                Sprite currencySprite = null;
-        //                string currencyItemID = "";
-        //                if (Mod.traders[currentTraderIndex].currency == 0)
-        //                {
-        //                    currencySprite = HideoutController.roubleCurrencySprite;
-        //                    currencyItemID = "203";
-        //                }
-        //                else if (Mod.traders[currentTraderIndex].currency == 1)
-        //                {
-        //                    currencySprite = HideoutController.dollarCurrencySprite;
-        //                    itemInsureValue = (int)Mathf.Max(itemInsureValue * 0.008f, 1); // Adjust item value
-        //                    currencyItemID = "201";
-        //                }
-        //                Mod.LogInfo("0");
-        //                marketItemView.insureValue = itemInsureValue;
-        //                currentTotalInsurePrice += itemInsureValue;
-        //                currentItemIcon.GetChild(3).GetChild(5).GetChild(0).GetComponent<Image>().sprite = currencySprite;
-        //                currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = itemInsureValue.ToString();
-
-        //                // Set count text
-        //                currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = "1";
-
-        //                Mod.LogInfo("0");
-        //                //// Setup button
-        //                //EFM_PointableButton pointableButton = currentItemIcon.gameObject.AddComponent<EFM_PointableButton>();
-        //                //pointableButton.SetButton();
-        //                //pointableButton.Button.onClick.AddListener(() => { OnInsureItemClick(currentItemIcon, itemValue, currencyItemID); });
-        //                //pointableButton.MaxPointingRange = 20;
-        //                //pointableButton.hoverSound = transform.GetChild(2).GetComponent<AudioSource>();
-
-        //                // Add the icon object to the list for that item
-        //                CIW.marketItemViews.Add(marketItemView);
-        //                Mod.LogInfo("0");
-
-        //                // Update total insure price
-        //                traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.itemNames[currencyItemID];
-        //                traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetChild(2).GetComponent<Image>().sprite = Mod.itemIcons[currencyItemID];
-
-        //                // Activate deal button
-        //                if (tradeVolumeInventory.ContainsKey(currencyItemID) && tradeVolumeInventory[currencyItemID] >= currentTotalInsurePrice)
-        //                {
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
-        //                }
-
-        //                Mod.LogInfo("0");
-        //                // Update hoverscrolls
-        //                HoverScroll downInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
-        //                HoverScroll upInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
-        //                if (insureShowCaseHeight > 150)
-        //                {
-        //                    downInsureHoverScroll.rate = 150 / (insureShowCaseHeight - 150);
-        //                    upInsureHoverScroll.rate = 150 / (insureShowCaseHeight - 150);
-        //                    downInsureHoverScroll.gameObject.SetActive(true);
-        //                    upInsureHoverScroll.gameObject.SetActive(false);
-        //                }
-        //                else
-        //                {
-        //                    downInsureHoverScroll.gameObject.SetActive(false);
-        //                    upInsureHoverScroll.gameObject.SetActive(false);
-        //                }
-        //                Mod.LogInfo("0");
-        //            }
-        //            traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalInsurePrice.ToString();
-        //        }
-        //        Transform insurePriceFulfilledIcons = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(2);
-        //        Transform insureDealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
-
-        //        if (itemInsureable || itemID.Equals("201") || itemID.Equals("203"))
-        //        {
-        //            if (Mod.traders[currentTraderIndex].currency == 0)
-        //            {
-        //                if (tradeVolumeInventory.ContainsKey("203") && tradeVolumeInventory["203"] >= currentTotalInsurePrice)
-        //                {
-        //                    insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(true);
-        //                    insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(false);
-
-        //                    insureDealButton.GetComponent<Collider>().enabled = true;
-        //                    insureDealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(false);
-        //                    insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(true);
-
-        //                    insureDealButton.GetComponent<Collider>().enabled = false;
-        //                    insureDealButton.GetChild(1).GetComponent<Text>().color = Color.gray;
-        //                }
-        //            }
-        //            else if (Mod.traders[currentTraderIndex].currency == 1)
-        //            {
-        //                if (tradeVolumeInventory.ContainsKey("201") && tradeVolumeInventory["201"] >= currentTotalInsurePrice)
-        //                {
-        //                    insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(true);
-        //                    insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(false);
-
-        //                    insureDealButton.GetComponent<Collider>().enabled = true;
-        //                    insureDealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(false);
-        //                    insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(true);
-
-        //                    insureDealButton.GetComponent<Collider>().enabled = false;
-        //                    insureDealButton.GetChild(1).GetComponent<Text>().color = Color.gray;
-        //                }
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        Mod.LogInfo("removed");
-        //        // Remove from trade volume inventory
-        //        Mod.LogInfo("custom, pre amount: " + tradeVolumeInventory[CIW.H3ID]);
-        //        tradeVolumeInventory[CIW.H3ID] -= (CIW.maxStack > 1 ? CIW.stack : 1);
-        //        tradeVolumeInventoryObjects[CIW.H3ID].Remove(CIW.gameObject);
-        //        Mod.LogInfo("post amount: " + tradeVolumeInventory[CIW.H3ID]);
-        //        if (tradeVolumeInventory[CIW.H3ID] == 0)
-        //        {
-        //            tradeVolumeInventory.Remove(CIW.H3ID);
-        //            tradeVolumeInventoryObjects.Remove(CIW.H3ID);
-        //        }
-        //        if (CIW.foundInRaid)
-        //        {
-        //            tradeVolumeFIRInventory[CIW.H3ID] -= (CIW.maxStack > 1 ? CIW.stack : 1);
-        //            tradeVolumeFIRInventoryObjects[CIW.H3ID].Remove(CIW.gameObject);
-        //            if (tradeVolumeFIRInventory[CIW.H3ID] == 0)
-        //            {
-        //                tradeVolumeFIRInventory.Remove(CIW.H3ID);
-        //                tradeVolumeFIRInventoryObjects.Remove(CIW.H3ID);
-        //            }
-        //        }
-
-        //        Mod.LogInfo("updating trader buy");
-        //        // IN BUY, check if item corresponds to price, update fulfilled icon and deactivate deal! button if necessary
-        //        if (prices != null)
-        //        {
-        //            bool foundID = false;
-        //            AssortmentPriceData foundPriceData = null;
-        //            foreach (AssortmentPriceData otherAssortPriceData in prices)
-        //            {
-        //                if (otherAssortPriceData.ID.Equals(itemID))
-        //                {
-        //                    foundPriceData = otherAssortPriceData;
-        //                    foundID = true;
-        //                    break;
-        //                }
-        //            }
-        //            bool matchesType = false;
-        //            if (foundID && foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-        //            {
-        //                matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
-        //            }
-        //            else
-        //            {
-        //                matchesType = true;
-        //            }
-        //            if (foundID && matchesType)
-        //            {
-        //                // Go through each price because need to check if all are fulfilled anyway
-        //                bool canDeal = true;
-        //                for (int i = 0; i < prices.Count; ++i)
-        //                {
-        //                    AssortmentPriceData priceData = prices[i];
-        //                    if (tradeVolumeInventory.ContainsKey(priceData.ID))
-        //                    {
-        //                        // Find how many we have in trade inventory
-        //                        // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
-        //                        int matchingCountInInventory = 0;
-        //                        if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-        //                        {
-        //                            foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
-        //                            {
-        //                                MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
-        //                                if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
-        //                                {
-        //                                    ++matchingCountInInventory;
-        //                                }
-        //                            }
-        //                        }
-        //                        else
-        //                        {
-        //                            matchingCountInInventory = priceData.count;
-        //                        }
-
-        //                        // If this is the item we are removing, make sure the requirement fulfilled icon is active
-        //                        if (matchingCountInInventory < (priceData.count * cartItemCount))
-        //                        {
-        //                            // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
-        //                            if (priceData.ID.Equals(itemID))
-        //                            {
-        //                                Transform priceElement = buyPriceElements[i].transform;
-        //                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
-        //                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
-        //                            }
-        //                            canDeal = false;
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
-        //                        if (priceData.ID.Equals(itemID))
-        //                        {
-        //                            Transform priceElement = buyPriceElements[i].transform;
-        //                            priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
-        //                            priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
-        //                        }
-        //                        canDeal = false;
-        //                    }
-        //                }
-        //                Transform dealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(3).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
-        //                if (canDeal)
-        //                {
-        //                    dealButton.GetComponent<Collider>().enabled = true;
-        //                    dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    dealButton.GetComponent<Collider>().enabled = false;
-        //                    dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
-        //                }
-        //            }
-        //        }
-
-        //        Mod.LogInfo("0");
-        //        // IN RAGFAIR BUY, check if item corresponds to price, update fulfilled icon and deactivate deal! button if necessary
-        //        if (ragfairPrices != null)
-        //        {
-        //            bool foundID = false;
-        //            AssortmentPriceData foundPriceData = null;
-        //            foreach (AssortmentPriceData otherAssortPriceData in ragfairPrices)
-        //            {
-        //                if (otherAssortPriceData.ID.Equals(itemID))
-        //                {
-        //                    foundPriceData = otherAssortPriceData;
-        //                    foundID = true;
-        //                    break;
-        //                }
-        //            }
-        //            bool matchesType = false;
-        //            if (foundID && foundPriceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-        //            {
-        //                matchesType = foundPriceData.dogtagLevel <= CIW.dogtagLevel;  // No need to check USEC because true or false have different item IDs
-        //            }
-        //            else
-        //            {
-        //                matchesType = true;
-        //            }
-        //            if (foundID && matchesType)
-        //            {
-        //                // Go through each price because need to check if all are fulfilled anyway
-        //                bool canDeal = true;
-        //                for (int i = 0; i < ragfairPrices.Count; ++i)
-        //                {
-        //                    AssortmentPriceData priceData = ragfairPrices[i];
-        //                    if (tradeVolumeInventory.ContainsKey(priceData.ID))
-        //                    {
-        //                        // Find how many we have in trade inventory
-        //                        // If the type has more data (ie. dogtags) we must check if that data matches also, not just the ID
-        //                        int matchingCountInInventory = 0;
-        //                        if (priceData.priceItemType == AssortmentPriceData.PriceItemType.Dogtag)
-        //                        {
-        //                            foreach (GameObject priceObject in tradeVolumeInventoryObjects[priceData.ID])
-        //                            {
-        //                                MeatovItem priceCIW = priceObject.GetComponent<MeatovItem>();
-        //                                if (priceCIW.dogtagLevel >= priceData.dogtagLevel) // No need to check USEC because true or false have different item IDs
-        //                                {
-        //                                    ++matchingCountInInventory;
-        //                                }
-        //                            }
-        //                        }
-        //                        else
-        //                        {
-        //                            matchingCountInInventory = priceData.count;
-        //                        }
-
-        //                        // If this is the item we are removing, make sure the requirement fulfilled icon is active
-        //                        if (matchingCountInInventory < (priceData.count * ragfairCartItemCount))
-        //                        {
-        //                            // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
-        //                            if (priceData.ID.Equals(itemID))
-        //                            {
-        //                                Transform priceElement = ragfairBuyPriceElements[i].transform;
-        //                                priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
-        //                                priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
-        //                            }
-        //                            canDeal = false;
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        // If this is the item we are removing, make sure the requirement fulfilled icon is inactive
-        //                        if (priceData.ID.Equals(itemID))
-        //                        {
-        //                            Transform priceElement = ragfairBuyPriceElements[i].transform;
-        //                            priceElement.GetChild(2).GetChild(0).gameObject.SetActive(false);
-        //                            priceElement.GetChild(2).GetChild(1).gameObject.SetActive(true);
-        //                        }
-        //                        canDeal = false;
-        //                    }
-        //                }
-        //                Transform dealButton = transform.GetChild(0).GetChild(2).GetChild(0).GetChild(3).GetChild(0).GetChild(2).GetChild(2).GetChild(2).GetChild(0).GetChild(0);
-        //                if (canDeal)
-        //                {
-        //                    dealButton.GetComponent<Collider>().enabled = true;
-        //                    dealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    dealButton.GetComponent<Collider>().enabled = false;
-        //                    dealButton.GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
-        //                }
-        //            }
-        //        }
-
-        //        Mod.LogInfo("0");
-        //        // IN SELL, find item in showcase, if there are more its stack, decrement count, if not, remove entry, update price under FOR, make sure deal! button is deactivated if no sellable item in volume (only need to check this if this item was sellable)
-        //        Transform traderDisplay = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3);
-        //        if (sellItemShowcaseElements != null && sellItemShowcaseElements.ContainsKey(itemID))
-        //        {
-        //            Transform sellHorizontalsParent = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-        //            float sellShowCaseHeight = 3 + 24 * sellHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
-        //            Transform currentItemIcon = sellItemShowcaseElements[itemID].transform;
-        //            MarketItemView marketItemView = currentItemIcon.GetComponent<MarketItemView>();
-        //            int actualValue;
-        //            if (Mod.lowestBuyValueByItem.ContainsKey(itemID))
-        //            {
-        //                actualValue = (int)Mathf.Max(Mod.lowestBuyValueByItem[itemID] * 0.9f, 1);
-        //            }
-        //            else
-        //            {
-        //                // If we do not have a buy value to compare with, just use half of the original value TODO: Will have to adjust this multiplier if it is still too high
-        //                actualValue = (int)Mathf.Max(itemValue * 0.5f, 1);
-        //            }
-        //            if (currentTraderIndex == 2)
-        //            {
-        //                actualValue = (int)(actualValue * 0.9f);
-        //            }
-        //            actualValue = Mod.traders[currentTraderIndex].currency == 0 ? actualValue : (int)Mathf.Max(actualValue * 0.008f, 1);
-        //            marketItemView.value = marketItemView.value -= actualValue;
-        //            bool shouldRemove = false;
-        //            bool lastOne = false;
-        //            marketItemView.MI.Remove(CIW);
-        //            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
-        //            shouldRemove = marketItemView.MI.Count == 0;
-        //            lastOne = marketItemView.MI.Count == 1;
-        //            currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.value.ToString();
-        //            currentTotalSellingPrice -= actualValue;
-
-        //            // Setup itemIcon
-        //            if (lastOne)
-        //            {
-        //                ItemIcon currentItemIconScript = currentItemIcon.GetComponent<ItemIcon>();
-        //                currentItemIconScript.isPhysical = true;
-        //                currentItemIconScript.MI = CIW;
-        //            }
-
-        //            // Remove item if necessary and move all other item icons that come after
-        //            if (shouldRemove)
-        //            {
-        //                currentItemIcon.SetParent(null);
-        //                Destroy(currentItemIcon.gameObject);
-        //                sellItemShowcaseElements.Remove(itemID);
-
-        //                for (int i = 1; i < sellHorizontalsParent.childCount - 1; ++i)
-        //                {
-        //                    Transform currentHorizontal = sellHorizontalsParent.GetChild(i);
-        //                    // If item icon missing from this horizontal but not thi is not the last horizontal
-        //                    if (currentHorizontal.childCount == 6 && i < sellHorizontalsParent.childCount - 2)
-        //                    {
-        //                        // Take item icon from next horizontal and put it on current
-        //                        sellHorizontalsParent.GetChild(i + 1).GetChild(0).SetParent(currentHorizontal);
-        //                    }
-        //                    else if (currentHorizontal.childCount == 0)
-        //                    {
-        //                        currentHorizontal.SetParent(null);
-        //                        Destroy(currentHorizontal.gameObject);
-
-        //                        sellShowCaseHeight -= 24;
-        //                        break; // we can break here because if there are 0 it means there wasnt another horizontal after it
-        //                    }
-        //                }
-        //            }
-
-        //            // Deactivate deal button if no sellable items
-        //            if (sellHorizontalsParent.childCount == 1)
-        //            {
-        //                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
-        //                traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
-        //            }
-
-        //            // Update hoverscrolls
-        //            HoverScroll downSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
-        //            HoverScroll upSellHoverScroll = traderDisplay.GetChild(1).GetChild(2).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
-        //            if (sellShowCaseHeight > 150)
-        //            {
-        //                downSellHoverScroll.rate = 150 / (sellShowCaseHeight - 150);
-        //                upSellHoverScroll.rate = 150 / (sellShowCaseHeight - 150);
-        //                downSellHoverScroll.gameObject.SetActive(true);
-        //                upSellHoverScroll.gameObject.SetActive(false);
-        //            }
-        //            else
-        //            {
-        //                downSellHoverScroll.gameObject.SetActive(false);
-        //                upSellHoverScroll.gameObject.SetActive(false);
-        //            }
-        //        }
-        //        // else, if we are removing an item and it is not a sellable item (not in sellItemShowcaseElements) we dont need to do anything
-        //        traderDisplay.GetChild(1).GetChild(2).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalSellingPrice.ToString();
-
-        //        Mod.LogInfo("0");
-        //        // IN TASKS, for each item requirement of each task, deactivate TURN IN buttons accordingly
-        //        if (Trader.conditionsByItem.ContainsKey(itemID))
-        //        {
-        //            foreach (Condition condition in Trader.conditionsByItem[itemID])
-        //            {
-        //                if ((condition.conditionType == Condition.ConditionType.HandoverItem || condition.conditionType == Condition.ConditionType.WeaponAssembly) &&
-        //                    !condition.fulfilled && condition.marketUI != null)
-        //                {
-        //                    if (!tradeVolumeFIRInventory.ContainsKey(itemID) || tradeVolumeFIRInventory[itemID] == 0)
-        //                    {
-        //                        condition.marketUI.transform.GetChild(0).GetChild(0).GetChild(5).gameObject.SetActive(false);
-        //                    }
-        //                }
-        //            }
-        //        }
-
-        //        Mod.LogInfo("0");
-        //        // IN INSURE, find item in showcase, if there are more its stack, decrement count, if not, remove entry, update price under FOR, make sure deal! button is deactivated if no insureable item in volume (only need to check this if this item was insureable)
-        //        bool insureable = false;
-        //        if (insureItemShowcaseElements != null && insureItemShowcaseElements.ContainsKey(itemID))
-        //        {
-        //            insureable = true;
-        //            Transform insureHorizontalsParent = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0);
-        //            float insureShowCaseHeight = 3 + 24 * insureHorizontalsParent.childCount - 1; // Top padding + horizontal * number of horizontals
-        //            Transform currentItemIcon = insureItemShowcaseElements[itemID].transform;
-        //            MarketItemView marketItemView = currentItemIcon.GetComponent<MarketItemView>();
-        //            int actualInsureValue = Mod.traders[currentTraderIndex].currency == 0 ? itemInsureValue : (int)Mathf.Max(itemInsureValue * 0.008f, 1);
-        //            marketItemView.insureValue = marketItemView.insureValue -= actualInsureValue;
-        //            bool shouldRemove = false;
-        //            bool lastOne = false;
-        //            marketItemView.MI.Remove(CIW);
-        //            currentItemIcon.GetChild(3).GetChild(7).GetChild(2).GetComponent<Text>().text = marketItemView.MI.Count.ToString();
-        //            shouldRemove = marketItemView.MI.Count == 0;
-        //            lastOne = marketItemView.MI.Count == 1;
-        //            currentItemIcon.GetChild(3).GetChild(5).GetChild(1).GetComponent<Text>().text = marketItemView.insureValue.ToString();
-        //            currentTotalInsurePrice -= actualInsureValue;
-
-        //            // Setup itemIcon
-        //            if (lastOne)
-        //            {
-        //                ItemIcon currentItemIconScript = currentItemIcon.GetComponent<ItemIcon>();
-        //                currentItemIconScript.isPhysical = true;
-        //                currentItemIconScript.MI = CIW;
-        //            }
-
-        //            // Remove item if necessary and move all other item icons that come after
-        //            if (shouldRemove)
-        //            {
-        //                currentItemIcon.SetParent(null);
-        //                Destroy(currentItemIcon.gameObject);
-        //                insureItemShowcaseElements.Remove(itemID);
-
-        //                for (int i = 1; i < insureHorizontalsParent.childCount - 1; ++i)
-        //                {
-        //                    Transform currentHorizontal = insureHorizontalsParent.GetChild(i);
-        //                    // If item icon missing from this horizontal but not thi is not the last horizontal
-        //                    if (currentHorizontal.childCount == 6 && i < insureHorizontalsParent.childCount - 2)
-        //                    {
-        //                        // Take item icon from next horizontal and put it on current
-        //                        insureHorizontalsParent.GetChild(i + 1).GetChild(0).SetParent(currentHorizontal);
-        //                    }
-        //                    else if (currentHorizontal.childCount == 0)
-        //                    {
-        //                        currentHorizontal.SetParent(null);
-        //                        Destroy(currentHorizontal.gameObject);
-
-        //                        insureShowCaseHeight -= 24;
-        //                        break; // we can break here because if there are 0 it means there wasnt another horizontal after it
-        //                    }
-        //                }
-        //            }
-
-        //            // Deactivate deal button if no insureable items
-        //            if (insureHorizontalsParent.childCount == 1)
-        //            {
-        //                traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
-        //                traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = new Color(0.15f, 0.15f, 0.15f);
-        //            }
-        //            else
-        //            {
-        //                string currencyItemID = "";
-        //                if (Mod.traders[currentTraderIndex].currency == 0)
-        //                {
-        //                    currencyItemID = "203";
-        //                }
-        //                else if (Mod.traders[currentTraderIndex].currency == 1)
-        //                {
-        //                    currencyItemID = "201";
-        //                }
-        //                // Activate deal button
-        //                if (tradeVolumeInventory.ContainsKey(currencyItemID) && tradeVolumeInventory[currencyItemID] >= currentTotalInsurePrice)
-        //                {
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = true;
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetComponent<Collider>().enabled = false;
-        //                    traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>().color = Color.gray;
-        //                }
-        //            }
-
-        //            // Update hoverscrolls
-        //            HoverScroll downInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(2).GetComponent<HoverScroll>();
-        //            HoverScroll upInsureHoverScroll = traderDisplay.GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(3).GetComponent<HoverScroll>();
-        //            if (insureShowCaseHeight > 150)
-        //            {
-        //                downInsureHoverScroll.rate = 150 / (insureShowCaseHeight - 150);
-        //                upInsureHoverScroll.rate = 150 / (insureShowCaseHeight - 150);
-        //                downInsureHoverScroll.gameObject.SetActive(true);
-        //                upInsureHoverScroll.gameObject.SetActive(false);
-        //            }
-        //            else
-        //            {
-        //                downInsureHoverScroll.gameObject.SetActive(false);
-        //                upInsureHoverScroll.gameObject.SetActive(false);
-        //            }
-        //        }
-        //        // else, if we are removing an item and it is not an insureable item (not in insureItemShowcaseElements) we dont need to do anything
-        //        traderDisplay.GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = currentTotalInsurePrice.ToString();
-        //        Transform insurePriceFulfilledIcons = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetChild(2);
-        //        Transform insureDealButton = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(3).GetChild(1).GetChild(0).GetChild(1).GetChild(2).GetChild(0).GetChild(0);
-
-        //        Mod.LogInfo("0");
-        //        if (insureable || itemID.Equals("201") || itemID.Equals("203"))
-        //        {
-        //            if (Mod.traders[currentTraderIndex].currency == 0)
-        //            {
-        //                if (tradeVolumeInventory.ContainsKey("203") && tradeVolumeInventory["203"] >= currentTotalInsurePrice)
-        //                {
-        //                    insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(true);
-        //                    insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(false);
-
-        //                    insureDealButton.GetComponent<Collider>().enabled = true;
-        //                    insureDealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(false);
-        //                    insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(true);
-
-        //                    insureDealButton.GetComponent<Collider>().enabled = false;
-        //                    insureDealButton.GetChild(1).GetComponent<Text>().color = Color.gray;
-        //                }
-        //            }
-        //            else if (Mod.traders[currentTraderIndex].currency == 1)
-        //            {
-        //                if (tradeVolumeInventory.ContainsKey("201") && tradeVolumeInventory["201"] >= currentTotalInsurePrice)
-        //                {
-        //                    insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(true);
-        //                    insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(false);
-
-        //                    insureDealButton.GetComponent<Collider>().enabled = true;
-        //                    insureDealButton.GetChild(1).GetComponent<Text>().color = Color.white;
-        //                }
-        //                else
-        //                {
-        //                    insurePriceFulfilledIcons.GetChild(0).gameObject.SetActive(false);
-        //                    insurePriceFulfilledIcons.GetChild(1).gameObject.SetActive(true);
-
-        //                    insureDealButton.GetComponent<Collider>().enabled = false;
-        //                    insureDealButton.GetChild(1).GetComponent<Text>().color = Color.gray;
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
-        //public void UpdateBasedOnPlayerLevel()
-        //{
-        //    SetTrader(currentTraderIndex);
-
-        //    // TODO: Will also need to check if level 15 then we also want to add player items to flea market
-        //}
-
         public void OnBuyItemClick(MeatovItemData item, BarterPrice[] priceList)
         {
             cartItem = item;
@@ -2170,6 +935,7 @@ namespace EFM
                     priceElement.gameObject.SetActive(true);
                     PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
                     currentPriceView.price = price;
+                    price.priceItemView = currentPriceView;
 
                     currentPriceView.amount.text = price.count.ToString();
                     currentPriceView.itemName.text = price.itemData.name.ToString();
@@ -2228,8 +994,9 @@ namespace EFM
                 Mod.splittingItem.CancelSplit();
             }
 
-            // Disable buy amount buttons until done choosing amount
-            buyDealButton.SetActive(false);
+            // Disable buy deal/amount buttons until done choosing amount
+            buyAmountButtonCollider.enabled = false;
+            ragFairBuyAmountButtonCollider.enabled = false;
 
             // Start choosing amount
             Mod.stackSplitUI.SetActive(true);
@@ -2290,36 +1057,11 @@ namespace EFM
             }
 
             // Remove insurance price from trade volume
-            RemoveItemFromTrade(price.itemData, price.count);
+            RemoveItemFromTrade(currencyItemData, currentTotalInsurePrice);
 
             // Update the whole thing
             SetTrader(currentTraderIndex);
         }
-
-        ////public void OnInsureItemClick(Transform currentItemIcon, int itemValue, string currencyItemID)
-        ////{
-        ////    // TODO: MAYBE DONT EVEN NEED THIS, WE JUST INSURE EVERYTHING IN THE INSURE SHOWCASE
-        ////    // TODO: Set cart UI to this item
-        ////    // de/activate deal! button depending on whether trade volume has enough money
-        ////}
-
-        //public void OnTaskShortInfoClick(GameObject description)
-        //{
-        //    // Toggle task description
-        //    description.SetActive(!description.activeSelf);
-        //    clickAudio.Play();
-
-        //    if (description.activeSelf)
-        //    {
-        //        // Set to call UpdateTaskListHeight on next frame because we will need description height but that will only be accessible next frame
-        //        mustUpdateTaskListHeight = 1;
-        //    }
-        //    else
-        //    {
-        //        // If deactivated we can update height right away
-        //        UpdateTaskListHeight();
-        //    }
-        //}
 
         //public void AddTask(Task task)
         //{
@@ -3625,7 +2367,7 @@ namespace EFM
         public void OnDestroy()
         {
             // Unsubscribe to events
-            tradeVolume.OnItemAdded -= OnItemAdded;
+            tradeVolume.OnItemAdded -= OnTradeVolumeItemAdded;
             tradeVolume.OnItemRemoved -= OnItemRemoved;
         }
     }
