@@ -84,13 +84,17 @@ namespace EFM
                 {
                     if (preValue) // Was on wishlist, must remove
                     {
-                        Mod.wishList.Remove(H3ID);
+                        Mod.wishList.Remove(this);
                     }
                     else // Was not on wishlist, must add
                     {
-                        Mod.wishList.Add(H3ID);
+                        Mod.wishList.Add(this);
                     }
                     OnNeededForChangedInvoke(2);
+                    if (_onWishlist)
+                    {
+                        OnAddedToWishlistInvoke(this);
+                    }
                 }
             }
         }
@@ -160,6 +164,8 @@ namespace EFM
         public event OnItemUsedDelegate OnItemUsed;
         public delegate void OnNeededForChangedDelegate(int index);
         public event OnNeededForChangedDelegate OnNeededForChanged;
+        public delegate void OnAddedToWishlistDelegate(MeatovItemData itemData);
+        public static event OnAddedToWishlistDelegate OnAddedToWishlist;
         public delegate void OnMinimumUpgradeAmountChangedDelegate();
         public event OnMinimumUpgradeAmountChangedDelegate OnMinimumUpgradeAmountChanged;
         public delegate void OnNeededForAreaTotalChangedDelegate();
@@ -333,7 +339,7 @@ namespace EFM
                 return;
             }
 
-            onWishlist = Mod.wishList.Contains(H3ID);
+            onWishlist = Mod.wishList.Contains(this);
             neededFor[2] = onWishlist;
 
             // Get Area specific data (Upgrades, Productions)
@@ -1176,6 +1182,14 @@ namespace EFM
             if(OnNeededForTaskTotalChanged != null)
             {
                 OnNeededForTaskTotalChanged();
+            }
+        }
+
+        public static void OnAddedToWishlistInvoke(MeatovItemData itemData)
+        {
+            if (OnAddedToWishlist != null)
+            {
+                OnAddedToWishlist(itemData);
             }
         }
     }

@@ -87,6 +87,10 @@
     <Compile Include="src\ProductionView.cs" />
     <Compile Include="src\RagFairBuyItemView.cs" />
     <Compile Include="src\RagFairCategory.cs" />
+    <Compile Include="src\RagFairListing.cs" />
+    <Compile Include="src\RagFairListingUI.cs" />
+    <Compile Include="src\RagFairSellItemView.cs" />
+    <Compile Include="src\RagFairWishlistItemView.cs" />
     <Compile Include="src\RequirementItemView.cs" />
     <Compile Include="src\ResultItemView.cs" />
     <Compile Include="src\RigSlot.cs" />

@@ -1425,7 +1425,15 @@ namespace EFM
             }
 
             // Load wishlist
-            Mod.wishList = loadedData["wishlist"].ToObject<List<string>>();
+            JArray wishlistArray = loadedData["wishlist"] as JArray;
+            Mod.wishList = new List<MeatovItemData>();
+            for (int i=0; i < wishlistArray.Count; ++i)
+            {
+                if (Mod.GetItemData(wishlistArray[i].ToString(), out MeatovItemData itemData))
+                {
+                    Mod.wishList.Add(itemData);
+                }
+            }
 
             // Get what each meatov item is needed for now that we have all the necessary data
             for (int i = 0; i < Mod.customItemData.Length; ++i)

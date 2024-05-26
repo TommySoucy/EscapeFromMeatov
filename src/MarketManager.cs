@@ -1,9 +1,6 @@
 ﻿using FistVR;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -89,8 +86,19 @@ namespace EFM
         public GameObject ragFairBuyDealButton;
         public Collider ragFairBuyAmountButtonCollider;
 
-        private GameObject currentActiveCategory;
-        private GameObject currentActiveItemSelector;
+        public Transform ragFairSellShowcaseParent;
+        public GameObject ragFairSellRowPrefab;
+        public GameObject ragFairSellItemPrefab;
+        public PriceItemView ragFairSellSelectedItemView;
+        public PriceItemView ragFairSellForItemView;
+        public Text ragFairSellChance;
+        public GameObject ragFairSellListButton;
+
+        public Transform ragFairListingsParent;
+        public GameObject ragFairListingPrefab;
+
+        public Transform ragFairWishlistParent;
+        public GameObject ragFairWishlistItemPrefab;
 
         // Live data
         [NonSerialized]
@@ -101,10 +109,11 @@ namespace EFM
         public Dictionary<string, int> FIRInventory;
         public Dictionary<string, List<MeatovItem>> FIRInventoryItems;
 
-        public TraderTab[] ragFairTabs;
+        public List<RagFairListing> ragFairListings = new List<RagFairListing>();
         public Dictionary<string, GameObject> wishListItemViewsByID;
         public Dictionary<string, List<GameObject>> ragFairItemBuyViewsByID;
 
+        [NonSerialized]
         public int currentTraderIndex;
         public MeatovItemData currencyItemData;
         public MeatovItemData cartItem;
@@ -147,7 +156,10 @@ namespace EFM
             // Subscribe to events
             tradeVolume.OnItemAdded += OnTradeVolumeItemAdded;
             tradeVolume.OnItemRemoved += OnItemRemoved;
+            MeatovItemData.OnAddedToWishlist += OnItemAddedToWishlist;
             
+            TODO: // Also init ragfair
+
             // Set default trader
             SetTrader(0);
         }
@@ -202,7 +214,6 @@ namespace EFM
 
         public void OnItemAdded(MeatovItem item, bool processUI = true)
         {
-            cotn from ehre// next step if setting up UI for rag fair selling, probably need to figure out how we want to make it work first
             AddToInventory(item);
 
             // Update children
@@ -213,6 +224,7 @@ namespace EFM
 
             if (processUI)
             {
+                TODO: // MAke sure all updates are here for ragfair
                 UpdateBuyPriceForItem(item.itemData);
                 AddSellItem(item);
                 AddRagFairSellItem(item);
@@ -397,6 +409,12 @@ namespace EFM
             UpdateBuyPriceForItem(item.itemData);
         }
 
+        public void OnItemAddedToWishlist(MeatovItemData itemData)
+        {
+            TODO: // Add to wishlist
+            Mod.LogInfo("");
+        }
+
         public void AddToInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
         {
             // StackOnly should be true if not item location was changed, but the stack count has
@@ -545,13 +563,25 @@ namespace EFM
             Mod.LogInfo("");
         }
 
+        public void UpdateRagFairBuyPriceForItem(MeatovItemData item)
+        {
+            TODO: // Implement
+            Mod.LogInfo("");
+        }
+
         public void AddRagFairSellItem(MeatovItem item)
         {
             TODO: // Implement
             Mod.LogInfo("");
         }
 
-        public void UpdateRagFairBuyPriceForItem(MeatovItemData item)
+        public void OnRagFairSellListClicked()
+        {
+            TODO: // Implement
+            Mod.LogInfo("");
+        }
+
+        public void OnRagFairSellAmountClicked()
         {
             TODO: // Implement
             Mod.LogInfo("");

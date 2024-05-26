@@ -84,7 +84,7 @@ namespace EFM
         public static GameObject rightShoulderObject;
         public static Raid_Manager currentRaidManager;
         public static Dictionary<string, int>[] requiredPerArea;
-        public static List<string> wishList;
+        public static List<MeatovItemData> wishList;
         public static Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> ammoBoxesByRoundClassByRoundType; // Ammo boxes (key) and their round count (value), corresponding to round type and class
         public static Dictionary<MeatovItem.ItemRarity, List<string>> itemsByRarity;
         public static Dictionary<string, List<MeatovItemData>> itemsByParents;
@@ -1926,7 +1926,6 @@ namespace EFM
 
             // Instantiate lists
             ammoBoxesByRoundClassByRoundType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>>();
-            wishList = new List<string>();
             itemsByRarity = new Dictionary<MeatovItem.ItemRarity, List<string>>();
 
             // Subscribe to events
