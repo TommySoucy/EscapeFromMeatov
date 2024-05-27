@@ -25,7 +25,8 @@ namespace EFM
             categoryName.text = category.name;
             count.text = "("+Mod.itemsByParents[category.ID].Count+")";
 
-            cont from ehre // apply step
+            layoutGroup.padding.left = 10 * step;
+            mainCollider.size = new Vector3(mainCollider.size.x - 10 * step, mainCollider.size.y, mainCollider.size.z);
         }
 
         public void OnToggleClicked()

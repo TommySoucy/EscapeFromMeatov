@@ -564,14 +564,38 @@ namespace EFM
 
         public void UpdateRagFairBuyPriceForItem(MeatovItemData item)
         {
+            TODO e: // When removing an item, when removign from sell we need to manage rows so they stack properly
             TODO: // Implement
             Mod.LogInfo("");
         }
 
         public void AddRagFairSellItem(MeatovItem item)
         {
-            TODO: // Implement
-            Mod.LogInfo("");
+            // Check if this item can be sold on ragfair
+            if (!item.canSellOnRagfair)
+            {
+                return;
+            }
+
+            // Manage rows
+            Transform currentRow = ragFairSellShowcaseParent.GetChild(ragFairSellShowcaseParent.childCount - 1);
+            if (ragFairSellShowcaseParent.childCount == 1 || currentRow.childCount == 6) // If dont even have a single horizontal yet, add it
+            {
+                currentRow = GameObject.Instantiate(sellShowcaseRowPrefab, ragFairSellShowcaseParent).transform;
+                currentRow.gameObject.SetActive(true);
+            }
+
+            GameObject currentItemView = GameObject.Instantiate(sellShowcaseItemViewPrefab, currentRow);
+            currentItemView.SetActive(true);
+
+            // Setup ItemView
+            RagFairSellItemView itemView = currentItemView.GetComponent<RagFairSellItemView>();
+            int actualValue = item.itemData.value;
+
+            itemView.SetItem(item, actualValue);
+
+            // Set the itemView for that item
+            item.ragFairSellItemView = itemView;
         }
 
         public void OnRagFairSellListClicked()
@@ -635,14 +659,14 @@ namespace EFM
             }
         }
 
-        public void AddRagFairCategories(CategoryTreeNode category, Transform currentParent)
+        public void AddRagFairCategories(CategoryTreeNode category, Transform currentParent, int step = 0)
         {
             RagFairCategory categoryUI = Instantiate(ragFairBuyCategoryPrefab, currentParent).GetComponent<RagFairCategory>();
-            categoryUI.SetCategory(category, 0);
+            categoryUI.SetCategory(category, step);
 
             for(int i=0; i < category.children.Count; ++i)
             {
-                AddRagFairCategories(category.children[i], categoryUI.subList.transform);
+                AddRagFairCategories(category.children[i], categoryUI.subList.transform, step + 1);
             }
         }
 
@@ -651,7 +675,26 @@ namespace EFM
             // Buy
             AddRagFairCategories(Mod.itemCategories, ragFairBuyCategoriesParent);
 
-            cont from here // need to finish initializing ragfair ui
+            // Sell
+            // Setup selling price display
+            Mod.GetItemData("203", out MeatovItemData ragFairCurrency);
+            ragFairSellForItemView.itemName.text = ragFairCurrency.name;
+            ragFairSellForItemView.itemView.SetItemData(ragFairCurrency);
+            Mod.LogInfo("0");
+            Mod.LogInfo("Adding all sellable item in volume to ragfair sell showcase");
+
+            // Add all items in trade volume that are sellable at this trader to showcase
+            sellDealButton.SetActive(false);
+
+            foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
+            {
+                for (int i = 0; i < volumeItemEntry.Value.Count; ++i)
+                {
+                    Mod.LogInfo("\tAdding item from volume: " + volumeItemEntry.Value[i].name);
+                    AddRagFairSellItem(volumeItemEntry.Value[i]);
+                }
+            }
+            Mod.LogInfo("0");
         }
 
         public void SetTrader(int index, string defaultItemID = null)

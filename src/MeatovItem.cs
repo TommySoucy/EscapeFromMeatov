@@ -169,6 +169,8 @@ namespace EFM
         [NonSerialized]
         public ItemView marketSellItemView;
         [NonSerialized]
+        public RagFairSellItemView ragFairSellItemView;
+        [NonSerialized]
         public ItemView marketInsureItemView;
         //public LeaveItemProcessor leaveItemProcessor;
 

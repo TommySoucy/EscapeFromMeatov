@@ -10,11 +10,11 @@ namespace EFM
 
         public ItemView itemView;
 
-        public void SetItemData(MeatovItem item)
+        public void SetItem(MeatovItem item, int actualValue)
         {
             this.item = item;
 
-            itemView.SetItem(item);
+            itemView.SetItem(item, true, 0, actualValue);
         }
 
         public void OnClicked()
