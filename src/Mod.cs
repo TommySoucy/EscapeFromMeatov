@@ -92,7 +92,6 @@ namespace EFM
         public static Trader[] traders; // Prapor, Therapist, Fence, Skier, Peacekeeper, Mechanic, Ragman, Jaeger, Lightkeeper
         public static Dictionary<int, List<Task>> tasksByTraderIndex;
         public static CategoryTreeNode itemCategories;
-        public static Dictionary<string, List<string>> itemAncestors;
         public static bool amountChoiceUIUp;
         public static MeatovItem splittingItem;
         public static bool preventLoadMagUpdateLists; // Flag to prevent load mag patches to update lists before they are initialized
@@ -1006,32 +1005,6 @@ namespace EFM
             LogInfo("Config loaded", false);
         }
 
-        private void AddCategories(List<string> parents)
-        {
-            // If necessary, init categ tree root with item ID
-            if (itemCategories == null)
-            {
-                itemCategories = new CategoryTreeNode(null, "54009119af1c881c07000029", "Item");
-            }
-            CategoryTreeNode currentParent = itemCategories;
-            for (int i = parents.Count - 2; i >= 0; i--)
-            {
-                string ID = parents[i];
-                CategoryTreeNode foundChild = currentParent.FindChild(ID);
-                if (foundChild != null)
-                {
-                    currentParent = foundChild;
-                }
-                else
-                {
-                    string name = localeDB["templates"][ID]["Name"].ToString();
-                    CategoryTreeNode newNode = new CategoryTreeNode(currentParent, ID, name);
-                    currentParent.children.Add(newNode);
-                    currentParent = newNode;
-                }
-            }
-        }
-
         private void LoadDB()
         {
             globalDB = JObject.Parse(File.ReadAllText(path + "/database/globals.json"));
@@ -1100,6 +1073,7 @@ namespace EFM
             itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
             ParseDefaultItemData();
             ParseItemMap();
+            BuildCategoriesTree();
 
             traders = new Trader[9];
             traderBaseDB = new JObject[9];
@@ -1395,6 +1369,47 @@ namespace EFM
                 newEntry.modded = newEntry.moddedID != null && !newEntry.moddedID.Equals("") && IM.OD.ContainsKey(newEntry.moddedID);
 
                 itemMap.Add(item.Key, newEntry);
+            }
+        }
+
+        public void BuildCategoriesTree()
+        {
+            if (itemCategories == null)
+            {
+                itemCategories = new CategoryTreeNode(null, itemParentID, localeDB[itemParentID + " Name"].ToString());
+            }
+            // Note that a particular item will appear in the list corresponding to all of its ancestors, not only its direct parent
+            foreach(KeyValuePair<string, List<MeatovItemData>> parentEntry in itemsByParents)
+            {
+                // Build list of all ancestors starting from this parent
+                List<string> parents = new List<string>() { parentEntry.Key };
+                JToken nextParentToken = itemDB[parentEntry.Key]["_parent"];
+                while (nextParentToken != null && !nextParentToken.ToString().Equals(""))
+                {
+                    parents.Add(nextParentToken.ToString());
+                }
+
+                // Make sure this parent and all ancestors are in the tree
+                CategoryTreeNode previousParentNode = itemCategories;
+                for (int i = parents.Count-1; i >= 0; --i)
+                {
+                    // Find the first ancestor ID that isn't in tree yet
+                    CategoryTreeNode currentParentNode = itemCategories.FindChild(parents[i]);
+                    if (currentParentNode == null)
+                    {
+                        // If this parent isn't in the tree yet, add it and all parents under it to the tree
+                        for(int j=i; j >= 0; --j)
+                        {
+                            string name = localeDB[parents[j]+" Name"].ToString();
+                            previousParentNode = new CategoryTreeNode(previousParentNode, parents[i], name);
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        previousParentNode = currentParentNode;
+                    }
+                }
             }
         }
 

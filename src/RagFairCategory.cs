@@ -7,7 +7,7 @@ namespace EFM
     public class RagFairCategory : MonoBehaviour
     {
         [NonSerialized]
-        public string category;
+        public CategoryTreeNode category;
 
         public GameObject openArrow;
         public GameObject closeArrow;
@@ -17,6 +17,16 @@ namespace EFM
         public VerticalLayoutGroup layoutGroup;
         public BoxCollider mainCollider;
         public GameObject toggle;
+
+        public void SetCategory(CategoryTreeNode category, int step)
+        {
+            this.category = category;
+
+            categoryName.text = category.name;
+            count.text = "("+Mod.itemsByParents[category.ID].Count+")";
+
+            cont from ehre // apply step
+        }
 
         public void OnToggleClicked()
         {

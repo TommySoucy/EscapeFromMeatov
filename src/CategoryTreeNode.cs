@@ -17,6 +17,10 @@ namespace EFM
         {
             this.parent = parent;
             children = new List<CategoryTreeNode>();
+            if(parent != null)
+            {
+                parent.children.Add(this);
+            }
 
             this.ID = ID;
             this.name = name;
@@ -24,13 +28,22 @@ namespace EFM
 
         public CategoryTreeNode FindChild(string ID)
         {
-            foreach(CategoryTreeNode child in children)
+            if (ID.Equals(this.ID))
             {
-                if (child.ID.Equals(ID))
+                return this;
+            }
+            else
+            {
+                for(int i=0; i < children.Count; ++i)
                 {
-                    return child;
+                    CategoryTreeNode child = children[i].FindChild(ID);
+                    if(child != null)
+                    {
+                        return child;
+                    }
                 }
             }
+
             return null;
         }
     }

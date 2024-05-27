@@ -158,10 +158,9 @@ namespace EFM
             tradeVolume.OnItemRemoved += OnItemRemoved;
             MeatovItemData.OnAddedToWishlist += OnItemAddedToWishlist;
             
-            TODO: // Also init ragfair
-
-            // Set default trader
+            // Initialize everything
             SetTrader(0);
+            InitRagFair();
         }
 
         private void Update()
@@ -636,47 +635,23 @@ namespace EFM
             }
         }
 
-        public void AddRagFairCategories(List<CategoryTreeNode> children, Transform parent, GameObject template, int level)
+        public void AddRagFairCategories(CategoryTreeNode category, Transform currentParent)
         {
-            foreach (CategoryTreeNode child in children)
+            RagFairCategory categoryUI = Instantiate(ragFairBuyCategoryPrefab, currentParent).GetComponent<RagFairCategory>();
+            categoryUI.SetCategory(category, 0);
+
+            for(int i=0; i < category.children.Count; ++i)
             {
-                GameObject category = Instantiate(template, parent);
-                category.SetActive(true);
-                category.transform.GetChild(0).GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(level * 10, 0, 0, 0);
-                category.transform.GetChild(0).GetChild(2).GetComponent<Text>().text = child.name;
-                category.transform.GetChild(0).GetChild(3).GetComponent<Text>().text = "(" + ((child.children.Count == 0 && Mod.itemsByParents.ContainsKey(child.ID)) ? Mod.itemsByParents[child.ID].Count : child.children.Count) + ")";
-
-                // Setup buttons
-                //category.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnRagFairCategoryMainClick(category, child.ID); });
-                //category.transform.GetChild(0).GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnRagFairCategoryToggleClick(category); });
-
-                // Setup actual item entries if this is a leaf category
-                if (child.children.Count == 0)
-                {
-                    if (Mod.itemsByParents.ContainsKey(child.ID))
-                    {
-                        List<MeatovItemData> itemIDs = Mod.itemsByParents[child.ID];
-                        foreach (MeatovItemData itemID in itemIDs)
-                        {
-                            GameObject item = Instantiate(template, category.transform.GetChild(1));
-                            item.SetActive(true);
-                            item.transform.GetChild(0).GetComponent<HorizontalLayoutGroup>().padding = new RectOffset((level + 1) * 10, 0, 0, 0);
-                            item.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-
-                            item.transform.GetChild(0).GetChild(2).GetComponent<Text>().text = "itemname";
-                            //item.transform.GetChild(0).GetChild(3).GetComponent<Text>().text = "(" + GetTotalItemSell(itemID.H3ID) + ")";
-
-                            item.transform.GetChild(0).GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
-
-                            //item.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { OnRagFairItemMainClick(item, itemID.H3ID); });
-                        }
-                    }
-                }
-                else
-                {
-                    AddRagFairCategories(child.children, category.transform.GetChild(1), template, level + 1);
-                }
+                AddRagFairCategories(category.children[i], categoryUI.subList.transform);
             }
+        }
+
+        public void InitRagFair()
+        {
+            // Buy
+            AddRagFairCategories(Mod.itemCategories, ragFairBuyCategoriesParent);
+
+            cont from here // need to finish initializing ragfair ui
         }
 
         public void SetTrader(int index, string defaultItemID = null)
