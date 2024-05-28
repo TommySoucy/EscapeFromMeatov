@@ -154,6 +154,7 @@ namespace EFM
             }
             get { return _neededForTaskTotal; }
         }
+        public RagFairWishlistItemView ragFairWishlistItemView;
 
         // Events
         public delegate void OnItemFoundDelegate();

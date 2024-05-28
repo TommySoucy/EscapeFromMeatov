@@ -34,6 +34,7 @@ namespace EFM
 
         public void OnBuyClicked()
         {
+            cont from here // go through entre buy process and implement stuff as we go like we have them for buying from trader
             TODO: // Open cart, set ui, and set prices in market
             Mod.LogInfo("");
         }

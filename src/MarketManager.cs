@@ -81,6 +81,7 @@ namespace EFM
         public GameObject ragFairBuyCategoryPrefab;
         public Transform ragFairBuyItemParent;
         public GameObject ragFairBuyItemPrefab;
+        public GameObject ragFairBuyCart;
         public PriceItemView ragFairBuyItemView;
         public Transform ragFairBuyPricesParent;
         public GameObject ragFairBuyPricePrefab;
@@ -590,8 +591,7 @@ namespace EFM
 
         public void OnItemAddedToWishlist(MeatovItemData itemData)
         {
-            TODO: // Add to wishlist
-            Mod.LogInfo("");
+            AddRagFairWishlistEntry(itemData);
         }
 
         public void AddToInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
@@ -720,8 +720,7 @@ namespace EFM
 
         public void OnRagFairBuyCancelClicked()
         {
-            TODO: // Implement
-            Mod.LogInfo("");
+            ragFairBuyCart.SetActive(false);
         }
 
         public void OnRagFairBuyDealClicked()
@@ -851,6 +850,9 @@ namespace EFM
 
         public void InitRagFair()
         {
+            // Init vars
+            ragFairListings = new List<RagFairListing>();
+
             // Buy
             AddRagFairCategories(Mod.itemCategories, ragFairBuyCategoriesParent);
 
@@ -859,21 +861,44 @@ namespace EFM
             Mod.GetItemData("203", out MeatovItemData ragFairCurrency);
             ragFairSellForItemView.itemName.text = ragFairCurrency.name;
             ragFairSellForItemView.itemView.SetItemData(ragFairCurrency);
-            Mod.LogInfo("0");
-            Mod.LogInfo("Adding all sellable item in volume to ragfair sell showcase");
 
-            // Add all items in trade volume that are sellable at this trader to showcase
-            sellDealButton.SetActive(false);
+            // Add all items in trade volume that can be sold on rag fair
+            ragFairSellListButton.SetActive(false);
 
             foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
             {
                 for (int i = 0; i < volumeItemEntry.Value.Count; ++i)
                 {
-                    Mod.LogInfo("\tAdding item from volume: " + volumeItemEntry.Value[i].name);
                     AddRagFairSellItem(volumeItemEntry.Value[i]);
                 }
             }
-            Mod.LogInfo("0");
+
+            // Listings
+            for(int i=0; i < ragFairListings.Count; ++i)
+            {
+                AddRagFairListing(ragFairListings[i]);
+            }
+
+            // Wishlist
+            for (int i = 0; i < Mod.wishList.Count; ++i)
+            {
+                AddRagFairWishlistEntry(Mod.wishList[i]);
+            }
+        }
+
+        public void AddRagFairListing(RagFairListing listing)
+        {
+            TODO: // Implement listing timer decrement and unlisting when it reaches 0
+            RagFairListingUI listingUI = Instantiate(ragFairListingPrefab, ragFairListingsParent).GetComponent<RagFairListingUI>();
+            listingUI.SetListing(listing);
+            listing.UI = listingUI;
+        }
+
+        public void AddRagFairWishlistEntry(MeatovItemData itemData)
+        {
+            RagFairWishlistItemView ragFairWishlistItemView = Instantiate(ragFairWishlistItemPrefab, ragFairWishlistParent).GetComponent<RagFairWishlistItemView>();
+            ragFairWishlistItemView.SetItemData(itemData);
+            itemData.ragFairWishlistItemView = ragFairWishlistItemView;
         }
 
         public void SetTrader(int index, string defaultItemID = null)
