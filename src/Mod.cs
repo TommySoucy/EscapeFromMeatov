@@ -1074,7 +1074,6 @@ namespace EFM
             itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
             ParseDefaultItemData();
             ParseItemMap();
-            BuildCategoriesTree();
 
             traders = new Trader[9];
             traderBaseDB = new JObject[9];
@@ -1090,6 +1089,9 @@ namespace EFM
 
                 traders[i] = new Trader(i, traderID);
             }
+
+            // Must be done after loading trader data because we need assort data and barters to be set
+            BuildCategoriesTree();
 
             tasksByTraderIndex = new Dictionary<int, List<Task>>();
             questDB = JObject.Parse(File.ReadAllText(Mod.path + "/database/templates/quests.json"));

@@ -23,7 +23,7 @@ namespace EFM
             this.category = category;
 
             categoryName.text = category.name;
-            count.text = "("+Mod.itemsByParents[category.ID].Count+")";
+            count.text = "("+ category.barters.Count+")";
 
             layoutGroup.padding.left = 10 * step;
             mainCollider.size = new Vector3(mainCollider.size.x - 10 * step, mainCollider.size.y, mainCollider.size.z);
@@ -38,8 +38,7 @@ namespace EFM
 
         public void OnClicked()
         {
-            TODO: // List all items
-            Mod.LogInfo("");
+            HideoutController.instance.marketManager.SetRagFairBuyCategory(category);
         }
     }
 }

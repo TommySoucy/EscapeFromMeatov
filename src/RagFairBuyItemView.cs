@@ -5,53 +5,54 @@ namespace EFM
 {
     public class RagFairBuyItemView : MonoBehaviour
     {
-        public MeatovItemData itemData;
+        public Barter barter;
 
         public ItemView itemView;
         public Text itemName;
         public Image wishlistStar;
 
-        public void SetItemData(MeatovItemData itemData)
+        public void SetBarter(Barter barter)
         {
-            if(this.itemData != null)
+            if(this.barter != null)
             {
-                this.itemData.OnNeededForChanged -= OnNeededForChanged;
+                this.barter.itemData.OnNeededForChanged -= OnNeededForChanged;
             }
 
-            this.itemData = itemData;
-            itemData.OnNeededForChanged += OnNeededForChanged;
+            this.barter = barter;
+            barter.itemData.OnNeededForChanged += OnNeededForChanged;
 
-            itemView.SetItemData(itemData);
-            itemName.text = itemData.name;
-            wishlistStar.color = itemData.onWishlist ? Color.yellow : Color.black;
+            itemView.SetItemData(barter.itemData);
+            itemName.text = barter.itemData.name;
+            wishlistStar.color = barter.itemData.onWishlist ? Color.yellow : Color.black;
         }
 
         public void OnWishlistClicked()
         {
             // Note that we don't set star color here, it will be changed through OnNeededForChanged
-            itemData.onWishlist = !itemData.onWishlist;
+            barter.itemData.onWishlist = !barter.itemData.onWishlist;
         }
 
         public void OnBuyClicked()
         {
-            cont from here // go through entre buy process and implement stuff as we go like we have them for buying from trader
-            TODO: // Open cart, set ui, and set prices in market
-            Mod.LogInfo("");
+            if(barter != null)
+            {
+                HideoutController.instance.marketManager.SetRagFairBuy(barter);
+            }
         }
 
         public void OnNeededForChanged(int index)
         {
             if(index == 2)
             {
-                wishlistStar.color = itemData.onWishlist ? Color.yellow : Color.black;
+                wishlistStar.color = barter.itemData.onWishlist ? Color.yellow : Color.black;
             }
         }
 
         public void OnDestroy()
         {
-            if (itemData != null)
+            if (barter != null)
             {
-                itemData.OnNeededForChanged -= OnNeededForChanged;
+                barter.itemData.OnNeededForChanged -= OnNeededForChanged;
             }
         }
     }

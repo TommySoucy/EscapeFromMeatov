@@ -86,6 +86,8 @@ namespace EFM
         public Transform ragFairBuyPricesParent;
         public GameObject ragFairBuyPricePrefab;
         public GameObject ragFairBuyDealButton;
+        public Dictionary<string, PriceItemView> ragFairBuyItemPriceViewsByH3ID;
+        public Text ragFairBuyItemCount;
         public Collider ragFairBuyAmountButtonCollider;
 
         public Transform ragFairSellShowcaseParent;
@@ -121,10 +123,9 @@ namespace EFM
         public MeatovItemData cartItem;
         public int cartItemCount;
         public List<BarterPrice> buyPrices;
-        public string ragfairCartItem;
-        public int ragfairCartItemCount;
-        public List<BarterPrice> ragfairPrices;
-        public List<GameObject> ragfairBuyPriceElements;
+        public MeatovItemData ragFairCartItem;
+        public int ragFairCartItemCount;
+        public List<BarterPrice> ragFairBuyPrices;
         public int currentTotalSellingPrice = 0;
         public int currentTotalInsurePrice = 0;
         public MeatovItem currentRagFairSellItem; 
@@ -723,28 +724,161 @@ namespace EFM
             ragFairBuyCart.SetActive(false);
         }
 
+        public void SetRagFairBuy(Barter ragFairBarter)
+        {
+            ragFairCartItem = ragFairBarter.itemData;
+
+            if (ragFairBuyItemPriceViewsByH3ID == null)
+            {
+                ragFairBuyItemPriceViewsByH3ID = new Dictionary<string, PriceItemView>();
+            }
+            else
+            { 
+                ragFairBuyItemPriceViewsByH3ID.Clear();
+            }
+
+            ragFairBuyCart.SetActive(true);
+            ragFairBuyItemView.itemView.SetItemData(ragFairBarter.itemData);
+            ragFairBuyItemView.itemName.text = ragFairBarter.itemData.name;
+            ragFairBuyItemView.amount.text = "1";
+            ragFairBuyPrices = new List<BarterPrice>(ragFairBarter.prices);
+
+            while (ragFairBuyPricesParent.childCount > 1)
+            {
+                Transform currentFirstChild = ragFairBuyPricesParent.GetChild(1);
+                currentFirstChild.SetParent(null);
+                Destroy(currentFirstChild.gameObject);
+            }
+
+            bool canDeal = true;
+            foreach (BarterPrice price in ragFairBarter.prices)
+            {
+                Transform priceElement = Instantiate(ragFairBuyPricePrefab, ragFairBuyPricesParent).transform;
+                priceElement.gameObject.SetActive(true);
+                PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
+                currentPriceView.price = price;
+                price.priceItemView = currentPriceView;
+
+                currentPriceView.amount.text = price.count.ToString();
+                currentPriceView.itemName.text = price.itemData.name.ToString();
+                if (price.itemData.itemType == MeatovItem.ItemType.DogTag)
+                {
+                    currentPriceView.itemView.SetItemData(price.itemData, false, false, true, ">= lvl " + price.dogTagLevel);
+                }
+                else
+                {
+                    currentPriceView.itemView.SetItemData(price.itemData);
+                }
+
+                int count = 0;
+                tradeVolume.inventory.TryGetValue(price.itemData.H3ID, out count);
+                currentPriceView.amount.text = Mathf.Min(price.count, count).ToString() + "/" + price.count.ToString();
+
+                if (count >= price.count)
+                {
+                    currentPriceView.fulfilledIcon.SetActive(true);
+                    currentPriceView.unfulfilledIcon.SetActive(false);
+                }
+                else
+                {
+                    currentPriceView.fulfilledIcon.SetActive(false);
+                    currentPriceView.unfulfilledIcon.SetActive(true);
+                    canDeal = false;
+                }
+                ragFairBuyItemPriceViewsByH3ID.Add(price.itemData.H3ID, currentPriceView);
+            }
+
+            ragFairBuyDealButton.SetActive(canDeal);
+        }
+
+        public void SetRagFairBuyCategory(CategoryTreeNode category)
+        {
+            while (ragFairBuyItemParent.childCount > 1)
+            {
+                Transform currentFirstChild = ragFairBuyItemParent.GetChild(1);
+                currentFirstChild.SetParent(null);
+                Destroy(currentFirstChild.gameObject);
+            }
+
+            for (int i = 0; i < category.barters.Count; ++i) 
+            {
+                Transform buyItemElement = Instantiate(ragFairBuyItemPrefab, ragFairBuyItemParent).transform;
+                buyItemElement.gameObject.SetActive(true);
+                RagFairBuyItemView currentItemView = buyItemElement.GetComponent<RagFairBuyItemView>();
+                currentItemView.SetBarter(category.barters[i]);
+            }
+        }
+
         public void OnRagFairBuyDealClicked()
         {
-            TODO: // Implement
-            Mod.LogInfo("");
+            // Remove price from trade volume
+            foreach (BarterPrice price in ragFairBuyPrices)
+            {
+                RemoveItemFromTrade(price.itemData, price.count * ragFairCartItemCount, price.dogTagLevel);
+            }
+
+            // Add bought amount of item to trade volume
+            tradeVolume.SpawnItem(ragFairCartItem, ragFairCartItemCount);
         }
 
         public void OnRagFairBuyAmountClicked()
         {
-            TODO: // Implement
-            Mod.LogInfo("");
+            // Cancel stack splitting if in progress
+            if (Mod.amountChoiceUIUp || Mod.splittingItem != null)
+            {
+                Mod.splittingItem.CancelSplit();
+            }
+
+            // Disable buy deal/amount buttons until done choosing amount
+            buyAmountButtonCollider.enabled = false;
+            ragFairBuyAmountButtonCollider.enabled = false;
+
+            // Start choosing amount
+            Mod.stackSplitUI.SetActive(true);
+            Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
+            Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
+            amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
+            amountChoiceRightVector = Mod.rightHand.transform.right;
+            amountChoiceRightVector.y = 0;
+
+            choosingRagfairBuyAmount = true;
+            startedChoosingThisFrame = true;
+
+            // Set max buy amount, limit it to 360 otherwise scale is not large enough and its hard to specify an exact value
+            maxBuyAmount = 360;
         }
 
-        public void OnRagFairBuyItemClicked(MeatovItemData item, BarterPrice[] priceList)
+        public void UpdateRagFairBuyPriceForItem(MeatovItemData itemData)
         {
-            TODO: // Implement
-            Mod.LogInfo("");
-        }
-
-        public void UpdateRagFairBuyPriceForItem(MeatovItemData item)
-        {
-            TODO: // Implement
-            Mod.LogInfo("");
+            if (ragFairBuyItemPriceViewsByH3ID.TryGetValue(itemData.H3ID, out PriceItemView itemView))
+            {
+                bool prefulfilled = itemView.fulfilledIcon.activeSelf;
+                int count = 0;
+                tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
+                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + itemView.price.count.ToString();
+                if (count >= itemView.price.count)
+                {
+                    itemView.fulfilledIcon.SetActive(true);
+                    itemView.unfulfilledIcon.SetActive(false);
+                    if (!prefulfilled)
+                    {
+                        // Newly fulfilled, we might now be able to buy, check if all prices fulfilled
+                        bool allFulfilled = true;
+                        for (int i = 0; i < ragFairBuyPrices.Count; ++i)
+                        {
+                            int currentCount = 0;
+                            allFulfilled |= tradeVolume.inventory.TryGetValue(ragFairBuyPrices[i].itemData.H3ID, out currentCount) && currentCount >= ragFairBuyPrices[i].count;
+                        }
+                        ragFairBuyDealButton.SetActive(allFulfilled);
+                    }
+                }
+                else
+                {
+                    itemView.fulfilledIcon.SetActive(false);
+                    itemView.unfulfilledIcon.SetActive(true);
+                    ragFairBuyDealButton.SetActive(false);
+                }
+            }
         }
 
         public void AddRagFairSellItem(MeatovItem item)
@@ -801,31 +935,35 @@ namespace EFM
                 }
                 else if (hand.Input.TriggerDown)
                 {
-                    List<BarterPrice> pricesToUse = null;
                     if (choosingBuyAmount)
                     {
                         cartItemCount = chosenAmount;
                         countString = cartItemCount.ToString();
-                        pricesToUse = buyPrices;
+                        List<BarterPrice> pricesToUse = buyPrices;
+                        buyItemCount.text = countString;
+
+                        foreach (BarterPrice price in pricesToUse)
+                        {
+                            price.priceItemView.amount.text = (price.count * cartItemCount).ToString();
+
+                            UpdateBuyPriceForItem(price.itemData);
+                        }
                     }
                     else
                     {
-                        ragfairCartItemCount = chosenAmount;
-                        countString = ragfairCartItemCount.ToString();
-                        pricesToUse = ragfairPrices;
+                        ragFairCartItemCount = chosenAmount;
+                        countString = ragFairCartItemCount.ToString();
+                        List<BarterPrice> pricesToUse = ragFairBuyPrices;
+                        ragFairBuyItemCount.text = countString;
+
+                        foreach (BarterPrice price in pricesToUse)
+                        {
+                            price.ragFairPriceItemView.amount.text = (price.count * ragFairCartItemCount).ToString();
+
+                            UpdateRagFairBuyPriceForItem(price.itemData);
+                        }
                     }
                     Mod.stackSplitUI.SetActive(false);
-
-                    // Change amount and price on UI
-                    buyItemCount.text = countString;
-
-                    foreach (BarterPrice price in pricesToUse)
-                    {
-                        PriceItemView currentView = price.priceItemView;
-                        currentView.amount.text = (price.count * cartItemCount).ToString();
-
-                        UpdateBuyPriceForItem(price.itemData);
-                    }
 
                     // Reenable buy amount buttons
                     buyAmountButtonCollider.enabled = true;
@@ -1019,7 +1157,7 @@ namespace EFM
                 // Fence special case, no assort, want to build a random one
                 if (index == 2)
                 {
-                    TODO: // Generate fence barters
+                    TODO: // Generate fence barters, make sure to add/remove barters from corresponding categories
 
                     // We want everyone to use the same seed for generating random fence barters
                     UnityEngine.Random.InitState(Convert.ToInt32((DateTime.UtcNow - DateTime.Today.ToUniversalTime()).TotalHours));

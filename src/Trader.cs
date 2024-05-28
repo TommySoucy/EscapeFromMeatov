@@ -514,6 +514,7 @@ namespace EFM
         public MeatovItemData itemData;
         public int count;
         public PriceItemView priceItemView;
+        public PriceItemView ragFairPriceItemView;
 
         // DogTag specific
         public int dogTagLevel;
