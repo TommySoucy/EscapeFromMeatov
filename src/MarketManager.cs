@@ -1,6 +1,7 @@
 ﻿using FistVR;
 using System;
 using System.Collections.Generic;
+using System.Security.Policy;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -125,6 +126,7 @@ namespace EFM
         public List<GameObject> ragfairBuyPriceElements;
         public int currentTotalSellingPrice = 0;
         public int currentTotalInsurePrice = 0;
+        public MeatovItem currentRagFairSellItem; 
 
         public bool choosingBuyAmount;
         public bool choosingRagfairBuyAmount;
@@ -223,7 +225,7 @@ namespace EFM
 
             if (processUI)
             {
-                TODO: // MAke sure all updates are here for ragfair
+                TODO: // Make sure all updates are here for ragfair
                 UpdateBuyPriceForItem(item.itemData);
                 AddSellItem(item);
                 AddRagFairSellItem(item);
@@ -231,6 +233,25 @@ namespace EFM
                 UpdateInsurePriceForItem(item.itemData);
                 UpdateRagFairBuyPriceForItem(item.itemData);
             }
+        }
+
+        public void OnItemRemoved(MeatovItem item)
+        {
+            RemoveFromInventory(item);
+
+            // Update children
+            for (int i = 0; i < item.children.Count; ++i)
+            {
+                RemoveFromInventory(item.children[i]);
+            }
+
+            // Update UI
+            RemoveSellItem(item);
+            RemoveInsureItem(item);
+            RemoveRagFairSellItem(item);
+            UpdateBuyPriceForItem(item.itemData);
+            UpdateInsurePriceForItem(item.itemData);
+            UpdateRagFairBuyPriceForItem(item.itemData);
         }
 
         public void AddInsureItem(MeatovItem item)
@@ -340,6 +361,179 @@ namespace EFM
             sellItemView.amount.text = currentTotalSellingPrice.ToString();
         }
 
+        public void RemoveSellItem(MeatovItem item)
+        {
+            if(item.marketSellItemView == null)
+            {
+                return;
+            }
+
+            Transform row = item.marketSellItemView.transform.parent;
+            item.marketSellItemView.transform.SetParent(null);
+            Destroy(item.marketSellItemView.gameObject);
+            item.marketSellItemView = null;
+
+            // Get last row in display
+            Transform lastRow = sellShowcaseContent.transform.GetChild(sellShowcaseContent.transform.childCount - 1);
+
+            if(lastRow == row) // The item's row was last row, need to remove the row if there are no other items in it
+            {
+                if (lastRow.childCount == 1)
+                {
+                    lastRow.SetParent(null);
+                    Destroy(lastRow.gameObject);
+                }
+            }
+            else // Different row, replace destroyed item view with one from last row
+            {
+                // Note that if a row exists, it must have at least 1 active item view child
+                Transform otherItemView = lastRow.GetChild(lastRow.childCount - 1);
+                otherItemView.SetParent(row);
+
+                // Destroy last row if other item view was the only one on it
+                if(lastRow.childCount == 1)
+                {
+                    lastRow.SetParent(null);
+                    Destroy(lastRow.gameObject);
+                }
+            }
+
+            // Update price
+            Trader trader = Mod.traders[currentTraderIndex];
+            int actualValue = item.itemData.value;
+
+            // Apply exchange rate if necessary
+            if (trader.currency == 1)
+            {
+                actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
+            }
+            else if (trader.currency == 2)
+            {
+                actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
+            }
+
+            // Apply trader buy coefficient
+            actualValue -= (int)(actualValue * (trader.levels[trader.level].buyPriceCoef / 100.0f));
+            actualValue = Mathf.Max(actualValue, 1);
+
+            currentTotalSellingPrice -= actualValue;
+            if (currentTotalSellingPrice > 0)
+            {
+                sellDealButton.SetActive(true);
+            }
+            sellItemView.amount.text = currentTotalSellingPrice.ToString();
+        }
+
+        public void RemoveRagFairSellItem(MeatovItem item)
+        {
+            if(item.ragFairSellItemView == null)
+            {
+                return;
+            }
+
+            Transform row = item.ragFairSellItemView.transform.parent;
+            item.ragFairSellItemView.transform.SetParent(null);
+            Destroy(item.ragFairSellItemView.gameObject);
+            item.ragFairSellItemView = null;
+
+            // Get last row in display
+            Transform lastRow = ragFairSellShowcaseParent.transform.GetChild(ragFairSellShowcaseParent.transform.childCount - 1);
+
+            if(lastRow == row) // The item's row was last row, need to remove the row if there are no other items in it
+            {
+                if (lastRow.childCount == 1)
+                {
+                    lastRow.SetParent(null);
+                    Destroy(lastRow.gameObject);
+                }
+            }
+            else // Different row, replace destroyed item view with one from last row
+            {
+                // Note that if a row exists, it must have at least 1 active item view child
+                Transform otherItemView = lastRow.GetChild(lastRow.childCount - 1);
+                otherItemView.SetParent(row);
+
+                // Destroy last row if other item view was the only one on it
+                if(lastRow.childCount == 1)
+                {
+                    lastRow.SetParent(null);
+                    Destroy(lastRow.gameObject);
+                }
+            }
+
+            // Make sure to unselect this item from ragfair sell if it was the one selected
+            if(currentRagFairSellItem == item)
+            {
+                currentRagFairSellItem = null;
+                ragFairSellSelectedItemView.Reset();
+                ragFairSellListButton.SetActive(false);
+            }
+        }
+
+        public void RemoveInsureItem(MeatovItem item)
+        {
+            if(item.marketInsureItemView == null)
+            {
+                return;
+            }
+
+            Transform row = item.marketInsureItemView.transform.parent;
+            item.marketInsureItemView.transform.SetParent(null);
+            Destroy(item.marketInsureItemView.gameObject);
+            item.marketInsureItemView = null;
+
+            // Get last row in display
+            Transform lastRow = insureShowcaseContent.transform.GetChild(insureShowcaseContent.transform.childCount - 1);
+
+            if(lastRow == row) // The item's row was last row, need to remove the row if there are no other items in it
+            {
+                if (lastRow.childCount == 1)
+                {
+                    lastRow.SetParent(null);
+                    Destroy(lastRow.gameObject);
+                }
+            }
+            else // Different row, replace destroyed item view with one from last row
+            {
+                // Note that if a row exists, it must have at least 1 active item view child
+                Transform otherItemView = lastRow.GetChild(lastRow.childCount - 1);
+                otherItemView.SetParent(row);
+
+                // Destroy last row if other item view was the only one on it
+                if(lastRow.childCount == 1)
+                {
+                    lastRow.SetParent(null);
+                    Destroy(lastRow.gameObject);
+                }
+            }
+
+            // Update price
+            Trader trader = Mod.traders[currentTraderIndex];
+            int actualValue = item.itemData.value;
+
+            // Apply exchange rate if necessary
+            if (trader.currency == 1)
+            {
+                actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
+            }
+            else if (trader.currency == 2)
+            {
+                actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
+            }
+
+            // Apply trader insure coefficient
+            actualValue -= (int)(actualValue * (trader.levels[trader.level].insurancePriceCoef / 100.0f));
+            actualValue = Mathf.Max(actualValue, 1);
+
+            // Update price
+            currentTotalInsurePrice -= actualValue;
+            if (currentTotalInsurePrice > 0)
+            {
+                UpdateInsurePriceForItem(currencyItemData);
+            }
+            insureItemView.amount.text = currentTotalInsurePrice.ToString();
+        }
+
         public void UpdateBuyPriceForItem(MeatovItemData itemData)
         {
             if (buyItemPriceViewsByH3ID.TryGetValue(itemData.H3ID, out PriceItemView itemView))
@@ -393,19 +587,6 @@ namespace EFM
                     buyDealButton.SetActive(false);
                 }
             }
-        }
-
-        public void OnItemRemoved(MeatovItem item)
-        {
-            RemoveFromInventory(item);
-
-            // Update children
-            for (int i = 0; i < item.children.Count; ++i)
-            {
-                RemoveFromInventory(item.children[i]);
-            }
-
-            UpdateBuyPriceForItem(item.itemData);
         }
 
         public void OnItemAddedToWishlist(MeatovItemData itemData)
@@ -564,7 +745,6 @@ namespace EFM
 
         public void UpdateRagFairBuyPriceForItem(MeatovItemData item)
         {
-            TODO e: // When removing an item, when removign from sell we need to manage rows so they stack properly
             TODO: // Implement
             Mod.LogInfo("");
         }
