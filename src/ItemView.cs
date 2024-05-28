@@ -82,6 +82,31 @@ namespace EFM
             SetItemData(item.itemData);
         }
 
+        public void ResetItemView()
+        {
+            if (item != null)
+            {
+                item.OnInsuredChanged -= OnInsuredChanged;
+                item.OnFIRStatusChanged -= OnFIRStatusChanged;
+                item.OnContainingVolumeChanged -= OnContainingVolumeChanged;
+                item.OnStackChanged -= OnStackChanged;
+                item.OnAmountChanged -= OnAmountChanged;
+            }
+
+            item = null;
+
+            infoFoundInRaidCheckmark.SetActive(false);
+            infoInsuredIcon.SetActive(false);
+            insuredBorder.SetActive(false);
+            infoValueIcon.gameObject.SetActive(false);
+            infoValueText.gameObject.SetActive(false);
+            infoCountText.gameObject.SetActive(false);
+            toolIcon.SetActive(false);
+            toolBorder.SetActive(false);
+
+            SetItemData(null);
+        }
+
         public void SetItemData(MeatovItemData itemData,
                                 bool hasInsuredOverride = false, bool insuredOverride = false,
                                 bool hasCountOverride = false, string countOverride = null,
@@ -97,7 +122,7 @@ namespace EFM
 
             if (itemData == null)
             {
-                itemIcon.sprite = Mod.questionMarkIcon;
+                itemIcon.sprite = Mod.emptyCellIcon;
 
                 infoSpecial.SetActive(false);
                 infoNeededForCheckmark.gameObject.SetActive(false);

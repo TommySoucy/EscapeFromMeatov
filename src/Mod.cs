@@ -446,6 +446,7 @@ namespace EFM
         public static AudioClip[] barbedWireClips;
         public static Sprite[] skillIcons;
         public static Sprite questionMarkIcon;
+        public static Sprite emptyCellIcon;
 
         // DB
         public static JArray areasDB;

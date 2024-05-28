@@ -140,7 +140,8 @@ namespace EFM
                     Mod.pocketsConfigIndex = GM.Instance.QuickbeltConfigurations.Length;
                     GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("PocketsConfiguration"));
 
-                    Mod.questionMarkIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("QuestionMarkIcon"); ;
+                    Mod.questionMarkIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("QuestionMarkIcon");
+                    Mod.emptyCellIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("cell_full_border");
 
                     Mod.playerBundleRequest = null;
                     Mod.itemsBundlesRequests = null;

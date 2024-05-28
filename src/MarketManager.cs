@@ -225,7 +225,6 @@ namespace EFM
 
             if (processUI)
             {
-                TODO: // Make sure all updates are here for ragfair
                 UpdateBuyPriceForItem(item.itemData);
                 AddSellItem(item);
                 AddRagFairSellItem(item);
@@ -465,7 +464,7 @@ namespace EFM
             if(currentRagFairSellItem == item)
             {
                 currentRagFairSellItem = null;
-                ragFairSellSelectedItemView.Reset();
+                ragFairSellSelectedItemView.ResetItemView();
                 ragFairSellListButton.SetActive(false);
             }
         }
