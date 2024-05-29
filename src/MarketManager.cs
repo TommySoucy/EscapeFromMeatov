@@ -1,6 +1,7 @@
 ﻿using FistVR;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Policy;
 using UnityEngine;
 using UnityEngine.UI;
@@ -923,9 +924,60 @@ namespace EFM
             // 3: Ragfair will otherwise be selling it at 1.5x item value if canSellOnRagfair
 
             // If given value > found value, chance is 0%.
-            //    given value <= found value, should result in s-curve(actually half of gaussian) increasing chance with 100% being at the value the item can be sold at a trader
+            //    given value <= found value, should result in sigmoid increasing chance with 100% being at the value the item can be sold at a trader
 
+            int foundValue = 0;
+            for(int i=0; i < Mod.traders.Length; ++i)
+            {
+                if (Mod.traders[i].bartersByItemID.TryGetValue(item.H3ID, out List<Barter> barters))
+                {
+                    for(int j=0; j < barters.Count; ++j)
+                    {
+                        if (barters[j].prices.Length == 1)
+                        {
+                            if (barters[j].prices[0].itemData.H3ID.Equals("203"))
+                            {
+                                foundValue = barters[j].prices[0].count;
+                            }
+                            else if (barters[j].prices[0].itemData.H3ID.Equals("202"))
+                            {
+                                foundValue = (int)Mathf.Max(barters[j].prices[0].count / 135.0f, 1);
+                            }
+                            else if (barters[j].prices[0].itemData.H3ID.Equals("201"))
+                            {
+                                foundValue = (int)Mathf.Max(barters[j].prices[0].count / 120.0f, 1);
+                            }
+                            else
+                            {
+                                for (int k = 0; k < barters[j].prices.Length; ++k) 
+                                {
+                                    foundValue += barters[j].prices[k].count * barters[j].prices[k].itemData.value;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int k = 0; k < barters[j].prices.Length; ++k)
+                            {
+                                foundValue += barters[j].prices[k].count * barters[j].prices[k].itemData.value;
+                            }
+                        }
+                    }
+                }
+            }
+            if(foundValue == 0)
+            {
+                foundValue = (int)(item.itemData.value * 1.5f);
+            }
 
+            if(givenValue > foundValue)
+            {
+                return 0;
+            }
+            else
+            {
+                cont from ehre// implement function
+            }
         }
 
         public void SetRagFairSell(MeatovItem item)
