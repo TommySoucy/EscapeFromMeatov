@@ -910,6 +910,77 @@ namespace EFM
             item.ragFairSellItemView = itemView;
         }
 
+        public float GetRagFairSellChance(MeatovItem item, int givenValue)
+        {
+            if (!item.canSellOnRagfair)
+            {
+                return 0;
+            }
+
+            // CASES
+            // 1: Trader may be selling this item at arbitrary currency value
+            // 2: Trader may also be selling this item as trade for other item, each of them having a value, and thus the barter having a total currency value
+            // 3: Ragfair will otherwise be selling it at 1.5x item value if canSellOnRagfair
+
+            // If given value > found value, chance is 0%.
+            //    given value <= found value, should result in s-curve(actually half of gaussian) increasing chance with 100% being at the value the item can be sold at a trader
+
+
+        }
+
+        public void SetRagFairSell(MeatovItem item)
+        {
+            currentRagFairSellItem = item;
+            ragFairSellSelectedItemView.itemView.SetItem(item);
+            ragFairSellSelectedItemView.itemName.text = item.name;
+            ragFairSellSelectedItemView.amount.text = item.stack.ToString();
+            ragFairSellForItemView.amount.text = (item.stack * item.itemData.value).ToString();
+            ragFairSellChance.text = "Sell Chance: " + (int)Mathf.Max(GetRagFairSellChance(item, item.stack * item.itemData.value), 1) + "%";
+            ragFairSellListButton.SetActive(true);
+
+            bool canDeal = true;
+            foreach (BarterPrice price in priceList)
+            {
+                Mod.LogInfo("\tSetting price: " + price.itemData.H3ID);
+                Transform priceElement = Instantiate(buyPricePrefab, buyPricesContent).transform;
+                priceElement.gameObject.SetActive(true);
+                PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
+                currentPriceView.price = price;
+                price.priceItemView = currentPriceView;
+
+                currentPriceView.amount.text = price.count.ToString();
+                currentPriceView.itemName.text = price.itemData.name.ToString();
+                if (price.itemData.itemType == MeatovItem.ItemType.DogTag)
+                {
+                    currentPriceView.itemView.SetItemData(price.itemData, false, false, true, ">= lvl " + price.dogTagLevel);
+                }
+                else
+                {
+                    currentPriceView.itemView.SetItemData(price.itemData);
+                }
+
+                int count = 0;
+                tradeVolume.inventory.TryGetValue(price.itemData.H3ID, out count);
+                currentPriceView.amount.text = Mathf.Min(price.count, count).ToString() + "/" + price.count.ToString();
+
+                if (count >= price.count)
+                {
+                    currentPriceView.fulfilledIcon.SetActive(true);
+                    currentPriceView.unfulfilledIcon.SetActive(false);
+                }
+                else
+                {
+                    currentPriceView.fulfilledIcon.SetActive(false);
+                    currentPriceView.unfulfilledIcon.SetActive(true);
+                    canDeal = false;
+                }
+
+                buyItemPriceViewsByH3ID.Add(price.itemData.H3ID, currentPriceView);
+            }
+
+            buyDealButton.SetActive(canDeal);
+        }
+
         public void OnRagFairSellListClicked()
         {
             TODO: // Implement

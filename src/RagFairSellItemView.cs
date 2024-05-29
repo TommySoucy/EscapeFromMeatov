@@ -19,8 +19,7 @@ namespace EFM
 
         public void OnClicked()
         {
-            TODO: // Set selected itemview, set For itemview, set sell chance
-            Mod.LogInfo("");
+            HideoutController.instance.marketManager.SetRagFairSell(item);
         }
     }
 }
