@@ -21,7 +21,7 @@ namespace EFM
         {
             this.listing = listing;
 
-            itemView.SetItemData(listing.itemData, false, false, listing.amount > 1, listing.amount.ToString());
+            itemView.SetItemData(listing.itemData, false, false, listing.stack > 1, listing.stack.ToString());
             itemName.text = listing.itemData.name;
             amount.text = listing.price.ToString();
             timeLeftText.text = "Time Left: " + Mod.FormatTimeString(listing.timeLeft);
@@ -29,8 +29,8 @@ namespace EFM
 
         public void OnCancelClicked()
         {
-            TODO: // Remove listing
-            Mod.LogInfo("");
+            HideoutController.instance.marketManager.CancelRagFairListing(listing);
+            Destroy(gameObject);
         }
     }
 }

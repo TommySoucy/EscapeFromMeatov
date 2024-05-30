@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Policy;
 using UnityEngine;
 using UnityEngine.UI;
+using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
@@ -97,7 +98,9 @@ namespace EFM
         public PriceItemView ragFairSellSelectedItemView;
         public PriceItemView ragFairSellForItemView;
         public Text ragFairSellChance;
+        public Text ragFairSellTax;
         public GameObject ragFairSellListButton;
+        public Collider ragFairSellAmountButtonCollider;
 
         public Transform ragFairListingsParent;
         public GameObject ragFairListingPrefab;
@@ -106,6 +109,7 @@ namespace EFM
         public GameObject ragFairWishlistItemPrefab;
 
         // Live data
+        public MeatovItemData roubleItemData;
         [NonSerialized]
         public float fenceRestockTimer;
 
@@ -122,17 +126,33 @@ namespace EFM
         public int currentTraderIndex;
         public MeatovItemData currencyItemData;
         public MeatovItemData cartItem;
+        [NonSerialized]
         public int cartItemCount;
         public List<BarterPrice> buyPrices;
         public MeatovItemData ragFairCartItem;
+        [NonSerialized]
         public int ragFairCartItemCount;
         public List<BarterPrice> ragFairBuyPrices;
+        [NonSerialized]
         public int currentTotalSellingPrice = 0;
+        [NonSerialized]
         public int currentTotalInsurePrice = 0;
-        public MeatovItem currentRagFairSellItem; 
+        [NonSerialized]
+        public MeatovItem currentRagFairSellItem;
+        [NonSerialized]
+        public float currentRagFairSellChance;
+        [NonSerialized]
+        public int currentRagFairSellPrice;
+        [NonSerialized]
+        public int currentRagFairSellTax;
 
+        [NonSerialized]
         public bool choosingBuyAmount;
+        [NonSerialized]
         public bool choosingRagfairBuyAmount;
+        [NonSerialized]
+        public bool choosingRagFairSellAmount;
+        [NonSerialized]
         public bool startedChoosingThisFrame;
         private Vector3 amountChoiceStartPosition;
         private Vector3 amountChoiceRightVector;
@@ -149,6 +169,8 @@ namespace EFM
 
         public void Start()
         {
+            Mod.GetItemData("203", out roubleItemData);
+
             // Process items loaded in trade volume
             foreach (KeyValuePair<string, List<MeatovItem>> itemEntry in tradeVolume.inventoryItems)
             {
@@ -173,7 +195,7 @@ namespace EFM
             TakeInput();
 
             // Update based on splitting stack
-            if (choosingBuyAmount || choosingRagfairBuyAmount)
+            if (choosingBuyAmount || choosingRagfairBuyAmount || choosingRagFairSellAmount)
             {
                 Vector3 handVector = Mod.rightHand.transform.localPosition - amountChoiceStartPosition;
                 float angle = Vector3.Angle(amountChoiceRightVector, handVector);
@@ -197,6 +219,34 @@ namespace EFM
                 Mod.stackSplitUIText.text = chosenAmount.ToString() + "/" + maxBuyAmount;
             }
 
+            // Update ragfair listings
+            for(int i=0; i < ragFairListings.Count; ++i)
+            {
+                ragFairListings[i].timeLeft -= Time.deltaTime;
+                if(ragFairListings[i].timeToSellCheck <= 0)
+                {
+                    if (!ragFairListings[i].sellChecked)
+                    {
+                        if (ragFairListings[i].SellCheck())
+                        {
+                            tradeVolume.SpawnItem(roubleItemData, ragFairListings[i].price);
+                            Destroy(ragFairListings[i].UI.gameObject);
+                            ragFairListings[i] = ragFairListings[ragFairListings.Count - 1];
+                            ragFairListings.RemoveAt(ragFairListings.Count - 1);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    ragFairListings[i].timeToSellCheck -= Time.deltaTime;
+                }
+                if(ragFairListings[i].timeLeft <= 0)
+                {
+                    CancelRagFairListing(i);
+                }
+            }
+
             if (fenceRestockTimer > 0)
             {
                 fenceRestockTimer -= Time.deltaTime;
@@ -207,6 +257,46 @@ namespace EFM
                 if (currentTraderIndex == 2)
                 {
                     SetTrader(2);
+                }
+            }
+        }
+
+        public void CancelRagFairListing(int index)
+        {
+            // Reload serialized item from listing and readd it to trade volume
+            JToken tradeItemData = ragFairListings[index].serializedItem;
+            VaultSystem.ReturnObjectListDelegate del = objs =>
+            {
+                MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                if (meatovItem != null)
+                {
+                    tradeVolume.AddItem(meatovItem);
+                    meatovItem.transform.localPosition = Vector3.zero;
+                }
+            };
+
+            MeatovItem loadedItem = MeatovItem.Deserialize(tradeItemData, del);
+
+            if (loadedItem != null)
+            {
+                tradeVolume.AddItem(loadedItem);
+                loadedItem.transform.localPosition = Vector3.zero;
+            }
+
+            // Remove listing from list
+            Destroy(ragFairListings[index].UI.gameObject);
+            ragFairListings[index] = ragFairListings[ragFairListings.Count - 1];
+            ragFairListings.RemoveAt(ragFairListings.Count - 1);
+        }
+
+        public void CancelRagFairListing(RagFairListing listing)
+        {
+            for(int i=0; i < ragFairListings.Count; ++i)
+            {
+                if(ragFairListings[i] == listing)
+                {
+                    CancelRagFairListing(i);
+                    break;
                 }
             }
         }
@@ -234,6 +324,7 @@ namespace EFM
                 AddInsureItem(item);
                 UpdateInsurePriceForItem(item.itemData);
                 UpdateRagFairBuyPriceForItem(item.itemData);
+                UpdateRagFairSellTax();
             }
         }
 
@@ -254,6 +345,7 @@ namespace EFM
             UpdateBuyPriceForItem(item.itemData);
             UpdateInsurePriceForItem(item.itemData);
             UpdateRagFairBuyPriceForItem(item.itemData);
+            UpdateRagFairSellTax();
         }
 
         public void AddInsureItem(MeatovItem item)
@@ -833,6 +925,7 @@ namespace EFM
             // Disable buy deal/amount buttons until done choosing amount
             buyAmountButtonCollider.enabled = false;
             ragFairBuyAmountButtonCollider.enabled = false;
+            ragFairSellAmountButtonCollider.enabled = false;
 
             // Start choosing amount
             Mod.stackSplitUI.SetActive(true);
@@ -976,78 +1069,99 @@ namespace EFM
             }
             else
             {
-                cont from ehre// implement function
+                int soldValue = (int)(item.itemData.value * 0.5f);
+                float actualX = Mathf.InverseLerp(soldValue, foundValue, givenValue) - 0.5f;
+                return 1 / (1 + Mathf.Pow(43000, actualX));
+            }
+        }
+
+        public void UpdateRagFairSellTax()
+        {
+            if(currentRagFairSellItem == null)
+            {
+                ragFairSellTax.text = "Tax (5%): " + 0;
+                ragFairSellListButton.SetActive(false);
+
+                return;
+            }
+
+            currentRagFairSellTax = (int)Mathf.Max(currentRagFairSellPrice / 100f * 5f, 1);
+            ragFairSellTax.text = "Tax (5%): " + currentRagFairSellTax;
+
+            int amount = 0;
+            if(tradeVolume.inventory.TryGetValue(roubleItemData.H3ID, out amount))
+            {
+                ragFairSellListButton.SetActive(amount >= currentRagFairSellTax);
+            }
+            else
+            {
+                ragFairSellListButton.SetActive(false);
             }
         }
 
         public void SetRagFairSell(MeatovItem item)
         {
             currentRagFairSellItem = item;
+            currentRagFairSellPrice = item.stack * item.itemData.value;
+            currentRagFairSellChance = GetRagFairSellChance(item, currentRagFairSellPrice);
+
             ragFairSellSelectedItemView.itemView.SetItem(item);
             ragFairSellSelectedItemView.itemName.text = item.name;
             ragFairSellSelectedItemView.amount.text = item.stack.ToString();
-            ragFairSellForItemView.amount.text = (item.stack * item.itemData.value).ToString();
-            ragFairSellChance.text = "Sell Chance: " + (int)Mathf.Max(GetRagFairSellChance(item, item.stack * item.itemData.value), 1) + "%";
-            ragFairSellListButton.SetActive(true);
+            ragFairSellForItemView.amount.text = currentRagFairSellPrice.ToString();
+            ragFairSellChance.text = "Sell Chance: " + (int)(currentRagFairSellChance * 100) + "%";
 
-            bool canDeal = true;
-            foreach (BarterPrice price in priceList)
-            {
-                Mod.LogInfo("\tSetting price: " + price.itemData.H3ID);
-                Transform priceElement = Instantiate(buyPricePrefab, buyPricesContent).transform;
-                priceElement.gameObject.SetActive(true);
-                PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
-                currentPriceView.price = price;
-                price.priceItemView = currentPriceView;
-
-                currentPriceView.amount.text = price.count.ToString();
-                currentPriceView.itemName.text = price.itemData.name.ToString();
-                if (price.itemData.itemType == MeatovItem.ItemType.DogTag)
-                {
-                    currentPriceView.itemView.SetItemData(price.itemData, false, false, true, ">= lvl " + price.dogTagLevel);
-                }
-                else
-                {
-                    currentPriceView.itemView.SetItemData(price.itemData);
-                }
-
-                int count = 0;
-                tradeVolume.inventory.TryGetValue(price.itemData.H3ID, out count);
-                currentPriceView.amount.text = Mathf.Min(price.count, count).ToString() + "/" + price.count.ToString();
-
-                if (count >= price.count)
-                {
-                    currentPriceView.fulfilledIcon.SetActive(true);
-                    currentPriceView.unfulfilledIcon.SetActive(false);
-                }
-                else
-                {
-                    currentPriceView.fulfilledIcon.SetActive(false);
-                    currentPriceView.unfulfilledIcon.SetActive(true);
-                    canDeal = false;
-                }
-
-                buyItemPriceViewsByH3ID.Add(price.itemData.H3ID, currentPriceView);
-            }
-
-            buyDealButton.SetActive(canDeal);
+            UpdateRagFairSellTax();
         }
 
         public void OnRagFairSellListClicked()
         {
-            TODO: // Implement
-            Mod.LogInfo("");
+            RagFairListing listing = new RagFairListing();
+            listing.price = currentRagFairSellPrice;
+            listing.itemData = currentRagFairSellItem.itemData;
+            listing.serializedItem = currentRagFairSellItem.Serialize();
+            listing.stack = currentRagFairSellItem.stack;
+            listing.timeLeft = 3600 * 24 * 3; // 3 days in seconds
+            listing.sellChance = currentRagFairSellChance;
+            listing.timeToSellCheck = UnityEngine.Random.Range(10, listing.timeLeft - 10);
+            AddRagFairListing(listing);
+
+            Destroy(currentRagFairSellItem.gameObject);
+
+            RemoveItemFromTrade(roubleItemData, currentRagFairSellTax);
         }
 
         public void OnRagFairSellAmountClicked()
         {
-            TODO: // Implement
-            Mod.LogInfo("");
+            // Cancel stack splitting if in progress
+            if (Mod.amountChoiceUIUp || Mod.splittingItem != null)
+            {
+                Mod.splittingItem.CancelSplit();
+            }
+
+            // Disable buy deal/amount buttons until done choosing amount
+            buyAmountButtonCollider.enabled = false;
+            ragFairBuyAmountButtonCollider.enabled = false;
+            ragFairSellAmountButtonCollider.enabled = false;
+
+            // Start choosing amount
+            Mod.stackSplitUI.SetActive(true);
+            Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
+            Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
+            amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
+            amountChoiceRightVector = Mod.rightHand.transform.right;
+            amountChoiceRightVector.y = 0;
+
+            choosingRagFairSellAmount = true;
+            startedChoosingThisFrame = true;
+
+            // Set max buy amount, limit it to 360 otherwise scale is not large enough and its hard to specify an exact value
+            maxBuyAmount = 10000000;
         }
 
         private void TakeInput()
         {
-            if (choosingBuyAmount || choosingRagfairBuyAmount)
+            if (choosingBuyAmount || choosingRagfairBuyAmount || choosingRagFairSellAmount)
             {
                 FVRViveHand hand = Mod.rightHand.fvrHand;
                 string countString;
@@ -1072,7 +1186,7 @@ namespace EFM
                             UpdateBuyPriceForItem(price.itemData);
                         }
                     }
-                    else
+                    else if (choosingRagfairBuyAmount)
                     {
                         ragFairCartItemCount = chosenAmount;
                         countString = ragFairCartItemCount.ToString();
@@ -1086,11 +1200,19 @@ namespace EFM
                             UpdateRagFairBuyPriceForItem(price.itemData);
                         }
                     }
+                    else // choosingRagFairSellAmount
+                    {
+                        currentRagFairSellPrice = chosenAmount;
+                        ragFairSellForItemView.amount.text = currentRagFairSellPrice.ToString();
+                        currentRagFairSellChance = GetRagFairSellChance(currentRagFairSellItem, currentRagFairSellPrice);
+                        ragFairSellChance.text = "Sell Chance: " + (int)(currentRagFairSellChance * 100) + "%";
+                    }
                     Mod.stackSplitUI.SetActive(false);
 
                     // Reenable buy amount buttons
                     buyAmountButtonCollider.enabled = true;
                     ragFairBuyAmountButtonCollider.enabled = true;
+                    ragFairSellAmountButtonCollider.enabled = true;
 
                     choosingBuyAmount = false;
                     choosingRagfairBuyAmount = false;
@@ -1119,13 +1241,13 @@ namespace EFM
 
             // Sell
             // Setup selling price display
-            Mod.GetItemData("203", out MeatovItemData ragFairCurrency);
-            ragFairSellForItemView.itemName.text = ragFairCurrency.name;
-            ragFairSellForItemView.itemView.SetItemData(ragFairCurrency);
+            ragFairSellForItemView.itemName.text = roubleItemData.name;
+            ragFairSellForItemView.itemView.SetItemData(roubleItemData);
 
-            // Add all items in trade volume that can be sold on rag fair
+            // Disable lsit button by default
             ragFairSellListButton.SetActive(false);
 
+            // Add all items in trade volume that can be sold on rag fair
             foreach (KeyValuePair<string, List<MeatovItem>> volumeItemEntry in tradeVolume.inventoryItems)
             {
                 for (int i = 0; i < volumeItemEntry.Value.Count; ++i)
@@ -1149,7 +1271,6 @@ namespace EFM
 
         public void AddRagFairListing(RagFairListing listing)
         {
-            TODO: // Implement listing timer decrement and unlisting when it reaches 0
             RagFairListingUI listingUI = Instantiate(ragFairListingPrefab, ragFairListingsParent).GetComponent<RagFairListingUI>();
             listingUI.SetListing(listing);
             listing.UI = listingUI;
@@ -1557,6 +1678,7 @@ namespace EFM
             // Disable buy deal/amount buttons until done choosing amount
             buyAmountButtonCollider.enabled = false;
             ragFairBuyAmountButtonCollider.enabled = false;
+            ragFairSellAmountButtonCollider.enabled = false;
 
             // Start choosing amount
             Mod.stackSplitUI.SetActive(true);
