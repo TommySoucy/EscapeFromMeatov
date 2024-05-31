@@ -253,11 +253,17 @@ namespace EFM
             }
             else
             {
-                fenceRestockTimer = Convert.ToSingle((DateTime.Today.ToUniversalTime().AddHours(24) - DateTime.UtcNow).TotalSeconds);
+                // Generate new fence assort
+                GenerateFenceAssort();
+
+                // Reset trader if necessary
                 if (currentTraderIndex == 2)
                 {
                     SetTrader(2);
                 }
+
+                // Reset timer
+                fenceRestockTimer = Convert.ToSingle((DateTime.Today.ToUniversalTime().AddHours(24) - DateTime.UtcNow).TotalSeconds);
             }
         }
 
@@ -1220,6 +1226,16 @@ namespace EFM
             }
         }
 
+        public void ClearRagFairCategories()
+        {
+            while (ragFairBuyCategoriesParent.childCount > 1)
+            {
+                Transform currentFirstChild = ragFairBuyCategoriesParent.GetChild(1);
+                currentFirstChild.SetParent(null);
+                Destroy(currentFirstChild.gameObject);
+            }
+        }
+
         public void AddRagFairCategories(CategoryTreeNode category, Transform currentParent, int step = 0)
         {
             RagFairCategory categoryUI = Instantiate(ragFairBuyCategoryPrefab, currentParent).GetComponent<RagFairCategory>();
@@ -1401,10 +1417,7 @@ namespace EFM
                 // Fence special case, no assort, want to build a random one
                 if (index == 2)
                 {
-                    TODO: // Generate fence barters, make sure to add/remove barters from corresponding categories
-
-                    // We want everyone to use the same seed for generating random fence barters
-                    UnityEngine.Random.InitState(Convert.ToInt32((DateTime.UtcNow - DateTime.Today.ToUniversalTime()).TotalHours));
+                    GenerateFenceAssort();
                 }
                 else
                 {
@@ -1545,6 +1558,25 @@ namespace EFM
             }
 
             Mod.LogInfo("0");
+        }
+
+        public void GenerateFenceAssort()
+        {
+            Trader fence = Mod.traders[2];
+
+            // Clear existing barters
+            fence.bartersByLevel.Clear();
+            fence.bartersByItemID.Clear();
+
+            // We want everyone to use the same seed for generating random fence barters
+            UnityEngine.Random.InitState(Convert.ToInt32((DateTime.UtcNow - DateTime.Today.ToUniversalTime()).TotalHours));
+
+            // Generate 25-50 random barters from fence's buyCategories and buyBlacklist
+            int generateCount = UnityEngine.Random.Range(25, 51);
+            for(int i=0; i < generateCount; ++i)
+            {
+                td
+            }
         }
 
         public void AddTask(Task task)
