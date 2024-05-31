@@ -49,7 +49,7 @@ namespace EFM
                         barter.prices = new BarterPrice[1];
                         barter.prices[0] = new BarterPrice();
                         barter.prices[0].itemData = roubleData;
-                        barter.prices[0].count = (int)(items[i].value * 1.5f);
+                        barter.prices[0].count = (int)(items[i].value * MarketManager.RAGFAIR_PRICE_MULT);
                         barters.Add(barter);
                     }
                 }

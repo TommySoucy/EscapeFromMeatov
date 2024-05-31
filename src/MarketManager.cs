@@ -1,8 +1,6 @@
 ﻿using FistVR;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
@@ -11,6 +9,9 @@ namespace EFM
 {
     public class MarketManager : MonoBehaviour
     {
+        public static readonly float RAGFAIR_PRICE_MULT = 2f;
+        public static readonly float FENCE_PRICE_MULT = 1.8f; // Should be lower than RAGFAIR_PRICE_MULT
+
         // Objects
         public HideoutController controller;
         public ContainmentVolume tradeVolume;
@@ -130,6 +131,7 @@ namespace EFM
         public int cartItemCount;
         public List<BarterPrice> buyPrices;
         public MeatovItemData ragFairCartItem;
+        public Barter ragFairCartBarter;
         [NonSerialized]
         public int ragFairCartItemCount;
         public List<BarterPrice> ragFairBuyPrices;
@@ -826,6 +828,7 @@ namespace EFM
         public void SetRagFairBuy(Barter ragFairBarter)
         {
             ragFairCartItem = ragFairBarter.itemData;
+            ragFairCartBarter = ragFairBarter;
 
             if (ragFairBuyItemPriceViewsByH3ID == null)
             {
@@ -922,6 +925,11 @@ namespace EFM
 
         public void OnRagFairBuyAmountClicked()
         {
+            if(ragFairCartItem == null)
+            {
+                return;
+            }
+
             // Cancel stack splitting if in progress
             if (Mod.amountChoiceUIUp || Mod.splittingItem != null)
             {
@@ -1066,7 +1074,7 @@ namespace EFM
             }
             if(foundValue == 0)
             {
-                foundValue = (int)(item.itemData.value * 1.5f);
+                foundValue = (int)(item.itemData.value * MarketManager.RAGFAIR_PRICE_MULT);
             }
 
             if(givenValue > foundValue)
@@ -1139,6 +1147,11 @@ namespace EFM
 
         public void OnRagFairSellAmountClicked()
         {
+            if (currentRagFairSellItem == null)
+            {
+                return;
+            }
+
             // Cancel stack splitting if in progress
             if (Mod.amountChoiceUIUp || Mod.splittingItem != null)
             {
@@ -1564,6 +1577,33 @@ namespace EFM
         {
             Trader fence = Mod.traders[2];
 
+            // Remove existing barters from categories
+            if(fence.bartersByItemID.Count > 0)
+            {
+                foreach (KeyValuePair<string, List<Barter>> barters in fence.bartersByItemID)
+                {
+                    for (int i = 0; i < barters.Value.Count; ++i)
+                    {
+                        for (int j = 0; j < barters.Value[i].itemData.parents.Length; ++j)
+                        {
+                            CategoryTreeNode category = Mod.itemCategories.FindChild(barters.Value[i].itemData.parents[j]);
+                            if (category != null)
+                            {
+                                category.barters.Remove(barters.Value[i]);
+                            }
+                        }
+
+                        if(ragFairCartBarter == barters.Value[i])
+                        {
+                            ragFairCartBarter = null;
+                            ragFairCartItem = null;
+
+                            ragFairBuyDealButton.SetActive(false);
+                        }
+                    }
+                }
+            }
+
             // Clear existing barters
             fence.bartersByLevel.Clear();
             fence.bartersByItemID.Clear();
@@ -1575,8 +1615,42 @@ namespace EFM
             int generateCount = UnityEngine.Random.Range(25, 51);
             for(int i=0; i < generateCount; ++i)
             {
-                td
+                CategoryTreeNode randomCategory = Mod.itemCategories.FindChild(fence.buyCategories[UnityEngine.Random.Range(0, fence.buyCategories.Length)]);
+                if(randomCategory != null)
+                {
+                    if(Mod.itemsByParents.TryGetValue(randomCategory.ID, out List<MeatovItemData> items))
+                    {
+                        MeatovItemData randomItem = items[UnityEngine.Random.Range(0, items.Count)];
+
+                        // Note that fence should only ever have a single barter for a specific item since they would all have the same price anyway
+                        if (!fence.bartersByItemID.ContainsKey(randomItem.H3ID))
+                        {
+                            Barter barter = new Barter();
+                            barter.itemData = randomItem;
+                            barter.prices = new BarterPrice[1];
+                            barter.prices[0] = new BarterPrice();
+                            barter.prices[0].itemData = roubleItemData;
+                            // Barter price will be a little lower than ragfair if can sell on ragfair, or 1.5x higher if can't
+                            barter.prices[0].count = randomItem.canSellOnRagfair ? (int)(randomItem.value * FENCE_PRICE_MULT) : (int)(randomItem.value * FENCE_PRICE_MULT * 1.5f);
+
+                            randomCategory.barters.Add(barter);
+                            if (fence.bartersByLevel.TryGetValue(0, out List<Barter> levelBarters))
+                            {
+                                levelBarters.Add(barter);
+                            }
+                            else
+                            {
+                                fence.bartersByLevel.Add(0, new List<Barter>() { barter });
+                            }
+
+                            fence.bartersByItemID.Add(randomItem.H3ID, new List<Barter>() { barter });
+                        }
+                    }
+                }
             }
+
+            ClearRagFairCategories();
+            AddRagFairCategories(Mod.itemCategories, ragFairBuyCategoriesParent);
         }
 
         public void AddTask(Task task)
