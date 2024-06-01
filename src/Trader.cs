@@ -234,10 +234,10 @@ namespace EFM
             }
             levels = tempLevels.ToArray();
 
+            bartersByLevel = new Dictionary<int, List<Barter>>();
+            bartersByItemID = new Dictionary<string, List<Barter>>();
             if (Mod.traderAssortDB[index] != null)
             {
-                bartersByLevel = new Dictionary<int, List<Barter>>();
-                bartersByItemID = new Dictionary<string, List<Barter>>();
                 Dictionary<string, int> barterLevelPerID = Mod.traderAssortDB[index]["loyal_level_items"].ToObject<Dictionary<string, int>>();
                 JArray itemsArray = Mod.traderAssortDB[index]["items"] as JArray;
                 foreach (KeyValuePair<string, int> barterLevelEntry in barterLevelPerID)

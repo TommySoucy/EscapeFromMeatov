@@ -1377,19 +1377,23 @@ namespace EFM
 
         public void BuildCategoriesTree()
         {
+            Mod.LogInfo("Building categ tree");
             if (itemCategories == null)
             {
-                itemCategories = new CategoryTreeNode(null, itemParentID, localeDB[itemParentID + " Name"].ToString());
+                itemCategories = new CategoryTreeNode(null, itemParentID, "Item");
             }
             // Note that a particular item will appear in the list corresponding to all of its ancestors, not only its direct parent
             foreach(KeyValuePair<string, List<MeatovItemData>> parentEntry in itemsByParents)
             {
+                Mod.LogInfo("Get all ancestors for "+ parentEntry.Key);
                 // Build list of all ancestors starting from this parent
                 List<string> parents = new List<string>() { parentEntry.Key };
                 JToken nextParentToken = itemDB[parentEntry.Key]["_parent"];
                 while (nextParentToken != null && !nextParentToken.ToString().Equals(""))
                 {
+                    Mod.LogInfo("Found " + nextParentToken.ToString());
                     parents.Add(nextParentToken.ToString());
+                    nextParentToken = itemDB[nextParentToken.ToString()]["_parent"];
                 }
 
                 // Make sure this parent and all ancestors are in the tree
@@ -1403,7 +1407,16 @@ namespace EFM
                         // If this parent isn't in the tree yet, add it and all parents under it to the tree
                         for(int j=i; j >= 0; --j)
                         {
-                            string name = localeDB[parents[j]+" Name"].ToString();
+                            string name = null;
+                            if(localeDB[parents[j] + " Name"] != null)
+                            {
+                                name = localeDB[parents[j] + " Name"].ToString();
+                            }
+                            else
+                            {
+                                Mod.LogWarning("DEV: Failed to get category name for parent: "+ parents[j]);
+                                name = parents[j] + " Name";
+                            }
                             previousParentNode = new CategoryTreeNode(previousParentNode, parents[i], name);
                         }
                         break;

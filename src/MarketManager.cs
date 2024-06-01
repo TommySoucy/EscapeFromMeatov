@@ -11,6 +11,8 @@ namespace EFM
     {
         public static readonly float RAGFAIR_PRICE_MULT = 2f;
         public static readonly float FENCE_PRICE_MULT = 1.8f; // Should be lower than RAGFAIR_PRICE_MULT
+        public static readonly float DOLLAR_EXCHANGE_RATE = 120.0f;
+        public static readonly float EURO_EXCHANGE_RATE = 135.0f;
 
         // Objects
         public HideoutController controller;
@@ -384,11 +386,11 @@ namespace EFM
             // Apply exchange rate if necessary
             if (trader.currency == 1)
             {
-                actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
+                actualValue = (int)Mathf.Max(actualValue / DOLLAR_EXCHANGE_RATE, 1);
             }
             else if (trader.currency == 2)
             {
-                actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
+                actualValue = (int)Mathf.Max(actualValue / EURO_EXCHANGE_RATE, 1);
             }
 
             // Apply trader insure coefficient
@@ -438,11 +440,11 @@ namespace EFM
             // Apply exchange rate if necessary
             if (trader.currency == 1)
             {
-                actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
+                actualValue = (int)Mathf.Max(actualValue / DOLLAR_EXCHANGE_RATE, 1);
             }
             else if (trader.currency == 2)
             {
-                actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
+                actualValue = (int)Mathf.Max(actualValue / EURO_EXCHANGE_RATE, 1);
             }
 
             // Apply trader buy coefficient
@@ -507,11 +509,11 @@ namespace EFM
             // Apply exchange rate if necessary
             if (trader.currency == 1)
             {
-                actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
+                actualValue = (int)Mathf.Max(actualValue / DOLLAR_EXCHANGE_RATE, 1);
             }
             else if (trader.currency == 2)
             {
-                actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
+                actualValue = (int)Mathf.Max(actualValue / EURO_EXCHANGE_RATE, 1);
             }
 
             // Apply trader buy coefficient
@@ -616,11 +618,11 @@ namespace EFM
             // Apply exchange rate if necessary
             if (trader.currency == 1)
             {
-                actualValue = (int)Mathf.Max(actualValue / 120.0f, 1);
+                actualValue = (int)Mathf.Max(actualValue / DOLLAR_EXCHANGE_RATE, 1);
             }
             else if (trader.currency == 2)
             {
-                actualValue = (int)Mathf.Max(actualValue / 135.0f, 1);
+                actualValue = (int)Mathf.Max(actualValue / EURO_EXCHANGE_RATE, 1);
             }
 
             // Apply trader insure coefficient
@@ -1048,11 +1050,11 @@ namespace EFM
                             }
                             else if (barters[j].prices[0].itemData.H3ID.Equals("202"))
                             {
-                                foundValue = (int)Mathf.Max(barters[j].prices[0].count / 135.0f, 1);
+                                foundValue = (int)Mathf.Max(barters[j].prices[0].count / EURO_EXCHANGE_RATE, 1);
                             }
                             else if (barters[j].prices[0].itemData.H3ID.Equals("201"))
                             {
-                                foundValue = (int)Mathf.Max(barters[j].prices[0].count / 120.0f, 1);
+                                foundValue = (int)Mathf.Max(barters[j].prices[0].count / DOLLAR_EXCHANGE_RATE, 1);
                             }
                             else
                             {

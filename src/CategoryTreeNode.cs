@@ -25,12 +25,12 @@ namespace EFM
 
             barters = new List<Barter>();
             Mod.GetItemData("203", out MeatovItemData roubleData);
-            if(Mod.itemsByParents.TryGetValue(ID, out List<MeatovItemData> items))
+            if (Mod.itemsByParents.TryGetValue(ID, out List<MeatovItemData> items))
             {
                 for (int i = 0; i < items.Count; ++i)
                 {
                     // Find trader barters for this item
-                    for(int j=0; j < Mod.traders.Length; ++j)
+                    for (int j = 0; j < Mod.traders.Length; ++j)
                     {
                         if (Mod.traders[j].bartersByItemID.TryGetValue(items[i].H3ID, out List<Barter> traderBarters))
                         {
@@ -40,9 +40,8 @@ namespace EFM
                             }
                         }
                     }
-
                     // Only add a barter if there aren't any trader barters and if the item canSellOnRagFair
-                    if(barters.Count == 0 && items[i].canSellOnRagfair)
+                    if (barters.Count == 0 && items[i].canSellOnRagfair)
                     {
                         Barter barter = new Barter();
                         barter.itemData = items[i];
@@ -53,6 +52,10 @@ namespace EFM
                         barters.Add(barter);
                     }
                 }
+            }
+            else
+            {
+                Mod.LogError("CategoryTreeNode " + ID + " was not found as parent in items by parent");
             }
         }
 

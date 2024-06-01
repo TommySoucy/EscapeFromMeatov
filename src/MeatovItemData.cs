@@ -207,9 +207,17 @@ namespace EFM
             name = data["name"].ToString();
             description = data["description"].ToString();
             canSellOnRagfair = (bool)data["canSellOnRagfair"];
-            if(!Mod.itemValues.TryGetValue(tarkovID, out value))
+            bool gotValue = Mod.itemValues.TryGetValue(tarkovID, out value);
+            if(!gotValue)
             {
-                Mod.LogError("DEV: Could not find value for item "+H3ID+" with tarkovID "+tarkovID);
+                if (data["value"] == null)
+                {
+                    Mod.LogError("DEV: Could not find value for item " + H3ID + " with tarkovID " + tarkovID);
+                }
+                else
+                {
+                    value = (int)data["value"];
+                }
             }
 
             compatibilityValue = (int)data["compatibilityValue"];
