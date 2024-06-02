@@ -180,6 +180,7 @@ namespace EFM
         {
             if(data["tarkovID"] == null)
             {
+                H3ID = null;
                 return;
             }
             
@@ -328,6 +329,11 @@ namespace EFM
 
         public void InitCheckmarkData()
         {
+            if(H3ID == null)
+            {
+                return;
+            }
+
             Mod.LogInfo("InitCheckmarkData for "+H3ID);
             if (HideoutController.instance == null)
             {
