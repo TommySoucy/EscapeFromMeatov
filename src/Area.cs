@@ -94,8 +94,6 @@ namespace EFM
                 }
             }
 
-            LoadStaticData();
-
             UpdateObjectsPerLevel();
 
             if (mainAudioClips != null)
@@ -1390,7 +1388,7 @@ namespace EFM
             }
 
             // Load live data
-            if(HideoutController.loadedData["hideout"]["areas"][area.index]["productions"][ID] != null)
+            if (HideoutController.loadedData["hideout"]["areas"][area.index]["productions"][ID] == null)
             {
                 inProduction = false;
                 progress = 0;

@@ -1,8 +1,10 @@
 ﻿using FistVR;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
+using static RootMotion.Demos.KissingRig;
 
 namespace EFM
 {
@@ -326,18 +328,23 @@ namespace EFM
 
         public void InitCheckmarkData()
         {
+            Mod.LogInfo("InitCheckmarkData for "+H3ID);
             if (HideoutController.instance == null)
             {
                 Mod.LogError("MeatovItemData.UpdateCheckmarkData called but missing hideout instance!");
                 return;
             }
 
+            Mod.LogInfo("\t0");
             if (neededForLevelByArea == null)
             {
                 neededFor = new bool[5];
                 neededForLevelByArea = new Dictionary<int, Dictionary<int, int>>();
+                neededForLevelByAreaCurrent = new Dictionary<int, Dictionary<int, int>>();
                 neededForProductionByLevelByArea = new Dictionary<int, Dictionary<int, Dictionary<Production, int>>>();
+                neededForProductionByLevelByAreaCurrent = new Dictionary<int, Dictionary<int, Dictionary<Production, int>>>();
                 neededForBarterByLevelByTrader = new Dictionary<int, Dictionary<int, Dictionary<Barter, int>>>();
+                neededForBarterByLevelByTraderCurrent = new Dictionary<int, Dictionary<int, Dictionary<Barter, int>>>();
                 neededForTasks = new Dictionary<Task, KeyValuePair<int, bool>>();
                 neededForTasksCurrent = new Dictionary<Task, KeyValuePair<int, bool>>();
             }
@@ -348,245 +355,285 @@ namespace EFM
                 // Everything this item is needed for never changes
                 return;
             }
+            Mod.LogInfo("\t0");
 
             onWishlist = Mod.wishList.Contains(this);
             neededFor[2] = onWishlist;
 
+            Mod.LogInfo("\t0");
             // Get Area specific data (Upgrades, Productions)
             for (int i = 0; i < HideoutController.instance.areaController.areas.Length; ++i)
             {
+                Mod.LogInfo("\t\tArea " + i);
                 Area area = HideoutController.instance.areaController.areas[i];
-                bool subscribed = false;
-
-                // Area upgrades
-                for (int j = 0; j < area.requirementsByTypePerLevel.Length; ++j)
+                if (area != null)
                 {
-                    Dictionary<Requirement.RequirementType, List<Requirement>> requirementsByType = area.requirementsByTypePerLevel[j];
-                    if (requirementsByType.ContainsKey(Requirement.RequirementType.Item) && requirementsByType[Requirement.RequirementType.Item] != null)
+                    bool subscribed = false;
+
+                    // Area upgrades
+                    for (int j = 0; j < area.requirementsByTypePerLevel.Length; ++j)
                     {
-                        List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Item];
-                        for (int k = 0; k < itemRequirements.Count; ++k)
+                        Mod.LogInfo("\t\t\tUpgrades " + j);
+                        Dictionary<Requirement.RequirementType, List<Requirement>> requirementsByType = area.requirementsByTypePerLevel[j];
+                        if (requirementsByType.ContainsKey(Requirement.RequirementType.Item) && requirementsByType[Requirement.RequirementType.Item] != null)
                         {
-                            Requirement requirement = itemRequirements[k];
-                            if (requirement.item.H3ID.Equals(H3ID))
+                            Mod.LogInfo("\t\t\t\tItem reqs ");
+                            List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Item];
+                            for (int k = 0; k < itemRequirements.Count; ++k)
                             {
-                                int newCount = requirement.itemCount;
-                                if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
+                                Mod.LogInfo("\t\t\t\t\tItem req "+k);
+                                Requirement requirement = itemRequirements[k];
+                                if (requirement.item == this)
                                 {
-                                    int currentCount = 0;
-                                    if (levels.TryGetValue(j, out currentCount))
+                                    Mod.LogInfo("\t\t\t\t\t0");
+                                    int newCount = requirement.itemCount;
+                                    if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
                                     {
-                                        levels[j] = currentCount + newCount;
-                                    }
-                                    else
-                                    {
-                                        levels.Add(j, newCount);
-                                    }
-                                }
-                                else
-                                {
-                                    Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
-                                    newLevelsDict.Add(j, newCount);
-                                    neededForLevelByArea.Add(i, newLevelsDict);
-                                }
-
-                                // Set initial needed for state
-                                if (area.currentLevel < area.levels.Length - 1)
-                                {
-                                    if (!subscribed)
-                                    {
-                                        area.OnAreaLevelChanged += OnAreaLevelChanged;
-                                        subscribed = true;
-                                    }
-
-                                    // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
-                                    neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
-                                    if (neededFor[1])
-                                    {
-                                        if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int,int> neededForLevels))
-                                        {
-                                            int currentCount = 0;
-                                            if (neededForLevels.TryGetValue(j, out currentCount))
-                                            {
-                                                neededForLevels[j] = currentCount + newCount;
-                                            }
-                                            else
-                                            {
-                                                neededForLevels.Add(j, newCount);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
-                                            newLevelsDict.Add(j, newCount);
-                                            neededForLevelByAreaCurrent.Add(i, newLevelsDict);
-
-                                            if(newCount < minimumUpgradeAmount)
-                                            {
-                                                minimumUpgradeAmount = newCount;
-                                            }
-                                        }
-                                        neededForAreaTotal += newCount;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (requirementsByType.ContainsKey(Requirement.RequirementType.Tool) && requirementsByType[Requirement.RequirementType.Tool] != null)
-                    {
-                        List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Tool];
-                        for (int k = 0; k < itemRequirements.Count; ++k)
-                        {
-                            Requirement requirement = itemRequirements[k];
-                            if (requirement.item.H3ID.Equals(H3ID))
-                            {
-                                if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
-                                {
-                                    int currentCount = 0;
-                                    if (levels.TryGetValue(j, out currentCount))
-                                    {
-                                        levels[j] = currentCount + 1;
-                                    }
-                                    else
-                                    {
-                                        levels.Add(j, 1);
-                                    }
-                                }
-                                else
-                                {
-                                    Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
-                                    newLevelsDict.Add(j, 1);
-                                    neededForLevelByArea.Add(i, newLevelsDict);
-                                }
-
-                                // Set initial needed for state
-                                if (area.currentLevel < area.levels.Length - 1)
-                                {
-                                    if (!subscribed)
-                                    {
-                                        area.OnAreaLevelChanged += OnAreaLevelChanged;
-                                        subscribed = true;
-                                    }
-
-                                    // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
-                                    neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
-                                    if (neededFor[1])
-                                    {
-                                        if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
-                                        {
-                                            int currentCount = 0;
-                                            if (neededForLevels.TryGetValue(j, out currentCount))
-                                            {
-                                                neededForLevels[j] = currentCount + 1;
-                                            }
-                                            else
-                                            {
-                                                neededForLevels.Add(j, 1);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
-                                            newLevelsDict.Add(j, 1);
-                                            neededForLevelByAreaCurrent.Add(i, newLevelsDict);
-
-                                            if (1 < minimumUpgradeAmount)
-                                            {
-                                                minimumUpgradeAmount = 1;
-                                            }
-                                        }
-                                        ++neededForAreaTotal;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Productions
-                for (int j = 0; j < area.productionsPerLevel.Count; ++j)
-                {
-                    List<Production> productions = area.productionsPerLevel[j];
-                    for (int k = 0; k < productions.Count; ++k)
-                    {
-                        Production production = productions[k];
-                        for (int l = 0; l < production.requirements.Count; ++l)
-                        {
-                            Requirement requirement = production.requirements[l];
-                            if (requirement.item.H3ID.Equals(H3ID))
-                            {
-                                int newCount = requirement.itemCount;
-                                if (neededForProductionByLevelByArea.TryGetValue(i, out Dictionary<int, Dictionary<Production, int>> levels))
-                                {
-                                    if (levels.TryGetValue(j, out Dictionary<Production, int> productionsDict))
-                                    {
+                                        Mod.LogInfo("\t\t\t\t\t1");
                                         int currentCount = 0;
-                                        if (productionsDict.TryGetValue(production, out currentCount))
+                                        if (levels.TryGetValue(j, out currentCount))
                                         {
-                                            productionsDict[production] = currentCount + newCount;
+                                            levels[j] = currentCount + newCount;
                                         }
                                         else
                                         {
-                                            productionsDict.Add(production, newCount);
+                                            levels.Add(j, newCount);
                                         }
+                                        Mod.LogInfo("\t\t\t\t\t1");
                                     }
                                     else
                                     {
-                                        Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
-                                        newProductionDict.Add(production, newCount);
-                                        levels.Add(j, newProductionDict);
-                                    }
-                                }
-                                else
-                                {
-                                    Dictionary<int, Dictionary<Production, int>> newLevelsDict = new Dictionary<int, Dictionary<Production, int>>();
-                                    Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
-                                    newProductionDict.Add(production, newCount);
-                                    newLevelsDict.Add(j, newProductionDict);
-                                    neededForProductionByLevelByArea.Add(i, newLevelsDict);
-                                }
-
-                                // Set initial needed for state
-                                if (area.currentLevel < area.levels.Length - 1)
-                                {
-                                    if (!subscribed)
-                                    {
-                                        area.OnAreaLevelChanged += OnAreaLevelChanged;
-                                        subscribed = true;
+                                        Mod.LogInfo("\t\t\t\t\t2");
+                                        Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
+                                        newLevelsDict.Add(j, newCount);
+                                        neededForLevelByArea.Add(i, newLevelsDict);
                                     }
 
-                                    // Needed for production if this requirement's level is a future one and (we want future productions or this requirement's level is next)
-                                    neededFor[4] = j > area.currentLevel && (Mod.checkmarkFutureProductions || j == (area.currentLevel + 1));
-                                    if (neededFor[4])
+                                    Mod.LogInfo("\t\t\t\t\t0");
+                                    // Set initial needed for state
+                                    if (area.currentLevel < area.levels.Length - 1)
                                     {
-                                        if (neededForProductionByLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, Dictionary<Production, int>> currentLevels))
+                                        Mod.LogInfo("\t\t\t\t\t1");
+                                        if (!subscribed)
                                         {
-                                            if (currentLevels.TryGetValue(j, out Dictionary<Production, int> productionsDict))
+                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                            subscribed = true;
+                                        }
+
+                                        Mod.LogInfo("\t\t\t\t\t1");
+                                        // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
+                                        neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
+                                        if (neededFor[1])
+                                        {
+                                            Mod.LogInfo("\t\t\t\t\t2");
+                                            if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
                                             {
+                                                Mod.LogInfo("\t\t\t\t\t3");
                                                 int currentCount = 0;
-                                                if (productionsDict.TryGetValue(production, out currentCount))
+                                                if (neededForLevels.TryGetValue(j, out currentCount))
                                                 {
-                                                    productionsDict[production] = currentCount + newCount;
+                                                    neededForLevels[j] = currentCount + newCount;
                                                 }
                                                 else
                                                 {
-                                                    productionsDict.Add(production, newCount);
+                                                    neededForLevels.Add(j, newCount);
                                                 }
+                                                Mod.LogInfo("\t\t\t\t\t3");
                                             }
                                             else
                                             {
-                                                Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
-                                                newProductionDict.Add(production, newCount);
-                                                currentLevels.Add(j, newProductionDict);
+                                                Mod.LogInfo("\t\t\t\t\t4");
+                                                Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
+                                                newLevelsDict.Add(j, newCount);
+                                                neededForLevelByAreaCurrent.Add(i, newLevelsDict);
+
+                                                if (newCount < minimumUpgradeAmount)
+                                                {
+                                                    minimumUpgradeAmount = newCount;
+                                                }
+                                                Mod.LogInfo("\t\t\t\t\t4");
+                                            }
+                                            neededForAreaTotal += newCount;
+                                            Mod.LogInfo("\t\t\t\t\t2");
+                                        }
+                                        Mod.LogInfo("\t\t\t\t\t1");
+                                    }
+                                }
+                            }
+                        }
+                        if (requirementsByType.ContainsKey(Requirement.RequirementType.Tool) && requirementsByType[Requirement.RequirementType.Tool] != null)
+                        {
+                            Mod.LogInfo("\t\t\t\tTool reqs ");
+                            List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Tool];
+                            for (int k = 0; k < itemRequirements.Count; ++k)
+                            {
+                                Mod.LogInfo("\t\t\t\t\tTool req " + k);
+                                Requirement requirement = itemRequirements[k];
+                                if (requirement.item == this)
+                                {
+                                    Mod.LogInfo("\t\t\t\t\t0");
+                                    if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
+                                    {
+                                        int currentCount = 0;
+                                        if (levels.TryGetValue(j, out currentCount))
+                                        {
+                                            levels[j] = currentCount + 1;
+                                        }
+                                        else
+                                        {
+                                            levels.Add(j, 1);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
+                                        newLevelsDict.Add(j, 1);
+                                        neededForLevelByArea.Add(i, newLevelsDict);
+                                    }
+                                    Mod.LogInfo("\t\t\t\t\t0");
+
+                                    // Set initial needed for state
+                                    if (area.currentLevel < area.levels.Length - 1)
+                                    {
+                                        Mod.LogInfo("\t\t\t\t\t1");
+                                        if (!subscribed)
+                                        {
+                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                            subscribed = true;
+                                        }
+
+                                        Mod.LogInfo("\t\t\t\t\t1");
+                                        // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
+                                        neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
+                                        if (neededFor[1])
+                                        {
+                                            Mod.LogInfo("\t\t\t\t\t2");
+                                            if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
+                                            {
+                                                Mod.LogInfo("\t\t\t\t\t3");
+                                                int currentCount = 0;
+                                                if (neededForLevels.TryGetValue(j, out currentCount))
+                                                {
+                                                    neededForLevels[j] = currentCount + 1;
+                                                }
+                                                else
+                                                {
+                                                    neededForLevels.Add(j, 1);
+                                                }
+                                                Mod.LogInfo("\t\t\t\t\t3");
+                                            }
+                                            else
+                                            {
+                                                Mod.LogInfo("\t\t\t\t\t4");
+                                                Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
+                                                newLevelsDict.Add(j, 1);
+                                                neededForLevelByAreaCurrent.Add(i, newLevelsDict);
+
+                                                if (1 < minimumUpgradeAmount)
+                                                {
+                                                    minimumUpgradeAmount = 1;
+                                                }
+                                                Mod.LogInfo("\t\t\t\t\t4");
+                                            }
+                                            ++neededForAreaTotal;
+                                            Mod.LogInfo("\t\t\t\t\t2");
+                                        }
+                                        Mod.LogInfo("\t\t\t\t\t1");
+                                    }
+                                    Mod.LogInfo("\t\t\t\t\t0");
+                                }
+                            }
+                        }
+                    }
+
+                    // Productions
+                    for (int j = 0; j < area.productionsPerLevel.Count; ++j)
+                    {
+                        Mod.LogInfo("\t\t\tProds " + j);
+                        List<Production> productions = area.productionsPerLevel[j];
+                        for (int k = 0; k < productions.Count; ++k)
+                        {
+                            Production production = productions[k];
+                            Mod.LogInfo("\t\t\t\tProd " + j);
+                            Mod.LogInfo("\t\t\t\tProd " + production.ID);
+                            for (int l = 0; l < production.requirements.Count; ++l)
+                            {
+                                Requirement requirement = production.requirements[l];
+                                if (requirement.item == this)
+                                {
+                                    int newCount = requirement.itemCount;
+                                    if (neededForProductionByLevelByArea.TryGetValue(i, out Dictionary<int, Dictionary<Production, int>> levels))
+                                    {
+                                        if (levels.TryGetValue(j, out Dictionary<Production, int> productionsDict))
+                                        {
+                                            int currentCount = 0;
+                                            if (productionsDict.TryGetValue(production, out currentCount))
+                                            {
+                                                productionsDict[production] = currentCount + newCount;
+                                            }
+                                            else
+                                            {
+                                                productionsDict.Add(production, newCount);
                                             }
                                         }
                                         else
                                         {
-                                            Dictionary<int, Dictionary<Production, int>> newLevelsDict = new Dictionary<int, Dictionary<Production, int>>();
                                             Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
                                             newProductionDict.Add(production, newCount);
-                                            newLevelsDict.Add(j, newProductionDict);
-                                            neededForProductionByLevelByAreaCurrent.Add(i, newLevelsDict);
+                                            levels.Add(j, newProductionDict);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Dictionary<int, Dictionary<Production, int>> newLevelsDict = new Dictionary<int, Dictionary<Production, int>>();
+                                        Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
+                                        newProductionDict.Add(production, newCount);
+                                        newLevelsDict.Add(j, newProductionDict);
+                                        neededForProductionByLevelByArea.Add(i, newLevelsDict);
+                                    }
+
+                                    // Set initial needed for state
+                                    if (area.currentLevel < area.levels.Length - 1)
+                                    {
+                                        if (!subscribed)
+                                        {
+                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                            subscribed = true;
+                                        }
+
+                                        // Needed for production if this requirement's level is a future one and (we want future productions or this requirement's level is next)
+                                        neededFor[4] = j > area.currentLevel && (Mod.checkmarkFutureProductions || j == (area.currentLevel + 1));
+                                        if (neededFor[4])
+                                        {
+                                            if (neededForProductionByLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, Dictionary<Production, int>> currentLevels))
+                                            {
+                                                if (currentLevels.TryGetValue(j, out Dictionary<Production, int> productionsDict))
+                                                {
+                                                    int currentCount = 0;
+                                                    if (productionsDict.TryGetValue(production, out currentCount))
+                                                    {
+                                                        productionsDict[production] = currentCount + newCount;
+                                                    }
+                                                    else
+                                                    {
+                                                        productionsDict.Add(production, newCount);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
+                                                    newProductionDict.Add(production, newCount);
+                                                    currentLevels.Add(j, newProductionDict);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Dictionary<int, Dictionary<Production, int>> newLevelsDict = new Dictionary<int, Dictionary<Production, int>>();
+                                                Dictionary<Production, int> newProductionDict = new Dictionary<Production, int>();
+                                                newProductionDict.Add(production, newCount);
+                                                newLevelsDict.Add(j, newProductionDict);
+                                                neededForProductionByLevelByAreaCurrent.Add(i, newLevelsDict);
+                                            }
                                         }
                                     }
                                 }
@@ -596,14 +643,15 @@ namespace EFM
                 }
             }
 
+            Mod.LogInfo("\t0");
             // Barters
-            for(int i=0; i < Mod.traders.Length; ++i)
+            for (int i=0; i < Mod.traders.Length; ++i)
             {
                 Trader trader = Mod.traders[i];
                 bool subscribed = false;
-                for (int j = 0; j < trader.bartersByLevel.Count; ++j)
+                foreach(KeyValuePair<int, List<Barter>> levelBarters in trader.bartersByLevel)
                 {
-                    List<Barter> barters = trader.bartersByLevel[j];
+                    List<Barter> barters = levelBarters.Value;
                     for (int k = 0; k < barters.Count; ++k)
                     {
                         Barter barter = barters[k];
@@ -615,7 +663,7 @@ namespace EFM
                                 int newCount = price.count;
                                 if (neededForBarterByLevelByTrader.TryGetValue(i, out Dictionary<int, Dictionary<Barter, int>> levels))
                                 {
-                                    if (levels.TryGetValue(j, out Dictionary<Barter, int> bartersDict))
+                                    if (levels.TryGetValue(levelBarters.Key, out Dictionary<Barter, int> bartersDict))
                                     {
                                         int currentCount = 0;
                                         if (bartersDict.TryGetValue(barter, out currentCount))
@@ -631,7 +679,7 @@ namespace EFM
                                     {
                                         Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
                                         newBarterDict.Add(barter, newCount);
-                                        levels.Add(j, newBarterDict);
+                                        levels.Add(levelBarters.Key, newBarterDict);
                                     }
                                 }
                                 else
@@ -639,7 +687,7 @@ namespace EFM
                                     Dictionary<int, Dictionary<Barter, int>> newLevelsDict = new Dictionary<int, Dictionary<Barter, int>>();
                                     Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
                                     newBarterDict.Add(barter, newCount);
-                                    newLevelsDict.Add(j, newBarterDict);
+                                    newLevelsDict.Add(levelBarters.Key, newBarterDict);
                                     neededForBarterByLevelByTrader.Add(i, newLevelsDict);
                                 }
 
@@ -652,12 +700,12 @@ namespace EFM
                                 }
 
                                 // Needed for barter if we want future barters (Implying we want all of them) or this barter's trader's level is <= trader's current level
-                                neededFor[3] = Mod.checkmarkFutureBarters || j <= trader.level;
+                                neededFor[3] = Mod.checkmarkFutureBarters || levelBarters.Key <= trader.level;
                                 if (neededFor[3])
                                 {
                                     if (neededForBarterByLevelByTraderCurrent.TryGetValue(i, out Dictionary<int, Dictionary<Barter, int>> currentLevels))
                                     {
-                                        if (currentLevels.TryGetValue(j, out Dictionary<Barter, int> bartersDict))
+                                        if (currentLevels.TryGetValue(levelBarters.Key, out Dictionary<Barter, int> bartersDict))
                                         {
                                             int currentCount = 0;
                                             if (bartersDict.TryGetValue(barter, out currentCount))
@@ -673,7 +721,7 @@ namespace EFM
                                         {
                                             Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
                                             newBarterDict.Add(barter, newCount);
-                                            currentLevels.Add(j, newBarterDict);
+                                            currentLevels.Add(levelBarters.Key, newBarterDict);
                                         }
                                     }
                                     else
@@ -681,7 +729,7 @@ namespace EFM
                                         Dictionary<int, Dictionary<Barter, int>> newLevelsDict = new Dictionary<int, Dictionary<Barter, int>>();
                                         Dictionary<Barter, int> newBarterDict = new Dictionary<Barter, int>();
                                         newBarterDict.Add(barter, newCount);
-                                        newLevelsDict.Add(j, newBarterDict);
+                                        newLevelsDict.Add(levelBarters.Key, newBarterDict);
                                         neededForBarterByLevelByTraderCurrent.Add(i, newLevelsDict);
                                     }
                                 }
@@ -691,22 +739,28 @@ namespace EFM
                 }
             }
 
+            Mod.LogInfo("\t0");
             // Tasks
-            foreach(KeyValuePair<string, Task> taskEntry in Task.allTasks)
+            foreach (KeyValuePair<string, Task> taskEntry in Task.allTasks)
             {
+                Mod.LogInfo("\t\tTask " + taskEntry.Value.ID);
                 bool subscribed = false;
                 for (int i=0; i < taskEntry.Value.finishConditions.Count; ++i)
                 {
                     Condition condition = taskEntry.Value.finishConditions[i];
+                    Mod.LogInfo("\t\t\tCondition" + condition.ID);
                     if (condition.conditionType == Condition.ConditionType.HandoverItem
                         || condition.conditionType == Condition.ConditionType.LeaveItemAtLocation
                         || condition.conditionType == Condition.ConditionType.PlaceBeacon
                         || condition.conditionType == Condition.ConditionType.WeaponAssembly)
                     {
-                        for(int j=0; j < condition.targetItems.Count; ++j)
+                        Mod.LogInfo("\t\t\t\tItem condition");
+                        for (int j=0; j < condition.targetItems.Count; ++j)
                         {
+                            Mod.LogInfo("\t\t\tItem " + j+": " +(condition.targetItems[j] == null ? "null" : condition.targetItems[j].H3ID));
                             if (condition.targetItems[j] == this)
                             {
+                                Mod.LogInfo("\t\t\t\t0");
                                 KeyValuePair<int, bool> currentCount;
                                 if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                 {
@@ -716,16 +770,19 @@ namespace EFM
                                 {
                                     neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                 }
+                                Mod.LogInfo("\t\t\t\t0");
 
                                 // Set initial needed for state
-                                if(taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
+                                if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                 {
+                                    Mod.LogInfo("\t\t\t\t1");
                                     if (!subscribed)
                                     {
                                         taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
                                         subscribed = true;
                                     }
 
+                                    Mod.LogInfo("\t\t\t\t1");
                                     // Needed for quest if we want future quests (Active or not) or if currently active
                                     neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
                                     if (neededFor[0])
@@ -740,7 +797,9 @@ namespace EFM
                                         }
                                         neededForTaskTotal += condition.value;
                                     }
+                                    Mod.LogInfo("\t\t\t\t1");
                                 }
+                                Mod.LogInfo("\t\t\t0");
 
                                 break;
                             }
@@ -748,14 +807,19 @@ namespace EFM
                     }
                     else if(condition.conditionType == Condition.ConditionType.CounterCreator)
                     {
-                        for (int j = 0; j < condition.counters.Count; ++j) 
+                        Mod.LogInfo("\t\t\t\tCounter condition");
+                        for (int j = 0; j < condition.counters.Count; ++j)
                         {
+                            Mod.LogInfo("\t\t\t\t\tCounter "+j);
                             if (condition.counters[j].counterCreatorConditionType == ConditionCounter.CounterCreatorConditionType.UseItem)
                             {
-                                for(int k = 0; k< condition.counters[j].useItemTargets.Count; ++k)
+                                Mod.LogInfo("\t\t\t\t\tUse item counter");
+                                for (int k = 0; k< condition.counters[j].useItemTargets.Count; ++k)
                                 {
+                                    Mod.LogInfo("\t\t\t\t\t\tItem " + k + ": " + (condition.counters[j].useItemTargets[k] == null ? "null" : condition.counters[j].useItemTargets[k].H3ID));
                                     if (condition.counters[j].useItemTargets[k] == this)
                                     {
+                                        Mod.LogInfo("\t\t\t\t\t\t\t0");
                                         KeyValuePair<int, bool> currentCount;
                                         if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                         {
@@ -766,14 +830,17 @@ namespace EFM
                                             neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                         }
 
+                                        Mod.LogInfo("\t\t\t\t\t\t\t0");
                                         // Set initial needed for state
                                         if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                         {
+                                            Mod.LogInfo("\t\t\t\t\t\t\t1");
                                             if (!subscribed)
                                             {
                                                 taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
                                                 subscribed = true;
                                             }
+                                            Mod.LogInfo("\t\t\t\t\t\t\t1");
 
                                             // Needed for quest if we want future quests (Active or not) or if currently active
                                             neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
@@ -789,7 +856,9 @@ namespace EFM
                                                 }
                                                 neededForTaskTotal += condition.value;
                                             }
+                                            Mod.LogInfo("\t\t\t\t\t\t\t1");
                                         }
+                                        Mod.LogInfo("\t\t\t\t\t\t\t0");
 
                                         break;
                                     }
@@ -797,52 +866,15 @@ namespace EFM
                             }
                             else if(condition.counters[j].counterCreatorConditionType == ConditionCounter.CounterCreatorConditionType.Equipment)
                             {
-                                for (int k = 0; k < condition.counters[j].equipmentWhitelists.Count; ++k)
+                                Mod.LogInfo("\t\t\t\t\tEquipment counter");
+                                if (condition.counters[j].equipmentWhitelists != null)
                                 {
-                                    if (condition.counters[j].equipmentWhitelists[k].Contains(H3ID))
+                                    for (int k = 0; k < condition.counters[j].equipmentWhitelists.Count; ++k)
                                     {
-                                        KeyValuePair<int, bool> currentCount;
-                                        if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
+                                        Mod.LogInfo("\t\t\t\t\t\tItem " + k + ": " + condition.counters[j].equipmentWhitelists[k].Contains(H3ID));
+                                        if (condition.counters[j].equipmentWhitelists[k].Contains(H3ID))
                                         {
-                                            neededForTasks[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + 1, currentCount.Value);
-                                        }
-                                        else
-                                        {
-                                            neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(1, currentCount.Value));
-                                        }
-
-                                        // Set initial needed for state
-                                        if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
-                                        {
-                                            if (!subscribed)
-                                            {
-                                                taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
-                                                subscribed = true;
-                                            }
-
-                                            // Needed for quest if we want future quests (Active or not) or if currently active
-                                            neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
-                                            if (neededFor[0])
-                                            {
-                                                if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
-                                                {
-                                                    neededForTasksCurrent[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + condition.value, currentCount.Value);
-                                                }
-                                                else
-                                                {
-                                                    neededForTasksCurrent.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
-                                                }
-                                                neededForTaskTotal += condition.value;
-                                            }
-                                        }
-
-                                        break;
-                                    }
-                                    bool foundInWhitelists = false;
-                                    for (int l=0; l < parents.Length; ++l)
-                                    {
-                                        if (condition.counters[j].equipmentWhitelists[k].Contains(parents[l]))
-                                        {
+                                            Mod.LogInfo("\t\t\t\t\t\t\t0");
                                             KeyValuePair<int, bool> currentCount;
                                             if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                             {
@@ -853,14 +885,17 @@ namespace EFM
                                                 neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(1, currentCount.Value));
                                             }
 
+                                            Mod.LogInfo("\t\t\t\t\t\t\t0");
                                             // Set initial needed for state
                                             if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                             {
+                                                Mod.LogInfo("\t\t\t\t\t\t\t1");
                                                 if (!subscribed)
                                                 {
                                                     taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
                                                     subscribed = true;
                                                 }
+                                                Mod.LogInfo("\t\t\t\t\t\t\t1");
 
                                                 // Needed for quest if we want future quests (Active or not) or if currently active
                                                 neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
@@ -876,15 +911,60 @@ namespace EFM
                                                     }
                                                     neededForTaskTotal += condition.value;
                                                 }
+                                                Mod.LogInfo("\t\t\t\t\t\t\t1");
                                             }
+                                            Mod.LogInfo("\t\t\t\t\t\t\t0");
 
-                                            foundInWhitelists = true;
                                             break;
                                         }
-                                    }
-                                    if (foundInWhitelists)
-                                    {
-                                        break;
+                                        bool foundInWhitelists = false;
+                                        for (int l = 0; l < parents.Length; ++l)
+                                        {
+                                            if (condition.counters[j].equipmentWhitelists[k].Contains(parents[l]))
+                                            {
+                                                KeyValuePair<int, bool> currentCount;
+                                                if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
+                                                {
+                                                    neededForTasks[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + 1, currentCount.Value);
+                                                }
+                                                else
+                                                {
+                                                    neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(1, currentCount.Value));
+                                                }
+
+                                                // Set initial needed for state
+                                                if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
+                                                {
+                                                    if (!subscribed)
+                                                    {
+                                                        taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
+                                                        subscribed = true;
+                                                    }
+
+                                                    // Needed for quest if we want future quests (Active or not) or if currently active
+                                                    neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
+                                                    if (neededFor[0])
+                                                    {
+                                                        if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
+                                                        {
+                                                            neededForTasksCurrent[taskEntry.Value] = new KeyValuePair<int, bool>(currentCount.Key + condition.value, currentCount.Value);
+                                                        }
+                                                        else
+                                                        {
+                                                            neededForTasksCurrent.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
+                                                        }
+                                                        neededForTaskTotal += condition.value;
+                                                    }
+                                                }
+
+                                                foundInWhitelists = true;
+                                                break;
+                                            }
+                                        }
+                                        if (foundInWhitelists)
+                                        {
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -892,6 +972,7 @@ namespace EFM
                     }
                 }
             }
+            Mod.LogInfo("\t0");
         }
 
         public void OnTaskStateChanged(Task task)

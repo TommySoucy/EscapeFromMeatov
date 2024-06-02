@@ -200,7 +200,10 @@ namespace EFM
                         }
                     }
                 }
-                // else new game, loadedData = null
+                else // New game, use default save
+                {
+                    loadedData = JObject.Parse(File.ReadAllText(Mod.path + "/Saves/DefaultSave.sav"));
+                }
             }
             else
             {
