@@ -44,10 +44,14 @@ namespace EFM
                 {
                     loadingHideoutAVGProgress += Mod.itemsBundlesRequests[i].progress;
                 }
+                for(int i=0; i < Mod.hideoutAreaBundleRequests.Length; ++i)
+                {
+                    loadingHideoutAVGProgress += Mod.hideoutAreaBundleRequests[i].progress;
+                }
                 loadingHideoutAVGProgress += Mod.itemIconsBundleRequest.progress;
                 loadingHideoutAVGProgress += Mod.hideoutBundleRequest.progress;
 
-                loadingHideoutAVGProgress /= 3 + Mod.itemsBundlesRequests.Length;
+                loadingHideoutAVGProgress /= 3 + Mod.itemsBundlesRequests.Length + Mod.hideoutAreaBundleRequests.Length;
 
                 // Check if they are done loading
                 bool doneLoadingItems = true;
@@ -55,7 +59,13 @@ namespace EFM
                 {
                     doneLoadingItems &= Mod.itemsBundlesRequests[i].isDone;
                 }
+                bool doneLoadingAreas = true;
+                for (int i = 0; i < Mod.hideoutAreaBundleRequests.Length; ++i)
+                {
+                    doneLoadingAreas &= Mod.hideoutAreaBundleRequests[i].isDone;
+                }
                 if (doneLoadingItems 
+                    && doneLoadingAreas
                     && Mod.playerBundleRequest.isDone
                     && Mod.itemIconsBundleRequest.isDone
                     && Mod.hideoutBundleRequest.isDone)
@@ -67,6 +77,10 @@ namespace EFM
                     }
                     Mod.itemIconsBundle = Mod.itemIconsBundleRequest.assetBundle;
                     Mod.hideoutBundle = Mod.hideoutBundleRequest.assetBundle;
+                    for (int i = 0; i < Mod.hideoutAreaBundles.Length; ++i)
+                    {
+                        Mod.hideoutAreaBundles[i] = Mod.hideoutAreaBundleRequests[i].assetBundle;
+                    }
 
                     LoadHideout(loadingHideoutSlotIndex, loadingHideoutLatest);
                 }
@@ -119,6 +133,12 @@ namespace EFM
                 }
                 Mod.itemIconsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMItemIcons.ab");
                 Mod.hideoutBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideout.ab");
+                Mod.hideoutAreaBundleRequests = new AssetBundleCreateRequest[4];
+                Mod.hideoutAreaBundles = new AssetBundle[4];
+                for(int i=0; i< Mod.hideoutAreaBundleRequests.Length; ++i)
+                {
+                    Mod.hideoutAreaBundleRequests[i] = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideoutAreas"+i+".ab");
+                }
                 return;
             }
             else // Asset bundles loaded
@@ -147,6 +167,7 @@ namespace EFM
                     Mod.itemsBundlesRequests = null;
                     Mod.itemIconsBundleRequest = null;
                     Mod.hideoutBundleRequest = null;
+                    Mod.hideoutAreaBundleRequests = null;
                 }
                 // else
                 // Already have the bundles loaded and already cleared requests
@@ -187,6 +208,12 @@ namespace EFM
                 Mod.saveSlotIndex = slotIndex;
             }
 
+            string[] bundledScenes = Mod.hideoutBundle.GetAllScenePaths();
+            Mod.LogInfo("Got " + bundledScenes.Length + " bundled scenes in hideout ab");
+            for (int i = 0; i < bundledScenes.Length; ++i)
+            {
+                Mod.LogInfo(i.ToString() + " : " + bundledScenes[i]);
+            }
             SteamVR_LoadLevel.Begin("MeatovHideout", false, 0.5f, 0f, 0f, 0f, 1f);
         }
 

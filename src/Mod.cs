@@ -43,6 +43,8 @@ namespace EFM
         public static AssetBundle mainMenuBundle;
         public static AssetBundle hideoutBundle;
         public static AssetBundleCreateRequest hideoutBundleRequest;
+        public static AssetBundle[] hideoutAreaBundles;
+        public static AssetBundleCreateRequest[] hideoutAreaBundleRequests;
         public static AssetBundle itemIconsBundle;
         public static AssetBundleCreateRequest itemIconsBundleRequest;
         public static AssetBundle[] itemsBundles;
@@ -150,7 +152,7 @@ namespace EFM
         public static bool dead;
         // Parts arrays: 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
         public static float[] defaultMaxHealth;
-        public static float[] currentMaxHealth;
+        private static float[] currentMaxHealth;
         private static float[] health; 
         private static float[] currentHealthRates;
         private static float[] currentNonLethalHealthRates;
@@ -487,6 +489,8 @@ namespace EFM
         public static event OnPlayerLevelChangedDelegate OnPlayerLevelChanged;
         public delegate void OnPartHealthChangedDelegate(int index);
         public static event OnPartHealthChangedDelegate OnPartHealthChanged;
+        public delegate void OnPartCurrentMaxHealthChangedDelegate(int index);
+        public static event OnPartCurrentMaxHealthChangedDelegate OnPartCurrentMaxHealthChanged;
         public delegate void OnPlayerExperienceChangedDelegate();
         public static event OnPlayerExperienceChangedDelegate OnPlayerExperienceChanged;
         public delegate void OnHydrationChangedDelegate();
@@ -756,8 +760,49 @@ namespace EFM
             OnPartHealthChangedInvoke(-1);
         }
 
+        public static void SetCurrentMaxHealthArray(float[] value)
+        {
+            currentMaxHealth = value;
+            OnPartCurrentMaxHealthChangedInvoke(-1);
+        }
+
+        public static float GetCurrentMaxHealth(int index)
+        {
+            if(currentMaxHealth == null)
+            {
+                return -1;
+            }
+
+            return currentMaxHealth[index];
+        }
+
+        public static float[] GetCurrentMaxHealthArray()
+        {
+            return currentMaxHealth;
+        }
+
+        public static void SetCurrentMaxHealth(int index, float value)
+        {
+            if (currentMaxHealth == null)
+            {
+                return;
+            }
+
+            float preValue = currentMaxHealth[index];
+            currentMaxHealth[index] = value;
+            if (value != preValue)
+            {
+                OnPartCurrentMaxHealthChangedInvoke(index);
+            }
+        }
+
         public static float GetHealthRate(int index)
         {
+            if (currentHealthRates == null)
+            {
+                return 0;
+            }
+
             return currentHealthRates[index];
         }
 
@@ -768,6 +813,11 @@ namespace EFM
 
         public static void SetHealthRate(int index, float value)
         {
+            if (currentHealthRates == null)
+            {
+                return;
+            }
+
             float preValue = currentHealthRates[index];
             currentHealthRates[index] = value;
             if (value != preValue)
@@ -784,6 +834,11 @@ namespace EFM
 
         public static float GetNonLethalHealthRate(int index)
         {
+            if (currentNonLethalHealthRates == null)
+            {
+                return 0;
+            }
+
             return currentNonLethalHealthRates[index];
         }
 
@@ -794,6 +849,11 @@ namespace EFM
 
         public static void SetNonLethalHealthRate(int index, float value)
         {
+            if (currentNonLethalHealthRates == null)
+            {
+                return;
+            }
+
             float preValue = currentNonLethalHealthRates[index];
             currentNonLethalHealthRates[index] = value;
             if (value != preValue)
@@ -821,6 +881,14 @@ namespace EFM
             if(OnPartHealthChanged != null)
             {
                 OnPartHealthChanged(index);
+            }
+        }
+
+        public static void OnPartCurrentMaxHealthChangedInvoke(int index)
+        {
+            if(OnPartCurrentMaxHealthChanged != null)
+            {
+                OnPartCurrentMaxHealthChanged(index);
             }
         }
 
@@ -2012,6 +2080,11 @@ namespace EFM
                         {
                             hideoutBundle.Unload(true);
                             hideoutBundle = null;
+                            for(int i=0; i < hideoutAreaBundles.Length; ++i)
+                            {
+                                hideoutAreaBundles[i].Unload(true);
+                                hideoutAreaBundles[i] = null;
+                            }
                             for(int i=0; i < itemsBundles.Length; ++i)
                             {
                                 itemsBundles[i].Unload(true);

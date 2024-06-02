@@ -68,6 +68,7 @@ namespace EFM
 
             Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
             Mod.OnPartHealthChanged += OnPartHealthChanged;
+            Mod.OnPartCurrentMaxHealthChanged += OnPartHealthChanged;
             Mod.OnPlayerWeightChanged += OnPlayerWeightChanged;
             Mod.OnPlayerExperienceChanged += OnPlayerExperienceChanged;
             Mod.OnHydrationChanged += OnHydrationChanged;
@@ -94,10 +95,7 @@ namespace EFM
         {
             OnPlayerLevelChanged();
             OnPlayerExperienceChanged();
-            for(int i = 0; i < partImages.Length; ++i)
-            {
-                OnPartHealthChanged(i);
-            }
+            OnPartHealthChanged(-1);
             OnPlayerWeightChanged();
             OnHydrationChanged();
             OnEnergyChanged();
@@ -234,18 +232,23 @@ namespace EFM
 
         public void OnPartHealthChanged(int index)
         {
+            if(Mod.GetCurrentMaxHealthArray() == null || Mod.GetHealthArray() == null)
+            {
+                return;
+            }
+
             if (index == -1)
             {
                 for(int i=0; i < Mod.GetHealthCount(); ++i)
                 {
-                    partImages[i].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(i) / Mod.currentMaxHealth[i]);
-                    partHealth[i].text = ((int)Mod.GetHealth(i)).ToString() + "/" + ((int)Mod.currentMaxHealth[i]);
+                    partImages[i].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(i) / Mod.GetCurrentMaxHealth(i));
+                    partHealth[i].text = ((int)Mod.GetHealth(i)).ToString() + "/" + ((int)Mod.GetCurrentMaxHealth(i));
                 }
             }
             else
             {
-                partImages[index].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(index) / Mod.currentMaxHealth[index]);
-                partHealth[index].text = ((int)Mod.GetHealth(index)).ToString() + "/" + ((int)Mod.currentMaxHealth[index]);
+                partImages[index].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(index) / Mod.GetCurrentMaxHealth(index));
+                partHealth[index].text = ((int)Mod.GetHealth(index)).ToString() + "/" + ((int)Mod.GetCurrentMaxHealth(index));
             }
         }
 
@@ -489,6 +492,7 @@ namespace EFM
         {
             Mod.OnPlayerLevelChanged -= OnPlayerLevelChanged;
             Mod.OnPartHealthChanged -= OnPartHealthChanged;
+            Mod.OnPartCurrentMaxHealthChanged -= OnPartHealthChanged;
             Mod.OnPlayerWeightChanged -= OnPlayerWeightChanged;
             Mod.OnPlayerExperienceChanged -= OnPlayerExperienceChanged;
             Mod.OnHydrationChanged -= OnHydrationChanged;

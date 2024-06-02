@@ -1,4 +1,5 @@
 ﻿using FistVR;
+using FMOD;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -1014,7 +1015,7 @@ namespace EFM
 									{
                                         float health = Mod.GetHealth(i);
 
-                                        if (health < Mod.currentMaxHealth[i] && health < leastAmount)
+                                        if (health < Mod.GetCurrentMaxHealth(i) && health < leastAmount)
 										{
 											leastIndex = i;
 											leastAmount = Mod.GetHealth(i);
@@ -1031,8 +1032,8 @@ namespace EFM
                                 {
                                     float health = Mod.GetHealth(partIndex);
                                     Mod.LogInfo("\t\t\t\tApplying "+actualAmountConsumed+" to "+partIndex+", which has "+ health + " health");
-									actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - health));
-                                    Mod.SetHealth(partIndex, Mathf.Min(Mod.currentMaxHealth[partIndex], health + actualAmountConsumed));
+									actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.GetCurrentMaxHealth(partIndex) - health));
+                                    Mod.SetHealth(partIndex, Mathf.Min(Mod.GetCurrentMaxHealth(partIndex), health + actualAmountConsumed));
 									Mod.LogInfo("\t\t\t\tAfter healing: "+ health);
 								}
 								// else, no target part and all parts are at max health
@@ -1073,7 +1074,7 @@ namespace EFM
                                     for (int i = 0; i < Mod.GetHealthCount(); ++i)
                                     {
                                         float health = Mod.GetHealth(i);
-                                        if (health < Mod.currentMaxHealth[i] && health < leastAmount)
+                                        if (health < Mod.GetCurrentMaxHealth(i) && health < leastAmount)
 										{
 											leastIndex = i;
 											leastAmount = health;
@@ -1090,13 +1091,13 @@ namespace EFM
                                     float health = Mod.GetHealth(partIndex);
                                     if (Mod.currentLocationIndex == 1) // In hideout, take base max health
 									{
-										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - health));
-                                        Mod.SetHealth(partIndex, Mathf.Min(Mod.currentMaxHealth[partIndex], health + actualAmountConsumed));
+										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.GetCurrentMaxHealth(partIndex) - health));
+                                        Mod.SetHealth(partIndex, Mathf.Min(Mod.GetCurrentMaxHealth(partIndex), health + actualAmountConsumed));
 									}
 									else // In raid, take raid max health
 									{
-										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.currentMaxHealth[partIndex] - health));
-                                        Mod.SetHealth(partIndex, Mathf.Min(Mod.currentMaxHealth[partIndex], health + actualAmountConsumed));
+										actualAmountConsumed = Mathf.Min(amountToConsume, Mathf.CeilToInt(Mod.GetCurrentMaxHealth(partIndex) - health));
+                                        Mod.SetHealth(partIndex, Mathf.Min(Mod.GetCurrentMaxHealth(partIndex), health + actualAmountConsumed));
 									}
 								}
 								// else, no target part and all parts are at max health
@@ -1560,9 +1561,9 @@ namespace EFM
                                 Mod.SetHealth(lowestPartIndex, 1);
 								if(Mod.currentLocationIndex == 2)
                                 {
-									Mod.currentMaxHealth[lowestPartIndex] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
+                                    Mod.SetCurrentMaxHealth(lowestPartIndex, Mod.GetCurrentMaxHealth(lowestPartIndex) * UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax));
 									float totalMaxHealth = 0;
-									foreach (float bodyPartMaxHealth in Mod.currentMaxHealth)
+									foreach (float bodyPartMaxHealth in Mod.GetCurrentMaxHealthArray())
 									{
 										totalMaxHealth += bodyPartMaxHealth;
 									}
@@ -1609,9 +1610,9 @@ namespace EFM
                                 Mod.SetHealth(targettedPart, 1);
 								if (Mod.currentLocationIndex == 2)
 								{
-									Mod.currentMaxHealth[targettedPart] *= UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax);
+                                    Mod.SetCurrentMaxHealth(targettedPart, Mod.GetCurrentMaxHealth(targettedPart) * UnityEngine.Random.Range(consumeEffect.healthPenaltyMin, consumeEffect.healthPenaltyMax));
 									float totalMaxHealth = 0;
-									foreach (float bodyPartMaxHealth in Mod.currentMaxHealth)
+									foreach (float bodyPartMaxHealth in Mod.GetCurrentMaxHealthArray())
 									{
 										totalMaxHealth += bodyPartMaxHealth;
 									}

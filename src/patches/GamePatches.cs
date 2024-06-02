@@ -14,6 +14,7 @@ using H3MP.Scripts;
 using System.Net.Mail;
 using static FistVR.SosigInventory;
 using FFmpeg.AutoGen;
+using FMOD;
 
 namespace EFM
 {
@@ -2278,7 +2279,7 @@ namespace EFM
                             if (i != partIndex)
                             {
                                 float actualDamage = Mathf.Min(totalDamage / 6 * destroyedMultiplier[partIndex], Mod.GetHealth(i));
-                                Mod.SetHealth(i, Mathf.Clamp(Mod.GetHealth(i) - actualDamage, 0, Mod.currentMaxHealth[i]));
+                                Mod.SetHealth(i, Mathf.Clamp(Mod.GetHealth(i) - actualDamage, 0, Mod.GetCurrentMaxHealth(i)));
                                 actualTotalDamage += actualDamage;
 
                                 if (i == 0 || i == 1)
@@ -2295,7 +2296,7 @@ namespace EFM
                     else
                     {
                         actualTotalDamage = totalDamage;
-                        Mod.SetHealth(partIndex, Mathf.Clamp(Mod.GetHealth(partIndex) - totalDamage, 0, Mod.currentMaxHealth[partIndex]));
+                        Mod.SetHealth(partIndex, Mathf.Clamp(Mod.GetHealth(partIndex) - totalDamage, 0, Mod.GetCurrentMaxHealth(partIndex)));
                     }
                 }
                 else if (Mod.GetHealth(partIndex) <= 0) // Part is head or thorax, destroyed
@@ -2306,7 +2307,7 @@ namespace EFM
                 else // Part is head or thorax, not yet destroyed
                 {
                     actualTotalDamage = totalDamage;
-                    Mod.SetHealth(partIndex, Mathf.Clamp(Mod.GetHealth(partIndex) - totalDamage, 0, Mod.currentMaxHealth[partIndex]));
+                    Mod.SetHealth(partIndex, Mathf.Clamp(Mod.GetHealth(partIndex) - totalDamage, 0, Mod.GetCurrentMaxHealth(partIndex)));
                 }
                 GM.CurrentSceneSettings.OnPlayerTookDamage(actualTotalDamage / 440f);
             }
@@ -5358,7 +5359,7 @@ namespace EFM
             {
                 if (Mod.GetHealth(i) != 0)
                 {
-                    Mod.SetHealth(i, Mathf.Clamp(Mod.GetHealth(i) + amountHealed / 7, Mod.GetHealth(i), Mod.currentMaxHealth[i]));
+                    Mod.SetHealth(i, Mathf.Clamp(Mod.GetHealth(i) + amountHealed / 7, Mod.GetHealth(i), Mod.GetCurrentMaxHealth(i)));
                 }
             }
         }
