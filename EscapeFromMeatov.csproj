@@ -37,6 +37,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src\AreaLevelData.cs" />
     <Compile Include="src\ConsumeUI.cs" />
     <Compile Include="src\AI.cs" />
     <Compile Include="src\AreaBonus.cs" />

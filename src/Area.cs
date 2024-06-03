@@ -63,7 +63,7 @@ namespace EFM
 
         // Objects
         public AreaUI UI;
-        public GameObject[] levels;
+        public AreaLevelData[] levels;
         public GameObject[] objectsToToggle;
         public GameObjects[] objectsToTogglePerLevel;
         public AreaUpgradeCheckProcessorPair[] upgradeCheckProcessors;
@@ -270,6 +270,7 @@ namespace EFM
 
         public void LoadLiveData()
         {
+            Mod.LogInfo("LoadLiveData on area " + index);
             powered = requiresPower && (bool)HideoutController.loadedData["hideout"]["powered"];
             previousPowered = powered;
             currentLevel = (int)HideoutController.loadedData["hideout"]["areas"][index]["level"];
@@ -312,7 +313,7 @@ namespace EFM
             // Set area based on live data
             for(int i=0; i < levels.Length; ++i)
             {
-                levels[i].SetActive(i == currentLevel);
+                levels[i].gameObject.SetActive(i == currentLevel);
             }
 
             // Special case for bitcoin farm
@@ -398,7 +399,7 @@ namespace EFM
 
                     for (int i = 0; i < levels.Length; ++i)
                     {
-                        levels[i].SetActive(i == currentLevel);
+                        levels[i].gameObject.SetActive(i == currentLevel);
                     }
 
                     UI.Init();

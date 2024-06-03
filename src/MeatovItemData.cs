@@ -341,7 +341,6 @@ namespace EFM
                 return;
             }
 
-            Mod.LogInfo("\t0");
             if (neededForLevelByArea == null)
             {
                 neededFor = new bool[5];
@@ -361,16 +360,13 @@ namespace EFM
                 // Everything this item is needed for never changes
                 return;
             }
-            Mod.LogInfo("\t0");
 
             onWishlist = Mod.wishList.Contains(this);
             neededFor[2] = onWishlist;
 
-            Mod.LogInfo("\t0");
             // Get Area specific data (Upgrades, Productions)
             for (int i = 0; i < HideoutController.instance.areaController.areas.Length; ++i)
             {
-                Mod.LogInfo("\t\tArea " + i);
                 Area area = HideoutController.instance.areaController.areas[i];
                 if (area != null)
                 {
@@ -379,23 +375,18 @@ namespace EFM
                     // Area upgrades
                     for (int j = 0; j < area.requirementsByTypePerLevel.Length; ++j)
                     {
-                        Mod.LogInfo("\t\t\tUpgrades " + j);
                         Dictionary<Requirement.RequirementType, List<Requirement>> requirementsByType = area.requirementsByTypePerLevel[j];
                         if (requirementsByType.ContainsKey(Requirement.RequirementType.Item) && requirementsByType[Requirement.RequirementType.Item] != null)
                         {
-                            Mod.LogInfo("\t\t\t\tItem reqs ");
                             List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Item];
                             for (int k = 0; k < itemRequirements.Count; ++k)
                             {
-                                Mod.LogInfo("\t\t\t\t\tItem req "+k);
                                 Requirement requirement = itemRequirements[k];
                                 if (requirement.item == this)
                                 {
-                                    Mod.LogInfo("\t\t\t\t\t0");
                                     int newCount = requirement.itemCount;
                                     if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
                                     {
-                                        Mod.LogInfo("\t\t\t\t\t1");
                                         int currentCount = 0;
                                         if (levels.TryGetValue(j, out currentCount))
                                         {
@@ -405,36 +396,29 @@ namespace EFM
                                         {
                                             levels.Add(j, newCount);
                                         }
-                                        Mod.LogInfo("\t\t\t\t\t1");
                                     }
                                     else
                                     {
-                                        Mod.LogInfo("\t\t\t\t\t2");
                                         Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
                                         newLevelsDict.Add(j, newCount);
                                         neededForLevelByArea.Add(i, newLevelsDict);
                                     }
 
-                                    Mod.LogInfo("\t\t\t\t\t0");
                                     // Set initial needed for state
                                     if (area.currentLevel < area.levels.Length - 1)
                                     {
-                                        Mod.LogInfo("\t\t\t\t\t1");
                                         if (!subscribed)
                                         {
                                             area.OnAreaLevelChanged += OnAreaLevelChanged;
                                             subscribed = true;
                                         }
 
-                                        Mod.LogInfo("\t\t\t\t\t1");
                                         // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
                                         neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
                                         if (neededFor[1])
                                         {
-                                            Mod.LogInfo("\t\t\t\t\t2");
                                             if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
                                             {
-                                                Mod.LogInfo("\t\t\t\t\t3");
                                                 int currentCount = 0;
                                                 if (neededForLevels.TryGetValue(j, out currentCount))
                                                 {
@@ -444,11 +428,9 @@ namespace EFM
                                                 {
                                                     neededForLevels.Add(j, newCount);
                                                 }
-                                                Mod.LogInfo("\t\t\t\t\t3");
                                             }
                                             else
                                             {
-                                                Mod.LogInfo("\t\t\t\t\t4");
                                                 Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
                                                 newLevelsDict.Add(j, newCount);
                                                 neededForLevelByAreaCurrent.Add(i, newLevelsDict);
@@ -457,27 +439,21 @@ namespace EFM
                                                 {
                                                     minimumUpgradeAmount = newCount;
                                                 }
-                                                Mod.LogInfo("\t\t\t\t\t4");
                                             }
                                             neededForAreaTotal += newCount;
-                                            Mod.LogInfo("\t\t\t\t\t2");
                                         }
-                                        Mod.LogInfo("\t\t\t\t\t1");
                                     }
                                 }
                             }
                         }
                         if (requirementsByType.ContainsKey(Requirement.RequirementType.Tool) && requirementsByType[Requirement.RequirementType.Tool] != null)
                         {
-                            Mod.LogInfo("\t\t\t\tTool reqs ");
                             List<Requirement> itemRequirements = area.requirementsByTypePerLevel[j][Requirement.RequirementType.Tool];
                             for (int k = 0; k < itemRequirements.Count; ++k)
                             {
-                                Mod.LogInfo("\t\t\t\t\tTool req " + k);
                                 Requirement requirement = itemRequirements[k];
                                 if (requirement.item == this)
                                 {
-                                    Mod.LogInfo("\t\t\t\t\t0");
                                     if (neededForLevelByArea.TryGetValue(i, out Dictionary<int, int> levels))
                                     {
                                         int currentCount = 0;
@@ -496,27 +472,22 @@ namespace EFM
                                         newLevelsDict.Add(j, 1);
                                         neededForLevelByArea.Add(i, newLevelsDict);
                                     }
-                                    Mod.LogInfo("\t\t\t\t\t0");
 
                                     // Set initial needed for state
                                     if (area.currentLevel < area.levels.Length - 1)
                                     {
-                                        Mod.LogInfo("\t\t\t\t\t1");
                                         if (!subscribed)
                                         {
                                             area.OnAreaLevelChanged += OnAreaLevelChanged;
                                             subscribed = true;
                                         }
 
-                                        Mod.LogInfo("\t\t\t\t\t1");
                                         // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
                                         neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
                                         if (neededFor[1])
                                         {
-                                            Mod.LogInfo("\t\t\t\t\t2");
                                             if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
                                             {
-                                                Mod.LogInfo("\t\t\t\t\t3");
                                                 int currentCount = 0;
                                                 if (neededForLevels.TryGetValue(j, out currentCount))
                                                 {
@@ -526,11 +497,9 @@ namespace EFM
                                                 {
                                                     neededForLevels.Add(j, 1);
                                                 }
-                                                Mod.LogInfo("\t\t\t\t\t3");
                                             }
                                             else
                                             {
-                                                Mod.LogInfo("\t\t\t\t\t4");
                                                 Dictionary<int, int> newLevelsDict = new Dictionary<int, int>();
                                                 newLevelsDict.Add(j, 1);
                                                 neededForLevelByAreaCurrent.Add(i, newLevelsDict);
@@ -539,14 +508,10 @@ namespace EFM
                                                 {
                                                     minimumUpgradeAmount = 1;
                                                 }
-                                                Mod.LogInfo("\t\t\t\t\t4");
                                             }
                                             ++neededForAreaTotal;
-                                            Mod.LogInfo("\t\t\t\t\t2");
                                         }
-                                        Mod.LogInfo("\t\t\t\t\t1");
                                     }
-                                    Mod.LogInfo("\t\t\t\t\t0");
                                 }
                             }
                         }
@@ -555,13 +520,10 @@ namespace EFM
                     // Productions
                     for (int j = 0; j < area.productionsPerLevel.Count; ++j)
                     {
-                        Mod.LogInfo("\t\t\tProds " + j);
                         List<Production> productions = area.productionsPerLevel[j];
                         for (int k = 0; k < productions.Count; ++k)
                         {
                             Production production = productions[k];
-                            Mod.LogInfo("\t\t\t\tProd " + j);
-                            Mod.LogInfo("\t\t\t\tProd " + production.ID);
                             for (int l = 0; l < production.requirements.Count; ++l)
                             {
                                 Requirement requirement = production.requirements[l];
@@ -649,7 +611,6 @@ namespace EFM
                 }
             }
 
-            Mod.LogInfo("\t0");
             // Barters
             for (int i=0; i < Mod.traders.Length; ++i)
             {
@@ -745,28 +706,22 @@ namespace EFM
                 }
             }
 
-            Mod.LogInfo("\t0");
             // Tasks
             foreach (KeyValuePair<string, Task> taskEntry in Task.allTasks)
             {
-                Mod.LogInfo("\t\tTask " + taskEntry.Value.ID);
                 bool subscribed = false;
                 for (int i=0; i < taskEntry.Value.finishConditions.Count; ++i)
                 {
                     Condition condition = taskEntry.Value.finishConditions[i];
-                    Mod.LogInfo("\t\t\tCondition" + condition.ID);
                     if (condition.conditionType == Condition.ConditionType.HandoverItem
                         || condition.conditionType == Condition.ConditionType.LeaveItemAtLocation
                         || condition.conditionType == Condition.ConditionType.PlaceBeacon
                         || condition.conditionType == Condition.ConditionType.WeaponAssembly)
                     {
-                        Mod.LogInfo("\t\t\t\tItem condition");
                         for (int j=0; j < condition.targetItems.Count; ++j)
                         {
-                            Mod.LogInfo("\t\t\tItem " + j+": " +(condition.targetItems[j] == null ? "null" : condition.targetItems[j].H3ID));
                             if (condition.targetItems[j] == this)
                             {
-                                Mod.LogInfo("\t\t\t\t0");
                                 KeyValuePair<int, bool> currentCount;
                                 if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                 {
@@ -776,19 +731,16 @@ namespace EFM
                                 {
                                     neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                 }
-                                Mod.LogInfo("\t\t\t\t0");
 
                                 // Set initial needed for state
                                 if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                 {
-                                    Mod.LogInfo("\t\t\t\t1");
                                     if (!subscribed)
                                     {
                                         taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
                                         subscribed = true;
                                     }
 
-                                    Mod.LogInfo("\t\t\t\t1");
                                     // Needed for quest if we want future quests (Active or not) or if currently active
                                     neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
                                     if (neededFor[0])
@@ -803,9 +755,7 @@ namespace EFM
                                         }
                                         neededForTaskTotal += condition.value;
                                     }
-                                    Mod.LogInfo("\t\t\t\t1");
                                 }
-                                Mod.LogInfo("\t\t\t0");
 
                                 break;
                             }
@@ -813,19 +763,14 @@ namespace EFM
                     }
                     else if(condition.conditionType == Condition.ConditionType.CounterCreator)
                     {
-                        Mod.LogInfo("\t\t\t\tCounter condition");
                         for (int j = 0; j < condition.counters.Count; ++j)
                         {
-                            Mod.LogInfo("\t\t\t\t\tCounter "+j);
                             if (condition.counters[j].counterCreatorConditionType == ConditionCounter.CounterCreatorConditionType.UseItem)
                             {
-                                Mod.LogInfo("\t\t\t\t\tUse item counter");
                                 for (int k = 0; k< condition.counters[j].useItemTargets.Count; ++k)
                                 {
-                                    Mod.LogInfo("\t\t\t\t\t\tItem " + k + ": " + (condition.counters[j].useItemTargets[k] == null ? "null" : condition.counters[j].useItemTargets[k].H3ID));
                                     if (condition.counters[j].useItemTargets[k] == this)
                                     {
-                                        Mod.LogInfo("\t\t\t\t\t\t\t0");
                                         KeyValuePair<int, bool> currentCount;
                                         if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                         {
@@ -836,17 +781,14 @@ namespace EFM
                                             neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(condition.value, condition.onlyFoundInRaid));
                                         }
 
-                                        Mod.LogInfo("\t\t\t\t\t\t\t0");
                                         // Set initial needed for state
                                         if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                         {
-                                            Mod.LogInfo("\t\t\t\t\t\t\t1");
                                             if (!subscribed)
                                             {
                                                 taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
                                                 subscribed = true;
                                             }
-                                            Mod.LogInfo("\t\t\t\t\t\t\t1");
 
                                             // Needed for quest if we want future quests (Active or not) or if currently active
                                             neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
@@ -862,9 +804,7 @@ namespace EFM
                                                 }
                                                 neededForTaskTotal += condition.value;
                                             }
-                                            Mod.LogInfo("\t\t\t\t\t\t\t1");
                                         }
-                                        Mod.LogInfo("\t\t\t\t\t\t\t0");
 
                                         break;
                                     }
@@ -872,15 +812,12 @@ namespace EFM
                             }
                             else if(condition.counters[j].counterCreatorConditionType == ConditionCounter.CounterCreatorConditionType.Equipment)
                             {
-                                Mod.LogInfo("\t\t\t\t\tEquipment counter");
                                 if (condition.counters[j].equipmentWhitelists != null)
                                 {
                                     for (int k = 0; k < condition.counters[j].equipmentWhitelists.Count; ++k)
                                     {
-                                        Mod.LogInfo("\t\t\t\t\t\tItem " + k + ": " + condition.counters[j].equipmentWhitelists[k].Contains(H3ID));
                                         if (condition.counters[j].equipmentWhitelists[k].Contains(H3ID))
                                         {
-                                            Mod.LogInfo("\t\t\t\t\t\t\t0");
                                             KeyValuePair<int, bool> currentCount;
                                             if (neededForTasks.TryGetValue(taskEntry.Value, out currentCount))
                                             {
@@ -891,17 +828,14 @@ namespace EFM
                                                 neededForTasks.Add(taskEntry.Value, new KeyValuePair<int, bool>(1, currentCount.Value));
                                             }
 
-                                            Mod.LogInfo("\t\t\t\t\t\t\t0");
                                             // Set initial needed for state
                                             if (taskEntry.Value.taskState != Task.TaskState.Complete && taskEntry.Value.taskState != Task.TaskState.Fail)
                                             {
-                                                Mod.LogInfo("\t\t\t\t\t\t\t1");
                                                 if (!subscribed)
                                                 {
                                                     taskEntry.Value.OnTaskStateChanged += OnTaskStateChanged;
                                                     subscribed = true;
                                                 }
-                                                Mod.LogInfo("\t\t\t\t\t\t\t1");
 
                                                 // Needed for quest if we want future quests (Active or not) or if currently active
                                                 neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
@@ -917,9 +851,7 @@ namespace EFM
                                                     }
                                                     neededForTaskTotal += condition.value;
                                                 }
-                                                Mod.LogInfo("\t\t\t\t\t\t\t1");
                                             }
-                                            Mod.LogInfo("\t\t\t\t\t\t\t0");
 
                                             break;
                                         }
@@ -978,7 +910,6 @@ namespace EFM
                     }
                 }
             }
-            Mod.LogInfo("\t0");
         }
 
         public void OnTaskStateChanged(Task task)
