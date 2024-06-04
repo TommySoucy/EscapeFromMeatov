@@ -1092,7 +1092,7 @@ namespace EFM
                 for(int i=0; i < HideoutController.instance.areaController.areas.Length; ++i)
                 {
                     Area area = HideoutController.instance.areaController.areas[i];
-                    if (area.currentLevel < area.levels.Length)
+                    if (area != null && area.currentLevel < area.levels.Length)
                     {
                         for(int j = 0; j < area.levels[area.currentLevel].areaSlots.Length; ++j)
                         {
