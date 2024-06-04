@@ -1596,7 +1596,7 @@ namespace EFM
                                             MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                                             if (meatovItem != null)
                                             {
-                                                areaController.areas[i].areaVolumesPerLevel[j][k].AddItem(meatovItem);
+                                                areaController.areas[i].levels[j].areaVolumes[k].AddItem(meatovItem);
                                                 meatovItem.transform.localPosition = new Vector3((float)volumeItemData["posX"], (float)volumeItemData["posY"], (float)volumeItemData["posZ"]);
                                                 meatovItem.transform.localRotation = Quaternion.Euler((float)volumeItemData["rotX"], (float)volumeItemData["rotY"], (float)volumeItemData["rotZ"]);
                                             }
@@ -1606,7 +1606,7 @@ namespace EFM
 
                                         if (loadedItem != null)
                                         {
-                                            areaController.areas[i].areaVolumesPerLevel[j][k].AddItem(loadedItem);
+                                            areaController.areas[i].levels[j].areaVolumes[k].AddItem(loadedItem);
                                             loadedItem.transform.localPosition = new Vector3((float)volumeItemData["posX"], (float)volumeItemData["posY"], (float)volumeItemData["posZ"]);
                                             loadedItem.transform.localRotation = Quaternion.Euler((float)volumeItemData["rotX"], (float)volumeItemData["rotY"], (float)volumeItemData["rotZ"]);
                                         }
@@ -1627,7 +1627,7 @@ namespace EFM
                                             MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
                                             if (meatovItem != null)
                                             {
-                                                objs[0].SetQuickBeltSlot(areaController.areas[i].areaSlotsPerLevel[j][k]);
+                                                objs[0].SetQuickBeltSlot(areaController.areas[i].levels[j].areaSlots[k]);
                                             }
                                         };
 
@@ -1635,7 +1635,7 @@ namespace EFM
 
                                         if (loadedItem != null)
                                         {
-                                            loadedItem.physObj.SetQuickBeltSlot(areaController.areas[i].areaSlotsPerLevel[j][k]);
+                                            loadedItem.physObj.SetQuickBeltSlot(areaController.areas[i].levels[j].areaSlots[k]);
                                         }
                                     }
                                 }
@@ -3860,10 +3860,10 @@ namespace EFM
                     JObject level = new JObject();
                     JArray volumes = new JArray();
                     JArray slots = new JArray();
-                    for (int k=0; k< areaController.areas[i].areaVolumesPerLevel[j].Length; ++j)
+                    for (int k=0; k< areaController.areas[i].levels[j].areaVolumes.Length; ++j)
                     {
                         JArray areaVolumeItems = new JArray();
-                        foreach (KeyValuePair<string, List<MeatovItem>> entry in areaController.areas[i].areaVolumesPerLevel[j][k].inventoryItems)
+                        foreach (KeyValuePair<string, List<MeatovItem>> entry in areaController.areas[i].levels[j].areaVolumes[k].inventoryItems)
                         {
                             for (int l = 0; l < entry.Value.Count; ++l)
                             {
@@ -3884,12 +3884,12 @@ namespace EFM
                         volumes.Add(areaVolumeItems);
                     }
                     level["volumes"] = volumes;
-                    for (int k = 0; k < areaController.areas[i].areaSlotsPerLevel[j].Length; ++j)
+                    for (int k = 0; k < areaController.areas[i].levels[j].areaSlots.Length; ++j)
                     {
                         JObject serialized = null;
-                        if (areaController.areas[i].areaSlotsPerLevel[j][k].CurObject != null)
+                        if (areaController.areas[i].levels[j].areaSlots[k].CurObject != null)
                         {
-                            MeatovItem meatovItem = areaController.areas[i].areaSlotsPerLevel[j][k].CurObject.GetComponent<MeatovItem>();
+                            MeatovItem meatovItem = areaController.areas[i].levels[j].areaSlots[k].CurObject.GetComponent<MeatovItem>();
                             serializedItem = meatovItem == null ? null : meatovItem.Serialize();
                         }
                         slots.Add(serialized);

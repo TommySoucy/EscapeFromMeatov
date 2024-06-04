@@ -1092,13 +1092,13 @@ namespace EFM
                 for(int i=0; i < HideoutController.instance.areaController.areas.Length; ++i)
                 {
                     Area area = HideoutController.instance.areaController.areas[i];
-                    if (area.areaSlotsPerLevel != null && area.currentLevel < area.areaSlotsPerLevel.Length)
+                    if (area.currentLevel < area.levels.Length)
                     {
-                        for(int j = 0; j < area.areaSlotsPerLevel[area.currentLevel].Length; ++j)
+                        for(int j = 0; j < area.levels[area.currentLevel].areaSlots.Length; ++j)
                         {
-                            if (area.areaSlotsPerLevel[area.currentLevel][j].IsPointInsideMe(position))
+                            if (area.levels[area.currentLevel].areaSlots[j].IsPointInsideMe(position))
                             {
-                                fvrquickBeltSlot = area.areaSlotsPerLevel[area.currentLevel][j];
+                                fvrquickBeltSlot = area.levels[area.currentLevel].areaSlots[j];
                                 break;
                             }
                         }

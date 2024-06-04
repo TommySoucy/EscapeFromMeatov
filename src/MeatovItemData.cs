@@ -407,16 +407,16 @@ namespace EFM
                                     // Set initial needed for state
                                     if (area.currentLevel < area.levels.Length - 1)
                                     {
-                                        if (!subscribed)
-                                        {
-                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
-                                            subscribed = true;
-                                        }
-
                                         // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
                                         neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
                                         if (neededFor[1])
                                         {
+                                            if (!subscribed)
+                                            {
+                                                area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                                subscribed = true;
+                                            }
+
                                             if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
                                             {
                                                 int currentCount = 0;
@@ -476,16 +476,16 @@ namespace EFM
                                     // Set initial needed for state
                                     if (area.currentLevel < area.levels.Length - 1)
                                     {
-                                        if (!subscribed)
-                                        {
-                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
-                                            subscribed = true;
-                                        }
-
                                         // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
                                         neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
                                         if (neededFor[1])
                                         {
+                                            if (!subscribed)
+                                            {
+                                                area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                                subscribed = true;
+                                            }
+
                                             if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
                                             {
                                                 int currentCount = 0;
@@ -563,16 +563,16 @@ namespace EFM
                                     // Set initial needed for state
                                     if (area.currentLevel < area.levels.Length - 1)
                                     {
-                                        if (!subscribed)
-                                        {
-                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
-                                            subscribed = true;
-                                        }
-
                                         // Needed for production if this requirement's level is a future one and (we want future productions or this requirement's level is next)
                                         neededFor[4] = j > area.currentLevel && (Mod.checkmarkFutureProductions || j == (area.currentLevel + 1));
                                         if (neededFor[4])
                                         {
+                                            if (!subscribed)
+                                            {
+                                                area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                                subscribed = true;
+                                            }
+
                                             if (neededForProductionByLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, Dictionary<Production, int>> currentLevels))
                                             {
                                                 if (currentLevels.TryGetValue(j, out Dictionary<Production, int> productionsDict))
@@ -1009,7 +1009,6 @@ namespace EFM
                 }
             }
 
-            TODO: // If item needed for area upgrade, we must keep track of inventory count so as to update our checkmark color accordingly since count may become greater/smaller than minimum
             // If still needed, must find minimum again as it might have changed
             if (neededFor[1])
             {

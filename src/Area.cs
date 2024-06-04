@@ -53,9 +53,6 @@ namespace EFM
         public bool previousPowered;
         [NonSerialized]
         public bool powered; // Live
-        public MainAudioSources[] mainAudioSources;
-        public MainAudioClips[] mainAudioClips;
-        public Vector2s[] workingRanges;
         [NonSerialized]
         public AudioClip[][][] subClips;
         [NonSerialized]
@@ -65,12 +62,8 @@ namespace EFM
         public AreaUI UI;
         public AreaLevelData[] levels;
         public GameObject[] objectsToToggle;
-        public GameObjects[] objectsToTogglePerLevel;
-        public AreaUpgradeCheckProcessorPair[] upgradeCheckProcessors;
         [NonSerialized]
         public AreaUpgradeCheckProcessor[] activeCheckProcessors;
-        public AreaSlots[] areaSlotsPerLevel;
-        public AreaVolumes[] areaVolumesPerLevel;
         public bool craftOuputSlot; // False is Volume, output will always be first in slot/vol per level
 
         public delegate void OnSlotContentChangedDelegate();
@@ -96,21 +89,18 @@ namespace EFM
 
             UpdateObjectsPerLevel();
 
-            if (mainAudioClips != null)
+            subClips = new AudioClip[levels.Length][][];
+            for(int i=0; i< levels.Length; ++i)
             {
-                subClips = new AudioClip[levels.Length][][];
-                for(int i=0; i< levels.Length; ++i)
+                if(levels[i].mainAudioClips != null && levels[i].mainAudioClips.Length > 0)
                 {
-                    if(mainAudioClips[i] != null && mainAudioClips[i].Length > 0)
+                    subClips[i] = new AudioClip[levels[i].mainAudioClips.Length][];
+                    for (int j=0; j< levels[i].mainAudioClips.Length; ++j)
                     {
-                        subClips[i] = new AudioClip[mainAudioClips[i].Length][];
-                        for (int j=0; j< mainAudioClips[i].Length; ++j)
-                        {
-                            subClips[i][j] = new AudioClip[3];
-                            subClips[i][j][0] = MakeSubclip(mainAudioClips[i][j], 0, workingRanges[i][j].x);
-                            subClips[i][j][1] = MakeSubclip(mainAudioClips[i][j], workingRanges[i][j].x, workingRanges[i][j].y);
-                            subClips[i][j][2] = MakeSubclip(mainAudioClips[i][j], workingRanges[i][j].y, mainAudioClips[i][j].length);
-                        }
+                        subClips[i][j] = new AudioClip[3];
+                        subClips[i][j][0] = levels[i].workingRanges[j].x == 0 ? null : MakeSubclip(levels[i].mainAudioClips[j], 0, levels[i].workingRanges[j].x);
+                        subClips[i][j][1] = MakeSubclip(levels[i].mainAudioClips[j], levels[i].workingRanges[j].x, levels[i].workingRanges[j].y);
+                        subClips[i][j][2] = levels[i].workingRanges[j].y == levels[i].mainAudioClips[j].length ? null : MakeSubclip(levels[i].mainAudioClips[j], levels[i].workingRanges[j].y, levels[i].mainAudioClips[j].length);
                     }
                 }
             }
@@ -130,11 +120,14 @@ namespace EFM
             {
                 for (int i = 0; i < levels.Length; ++i)
                 {
-                    for (int j = 0; j < mainAudioSources[i].Length; ++j)
+                    for (int j = 0; j < levels[i].mainAudioSources.Length; ++j)
                     {
-                        mainAudioSources[i][j].loop = true;
-                        mainAudioSources[i][j].clip = subClips[i][j][1];
-                        mainAudioSources[i][j].Play();
+                        if (subClips[i][j][1] != null)
+                        {
+                            levels[i].mainAudioSources[j].loop = true;
+                            levels[i].mainAudioSources[j].clip = subClips[i][j][1];
+                            levels[i].mainAudioSources[j].Play();
+                        }
                     }
                 }
                 previousPowered = true;
@@ -317,7 +310,10 @@ namespace EFM
             }
 
             // Special case for bitcoin farm
-            productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged();
+            if(index == 20)
+            {
+                productionsPerLevel[startLevel + 1][0].OnBitcoinFarmSlotContentChanged();
+            }
         }
 
         public void Update()
@@ -330,9 +326,12 @@ namespace EFM
                     poweringOn = true;
                     for(int i=0;i < levels.Length; ++i)
                     {
-                        for (int j = 0; j < mainAudioSources[i].Length; ++j)
+                        for (int j = 0; j < levels[i].mainAudioSources.Length; ++j)
                         {
-                            mainAudioSources[i][j].PlayOneShot(subClips[i][j][0]);
+                            if(subClips[i][j][0] != null)
+                            {
+                                levels[i].mainAudioSources[j].PlayOneShot(subClips[i][j][0]);
+                            }
                         }
                     }
 
@@ -347,10 +346,13 @@ namespace EFM
                     // Manage audio
                     for (int i = 0; i < levels.Length; ++i)
                     {
-                        for (int j = 0; j < mainAudioSources[i].Length; ++j)
+                        for (int j = 0; j < levels[i].mainAudioSources.Length; ++j)
                         {
-                            mainAudioSources[i][j].Stop();
-                            mainAudioSources[i][j].PlayOneShot(subClips[i][j][2]);
+                            levels[i].mainAudioSources[j].Stop();
+                            if(subClips[i][j][2] != null)
+                            {
+                                levels[i].mainAudioSources[j].PlayOneShot(subClips[i][j][2]);
+                            }
                         }
                     }
 
@@ -361,16 +363,19 @@ namespace EFM
                     }
                 }
 
-                if (poweringOn && !mainAudioSources[currentLevel][0].isPlaying)
+                if (poweringOn && !levels[currentLevel].mainAudioSources[0].isPlaying)
                 {
                     poweringOn = false;
                     for (int i = 0; i < levels.Length; ++i)
                     {
-                        for (int j = 0; j < mainAudioSources[i].Length; ++j)
+                        for (int j = 0; j < levels[i].mainAudioSources.Length; ++j)
                         {
-                            mainAudioSources[i][j].loop = true;
-                            mainAudioSources[i][j].clip = subClips[i][j][1];
-                            mainAudioSources[i][j].Play();
+                            if (subClips[i][j][1] != null)
+                            {
+                                levels[i].mainAudioSources[j].loop = true;
+                                levels[i].mainAudioSources[j].clip = subClips[i][j][1];
+                                levels[i].mainAudioSources[j].Play();
+                            }
                         }
                     }
                 }
@@ -413,15 +418,12 @@ namespace EFM
 
         public void UpdateObjectsPerLevel()
         {
-            if (objectsToTogglePerLevel != null)
+            for (int i = 0; i < levels.Length; ++i)
             {
-                for (int i = 0; i < objectsToTogglePerLevel.Length; ++i)
+                // Only enable object for current level
+                for (int j = 0; j < levels[i].objectsToToggle.Length; ++j)
                 {
-                    // Only enable object for current level
-                    for (int j = 0; j < objectsToTogglePerLevel[i].Length; ++j)
-                    {
-                        objectsToTogglePerLevel[i][j].SetActive(i == currentLevel);
-                    }
+                    levels[i].objectsToToggle[j].SetActive(i == currentLevel);
                 }
             }
         }
@@ -596,15 +598,15 @@ namespace EFM
                 }
             }
 
-            if(upgradeCheckProcessors != null && upgradeCheckProcessors[currentLevel] != null)
+            if(levels[currentLevel].areaUpgradeCheckProcessors != null)
             {
-                if (upgradeCheckProcessors[currentLevel][0] != null)
+                if (levels[currentLevel].areaUpgradeCheckProcessors[0] != null)
                 {
-                    upgradeCheckProcessors[currentLevel][0].gameObject.SetActive(true);
+                    levels[currentLevel].areaUpgradeCheckProcessors[0].gameObject.SetActive(true);
                 }
-                if (upgradeCheckProcessors[currentLevel][1] != null)
+                if (levels[currentLevel].areaUpgradeCheckProcessors[1] != null)
                 {
-                    upgradeCheckProcessors[currentLevel][1].gameObject.SetActive(true);
+                    levels[currentLevel].areaUpgradeCheckProcessors[1].gameObject.SetActive(true);
                 }
             }
         }
@@ -957,11 +959,11 @@ namespace EFM
             {
                 case RequirementType.Resource:
                     int totalAmount = 0;
-                    for(int i=0; i < area.areaSlotsPerLevel[area.currentLevel].Length; ++i)
+                    for(int i=0; i < area.levels[area.currentLevel].areaSlots.Length; ++i)
                     {
-                        if(area.areaSlotsPerLevel[area.currentLevel][i].item != null)
+                        if(area.levels[area.currentLevel].areaSlots[i].item != null)
                         {
-                            totalAmount += area.areaSlotsPerLevel[area.currentLevel][i].item.amount;
+                            totalAmount += area.levels[area.currentLevel].areaSlots[i].item.amount;
                         }
                     }
                     // Note that here we only check greater than 0
@@ -982,9 +984,9 @@ namespace EFM
                     break;
                 case RequirementType.Item:
                     int itemCount = 0;
-                    for(int i=0; i < area.areaSlotsPerLevel[area.currentLevel].Length; ++i)
+                    for(int i=0; i < area.levels[area.currentLevel].areaSlots.Length; ++i)
                     {
-                        if(area.areaSlotsPerLevel[area.currentLevel][i].item != null)
+                        if(area.levels[area.currentLevel].areaSlots[i].item != null)
                         {
                             ++itemCount;
                         }
@@ -1554,19 +1556,24 @@ namespace EFM
             // Time per bitcoin (s): productionsPerLevel[currentLevel][0].time/(1+(GC-1)*GPUBoostRate)
             // Time left if already in progress: (Time per bitcoin) - (Time per bitcoin) * (productionsPerLevel[currentLevel][0].progress / 100)
             int GPUCount = 0;
-            for (int i = 0; i < area.areaSlotsPerLevel[area.currentLevel].Length; ++i)
+            for (int i = 0; i < area.levels[area.currentLevel].areaSlots.Length; ++i)
             {
-                if (area.areaSlotsPerLevel[area.currentLevel][i].item != null)
+                if (area.levels[area.currentLevel].areaSlots[i].item != null)
                 {
                     ++GPUCount;
                 }
             }
             timeLeft = time / (1 + (GPUCount - 1) * Area.GPUBoostRate);
             progressBaseTime = timeLeft;
-            farmingUI.timePanel.requiredTime.text = Mod.FormatTimeString(progressBaseTime);
             timeLeft = timeLeft - timeLeft * (progress / 100);
             timeLeftSet = true;
             inProduction = GPUCount > 0;
+
+            // Check because we call this before farming view is set just to set data above
+            if(farmingUI != null)
+            {
+                farmingUI.timePanel.requiredTime.text = Mod.FormatTimeString(progressBaseTime);
+            }
         }
 
         public void OnBeginProductionInvoke()
@@ -1583,120 +1590,6 @@ namespace EFM
             {
                 OnStopProduction(this);
             }
-        }
-    }
-
-    [Serializable]
-    public class MainAudioSources
-    {
-        public AudioSource[] mainAudioSources; 
-        
-        public AudioSource this[int i]
-        {
-            get { return mainAudioSources[i]; }
-            set { mainAudioSources[i] = value; }
-        }
-
-        public int Length
-        {
-            get { return mainAudioSources.Length; }
-        }
-    }
-
-    [Serializable]
-    public class MainAudioClips
-    {
-        public AudioClip[] mainAudioClips; 
-        
-        public AudioClip this[int i]
-        {
-            get { return mainAudioClips[i]; }
-            set { mainAudioClips[i] = value; }
-        }
-
-        public int Length
-        {
-            get { return mainAudioClips.Length; }
-        }
-    }
-
-    [Serializable]
-    public class Vector2s
-    {
-        public Vector2[] workingRanges; 
-        
-        public Vector2 this[int i]
-        {
-            get { return workingRanges[i]; }
-            set { workingRanges[i] = value; }
-        }
-
-        public int Length
-        {
-            get { return workingRanges.Length; }
-        }
-    }
-
-    [Serializable]
-    public class GameObjects
-    {
-        public GameObject[] objectsToTogglePerLevel; 
-        
-        public GameObject this[int i]
-        {
-            get { return objectsToTogglePerLevel[i]; }
-            set { objectsToTogglePerLevel[i] = value; }
-        }
-
-        public int Length
-        {
-            get { return objectsToTogglePerLevel.Length; }
-        }
-    }
-
-    [Serializable]
-    public class AreaSlots
-    {
-        public AreaSlot[] areaSlotsPerLevel; 
-        
-        public AreaSlot this[int i]
-        {
-            get { return areaSlotsPerLevel[i]; }
-            set { areaSlotsPerLevel[i] = value; }
-        }
-
-        public int Length
-        {
-            get { return areaSlotsPerLevel.Length; }
-        }
-    }
-
-    [Serializable]
-    public class AreaVolumes
-    {
-        public AreaVolume[] areaVolumesPerLevel; 
-        
-        public AreaVolume this[int i]
-        {
-            get { return areaVolumesPerLevel[i]; }
-            set { areaVolumesPerLevel[i] = value; }
-        }
-
-        public int Length
-        {
-            get { return areaVolumesPerLevel.Length; }
-        }
-    }
-
-    [Serializable]
-    public class AreaUpgradeCheckProcessorPair
-    {
-        public AreaUpgradeCheckProcessor[] areaUpgradeCheckProcessors; 
-        
-        public AreaUpgradeCheckProcessor this[int i]
-        {
-            get { return areaUpgradeCheckProcessors[i]; }
-            set { areaUpgradeCheckProcessors[i] = value; }
         }
     }
 }

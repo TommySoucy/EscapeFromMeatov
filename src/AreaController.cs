@@ -6,7 +6,6 @@ namespace EFM
     {
         public Area[] areas;
         public Sprite[] areaIcons;
-        public string[] areaNames;
 
         public void TogglePower()
         {

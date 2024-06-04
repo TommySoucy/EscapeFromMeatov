@@ -110,9 +110,9 @@ namespace EFM
             if(area.controller.areaIcons != null && area.controller.areaIcons.Length > 0)
             {
                 summaryIcon.sprite = area.controller.areaIcons[area.index];
-                summaryName.text = area.controller.areaNames[area.index];
+                summaryName.text = Area.IndexToName(area.index);
                 fullIcon.sprite = area.controller.areaIcons[area.index];
-                fullName.text = area.controller.areaNames[area.index];
+                fullName.text = Area.IndexToName(area.index);
             }
 
             UpdateStatusTexts();
@@ -522,9 +522,9 @@ namespace EFM
                                     int itemCount = 0;
                                     if(currentProduction.requirements[0].requirementType == Requirement.RequirementType.Item)
                                     {
-                                        for (int l = 0; l < area.areaSlotsPerLevel[area.currentLevel].Length; ++l)
+                                        for (int l = 0; l < area.levels[area.currentLevel].areaSlots.Length; ++l)
                                         {
-                                            if (area.areaSlotsPerLevel[area.currentLevel][i].item != null)
+                                            if (area.levels[area.currentLevel].areaSlots[i].item != null)
                                             {
                                                 ++itemCount;
                                             }
@@ -532,11 +532,11 @@ namespace EFM
                                     }
                                     else // Resource
                                     {
-                                        for (int l = 0; l < area.areaSlotsPerLevel[area.currentLevel].Length; ++l)
+                                        for (int l = 0; l < area.levels[area.currentLevel].areaSlots.Length; ++l)
                                         {
-                                            if (area.areaSlotsPerLevel[area.currentLevel][i].item != null)
+                                            if (area.levels[area.currentLevel].areaSlots[i].item != null)
                                             {
-                                                ++area.areaSlotsPerLevel[area.currentLevel][i].item.amount;
+                                                ++area.levels[area.currentLevel].areaSlots[i].item.amount;
                                             }
                                         }
                                     }
@@ -995,7 +995,7 @@ namespace EFM
                         TraderRequirement traderRequirement = Instantiate(traderRequirementPrefab, currentTraderRequirementParent).GetComponent<TraderRequirement>();
 
                         traderRequirement.traderIcon.sprite = traderRequirement.traderIcons[traderRequirements[i].trader.index];
-                        if(traderRequirements[i].traderLevel == traderRequirements[i].trader.levels.Length - 1)
+                        if(traderRequirements[i].traderLevel == traderRequirements[i].trader.levels.Length)
                         {
                             traderRequirement.elite.SetActive(true);
                             traderRequirement.rankText.gameObject.SetActive(false);
@@ -1157,7 +1157,7 @@ namespace EFM
                         TraderRequirement traderRequirement = Instantiate(futureTraderRequirementPrefab, currentTraderRequirementParent).GetComponent<TraderRequirement>();
 
                         traderRequirement.traderIcon.sprite = traderRequirement.traderIcons[traderRequirements[i].trader.index];
-                        if (traderRequirements[i].traderLevel == traderRequirements[i].trader.levels.Length - 1)
+                        if (traderRequirements[i].traderLevel == traderRequirements[i].trader.levels.Length)
                         {
                             traderRequirement.elite.SetActive(true);
                             traderRequirement.rankText.gameObject.SetActive(false);
