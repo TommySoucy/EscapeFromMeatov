@@ -984,23 +984,27 @@ namespace EFM
             }
             else
             {
-                neededForAreaTotal -= neededForLevelByAreaCurrent[area.index][area.currentLevel];
-
-                neededForLevelByAreaCurrent[area.index].Remove(area.currentLevel);
-                neededForProductionByLevelByAreaCurrent[area.index].Remove(area.currentLevel);
-
-                if (neededForLevelByAreaCurrent[area.index].Count == 0)
+                if (neededForLevelByAreaCurrent.ContainsKey(area.index))
                 {
-                    neededForLevelByAreaCurrent.Remove(area.index);
+                    neededForAreaTotal -= neededForLevelByAreaCurrent[area.index][area.currentLevel];
+                    neededForLevelByAreaCurrent[area.index].Remove(area.currentLevel);
+                    if (neededForLevelByAreaCurrent[area.index].Count == 0)
+                    {
+                        neededForLevelByAreaCurrent.Remove(area.index);
 
-                    neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
+                        neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
+                    }
                 }
 
-                if(neededForProductionByLevelByAreaCurrent[area.index].Count == 0)
+                if (neededForProductionByLevelByAreaCurrent.ContainsKey(area.index))
                 {
-                    neededForProductionByLevelByAreaCurrent.Remove(area.index);
+                    neededForProductionByLevelByAreaCurrent[area.index].Remove(area.currentLevel);
+                    if (neededForProductionByLevelByAreaCurrent[area.index].Count == 0)
+                    {
+                        neededForProductionByLevelByAreaCurrent.Remove(area.index);
 
-                    neededFor[4] = neededForProductionByLevelByAreaCurrent.Count > 0;
+                        neededFor[4] = neededForProductionByLevelByAreaCurrent.Count > 0;
+                    }
                 }
 
                 if (!neededForLevelByAreaCurrent.ContainsKey(area.index) && !neededForProductionByLevelByAreaCurrent.ContainsKey(area.index))

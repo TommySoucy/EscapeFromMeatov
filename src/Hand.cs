@@ -154,12 +154,14 @@ namespace EFM
             }
         }
 
-        public void SetDescribable(IDescribable decribable)
+        public void SetDescribable(IDescribable describable)
         {
-            if(currentDescribable == decribable)
+            if(currentDescribable == describable)
             {
                 return;
             }
+
+            currentDescribable = describable;
 
             if (description == null)
             {
@@ -167,7 +169,7 @@ namespace EFM
                 description.hand = this;
             }
 
-            description.SetDescriptionPack(decribable.GetDescriptionPack());
+            description.SetDescriptionPack(describable.GetDescriptionPack());
         }
     }
 }

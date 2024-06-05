@@ -586,7 +586,8 @@ namespace EFM
 
         public void SetUpgradeCheckProcessors(bool active)
         {
-            if(activeCheckProcessors != null)
+            // Check for length because serialized array will not be null but will have no elements
+            if(activeCheckProcessors != null && activeCheckProcessors.Length > 0)
             {
                 if (activeCheckProcessors[0] != null)
                 {
@@ -598,7 +599,7 @@ namespace EFM
                 }
             }
 
-            if(levels[currentLevel].areaUpgradeCheckProcessors != null)
+            if(levels[currentLevel].areaUpgradeCheckProcessors != null && levels[currentLevel].areaUpgradeCheckProcessors.Length > 0)
             {
                 if (levels[currentLevel].areaUpgradeCheckProcessors[0] != null)
                 {
@@ -751,13 +752,25 @@ namespace EFM
                                 Mod.LogError("DEV: "+(production == null ? "Area":"Prodution") +" item requirement targets item " + itemID + " for which we do not have data");
                             }
                         }
+                        if(item == null)
+                        {
+                            Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " item requirement targets item " + itemID + " but found data was null");
+                            return;
+                        }
 
                         if (requirementData["count"] != null)
                         {
                             itemCount = (int)requirementData["count"];
                         }
-                        HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
-                        area.OnSlotContentChanged += OnAreaSlotContentChanged;
+                        // Really just want to handle a change in slot content if we are continuous production req
+                        if (production != null && production.continuous)
+                        {
+                            area.OnSlotContentChanged += OnAreaSlotContentChanged;
+                        }
+                        else // Either we are area upgrade req or we are production but not continuous so not slot dependent
+                        {
+                            HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                        }
                         break;
                     case RequirementType.Area:
                         areaIndex = (int)requirementData["areaType"];
@@ -799,6 +812,16 @@ namespace EFM
                                 Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " tool requirement targets item " + toolItemID + " for which we do not have data");
                             }
                         }
+                        if (item == null)
+                        {
+                            Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " tool requirement targets item " + toolItemID + " but found data was null");
+                            return;
+                        }
+
+                        if (production == null || !production.continuous)
+                        {
+                            HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                        }
                         HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
                         break;
                     case RequirementType.Resource:
@@ -819,9 +842,22 @@ namespace EFM
                                 Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " item requirement targets item " + resourceItemID + " for which we do not have data");
                             }
                         }
+                        if (item == null)
+                        {
+                            Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " resource requirement targets item " + resourceItemID + " but found data was null");
+                            return;
+                        }
+
                         resourceCount = (int)requirementData["resource"];
-                        HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
-                        area.OnSlotContentChanged += OnAreaSlotContentChanged;
+                        // Really just want to handle a change in slot content if we are continuous production req
+                        if (production != null && production.continuous)
+                        {
+                            area.OnSlotContentChanged += OnAreaSlotContentChanged;
+                        }
+                        else // Either we are area upgrade req or we are production but not continuous so not slot dependent
+                        {
+                            HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                        }
                         break;
                     case RequirementType.QuestComplete:
                         task = Task.allTasks[requirementData["questId"].ToString()];
@@ -970,7 +1006,7 @@ namespace EFM
                     // Slot resource requirements are really only used for continuous productions
                     // These requirements specify an amount to COMPLETE the production
                     // but the production itself should be in production if we have more than 0 amount
-                    fulfilled = totalAmount >= 0;
+                    fulfilled = totalAmount > 0;
                     if (itemRequirementUI != null)
                     {
                         itemRequirementUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString();
@@ -991,10 +1027,8 @@ namespace EFM
                             ++itemCount;
                         }
                     }
-                    // Note that here we only check greater than 0
-                    // Slot item requirements are really only used for continuous productions
-                    // The production itself should be in production if we have more than 0 item installed
-                    fulfilled = itemCount >= 0;
+
+                    fulfilled = itemCount > this.itemCount;
                     if (itemRequirementUI != null)
                     {
                         itemRequirementUI.amount.text = itemCount.ToString();

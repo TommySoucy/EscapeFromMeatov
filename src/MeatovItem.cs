@@ -2620,12 +2620,15 @@ namespace EFM
 
             if (newParent != parent)
             {
-                // Remove from previous parent
-                parent.children[childIndex] = parent.children[parent.children.Count - 1];
-                parent.children[childIndex].childIndex = childIndex;
-                parent.children.RemoveAt(parent.children.Count - 1);
-                parent = null;
-                childIndex = -1; 
+                // Remove from previous parent if necessary
+                if (parent != null)
+                {
+                    parent.children[childIndex] = parent.children[parent.children.Count - 1];
+                    parent.children[childIndex].childIndex = childIndex;
+                    parent.children.RemoveAt(parent.children.Count - 1);
+                    parent = null;
+                    childIndex = -1;
+                }
                 
                 // If was in a volume, must check if still correct one
                 // because of the order in which this parent changed event is called and when we call
@@ -2639,7 +2642,7 @@ namespace EFM
                         ownerItem = (parentVolume as ContainerVolume).ownerItem;
                     }
 
-                    if(ownerItem != parent)
+                    if(newParent == null || ownerItem != parent)
                     {
                         parentVolume.RemoveItem(this);
                     }

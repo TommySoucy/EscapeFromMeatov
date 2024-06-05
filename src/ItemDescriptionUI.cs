@@ -68,6 +68,7 @@ namespace EFM
         public GameObject compatibleAmmoParent;
         public GameObject compatibleAmmoEntryPrefab;
         public Text description;
+        public Image wishlistStar;
 
         public AudioSource clickAudio;
 
@@ -181,32 +182,62 @@ namespace EFM
 
         public void OnToggleAreasClicked()
         {
-
+            // open is the new state
+            bool open = !neededForAreasParent.activeSelf;
+            neededForAreasParent.SetActive(open);
+            neededForAreasOpenIcon.SetActive(!open);
+            neededForAreasCloseIcon.SetActive(open);
+            clickAudio.Play();
         }
 
         public void OnToggleQuestsClicked()
         {
-
+            // open is the new state
+            bool open = !neededForQuestsParent.activeSelf;
+            neededForQuestsParent.SetActive(open);
+            neededForQuestsOpenIcon.SetActive(!open);
+            neededForQuestsCloseIcon.SetActive(open);
+            clickAudio.Play();
         }
 
         public void OnToggleBartersClicked()
         {
-
+            // open is the new state
+            bool open = !neededForBartersParent.activeSelf;
+            neededForBartersParent.SetActive(open);
+            neededForBartersOpenIcon.SetActive(!open);
+            neededForBartersCloseIcon.SetActive(open);
+            clickAudio.Play();
         }
 
         public void OnToggleProductionsClicked()
         {
-
+            // open is the new state
+            bool open = !neededForProductionsParent.activeSelf;
+            neededForProductionsParent.SetActive(open);
+            neededForProductionsOpenIcon.SetActive(!open);
+            neededForProductionsCloseIcon.SetActive(open);
+            clickAudio.Play();
         }
 
         public void OnToggleAmmoContainersClicked()
         {
-
+            // open is the new state
+            bool open = !compatibleAmmoContainersParent.activeSelf;
+            compatibleAmmoContainersParent.SetActive(open);
+            compatibleAmmoContainersOpenIcon.SetActive(!open);
+            compatibleAmmoContainersCloseIcon.SetActive(open);
+            clickAudio.Play();
         }
 
         public void OnToggleAmmoClicked()
         {
-
+            // open is the new state
+            bool open = !compatibleAmmoParent.activeSelf;
+            compatibleAmmoParent.SetActive(open);
+            compatibleAmmoOpenIcon.SetActive(!open);
+            compatibleAmmoCloseIcon.SetActive(open);
+            clickAudio.Play();
         }
 
         public void OnOpenFullClicked()
@@ -216,6 +247,7 @@ namespace EFM
             full.SetActive(true);
             transform.parent = null;
             hand.description = null;
+            hand.currentDescribable = null;
             hand = null;
         }
 
@@ -328,6 +360,7 @@ namespace EFM
                 foreach (KeyValuePair<Task, KeyValuePair<int, bool>> entry in descriptionPack.itemData.neededForTasksCurrent) 
                 {
                     GameObject newEntry = Instantiate(neededForQuestsEntryPrefab, neededForQuestsParent.transform);
+                    newEntry.SetActive(true);
                     ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
                     entryUI.SetTask(this, entry.Key, entry.Value.Value ? currentFIRCount : currentCount, entry.Value.Key);
                     total += entry.Value.Key;
@@ -363,6 +396,7 @@ namespace EFM
                     foreach(KeyValuePair<int, int> entry in areaEntry.Value)
                     {
                         GameObject newEntry = Instantiate(neededForAreasEntryPrefab, neededForAreasParent.transform);
+                        newEntry.SetActive(true);
                         ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
                         entryUI.SetAreaLevel(this, areaEntry.Key, entry.Key, currentCount, entry.Value);
                         total += entry.Value;
@@ -384,12 +418,14 @@ namespace EFM
             {
                 summaryWishlist.gameObject.SetActive(true);
                 neededForWishlist.gameObject.SetActive(true);
+                wishlistStar.color = Color.yellow;
                 return true;
             }
             else
             {
                 summaryWishlist.gameObject.SetActive(false);
                 neededForWishlist.gameObject.SetActive(false);
+                wishlistStar.color = Color.black;
                 return false;
             }
         }
@@ -417,6 +453,7 @@ namespace EFM
                         foreach (KeyValuePair<Barter, int> entry in traderLevelEntry.Value)
                         {
                             GameObject newEntry = Instantiate(neededForBartersEntryPrefab, neededForBartersParent.transform);
+                            newEntry.SetActive(true);
                             ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
                             entryUI.SetBarter(this, entry.Key, traderEntry.Key, traderLevelEntry.Key, currentCount, entry.Value);
                             total += entry.Value;
@@ -456,6 +493,7 @@ namespace EFM
                         foreach (KeyValuePair<Production, int> entry in areaLevelEntry.Value)
                         {
                             GameObject newEntry = Instantiate(neededForProductionsEntryPrefab, neededForProductionsParent.transform);
+                            newEntry.SetActive(true);
                             ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
                             entryUI.SetProduction(this, entry.Key, areaEntry.Key, areaLevelEntry.Key, currentCount, entry.Value);
                             total += entry.Value;
@@ -555,6 +593,7 @@ namespace EFM
                             if(hideoutCount > 0 || playerCount > 0)
                             {
                                 GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
+                                newEntry.SetActive(true);
                                 ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
                                 entryUI.SetAmmoContainer(this, itemData, hideoutCount, playerCount, true);
                                 gotContainer = true;
@@ -599,6 +638,7 @@ namespace EFM
                             if (hideoutCount > 0 || playerCount > 0)
                             {
                                 GameObject newEntry = Instantiate(compatibleAmmoContainersEntryPrefab, compatibleAmmoContainersParent.transform);
+                                newEntry.SetActive(true);
                                 ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
                                 entryUI.SetAmmoContainer(this, itemData, hideoutCount, playerCount, false);
                                 gotContainer = true;
@@ -670,6 +710,7 @@ namespace EFM
                             }
                         }
                         GameObject newEntry = Instantiate(compatibleAmmoEntryPrefab, compatibleAmmoParent.transform);
+                        newEntry.SetActive(true);
                         ItemDescriptionListEntryUI entryUI = newEntry.GetComponent<ItemDescriptionListEntryUI>();
                         entryUI.SetAmmo(this, itemData, hideoutCount, playerCount, ammoBoxCount);
                         gotAmmo = true;

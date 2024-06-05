@@ -57,7 +57,6 @@ namespace EFM
             }
             amount.text = currentCount.ToString() + "/" + neededCount;
             entryName.text = Area.IndexToName(areaIndex) + " lvl " + level;
-            entryInfo.gameObject.SetActive(false);
         }
 
         public void SetBarter(ItemDescriptionUI owner, Barter barter, int traderIndex, int level, long currentCount, int neededCount)

@@ -15,6 +15,7 @@ using System.Net.Mail;
 using static FistVR.SosigInventory;
 using FFmpeg.AutoGen;
 using FMOD;
+using Valve.VR.InteractionSystem;
 
 namespace EFM
 {
@@ -2922,6 +2923,21 @@ namespace EFM
                     IDescribable describable = null;
                     if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out __instance.m_grabHit, 3f, __instance.GrabLaserMask, QueryTriggerInteraction.Collide))
                     {
+                        // Describable will not necessarily have a rigidbody and physicalObject script, so check for IDescribable before
+                        TODO: // Test, is performance of using GetComponentInParent fine or should we make our own script we attach to every collider of every item so we can refer to the describable
+                        describable = __instance.m_grabHit.collider.GetComponentInParent<IDescribable>();
+                        if (describable != null)
+                        {
+                            if (__instance.IsThisTheRightHand)
+                            {
+                                Mod.rightHand.SetDescribable(describable);
+                            }
+                            else
+                            {
+                                Mod.leftHand.SetDescribable(describable);
+                            }
+                        }
+
                         if (__instance.m_grabHit.collider.attachedRigidbody != null && __instance.m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<FVRPhysicalObject>())
                         {
                             fvrphysicalObject = __instance.m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<FVRPhysicalObject>();
@@ -2930,19 +2946,6 @@ namespace EFM
                                 flag3 = true;
                             }
 
-                            // Also check if hit object is describable and if it is, set description
-                            describable = __instance.m_grabHit.collider.attachedRigidbody.gameObject.GetComponent<IDescribable>();
-                            if (describable != null)
-                            {
-                                if (__instance.IsThisTheRightHand)
-                                {
-                                    Mod.rightHand.SetDescribable(describable);
-                                }
-                                else
-                                {
-                                    Mod.leftHand.SetDescribable(describable);
-                                }
-                            }
                         }
                         __instance.GrabLaser.localScale = new Vector3(0.004f, 0.004f, __instance.m_grabHit.distance) * d;
                     }
@@ -2986,22 +2989,34 @@ namespace EFM
                     // Update description visibility
                     if (__instance.IsThisTheRightHand)
                     {
-                        if(Mod.rightHand.description != null && Mod.rightHand.description.gameObject.activeSelf != (describable != null))
+                        if(Mod.rightHand != null && Mod.rightHand.description != null && Mod.rightHand.description.gameObject.activeSelf != (describable != null))
                         {
                             Mod.rightHand.description.gameObject.SetActive(describable != null);
                         }
                     }
                     else
                     {
-                        if (Mod.leftHand.description != null && Mod.leftHand.description.gameObject.activeSelf != (describable != null))
+                        if (Mod.leftHand != null && Mod.leftHand.description != null && Mod.leftHand.description.gameObject.activeSelf != (describable != null))
                         {
                             Mod.leftHand.description.gameObject.SetActive(describable != null);
                         }
                     }
                 }
-                else if (__instance.GrabLaser.gameObject.activeSelf)
+                else // No laser or description input
                 {
-                    __instance.GrabLaser.gameObject.SetActive(false);
+                    if (__instance.GrabLaser.gameObject.activeSelf)
+                    {
+                        __instance.GrabLaser.gameObject.SetActive(false);
+                    }
+
+                    // Also disable description if necessary
+                    // Note, we check for nullity on hand because this will be state of hand by default before we go into Meatov
+                    // So hands will not exist yet
+                    Hand hand = __instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand;
+                    if (hand != null && hand.description != null && hand.description.gameObject.activeSelf)
+                    {
+                        hand.description.gameObject.SetActive(false);
+                    }
                 }
             }
             else
@@ -3013,27 +3028,30 @@ namespace EFM
 
                 // If hand is holding something, we want to activate description if have description input
                 Hand hand = __instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand;
-                if (__instance.m_state == FVRViveHand.HandState.GripInteracting)
+                if (hand != null)
                 {
-                    if (descriptionInput)
+                    if (__instance.m_state == FVRViveHand.HandState.GripInteracting)
                     {
-                        if (hand.heldItem != null)
+                        if (descriptionInput)
                         {
-                            hand.SetDescribable(hand.heldItem);
-                            if (!hand.description.gameObject.activeSelf)
+                            if (hand.heldItem != null)
                             {
-                                hand.description.gameObject.SetActive(true);
+                                hand.SetDescribable(hand.heldItem);
+                                if (!hand.description.gameObject.activeSelf)
+                                {
+                                    hand.description.gameObject.SetActive(true);
+                                }
                             }
                         }
+                        else if (hand.description != null && hand.description.gameObject.activeSelf)
+                        {
+                            hand.description.gameObject.SetActive(false);
+                        }
                     }
-                    else if(hand.description != null && hand.description.gameObject.activeSelf)
+                    else if (hand.description != null && hand.description.gameObject.activeSelf) // Not holding anything, no grab laser, deactivate description
                     {
                         hand.description.gameObject.SetActive(false);
                     }
-                }
-                else if (hand.description != null && hand.description.gameObject.activeSelf) // Not holding anything, no grab laser, deactivate description
-                {
-                    hand.description.gameObject.SetActive(false);
                 }
             }
             if (__instance.Mode == FVRViveHand.HandMode.Neutral && __instance.m_state == FVRViveHand.HandState.Empty && flag)

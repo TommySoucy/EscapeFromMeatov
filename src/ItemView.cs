@@ -50,6 +50,8 @@ namespace EFM
             this.item.OnStackChanged += OnStackChanged;
             this.item.OnAmountChanged += OnAmountChanged;
 
+            SetItemData(item.itemData);
+
             infoFoundInRaidCheckmark.SetActive(item.foundInRaid);
             infoInsuredIcon.SetActive(item.insured);
             insuredBorder.SetActive(item.insured);
@@ -78,8 +80,6 @@ namespace EFM
             }
             toolIcon.SetActive(false);
             toolBorder.SetActive(false);
-
-            SetItemData(item.itemData);
         }
 
         public void ResetItemView()
