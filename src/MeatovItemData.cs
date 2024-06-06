@@ -108,7 +108,7 @@ namespace EFM
         // Otherwise, only if we have enough for all upgrades requiring this item
         // For this, we need to keep track of the area uprade item requirement
         // requiring the least amount of this item
-        private int _minimumUpgradeAmount;
+        private int _minimumUpgradeAmount = int.MaxValue;
         public int minimumUpgradeAmount
         {
             set
@@ -407,16 +407,19 @@ namespace EFM
                                     // Set initial needed for state
                                     if (area.currentLevel < area.levels.Length - 1)
                                     {
-                                        // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
-                                        neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
-                                        if (neededFor[1])
+                                        // Note that despite Mod.checkmarkFutureAreas, we always want to sub to this because we might not be needed yet
+                                        // but when the area level increases, we might then be needed. It is through this event that we will check that
+                                        if (!subscribed)
                                         {
-                                            if (!subscribed)
-                                            {
-                                                area.OnAreaLevelChanged += OnAreaLevelChanged;
-                                                subscribed = true;
-                                            }
+                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                            subscribed = true;
+                                        }
 
+                                        // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
+                                        bool currentNeededFor = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
+                                        neededFor[1] |= currentNeededFor;
+                                        if (currentNeededFor)
+                                        {
                                             if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
                                             {
                                                 int currentCount = 0;
@@ -476,16 +479,19 @@ namespace EFM
                                     // Set initial needed for state
                                     if (area.currentLevel < area.levels.Length - 1)
                                     {
-                                        // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
-                                        neededFor[1] = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
-                                        if (neededFor[1])
+                                        // Note that despite Mod.checkmarkFutureAreas, we always want to sub to this because we might not be needed yet
+                                        // but when the area level increases, we might then be needed. It is through this event that we will check that
+                                        if (!subscribed)
                                         {
-                                            if (!subscribed)
-                                            {
-                                                area.OnAreaLevelChanged += OnAreaLevelChanged;
-                                                subscribed = true;
-                                            }
+                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                            subscribed = true;
+                                        }
 
+                                        // Needed for area upgrade if this requirement's level is a future one and (we want future upgrades or this requirement's level is next)
+                                        bool currentNeededFor = j > area.currentLevel && (Mod.checkmarkFutureAreas || j == (area.currentLevel + 1));
+                                        neededFor[1] |= currentNeededFor;
+                                        if (currentNeededFor)
+                                        {
                                             if (neededForLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, int> neededForLevels))
                                             {
                                                 int currentCount = 0;
@@ -563,16 +569,19 @@ namespace EFM
                                     // Set initial needed for state
                                     if (area.currentLevel < area.levels.Length - 1)
                                     {
-                                        // Needed for production if this requirement's level is a future one and (we want future productions or this requirement's level is next)
-                                        neededFor[4] = j > area.currentLevel && (Mod.checkmarkFutureProductions || j == (area.currentLevel + 1));
-                                        if (neededFor[4])
+                                        // Note that despite Mod.checkmarkFutureAreas, we always want to sub to this because we might not be needed yet
+                                        // but when the area level increases, we might then be needed. It is through this event that we will check that
+                                        if (!subscribed)
                                         {
-                                            if (!subscribed)
-                                            {
-                                                area.OnAreaLevelChanged += OnAreaLevelChanged;
-                                                subscribed = true;
-                                            }
+                                            area.OnAreaLevelChanged += OnAreaLevelChanged;
+                                            subscribed = true;
+                                        }
 
+                                        // Needed for production if this requirement's level is a future one and (we want future productions or this requirement's level is next)
+                                        bool currentNeededFor = j > area.currentLevel && (Mod.checkmarkFutureProductions || j == (area.currentLevel + 1));
+                                        neededFor[4] |= currentNeededFor;
+                                        if (currentNeededFor)
+                                        {
                                             if (neededForProductionByLevelByAreaCurrent.TryGetValue(i, out Dictionary<int, Dictionary<Production, int>> currentLevels))
                                             {
                                                 if (currentLevels.TryGetValue(j, out Dictionary<Production, int> productionsDict))
@@ -667,8 +676,9 @@ namespace EFM
                                 }
 
                                 // Needed for barter if we want future barters (Implying we want all of them) or this barter's trader's level is <= trader's current level
-                                neededFor[3] = Mod.checkmarkFutureBarters || levelBarters.Key <= trader.level;
-                                if (neededFor[3])
+                                bool currentNeededFor = Mod.checkmarkFutureBarters || levelBarters.Key <= trader.level;
+                                neededFor[3] |= currentNeededFor;
+                                if (currentNeededFor)
                                 {
                                     if (neededForBarterByLevelByTraderCurrent.TryGetValue(i, out Dictionary<int, Dictionary<Barter, int>> currentLevels))
                                     {
@@ -742,8 +752,9 @@ namespace EFM
                                     }
 
                                     // Needed for quest if we want future quests (Active or not) or if currently active
-                                    neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
-                                    if (neededFor[0])
+                                    bool currentNeededFor = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
+                                    neededFor[0] |= currentNeededFor;
+                                    if (currentNeededFor)
                                     {
                                         if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
                                         {
@@ -791,8 +802,9 @@ namespace EFM
                                             }
 
                                             // Needed for quest if we want future quests (Active or not) or if currently active
-                                            neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
-                                            if (neededFor[0])
+                                            bool currentNeededFor = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
+                                            neededFor[0] |= currentNeededFor;
+                                            if (currentNeededFor)
                                             {
                                                 if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
                                                 {
@@ -838,8 +850,9 @@ namespace EFM
                                                 }
 
                                                 // Needed for quest if we want future quests (Active or not) or if currently active
-                                                neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
-                                                if (neededFor[0])
+                                                bool currentNeededFor = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
+                                                neededFor[0] |= currentNeededFor;
+                                                if (currentNeededFor)
                                                 {
                                                     if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
                                                     {
@@ -880,8 +893,9 @@ namespace EFM
                                                     }
 
                                                     // Needed for quest if we want future quests (Active or not) or if currently active
-                                                    neededFor[0] = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
-                                                    if (neededFor[0])
+                                                    bool currentNeededFor = Mod.checkmarkFutureQuests || taskEntry.Value.taskState == Task.TaskState.Active;
+                                                    neededFor[0] |= currentNeededFor;
+                                                    if (currentNeededFor)
                                                     {
                                                         if (neededForTasksCurrent.TryGetValue(taskEntry.Value, out currentCount))
                                                         {
@@ -970,13 +984,26 @@ namespace EFM
             // Note that here we assume level of an area can only ever go up and only by 1
             if (area.currentLevel == area.levels.Length - 1)
             {
-                neededForAreaTotal -= neededForLevelByAreaCurrent[area.index][area.currentLevel];
+                bool stillSubbed = false;
+                if (neededForLevelByAreaCurrent.TryGetValue(area.index, out Dictionary<int,int> currentDict))
+                {
+                    stillSubbed = true;
+                    if(currentDict.TryGetValue(area.currentLevel, out int currentValue))
+                    {
+                        neededForAreaTotal -= currentValue;
+                    }
+                    neededForLevelByAreaCurrent.Remove(area.index);
+                }
+
+                stillSubbed |= neededForProductionByLevelByAreaCurrent.Remove(area.index);
 
                 // Reached highest level, this item is not needed for this area anymore
-                area.OnAreaLevelChanged -= OnAreaLevelChanged;
-
-                neededForLevelByAreaCurrent.Remove(area.index);
-                neededForProductionByLevelByAreaCurrent.Remove(area.index);
+                // We check if still subbed because we might have unsubbed already at a lower level if we were already not needed for 
+                // any areas
+                if (stillSubbed)
+                {
+                    area.OnAreaLevelChanged -= OnAreaLevelChanged;
+                }
 
                 // Might still be needed by another area
                 neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
@@ -984,10 +1011,52 @@ namespace EFM
             }
             else
             {
-                if (neededForLevelByAreaCurrent.ContainsKey(area.index))
+                // Add new level needed for stuff to current if necessary
+                if (!Mod.checkmarkFutureAreas)
                 {
-                    neededForAreaTotal -= neededForLevelByAreaCurrent[area.index][area.currentLevel];
-                    neededForLevelByAreaCurrent[area.index].Remove(area.currentLevel);
+                    if(neededForLevelByArea.TryGetValue(area.index, out Dictionary<int, int> neededForLevels))
+                    {
+                        if(neededForLevels.TryGetValue(area.currentLevel + 1, out int neededForValue))
+                        {
+                            if(neededForLevelByAreaCurrent.TryGetValue(area.index, out Dictionary<int, int> neededForLevelsCurrent))
+                            {
+                                // Note that we don't check if area.currentLevel + 1 is already in the dict 
+                                // It shouldn't be since !Mod.checkmarkFutureAreas
+                                neededForLevelsCurrent.Add(area.currentLevel + 1, neededForValue);
+                            }
+                            else
+                            {
+                                neededForLevelByAreaCurrent.Add(area.index, new Dictionary<int, int>() { { area.currentLevel + 1, neededForValue } });
+                            }
+                        }
+                    }
+                }
+                if (!Mod.checkmarkFutureProductions)
+                {
+                    if(neededForProductionByLevelByArea.TryGetValue(area.index, out Dictionary<int, Dictionary<Production, int>> neededForLevels))
+                    {
+                        if(neededForLevels.TryGetValue(area.currentLevel + 1, out Dictionary<Production, int> neededForProductions))
+                        {
+                            if(neededForProductionByLevelByAreaCurrent.TryGetValue(area.index, out Dictionary<int, Dictionary<Production, int>> neededForLevelsCurrent))
+                            {
+                                neededForLevelsCurrent.Add(area.currentLevel + 1, neededForProductions);
+                            }
+                            else
+                            {
+                                neededForProductionByLevelByAreaCurrent.Add(area.index, new Dictionary<int, Dictionary<Production, int>>() { { area.currentLevel + 1, neededForProductions } });
+                            }
+                        }
+                    }
+                }
+
+                // Remove previous level needed for stuff from current
+                if (neededForLevelByAreaCurrent.TryGetValue(area.index, out Dictionary<int,int> currentAreaDict))
+                {
+                    if (currentAreaDict.TryGetValue(area.currentLevel, out int currentValue))
+                    {
+                        neededForAreaTotal -= currentValue;
+                        currentAreaDict.Remove(area.currentLevel);
+                    }
                     if (neededForLevelByAreaCurrent[area.index].Count == 0)
                     {
                         neededForLevelByAreaCurrent.Remove(area.index);
@@ -996,9 +1065,12 @@ namespace EFM
                     }
                 }
 
-                if (neededForProductionByLevelByAreaCurrent.ContainsKey(area.index))
+                if (neededForProductionByLevelByAreaCurrent.TryGetValue(area.index, out Dictionary<int,Dictionary<Production,int>> currentProductionDict))
                 {
-                    neededForProductionByLevelByAreaCurrent[area.index].Remove(area.currentLevel);
+                    if (currentProductionDict.ContainsKey(area.currentLevel))
+                    {
+                        currentProductionDict.Remove(area.currentLevel);
+                    }
                     if (neededForProductionByLevelByAreaCurrent[area.index].Count == 0)
                     {
                         neededForProductionByLevelByAreaCurrent.Remove(area.index);
@@ -1007,7 +1079,9 @@ namespace EFM
                     }
                 }
 
-                if (!neededForLevelByAreaCurrent.ContainsKey(area.index) && !neededForProductionByLevelByAreaCurrent.ContainsKey(area.index))
+                // Note that here we only sub if Mod.checkmarkFutureAreas and not in current, because if !Mod.checkmarkFutureAreas current dicts
+                // can become empty but refill later
+                if (Mod.checkmarkFutureAreas && Mod.checkmarkFutureProductions && !neededForLevelByAreaCurrent.ContainsKey(area.index) && !neededForProductionByLevelByAreaCurrent.ContainsKey(area.index))
                 {
                     area.OnAreaLevelChanged -= OnAreaLevelChanged;
                 }
