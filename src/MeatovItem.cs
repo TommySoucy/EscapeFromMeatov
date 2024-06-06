@@ -2615,7 +2615,7 @@ namespace EFM
             }
             else
             {
-                newParent = transform.GetComponentInParents<MeatovItem>();
+                newParent = transform.GetComponentInParents<MeatovItem>(false);
             }
 
             if (newParent != parent)

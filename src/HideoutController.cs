@@ -148,6 +148,8 @@ namespace EFM
 
         public delegate void OnHideoutInventoryChangedDelegate();
         public event OnHideoutInventoryChangedDelegate OnHideoutInventoryChanged;
+        public delegate void OnHideoutItemInventoryChangedDelegate(MeatovItemData itemData, int difference);
+        public event OnHideoutItemInventoryChangedDelegate OnHideoutItemInventoryChanged;
 
         public override void Awake()
         {
@@ -1933,6 +1935,7 @@ namespace EFM
 
         public void AddToInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
         {
+            int difference = stackDifference;
             // StackOnly should be true if not item location was changed, but the stack count has
             if (stackOnly)
             {
@@ -1973,6 +1976,7 @@ namespace EFM
             }
             else
             {
+                difference = item.stack;
                 if (inventory.ContainsKey(item.H3ID))
                 {
                     inventory[item.H3ID] += item.stack;
@@ -2041,10 +2045,8 @@ namespace EFM
                 }
             }
 
-            if(OnHideoutInventoryChanged != null)
-            {
-                OnHideoutInventoryChanged();
-            }
+            OnHideoutInventoryChangedInvoke();
+            OnHideoutItemInventoryChangedInvoke(item.itemData, difference);
         }
 
         public void AddToFIRInventory(MeatovItem item)
@@ -2105,6 +2107,8 @@ namespace EFM
 
         public void RemoveFromInventory(MeatovItem item)
         {
+            int difference = -item.stack;
+
             if (inventory.ContainsKey(item.H3ID))
             {
                 inventory[item.H3ID] -= item.stack;
@@ -2166,10 +2170,8 @@ namespace EFM
                 }
             }
 
-            if (OnHideoutInventoryChanged != null)
-            {
-                OnHideoutInventoryChanged();
-            }
+            OnHideoutInventoryChangedInvoke();
+            OnHideoutItemInventoryChangedInvoke(item.itemData, difference);
         }
 
         public void RemoveFromFIRInventory(MeatovItem item)
@@ -4004,6 +4006,16 @@ namespace EFM
             {
                 OnHideoutInventoryChanged();
             }
+        }
+
+        public void OnHideoutItemInventoryChangedInvoke(MeatovItemData itemData, int difference)
+        {
+            // Raise event
+            if (OnHideoutItemInventoryChanged != null)
+            {
+                OnHideoutItemInventoryChanged(itemData, difference);
+            }
+            itemData.OnHideoutItemInventoryChangedInvoke(difference);
         }
     }
 

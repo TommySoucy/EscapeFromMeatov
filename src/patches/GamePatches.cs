@@ -2924,8 +2924,8 @@ namespace EFM
                     if (Physics.Raycast(__instance.Input.OneEuroPointingPos, __instance.Input.OneEuroPointRotation * Vector3.forward, out __instance.m_grabHit, 3f, __instance.GrabLaserMask, QueryTriggerInteraction.Collide))
                     {
                         // Describable will not necessarily have a rigidbody and physicalObject script, so check for IDescribable before
-                        TODO: // Test, is performance of using GetComponentInParent fine or should we make our own script we attach to every collider of every item so we can refer to the describable
-                        describable = __instance.m_grabHit.collider.GetComponentInParent<IDescribable>();
+                        TODO: // Test, is performance of using GetComponentInParents fine or should we make our own script we attach to every collider of every item so we can refer to the describable
+                        describable = __instance.m_grabHit.collider.GetComponentInParents<IDescribable>();
                         if (describable != null)
                         {
                             if (__instance.IsThisTheRightHand)

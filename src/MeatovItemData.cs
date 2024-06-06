@@ -175,6 +175,10 @@ namespace EFM
         public event OnNeededForAreaTotalChangedDelegate OnNeededForAreaTotalChanged;
         public delegate void OnNeededForTaskTotalChangedDelegate();
         public event OnNeededForTaskTotalChangedDelegate OnNeededForTaskTotalChanged;
+        public delegate void OnHideoutItemInventoryChangedDelegate(int difference);
+        public event OnHideoutItemInventoryChangedDelegate OnHideoutItemInventoryChanged;
+        public delegate void OnPlayerItemInventoryChangedDelegate(int difference);
+        public event OnPlayerItemInventoryChangedDelegate OnPlayerItemInventoryChanged;
 
         public MeatovItemData(JToken data)
         {
@@ -1103,7 +1107,7 @@ namespace EFM
                 }
                 minimumUpgradeAmount = minimum;
             }
-
+            
             if (preNeededForArea != neededFor[1])
             {
                 OnNeededForChangedInvoke(1);
@@ -1295,6 +1299,22 @@ namespace EFM
             if (OnAddedToWishlist != null)
             {
                 OnAddedToWishlist(itemData);
+            }
+        }
+
+        public void OnHideoutItemInventoryChangedInvoke(int difference)
+        {
+            if (OnHideoutItemInventoryChanged != null)
+            {
+                OnHideoutItemInventoryChanged(difference);
+            }
+        }
+
+        public void OnPlayerItemInventoryChangedInvoke(int difference)
+        {
+            if (OnPlayerItemInventoryChanged != null)
+            {
+                OnPlayerItemInventoryChanged(difference);
             }
         }
     }

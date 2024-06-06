@@ -33,7 +33,7 @@ namespace EFM
 
         public void OnTriggerEnter(Collider other)
         {
-            MeatovItem item = other.GetComponentInParents<MeatovItem>(maxUpCheck);
+            MeatovItem item = other.GetComponentInParents<MeatovItem>(true, maxUpCheck);
             if(item != null)
             {
                 if (block)

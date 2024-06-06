@@ -117,6 +117,8 @@ namespace EFM
             {
                 this.itemData.OnNeededForChanged -= OnNeededForChanged;
                 this.itemData.OnMinimumUpgradeAmountChanged -= OnMinimumUpgradeAmountChanged;
+                this.itemData.OnHideoutItemInventoryChanged -= OnItemInventoryChanged;
+                this.itemData.OnPlayerItemInventoryChanged -= OnItemInventoryChanged;
             }
             this.itemData = itemData;
 
@@ -152,6 +154,8 @@ namespace EFM
 
                 itemData.OnNeededForChanged += OnNeededForChanged;
                 itemData.OnMinimumUpgradeAmountChanged += OnMinimumUpgradeAmountChanged;
+                itemData.OnHideoutItemInventoryChanged += OnItemInventoryChanged;
+                itemData.OnPlayerItemInventoryChanged += OnItemInventoryChanged;
 
                 // Set overrides
                 if (hasInsuredOverride)
@@ -195,6 +199,19 @@ namespace EFM
         }
 
         public void OnMinimumUpgradeAmountChanged()
+        {
+            if (itemData.GetCheckmark(out Color color))
+            {
+                infoNeededForCheckmark.gameObject.SetActive(true);
+                infoNeededForCheckmark.color = color;
+            }
+            else
+            {
+                infoNeededForCheckmark.gameObject.SetActive(false);
+            }
+        }
+
+        public void OnItemInventoryChanged(int difference)
         {
             if (itemData.GetCheckmark(out Color color))
             {
@@ -251,6 +268,8 @@ namespace EFM
             {
                 itemData.OnNeededForChanged -= OnNeededForChanged;
                 itemData.OnMinimumUpgradeAmountChanged -= OnMinimumUpgradeAmountChanged;
+                itemData.OnHideoutItemInventoryChanged -= OnItemInventoryChanged;
+                itemData.OnPlayerItemInventoryChanged -= OnItemInventoryChanged;
             }
         }
     }

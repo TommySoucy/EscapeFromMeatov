@@ -529,6 +529,8 @@ namespace EFM
         public static event OnPlaceVisitedDelegate OnPlaceVisited;
         public delegate void OnFlareLaunchedDelegate(string placeID);
         public static event OnFlareLaunchedDelegate OnFlareLaunched;
+        public delegate void OnPlayerItemInventoryChangedDelegate(MeatovItemData itemData, int difference);
+        public static event OnPlayerItemInventoryChangedDelegate OnPlayerItemInventoryChanged;
 
         public void Start()
         {
@@ -1042,6 +1044,15 @@ namespace EFM
             {
                 OnKIARaidCountChanged();
             }
+        }
+
+        public static void OnPlayerItemInventoryChangedInvoke(MeatovItemData itemData, int difference)
+        {
+            if(OnPlayerItemInventoryChanged != null)
+            {
+                OnPlayerItemInventoryChanged(itemData, difference);
+            }
+            itemData.OnPlayerItemInventoryChangedInvoke(difference);
         }
 
         public void DumpLayers()
@@ -1561,6 +1572,8 @@ namespace EFM
 
         public static void AddToPlayerInventory(MeatovItem item, bool stackOnly = false, int stackDifference = 0)
         {
+            int difference = stackDifference;
+
             if (stackOnly)
             {
                 if (playerInventory.ContainsKey(item.H3ID))
@@ -1600,6 +1613,7 @@ namespace EFM
             }
             else
             {
+                difference = item.stack;
                 if (playerInventory.ContainsKey(item.H3ID))
                 {
                     playerInventory[item.H3ID] += item.stack;
@@ -1667,6 +1681,8 @@ namespace EFM
                     }
                 }
             }
+
+            OnPlayerItemInventoryChangedInvoke(item.itemData, difference);
         }
 
         public static void AddToPlayerFIRInventory(MeatovItem item)
@@ -1690,6 +1706,8 @@ namespace EFM
 
         public static void RemoveFromPlayerInventory(MeatovItem item)
         {
+            int difference = -item.stack;
+
             if (playerInventory.ContainsKey(item.H3ID))
             {
                 playerInventory[item.H3ID] -= item.stack;
@@ -1750,6 +1768,8 @@ namespace EFM
                     }
                 }
             }
+
+            OnPlayerItemInventoryChangedInvoke(item.itemData, difference);
         }
 
         public static void RemoveFromPlayerFIRInventory(MeatovItem item)
