@@ -1,9 +1,7 @@
 ﻿using FistVR;
-using FMOD;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -215,6 +213,8 @@ namespace EFM
                         highestIndex = areaIndex;
                     }
 
+                    area.UI = Instantiate(areaCanvasPrefab, area.UIRoot).GetComponent<AreaUI>();
+                    area.UI.area = area;
                     switches[0].gameObjects.Add(area.UI.gameObject);
                     switches[1].negativeGameObjects.Add(area.UI.transform.parent.gameObject);
                     area.controller = areaController;

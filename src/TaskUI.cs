@@ -474,9 +474,17 @@ namespace EFM
         {
             // Toggle task description
             full.SetActive(!full.activeSelf);
-            StatusUI.instance.clickAudio.Play();
 
-            StatusUI.instance.mustUpdateTaskListHeight = 1;
+            if (market)
+            {
+                HideoutController.instance.marketManager.clickAudio.Play();
+                HideoutController.instance.marketManager.tasksHoverScrollProcessor.mustUpdateMiddleHeight = 1;
+            }
+            else
+            {
+                StatusUI.instance.clickAudio.Play();
+                StatusUI.instance.tasksHoverScrollProcessor.mustUpdateMiddleHeight = 1;
+            }
         }
 
         public void OnStartClicked()

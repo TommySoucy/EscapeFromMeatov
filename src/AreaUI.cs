@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -56,6 +55,11 @@ namespace EFM
         public Text fullStatusText;
         public Image fullStatusImage;
         public Text fullDescription;
+        public ScrollRect fullScrollRect;
+        public RectTransform currentContent;
+        public RectTransform futureContent;
+        public HoverScrollProcessor fullCurrentHoverScrollProcessor;
+        public HoverScrollProcessor fullFutureHoverScrollProcessor;
         public GameObject productionPanel;
         public GameObject productionPanelContainer;
         public GameObject productionViewPrefab;
@@ -92,13 +96,10 @@ namespace EFM
         public Text levelButtonText;
         public GameObject backButton;
         public GameObject upgradeButton;
-        public RectTransform currentContent;
-        public RectTransform futureContent;
         public GameObject upgradeConfirmDialog;
         public GameObject warningDialog;
         public GameObject blockDialog;
         public AudioSource genericAudioSource;
-        public AudioClip[] genericAudioClips; // AreaSelected, UpgradeBegin, UpgradeComplete, ItemInstalled, ItemStarted, ItemComplete
 
         public void Init()
         {
@@ -121,11 +122,14 @@ namespace EFM
             UpdateProductions();
             UpdateRequirements();
             UpdateBonuses();
-            UpdateBottomButtons();
 
             // Once content set, reenable current
             // Ensures its HoverScrollProcessor.OnEnable is called
             currentContent.gameObject.SetActive(true);
+            fullScrollRect.content = currentContent;
+
+            // This must be called while correct content page is active, so after we set current active in this case
+            UpdateBottomButtons();
         }
 
         public void UpdateStatusTexts()
@@ -416,10 +420,10 @@ namespace EFM
 
         public void UpdateProductions()
         {
-            productionPanel.SetActive(area.currentLevel != area.startLevel);
+            productionPanel.SetActive(area.productionsPerLevel[area.currentLevel] != null && area.productionsPerLevel[area.currentLevel].Count > 0);
 
             // Destroy any existing productions
-            while (productionPanelContainer.transform.childCount > 3) // 3: title + 3 production types
+            while (productionPanelContainer.transform.childCount > 3) // 3: 3 production types
             {
                 Transform currentChild = productionPanelContainer.transform.GetChild(3);
                 currentChild.parent = null;
@@ -1247,7 +1251,7 @@ namespace EFM
         public void OnSummaryClicked()
         {
             buttonClickSound.Play();
-            genericAudioSource.PlayOneShot(genericAudioClips[0]);
+            genericAudioSource.PlayOneShot(area.genericAudioClips[0]);
             OpenUI();
         }
 
@@ -1304,6 +1308,7 @@ namespace EFM
             // Page
             currentContent.gameObject.SetActive(false);
             futureContent.gameObject.SetActive(true);
+            fullScrollRect.content = futureContent;
 
             // Buttons
             levelButton.SetActive(false);
@@ -1318,6 +1323,7 @@ namespace EFM
             // Page
             currentContent.gameObject.SetActive(true);
             futureContent.gameObject.SetActive(false);
+            fullScrollRect.content = currentContent;
 
             // Buttons
             levelButton.SetActive(true);
@@ -1345,7 +1351,7 @@ namespace EFM
 
             area.BeginUpgrade();
 
-            genericAudioSource.PlayOneShot(genericAudioClips[1]);
+            genericAudioSource.PlayOneShot(area.genericAudioClips[1]);
 
             upgradeConfirmDialog.SetActive(false);
 
@@ -1391,7 +1397,7 @@ namespace EFM
 
         public void PlaySlotInputSound()
         {
-            genericAudioSource.PlayOneShot(genericAudioClips[3]);
+            genericAudioSource.PlayOneShot(area.genericAudioClips[3]);
         }
     }
 }

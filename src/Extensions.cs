@@ -10,27 +10,24 @@ namespace EFM
         /// <typeparam name="T"></typeparam>
         /// <param name="c">The calling component</param>
         /// <param name="checkCurrent">Whether we want to check the calling component as well</param>
-        /// <param name="steps">How high up the hierarchy we want to go. 0 is first parent</param>
         /// <returns></returns>
-        public static T GetComponentInParents<T>(this Component c, bool checkCurrent = true, int steps = -1)
+        public static T GetComponentInParents<T>(this Component c, bool checkCurrent = true)
         {
-            Transform current = checkCurrent ? c.transform : c.transform.parent;
-            T t = default(T);
-            if (current == null)
+            if (checkCurrent)
             {
-                return t;
+                return c.GetComponentInParent<T>();
             }
-
-            int step = 0;
-
-            do
+            else
             {
-                t = c.GetComponent<T>();
-                current = current.parent;
+                if(c.transform.parent == null)
+                {
+                    return default(T);
+                }
+                else
+                {
+                    return c.transform.parent.GetComponentInParent<T>();
+                }
             }
-            while (t == null && current != null && (steps == -1 || step++ < steps));
-
-            return t;
         }
     }
 }

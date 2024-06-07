@@ -50,6 +50,7 @@ namespace EFM
         public Text infoRunthrough;
         public Text infoMIA;
         public Text infoKIA;
+        public HoverScrollProcessor tasksHoverScrollProcessor;
         public HoverScroll infoDownHoverScroll;
         public HoverScroll infoUpHoverScroll;
         public AudioSource clickAudio;
@@ -57,9 +58,6 @@ namespace EFM
         public AudioSource openAudio;
         public AudioSource closeAudio;
         public Text extractionTimer;
-
-        [NonSerialized]
-        public int mustUpdateTaskListHeight;
 
         public void Awake()
         {
@@ -134,10 +132,12 @@ namespace EFM
                 if (currentPair == null || currentPair.childCount == 3)
                 {
                     currentPair = Instantiate(skillPairPrefab, skillsParent).transform;
+                    currentPair.gameObject.SetActive(true);
                 }
 
                 SkillUI skillUI = Instantiate(skillPrefab, currentPair).GetComponent<SkillUI>();
                 skillUI.SetSkill(Mod.skills[i]);
+                skillUI.gameObject.SetActive(true);
             }
         }
 

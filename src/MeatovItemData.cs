@@ -1008,10 +1008,6 @@ namespace EFM
                 {
                     area.OnAreaLevelChanged -= OnAreaLevelChanged;
                 }
-
-                // Might still be needed by another area
-                neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
-                neededFor[4] = neededForProductionByLevelByAreaCurrent.Count > 0;
             }
             else
             {
@@ -1064,8 +1060,6 @@ namespace EFM
                     if (neededForLevelByAreaCurrent[area.index].Count == 0)
                     {
                         neededForLevelByAreaCurrent.Remove(area.index);
-
-                        neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
                     }
                 }
 
@@ -1078,8 +1072,6 @@ namespace EFM
                     if (neededForProductionByLevelByAreaCurrent[area.index].Count == 0)
                     {
                         neededForProductionByLevelByAreaCurrent.Remove(area.index);
-
-                        neededFor[4] = neededForProductionByLevelByAreaCurrent.Count > 0;
                     }
                 }
 
@@ -1090,6 +1082,10 @@ namespace EFM
                     area.OnAreaLevelChanged -= OnAreaLevelChanged;
                 }
             }
+
+            // Update neededFor
+            neededFor[1] = neededForLevelByAreaCurrent.Count > 0;
+            neededFor[4] = neededForProductionByLevelByAreaCurrent.Count > 0;
 
             // If still needed, must find minimum again as it might have changed
             if (neededFor[1])

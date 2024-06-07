@@ -1,8 +1,4 @@
-﻿using H3MP.Scripts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using UnityEngine;
 
 namespace EFM
@@ -19,6 +15,8 @@ namespace EFM
 
         public void Update()
         {
+            // We use this system to delay the update to a frame later
+            // This is because the sizeDelta.y of a rectTransform will be updated a frame after the height change
             if (mustUpdateMiddleHeight == 0)
             {
                 UpdateMiddleHeight();
@@ -32,7 +30,7 @@ namespace EFM
 
         public void OnEnable()
         {
-            ++mustUpdateMiddleHeight;
+            mustUpdateMiddleHeight = 1;
         }
 
         public void UpdateMiddleHeight()

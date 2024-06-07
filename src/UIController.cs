@@ -50,8 +50,9 @@ namespace EFM
                 }
                 loadingHideoutAVGProgress += Mod.itemIconsBundleRequest.progress;
                 loadingHideoutAVGProgress += Mod.hideoutBundleRequest.progress;
+                loadingHideoutAVGProgress += Mod.hideoutAssetsBundleRequest.progress;
 
-                loadingHideoutAVGProgress /= 3 + Mod.itemsBundlesRequests.Length + Mod.hideoutAreaBundleRequests.Length;
+                loadingHideoutAVGProgress /= 4 + Mod.itemsBundlesRequests.Length + Mod.hideoutAreaBundleRequests.Length;
 
                 // Check if they are done loading
                 bool doneLoadingItems = true;
@@ -77,6 +78,7 @@ namespace EFM
                     }
                     Mod.itemIconsBundle = Mod.itemIconsBundleRequest.assetBundle;
                     Mod.hideoutBundle = Mod.hideoutBundleRequest.assetBundle;
+                    Mod.hideoutAssetsBundle = Mod.hideoutAssetsBundleRequest.assetBundle;
                     for (int i = 0; i < Mod.hideoutAreaBundles.Length; ++i)
                     {
                         Mod.hideoutAreaBundles[i] = Mod.hideoutAreaBundleRequests[i].assetBundle;
@@ -133,6 +135,7 @@ namespace EFM
                 }
                 Mod.itemIconsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMItemIcons.ab");
                 Mod.hideoutBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideout.ab");
+                Mod.hideoutAssetsBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMHideoutAssets.ab");
                 Mod.hideoutAreaBundleRequests = new AssetBundleCreateRequest[4];
                 Mod.hideoutAreaBundles = new AssetBundle[4];
                 for(int i=0; i< Mod.hideoutAreaBundleRequests.Length; ++i)
@@ -162,6 +165,8 @@ namespace EFM
 
                     Mod.questionMarkIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("QuestionMarkIcon");
                     Mod.emptyCellIcon = Mod.itemIconsBundle.LoadAsset<Sprite>("cell_full_border");
+
+                    HideoutController.areaCanvasPrefab = Mod.hideoutAssetsBundle.LoadAsset<GameObject>("AreaCanvas");
 
                     Mod.playerBundleRequest = null;
                     Mod.itemsBundlesRequests = null;

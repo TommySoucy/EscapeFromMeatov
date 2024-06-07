@@ -43,6 +43,8 @@ namespace EFM
         public static AssetBundle mainMenuBundle;
         public static AssetBundle hideoutBundle;
         public static AssetBundleCreateRequest hideoutBundleRequest;
+        public static AssetBundle hideoutAssetsBundle;
+        public static AssetBundleCreateRequest hideoutAssetsBundleRequest;
         public static AssetBundle[] hideoutAreaBundles;
         public static AssetBundleCreateRequest[] hideoutAreaBundleRequests;
         public static AssetBundle itemIconsBundle;
@@ -2100,6 +2102,8 @@ namespace EFM
                         {
                             hideoutBundle.Unload(true);
                             hideoutBundle = null;
+                            hideoutAssetsBundle.Unload(true);
+                            hideoutAssetsBundle = null;
                             for(int i=0; i < hideoutAreaBundles.Length; ++i)
                             {
                                 hideoutAreaBundles[i].Unload(true);

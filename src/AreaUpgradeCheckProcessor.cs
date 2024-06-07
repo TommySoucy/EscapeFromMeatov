@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace EFM
 {
     public class AreaUpgradeCheckProcessor : MonoBehaviour
     {
-        public static readonly int maxUpCheck = 4;
-
         public AreaUI areaUI;
         [NonSerialized]
         public List<MeatovItem> items = new List<MeatovItem>();
@@ -33,7 +30,7 @@ namespace EFM
 
         public void OnTriggerEnter(Collider other)
         {
-            MeatovItem item = other.GetComponentInParents<MeatovItem>(true, maxUpCheck);
+            MeatovItem item = other.GetComponentInParents<MeatovItem>();
             if(item != null)
             {
                 if (block)

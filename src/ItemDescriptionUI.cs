@@ -21,6 +21,7 @@ namespace EFM
         public Text summaryVolume;
 
         public GameObject full;
+        public HoverScrollProcessor fullHoverScrollProcessor;
         public ItemView fullItemView;
         public Text fullName;
         public Text propertiesText;
@@ -163,9 +164,6 @@ namespace EFM
             needed |= UpdateNeededForProduction();
             neededForQuestsTitle.color = Mod.neededForColors[0];
             neededForQuestsTotal.color = Mod.neededForColors[0];
-            Color areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID) >= descriptionPack.itemData.minimumUpgradeAmount ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
-            neededForAreasTitle.color = areasColor;
-            neededForAreasTotal.color = areasColor;
             neededForWishlist.color = Mod.neededForColors[2];
             neededForBartersTitle.color = Mod.neededForColors[3];
             neededForBartersTotal.color = Mod.neededForColors[3];
@@ -187,6 +185,7 @@ namespace EFM
             neededForAreasParent.SetActive(open);
             neededForAreasOpenIcon.SetActive(!open);
             neededForAreasCloseIcon.SetActive(open);
+            fullHoverScrollProcessor.mustUpdateMiddleHeight = 1;
             clickAudio.Play();
         }
 
@@ -197,6 +196,7 @@ namespace EFM
             neededForQuestsParent.SetActive(open);
             neededForQuestsOpenIcon.SetActive(!open);
             neededForQuestsCloseIcon.SetActive(open);
+            fullHoverScrollProcessor.mustUpdateMiddleHeight = 1;
             clickAudio.Play();
         }
 
@@ -207,6 +207,7 @@ namespace EFM
             neededForBartersParent.SetActive(open);
             neededForBartersOpenIcon.SetActive(!open);
             neededForBartersCloseIcon.SetActive(open);
+            fullHoverScrollProcessor.mustUpdateMiddleHeight = 1;
             clickAudio.Play();
         }
 
@@ -217,6 +218,7 @@ namespace EFM
             neededForProductionsParent.SetActive(open);
             neededForProductionsOpenIcon.SetActive(!open);
             neededForProductionsCloseIcon.SetActive(open);
+            fullHoverScrollProcessor.mustUpdateMiddleHeight = 1;
             clickAudio.Play();
         }
 
@@ -227,6 +229,7 @@ namespace EFM
             compatibleAmmoContainersParent.SetActive(open);
             compatibleAmmoContainersOpenIcon.SetActive(!open);
             compatibleAmmoContainersCloseIcon.SetActive(open);
+            fullHoverScrollProcessor.mustUpdateMiddleHeight = 1;
             clickAudio.Play();
         }
 
@@ -237,6 +240,7 @@ namespace EFM
             compatibleAmmoParent.SetActive(open);
             compatibleAmmoOpenIcon.SetActive(!open);
             compatibleAmmoCloseIcon.SetActive(open);
+            fullHoverScrollProcessor.mustUpdateMiddleHeight = 1;
             clickAudio.Play();
         }
 
@@ -336,8 +340,6 @@ namespace EFM
                     Mod.LogError("OnNeededForChanged called with wrong index: " + index);
                     break;
             }
-
-            UpdateNeededForAreas();
         }
 
         public bool UpdateNeededForTasks()
@@ -403,11 +405,14 @@ namespace EFM
                     }
                 }
                 neededForAreasTotal.text = "Total: " + currentCount + "/" + total;
+                Color areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID) >= descriptionPack.itemData.minimumUpgradeAmount ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
+                neededForAreasTitle.color = areasColor;
+                neededForAreasTotal.color = areasColor;
                 return true;
             }
             else
             {
-                neededForQuests.SetActive(false);
+                neededForAreas.SetActive(false);
                 return false;
             }
         }

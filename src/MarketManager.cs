@@ -52,6 +52,7 @@ namespace EFM
         public GameObject[] pages; // Buy, Sell, Tasks, Insure
 
         public Transform buyShowcaseContent;
+        public HoverScrollProcessor buyShowcaseHoverScrollProcessor;
         public GameObject buyShowcaseRowPrefab;
         public GameObject buyShowcaseItemViewPrefab;
         public Text buyItemName;
@@ -59,11 +60,13 @@ namespace EFM
         public Dictionary<string, PriceItemView> buyItemPriceViewsByH3ID;
         public Text buyItemCount;
         public Transform buyPricesContent;
+        public HoverScrollProcessor buyPricesHoverScrollProcessor;
         public GameObject buyPricePrefab;
         public GameObject buyDealButton;
         public Collider buyAmountButtonCollider;
 
         public Transform sellShowcaseContent;
+        public HoverScrollProcessor sellShowcaseHoverScrollProcessor;
         public GameObject sellShowcaseRowPrefab;
         public GameObject sellShowcaseItemViewPrefab;
         public Text sellItemName;
@@ -71,9 +74,11 @@ namespace EFM
         public GameObject sellDealButton;
 
         public Transform tasksContent;
+        public HoverScrollProcessor tasksHoverScrollProcessor;
         public GameObject taskPrefab;
 
         public Transform insureShowcaseContent;
+        public HoverScrollProcessor insureShowcaseHoverScrollProcessor;
         public GameObject insureShowcaseRowPrefab;
         public GameObject insureShowcaseItemViewPrefab;
         public Text insureItemName;
@@ -83,12 +88,15 @@ namespace EFM
         public GameObject insurePriceUnfulfilled;
 
         public Transform ragFairBuyCategoriesParent;
+        public HoverScrollProcessor ragFairCategoriesHoverScrollProcessor;
         public GameObject ragFairBuyCategoryPrefab;
         public Transform ragFairBuyItemParent;
+        public HoverScrollProcessor ragFairBuyItemsHoverScrollProcessor;
         public GameObject ragFairBuyItemPrefab;
         public GameObject ragFairBuyCart;
         public PriceItemView ragFairBuyItemView;
         public Transform ragFairBuyPricesParent;
+        public HoverScrollProcessor ragFairPricesHoverScrollProcessor;
         public GameObject ragFairBuyPricePrefab;
         public GameObject ragFairBuyDealButton;
         public Dictionary<string, PriceItemView> ragFairBuyItemPriceViewsByH3ID;
@@ -96,6 +104,7 @@ namespace EFM
         public Collider ragFairBuyAmountButtonCollider;
 
         public Transform ragFairSellShowcaseParent;
+        public HoverScrollProcessor ragFairSellShowcaseHoverScrollProcessor;
         public GameObject ragFairSellRowPrefab;
         public GameObject ragFairSellItemPrefab;
         public PriceItemView ragFairSellSelectedItemView;
@@ -106,9 +115,11 @@ namespace EFM
         public Collider ragFairSellAmountButtonCollider;
 
         public Transform ragFairListingsParent;
+        public HoverScrollProcessor ragFairListingsHoverScrollProcessor;
         public GameObject ragFairListingPrefab;
 
         public Transform ragFairWishlistParent;
+        public HoverScrollProcessor ragFairWishlistHoverScrollProcessor;
         public GameObject ragFairWishlistItemPrefab;
 
         // Live data
@@ -374,6 +385,8 @@ namespace EFM
             {
                 currentRow = GameObject.Instantiate(insureShowcaseRowPrefab, insureShowcaseContent).transform;
                 currentRow.gameObject.SetActive(true);
+
+                insureShowcaseHoverScrollProcessor.mustUpdateMiddleHeight = 1;
             }
 
             GameObject currentItemView = GameObject.Instantiate(insureShowcaseItemViewPrefab, currentRow);
@@ -428,6 +441,7 @@ namespace EFM
             {
                 currentRow = GameObject.Instantiate(sellShowcaseRowPrefab, sellShowcaseContent).transform;
                 currentRow.gameObject.SetActive(true);
+                sellShowcaseHoverScrollProcessor.mustUpdateMiddleHeight = 1;
             }
 
             GameObject currentItemView = GameObject.Instantiate(sellShowcaseItemViewPrefab, currentRow);
@@ -1489,6 +1503,8 @@ namespace EFM
 
             OnBuyItemClick(null, null);
 
+            buyShowcaseHoverScrollProcessor.mustUpdateMiddleHeight = 1;
+
             Mod.LogInfo("0");
             // Sell
             // Setup selling price display
@@ -1664,6 +1680,8 @@ namespace EFM
 
             // Set task UI
             task.marketUI.SetTask(task, true);
+
+            tasksHoverScrollProcessor.mustUpdateMiddleHeight = 1;
         }
 
         public void OnBuyItemClick(MeatovItemData item, BarterPrice[] priceList)
@@ -1758,6 +1776,8 @@ namespace EFM
 
                 buyDealButton.SetActive(canDeal);
             }
+
+            buyPricesHoverScrollProcessor.mustUpdateMiddleHeight = 1;
         }
 
         public void OnBuyDealClick()

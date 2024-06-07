@@ -59,12 +59,14 @@ namespace EFM
         public bool poweringOn;
 
         // Objects
+        public Transform UIRoot;
         public AreaUI UI;
         public AreaLevelData[] levels;
         public GameObject[] objectsToToggle;
         [NonSerialized]
         public AreaUpgradeCheckProcessor[] activeCheckProcessors;
         public bool craftOuputSlot; // False is Volume, output will always be first in slot/vol per level
+        public AudioClip[] genericAudioClips; // AreaSelected, UpgradeBegin, UpgradeComplete, ItemInstalled, ItemStarted, ItemComplete
 
         public delegate void OnSlotContentChangedDelegate();
         public event OnSlotContentChangedDelegate OnSlotContentChanged;
@@ -409,7 +411,7 @@ namespace EFM
 
                     UI.Init();
 
-                    UI.genericAudioSource.PlayOneShot(UI.genericAudioClips[2]);
+                    UI.genericAudioSource.PlayOneShot(genericAudioClips[2]);
                 }
 
                 UI.UpdateStatusTexts();
