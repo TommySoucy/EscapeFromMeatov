@@ -1057,6 +1057,8 @@ namespace EFM
                     {
                         areaRequirementUI.fulfilled.SetActive(fulfilled);
                         areaRequirementUI.unfulfilled.SetActive(!fulfilled);
+                        areaRequirementUI.areaName.color = fulfilled ? Color.green : Color.red;
+                        areaRequirementUI.requiredLevel.color = fulfilled ? Color.green : Color.red;
                     }
                     break;
             }

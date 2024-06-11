@@ -12,6 +12,10 @@ namespace EFM
         public HoverScroll upHoverScroll;
         [NonSerialized]
         public int mustUpdateMiddleHeight = 0;
+        [NonSerialized]
+        public int mustUpdateHoverScrolls = 0;
+        [NonSerialized]
+        public bool setToTop;
 
         public void Update()
         {
@@ -26,10 +30,23 @@ namespace EFM
             {
                 --mustUpdateMiddleHeight;
             }
+
+            // The height of the transform gets set a frame after content changes
+            // The value of the scroll bar changes a frame after that
+            if (mustUpdateHoverScrolls == 0)
+            {
+                UpdateHoverScrolls();
+                --mustUpdateHoverScrolls;
+            }
+            else if (mustUpdateHoverScrolls > 0)
+            {
+                --mustUpdateHoverScrolls;
+            }
         }
 
         public void OnEnable()
         {
+            setToTop = true;
             mustUpdateMiddleHeight = 1;
         }
 
@@ -51,15 +68,29 @@ namespace EFM
             {
                 downHoverScroll.rate = 1 / ((controlledTransform.sizeDelta.y - maxHeight) / (targetRate * maxHeight));
                 upHoverScroll.rate = downHoverScroll.rate;
-                downHoverScroll.scrollbar.value = 1; // Put it back to the top
-                downHoverScroll.gameObject.SetActive(true);
-                upHoverScroll.gameObject.SetActive(false);
+                if (setToTop)
+                {
+                    setToTop = false;
+                    downHoverScroll.scrollbar.value = 1; // Put it back to the top
+                    downHoverScroll.gameObject.SetActive(true);
+                    upHoverScroll.gameObject.SetActive(false);
+                }
+                else
+                {
+                    mustUpdateHoverScrolls = 1;
+                }
             }
             else
             {
                 downHoverScroll.gameObject.SetActive(false);
                 upHoverScroll.gameObject.SetActive(false);
             }
+        }
+
+        public void UpdateHoverScrolls()
+        {
+            downHoverScroll.gameObject.SetActive(downHoverScroll.scrollbar.value > 0);
+            upHoverScroll.gameObject.SetActive(upHoverScroll.scrollbar.value < 1);
         }
     }
 }

@@ -127,9 +127,9 @@ namespace EFM
                 loadingHideoutLatest = latest;
 
                 Mod.playerBundleRequest = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMPlayer.ab");
-                Mod.itemsBundlesRequests = new AssetBundleCreateRequest[3];
-                Mod.itemsBundles = new AssetBundle[3];
-                for (int i = 0; i < 3; ++i) 
+                Mod.itemsBundlesRequests = new AssetBundleCreateRequest[5];
+                Mod.itemsBundles = new AssetBundle[5];
+                for (int i = 0; i < 5; ++i) 
                 {
                     Mod.itemsBundlesRequests[i] = AssetBundle.LoadFromFileAsync(Mod.path + "/Assets/EFMItems" + i + ".ab");
                 }

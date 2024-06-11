@@ -1331,11 +1331,11 @@ namespace EFM
                 Mod.SetHealthRateArray(loadedData["healthRates"].ToObject<float[]>());
                 Mod.SetNonLethalHealthRateArray(loadedData["nonLethalHealthRates"].ToObject<float[]>());
                 Mod.LogInfo("\t\t0");
+                Mod.SetCurrentMaxHealthArray(loadedData["maxHealth"].ToObject<float[]>());
                 for (int i = 0; i < Mod.GetHealthCount(); ++i)
                 {
-                    Mod.SetHealth(i, Mod.GetHealth(i) + Mathf.Min(Mod.GetHealthRate(i) * minutesSinceSave, Mod.GetCurrentMaxHealth(i)));
+                    Mod.SetHealth(i, Mathf.Min(Mod.GetHealth(i) + Mod.GetHealthRate(i) * minutesSinceSave, Mod.GetCurrentMaxHealth(i)));
                 }
-                Mod.SetCurrentMaxHealthArray(loadedData["maxHealth"].ToObject<float[]>());
                 Mod.currentMaxHydration = (float)loadedData["maxHydration"];
                 Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.defaultMaxHydration);
                 Mod.currentMaxEnergy = (float)loadedData["maxEnergy"];
@@ -2066,43 +2066,6 @@ namespace EFM
                 FIRInventory.Add(item.H3ID, item.stack);
                 FIRInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
             }
-        }
-
-        public static bool RemoveFromContainer(Transform item, MeatovItem MI)
-        {
-            if (item.transform.parent != null && item.transform.parent.parent != null)
-            {
-                MeatovItem containerItemWrapper = item.transform.parent.parent.GetComponent<MeatovItem>();
-                if (containerItemWrapper != null && (containerItemWrapper.itemType == MeatovItem.ItemType.Backpack ||
-                                                    containerItemWrapper.itemType == MeatovItem.ItemType.Container ||
-                                                    containerItemWrapper.itemType == MeatovItem.ItemType.Pouch))
-                {
-                    containerItemWrapper.currentWeight -= MI.currentWeight;
-
-                    containerItemWrapper.containingVolume -= MI.volumes[MI.mode];
-
-                    // Reset cols of item so that they are non trigger again and can collide with the world and the container
-                    FVRPhysicalObject physObj = item.GetComponent<FVRPhysicalObject>();
-                    for (int i = containerItemWrapper.resetColPairs.Count - 1; i >= 0; --i)
-                    {
-                        if (containerItemWrapper.resetColPairs[i].physObj.Equals(physObj))
-                        {
-                            foreach (Collider col in containerItemWrapper.resetColPairs[i].colliders)
-                            {
-                                col.isTrigger = false;
-                            }
-                            containerItemWrapper.resetColPairs.RemoveAt(i);
-                            break;
-                        }
-                    }
-
-                    physObj.RecoverRigidbody();
-
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         public void RemoveFromInventory(MeatovItem item)

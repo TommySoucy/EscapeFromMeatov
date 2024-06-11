@@ -163,10 +163,19 @@ namespace EFM
                     infoInsuredIcon.SetActive(insuredOverride);
                     insuredBorder.SetActive(insuredOverride);
                 }
+                else
+                {
+                    infoInsuredIcon.SetActive(false);
+                    insuredBorder.SetActive(false);
+                }
                 if (hasCountOverride && countOverride != null)
                 {
                     infoCountText.gameObject.SetActive(true);
                     infoCountText.text = countOverride;
+                }
+                else
+                {
+                    infoCountText.gameObject.SetActive(false);
                 }
                 if (hasValueOverride)
                 {
@@ -175,10 +184,20 @@ namespace EFM
                     infoValueText.gameObject.SetActive(true);
                     infoValueText.text = valueOverride.ToString();
                 }
+                else
+                {
+                    infoValueIcon.gameObject.SetActive(false);
+                    infoValueText.gameObject.SetActive(false);
+                }
                 if (hasToolOveride)
                 {
                     toolIcon.SetActive(isToolOverride);
                     toolBorder.SetActive(isToolOverride);
+                }
+                else
+                {
+                    toolIcon.SetActive(false);
+                    toolBorder.SetActive(false);
                 }
             }
         }

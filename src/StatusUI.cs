@@ -241,13 +241,13 @@ namespace EFM
             {
                 for(int i=0; i < Mod.GetHealthCount(); ++i)
                 {
-                    partImages[i].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(i) / Mod.GetCurrentMaxHealth(i));
+                    partImages[i].color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(i) / Mod.GetCurrentMaxHealth(i));
                     partHealth[i].text = ((int)Mod.GetHealth(i)).ToString() + "/" + ((int)Mod.GetCurrentMaxHealth(i));
                 }
             }
             else
             {
-                partImages[index].color = Color.Lerp(Color.white, Color.red, Mod.GetHealth(index) / Mod.GetCurrentMaxHealth(index));
+                partImages[index].color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(index) / Mod.GetCurrentMaxHealth(index));
                 partHealth[index].text = ((int)Mod.GetHealth(index)).ToString() + "/" + ((int)Mod.GetCurrentMaxHealth(index));
             }
         }

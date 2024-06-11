@@ -1,10 +1,8 @@
 ﻿using FistVR;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
-using static RootMotion.Demos.KissingRig;
 
 namespace EFM
 {
@@ -1028,6 +1026,7 @@ namespace EFM
                             {
                                 neededForLevelByAreaCurrent.Add(area.index, new Dictionary<int, int>() { { area.currentLevel + 1, neededForValue } });
                             }
+                            neededForAreaTotal += neededForValue;
                         }
                     }
                 }
@@ -1208,13 +1207,27 @@ namespace EFM
                 if (currentNeeded == 1)
                 {
                     long itemCount = Mod.GetItemCountInInventories(H3ID);
-                    if(itemCount >= minimumUpgradeAmount)
+                    if (Mod.checkmarkAreaFulfillledMinimum)
                     {
-                        color = Mod.neededForAreaFulfilledColor;
+                        if (itemCount >= minimumUpgradeAmount)
+                        {
+                            color = Mod.neededForAreaFulfilledColor;
+                        }
+                        else
+                        {
+                            color = Mod.neededForColors[1];
+                        }
                     }
                     else
                     {
-                        color = Mod.neededForColors[1];
+                        if (itemCount >= neededForAreaTotal)
+                        {
+                            color = Mod.neededForAreaFulfilledColor;
+                        }
+                        else
+                        {
+                            color = Mod.neededForColors[1];
+                        }
                     }
                 }
                 else // Not area, return corresponding color

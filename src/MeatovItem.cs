@@ -436,6 +436,7 @@ namespace EFM
 
         private void Awake()
 		{
+            Mod.LogInfo("Meatov item " + H3ID + " awake");
             if(physObj == null)
             {
                 physObj = gameObject.GetComponent<FVRPhysicalObject>();
@@ -444,13 +445,24 @@ namespace EFM
             // Set data based on default data
             if (index == -1) // Vanilla, index will not be set
             {
-                SetData(Mod.vanillaItemData[physObj.ObjectWrapper.ItemID]);
+                int parsedIndex = -1;
+                if(int.TryParse(H3ID, out parsedIndex))
+                {
+                    Mod.LogError("DEV: Custom item "+ H3ID+" does not have index set in asset!");
+                    index = parsedIndex;
+                    itemData = Mod.customItemData[index];
+                }
+                else
+                {
+                    SetData(Mod.vanillaItemData[physObj.ObjectWrapper.ItemID]);
+                }
             }
             else // Custom, index will already have been set in asset
             {
                 // Data already set, just need to set reference to data object
                 itemData = Mod.customItemData[index];
             }
+            Mod.LogInfo("\t0");
 
             Mod.meatovItemByInteractive.Add(physObj, this);
 
@@ -459,8 +471,9 @@ namespace EFM
 				_mode = volumes.Length - 1; // Set default mode to the last index of volumes, closed empty for containers and rigs
 			}
 			modeInitialized = true;
+            Mod.LogInfo("\t0");
 
-            if(itemType == ItemType.Rig || itemType == ItemType.ArmoredRig)
+            if (itemType == ItemType.Rig || itemType == ItemType.ArmoredRig)
             {
                 if(!Mod.quickbeltConfigurationIndices.TryGetValue(index, out configurationIndex))
                 {
@@ -468,9 +481,10 @@ namespace EFM
                     GM.Instance.QuickbeltConfigurations = GM.Instance.QuickbeltConfigurations.AddToArray(Mod.playerBundle.LoadAsset<GameObject>("Item"+index+"Configuration"));
                 }
             }
+            Mod.LogInfo("\t0");
 
             // Quantities/Contents gets set to max on awake and will be overriden as necessary
-            if(maxAmount > 0)
+            if (maxAmount > 0)
             {
                 amount = maxAmount;
             }
@@ -488,6 +502,7 @@ namespace EFM
                 FVRFireArmClip asClip = physObj as FVRFireArmClip;
                 asClip.ReloadClipWithType(roundClass);
             }
+            Mod.LogInfo("\t0");
 
             UpdateInventories();
 		}

@@ -752,6 +752,7 @@ namespace EFM
         {
             float preValue = health[index];
             health[index] = value;
+            Mod.LogInfo("Health "+index+" set: "+ health[index]);
             if (value != preValue)
             {
                 OnPartHealthChangedInvoke(index);
@@ -761,6 +762,11 @@ namespace EFM
         public static void SetHealthArray(float[] value)
         {
             health = value;
+            Mod.LogInfo("Health array set: ");
+            for(int i=0;i<health.Length; ++i)
+            {
+                Mod.LogInfo("\t" + health[i]);
+            }
             OnPartHealthChangedInvoke(-1);
         }
 
@@ -2303,7 +2309,7 @@ namespace EFM
 
         public static GameObject GetItemPrefab(int index)
         {
-            int bundleIndex = index / 300;
+            int bundleIndex = index / 200;
             return itemsBundles[bundleIndex].LoadAsset<GameObject>("Item" + index);
         }
 

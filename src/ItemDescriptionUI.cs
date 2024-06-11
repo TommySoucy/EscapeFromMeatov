@@ -405,7 +405,15 @@ namespace EFM
                     }
                 }
                 neededForAreasTotal.text = "Total: " + currentCount + "/" + total;
-                Color areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID) >= descriptionPack.itemData.minimumUpgradeAmount ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
+                Color areasColor = Color.red;
+                if (Mod.checkmarkAreaFulfillledMinimum)
+                {
+                    areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID) >= descriptionPack.itemData.minimumUpgradeAmount ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
+                }
+                else
+                {
+                    areasColor = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID) >= descriptionPack.itemData.neededForAreaTotal ? Mod.neededForAreaFulfilledColor : Mod.neededForColors[1];
+                }
                 neededForAreasTitle.color = areasColor;
                 neededForAreasTotal.color = areasColor;
                 return true;
@@ -745,13 +753,13 @@ namespace EFM
             {
                 summaryWeight.text = "Weight: " + (descriptionPack.itemData.weight / 1000f).ToString("0.0") + "kg";
                 summaryVolume.text = "Volume: " + (descriptionPack.itemData.volumes[0] / 1000f).ToString("0.0") + "L";
-                propertiesText.text = "Weight: " + descriptionPack.itemData.weight.ToString("0.0") + "kg, Volume: " + (descriptionPack.itemData.volumes[0] / 1000f).ToString("0.0") + "L";
+                propertiesText.text = "Weight: " + (descriptionPack.itemData.weight / 1000f).ToString("0.0") + "kg, Volume: " + (descriptionPack.itemData.volumes[0] / 1000f).ToString("0.0") + "L";
             }
             else
             {
                 summaryWeight.text = "Weight: " + (descriptionPack.item.currentWeight / 1000f).ToString("0.0") + "kg";
                 summaryVolume.text = "Volume: " + (descriptionPack.item.volumes[descriptionPack.item.mode] / 1000f).ToString("0.0") + "L";
-                propertiesText.text = "Weight: " + descriptionPack.item.currentWeight.ToString("0.0") + "kg, Volume: " + (descriptionPack.item.volumes[descriptionPack.item.mode] / 1000f).ToString("0.0") + "L";
+                propertiesText.text = "Weight: " + (descriptionPack.itemData.weight / 1000f).ToString("0.0") + "kg, Volume: " + (descriptionPack.item.volumes[descriptionPack.item.mode] / 1000f).ToString("0.0") + "L";
             }
         }
 

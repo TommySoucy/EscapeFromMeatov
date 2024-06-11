@@ -458,7 +458,7 @@ namespace EFM
 
                                     if (HideoutController.inventory.TryGetValue(currentProduction.requirements[k].item.H3ID, out int itemInventoryCount))
                                     {
-                                        itemRequirement.amount.text = Mathf.Max(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
+                                        itemRequirement.amount.text = Mathf.Min(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                     }
                                     else
                                     {
@@ -604,7 +604,7 @@ namespace EFM
 
                                         if (HideoutController.inventory.TryGetValue(currentProduction.requirements[k].item.H3ID, out int itemInventoryCount))
                                         {
-                                            itemRequirement.amount.text = Mathf.Max(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
+                                            itemRequirement.amount.text = Mathf.Min(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                         }
                                         else
                                         {
@@ -657,19 +657,42 @@ namespace EFM
         {
             if(area.currentLevel == area.startLevel)
             {
-                bonusPanel.SetActive(true);
-                bonusTitle.text = "FUTURE BONUSES";
+                if (area.bonusesPerLevel[area.currentLevel + 1] != null && area.bonusesPerLevel[area.currentLevel + 1].Length > 0)
+                {
+                    bonusPanel.SetActive(true);
+                    bonusTitle.text = "FUTURE BONUSES";
+                    UpdateCurrentBonuses(area.currentLevel + 1);
+                }
+                else
+                {
+                    bonusPanel.SetActive(false);
+                }
+
                 futureBonusPanel.SetActive(false);
-                UpdateCurrentBonuses(area.currentLevel + 1);
             }
             else
             {
-                bonusPanel.SetActive(true);
-                bonusTitle.text = "CURRENT BONUSES";
-                futureBonusPanel.SetActive(area.currentLevel < area.levels.Length - 1);
-                UpdateCurrentBonuses(area.currentLevel);
+                if (area.bonusesPerLevel[area.currentLevel] != null && area.bonusesPerLevel[area.currentLevel].Length > 0)
+                {
+                    bonusPanel.SetActive(true);
+                    bonusTitle.text = "CURRENT BONUSES";
+                    UpdateCurrentBonuses(area.currentLevel);
+                }
+                else
+                {
+                    bonusPanel.SetActive(false);
+                }
+
+                if(area.currentLevel < area.levels.Length - 1 && area.bonusesPerLevel[area.currentLevel + 1] != null && area.bonusesPerLevel[area.currentLevel + 1].Length > 0)
+                {
+                    futureBonusPanel.SetActive(true);
+                    UpdateFutureBonuses();
+                }
+                else
+                {
+                    futureBonusPanel.SetActive(false);
+                }
             }
-            UpdateFutureBonuses();
         }
 
         public void UpdateCurrentBonuses(int level)
@@ -942,6 +965,8 @@ namespace EFM
                             }
                             areaRequirement.fulfilled.SetActive(areaRequirements[i].fulfilled);
                             areaRequirement.unfulfilled.SetActive(!areaRequirements[i].fulfilled);
+                            areaRequirement.areaName.color = areaRequirements[i].fulfilled ? Color.green : Color.red;
+                            areaRequirement.requiredLevel.color = areaRequirements[i].fulfilled ? Color.green : Color.red;
                             areaRequirements[i].areaRequirementUI = areaRequirement;
                             areaRequirement.gameObject.SetActive(true);
                         }
@@ -968,7 +993,7 @@ namespace EFM
 
                         if(HideoutController.inventory.TryGetValue(itemRequirements[i].item.H3ID, out int itemInventoryCount))
                         {
-                            itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
+                            itemRequirement.amount.text = Mathf.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         }
                         else
                         {
@@ -1104,6 +1129,8 @@ namespace EFM
                             }
                             areaRequirement.fulfilled.SetActive(areaRequirements[i].fulfilled);
                             areaRequirement.unfulfilled.SetActive(!areaRequirements[i].fulfilled);
+                            areaRequirement.areaName.color = areaRequirements[i].fulfilled ? Color.green : Color.red;
+                            areaRequirement.requiredLevel.color = areaRequirements[i].fulfilled ? Color.green : Color.red;
                             areaRequirements[i].areaRequirementUI = areaRequirement;
                             areaRequirement.gameObject.SetActive(true);
                         }
@@ -1130,7 +1157,7 @@ namespace EFM
 
                         if (HideoutController.inventory.TryGetValue(itemRequirements[i].item.H3ID, out int itemInventoryCount))
                         {
-                            itemRequirement.amount.text = Mathf.Max(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
+                            itemRequirement.amount.text = Mathf.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         }
                         else
                         {
