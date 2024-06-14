@@ -135,15 +135,6 @@ namespace EFM
         public static bool inMarket; // whether we are currently in market mode or in area UI mode
         public GCManager GCManager;
 
-        public static float currentExperienceRate = 1;
-        public static float currentQuestMoneyReward = 0;
-        public static float currentFuelConsumption = 0;
-        public static float currentDebuffEndDelay = 0;
-        public static float currentScavCooldownTimer = 1;
-        public static float currentInsuranceReturnTime = 1;
-        public static float currentRagfairCommission = 1;
-        public static Dictionary<Skill.SkillType, float> currentSkillGroupLevelingBoosts;
-
         public delegate void OnHideoutInventoryChangedDelegate();
         public event OnHideoutInventoryChangedDelegate OnHideoutInventoryChanged;
         public delegate void OnHideoutItemInventoryChangedDelegate(MeatovItemData itemData, int difference);

@@ -92,10 +92,7 @@ namespace EFM
                 unfulfilledIcon.SetActive(true);
             }
             amount.text = currentCount.ToString() + "/" + neededCount;
-            if(Mod.GetItemData(production.endProduct, out MeatovItemData itemData))
-            {
-                entryName.text = itemData.name;
-            }
+            entryName.text = production.endProduct.name;
             entryName.color = Mod.neededForColors[4];
             entryInfo.text = Area.IndexToName(areaIndex) + " lvl " + level;
         }

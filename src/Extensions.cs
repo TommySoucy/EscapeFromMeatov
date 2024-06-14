@@ -29,5 +29,35 @@ namespace EFM
                 }
             }
         }
+
+        /// <summary>
+        /// Long overload of Mathf.Min
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static long Min(long a, long b)
+        {
+            if(a <= b)
+            {
+                return a;
+            }
+            return b;
+        }
+
+        /// <summary>
+        /// Long overload of Mathf.Max
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static long Max(long a, long b)
+        {
+            if(a > b)
+            {
+                return a;
+            }
+            return b;
+        }
     }
 }

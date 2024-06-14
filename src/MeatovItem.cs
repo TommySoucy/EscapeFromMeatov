@@ -2614,6 +2614,33 @@ namespace EFM
             }
         }
 
+        public void DetachChildren()
+        {
+            if (parentVolume == null)
+            {
+                // Must be reverse order since as children parent changes, they will remove themselves from the children list
+                for (int i = children.Count - 1; i >= 0; --i)
+                {
+                    if (children[i] != null)
+                    {
+                        children[i].transform.parent = null;
+                    }
+                }
+            }
+            else // We have parent volume, add children to it instead of just setting their parent to null
+            {
+                for (int i = children.Count - 1; i >= 0; --i)
+                {
+                    if (children[i] != null)
+                    {
+                        MeatovItem childItem = children[i];
+                        parentVolume.AddItem(children[i]);
+                        childItem.transform.localPosition = transform.localPosition;
+                    }
+                }
+            }
+        }
+
         public void OnTransformParentChanged()
         {
             MeatovItem newParent = null;

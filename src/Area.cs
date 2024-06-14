@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FistVR;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
@@ -14,6 +15,8 @@ namespace EFM
 
         // Data
         public static float GPUBoostRate;
+        public static float fuelConsumptionRate;
+        public static float filterConsumptionRate;
         [NonSerialized]
         public int[] constructionTimePerLevel; // In seconds
         public Dictionary<Requirement.RequirementType, List<Requirement>>[] requirementsByTypePerLevel;
@@ -57,6 +60,9 @@ namespace EFM
         public AudioClip[][][] subClips;
         [NonSerialized]
         public bool poweringOn;
+        public float fuelConsumptionTimer;
+        public bool previouslyConsumingFilter;
+        public float filterConsumptionTimer;
 
         // Objects
         public Transform UIRoot;
@@ -322,7 +328,7 @@ namespace EFM
         {
             if (requiresPower)
             {
-                if (powered && !previousPowered)
+                if (powered && !previousPowered) // Just powered on
                 {
                     // Manage audio
                     poweringOn = true;
@@ -342,8 +348,82 @@ namespace EFM
                     {
                         objectsToToggle[i].SetActive(true);
                     }
+
+                    // Resource consumption and specific bonuses
+                    if(index == 4) // Generator, fuel consumption
+                    {
+                        if (fuelConsumptionTimer <= 0)
+                        {
+                            // Consume fuel
+                            bool consumed = false;
+                            for (int i = 0; i < levels[currentLevel].areaSlots.Length; ++i)
+                            {
+                                if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
+                                {
+                                    --levels[currentLevel].areaSlots[i].item.amount;
+                                    break;
+                                }
+                            }
+
+                            // Reset timer or turn off if no fuel
+                            if (consumed)
+                            {
+                                fuelConsumptionTimer = 1 / fuelConsumptionRate;
+                                for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                                {
+                                    if (bonusesPerLevel[currentLevel][i].production)
+                                    {
+                                        bonusesPerLevel[currentLevel][i].Apply();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                controller.TogglePower();
+                            }
+                        }
+                    }
+                    else if (index == 17) // AFU, begin filter consumption if necessary
+                    {
+                        if (filterConsumptionTimer <= 0)
+                        {
+                            // Consume filter
+                            bool consumed = false;
+                            for (int i = 0; i < levels[currentLevel].areaSlots.Length; ++i)
+                            {
+                                if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
+                                {
+                                    --levels[currentLevel].areaSlots[i].item.amount;
+                                    break;
+                                }
+                            }
+
+                            // Reset timer and apply bonuses if consumed
+                            if (consumed)
+                            {
+                                filterConsumptionTimer = 1 / filterConsumptionRate;
+                                for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                                {
+                                    if (bonusesPerLevel[currentLevel][i].production)
+                                    {
+                                        bonusesPerLevel[currentLevel][i].Apply();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Bonuses
+                    for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                    {
+                        // Note that we only apply bonuses that are non passive (require power) and not production (but require no resources)
+                        if (!bonusesPerLevel[currentLevel][i].passive && !bonusesPerLevel[currentLevel][i].production)
+                        {
+                            bonusesPerLevel[currentLevel][i].Apply();
+                        }
+                    }
                 }
-                else if (!powered && previousPowered)
+                else if (!powered && previousPowered) // Just powered off
                 {
                     // Manage audio
                     for (int i = 0; i < levels.Length; ++i)
@@ -363,8 +443,22 @@ namespace EFM
                     {
                         objectsToToggle[i].SetActive(false);
                     }
+
+                    // Bonuses
+                    // Note that we don't manage resource consumption for generator and AFU here
+                    // as it will be done on update, where if not powered, resources will not be consumed
+                    for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                    {
+                        // Note that unlike power on, here we unapply all bonuses that are non passive (require power) 
+                        // regardless of whether it needs resources or not
+                        if (!bonusesPerLevel[currentLevel][i].passive)
+                        {
+                            bonusesPerLevel[currentLevel][i].Unapply();
+                        }
+                    }
                 }
 
+                // Manage powering on audio
                 if (poweringOn && !levels[currentLevel].mainAudioSources[0].isPlaying)
                 {
                     poweringOn = false;
@@ -386,6 +480,7 @@ namespace EFM
                 previousPowered = powered;
             }
 
+            // Update productions
             for (int i = 0; i <= currentLevel; ++i)
             {
                 for (int j = 0; j < productionsPerLevel[i].Count; ++j)
@@ -394,6 +489,7 @@ namespace EFM
                 }
             }
 
+            // Process upgrade
             if (upgrading)
             {
                 upgradeTimeLeft -= Time.deltaTime;
@@ -412,9 +508,143 @@ namespace EFM
                     UI.Init();
 
                     UI.genericAudioSource.PlayOneShot(genericAudioClips[2]);
+
+                    ReturnTools();
+
+                    // Apply new bonuses
+                    // Note that production bonuses are not applied, those are controlled through specific updates below
+                    for(int i=0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                    {
+                        if ((bonusesPerLevel[currentLevel][i].passive || powered) && !bonusesPerLevel[currentLevel][i].production)
+                        {
+                            bonusesPerLevel[currentLevel][i].Apply();
+                        }
+                    }
                 }
 
                 UI.UpdateStatusTexts();
+            }
+
+            // Specific updates
+            if(index == 4) // Generator, consume fuel if power is on
+            {
+                if (powered && fuelConsumptionTimer > 0)
+                {
+                    fuelConsumptionTimer -= Time.deltaTime;
+                    if(fuelConsumptionTimer <= 0)
+                    {
+                        // Consume fuel
+                        bool consumed = false;
+                        for (int i = 0; i < levels[currentLevel].areaSlots.Length; ++i)
+                        {
+                            if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
+                            {
+                                --levels[currentLevel].areaSlots[i].item.amount;
+                                break;
+                            }
+                        }
+
+                        // Reset timer or turn off if we ran out of fuel
+                        if (consumed)
+                        {
+                            fuelConsumptionTimer = 1/fuelConsumptionRate;
+                        }
+                        else
+                        {
+                            controller.TogglePower();
+                            for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                            {
+                                if (bonusesPerLevel[currentLevel][i].production)
+                                {
+                                    bonusesPerLevel[currentLevel][i].Unapply();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if(index == 17) // AFU, consume filter resource is power is on
+            {
+                if (powered && filterConsumptionTimer > 0) 
+                {
+                    filterConsumptionTimer -= Time.deltaTime;
+                    if (filterConsumptionTimer <= 0)
+                    {
+                        // Consume filter
+                        bool consumed = false;
+                        for (int i = 0; i < levels[currentLevel].areaSlots.Length; ++i)
+                        {
+                            if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
+                            {
+                                --levels[currentLevel].areaSlots[i].item.amount;
+                                break;
+                            }
+                        }
+
+                        // Reset timer or disable bonus if ran out of filter resource
+                        if (consumed)
+                        {
+                            filterConsumptionTimer = 1 / filterConsumptionRate;
+                        }
+                        else
+                        {
+                            for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                            {
+                                if (bonusesPerLevel[currentLevel][i].production)
+                                {
+                                    bonusesPerLevel[currentLevel][i].Unapply();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void ReturnTools()
+        {
+            if(requirementsByTypePerLevel[currentLevel].TryGetValue(Requirement.RequirementType.Tool, out List<Requirement> toolRequirements))
+            {
+                for (int i = 0; i < toolRequirements.Count; ++i)
+                {
+                    if (toolRequirements[i].requirementType == Requirement.RequirementType.Tool)
+                    {
+                        // In case item is vanilla, in which case we use the vault system to save it,
+                        // we will only be getting the instantiated item later
+                        // We must write a delegate in order to add it to the area volume later
+                        VaultSystem.ReturnObjectListDelegate del = objs =>
+                        {
+                            // Here, assume objs[0] is the root item
+                            MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                            if (meatovItem != null)
+                            {
+                                if (levels[currentLevel].areaVolumes != null && levels[currentLevel].areaVolumes.Length > 0)
+                                {
+                                    levels[currentLevel].areaVolumes[0].AddItem(meatovItem);
+                                }
+                                else // No output volume, spawn item in trade volume
+                                {
+                                    HideoutController.instance.marketManager.tradeVolume.AddItem(meatovItem);
+                                }
+                            }
+                        };
+
+                        // In case item is custom, it will be returned right away and we can handle it here
+                        MeatovItem loadedItem = MeatovItem.Deserialize(toolRequirements[i].serializedTool, del);
+
+                        if (loadedItem != null)
+                        {
+                            if (levels[currentLevel].areaVolumes != null && levels[currentLevel].areaVolumes.Length > 0)
+                            {
+                                levels[currentLevel].areaVolumes[0].AddItem(loadedItem);
+                            }
+                            else // No output volume, spawn item in trade volume
+                            {
+                                HideoutController.instance.marketManager.tradeVolume.AddItem(loadedItem);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -469,6 +699,37 @@ namespace EFM
 
         public void OnSlotContentChangedInvoke()
         {
+            // Area specific
+            if(index == 17) // AFU
+            {
+                if (powered && filterConsumptionTimer <= 0)
+                {
+                    // Consume filter
+                    bool consumed = false;
+                    for (int i = 0; i < levels[currentLevel].areaSlots.Length; ++i)
+                    {
+                        if (levels[currentLevel].areaSlots[i].item != null && levels[currentLevel].areaSlots[i].item.amount > 0)
+                        {
+                            --levels[currentLevel].areaSlots[i].item.amount;
+                            break;
+                        }
+                    }
+
+                    // Reset timer and apply bonuses if consumed
+                    if (consumed)
+                    {
+                        filterConsumptionTimer = 1 / filterConsumptionRate;
+                        for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
+                        {
+                            if (bonusesPerLevel[currentLevel][i].production)
+                            {
+                                bonusesPerLevel[currentLevel][i].Apply();
+                            }
+                        }
+                    }
+                }
+            }
+
             // Raise event
             if (OnSlotContentChanged != null)
             {
@@ -531,24 +792,79 @@ namespace EFM
             upgradeTimeLeft = constructionTimePerLevel[currentLevel + 1];
 
             // Consume requirements
-            List<Requirement> itemRequirements = requirementsByTypePerLevel[currentLevel + 1][Requirement.RequirementType.Item];
-            for(int i=0; i < itemRequirements.Count; ++i)
+            if(requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Item, out List<Requirement> itemRequirements))
             {
-                Requirement itemRequirement = itemRequirements[i];
-                int countLeft  = itemRequirement.itemCount;
-                while(countLeft > 0)
+                for (int i = 0; i < itemRequirements.Count; ++i)
                 {
-                    MeatovItem item = GetClosestItem(itemRequirement.item.H3ID);
-                    if(item.stack > countLeft)
+                    Requirement itemRequirement = itemRequirements[i];
+                    int countLeft = itemRequirement.itemCount;
+                    while (countLeft > 0)
                     {
-                        item.stack -= countLeft;
-                        countLeft = 0;
-                        break;
+                        MeatovItem item = GetClosestItem(itemRequirement.item.H3ID);
+                        if (item.stack > countLeft)
+                        {
+                            item.stack -= countLeft;
+                            countLeft = 0;
+                            break;
+                        }
+                        else
+                        {
+                            countLeft -= item.stack;
+                            item.DetachChildren();
+                            Destroy(item.gameObject);
+                        }
                     }
-                    else
+                }
+            }
+            if(requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Tool, out List<Requirement> toolRequirements))
+            {
+                for (int i = 0; i < toolRequirements.Count; ++i)
+                {
+                    Requirement toolRequirement = toolRequirements[i];
+                    int countLeft = toolRequirement.itemCount;
+                    while (countLeft > 0)
                     {
-                        countLeft -= item.stack;
-                        Destroy(item.gameObject);
+                        MeatovItem item = GetClosestItem(toolRequirement.item.H3ID);
+                        if (item.stack > countLeft)
+                        {
+                            item.stack -= countLeft;
+                            countLeft = 0;
+                            break;
+                        }
+                        else
+                        {
+                            countLeft -= item.stack;
+                            item.DetachChildren();
+                            if (toolRequirement.requirementType == Requirement.RequirementType.Tool)
+                            {
+                                toolRequirement.serializedTool = item.Serialize();
+                            }
+                            Destroy(item.gameObject);
+                        }
+                    }
+                }
+            }
+            if(requirementsByTypePerLevel[currentLevel + 1].TryGetValue(Requirement.RequirementType.Resource, out List<Requirement> resourceRequirements))
+            {
+                for (int i = 0; i < resourceRequirements.Count; ++i)
+                {
+                    Requirement resourceRequirement = resourceRequirements[i];
+                    int countLeft = resourceRequirement.resourceCount;
+                    while (countLeft > 0)
+                    {
+                        MeatovItem item = GetClosestItem(resourceRequirement.item.H3ID);
+                        if (item.amount > countLeft)
+                        {
+                            item.amount -= countLeft;
+                            countLeft = 0;
+                            break;
+                        }
+                        else
+                        {
+                            countLeft -= item.amount;
+                            item.DetachChildren();
+                            Destroy(item.gameObject);
+                        }
                     }
                 }
             }
@@ -574,6 +890,30 @@ namespace EFM
                         {
                             closestDistance = distance;
                             closest = items[i];
+                        }
+                    }
+                }
+
+                return closest;
+            }
+            else if (Mod.playerInventoryItems.TryGetValue(H3ID, out List<MeatovItem> playerItems))
+            {
+                MeatovItem closest = null;
+                float closestDistance = float.MaxValue;
+                for (int i = 0; i < playerItems.Count; ++i)
+                {
+                    if (closest == null)
+                    {
+                        closestDistance = Vector3.Distance(playerItems[i].transform.position, transform.position - Vector3.down);
+                        closest = playerItems[i];
+                    }
+                    else
+                    {
+                        float distance = Vector3.Distance(playerItems[i].transform.position, transform.position - Vector3.down);
+                        if (distance < closestDistance)
+                        {
+                            closestDistance = distance;
+                            closest = playerItems[i];
                         }
                     }
                 }
@@ -707,6 +1047,9 @@ namespace EFM
 
         // Item
         public int itemCount = 1;
+
+        // Tool
+        public JObject serializedTool;
 
         // Resource
         public int resourceCount;
@@ -915,75 +1258,53 @@ namespace EFM
             switch (requirementType)
             {
                 case RequirementType.Item:
-                    int count = 0;
-                    if(HideoutController.inventory.TryGetValue(item.H3ID, out count))
-                    {
-                        fulfilled = count >= itemCount;
-                    }
-                    else
-                    {
-                        fulfilled = false;
-                    }
+                    long count = Mod.GetItemCountInInventories(item.H3ID);
+                    fulfilled = count >= itemCount;
                     if (itemRequirementUI != null)
                     {
-                        itemRequirementUI.amount.text = Mathf.Min(count, itemCount).ToString() + "/" + itemCount;
+                        itemRequirementUI.amount.text = Extensions.Min(count, itemCount).ToString() + "/" + itemCount;
                         itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
                         itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
                     }
                     else if (itemResultUI != null)
                     {
-                        itemResultUI.amount.text = Mathf.Min(count, itemCount).ToString() + "/" + itemCount;
+                        itemResultUI.amount.text = Extensions.Min(count, itemCount).ToString() + "/" + itemCount;
                     }
                     if(stashItemUI != null)
                     {
-                        stashItemUI.amount.text = count.ToString() + "\n(STASH)";
+                        stashItemUI.amount.text = count.ToString() + "\n(INVENTORY)";
                     }
                     break;
                 case RequirementType.Tool:
-                    int toolCount = 0;
-                    if (HideoutController.inventory.TryGetValue(item.H3ID, out int toolCurrentItemCount))
-                    {
-                        fulfilled = toolCurrentItemCount >= 1;
-                        toolCount = toolCurrentItemCount;
-                    }
-                    else
-                    {
-                        fulfilled = false;
-                    }
+                    long toolCount = Mod.GetItemCountInInventories(item.H3ID);
+                    fulfilled = toolCount >= 1;
                     if (itemRequirementUI != null)
                     {
-                        itemRequirementUI.amount.text = Mathf.Min(toolCount, 1).ToString() + "/1";
+                        itemRequirementUI.amount.text = Extensions.Min(toolCount, 1).ToString() + "/1";
                         itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
                         itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
                     }
                     else if (itemResultUI != null)
                     {
-                        itemResultUI.amount.text = Mathf.Min(toolCount, 1).ToString() + "/1";
+                        itemResultUI.amount.text = Extensions.Min(toolCount, 1).ToString() + "/1";
                     }
                     break;
                 case RequirementType.Resource:
-                    int totalAmount = 0;
-                    if (HideoutController.inventory.TryGetValue(item.H3ID, out totalAmount))
-                    {
-                        fulfilled = totalAmount >= resourceCount;
-                    }
-                    else
-                    {
-                        fulfilled = false;
-                    }
+                    long totalAmount = Mod.GetItemCountInInventories(item.H3ID);
+                    fulfilled = totalAmount >= resourceCount;
                     if (itemRequirementUI != null)
                     {
-                        itemRequirementUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
+                        itemRequirementUI.amount.text = Extensions.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
                         itemRequirementUI.fulfilledIcon.SetActive(fulfilled);
                         itemRequirementUI.unfulfilledIcon.SetActive(!fulfilled);
                     }
                     else if (itemResultUI != null)
                     {
-                        itemResultUI.amount.text = Mathf.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
+                        itemResultUI.amount.text = Extensions.Min(totalAmount, resourceCount).ToString() + "/" + resourceCount;
                     }
                     if (stashItemUI != null)
                     {
-                        stashItemUI.amount.text = totalAmount.ToString() + "\n(STASH)";
+                        stashItemUI.amount.text = totalAmount.ToString() + "\n(INVENTORY)";
                     }
                     break;
             }
@@ -1147,34 +1468,62 @@ namespace EFM
         }
     }
 
+    /// <summary>
+    /// Bonus functionality:
+    /// Class keeps static amounts for each bonus type
+    /// When bonuses get un/applied, their value is removed/added from/to the coresponding variable
+    /// This way, this class keeps the raw bonus amount per type
+    /// 
+    /// Some values are being updated per frame, like energy regen
+    /// We don't want to have to calculate the base+bonus value every frame
+    /// For those types of values we keep a "current" var in Mod, which gets calculated only once on bonus un/apply
+    /// 
+    /// So some game functionality will use values here directly, like ragfair commision bonus
+    /// While others will have their dedicated value in Mod
+    /// </summary>
     public class Bonus
     {
         public Area area;
         public BonusUI bonusUI;
 
+        public static int energyRegeneration;
+        public static int debuffEndDelay;
+        public static int repairArmorBonus;
+        public static int hydrationRegeneration;
+        public static int healthRegeneration;
+        public static int maximumEnergyReserve;
+        public static int scavCooldownTimer;
+        public static int questMoneyReward;
+        public static int insuranceReturnTime;
+        public static int ragfairCommission;
+        public static int experienceRate;
+        public static Dictionary<Skill.SkillType, int> skillGroupLevelingBoost = new Dictionary<Skill.SkillType, int>();
+        public static int fuelConsumption;
+        public static int repairWeaponBonus;
+
         public enum BonusType
         {
             None,
-            EnergyRegeneration,
-            DebuffEndDelay,
+            EnergyRegeneration, // Value %
+            DebuffEndDelay, // Value %
             AdditionalSlots,
             UnlockArmorRepair,
-            RepairArmorBonus,
+            RepairArmorBonus, // Value %
             StashSize,
-            HydrationRegeneration,
-            HealthRegeneration,
+            HydrationRegeneration, // Value %
+            HealthRegeneration, // Value %
             TextBonus,
-            MaximumEnergyReserve,
-            ScavCooldownTimer,
-            QuestMoneyReward,
-            InsuranceReturnTime,
-            RagfairCommission,
-            ExperienceRate,
-            SkillGroupLevelingBoost,
-            FuelConsumption,
+            MaximumEnergyReserve, // Value +amount
+            ScavCooldownTimer, // Value %
+            QuestMoneyReward, // Value %
+            InsuranceReturnTime, // Value %
+            RagfairCommission, // Value %
+            ExperienceRate, // Value %
+            SkillGroupLevelingBoost, // Value %
+            FuelConsumption, // Value %
             UnlockWeaponModification,
             UnlockWeaponRepair,
-            RepairWeaponBonus,
+            RepairWeaponBonus, // Value %
         }
         public BonusType bonusType;
 
@@ -1225,6 +1574,16 @@ namespace EFM
             {
                 skillType = Skill.SkillTypeFromName(bonusData["skillType"].ToString());
             }
+        }
+
+        public void Apply()
+        {
+            td
+        }
+
+        public void Unapply()
+        {
+            td 
         }
 
         public static BonusType BonusTypeFromName(string name)
@@ -1290,8 +1649,8 @@ namespace EFM
         public int areaLevel;
         public int time; // Seconds
         public bool needFuelForAllProductionTime;
-        public string endProduct;
-        public Vector2Int[] endProductRarities;
+        public MeatovItemData endProduct;
+        public Vector2Int[] endProductRarities; // 0: Common, 1: Rare, 2: Superrare
         public bool continuous;
         public int limit;
         public int count;
@@ -1373,7 +1732,10 @@ namespace EFM
             }
             else
             {
-                endProduct = Mod.TarkovIDtoH3ID(data["endProduct"].ToString());
+                if(!Mod.GetItemData(Mod.TarkovIDtoH3ID(data["endProduct"].ToString()), out endProduct))
+                {
+                    Mod.LogError("DEV: Production "+ID+" end product with ID "+ Mod.TarkovIDtoH3ID(data["endProduct"].ToString())+" is missing item data");
+                }
                 needFuelForAllProductionTime = (bool)data["needFuelForAllProductionTime"];
                 continuous = (bool)data["continuous"];
                 count = (int)data["count"];
@@ -1381,13 +1743,16 @@ namespace EFM
                 time = (int)data["productionTime"];
                 requirementsArray = data["requirements"] as JArray;
 
-                if(area.productionsByProductID.TryGetValue(endProduct, out List<Production> productionList))
+                if(endProduct != null)
                 {
-                    productionList.Add(this);
-                }
-                else
-                {
-                    area.productionsByProductID.Add(endProduct, new List<Production>() { this });
+                    if (area.productionsByProductID.TryGetValue(endProduct.H3ID, out List<Production> productionList))
+                    {
+                        productionList.Add(this);
+                    }
+                    else
+                    {
+                        area.productionsByProductID.Add(endProduct.H3ID, new List<Production>() { this });
+                    }
                 }
             }
             progressBaseTime = time;
@@ -1546,7 +1911,6 @@ namespace EFM
                     progress = (1 - timeLeft / progressBaseTime) * 100;
                     if (continuous)
                     {
-                        TODO: // Have a timer for each resource requirement and consume resource as needed
                         farmingUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
                         farmingUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
                     }
@@ -1559,6 +1923,153 @@ namespace EFM
             }
 
             previousInProduction = inProduction;
+        }
+
+        public void ReturnTools()
+        {
+            for(int i=0; i < requirements.Count; ++i)
+            {
+                if (requirements[i].requirementType == Requirement.RequirementType.Tool)
+                {
+                    // In case item is vanilla, in which case we use the vault system to save it,
+                    // we will only be getting the instantiated item later
+                    // We must write a delegate in order to add it to the area volume later
+                    VaultSystem.ReturnObjectListDelegate del = objs =>
+                    {
+                        // Here, assume objs[0] is the root item
+                        MeatovItem meatovItem = objs[0].GetComponent<MeatovItem>();
+                        if (meatovItem != null)
+                        {
+                            // Note that despite this being a production, output could be a slot so we might not have a volume
+                            if (area.levels[area.currentLevel].areaVolumes != null && area.levels[area.currentLevel].areaVolumes.Length > 0)
+                            {
+                                area.levels[area.currentLevel].areaVolumes[0].AddItem(meatovItem);
+                            }
+                            else // No output volume, spawn item in trade volume
+                            {
+                                HideoutController.instance.marketManager.tradeVolume.AddItem(meatovItem);
+                            }
+                        }
+                    };
+
+                    // In case item is custom, it will be returned right away and we can handle it here
+                    MeatovItem loadedItem = MeatovItem.Deserialize(requirements[i].serializedTool, del);
+
+                    if (loadedItem != null)
+                    {
+                        if (area.levels[area.currentLevel].areaVolumes != null && area.levels[area.currentLevel].areaVolumes.Length > 0)
+                        {
+                            area.levels[area.currentLevel].areaVolumes[0].AddItem(loadedItem);
+                        }
+                        else // No output volume, spawn item in trade volume
+                        {
+                            HideoutController.instance.marketManager.tradeVolume.AddItem(loadedItem);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void SpawnProduct()
+        {
+            if (scavCase)
+            {
+                if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Common, out List<MeatovItemData> commonList))
+                {
+                    int commonCount = UnityEngine.Random.Range(endProductRarities[0].x, endProductRarities[0].y + 1);
+                    for (int i = 0; i < commonCount; ++i)
+                    {
+                        MeatovItemData randomCommon = commonList[UnityEngine.Random.Range(0, commonList.Count)];
+                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomCommon, 1);
+                    }
+                }
+                if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Rare, out List<MeatovItemData> rareList))
+                {
+                    int rareCount = UnityEngine.Random.Range(endProductRarities[1].x, endProductRarities[1].y + 1);
+                    for (int i = 0; i < rareCount; ++i)
+                    {
+                        MeatovItemData randomRare = rareList[UnityEngine.Random.Range(0, rareList.Count)];
+                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomRare, 1);
+                    }
+                }
+                if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Rare, out List<MeatovItemData> superRareList))
+                {
+                    int superRareCount = UnityEngine.Random.Range(endProductRarities[2].x, endProductRarities[2].y + 1);
+                    for (int i = 0; i < superRareCount; ++i)
+                    {
+                        MeatovItemData randomSuperRare = superRareList[UnityEngine.Random.Range(0, superRareList.Count)];
+                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomSuperRare, 1);
+                    }
+                }
+            }
+            else
+            {
+                if (area.craftOuputSlot)
+                {
+                    area.levels[area.currentLevel].areaSlots[0].SpawnItem(endProduct, count);
+                }
+                else
+                {
+                    area.levels[area.currentLevel].areaVolumes[0].SpawnItem(endProduct, count);
+                }
+            }
+        }
+
+        public void BeginProduction()
+        {
+            // Set into upgrade state
+            inProduction = true;
+            timeLeft = time;
+
+            // Consume requirements
+            for (int i = 0; i < requirements.Count; ++i)
+            {
+                Requirement itemRequirement = requirements[i];
+                if(itemRequirement.requirementType == Requirement.RequirementType.Resource)
+                {
+                    int countLeft = itemRequirement.resourceCount;
+                    while (countLeft > 0)
+                    {
+                        MeatovItem item = area.GetClosestItem(itemRequirement.item.H3ID);
+                        if (item.amount > countLeft)
+                        {
+                            item.amount -= countLeft;
+                            countLeft = 0;
+                            break;
+                        }
+                        else
+                        {
+                            countLeft -= item.amount;
+                            item.DetachChildren();
+                            GameObject.Destroy(item.gameObject);
+                        }
+                    }
+                }
+                else
+                {
+                    int countLeft = itemRequirement.itemCount;
+                    while (countLeft > 0)
+                    {
+                        MeatovItem item = area.GetClosestItem(itemRequirement.item.H3ID);
+                        if (item.stack > countLeft)
+                        {
+                            item.stack -= countLeft;
+                            countLeft = 0;
+                            break;
+                        }
+                        else
+                        {
+                            countLeft -= item.stack;
+                            item.DetachChildren();
+                            if(itemRequirement.requirementType == Requirement.RequirementType.Tool)
+                            {
+                                itemRequirement.serializedTool = item.Serialize();
+                            }
+                            GameObject.Destroy(item.gameObject);
+                        }
+                    }
+                }
+            }
         }
 
         public bool AllRequirementsFulfilled()

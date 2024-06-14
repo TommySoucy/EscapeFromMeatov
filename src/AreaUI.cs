@@ -456,14 +456,8 @@ namespace EFM
 
                                     itemRequirement.itemView.SetItemData(currentProduction.requirements[k].item);
 
-                                    if (HideoutController.inventory.TryGetValue(currentProduction.requirements[k].item.H3ID, out int itemInventoryCount))
-                                    {
-                                        itemRequirement.amount.text = Mathf.Min(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
-                                    }
-                                    else
-                                    {
-                                        itemRequirement.amount.text = "0/" + currentProduction.requirements[k].itemCount;
-                                    }
+                                    long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[k].item.H3ID);
+                                    itemRequirement.amount.text = Extensions.Min(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                     itemRequirement.fulfilledIcon.SetActive(currentProduction.requirements[k].fulfilled);
                                     itemRequirement.unfulfilledIcon.SetActive(!currentProduction.requirements[k].fulfilled);
 
@@ -546,14 +540,8 @@ namespace EFM
                                     }
                                     itemRequirement.amount.text = itemCount.ToString()+"\n(INSTALLED)";
 
-                                    if (HideoutController.inventory.TryGetValue(currentProduction.requirements[0].item.H3ID, out int itemInventoryCount))
-                                    {
-                                        itemRequirementStash.amount.text = itemInventoryCount.ToString()+"\n(STASH)";
-                                    }
-                                    else
-                                    {
-                                        itemRequirementStash.amount.text = "0\n(STASH)";
-                                    }
+                                    long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[0].item.H3ID);
+                                    itemRequirementStash.amount.text = itemInventoryCount.ToString()+"\n(INVENTORY)";
 
                                     itemRequirement.gameObject.SetActive(true);
                                 }
@@ -602,14 +590,8 @@ namespace EFM
 
                                         itemRequirement.itemView.SetItemData(currentProduction.requirements[k].item);
 
-                                        if (HideoutController.inventory.TryGetValue(currentProduction.requirements[k].item.H3ID, out int itemInventoryCount))
-                                        {
-                                            itemRequirement.amount.text = Mathf.Min(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
-                                        }
-                                        else
-                                        {
-                                            itemRequirement.amount.text = "0/" + currentProduction.requirements[k].itemCount;
-                                        }
+                                        long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[k].item.H3ID);
+                                        itemRequirement.amount.text = Extensions.Min(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
                                         itemRequirement.fulfilledIcon.SetActive(currentProduction.requirements[k].fulfilled);
                                         itemRequirement.unfulfilledIcon.SetActive(!currentProduction.requirements[k].fulfilled);
 
@@ -749,13 +731,26 @@ namespace EFM
                         bonus.bonusIcon.gameObject.SetActive(true);
                         bonus.bonusIcon.sprite = bonus.bonusIcons[0];
                     }
+                    string additionalString = "";
+                    if(bonuses[i].passive && bonuses[i].production)
+                    {
+                        additionalString = " (Needs resource)";
+                    }
+                    else if(!bonuses[i].passive && bonuses[i].production)
+                    {
+                        additionalString = " (While powered & needs resource)";
+                    }
+                    else if(!bonuses[i].passive && !bonuses[i].production)
+                    {
+                        additionalString = " (While powered)";
+                    }
                     if (Mod.localeDB["hideout_" + bonuses[i].ID] != null)
                     {
-                        bonus.description.text = Mod.localeDB["hideout_" + bonuses[i].ID].ToString();
+                        bonus.description.text = Mod.localeDB["hideout_" + bonuses[i].ID].ToString() + additionalString;
                     }
                     else if(Mod.localeDB["hideout_" + bonuses[i].bonusType.ToString()] != null)
                     {
-                        bonus.description.text = Mod.localeDB["hideout_" + bonuses[i].bonusType.ToString()].ToString();
+                        bonus.description.text = Mod.localeDB["hideout_" + bonuses[i].bonusType.ToString()].ToString() + additionalString;
                     }
                     else
                     {
@@ -991,14 +986,8 @@ namespace EFM
 
                         itemRequirement.itemView.SetItemData(itemRequirements[i].item);
 
-                        if(HideoutController.inventory.TryGetValue(itemRequirements[i].item.H3ID, out int itemInventoryCount))
-                        {
-                            itemRequirement.amount.text = Mathf.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
-                        }
-                        else
-                        {
-                            itemRequirement.amount.text = "0/" + itemRequirements[i].itemCount;
-                        }
+                        long itemInventoryCount = Mod.GetItemCountInInventories(itemRequirements[i].item.H3ID);
+                        itemRequirement.amount.text = Extensions.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         itemRequirement.fulfilledIcon.SetActive(itemRequirements[i].fulfilled);
                         itemRequirement.unfulfilledIcon.SetActive(!itemRequirements[i].fulfilled);
 
@@ -1155,14 +1144,8 @@ namespace EFM
 
                         itemRequirement.itemView.SetItemData(itemRequirements[i].item);
 
-                        if (HideoutController.inventory.TryGetValue(itemRequirements[i].item.H3ID, out int itemInventoryCount))
-                        {
-                            itemRequirement.amount.text = Mathf.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
-                        }
-                        else
-                        {
-                            itemRequirement.amount.text = "0/" + itemRequirements[i].itemCount;
-                        }
+                        long itemInventoryCount = Mod.GetItemCountInInventories(itemRequirements[i].item.H3ID);
+                        itemRequirement.amount.text = Extensions.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
                         itemRequirement.fulfilledIcon.SetActive(itemRequirements[i].fulfilled);
                         itemRequirement.unfulfilledIcon.SetActive(!itemRequirements[i].fulfilled);
 

@@ -1156,6 +1156,7 @@ namespace EFM
             listing.timeToSellCheck = UnityEngine.Random.Range(10, listing.timeLeft - 10);
             AddRagFairListing(listing);
 
+            currentRagFairSellItem.DetachChildren();
             Destroy(currentRagFairSellItem.gameObject);
 
             RemoveItemFromTrade(roubleItemData, currentRagFairSellTax);
@@ -1834,6 +1835,7 @@ namespace EFM
 
                     if (Mod.traders[currentTraderIndex].ItemSellable(meatovItem.itemData))
                     {
+                        meatovItem.DetachChildren();
                         Destroy(meatovItem.gameObject);
                     }
                 }

@@ -193,6 +193,14 @@ namespace EFM
 
             itemType = (MeatovItem.ItemType)Enum.Parse(typeof(MeatovItem.ItemType), data["itemType"].ToString());
             rarity = (MeatovItem.ItemRarity)Enum.Parse(typeof(MeatovItem.ItemRarity), data["rarity"].ToString());
+            if (Mod.itemsByRarity.TryGetValue(rarity, out List<MeatovItemData> rarityList))
+            {
+                rarityList.Add(this);
+            }
+            else
+            {
+                Mod.itemsByRarity.Add(rarity, new List<MeatovItemData>() { this });
+            }
             parents = data["parents"].ToObject<string[]>();
             // Note that a particular item will appear in the list corresponding to all of its ancestors, not only its direct parent
             for (int i=0; i < parents.Length; ++i)

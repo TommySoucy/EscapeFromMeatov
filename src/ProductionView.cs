@@ -18,12 +18,13 @@ namespace EFM
 
         public void OnStartClicked()
         {
-            // TODO
+            production.BeginProduction();
         }
 
         public void OnGetClicked()
         {
-            // TODO
+            production.ReturnTools();
+            production.SpawnProduct();
         }
     }
 }

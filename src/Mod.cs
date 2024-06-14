@@ -90,7 +90,7 @@ namespace EFM
         public static Dictionary<string, int>[] requiredPerArea;
         public static List<MeatovItemData> wishList;
         public static Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> ammoBoxesByRoundClassByRoundType; // Ammo boxes (key) and their round count (value), corresponding to round type and class
-        public static Dictionary<MeatovItem.ItemRarity, List<string>> itemsByRarity;
+        public static Dictionary<MeatovItem.ItemRarity, List<MeatovItemData>> itemsByRarity;
         public static Dictionary<string, List<MeatovItemData>> itemsByParents;
         public static List<AreaBonus> activeBonuses;
         public static Trader[] traders; // Prapor, Therapist, Fence, Skier, Peacekeeper, Mechanic, Ragman, Jaeger, Lightkeeper
@@ -1157,6 +1157,8 @@ namespace EFM
             scavCaseProductionsDB = JArray.Parse(File.ReadAllText(path + "/database/hideout/scavcase.json"));
             hideoutsettingsDB = JObject.Parse(File.ReadAllText(path + "/database/hideout/settings.json"));
             Area.GPUBoostRate = (float)hideoutsettingsDB["gpuBoostRate"];
+            Area.fuelConsumptionRate = (float)hideoutsettingsDB["generatorFuelFlowRate"];
+            Area.filterConsumptionRate = (float)hideoutsettingsDB["airFilterUnitFlowRate"];
             localeDB = JObject.Parse(File.ReadAllText(path + "/database/locales/global/en.json"));
             itemDB = JObject.Parse(File.ReadAllText(path + "/database/templates/items.json"));
             ParseDefaultItemData();
@@ -1427,6 +1429,7 @@ namespace EFM
             data = JObject.Parse(File.ReadAllText(path + "/database/DefaultItemData.json"));
 
             itemsByParents = new Dictionary<string, List<MeatovItemData>>();
+            itemsByRarity = new Dictionary<MeatovItem.ItemRarity, List<MeatovItemData>>();
 
             JArray customData = data["customItemData"] as JArray;
             customItemData = new MeatovItemData[customData.Count];
@@ -2053,7 +2056,6 @@ namespace EFM
 
             // Instantiate lists
             ammoBoxesByRoundClassByRoundType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>>();
-            itemsByRarity = new Dictionary<MeatovItem.ItemRarity, List<string>>();
 
             // Subscribe to events
             //SceneManager.sceneLoaded += OnSceneLoaded;

@@ -208,10 +208,6 @@ namespace EFM
                     GameObject spawnedItem = Instantiate(itemPrefab);
                     MeatovItem meatovItem = spawnedItem.GetComponent<MeatovItem>();
                     objectsList.Add(spawnedItem);
-                    spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
-                                                                      UnityEngine.Random.Range(-ySize / 2, ySize / 2),
-                                                                      UnityEngine.Random.Range(-zSize / 2, zSize / 2));
-                    spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
 
                     // Set stack and remove amount to spawn
                     if (meatovItem.maxStack > 1)
@@ -234,6 +230,11 @@ namespace EFM
 
                     // Add item to volume
                     AddItem(meatovItem);
+
+                    spawnedItem.transform.localPosition = new Vector3(UnityEngine.Random.Range(-xSize / 2, xSize / 2),
+                                                                      UnityEngine.Random.Range(-ySize / 2, ySize / 2),
+                                                                      UnityEngine.Random.Range(-zSize / 2, zSize / 2));
+                    spawnedItem.transform.localRotation = UnityEngine.Random.rotation;
                 }
             }
         }
