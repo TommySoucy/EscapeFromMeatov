@@ -369,6 +369,7 @@ namespace EFM
                             if (consumed)
                             {
                                 fuelConsumptionTimer = 1 / fuelConsumptionRate;
+                                fuelConsumptionTimer += fuelConsumptionTimer / 100 * Bonus.fuelConsumption;
                                 for (int i = 0; i < bonusesPerLevel[currentLevel].Length; ++i)
                                 {
                                     if (bonusesPerLevel[currentLevel][i].production)
@@ -548,6 +549,7 @@ namespace EFM
                         if (consumed)
                         {
                             fuelConsumptionTimer = 1/fuelConsumptionRate;
+                            fuelConsumptionTimer += fuelConsumptionTimer / 100 * Bonus.fuelConsumption;
                         }
                         else
                         {
@@ -1487,19 +1489,19 @@ namespace EFM
         public BonusUI bonusUI;
 
         public static int energyRegeneration;
-        public static int debuffEndDelay;
-        public static int repairArmorBonus;
+        public static int debuffEndDelay; // TODO: // Implement with effects
+        public static int repairArmorBonus; // TODO: // Implement with armor repair
         public static int hydrationRegeneration;
         public static int healthRegeneration;
         public static int maximumEnergyReserve;
         public static int scavCooldownTimer;
         public static int questMoneyReward;
-        public static int insuranceReturnTime;
+        public static int insuranceReturnTime; // TODO: // Implement with insurance
         public static int ragfairCommission;
         public static int experienceRate;
-        public static Dictionary<Skill.SkillType, int> skillGroupLevelingBoost = new Dictionary<Skill.SkillType, int>();
+        public static Dictionary<Skill.SkillType, int> skillGroupLevelingBoost = new Dictionary<Skill.SkillType, int>(); // TODO: // Implement with skill progress
         public static int fuelConsumption;
-        public static int repairWeaponBonus;
+        public static int repairWeaponBonus; // TODO: // Implement with weapon repair
 
         public enum BonusType
         {
@@ -1578,12 +1580,128 @@ namespace EFM
 
         public void Apply()
         {
-            td
+            switch (bonusType)
+            {
+                case BonusType.EnergyRegeneration:
+                    energyRegeneration += value;
+                    HideoutController.currentEnergyRate = HideoutController.defaultEnergyRate / 100 * energyRegeneration;
+                    break;
+                case BonusType.DebuffEndDelay:
+                    debuffEndDelay += value;
+                    break;
+                case BonusType.RepairArmorBonus:
+                    repairArmorBonus += value;
+                    break;
+                case BonusType.HydrationRegeneration:
+                    hydrationRegeneration += value;
+                    HideoutController.currentHydrationRate = HideoutController.defaultHydrationRate / 100 * hydrationRegeneration;
+                    break;
+                case BonusType.HealthRegeneration:
+                    healthRegeneration += value;
+                    for(int i=0; i < Mod.GetHealthCount(); ++i)
+                    {
+                        Mod.SetCurrentHealthRate(i, Mod.GetBasePositiveHealthRate(i) + (Mod.GetBasePositiveHealthRate(i) / 100 * healthRegeneration) + Mod.GetBaseNegativeHealthRate(i));
+                    }
+                    break;
+                case BonusType.MaximumEnergyReserve:
+                    maximumEnergyReserve += value;
+                    Mod.currentMaxEnergy = Mod.defaultMaxEnergy + maximumEnergyReserve;
+                    break;
+                case BonusType.ScavCooldownTimer:
+                    scavCooldownTimer += value;
+                    break;
+                case BonusType.QuestMoneyReward:
+                    questMoneyReward += value;
+                    break;
+                case BonusType.InsuranceReturnTime:
+                    insuranceReturnTime += value;
+                    break;
+                case BonusType.RagfairCommission:
+                    ragfairCommission += value;
+                    break;
+                case BonusType.ExperienceRate:
+                    experienceRate += value;
+                    break;
+                case BonusType.SkillGroupLevelingBoost:
+                    if(skillGroupLevelingBoost.ContainsKey(skillType))
+                    {
+                        skillGroupLevelingBoost[skillType] += value;
+                    }
+                    else
+                    {
+                        skillGroupLevelingBoost.Add(skillType, value);
+                    }
+                    break;
+                case BonusType.FuelConsumption:
+                    fuelConsumption += value;
+                    break;
+                case BonusType.RepairWeaponBonus:
+                    repairWeaponBonus += value;
+                    break;
+            }
         }
 
         public void Unapply()
         {
-            td 
+            switch (bonusType)
+            {
+                case BonusType.EnergyRegeneration:
+                    energyRegeneration -= value;
+                    HideoutController.currentEnergyRate = HideoutController.defaultEnergyRate / 100 * energyRegeneration;
+                    break;
+                case BonusType.DebuffEndDelay:
+                    debuffEndDelay -= value;
+                    break;
+                case BonusType.RepairArmorBonus:
+                    repairArmorBonus -= value;
+                    break;
+                case BonusType.HydrationRegeneration:
+                    hydrationRegeneration -= value;
+                    HideoutController.currentHydrationRate = HideoutController.defaultHydrationRate / 100 * hydrationRegeneration;
+                    break;
+                case BonusType.HealthRegeneration:
+                    healthRegeneration -= value;
+                    for (int i = 0; i < Mod.GetHealthCount(); ++i)
+                    {
+                        Mod.SetCurrentHealthRate(i, Mod.GetBasePositiveHealthRate(i) + (Mod.GetBasePositiveHealthRate(i) / 100 * healthRegeneration) + Mod.GetBaseNegativeHealthRate(i));
+                    }
+                    break;
+                case BonusType.MaximumEnergyReserve:
+                    maximumEnergyReserve -= value;
+                    Mod.currentMaxEnergy = Mod.defaultMaxEnergy + maximumEnergyReserve;
+                    break;
+                case BonusType.ScavCooldownTimer:
+                    scavCooldownTimer -= value;
+                    break;
+                case BonusType.QuestMoneyReward:
+                    questMoneyReward -= value;
+                    break;
+                case BonusType.InsuranceReturnTime:
+                    insuranceReturnTime -= value;
+                    break;
+                case BonusType.RagfairCommission:
+                    ragfairCommission -= value;
+                    break;
+                case BonusType.ExperienceRate:
+                    experienceRate -= value;
+                    break;
+                case BonusType.SkillGroupLevelingBoost:
+                    if (skillGroupLevelingBoost.ContainsKey(skillType))
+                    {
+                        skillGroupLevelingBoost[skillType] -= value;
+                    }
+                    else
+                    {
+                        Mod.LogError("Bonus skillGroupLevelingBoost did not contain "+skillType+" which we tried to unapply");
+                    }
+                    break;
+                case BonusType.FuelConsumption:
+                    fuelConsumption -= value;
+                    break;
+                case BonusType.RepairWeaponBonus:
+                    repairWeaponBonus -= value;
+                    break;
+            }
         }
 
         public static BonusType BonusTypeFromName(string name)

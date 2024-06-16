@@ -40,7 +40,6 @@
     <Compile Include="src\AreaLevelData.cs" />
     <Compile Include="src\ConsumeUI.cs" />
     <Compile Include="src\AI.cs" />
-    <Compile Include="src\AreaBonus.cs" />
     <Compile Include="src\Area.cs" />
     <Compile Include="src\AreaController.cs" />
     <Compile Include="src\AreaRequirement.cs" />

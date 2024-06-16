@@ -73,7 +73,7 @@ namespace EFM
             Mod.OnEnergyChanged += OnEnergyChanged;
             Mod.OnHydrationRateChanged += OnHydrationRateChanged;
             Mod.OnEnergyRateChanged += OnEnergyRateChanged;
-            Mod.OnHealthRateChanged += OnHealthRateChanged;
+            Mod.OnCurrentHealthRateChanged += OnCurrentHealthRateChanged;
             Mod.OnKillCountChanged += OnKillCountChanged;
             Mod.OnDeathCountChanged += OnDeathCountChanged;
             Mod.OnRaidCountChanged += OnRaidCountChanged;
@@ -371,7 +371,7 @@ namespace EFM
                 }
                 else
                 {
-                    Mod.stamina = Mathf.Min(Mod.stamina + Mod.staminaRestoration * Time.deltaTime, Mod.currentMaxStamina);
+                    Mod.stamina = Mathf.Min(Mod.stamina + Mod.staminaRate * Time.deltaTime, Mod.currentMaxStamina);
 
                     StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
                 }

@@ -92,7 +92,6 @@ namespace EFM
         public static Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> ammoBoxesByRoundClassByRoundType; // Ammo boxes (key) and their round count (value), corresponding to round type and class
         public static Dictionary<MeatovItem.ItemRarity, List<MeatovItemData>> itemsByRarity;
         public static Dictionary<string, List<MeatovItemData>> itemsByParents;
-        public static List<AreaBonus> activeBonuses;
         public static Trader[] traders; // Prapor, Therapist, Fence, Skier, Peacekeeper, Mechanic, Ragman, Jaeger, Lightkeeper
         public static Dictionary<int, List<Task>> tasksByTraderIndex;
         public static CategoryTreeNode itemCategories;
@@ -156,6 +155,13 @@ namespace EFM
         public static float[] defaultMaxHealth;
         private static float[] currentMaxHealth;
         private static float[] health; 
+        // Base health rates are based on solid value addition (bleed, healing, etc.) from bonuses, effects, and skills
+        // Note that health rates are split into positive and negative because we only want to apply health regen bonus
+        // to positive part of health rate
+        private static float[] basePositiveHealthRates;
+        private static float[] baseNegativeHealthRates;
+        private static float[] baseNonLethalHealthRates; // Note that non lethal healthrate is only ever negative
+        // Current health rates are base affected by percentages from bonuses, effects, and skills
         private static float[] currentHealthRates;
         private static float[] currentNonLethalHealthRates;
         private static float _energy;
@@ -176,7 +182,23 @@ namespace EFM
             }
         }
         public static float defaultMaxEnergy;
-        public static float currentMaxEnergy;
+        private static float _currentMaxEnergy;
+        public static float currentMaxEnergy
+        {
+            get
+            {
+                return _currentMaxEnergy;
+            }
+            set
+            {
+                float preValue = _currentMaxEnergy;
+                _currentMaxEnergy = value;
+                if ((int)preValue != (int)_currentMaxEnergy)
+                {
+                    OnEnergyChangedInvoke();
+                }
+            }
+        }
         private static float _hydration;
         public static float hydration
         {
@@ -244,10 +266,10 @@ namespace EFM
         public static Skill[] skills;
         public static float sprintStaminaDrain = 4.1f;
         public static float overweightStaminaDrain = 4f;
-        public static float staminaRestoration = 4.4f;
+        public static float staminaRate = 4.4f;
+        public static float currentStaminaRate = 4.4f;
         public static float jumpStaminaDrain = 16;
         public static float currentStaminaEffect = 0;
-        public static float baseWeightLimit = 55000;
         public static float effectWeightLimitBonus = 0;
         public static float skillWeightLimitBonus = 0;
         public static float currentDamageModifier = 1;
@@ -257,7 +279,7 @@ namespace EFM
         public static Effect dehydrationEffect;
         public static Effect fatigueEffect;
         public static Effect overweightFatigueEffect;
-        public static GameObject consumeUI;
+        public static ConsumeUI consumeUI;
         public static Text consumeUIText;
         public static GameObject stackSplitUI;
         public static Text stackSplitUIText;
@@ -404,6 +426,23 @@ namespace EFM
                 return _weight;
             }
         }
+        private static int _baseWeightLimit = 55000;
+        public static int baseWeightLimit
+        {
+            set
+            {
+                int preValue = _baseWeightLimit;
+                _baseWeightLimit = value;
+                if (_baseWeightLimit != preValue)
+                {
+                    currentWeightLimit = baseWeightLimit;
+                }
+            }
+            get
+            {
+                return _baseWeightLimit;
+            }
+        }
         private static int _currentWeightLimit = 55000;
         public static int currentWeightLimit
         {
@@ -411,7 +450,7 @@ namespace EFM
             {
                 int preValue = _currentWeightLimit;
                 _currentWeightLimit = value;
-                if (_weight != preValue)
+                if (_currentWeightLimit != preValue)
                 {
                     OnPlayerWeightChangedInvoke();
                 }
@@ -503,8 +542,8 @@ namespace EFM
         public static event OnHydrationRateChangedDelegate OnHydrationRateChanged;
         public delegate void OnEnergyRateChangedDelegate();
         public static event OnEnergyRateChangedDelegate OnEnergyRateChanged;
-        public delegate void OnHealthRateChangedDelegate(int index);
-        public static event OnHealthRateChangedDelegate OnHealthRateChanged;
+        public delegate void OnCurrentHealthRateChangedDelegate(int index);
+        public static event OnCurrentHealthRateChangedDelegate OnCurrentHealthRateChanged;
         public delegate void OnPlayerWeightChangedDelegate();
         public static event OnPlayerWeightChangedDelegate OnPlayerWeightChanged;
         public delegate void OnKillCountChangedDelegate();
@@ -806,7 +845,27 @@ namespace EFM
             }
         }
 
-        public static float GetHealthRate(int index)
+        public static float GetBasePositiveHealthRate(int index)
+        {
+            if (basePositiveHealthRates == null)
+            {
+                return 0;
+            }
+
+            return basePositiveHealthRates[index];
+        }
+
+        public static float GetBaseNegativeHealthRate(int index)
+        {
+            if (baseNegativeHealthRates == null)
+            {
+                return 0;
+            }
+
+            return baseNegativeHealthRates[index];
+        }
+
+        public static float GetCurrentHealthRate(int index)
         {
             if (currentHealthRates == null)
             {
@@ -816,12 +875,99 @@ namespace EFM
             return currentHealthRates[index];
         }
 
-        public static float[] GetHealthRateArray()
+        public static float GetBaseNonLethalHealthRate(int index)
+        {
+            if (baseNonLethalHealthRates == null)
+            {
+                return 0;
+            }
+
+            return baseNonLethalHealthRates[index];
+        }
+
+        public static float GetCurrentNonLethalHealthRate(int index)
+        {
+            if (currentNonLethalHealthRates == null)
+            {
+                return 0;
+            }
+
+            return currentNonLethalHealthRates[index];
+        }
+
+        public static float[] GetBasePositiveHealthRateArray()
+        {
+            return basePositiveHealthRates;
+        }
+
+        public static float[] GetBaseNegativeHealthRateArray()
+        {
+            return baseNegativeHealthRates;
+        }
+
+        public static float[] GetBaseNonLethalHealthRateArray()
+        {
+            return baseNonLethalHealthRates;
+        }
+
+        public static float[] GetCurrentHealthRateArray()
         {
             return currentHealthRates;
         }
 
-        public static void SetHealthRate(int index, float value)
+        public static float[] GetCurrentNonLethalHealthRateArray()
+        {
+            return currentNonLethalHealthRates;
+        }
+
+        public static void SetBasePositiveHealthRate(int index, float value)
+        {
+            if (basePositiveHealthRates == null)
+            {
+                return;
+            }
+
+            float preValue = basePositiveHealthRates[index];
+            basePositiveHealthRates[index] = value;
+            if (value != preValue)
+            {
+                // Recalculate current based on bonus
+                SetCurrentHealthRate(index, GetBasePositiveHealthRate(index) + (GetBasePositiveHealthRate(index) / 100 * Bonus.healthRegeneration) + GetBaseNegativeHealthRate(index));
+            }
+        }
+
+        public static void SetBaseNegativeHealthRate(int index, float value)
+        {
+            if (baseNegativeHealthRates == null)
+            {
+                return;
+            }
+
+            float preValue = baseNegativeHealthRates[index];
+            baseNegativeHealthRates[index] = value;
+            if (value != preValue)
+            {
+                // Recalculate current based on bonus
+                SetCurrentHealthRate(index, GetBasePositiveHealthRate(index) + (GetBasePositiveHealthRate(index) / 100 * Bonus.healthRegeneration) + GetBaseNegativeHealthRate(index));
+            }
+        }
+
+        public static void SetBaseNonLethalHealthRate(int index, float value)
+        {
+            if (baseNonLethalHealthRates == null)
+            {
+                return;
+            }
+
+            float preValue = baseNonLethalHealthRates[index];
+            baseNonLethalHealthRates[index] = value;
+            if (value != preValue)
+            {
+                SetCurrentNonLethalHealthRate(index, GetBaseNonLethalHealthRate(index));
+            }
+        }
+
+        public static void SetCurrentHealthRate(int index, float value)
         {
             if (currentHealthRates == null)
             {
@@ -832,32 +978,11 @@ namespace EFM
             currentHealthRates[index] = value;
             if (value != preValue)
             {
-                OnHealthRateChangedInvoke(index);
+                OnCurrentHealthRateChangedInvoke(index);
             }
         }
 
-        public static void SetHealthRateArray(float[] value)
-        {
-            currentHealthRates = value;
-            OnHealthRateChangedInvoke(-1);
-        }
-
-        public static float GetNonLethalHealthRate(int index)
-        {
-            if (currentNonLethalHealthRates == null)
-            {
-                return 0;
-            }
-
-            return currentNonLethalHealthRates[index];
-        }
-
-        public static float[] GetNonLethalHealthRateArray()
-        {
-            return currentNonLethalHealthRates;
-        }
-
-        public static void SetNonLethalHealthRate(int index, float value)
+        public static void SetCurrentNonLethalHealthRate(int index, float value)
         {
             if (currentNonLethalHealthRates == null)
             {
@@ -868,14 +993,48 @@ namespace EFM
             currentNonLethalHealthRates[index] = value;
             if (value != preValue)
             {
-                OnHealthRateChangedInvoke(index);
+                OnCurrentHealthRateChangedInvoke(index);
             }
         }
 
-        public static void SetNonLethalHealthRateArray(float[] value)
+        public static void SetBasePositiveHealthRateArray(float[] value)
         {
-            currentNonLethalHealthRates = value;
-            OnHealthRateChangedInvoke(-1);
+            for(int i = 0; i < GetHealthCount(); ++i)
+            {
+                SetBasePositiveHealthRate(i, value[i]);
+            }
+        }
+
+        public static void SetBaseNegativeHealthRateArray(float[] value)
+        {
+            for(int i = 0; i < GetHealthCount(); ++i)
+            {
+                SetBaseNegativeHealthRate(i, value[i]);
+            }
+        }
+
+        public static void SetBaseNonLethalHealthRateArray(float[] value)
+        {
+            for(int i = 0; i < GetHealthCount(); ++i)
+            {
+                SetBaseNonLethalHealthRate(i, value[i]);
+            }
+        }
+
+        public static void SetCurrentHealthRateArray(float[] value)
+        {
+            for(int i = 0; i < GetHealthCount(); ++i)
+            {
+                SetCurrentHealthRate(i, value[i]);
+            }
+        }
+
+        public static void SetCurrentNonLethalHealthRateArray(float[] value)
+        {
+            for(int i = 0; i < GetHealthCount(); ++i)
+            {
+                SetCurrentNonLethalHealthRate(i, value[i]);
+            }
         }
 
         public static void OnPlayerLevelChangedInvoke()
@@ -902,11 +1061,11 @@ namespace EFM
             }
         }
 
-        public static void OnHealthRateChangedInvoke(int index)
+        public static void OnCurrentHealthRateChangedInvoke(int index)
         {
-            if(OnHealthRateChanged != null)
+            if(OnCurrentHealthRateChanged != null)
             {
-                OnHealthRateChanged(index);
+                OnCurrentHealthRateChanged(index);
             }
         }
 
@@ -1816,9 +1975,9 @@ namespace EFM
             }
 
             // Add skill and area bonuses
-            xp = (int)(xp * (HideoutController.currentExperienceRate + HideoutController.currentExperienceRate * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100)));
+            int actualXP = (int)(xp + xp / 100.0f * Bonus.experienceRate);
 
-            experience += xp;
+            experience += actualXP;
             int XPForNextLevel = XPPerLevel[level];
             while (experience >= XPForNextLevel)
             {
@@ -1829,43 +1988,43 @@ namespace EFM
 
             if (type == 1)
             {
-                Mod.lootingExp += xp;
+                Mod.lootingExp += actualXP;
                 if (notifMsg == null)
                 {
-                    StatusUI.instance.AddNotification(string.Format("Gained {0} looting experience.", xp));
+                    StatusUI.instance.AddNotification(string.Format("Gained {0} looting experience.", actualXP));
                 }
                 else
                 {
-                    StatusUI.instance.AddNotification(string.Format(notifMsg, xp));
+                    StatusUI.instance.AddNotification(string.Format(notifMsg, actualXP));
                 }
             }
             else if (type == 2)
             {
-                Mod.healingExp += xp;
+                Mod.healingExp += actualXP;
                 if (notifMsg == null)
                 {
-                    StatusUI.instance.AddNotification(string.Format("Gained {0} healing experience.", xp));
+                    StatusUI.instance.AddNotification(string.Format("Gained {0} healing experience.", actualXP));
                 }
                 else
                 {
-                    StatusUI.instance.AddNotification(string.Format(notifMsg, xp));
+                    StatusUI.instance.AddNotification(string.Format(notifMsg, actualXP));
                 }
             }
             else if (type == 3)
             {
-                Mod.explorationExp += xp;
+                Mod.explorationExp += actualXP;
                 if (notifMsg == null)
                 {
-                    StatusUI.instance.AddNotification(string.Format("Gained {0} exploration experience.", xp));
+                    StatusUI.instance.AddNotification(string.Format("Gained {0} exploration experience.", actualXP));
                 }
                 else
                 {
-                    StatusUI.instance.AddNotification(string.Format(notifMsg, xp));
+                    StatusUI.instance.AddNotification(string.Format(notifMsg, actualXP));
                 }
             }
             else
             {
-                StatusUI.instance.AddNotification(string.Format("Gained {0} experience.", xp));
+                StatusUI.instance.AddNotification(string.Format("Gained {0} experience.", actualXP));
             }
         }
 
@@ -1883,7 +2042,7 @@ namespace EFM
             float preLevel = (int)(skill.progress / 100);
 
             float actualAmountToAdd = xp * ((skillIndex >= 12 && skillIndex <= 24) ? Skill.weaponSkillProgressRate : Skill.skillProgressRate);
-            actualAmountToAdd += actualAmountToAdd * (HideoutController.currentSkillGroupLevelingBoosts.ContainsKey(skill.skillType) ? HideoutController.currentSkillGroupLevelingBoosts[skill.skillType] : 0);
+            actualAmountToAdd += actualAmountToAdd * (Bonus.skillGroupLevelingBoost.ContainsKey(skill.skillType) ? Bonus.skillGroupLevelingBoost[skill.skillType] : 0);
             actualAmountToAdd *= skill.dimishingReturns ? 0.5f : 1;
 
             skill.progress += actualAmountToAdd;

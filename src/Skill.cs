@@ -194,7 +194,6 @@ namespace EFM
 
         public enum SkillType
         {
-            // Used in SkillGroupLevelingBoost type bonuses
             Special,
             Physical,
             Practical,

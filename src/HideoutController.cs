@@ -112,7 +112,9 @@ namespace EFM
         // Live data
         public static float[] defaultHealthRates;
         public static float defaultEnergyRate;
+        public static float currentEnergyRate;
         public static float defaultHydrationRate;
+        public static float currentHydrationRate;
         public static DateTime saveTime;
         public static double secondsSinceSave;
         public float time;
@@ -122,6 +124,7 @@ namespace EFM
         private float deployTimer;
         private float deployTime = 0; // TODO: Should be 10 but set to 0 for faster debugging
         private int insuredSetIndex = 0;
+        private float defaultScavTime = 900; // seconds, 15m
         private float scavTimer;
         public static Dictionary<string, int> inventory;
         public static Dictionary<string, int> FIRInventory;
@@ -288,7 +291,7 @@ namespace EFM
 
             //UpdateScavTimer();
 
-            //UpdateEffects();
+            Effect.UpdateStatic();
 
             //UpdateInsuredSets();
 
@@ -1226,19 +1229,12 @@ namespace EFM
         private void SetupPlayerRig()
         {
             Mod.LogInfo("Setting up player rig, current player body null?: " +(GM.CurrentPlayerBody == null)+ ", current player root null?: " + (GM.CurrentPlayerBody == null));
-            // Set player's max health
-            //float totalMaxHealth = 0;
-            //foreach (float bodyPartMaxHealth in Mod.currentMaxHealth)
-            //{
-            //    totalMaxHealth += bodyPartMaxHealth;
-            //}
 
             // Player status
             Instantiate(Mod.playerStatusUIPrefab, GM.CurrentPlayerRoot);
             // Consumable indicator
-            //Mod.consumeUI = Instantiate(Mod.consumeUIPrefab, GM.CurrentPlayerRoot);
-            //Mod.consumeUIText = Mod.consumeUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
-            //Mod.consumeUI.SetActive(false);
+            Mod.consumeUI = Instantiate(Mod.consumeUIPrefab, GM.CurrentPlayerRoot).GetComponent<ConsumeUI>();
+            Mod.consumeUI.gameObject.SetActive(false);
             //// Stack split UI
             //Mod.stackSplitUI = Instantiate(Mod.stackSplitUIPrefab, GM.CurrentPlayerRoot);
             //Mod.stackSplitUIText = Mod.stackSplitUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
@@ -1319,8 +1315,6 @@ namespace EFM
                 Mod.experience = (int)loadedData["experience"];
                 Mod.weight = (int)loadedData["weight"];
                 Mod.SetHealthArray(loadedData["health"].ToObject<float[]>());
-                Mod.SetHealthRateArray(loadedData["healthRates"].ToObject<float[]>());
-                Mod.SetNonLethalHealthRateArray(loadedData["nonLethalHealthRates"].ToObject<float[]>());
                 Mod.LogInfo("\t\t0");
                 Mod.SetCurrentMaxHealthArray(loadedData["maxHealth"].ToObject<float[]>());
                 for (int i = 0; i < Mod.GetHealthCount(); ++i)
@@ -1329,7 +1323,6 @@ namespace EFM
                 }
                 Mod.currentMaxHydration = (float)loadedData["maxHydration"];
                 Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.defaultMaxHydration);
-                Mod.currentMaxEnergy = (float)loadedData["maxEnergy"];
                 Mod.energy = Mathf.Min((float)loadedData["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.defaultMaxEnergy);
                 Mod.maxStamina = (float)loadedData["maxStamina"];
                 Mod.stamina = Mod.maxStamina;
@@ -3127,7 +3120,7 @@ namespace EFM
                 }
                 else // Finished scav raid
                 {
-                    scavTimer = 600 * (currentScavCooldownTimer - currentScavCooldownTimer * (Skill.skillBoostPercent * (Mod.skills[51].currentProgress / 100) / 100));
+                    scavTimer = (defaultScavTime - defaultScavTime / 100 * Bonus.scavCooldownTimer);
                 }
             }
 
@@ -3688,8 +3681,6 @@ namespace EFM
             loadedData["level"] = Mod.level;
             loadedData["experience"] = Mod.experience;
             loadedData["health"] = JArray.FromObject(Mod.GetHealthArray());
-            loadedData["healthRates"] = JArray.FromObject(Mod.GetHealthRateArray());
-            loadedData["nonLethalHealthRates"] = JArray.FromObject(Mod.GetNonLethalHealthRateArray());
             loadedData["maxHealth"] = JArray.FromObject(Mod.GetCurrentMaxHealthArray());
             loadedData["maxHydration"] = Mod.defaultMaxHydration;
             loadedData["hydration"] = Mod.hydration;
@@ -3703,7 +3694,7 @@ namespace EFM
             loadedData["MIARaidCount"] = Mod.MIARaidCount;
             loadedData["KIARaidCount"] = Mod.KIARaidCount;
             loadedData["failedRaidCount"] = Mod.failedRaidCount;
-            loadedData["scavTimer"] = scavTimer;
+            loadedData["hideout"]["scavTimer"] = scavTimer;
 
             // Write skills
             JArray skillData = new JArray();

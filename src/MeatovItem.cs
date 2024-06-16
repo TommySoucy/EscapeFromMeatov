@@ -321,7 +321,7 @@ namespace EFM
         // Consumable
         [Header("Consumable")]
         public float useTime = 0; // Amount of time it takes to use amountRate
-		public float amountRate = -1; // Maximum amount that can be used from the consumable in single use ex.: grizzly can only be used to heal up to 175 hp per use. 0 a single unit of multiple, -1 means no limit up to maxAmount
+		public int amountRate = -1; // Maximum amount that can be used from the consumable in single use ex.: grizzly can only be used to heal up to 175 hp per use. 0 a single unit of multiple, -1 means no limit up to maxAmount
 		public List<BuffEffect> effects; // Gives new effects
 		public List<ConsumableEffect> consumeEffects; // Immediate effects or effects that modify/override/give new effects 
         [NonSerialized]
@@ -838,7 +838,7 @@ namespace EFM
 				}
 			}
 
-			// If A has started being pressed this frame
+			// If usage button started being pressed this frame
 			if (usageButtonDown)
 			{
                 switch (itemType)
@@ -894,8 +894,8 @@ namespace EFM
                 }
             }
 
-			// If A is being pressed this frame
-			if (usageButtonPressed)
+            // If usage button is being pressed this frame
+            if (usageButtonPressed)
 			{
                 switch (itemType)
                 {
@@ -908,7 +908,7 @@ namespace EFM
                             consumableTimer += Time.deltaTime;
 
                             float use = Mathf.Clamp01(consumableTimer / useTime);
-                            Mod.consumeUIText.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
+                            Mod.consumeUI.text.text = string.Format("{0:0.#}/{1:0.#}", amountRate <= 0 ? (use * amount) : (use * amountRate), amountRate <= 0 ? amount : amountRate);
                             if (amountRate == 0)
                             {
                                 // This consumable is discrete units and can only use one at a time, so set text to red until we have reached useTime, then set it to green
@@ -928,7 +928,7 @@ namespace EFM
                             Mod.consumeUI.transform.parent = hand.transform;
                             Mod.consumeUI.transform.localPosition = new Vector3(hand.IsThisTheRightHand ? -0.15f : 0.15f, 0, 0);
                             Mod.consumeUI.transform.localRotation = Quaternion.Euler(25, 0, 0);
-                            Mod.consumeUI.SetActive(true);
+                            Mod.consumeUI.gameObject.SetActive(true);
                             validConsumePress = true;
                         }
                         break;
@@ -944,12 +944,12 @@ namespace EFM
 				if (validConsumePress)
 				{
 					validConsumePress = false;
-					hand.GetComponent<Hand>().consuming = false;
-					Mod.consumeUI.SetActive(false);
+					EFMHand.consuming = false;
+					Mod.consumeUI.gameObject.SetActive(false);
 					Mod.LogInfo("Valid consume released");
 
-					if (amountRate == -1)
-					{
+					if (amountRate == -1) // This consumable is an amount that can be consumed partially
+                    {
 						Mod.LogInfo("\tAmount rate -1");
 						if (maxAmount > 0)
 						{
@@ -957,33 +957,27 @@ namespace EFM
 							// Consume for the fraction timer/useTime of remaining amount. If timer >= useTime, we consume the whole thing
 							int amountToConsume = consumableTimer >= useTime ? amount : (int)(amount * (consumableTimer / useTime));
 							Mod.LogInfo("\t\tAmount to consume: " + amountToConsume);
-							if (amount - amountToConsume <= 0)
+							// Attempt to apply effects at effectiveness depending on how much we've consumed on possible total
+                            // Note that ApplyEffects may be unsuccessful if all effects have a cost and there was not enough consumed to cover at least one of them
+							if (ApplyEffects(amountToConsume / maxAmount, amountToConsume))
 							{
-								// Attempt to apply effects at full effectiveness
-								// Consume if succesful
-								if (ApplyEffects(1, amountToConsume))
-								{
-									amount = 0;
-
-                                    itemData.OnItemUsedInvoke();
-								}
-							}
-							else
-							{
-								// Apply effects at partial effectiveness
-								if (ApplyEffects(amountToConsume / maxAmount, amountToConsume))
-								{
-									amount -= amountToConsume;
-
-                                    itemData.OnItemUsedInvoke();
+                                if (amount - amountToConsume <= 0)
+                                {
+                                    amount = 0;
                                 }
+                                else
+                                {
+                                    amount -= amountToConsume;
+
+                                }
+
+                                itemData.OnItemUsedInvoke();
 							}
 						}
 					}
-					else if (amountRate == 0)
-					{
+					else if (amountRate == 0) // This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
+                    {
 						Mod.LogInfo("\tAmount rate 0");
-						// This consumable is discrete units and can only use one at a time, so consume one unit of it if timer >= useTime
 						if (consumableTimer >= useTime)
 						{
 							Mod.LogInfo("\t\tConsumable timer >= useTime");
@@ -993,14 +987,13 @@ namespace EFM
 
                                 itemData.OnItemUsedInvoke();
                             }
-							// Apply effects at full effectiveness
 						}
 					}
-					else
+					else // A maximum use amount per usage is specified
 					{
 						Mod.LogInfo("\tAmount rate else");
 						// Consume timer/useTime of to amountRate
-						int amountToConsume = consumableTimer >= useTime ? (int)amountRate : (int)(amountRate * (consumableTimer / useTime));
+						int amountToConsume = consumableTimer >= useTime ? amountRate : (int)(amountRate * (consumableTimer / useTime));
 						Mod.LogInfo("\tAmount to consume: "+ amountToConsume);
 						if (consumableTimer >= useTime)
 						{
@@ -1053,10 +1046,11 @@ namespace EFM
 								}
 								// else, no target part and all parts are at max health
 
-								amount -= actualAmountConsumed;
 								if (actualAmountConsumed > 0)
-								{
-									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
+                                {
+                                    amount -= actualAmountConsumed;
+
+                                    Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
 
                                     itemData.OnItemUsedInvoke();
                                 }
@@ -1117,10 +1111,11 @@ namespace EFM
 								}
 								// else, no target part and all parts are at max health
 
-								amount -= actualAmountConsumed;
 								if (actualAmountConsumed > 0)
-								{
-									Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
+                                {
+                                    amount -= actualAmountConsumed;
+
+                                    Mod.AddExperience(actualAmountConsumed, 2, "Treatment experience - Healing ({0})");
 
                                     itemData.OnItemUsedInvoke();
                                 }
@@ -1136,20 +1131,7 @@ namespace EFM
 
 					if (amount == 0)
 					{
-						// Update player inventory and weight
-						Mod.RemoveFromPlayerInventory(this);
-						Mod.weight -= currentWeight;
-						destroyed = true;
-						physObj.ForceBreakInteraction();
 						Destroy(gameObject);
-
-						if (Mod.currentLocationIndex == 1)
-						{
-							//foreach (BaseAreaManager areaManager in HideoutController.instance.baseAreaManagers)
-							//{
-							//	areaManager.UpdateBasedOnItem(H3ID);
-							//}
-						}
 					}
 				}
 			}
@@ -1163,7 +1145,7 @@ namespace EFM
 			Mod.splittingItem = null;
 		}
 
-		private bool ApplyEffects(float effectiveness, int amountToConsume)
+		public bool ApplyEffects(float effectiveness, int amountToConsume)
         {
 			Mod.LogInfo("Apply effects called, effectiveness: " + effectiveness + ", amount to consume: " + amountToConsume);
 			if(consumeEffects == null)
@@ -1172,11 +1154,10 @@ namespace EFM
 				effects = new List<BuffEffect>();
             }
 
-			// TODO: Set targetted part if hovering over a part
+			TODO: // Set targetted part if hovering over a part
 
 			int appliedEffectCount = 0;
 			bool singleEffect = consumeEffects.Count + effects.Count == 1;
-			int unusedEffectCount = 0;
 
 			// Apply consume effects
 			foreach (ConsumableEffect consumeEffect in consumeEffects)
@@ -1186,15 +1167,15 @@ namespace EFM
 					// Health
 					case ConsumableEffect.ConsumableEffectType.Hydration:
 						float hydrationAmount = consumeEffect.value * effectiveness;
-						Mod.hydration += hydrationAmount;
-						Mod.AddSkillExp(hydrationAmount * (Skill.hydrationRecoveryRate / 100), 5);
+						Mod.hydration = Mathf.Min(Mod.hydration + hydrationAmount, Mod.currentMaxHydration);
+						Mod.AddSkillExp(hydrationAmount, 5);
 						++appliedEffectCount;
 						Mod.LogInfo("\tApplied hydration");
 						break;
 					case ConsumableEffect.ConsumableEffectType.Energy:
 						float energyAmount = consumeEffect.value * effectiveness;
-						Mod.energy += energyAmount;
-						Mod.AddSkillExp(energyAmount * (Skill.energyRecoveryRate / 100), 5);
+                        Mod.energy = Mathf.Min(Mod.energy + energyAmount, Mod.currentMaxEnergy);
+                        Mod.AddSkillExp(energyAmount, 5);
 						++appliedEffectCount;
 						Mod.LogInfo("\tApplied energy");
 						break;
@@ -1202,258 +1183,265 @@ namespace EFM
 					// Damage
 					case ConsumableEffect.ConsumableEffectType.RadExposure:
 						Mod.LogInfo("\trad exposure");
-						bool radExposureApplied = false;
-						if (consumeEffect.duration == 0)
-						{
-							Mod.LogInfo("\t\tNo duration, curing rad exposure if present");
-							// Remove all rad exposure effects
-							for (int i = Effect.effects.Count - 1; i >= 0; --i)
+                        if (consumeEffect.cost == 0 || consumeEffect.cost <= amount - amountToConsume)
+                        {
+                            if (consumeEffect.duration == 0)
                             {
-								if (consumeEffect.cost == 0 || consumeEffect.cost <= amount - amountToConsume)
-								{
-									if (Effect.effects[i].effectType == Effect.EffectType.RadExposure)
-									{
-										Effect.effects.RemoveAt(i);
-										radExposureApplied = true;
-										++appliedEffectCount;
-										amount -= consumeEffect.cost;
-										Mod.LogInfo("\t\t\tFound valid rad exposure at effect index: "+i);
-										return true;
-									}
+                                Mod.LogInfo("\t\tNo duration, curing rad exposure if present");
+                                // Remove all rad exposure effects
+                                if (Effect.effectsByType.TryGetValue(Effect.EffectType.RadExposure, out List<Effect> effectList))
+                                {
+                                    Mod.LogInfo("\t\t\tFound valid rad exposure");
+                                    ++appliedEffectCount;
+                                    amount -= consumeEffect.cost;
+                                    Effect.RemoveEffects(Effect.EffectType.RadExposure);
+                                    return true;
                                 }
                                 else
                                 {
-									break;
+                                    Mod.LogInfo("\t\t\tNo valid rad exposure");
                                 }
-                            }
-                            if (!radExposureApplied)
-							{
-								Mod.LogInfo("\t\t\tNo valid rad exposure");
-								if (singleEffect)
-                                {
-									return false;
-                                }
-                                else
-                                {
-									++unusedEffectCount;
-                                }
-                            }
-                        }
-                        else
-						{
-							// Make all rad exposure effects inactive for the duration
-							for (int i = Effect.effects.Count - 1; i >= 0; --i)
-							{
-								if (Effect.effects[i].effectType == Effect.EffectType.RadExposure && Effect.effects[i].active)
-								{
-									Effect.effects[i].active = false;
-									Effect.effects[i].inactiveTimer = consumeEffect.duration * effectiveness;
-									radExposureApplied = true;
-									++appliedEffectCount;
-									Mod.LogInfo("RadExposure effect found, disabling for "+ Effect.effects[i].inactiveTimer);
-								}
-							}
-                            if (radExposureApplied)
-							{
-								return true;
                             }
                             else
                             {
-								++unusedEffectCount;
+                                if (Effect.inactiveTimersByType.ContainsKey(Effect.EffectType.RadExposure))
+                                {
+                                    Effect.inactiveTimersByType[Effect.EffectType.RadExposure] = Mathf.Max(consumeEffect.duration * effectiveness, Effect.inactiveTimersByType[Effect.EffectType.RadExposure]);
+                                }
+                                else
+                                {
+                                    Effect.inactiveTimersByType.Add(Effect.EffectType.RadExposure, consumeEffect.duration * effectiveness);
+                                }
+
+                                // Make all rad exposure effects inactive for the duration
+                                if (Effect.effectsByType.TryGetValue(Effect.EffectType.RadExposure, out List<Effect> effectList))
+                                {
+                                    ++appliedEffectCount;
+                                    amount -= consumeEffect.cost;
+                                    Mod.LogInfo("RadExposure effect found, disabling for " + consumeEffect.duration * effectiveness);
+                                    for (int i = effectList.Count - 1; i >= 0; --i)
+                                    {
+                                        effectList[i].Deactivate();
+                                        effectList[i].inactiveTimer = Mathf.Max(consumeEffect.duration * effectiveness, effectList[i].inactiveTimer);
+                                    }
+                                    return true;
+                                }
                             }
-						}
+                        }
 						break;
 					case ConsumableEffect.ConsumableEffectType.Pain:
 						Mod.LogInfo("\tPain");
 						if (painExperience == -1)
 						{
 							painExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["Pain"]["HealExperience"];
-						}
-						// Make all pain effects inactive for the duration
-						bool painApplied = false;
-						for (int i = Effect.effects.Count - 1; i >= 0; --i)
-						{
-							if (Effect.effects[i].effectType == Effect.EffectType.Pain && Effect.effects[i].active)
-							{
-								Effect.effects[i].active = false;
-								float timer = consumeEffect.duration * effectiveness;
-								Effect.effects[i].inactiveTimer = timer + timer * (Skill.immunityPainKiller * (Mod.skills[6].currentProgress / 100) / 100);
-								Mod.AddExperience((int)(painExperience * effectiveness), 2, "Treatment experience - Pain ({0})");
-								painApplied = true;
-								++appliedEffectCount;
-								Mod.LogInfo("\t\tFound pain effect at effect index "+i);
-							}
-						}
-						if (painApplied)
-						{
-							return true;
-						}
-						else
-						{
-							++unusedEffectCount;
-						}
-						break;
-					case ConsumableEffect.ConsumableEffectType.Contusion:
-						Mod.LogInfo("\tContusion");
-						// Remove all contusion effects
-						bool contusionApplied = false;
-						for (int i = Effect.effects.Count - 1; i >= 0; --i)
-						{
-							if (consumeEffect.cost <= amount - amountToConsume)
-							{
-								if (Effect.effects[i].effectType == Effect.EffectType.Contusion)
-								{
-									Effect.effects.RemoveAt(i);
-									contusionApplied = true;
-									++appliedEffectCount;
-									amount -= consumeEffect.cost;
-									Mod.LogInfo("\t\tFound contusion effect at effect index " + i);
-									return true;
-								}
+                        }
+                        if (consumeEffect.cost == 0 || consumeEffect.cost <= amount - amountToConsume)
+                        {
+                            if (consumeEffect.duration == 0)
+                            {
+                                Mod.LogInfo("\t\tNo duration, curing pain if present");
+                                // Remove all pain effects
+                                if (Effect.effectsByType.TryGetValue(Effect.EffectType.Pain, out List<Effect> effectList))
+                                {
+                                    Mod.LogInfo("\t\t\tFound valid pain");
+                                    ++appliedEffectCount;
+                                    amount -= consumeEffect.cost;
+                                    Effect.RemoveEffects(Effect.EffectType.Pain);
+                                    Mod.AddExperience((int)(painExperience * effectiveness), 2, "Treatment experience - Pain ({0})");
+                                    return true;
+                                }
+                                else
+                                {
+                                    Mod.LogInfo("\t\t\tNo valid pain");
+                                }
                             }
                             else
                             {
-								break;
+                                if (Effect.inactiveTimersByType.ContainsKey(Effect.EffectType.Pain))
+                                {
+                                    Effect.inactiveTimersByType[Effect.EffectType.Pain] = Mathf.Max(consumeEffect.duration * effectiveness, Effect.inactiveTimersByType[Effect.EffectType.Pain]);
+                                }
+                                else
+                                {
+                                    Effect.inactiveTimersByType.Add(Effect.EffectType.Pain, consumeEffect.duration * effectiveness);
+                                }
+
+                                // Make all pain effects inactive for the duration
+                                if (Effect.effectsByType.TryGetValue(Effect.EffectType.Pain, out List<Effect> effectList))
+                                {
+                                    ++appliedEffectCount;
+                                    amount -= consumeEffect.cost;
+                                    Mod.LogInfo("Pain effect found, disabling for " + consumeEffect.duration * effectiveness);
+                                    for (int i = effectList.Count - 1; i >= 0; --i)
+                                    {
+                                        effectList[i].Deactivate();
+                                        effectList[i].inactiveTimer = Mathf.Max(consumeEffect.duration * effectiveness, effectList[i].inactiveTimer);
+                                    }
+                                    Mod.AddExperience((int)(painExperience * effectiveness), 2, "Treatment experience - Pain ({0})");
+                                    return true;
+                                }
                             }
-						}
-                        if (!contusionApplied)
-						{
-							Mod.LogInfo("\t\tNo valid contusion found");
-							if (singleEffect)
-							{
-								return false;
-							}
-							else
-							{
-								++unusedEffectCount;
-							}
-						}
+                        }
 						break;
+					case ConsumableEffect.ConsumableEffectType.Contusion:
+						Mod.LogInfo("\tContusion");
+                        if (consumeEffect.cost == 0 || consumeEffect.cost <= amount - amountToConsume)
+                        {
+                            if (consumeEffect.duration == 0)
+                            {
+                                Mod.LogInfo("\t\tNo duration, curing contusion if present");
+                                // Remove all Contusion effects
+                                if (Effect.effectsByType.TryGetValue(Effect.EffectType.Contusion, out List<Effect> effectList))
+                                {
+                                    Mod.LogInfo("\t\t\tFound valid Contusion");
+                                    ++appliedEffectCount;
+                                    amount -= consumeEffect.cost;
+                                    Effect.RemoveEffects(Effect.EffectType.Contusion);
+                                    return true;
+                                }
+                                else
+                                {
+                                    Mod.LogInfo("\t\t\tNo valid Contusion");
+                                }
+                            }
+                            else
+                            {
+                                if (Effect.inactiveTimersByType.ContainsKey(Effect.EffectType.Contusion))
+                                {
+                                    Effect.inactiveTimersByType[Effect.EffectType.Contusion] = Mathf.Max(consumeEffect.duration * effectiveness, Effect.inactiveTimersByType[Effect.EffectType.Contusion]);
+                                }
+                                else
+                                {
+                                    Effect.inactiveTimersByType.Add(Effect.EffectType.Contusion, consumeEffect.duration * effectiveness);
+                                }
+
+                                // Make all Contusion effects inactive for the duration
+                                if (Effect.effectsByType.TryGetValue(Effect.EffectType.Contusion, out List<Effect> effectList))
+                                {
+                                    ++appliedEffectCount;
+                                    amount -= consumeEffect.cost;
+                                    Mod.LogInfo("Contusion effect found, disabling for " + consumeEffect.duration * effectiveness);
+                                    for (int i = effectList.Count - 1; i >= 0; --i)
+                                    {
+                                        effectList[i].Deactivate();
+                                        effectList[i].inactiveTimer = Mathf.Max(consumeEffect.duration * effectiveness, effectList[i].inactiveTimer);
+                                    }
+                                    return true;
+                                }
+                            }
+                        }
+                        break;
 					case ConsumableEffect.ConsumableEffectType.Intoxication:
 						Mod.LogInfo("\tIntoxication");
 						if (intoxicationExperience == -1)
 						{
 							intoxicationExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["Intoxication"]["HealExperience"];
-						}
-						// Remove all Intoxication effects
-						bool intoxicationApplied = false;
-						for (int i = Effect.effects.Count - 1; i >= 0; --i)
-						{
-							if (consumeEffect.cost <= amount - amountToConsume)
-							{
-								if (Effect.effects[i].effectType == Effect.EffectType.Intoxication)
-								{
-									Effect.effects.RemoveAt(i);
-									amount -= consumeEffect.cost;
-									intoxicationApplied = true;
-									 ++appliedEffectCount;
-									Mod.AddExperience(intoxicationExperience, 2, "Treatment experience - Intoxication ({0})");
-									Mod.LogInfo("\t\tFound contusion effect at effect index " + i);
-									return true;
-								}
+                        }
+                        if (consumeEffect.cost == 0 || consumeEffect.cost <= amount - amountToConsume)
+                        {
+                            if (consumeEffect.duration == 0)
+                            {
+                                Mod.LogInfo("\t\tNo duration, curing Intoxication if present");
+                                // Remove all Intoxication effects
+                                if (Effect.effectsByType.TryGetValue(Effect.EffectType.Intoxication, out List<Effect> effectList))
+                                {
+                                    Mod.LogInfo("\t\t\tFound valid Intoxication");
+                                    ++appliedEffectCount;
+                                    amount -= consumeEffect.cost;
+                                    Effect.RemoveEffects(Effect.EffectType.Intoxication);
+                                    Mod.AddExperience(intoxicationExperience, 2, "Treatment experience - Intoxication ({0})");
+                                    return true;
+                                }
+                                else
+                                {
+                                    Mod.LogInfo("\t\t\tNo valid Intoxication");
+                                }
                             }
                             else
                             {
-								break;
+                                if (Effect.inactiveTimersByType.ContainsKey(Effect.EffectType.Intoxication))
+                                {
+                                    Effect.inactiveTimersByType[Effect.EffectType.Intoxication] = Mathf.Max(consumeEffect.duration * effectiveness, Effect.inactiveTimersByType[Effect.EffectType.Intoxication]);
+                                }
+                                else
+                                {
+                                    Effect.inactiveTimersByType.Add(Effect.EffectType.Intoxication, consumeEffect.duration * effectiveness);
+                                }
+
+                                // Make all Contusion effects inactive for the duration
+                                if (Effect.effectsByType.TryGetValue(Effect.EffectType.Intoxication, out List<Effect> effectList))
+                                {
+                                    ++appliedEffectCount;
+                                    amount -= consumeEffect.cost;
+                                    Mod.LogInfo("Intoxication effect found, disabling for " + consumeEffect.duration * effectiveness);
+                                    for (int i = effectList.Count - 1; i >= 0; --i)
+                                    {
+                                        effectList[i].Deactivate();
+                                        effectList[i].inactiveTimer = Mathf.Max(consumeEffect.duration * effectiveness, effectList[i].inactiveTimer);
+                                    }
+                                    Mod.AddExperience(intoxicationExperience, 2, "Treatment experience - Intoxication ({0})");
+                                    return true;
+                                }
                             }
-						}
-						if (!intoxicationApplied)
-						{
-							Mod.LogInfo("\t\tNo valid intoxication found");
-							if (singleEffect)
-							{
-								return false;
-							}
-							else
-							{
-								++unusedEffectCount;
-							}
-						}
-						break;
+                        }
+                        break;
 					case ConsumableEffect.ConsumableEffectType.LightBleeding:
 						if (lightBleedExperience == -1)
 						{
 							lightBleedExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["HealExperience"];
 						}
 						Mod.LogInfo("\tHas damage light bleeding effect");
-						// Remove priority LightBleeding effect, or one found on targetted part
-						if (targettedPart == -1)
-						{
-							Mod.LogInfo("\t\tNo targetted part, cost: "+consumeEffect.cost+", amount: "+amount+", to consume: "+amountToConsume);
-							// Prioritize lowest partIndex
-							int highest = -1;
-							int lowestPartIndex = 7;
-							if (consumeEffect.cost <= amount - amountToConsume)
-							{
-								for (int i = Effect.effects.Count - 1; i >= 0; --i)
-								{
-									if (Effect.effects[i].effectType == Effect.EffectType.LightBleeding && Effect.effects[i].partIndex < lowestPartIndex)
-									{
-										Mod.LogInfo("\t\t\tFound valid light bleeding");
-										highest = i;
-									}
-								}
-							}
-							if(highest == -1) // We did not find light bleeding
-							{
-								Mod.LogInfo("\t\tNo valid light bleeding");
-								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
-								{
-									return false;
-								}
-								else // no bleeding to stop but this consumable has other effects we want to apply
-								{
-									++unusedEffectCount;
-								}
-                            }
-                            else
-							{
-								Mod.LogInfo("\t\tRemoving valid light bleed");
-								Effect.RemoveEffectAt(highest);
-								amount -= consumeEffect.cost;
-								++appliedEffectCount;
-								Mod.AddExperience(lightBleedExperience, 2, "Treatment experience - Light Bleeding ({0})");
-								return true;
-							}
-                        }
-                        else
+                        // Remove priority LightBleeding effect, or one found on targetted part
+                        if (consumeEffect.cost == 0 || consumeEffect.cost <= amount - amountToConsume)
                         {
-							// Find lightbleeding on targettedpart
-							int index = -1;
-							if (consumeEffect.cost <= amount - amountToConsume)
-							{
-								for (int i = Effect.effects.Count - 1; i >= 0; --i)
-								{
-									if (Effect.effects[i].partIndex == targettedPart && Effect.effects[i].effectType == Effect.EffectType.LightBleeding)
-									{
-										index = i;
-										break;
-									}
-								}
-							}
-							if (index == -1) // We did not find light bleeding on the part
-							{
-								if (singleEffect) // It is the only effect we want to apply, so fail it because there is nothing to do
-								{
-									return false;
-								}
-								else // no bleeding to stop but this consumable has other effects we want to apply
-								{
-									++unusedEffectCount;
-								}
-							}
-							else
-							{
-								Effect.RemoveEffectAt(index);
-								amount -= consumeEffect.cost;
-								++appliedEffectCount;
-								Mod.AddExperience(lightBleedExperience, 2, "Treatment experience - Light Bleeding ({0})");
-								return true;
-							}
-						}
+                            List<Effect> effectList = null;
+                            if (Effect.effectsByType.TryGetValue(Effect.EffectType.LightBleeding, out effectList))
+                            {
+                                if (targettedPart == -1)
+                                {
+                                    Mod.LogInfo("\t\tNo targetted part, cost: " + consumeEffect.cost + ", amount: " + amount + ", to consume: " + amountToConsume);
+                                    // Prioritize lowest partIndex, the lower the partIndex the more important the part, 0: Head, 1: Chest, 2: Stomach, arms, legs
+                                    int highest = -1;
+                                    int lowestPartIndex = 7;
+                                    for (int i = effectList.Count - 1; i >= 0; --i)
+                                    {
+                                        if (effectList[i].partIndex < lowestPartIndex)
+                                        {
+                                            Mod.LogInfo("\t\t\tFound valid light bleeding");
+                                            highest = i;
+                                        }
+                                    }
+                                    if (highest != -1)
+                                    {
+                                        Mod.LogInfo("\t\tRemoving valid light bleed");
+                                        Effect.RemoveEffect(effectList[highest], effectList);
+                                        amount -= consumeEffect.cost;
+                                        ++appliedEffectCount;
+                                        Mod.AddExperience(lightBleedExperience, 2, "Treatment experience - Light Bleeding ({0})");
+                                        return true;
+                                    }
+                                }
+                                else
+                                {
+                                    // Find lightbleeding on targettedpart
+                                    for (int i = effectList.Count - 1; i >= 0; --i)
+                                    {
+                                        if (effectList[i].partIndex == targettedPart)
+                                        {
+                                            Effect.RemoveEffect(effectList[i], effectList);
+                                            amount -= consumeEffect.cost;
+                                            ++appliedEffectCount;
+                                            Mod.AddExperience(lightBleedExperience, 2, "Treatment experience - Light Bleeding ({0})");
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
 						break;
 					case ConsumableEffect.ConsumableEffectType.Fracture:
-						Mod.LogInfo("\tFracture");
+                        cont from here: // Review the use of appliedEffectCount, should we be able to heal mutiple effects at once?
+                        Mod.LogInfo("\tFracture");
 						if (fractureExperience == -1)
 						{
 							fractureExperience = (int)Mod.globalDB["config"]["Health"]["Effects"]["Fracture"]["HealExperience"];

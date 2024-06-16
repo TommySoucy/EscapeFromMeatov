@@ -59,9 +59,9 @@ namespace EFM
         public int maxAmount;
         // Effects
         public float useTime = 0; // Amount of time it takes to use amountRate
-        public float amountRate = -1; // Maximum amount that can be used from the consumable in single use ex.: grizzly can only be used to heal up to 175 hp per use. 0 means a single unit of multiple, -1 means no limit up to maxAmount
-        public List<BuffEffect> effects; // Gives new effects
-        public List<ConsumableEffect> consumeEffects; // Immediate effects or effects that modify/override/give new effects 
+        public int amountRate = -1; // Maximum amount that can be used from the consumable in single use ex.: grizzly can only be used to heal up to 175 hp per use. 0 means a single unit of multiple, -1 means no limit up to maxAmount
+        public List<BuffEffect> effects; // Ongoing effects after consumption
+        public List<ConsumableEffect> consumeEffects; // Built from item effects_damage and effects_health, these are emmediate effects upon consuming the item
         // Dogtag
         public int dogtagLevel = 1;
         public string dogtagName;
@@ -263,7 +263,7 @@ namespace EFM
             maxAmount = (int)data["maxAmount"];
 
             useTime = (float)data["useTime"];
-            amountRate = (float)data["amountRate"];
+            amountRate = (int)data["amountRate"];
 
             JArray consumeEffectData = data["consumeEffects"] as JArray;
             consumeEffects = new List<ConsumableEffect>();

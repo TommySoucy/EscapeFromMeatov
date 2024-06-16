@@ -1,21 +1,18 @@
-﻿using FistVR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using Valve.Newtonsoft.Json.Linq;
 
 namespace EFM
 {
     public class Effect
     {
-        public static List<Effect> effects = new List<Effect>(); // Active effects
+        public static Dictionary<EffectType, List<Effect>> effectsByType = new Dictionary<EffectType, List<Effect>>();
+        public static Dictionary<EffectType, float> inactiveTimersByType = new Dictionary<EffectType, float>();
+
+        public static float damageModifier; 
 
         public enum EffectType
         {
-            SkillRate, // Increases skill level
+            SkillRate, // In/decreases skill level
             EnergyRate, // Adds/Subtract energy rate
             HydrationRate, // Adds/Subtract hydration rate
             MaxStamina, // Adds/Subtract max stamina
@@ -26,7 +23,7 @@ namespace EFM
             RemoveAllBloodLosses, // Removes and prevents blood loss
             Contusion, // No haptic feedbak, lowers volume by 0.33
             WeightLimit, // Adds/Subtract weightlimit above which cant sprint
-            DamageModifier, // Multiplies amount of damage taken
+            DamageModifier, // Adds to damage taken: Damage + Damage * DamageModifier value
             Pain, // Causes tremors
             StomachBloodloss, // Energy/Hydration rates multiplied by 5
             UnknownToxin, // Causes pain and negative health rate
@@ -35,7 +32,7 @@ namespace EFM
             LightBleeding, // Causes negative healthrate in each bodypart
             HeavyBleeding, // Causes negative healthrate in each bodypart
             Fracture, // Causes pain
-            Dehydration, // Causes damage
+            Dehydration, // Causes damage, causes pain
             HeavyDehydration, // Causes more damage
             Fatigue, // Cant sprint
             HeavyFatigue, // Cant sprint, cause damage
@@ -47,6 +44,7 @@ namespace EFM
         }
         public EffectType effectType;
 
+        public bool previousActive = false;
         public bool active = false;
         public float timer = 0;
         public bool hasTimer = false;
@@ -64,411 +62,464 @@ namespace EFM
         public int partIndex = -1; // 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
         public int skillIndex = -1;
         public float value;
-        public List<Effect> caused = new List<Effect>();
+        public Effect parentEffect; // Effect that caused this effect
+        public List<Effect> caused = new List<Effect>(); // Effects caused by this effect
         public bool nonLethal = false;
         public bool hideoutOnly = false;
         public bool fromStimulator = false;
 
-        public static void RemoveEffectAt(int index)
+        public delegate void OnEffectAddedDelegate(Effect effect);
+        public static event OnEffectAddedDelegate OnEffectAdded;
+        public delegate void OnEffectActivatedDelegate(Effect effect);
+        public static event OnEffectActivatedDelegate OnEffectActivated;
+        public delegate void OnEffectDeactivatedDelegate(Effect effect);
+        public static event OnEffectDeactivatedDelegate OnEffectDeactivated;
+        public delegate void OnEffectRemovedDelegate(Effect effect);
+        public static event OnEffectRemovedDelegate OnEffectRemoved;
+
+        public Effect(BuffEffect buffEffect)
         {
-            Mod.LogInfo("Effect remove at "+index+" called");
-            Effect effectToRemove = effects[index];
-            effects.RemoveAt(index);
-            switch (effectToRemove.effectType)
+            td
+        }
+
+        public static void UpdateStatic()
+        {
+            // Update global timers
+            List<EffectType> toRemove = new List<EffectType>();
+            foreach (KeyValuePair<EffectType, float> timer in inactiveTimersByType)
+            { 
+                float newValue = timer.Value - Time.deltaTime;
+                if(newValue <= 0)
+                {
+                    toRemove.Add(timer.Key);
+                }
+                else
+                {
+                    inactiveTimersByType[timer.Key] = newValue;
+                }
+            }
+            for(int i=0; i < toRemove.Count; ++i)
             {
-                case EffectType.LightBleeding:
-                    Mod.LogInfo("\t\tRemoving");
-                    foreach (Effect causedEffect in effectToRemove.caused)
-                    {
-                        if (causedEffect.effectType == Effect.EffectType.HealthRate)
-                        {
-                            if (causedEffect.partIndex == -1)
-                            {
-                                if (causedEffect.nonLethal)
-                                {
-                                    for (int k = 0; k < 7; ++k)
-                                    {
-                                        Mod.SetNonLethalHealthRate(k, Mod.GetNonLethalHealthRate(k) - causedEffect.value);
-                                    }
-                                }
-                                else
-                                {
-                                    for (int k = 0; k < 7; ++k)
-                                    {
-                                        Mod.SetHealthRate(k, Mod.GetHealthRate(k) - causedEffect.value);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (causedEffect.nonLethal)
-                                {
-                                    Mod.SetNonLethalHealthRate(causedEffect.partIndex, Mod.GetNonLethalHealthRate(causedEffect.partIndex) - causedEffect.value);
-                                }
-                                else
-                                {
-                                    Mod.SetHealthRate(causedEffect.partIndex, Mod.GetHealthRate(causedEffect.partIndex) - causedEffect.value);
-                                }
-                            }
-                        }
-                        else // Energy rate
-                        {
-                            Mod.currentEnergyRate -= causedEffect.value;
-                        }
-                        Effect.effects.Remove(causedEffect);
-                    }
+                inactiveTimersByType.Remove(toRemove[i]);
+            }
 
-                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
-                    {
-                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(false);
-                    }
+            // Update effect instances
+            foreach (KeyValuePair<EffectType, List<Effect>> effectEntry in effectsByType)
+            {
+                for (int i = 0; i < effectEntry.Value.Count; ++i)
+                {
+                    effectEntry.Value[i].Update();
+                }
+            }
+        }
 
-                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
+        public void Update()
+        {
+            // Update timers
+            if (active)
+            {
+                if (hasTimer)
+                {
+                    if(timer > 0)
                     {
-                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
+                        timer -= Time.deltaTime;
                     }
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case EffectType.HeavyBleeding:
-                    Mod.LogInfo("\t\tRemoving");
-                    foreach (Effect causedEffect in effectToRemove.caused)
+                    else
                     {
-                        if (causedEffect.effectType == Effect.EffectType.HealthRate)
-                        {
-                            if (causedEffect.partIndex == -1)
-                            {
-                                if (causedEffect.nonLethal)
-                                {
-                                    for (int k = 0; k < 7; ++k)
-                                    {
-                                        Mod.SetNonLethalHealthRate(k, Mod.GetNonLethalHealthRate(k) - causedEffect.value);
-                                    }
-                                }
-                                else
-                                {
-                                    for (int k = 0; k < 7; ++k)
-                                    {
-                                        Mod.SetHealthRate(k, Mod.GetHealthRate(k) - causedEffect.value);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (causedEffect.nonLethal)
-                                {
-                                    Mod.SetNonLethalHealthRate(causedEffect.partIndex, Mod.GetNonLethalHealthRate(causedEffect.partIndex) - causedEffect.value);
-                                }
-                                else
-                                {
-                                    Mod.SetHealthRate(causedEffect.partIndex, Mod.GetHealthRate(causedEffect.partIndex) - causedEffect.value);
-                                }
-                            }
-                        }
-                        else // Energy rate
-                        {
-                            Mod.currentEnergyRate -= causedEffect.value;
-                        }
-                        Effect.effects.Remove(causedEffect);
+                        active = false;
+                        RemoveEffect(this, parentEffect == null ? null : parentEffect.caused);
                     }
+                }
+            }
+            else
+            {
+                // Note that an effect can only become active once delay or timer have ran out
+                // If inactive but there is no timer, it will remain inactive forever
+                if(delay > 0)
+                {
+                    delay -= Time.deltaTime;
+                    if(delay <= 0 && inactiveTimer <= 0 && (parentEffect == null || parentEffect.active))
+                    {
+                        Activate();
+                    }
+                }
+                else if(inactiveTimer > 0)
+                {
+                    inactiveTimer -= Time.deltaTime;
+                    if (delay <= 0 && inactiveTimer <= 0 && (parentEffect == null || parentEffect.active))
+                    {
+                        Activate();
+                    }
+                }
+            }
 
-                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.activeSelf)
-                    {
-                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(0).gameObject.SetActive(false);
-                    }
+            previousActive = active;
+        }
 
-                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.activeSelf)
-                    {
-                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(1).gameObject.SetActive(false);
-                    }
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case EffectType.Fracture:
-                    Mod.LogInfo("\t\tRemoving");
-                    // Remove all effects caused by this fracture
-                    foreach (Effect causedEffect in effectToRemove.caused)
-                    {
-                        // Could go two layers deep
-                        foreach (Effect causedCausedEffect in effectToRemove.caused)
-                        {
-                            Effect.effects.Remove(causedCausedEffect);
-                        }
-                        Effect.effects.Remove(causedEffect);
-                    }
-                    bool hasFractureTremors = false;
-                    foreach (Effect effectCheck in Effect.effects)
-                    {
-                        if (effectCheck.effectType == Effect.EffectType.HandsTremor && effectCheck.active)
-                        {
-                            hasFractureTremors = true;
-                            break;
-                        }
-                    }
-                    if (!hasFractureTremors)
-                    {
-                        // TODO: Disable tremors
-                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
-                        {
-                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
-                        }
-                    }
+        public void Activate()
+        {
+            if(parentEffect != null && !parentEffect.active)
+            {
+                return;
+            }
 
-                    if (!StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(3).gameObject.activeSelf)
+            active = true;
+
+            // Apply effect
+            switch (effectType)
+            {
+                case EffectType.SkillRate:
+                    Mod.skills[skillIndex].currentProgress += value;
+                    break;
+                case EffectType.EnergyRate:
+                    Mod.currentEnergyRate += value;
+                    break;
+                case EffectType.HydrationRate:
+                    Mod.currentHydrationRate += value;
+                    break;
+                case EffectType.MaxStamina:
+                    Mod.currentMaxStamina += value;
+                    break;
+                case EffectType.StaminaRate:
+                    Mod.currentStaminaRate += value;
+                    break;
+                case EffectType.HandsTremor:
+                    TODO0: // Start tremors once implemented
+                    Mod.LogWarning("Tremors not implemented yet, tried to start");
+                    break;
+                case EffectType.QuantumTunnelling:
+                    TODO1: // Start tunnel vision once implemented
+                    Mod.LogWarning("Tunnel vision not implemented yet, tried to start");
+                    break;
+                case EffectType.HealthRate:
+                    if (value > 0)
                     {
-                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(3).gameObject.SetActive(true);
+                        Mod.SetBasePositiveHealthRate(partIndex, Mod.GetBasePositiveHealthRate(partIndex) - value);
                     }
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case EffectType.DestroyedPart:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.SkillRate:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.skills[effectToRemove.skillIndex].currentProgress -= effectToRemove.value;
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.EnergyRate:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.currentEnergyRate -= effectToRemove.value;
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.HydrationRate:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.currentHydrationRate -= effectToRemove.value;
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.MaxStamina:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.currentMaxStamina -= effectToRemove.value;
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.StaminaRate:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.currentStaminaEffect -= effectToRemove.value;
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.HandsTremor:
-                    Mod.LogInfo("\t\tRemoving");
-                    // TODO: Stop tremors if there are not other tremor effects
-                    if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
+                    else
                     {
-                        StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
-                    }
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.QuantumTunnelling:
-                    Mod.LogInfo("\t\tRemoving");
-                    // TODO: Stop QuantumTunnelling
-                    if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.activeSelf)
-                    {
-                        StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(4).gameObject.SetActive(false);
-                    }
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.HealthRate:
-                    Mod.LogInfo("\t\tRemoving");
-                    if (effectToRemove.nonLethal)
-                    {
-                        if (effectToRemove.partIndex == -1)
+                        if (nonLethal)
                         {
-                            for (int i = 0; i < 7; ++i)
-                            {
-                                Mod.SetNonLethalHealthRate(i, Mod.GetNonLethalHealthRate(i) - effectToRemove.value);
-                            }
+                            Mod.SetBaseNonLethalHealthRate(partIndex, Mod.GetBaseNonLethalHealthRate(partIndex) - value);
                         }
                         else
                         {
-                            Mod.SetNonLethalHealthRate(effectToRemove.partIndex, Mod.GetNonLethalHealthRate(effectToRemove.partIndex) - effectToRemove.value);
+                            Mod.SetBaseNegativeHealthRate(partIndex, Mod.GetBaseNegativeHealthRate(partIndex) - value);
+                        }
+                    }
+                    break;
+                case EffectType.RemoveAllBloodLosses:
+                    // Do nothing upon removing this effect
+                    // The effect really just takes the form of an inactive timer on all blood losses
+                    // Its deactivation/removal will be when the timer runs out
+                    break;
+                case EffectType.Contusion:
+                    TODO2: // Start Contusion once implemented
+                    Mod.LogWarning("Contusion not implemented yet, tried to start");
+                    break;
+                case EffectType.WeightLimit:
+                    Mod.baseWeightLimit -= (int)value;
+                    break;
+                case EffectType.DamageModifier:
+                    TODO5: // Implement with damage
+                    damageModifier -= value;
+                    break;
+                case EffectType.Pain:
+                    // Do nothing, really just there as a cause for other effects (Tremors)
+                    break;
+                case EffectType.StomachBloodloss:
+                    // Do nothing, really just there as a cause for other effects (Energy and hydration rates)
+                    break;
+                case EffectType.UnknownToxin:
+                    // Do nothing, really just there as a cause for other effects (Pain and healthrate)
+                    break;
+                case EffectType.BodyTemperature:
+                    // Do nothing, really just there as a cause for other effects
+                    break;
+                case EffectType.Antidote:
+                    // Do nothing, really just there as delayed removal for toxin
+                    break;
+                case EffectType.LightBleeding:
+                    // Do nothing, really just there as a cause for other effects (Healthrate and Energyrate)
+                    break;
+                case EffectType.HeavyBleeding:
+                    // Do nothing, really just there as a cause for other effects (Healthrate and Energyrate)
+                    break;
+                case EffectType.Fracture:
+                    // Do nothing, really just there as a cause for other effects (Pain)
+                    // Existence of this effect will also be used by other system for other behavior like bullet hit probability and random stagger 
+                    // if walking on a fracture
+                    break;
+                case EffectType.Dehydration:
+                    // Do nothing, really just there as a cause for other effects (Healthrate and pain)
+                    break;
+                case EffectType.HeavyDehydration:
+                    // Do nothing, really just there as a cause for other effects (Healthrate and pain)
+                    break;
+                case EffectType.Fatigue:
+                    // Do nothing, existence prevents sprint
+                    break;
+                case EffectType.HeavyFatigue:
+                    // Do nothing, existence prevents sprint, also causes healthrate
+                    break;
+                case EffectType.OverweightFatigue:
+                    // Do nothing, really just there as a cause for other effects (energyrate)
+                    break;
+            }
+
+            // Activate caused effects after
+            for (int i = 0; i < caused.Count; ++i)
+            {
+                caused[i].Activate();
+            }
+
+            OnEffectActivatedInvoke(this);
+        }
+
+        public void Deactivate()
+        {
+            active = false;
+
+            // Deactivate caused effects first
+            for(int i=0; i < caused.Count; ++i)
+            {
+                caused[i].Deactivate();
+            }
+
+            // Unapply effect
+            switch (effectType)
+            {
+                case EffectType.SkillRate:
+                    Mod.skills[skillIndex].currentProgress -= value;
+                    break;
+                case EffectType.EnergyRate:
+                    Mod.currentEnergyRate -= value;
+                    break;
+                case EffectType.HydrationRate:
+                    Mod.currentHydrationRate -= value;
+                    break;
+                case EffectType.MaxStamina:
+                    Mod.currentMaxStamina -= value;
+                    break;
+                case EffectType.StaminaRate:
+                    Mod.currentStaminaRate -= value;
+                    break;
+                case EffectType.HandsTremor:
+                    if (effectsByType.TryGetValue(EffectType.HandsTremor, out List<Effect> otherTremors))
+                    {
+                        bool activeTremors = false;
+                        for(int i=0; i < otherTremors.Count; ++i)
+                        {
+                            if (otherTremors[i].active)
+                            {
+                                activeTremors = true;
+                                break;
+                            }
+                        }
+                        if (!activeTremors)
+                        {
+                            TODO1: // Stop tremors once implemented
+                            Mod.LogWarning("Tremors not implemented yet, tried to deactivate");
                         }
                     }
                     else
                     {
-                        if (effectToRemove.partIndex == -1)
+                    TODO1: // Stop tremors once implemented
+                        Mod.LogWarning("Tremors not implemented yet, tried to deactivate");
+                    }
+                    break;
+                case EffectType.QuantumTunnelling:
+                    if (effectsByType.TryGetValue(EffectType.QuantumTunnelling, out List<Effect> otherTunnels))
+                    {
+                        bool activeTunnels = false;
+                        for (int i = 0; i < otherTunnels.Count; ++i)
                         {
-                            for (int i = 0; i < 7; ++i)
+                            if (otherTunnels[i].active)
                             {
-                                Mod.SetHealthRate(i, Mod.GetHealthRate(i) - effectToRemove.value);
+                                activeTunnels = true;
+                                break;
                             }
+                        }
+                        if (!activeTunnels)
+                        {
+                            TODO1: // Stop tunnel vision once implemented
+                            Mod.LogWarning("Tunnel vision not implemented yet, tried to deactivate");
+                        }
+                    }
+                    else
+                    {
+                        TODO1: // Stop tunnel vision once implemented
+                        Mod.LogWarning("Tunnel vision not implemented yet, tried to deactivate");
+                    }
+                    break;
+                case EffectType.HealthRate:
+                    if (value > 0)
+                    {
+                        Mod.SetBasePositiveHealthRate(partIndex, Mod.GetBasePositiveHealthRate(partIndex) - value);
+                    }
+                    else
+                    {
+                        if (nonLethal)
+                        {
+                            Mod.SetBaseNonLethalHealthRate(partIndex, Mod.GetBaseNonLethalHealthRate(partIndex) - value);
                         }
                         else
                         {
-                            Mod.SetHealthRate(effectToRemove.partIndex, Mod.GetHealthRate(effectToRemove.partIndex) - effectToRemove.value);
+                            Mod.SetBaseNegativeHealthRate(partIndex, Mod.GetBaseNegativeHealthRate(partIndex) - value);
                         }
                     }
-                    Mod.LogInfo("\t\tRemoved");
                     break;
-                case Effect.EffectType.RemoveAllBloodLosses:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.LogInfo("\t\tRemoved");
-                    // Reactivate all bleeding 
-                    // Not necessary because when we disabled them we used the disable timer
+                case EffectType.RemoveAllBloodLosses:
+                    // Do nothing upon removing this effect
+                    // The effect really just takes the form of an inactive timer on all blood losses
+                    // Its deactivation/removal will be when the timer runs out
                     break;
-                case Effect.EffectType.Contusion:
-                    Mod.LogInfo("\t\tRemoving");
-                    bool otherContusions = false;
-                    foreach (Effect contusionEffectCheck in Effect.effects)
+                case EffectType.Contusion:
+                    if (effectsByType.TryGetValue(EffectType.Contusion, out List<Effect> otherContusions))
                     {
-                        if (contusionEffectCheck.active && contusionEffectCheck.effectType == Effect.EffectType.Contusion)
+                        bool activeContusions = false;
+                        for (int i = 0; i < otherContusions.Count; ++i)
                         {
-                            otherContusions = true;
-                            break;
-                        }
-                    }
-                    if (!otherContusions)
-                    {
-                        // Enable haptic feedback
-                        GM.Options.ControlOptions.HapticsState = ControlOptions.HapticsMode.Enabled;
-                        // TODO: also set volume to full
-                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.activeSelf)
-                        {
-                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(0).gameObject.SetActive(false);
-                        }
-                    }
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.WeightLimit:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.effectWeightLimitBonus -= effectToRemove.value * 1000;
-                    Mod.currentWeightLimit = (int)(Mod.baseWeightLimit + Mod.effectWeightLimitBonus + Mod.skillWeightLimitBonus);
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.DamageModifier:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.currentDamageModifier -= effectToRemove.value;
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.Pain:
-                    Mod.LogInfo("\t\tRemoving");
-                    // Remove all tremors caused by this pain and disable tremors if no other tremors active
-                    foreach (Effect causedEffect in effectToRemove.caused)
-                    {
-                        Effect.effects.Remove(causedEffect);
-                    }
-                    bool hasPainTremors = false;
-                    foreach (Effect effectCheck in Effect.effects)
-                    {
-                        if (effectCheck.effectType == Effect.EffectType.HandsTremor && effectCheck.active)
-                        {
-                            hasPainTremors = true;
-                            break;
-                        }
-                    }
-                    if (!hasPainTremors)
-                    {
-                        // TODO: Disable tremors
-                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
-                        {
-                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
-                        }
-                    }
-
-                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(2).gameObject.activeSelf)
-                    {
-                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(effectToRemove.partIndex).GetChild(3).GetChild(2).gameObject.SetActive(false);
-                    }
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.StomachBloodloss:
-                    Mod.LogInfo("\t\tRemoving");
-                    --Mod.stomachBloodLossCount;
-                    if (StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.activeSelf)
-                    {
-                        StatusUI.instance.transform.GetChild(0).GetChild(7).GetChild(2).GetChild(3).GetChild(1).gameObject.SetActive(false);
-                    }
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.UnknownToxin:
-                    Mod.LogInfo("\t\tRemoving");
-                    // Remove all effects caused by this toxin
-                    foreach (Effect causedEffect in effectToRemove.caused)
-                    {
-                        if (causedEffect.effectType == Effect.EffectType.HealthRate)
-                        {
-                            if (effectToRemove.nonLethal)
+                            if (otherContusions[i].active)
                             {
-                                if (effectToRemove.partIndex == -1)
-                                {
-                                    for (int i = 0; i < 7; ++i)
-                                    {
-                                        Mod.SetNonLethalHealthRate(i, Mod.GetNonLethalHealthRate(i) - effectToRemove.value);
-                                    }
-                                }
-                                else
-                                {
-                                    Mod.SetNonLethalHealthRate(effectToRemove.partIndex, Mod.GetNonLethalHealthRate(effectToRemove.partIndex) - effectToRemove.value);
-                                }
-                            }
-                            else
-                            {
-                                if (effectToRemove.partIndex == -1)
-                                {
-                                    for (int i = 0; i < 7; ++i)
-                                    {
-                                        Mod.SetHealthRate(i, Mod.GetHealthRate(i) - effectToRemove.value);
-                                    }
-                                }
-                                else
-                                {
-                                    Mod.SetHealthRate(effectToRemove.partIndex, Mod.GetHealthRate(effectToRemove.partIndex) - effectToRemove.value);
-                                }
+                                activeContusions = true;
+                                break;
                             }
                         }
-                        // Could go two layers deep
-                        foreach (Effect causedCausedEffect in effectToRemove.caused)
+                        if (!activeContusions)
                         {
-                            Effect.effects.Remove(causedCausedEffect);
+                            TODO1: // Stop contusion once implemented
+                            Mod.LogWarning("Contusion not implemented yet, tried to deactivate");
                         }
-                        Effect.effects.Remove(causedEffect);
                     }
-                    bool hasToxinTremors = false;
-                    foreach (Effect effectCheck in Effect.effects)
+                    else
                     {
-                        if (effectCheck.effectType == Effect.EffectType.HandsTremor && effectCheck.active)
-                        {
-                            hasToxinTremors = true;
-                            break;
-                        }
+                        TODO1: // Stop contusion once implemented
+                        Mod.LogWarning("Contusion not implemented yet, tried to deactivate");
                     }
-                    if (!hasToxinTremors)
-                    {
-                        // TODO: Disable tremors
-                        if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.activeSelf)
-                        {
-                            StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(3).gameObject.SetActive(false);
-                        }
-                    }
+                    break;
+                case EffectType.WeightLimit:
+                    Mod.baseWeightLimit -= (int)value;
+                    break;
+                case EffectType.DamageModifier:
+                    TODO5: // Implement with damage
+                    damageModifier -= value;
+                    break;
+                case EffectType.Pain:
+                    // Do nothing, really just there as a cause for other effects (Tremors)
+                    break;
+                case EffectType.StomachBloodloss:
+                    // Do nothing, really just there as a cause for other effects (Energy and hydration rates)
+                    break;
+                case EffectType.UnknownToxin:
+                    // Do nothing, really just there as a cause for other effects (Pain and healthrate)
+                    break;
+                case EffectType.BodyTemperature:
+                    // Do nothing, really just there as a cause for other effects
+                    break;
+                case EffectType.Antidote:
+                    // Do nothing, really just there as delayed removal for toxin
+                    break;
+                case EffectType.LightBleeding:
+                    // Do nothing, really just there as a cause for other effects (Healthrate and Energyrate)
+                    break;
+                case EffectType.HeavyBleeding:
+                    // Do nothing, really just there as a cause for other effects (Healthrate and Energyrate)
+                    break;
+                case EffectType.Fracture:
+                    // Do nothing, really just there as a cause for other effects (Pain)
+                    // Existence of this effect will also be used by other system for other behavior like bullet hit probability and random stagger 
+                    // if walking on a fracture
+                    break;
+                case EffectType.Dehydration:
+                    // Do nothing, really just there as a cause for other effects (Healthrate and pain)
+                    break;
+                case EffectType.HeavyDehydration:
+                    // Do nothing, really just there as a cause for other effects (Healthrate and pain)
+                    break;
+                case EffectType.Fatigue:
+                    // Do nothing, existence prevents sprint
+                    break;
+                case EffectType.HeavyFatigue:
+                    // Do nothing, existence prevents sprint, also causes healthrate
+                    break;
+                case EffectType.OverweightFatigue:
+                    // Do nothing, really just there as a cause for other effects (energyrate)
+                    break;
+            }
 
-                    if (StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.activeSelf)
-                    {
-                        StatusUI.instance.transform.GetChild(0).GetChild(2).GetChild(1).gameObject.SetActive(false);
-                    }
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.BodyTemperature:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.temperatureOffset -= effectToRemove.value;
-                    Mod.LogInfo("\t\tRemoved");
-                    break;
-                case Effect.EffectType.Antidote:
-                    Mod.LogInfo("\t\tRemoving");
-                    Mod.LogInfo("\t\tRemoved");
-                    // Will remove toxin on activation, does nothing after
-                    break;
+            // Raise event
+            OnEffectDeactivatedInvoke(this);
+        }
+
+        public static void RemoveEffect(Effect effect, List<Effect> listToRemoveFrom)
+        {
+            // Remove from specified list (could be an effect caused by another)
+            if (listToRemoveFrom != null)
+            {
+                listToRemoveFrom.Remove(effect);
+            }
+            // Remove from global effect dict
+            if(effectsByType.TryGetValue(effect.effectType, out List<Effect> otherEffects))
+            {
+                otherEffects.Remove(effect);
+            }
+
+            // Remove caused effects first
+            for(int i=0; i < effect.caused.Count; ++i)
+            {
+                RemoveEffect(effect.caused[i], effect.caused);
+            }
+
+            // Deactivate this effect
+            effect.Deactivate();
+
+            // Raise event
+            OnEffectRemovedInvoke(effect);
+        }
+
+        public static void RemoveEffects(EffectType effectType = EffectType.LightBleeding)
+        {
+            Mod.LogInfo("Remove effects called with type: " + effectType);
+            if(effectsByType.TryGetValue(effectType, out List<Effect> effects))
+            {
+                for (int i = effects.Count - 1; i >= 0; --i)
+                {
+                    RemoveEffect(effects[i], effects);
+                }
+                effectsByType.Remove(effectType);
             }
         }
 
-        public static void RemoveEffects(bool all = true, EffectType effectType = EffectType.LightBleeding, int partIndex = -1)
+        public static void OnEffectAddedInvoke(Effect effect)
         {
-            Mod.LogInfo("Remove effects called with all: " + all + ", type: " + effectType + ", partindex: " + partIndex);
-            for (int j = Effect.effects.Count - 1; j >= 0;)
+            if(OnEffectAdded != null)
             {
-                if (all || ((partIndex == -1 || Effect.effects[j].partIndex == partIndex) && Effect.effects[j].effectType == effectType) && !Effect.effects[j].hideoutOnly)
-                {
-                    Mod.LogInfo("\tFound matching effect: "+effectType+" on "+partIndex+" at effect index "+j+" while effects has "+ Effect.effects.Count+" elements");
-                    RemoveEffectAt(j);
-                }
-                --j;
-                j = Mathf.Min(j, effects.Count - 1);
+                OnEffectAdded(effect);
+            }
+        }
+
+        public static void OnEffectActivatedInvoke(Effect effect)
+        {
+            if(OnEffectActivated != null)
+            {
+                OnEffectActivated(effect);
+            }
+        }
+
+        public static void OnEffectDeactivatedInvoke(Effect effect)
+        {
+            if(OnEffectDeactivated != null)
+            {
+                OnEffectDeactivated(effect);
+            }
+        }
+
+        public static void OnEffectRemovedInvoke(Effect effect)
+        {
+            if(OnEffectRemoved != null)
+            {
+                OnEffectRemoved(effect);
             }
         }
     }

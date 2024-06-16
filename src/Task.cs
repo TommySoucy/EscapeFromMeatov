@@ -2105,7 +2105,22 @@ namespace EFM
                     trader.standing += standing;
                     break;
                 case RewardType.Item:
-                    TODO: // Spawn item
+                    if (itemIDs != null && itemIDs.Count > 0 && itemIDs[0] != null)
+                    {
+                        int actualAmount = amount;
+                        if (itemIDs[0].itemType == MeatovItem.ItemType.Money)
+                        {
+                            actualAmount += (int)(amount / 100.0f * Bonus.questMoneyReward);
+                        }
+                        HideoutController.instance.marketManager.tradeVolume.SpawnItem(itemIDs[0], actualAmount);
+                        if (itemIDs.Count > 1)
+                        {
+                            for (int i = 1; i < itemIDs.Count; ++i)
+                            {
+                                HideoutController.instance.marketManager.tradeVolume.SpawnItem(itemIDs[i], 1);
+                            }
+                        }
+                    }
                     break;
                 case RewardType.TraderUnlock:
                     trader.unlocked = true;

@@ -1116,6 +1116,7 @@ namespace EFM
             }
 
             currentRagFairSellTax = (int)Mathf.Max(currentRagFairSellPrice / 100f * 5f, 1);
+            currentRagFairSellTax = (int)Mathf.Max(currentRagFairSellTax - currentRagFairSellTax / 100f * Bonus.ragfairCommission, 1);
             ragFairSellTax.text = "Tax (5%): " + currentRagFairSellTax;
 
             int amount = 0;
