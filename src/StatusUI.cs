@@ -20,7 +20,7 @@ namespace EFM
         public Image[] partImages; // Head, Thorax, Stomach, LeftArm, RightArm, LeftLeg, RightLeg
         public GameObject[] effectIcons; // Contusion, Toxin, Painkiller, Tremor, TunnelVision, Dehydration, Encumbered, Overencumbered, Fatigue, OverweightFatigue
         public Text[] partHealth;  // Head, Thorax, Stomach, LeftArm, RightArm, LeftLeg, RightLeg
-        public PartEffects[] partEffects;  // Light bleed, Heavy bleed, Pain, Fracture
+        public PartUI[] partEffects;
         public Text health;
         public Text healthDelta;
         public Text hydration;
@@ -81,6 +81,8 @@ namespace EFM
             Mod.OnRunthroughRaidCountChanged += OnRunthroughRaidCountChanged;
             Mod.OnMIARaidCountChanged += OnMIARaidCountChanged;
             Mod.OnKIARaidCountChanged += OnKIARaidCountChanged;
+            Effect.OnEffectActivated += OnEffectActivated;
+            Effect.OnEffectDeactivated += OnEffectDeactivated;
 
             // Initialize UI
             Init();
@@ -101,7 +103,7 @@ namespace EFM
             OnEnergyRateChanged();
             for (int i = 0; i < Mod.GetHealthCount(); ++i) 
             {
-                OnHealthRateChanged(i);
+                OnCurrentHealthRateChanged(i);
             }
             OnKillCountChanged();
             OnDeathCountChanged();
@@ -138,6 +140,34 @@ namespace EFM
                 SkillUI skillUI = Instantiate(skillPrefab, currentPair).GetComponent<SkillUI>();
                 skillUI.SetSkill(Mod.skills[i]);
                 skillUI.gameObject.SetActive(true);
+            }
+
+            // Set based on effects
+            foreach(KeyValuePair<Effect.EffectType, List<Effect>> effectTypeEntry in Effect.effectsByType)
+            {
+                for(int i=0; i < effectTypeEntry.Value.Count; ++i)
+                {
+                    if (effectTypeEntry.Value[i].active)
+                    {
+                        OnEffectActivated(effectTypeEntry.Value[i]);
+                    }
+                }
+            }
+            effectIcons[2].SetActive(Effect.inactiveTimersByType.ContainsKey(Effect.EffectType.Pain));
+            if(Mod.weight > Mod.currentWeightLimit)
+            {
+                effectIcons[6].SetActive(false);
+                effectIcons[7].SetActive(true);
+            }
+            else if(Mod.weight > Mod.currentWeightLimit / 2)
+            {
+                effectIcons[6].SetActive(true);
+                effectIcons[7].SetActive(false);
+            }
+            else
+            {
+                effectIcons[6].SetActive(false);
+                effectIcons[7].SetActive(false);
             }
         }
 
@@ -210,13 +240,13 @@ namespace EFM
             }
         }
 
-        public void OnHealthRateChanged(int index)
+        public void OnCurrentHealthRateChanged(int index)
         {
             float total = 0;
             for(int i=0; i < Mod.GetHealthCount(); ++i)
             {
-                total += Mod.GetHealthRate(i);
-                total += Mod.GetNonLethalHealthRate(i);
+                total += Mod.GetCurrentHealthRate(i);
+                total += Mod.GetCurrentNonLethalHealthRate(i);
             }
 
             if(total == 0)
@@ -316,6 +346,237 @@ namespace EFM
             infoKIA.text = "KIA: " + Mod.KIARaidCount;
         }
 
+        public void OnEffectActivated(Effect effect)
+        {
+            switch (effect.effectType)
+            {
+                case Effect.EffectType.Pain:
+                    if(effect.partIndex == -1)
+                    {
+                        partEffects[0].AddPain();
+                    }
+                    else
+                    {
+                        partEffects[effect.partIndex].AddPain();
+                    }
+                    break;
+                case Effect.EffectType.LightBleeding:
+                    if(effect.partIndex == -1)
+                    {
+                        partEffects[0].AddLightBleed();
+                    }
+                    else
+                    {
+                        partEffects[effect.partIndex].AddLightBleed();
+                    }
+                    break;
+                case Effect.EffectType.HeavyBleeding:
+                    if(effect.partIndex == -1)
+                    {
+                        partEffects[0].AddHeavyBleed();
+                    }
+                    else
+                    {
+                        partEffects[effect.partIndex].AddHeavyBleed();
+                    }
+                    break;
+                case Effect.EffectType.Fracture:
+                    partEffects[effect.partIndex].AddFracture();
+                    break;
+                case Effect.EffectType.Contusion:
+                    effectIcons[0].SetActive(true);
+                    break;
+                case Effect.EffectType.UnknownToxin:
+                    effectIcons[1].SetActive(true);
+                    break;
+                case Effect.EffectType.HandsTremor:
+                    effectIcons[3].SetActive(true);
+                    break;
+                case Effect.EffectType.QuantumTunnelling:
+                    effectIcons[4].SetActive(true);
+                    break;
+                case Effect.EffectType.Dehydration:
+                    effectIcons[5].SetActive(true);
+                    break;
+                case Effect.EffectType.Fatigue:
+                case Effect.EffectType.HeavyFatigue:
+                    effectIcons[8].SetActive(true);
+                    break;
+                case Effect.EffectType.OverweightFatigue:
+                    effectIcons[9].SetActive(true);
+                    break;
+            }
+        }
+
+        public void OnEffectDeactivated(Effect effect)
+        {
+            switch (effect.effectType)
+            {
+                case Effect.EffectType.Pain:
+                    if (effect.partIndex == -1)
+                    {
+                        partEffects[0].RemovePain();
+                    }
+                    else
+                    {
+                        partEffects[effect.partIndex].RemovePain();
+                    }
+                    break;
+                case Effect.EffectType.LightBleeding:
+                    if (effect.partIndex == -1)
+                    {
+                        partEffects[0].RemoveLightBleed();
+                    }
+                    else
+                    {
+                        partEffects[effect.partIndex].RemoveLightBleed();
+                    }
+                    break;
+                case Effect.EffectType.HeavyBleeding:
+                    if (effect.partIndex == -1)
+                    {
+                        partEffects[0].RemoveHeavyBleed();
+                    }
+                    else
+                    {
+                        partEffects[effect.partIndex].RemoveHeavyBleed();
+                    }
+                    break;
+                case Effect.EffectType.Fracture:
+                    partEffects[effect.partIndex].RemoveFracture();
+                    break;
+                case Effect.EffectType.Contusion:
+                    bool foundContusion = false;
+                    if (Effect.effectsByType.TryGetValue(effect.effectType, out List<Effect> otherContusions))
+                    {
+                        for(int i=0; i < otherContusions.Count; ++i)
+                        {
+                            if (otherContusions[i].active)
+                            {
+                                foundContusion = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!foundContusion)
+                    {
+                        effectIcons[0].SetActive(false);
+                    }
+                    break;
+                case Effect.EffectType.UnknownToxin:
+                    bool foundToxin = false;
+                    if (Effect.effectsByType.TryGetValue(effect.effectType, out List<Effect> otherToxins))
+                    {
+                        for (int i = 0; i < otherToxins.Count; ++i)
+                        {
+                            if (otherToxins[i].active)
+                            {
+                                foundToxin = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!foundToxin)
+                    {
+                        effectIcons[1].SetActive(false);
+                    }
+                    break;
+                case Effect.EffectType.HandsTremor:
+                    bool foundTremors = false;
+                    if (Effect.effectsByType.TryGetValue(effect.effectType, out List<Effect> otherTremors))
+                    {
+                        for (int i = 0; i < otherTremors.Count; ++i)
+                        {
+                            if (otherTremors[i].active)
+                            {
+                                foundTremors = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!foundTremors)
+                    {
+                        effectIcons[3].SetActive(false);
+                    }
+                    break;
+                case Effect.EffectType.QuantumTunnelling:
+                    bool foundTunnel = false;
+                    if (Effect.effectsByType.TryGetValue(effect.effectType, out List<Effect> otherTunnels))
+                    {
+                        for (int i = 0; i < otherTunnels.Count; ++i)
+                        {
+                            if (otherTunnels[i].active)
+                            {
+                                foundTunnel = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!foundTunnel)
+                    {
+                        effectIcons[4].SetActive(false);
+                    }
+                    break;
+                case Effect.EffectType.Dehydration:
+                    bool foundDehydration = false;
+                    if (Effect.effectsByType.TryGetValue(effect.effectType, out List<Effect> otherDehydration))
+                    {
+                        for (int i = 0; i < otherDehydration.Count; ++i)
+                        {
+                            if (otherDehydration[i].active)
+                            {
+                                foundDehydration = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!foundDehydration)
+                    {
+                        effectIcons[5].SetActive(false);
+                    }
+                    break;
+                case Effect.EffectType.Fatigue:
+                case Effect.EffectType.HeavyFatigue:
+                    bool foundFatigue = false;
+                    if (Effect.effectsByType.TryGetValue(effect.effectType, out List<Effect> otherFatigues))
+                    {
+                        for (int i = 0; i < otherFatigues.Count; ++i)
+                        {
+                            if (otherFatigues[i].active)
+                            {
+                                foundFatigue = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!foundFatigue)
+                    {
+                        effectIcons[8].SetActive(false);
+                    }
+                    break;
+                case Effect.EffectType.OverweightFatigue:
+                    bool foundOverweight = false;
+                    if (Effect.effectsByType.TryGetValue(effect.effectType, out List<Effect> otherOverweights))
+                    {
+                        for (int i = 0; i < otherOverweights.Count; ++i)
+                        {
+                            if (otherOverweights[i].active)
+                            {
+                                foundOverweight = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!foundOverweight)
+                    {
+                        effectIcons[9].SetActive(false);
+                    }
+                    break;
+            }
+        }
+
+        TODO: //HAve event for when we add a global timer so we can manage painciller icon
+
         public void SetExtractionLimitTimer(float raidTimeLeft)
         {
             extractionTimer.text = Mod.FormatTimeString(raidTimeLeft);
@@ -380,45 +641,14 @@ namespace EFM
             // If reach 0 stamina due to being overweight, activate overweight fatigue effect
             if (Mod.stamina == 0 && Mod.weight > Mod.currentWeightLimit)
             {
-                // TODO: maybe keep whether we have overweight fatigue as a bool in effects so we dont have to check the whole list every frame
-                bool found = false;
-                foreach (Effect effect in Effect.effects)
+                if (!Effect.overweightFatigue)
                 {
-                    if (effect.effectType == Effect.EffectType.OverweightFatigue)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    Effect newEffect = new Effect();
-                    newEffect.effectType = Effect.EffectType.OverweightFatigue;
-                    Effect.effects.Add(newEffect);
-
-                    // Activate overweight fatigue icon
-                    effectIcons[9].SetActive(true);
+                    new Effect(Effect.EffectType.OverweightFatigue, 0, 0, 0);
                 }
             }
             else
             {
-                for (int i = 0; i < Effect.effects.Count; ++i)
-                {
-                    if (Effect.effects[i].effectType == Effect.EffectType.OverweightFatigue)
-                    {
-                        // The overweight fatigue could also have caused an energy rate effect, need to remove that too
-                        if (Effect.effects[i].caused.Count > 0)
-                        {
-                            Effect.effects.Remove(Effect.effects[i].caused[0]);
-                        }
-                        Effect.effects.RemoveAt(i);
-
-                        // Deactivate overweight fatigue icon
-                        effectIcons[9].SetActive(true);
-
-                        break;
-                    }
-                }
+                Effect.RemoveEffects(Effect.EffectType.OverweightFatigue);
             }
         }
 
@@ -499,7 +729,7 @@ namespace EFM
             Mod.OnEnergyChanged -= OnEnergyChanged;
             Mod.OnHydrationRateChanged -= OnHydrationRateChanged;
             Mod.OnEnergyRateChanged -= OnEnergyRateChanged;
-            Mod.OnHealthRateChanged -= OnHealthRateChanged;
+            Mod.OnCurrentHealthRateChanged -= OnCurrentHealthRateChanged;
             Mod.OnKillCountChanged -= OnKillCountChanged;
             Mod.OnDeathCountChanged -= OnDeathCountChanged;
             Mod.OnRaidCountChanged -= OnRaidCountChanged;
@@ -507,23 +737,8 @@ namespace EFM
             Mod.OnRunthroughRaidCountChanged -= OnRunthroughRaidCountChanged;
             Mod.OnMIARaidCountChanged -= OnMIARaidCountChanged;
             Mod.OnKIARaidCountChanged -= OnKIARaidCountChanged;
-        }
-
-        [Serializable]
-        public class PartEffects
-        {
-            public GameObject[] partEffects;
-
-            public GameObject this[int i]
-            {
-                get { return partEffects[i]; }
-                set { partEffects[i] = value; }
-            }
-
-            public int Length
-            {
-                get { return partEffects.Length; }
-            }
+            Effect.OnEffectActivated -= OnEffectActivated;
+            Effect.OnEffectDeactivated -= OnEffectDeactivated;
         }
     }
 }

@@ -8,7 +8,8 @@ namespace EFM
         public static Dictionary<EffectType, List<Effect>> effectsByType = new Dictionary<EffectType, List<Effect>>();
         public static Dictionary<EffectType, float> inactiveTimersByType = new Dictionary<EffectType, float>();
 
-        public static float damageModifier; 
+        public static float damageModifier;
+        public static bool overweightFatigue;
 
         public enum EffectType
         {
@@ -24,11 +25,11 @@ namespace EFM
             Contusion, // No haptic feedbak, lowers volume by 0.33
             WeightLimit, // Adds/Subtract weightlimit above which cant sprint
             DamageModifier, // Adds to damage taken: Damage + Damage * DamageModifier value
-            Pain, // Causes tremors
+            Pain, // Causes tremors and tunnel vision
             StomachBloodloss, // Energy/Hydration rates multiplied by 5
             UnknownToxin, // Causes pain and negative health rate
             BodyTemperature, // Adds/Subtract from body temp
-            Antidote, // Removes toxin with 60s delay
+            Antidote, // Removes toxin with delay
             LightBleeding, // Causes negative healthrate in each bodypart
             HeavyBleeding, // Causes negative healthrate in each bodypart
             Fracture, // Causes pain
@@ -50,15 +51,6 @@ namespace EFM
         public bool hasTimer = false;
         public float inactiveTimer = 0;
         public float delay = 0;
-        public float healthLoopTime = 60;
-        public float healthRate = 0;
-        public float energyLoopTime = 60;
-        public float energyRate = 0;
-        public float hydrationLoopTime = 60;
-        public float hydrationRate = 0;
-        public float audioVolumeMultiplier = 1.0f;
-        public float healExperience = 0;
-        public int removePrice = 0;
         public int partIndex = -1; // 0 Head, 1 Chest, 2 Stomach, 3 LeftArm, 4 RightArm, 5 LeftLeg, 6 RightLeg
         public int skillIndex = -1;
         public float value;
@@ -77,9 +69,81 @@ namespace EFM
         public delegate void OnEffectRemovedDelegate(Effect effect);
         public static event OnEffectRemovedDelegate OnEffectRemoved;
 
-        public Effect(BuffEffect buffEffect)
+        public Effect(BuffEffect buffEffect, bool fromStimulator = true, int partIndex = -1, bool nonLethal = false, bool hideoutOnly = false)
         {
-            td
+            effectType = buffEffect.effectType;
+
+            value = buffEffect.value;
+            timer = buffEffect.duration;
+            hasTimer = buffEffect.duration > 0;
+            delay = buffEffect.delay;
+            this.fromStimulator = fromStimulator;
+            this.partIndex = partIndex;
+            skillIndex = buffEffect.skillIndex;
+            this.nonLethal = nonLethal;
+            this.hideoutOnly = hideoutOnly;
+
+            if(effectsByType.TryGetValue(effectType, out List<Effect> typeEffects))
+            {
+                typeEffects.Add(this);
+            }
+            else
+            {
+                effectsByType.Add(effectType, new List<Effect>() { this });
+            }
+
+            if(inactiveTimersByType.TryGetValue(effectType, out float typeInactiveTimer))
+            {
+                inactiveTimer = typeInactiveTimer;
+            }
+
+            if (hasTimer && !IsBuff())
+            {
+                timer = timer + timer / 100 * Bonus.debuffEndDelay;
+            }
+
+            if(inactiveTimer <= 0 && delay <= 0)
+            {
+                Activate();
+            }
+        }
+
+        public Effect(EffectType effectType, float value, float timer, float delay, Effect parentEffect = null, bool fromStimulator = true,
+                      int partIndex = -1, int skillIndex = -1, bool nonLethal = false, bool hideoutOnly = false)
+        {
+            this.effectType = effectType;
+
+            this.value = value;
+            this.timer = timer;
+            hasTimer = timer > 0;
+            this.delay = delay;
+            this.fromStimulator = fromStimulator;
+            this.partIndex = partIndex;
+            this.skillIndex = skillIndex;
+            this.nonLethal = nonLethal;
+            this.hideoutOnly = hideoutOnly;
+
+            this.parentEffect = parentEffect;
+            parentEffect.caused.Add(this);
+
+            if (effectsByType.TryGetValue(effectType, out List<Effect> typeEffects))
+            {
+                typeEffects.Add(this);
+            }
+            else
+            {
+                effectsByType.Add(effectType, new List<Effect>() { this });
+            }
+
+            if(inactiveTimersByType.TryGetValue(effectType, out float typeInactiveTimer))
+            {
+                inactiveTimer = typeInactiveTimer;
+            }
+
+            if(inactiveTimer <= 0 && delay <= 0)
+            {
+                Activate();
+            }
         }
 
         public static void UpdateStatic()
@@ -133,22 +197,26 @@ namespace EFM
             }
             else
             {
-                // Note that an effect can only become active once delay or timer have ran out
-                // If inactive but there is no timer, it will remain inactive forever
-                if(delay > 0)
+                // Don't want to process timers if parent isn't active
+                if(parentEffect == null || parentEffect.active)
                 {
-                    delay -= Time.deltaTime;
-                    if(delay <= 0 && inactiveTimer <= 0 && (parentEffect == null || parentEffect.active))
+                    // Note that an effect can only become active once delay or timer have ran out
+                    // If inactive but there is no timer, it will remain inactive forever
+                    if (delay > 0)
                     {
-                        Activate();
+                        delay -= Time.deltaTime;
+                        if (delay <= 0 && inactiveTimer <= 0 && (parentEffect == null || parentEffect.active))
+                        {
+                            Activate();
+                        }
                     }
-                }
-                else if(inactiveTimer > 0)
-                {
-                    inactiveTimer -= Time.deltaTime;
-                    if (delay <= 0 && inactiveTimer <= 0 && (parentEffect == null || parentEffect.active))
+                    else if (inactiveTimer > 0)
                     {
-                        Activate();
+                        inactiveTimer -= Time.deltaTime;
+                        if (delay <= 0 && inactiveTimer <= 0 && (parentEffect == null || parentEffect.active))
+                        {
+                            Activate();
+                        }
                     }
                 }
             }
@@ -156,9 +224,25 @@ namespace EFM
             previousActive = active;
         }
 
+        public bool IsBuff()
+        {
+            return (effectType == EffectType.SkillRate && value > 0)
+                || (effectType == EffectType.EnergyRate && value > 0)
+                || (effectType == EffectType.MaxStamina && value > 0)
+                || (effectType == EffectType.StaminaRate && value > 0)
+                || (effectType == EffectType.HydrationRate && value > 0)
+                || (effectType == EffectType.HealthRate && value > 0)
+                || (effectType == EffectType.WeightLimit && value > 0)
+                || (effectType == EffectType.DamageModifier && value < 0)
+                || effectType == EffectType.RemoveAllBloodLosses
+                || effectType == EffectType.Antidote;
+        }
+
         public void Activate()
         {
-            if(parentEffect != null && !parentEffect.active)
+            // Don't want to activate if parent isn't active,
+            // Also don't want to activate if have delay or inactive timer
+            if((parentEffect != null && !parentEffect.active) || delay > 0 || inactiveTimer > 0)
             {
                 return;
             }
@@ -194,76 +278,202 @@ namespace EFM
                 case EffectType.HealthRate:
                     if (value > 0)
                     {
-                        Mod.SetBasePositiveHealthRate(partIndex, Mod.GetBasePositiveHealthRate(partIndex) - value);
+                        Mod.SetBasePositiveHealthRate(partIndex, Mod.GetBasePositiveHealthRate(partIndex) + value);
                     }
                     else
                     {
                         if (nonLethal)
                         {
-                            Mod.SetBaseNonLethalHealthRate(partIndex, Mod.GetBaseNonLethalHealthRate(partIndex) - value);
+                            Mod.SetBaseNonLethalHealthRate(partIndex, Mod.GetBaseNonLethalHealthRate(partIndex) + value);
                         }
                         else
                         {
-                            Mod.SetBaseNegativeHealthRate(partIndex, Mod.GetBaseNegativeHealthRate(partIndex) - value);
+                            Mod.SetBaseNegativeHealthRate(partIndex, Mod.GetBaseNegativeHealthRate(partIndex) + value);
                         }
                     }
                     break;
                 case EffectType.RemoveAllBloodLosses:
-                    // Do nothing upon removing this effect
-                    // The effect really just takes the form of an inactive timer on all blood losses
-                    // Its deactivation/removal will be when the timer runs out
+                    if (inactiveTimersByType.ContainsKey(EffectType.LightBleeding))
+                    {
+                        inactiveTimersByType[EffectType.LightBleeding] = Mathf.Max(timer, inactiveTimersByType[EffectType.LightBleeding]);
+                    }
+                    else
+                    {
+                        inactiveTimersByType.Add(EffectType.LightBleeding, timer);
+                    }
+                    if (effectsByType.TryGetValue(EffectType.LightBleeding, out List<Effect> lightBleedEffectList))
+                    {
+                        for (int i = lightBleedEffectList.Count - 1; i >= 0; --i)
+                        {
+                            lightBleedEffectList[i].Deactivate();
+                            lightBleedEffectList[i].inactiveTimer = Mathf.Max(timer, lightBleedEffectList[i].inactiveTimer);
+                        }
+                    }
+                    if (inactiveTimersByType.ContainsKey(EffectType.HeavyBleeding))
+                    {
+                        inactiveTimersByType[EffectType.HeavyBleeding] = Mathf.Max(timer, inactiveTimersByType[EffectType.HeavyBleeding]);
+                    }
+                    else
+                    {
+                        inactiveTimersByType.Add(EffectType.HeavyBleeding, timer);
+                    }
+                    if (effectsByType.TryGetValue(EffectType.HeavyBleeding, out List<Effect> heavyBleedEffectList))
+                    {
+                        for (int i = heavyBleedEffectList.Count - 1; i >= 0; --i)
+                        {
+                            heavyBleedEffectList[i].Deactivate();
+                            heavyBleedEffectList[i].inactiveTimer = Mathf.Max(timer, heavyBleedEffectList[i].inactiveTimer);
+                        }
+                    }
                     break;
                 case EffectType.Contusion:
                     TODO2: // Start Contusion once implemented
                     Mod.LogWarning("Contusion not implemented yet, tried to start");
                     break;
                 case EffectType.WeightLimit:
-                    Mod.baseWeightLimit -= (int)value;
+                    Mod.baseWeightLimit += (int)value;
                     break;
                 case EffectType.DamageModifier:
                     TODO5: // Implement with damage
-                    damageModifier -= value;
+                    damageModifier += value;
                     break;
                 case EffectType.Pain:
-                    // Do nothing, really just there as a cause for other effects (Tremors)
+                    if(caused == null)
+                    {
+                        caused = new List<Effect>();
+                        float delay = timer > 30 ? 30 : timer / 2;
+                        new Effect(EffectType.HandsTremor, 0, timer - delay, delay, this, false);
+                        if(partIndex == -1 || partIndex == 0)
+                        {
+                            new Effect(EffectType.QuantumTunnelling, 0, timer - delay, delay, this, false);
+                        }
+                    }
                     break;
                 case EffectType.StomachBloodloss:
-                    // Do nothing, really just there as a cause for other effects (Energy and hydration rates)
+                    if(caused == null)
+                    {
+                        caused = new List<Effect>();
+                        new Effect(EffectType.EnergyRate, Mod.raidEnergyRate * 5, timer, 0, this, false);
+                        new Effect(EffectType.HydrationRate, Mod.raidHydrationRate * 5, timer, 0, this, false);
+                    }
                     break;
                 case EffectType.UnknownToxin:
-                    // Do nothing, really just there as a cause for other effects (Pain and healthrate)
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        float delay = timer > 5 ? 5 : timer / 2;
+                        new Effect(EffectType.Pain, 0, timer - delay, delay, this, false, partIndex);
+                        new Effect(EffectType.HealthRate, -2.33f, timer - delay, delay, this, false, partIndex);
+                    }
                     break;
                 case EffectType.BodyTemperature:
-                    // Do nothing, really just there as a cause for other effects
+                    TODO6: // Apply body temp once implemented
+                    Mod.LogWarning("BodyTemperature not implemented yet, tried to change");
                     break;
                 case EffectType.Antidote:
-                    // Do nothing, really just there as delayed removal for toxin
+                    // Antidote should have a delayed start so once we start, remove all toxins
+                    RemoveEffects(EffectType.UnknownToxin);
                     break;
                 case EffectType.LightBleeding:
-                    // Do nothing, really just there as a cause for other effects (Healthrate and Energyrate)
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        float healthRate = (float)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["DamageHealth"];
+                        float healthTime = (float)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["HealthLoopTime"];
+                        new Effect(EffectType.HealthRate, -healthRate / healthTime, 0, 0, this, false, partIndex, -1, true);
+                        float energyRate = (float)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["DamageEnergy"];
+                        float energyTime = (float)Mod.globalDB["config"]["Health"]["Effects"]["LightBleeding"]["EnergyLoopTime"];
+                        new Effect(EffectType.EnergyRate, -energyRate / energyTime, 0, 0, this, false, partIndex, -1, true);
+                    }
                     break;
                 case EffectType.HeavyBleeding:
-                    // Do nothing, really just there as a cause for other effects (Healthrate and Energyrate)
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        float healthRate = (float)Mod.globalDB["config"]["Health"]["Effects"]["HeavyBleeding"]["DamageHealth"];
+                        float healthTime = (float)Mod.globalDB["config"]["Health"]["Effects"]["HeavyBleeding"]["HealthLoopTime"];
+                        new Effect(EffectType.HealthRate, -healthRate / healthTime, 0, 0, this, false, partIndex, -1, true);
+                        float energyRate = (float)Mod.globalDB["config"]["Health"]["Effects"]["HeavyBleeding"]["DamageEnergy"];
+                        float energyTime = (float)Mod.globalDB["config"]["Health"]["Effects"]["HeavyBleeding"]["EnergyLoopTime"];
+                        new Effect(EffectType.EnergyRate, -energyRate / energyTime, 0, 0, this, false, partIndex, -1, true);
+                    }
                     break;
                 case EffectType.Fracture:
-                    // Do nothing, really just there as a cause for other effects (Pain)
-                    // Existence of this effect will also be used by other system for other behavior like bullet hit probability and random stagger 
-                    // if walking on a fracture
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        new Effect(EffectType.Pain, 0, 0, 0, this, false, partIndex);
+                    }
                     break;
                 case EffectType.Dehydration:
-                    // Do nothing, really just there as a cause for other effects (Healthrate and pain)
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        new Effect(EffectType.Pain, 0, 0, 0, this, false, partIndex);
+                        for(int i=0; i < Mod.GetHealthCount(); ++i)
+                        {
+                            new Effect(EffectType.HealthRate, -0.0666f, 0, 0, this, false, i);
+                        }
+                    }
                     break;
                 case EffectType.HeavyDehydration:
-                    // Do nothing, really just there as a cause for other effects (Healthrate and pain)
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        new Effect(EffectType.Pain, 0, 0, 0, this, false, partIndex);
+                        for (int i = 0; i < Mod.GetHealthCount(); ++i)
+                        {
+                            new Effect(EffectType.HealthRate, -1.0666f, 0, 0, this, false, i);
+                        }
+                    }
                     break;
                 case EffectType.Fatigue:
-                    // Do nothing, existence prevents sprint
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        new Effect(EffectType.Pain, 0, 0, 0, this, false, partIndex);
+                    }
                     break;
                 case EffectType.HeavyFatigue:
-                    // Do nothing, existence prevents sprint, also causes healthrate
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        new Effect(EffectType.Pain, 0, 0, 0, this, false, partIndex);
+                        for (int i = 0; i < Mod.GetHealthCount(); ++i)
+                        {
+                            new Effect(EffectType.HealthRate, -0.0714f, 0, 0, this, false, i);
+                        }
+                    }
                     break;
                 case EffectType.OverweightFatigue:
-                    // Do nothing, really just there as a cause for other effects (energyrate)
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        new Effect(EffectType.EnergyRate, -0.033f, 0, 0, this, false);
+                    }
+                    overweightFatigue = true;
+                    break;
+                case EffectType.RadExposure:
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        float healthRate = (float)Mod.globalDB["config"]["Health"]["Effects"]["RadExposure"]["Damage"];
+                        float healthTime = (float)Mod.globalDB["config"]["Health"]["Effects"]["RadExposure"]["DamageLoopTime"];
+                        new Effect(EffectType.HealthRate, -healthRate / healthTime, 0, 0, this, false);
+                    }
+                    break;
+                case EffectType.Intoxication:
+                    if (caused == null)
+                    {
+                        caused = new List<Effect>();
+                        float healthRate = (float)Mod.globalDB["config"]["Health"]["Effects"]["Intoxication"]["DamageHealth"];
+                        float healthTime = (float)Mod.globalDB["config"]["Health"]["Effects"]["Intoxication"]["HealthLoopTime"];
+                        new Effect(EffectType.HealthRate, -healthRate / healthTime, 0, 0, this, false);
+                    }
+                    break;
+                case EffectType.DestroyedPart:
+                    // Do nothing on activation
+                    // Existence has effects on other systems
                     break;
             }
 
@@ -444,7 +654,16 @@ namespace EFM
                     // Do nothing, existence prevents sprint, also causes healthrate
                     break;
                 case EffectType.OverweightFatigue:
-                    // Do nothing, really just there as a cause for other effects (energyrate)
+                    overweightFatigue = false;
+                    break;
+                case EffectType.RadExposure:
+                    // Do nothing, really just there as a cause for other effects (Healthrate)
+                    break;
+                case EffectType.Intoxication:
+                    // Do nothing, really just there as a cause for other effects (Healthrate)
+                    break;
+                case EffectType.DestroyedPart:
+                    // Do nothing, Existence has effects on other systems
                     break;
             }
 
@@ -478,7 +697,7 @@ namespace EFM
             OnEffectRemovedInvoke(effect);
         }
 
-        public static void RemoveEffects(EffectType effectType = EffectType.LightBleeding)
+        public static void RemoveEffects(EffectType effectType)
         {
             Mod.LogInfo("Remove effects called with type: " + effectType);
             if(effectsByType.TryGetValue(effectType, out List<Effect> effects))

@@ -83,6 +83,7 @@
     <Compile Include="src\LootContainerCover.cs" />
     <Compile Include="src\LootContainerSlider.cs" />
     <Compile Include="src\MeatovItemData.cs" />
+    <Compile Include="src\PartUI.cs" />
     <Compile Include="src\PriceItemView.cs" />
     <Compile Include="src\ProductionView.cs" />
     <Compile Include="src\RagFairBuyItemView.cs" />

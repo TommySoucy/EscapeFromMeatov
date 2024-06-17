@@ -158,9 +158,13 @@ namespace EFM
         // Base health rates are based on solid value addition (bleed, healing, etc.) from bonuses, effects, and skills
         // Note that health rates are split into positive and negative because we only want to apply health regen bonus
         // to positive part of health rate
+        TODO: // Init these
         private static float[] basePositiveHealthRates;
+        // Lethal healthrates will result in death if head or chest reach 0
         private static float[] baseNegativeHealthRates;
-        private static float[] baseNonLethalHealthRates; // Note that non lethal healthrate is only ever negative
+        // Note that non lethal healthrate is only ever negative
+        // NonLethal healthrates will not result in death if head or chest reach 0, but will cause death if total health reaches 0
+        private static float[] baseNonLethalHealthRates; 
         // Current health rates are base affected by percentages from bonuses, effects, and skills
         private static float[] currentHealthRates;
         private static float[] currentNonLethalHealthRates;
@@ -409,7 +413,7 @@ namespace EFM
             }
         }
         public static int failedRaidCount;
-        private static int _weight = 0;
+        private static int _weight = 0; // Overencumbered at currentWeightLimit / 2, Critical overencumbered at currentWeightLimit
         public static int weight
         {
             set
@@ -1968,6 +1972,11 @@ namespace EFM
 
         public static void AddExperience(int xp, int type = 0 /*0: General (kill, raid result, etc.), 1: Looting, 2: Healing, 3: Exploration*/, string notifMsg = null)
         {
+            if(xp == 0)
+            {
+                return;
+            }
+
             // Skip if in scav raid
             if (Mod.currentLocationIndex == 2 && Mod.chosenCharIndex == 1)
             {
