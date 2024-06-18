@@ -1357,7 +1357,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Effect.inactiveTimersByType.Add(Effect.EffectType.RadExposure, consumeEffect.duration * effectiveness);
+                                    Effect.AddInactiveTimer(Effect.EffectType.RadExposure, consumeEffect.duration * effectiveness);
                                 }
 
                                 // Make all rad exposure effects inactive for the duration
@@ -1406,7 +1406,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Effect.inactiveTimersByType.Add(Effect.EffectType.Pain, consumeEffect.duration * effectiveness);
+                                    Effect.AddInactiveTimer(Effect.EffectType.Pain, consumeEffect.duration * effectiveness);
                                 }
 
                                 // Make all pain effects inactive for the duration
@@ -1451,7 +1451,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Effect.inactiveTimersByType.Add(Effect.EffectType.Contusion, consumeEffect.duration * effectiveness);
+                                    Effect.AddInactiveTimer(Effect.EffectType.Contusion, consumeEffect.duration * effectiveness);
                                 }
 
                                 // Make all Contusion effects inactive for the duration
@@ -1500,7 +1500,7 @@ namespace EFM
                                 }
                                 else
                                 {
-                                    Effect.inactiveTimersByType.Add(Effect.EffectType.Intoxication, consumeEffect.duration * effectiveness);
+                                    Effect.AddInactiveTimer(Effect.EffectType.Intoxication, consumeEffect.duration * effectiveness);
                                 }
 
                                 // Make all Intoxication effects inactive for the duration

@@ -332,7 +332,7 @@ namespace EFM
                     if (Mod.chosenCharIndex == 1)
                     {
                         // TODO: Maybe make these somewhat random? The scav may not have max energy and hydration for example
-                        Effect.RemoveEffects();
+                        Effect.RemoveAllEffects();
                         for (int i = 0; i < Mod.GetHealthCount(); ++i)
                         {
                             Mod.SetHealth(i, Mod.defaultMaxHealth[i]);
@@ -1317,10 +1317,6 @@ namespace EFM
                 Mod.SetHealthArray(loadedData["health"].ToObject<float[]>());
                 Mod.LogInfo("\t\t0");
                 Mod.SetCurrentMaxHealthArray(loadedData["maxHealth"].ToObject<float[]>());
-                for (int i = 0; i < Mod.GetHealthCount(); ++i)
-                {
-                    Mod.SetHealth(i, Mathf.Min(Mod.GetHealth(i) + Mod.GetHealthRate(i) * minutesSinceSave, Mod.GetCurrentMaxHealth(i)));
-                }
                 Mod.currentMaxHydration = (float)loadedData["maxHydration"];
                 Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.defaultMaxHydration);
                 Mod.energy = Mathf.Min((float)loadedData["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.defaultMaxEnergy);
@@ -2789,7 +2785,7 @@ namespace EFM
                         Mod.energy = 0.3f * Mod.defaultMaxEnergy;
 
                         // Remove all effects
-                        Effect.RemoveEffects();
+                        Effect.RemoveAllEffects();
                     }
                     else if (Mod.raidState == FinishRaidState.Survived)
                     {
@@ -2894,47 +2890,47 @@ namespace EFM
                     Mod.LogInfo("\tSet hoverscrolls, setting medical");
 
 
-                    // Set medical body
-                    Dictionary<int, bool[]> partConditions = new Dictionary<int, bool[]>();
-                    foreach (Effect effect in Effect.effects)
-                    {
-                        if (effect.partIndex > -1)
-                        {
-                            if (effect.effectType == Effect.EffectType.LightBleeding)
-                            {
-                                if (partConditions.ContainsKey(effect.partIndex))
-                                {
-                                    partConditions[effect.partIndex][0] = true;
-                                }
-                                else
-                                {
-                                    partConditions.Add(effect.partIndex, new bool[] { true, false, false });
-                                }
-                            }
-                            else if (effect.effectType == Effect.EffectType.HeavyBleeding)
-                            {
-                                if (partConditions.ContainsKey(effect.partIndex))
-                                {
-                                    partConditions[effect.partIndex][1] = true;
-                                }
-                                else
-                                {
-                                    partConditions.Add(effect.partIndex, new bool[] { false, true, false });
-                                }
-                            }
-                            else if (effect.effectType == Effect.EffectType.Fracture)
-                            {
-                                if (partConditions.ContainsKey(effect.partIndex))
-                                {
-                                    partConditions[effect.partIndex][2] = true;
-                                }
-                                else
-                                {
-                                    partConditions.Add(effect.partIndex, new bool[] { false, false, true });
-                                }
-                            }
-                        }
-                    }
+                    //// Set medical body
+                    //Dictionary<int, bool[]> partConditions = new Dictionary<int, bool[]>();
+                    //foreach (Effect effect in Effect.effects)
+                    //{
+                    //    if (effect.partIndex > -1)
+                    //    {
+                    //        if (effect.effectType == Effect.EffectType.LightBleeding)
+                    //        {
+                    //            if (partConditions.ContainsKey(effect.partIndex))
+                    //            {
+                    //                partConditions[effect.partIndex][0] = true;
+                    //            }
+                    //            else
+                    //            {
+                    //                partConditions.Add(effect.partIndex, new bool[] { true, false, false });
+                    //            }
+                    //        }
+                    //        else if (effect.effectType == Effect.EffectType.HeavyBleeding)
+                    //        {
+                    //            if (partConditions.ContainsKey(effect.partIndex))
+                    //            {
+                    //                partConditions[effect.partIndex][1] = true;
+                    //            }
+                    //            else
+                    //            {
+                    //                partConditions.Add(effect.partIndex, new bool[] { false, true, false });
+                    //            }
+                    //        }
+                    //        else if (effect.effectType == Effect.EffectType.Fracture)
+                    //        {
+                    //            if (partConditions.ContainsKey(effect.partIndex))
+                    //            {
+                    //                partConditions[effect.partIndex][2] = true;
+                    //            }
+                    //            else
+                    //            {
+                    //                partConditions.Add(effect.partIndex, new bool[] { false, false, true });
+                    //            }
+                    //        }
+                    //    }
+                    //}
                     Mod.LogInfo("\tSet body");
 
                     // Process parts
@@ -2971,106 +2967,106 @@ namespace EFM
                         // Set part info
                         medicalScreenPartHealthTexts[partIndex] = partInfoParent.GetChild(partIndex).GetChild(1).GetComponent<Text>();
                         medicalScreenPartHealthTexts[partIndex].text = String.Format("{0:0}", Mod.GetHealth(partIndex)) + "/" + String.Format("{0:0}", Mod.GetCurrentMaxHealth(partIndex));
-                        if (partConditions.ContainsKey(partIndex))
-                        {
-                            for (int i = 0; i < partConditions[partIndex].Length; ++i)
-                            {
-                                partInfoParent.GetChild(partIndex).GetChild(3).GetChild(i).gameObject.SetActive(partConditions[partIndex][i]);
-                            }
-                        }
+                        //if (partConditions.ContainsKey(partIndex))
+                        //{
+                        //    for (int i = 0; i < partConditions[partIndex].Length; ++i)
+                        //    {
+                        //        partInfoParent.GetChild(partIndex).GetChild(3).GetChild(i).gameObject.SetActive(partConditions[partIndex][i]);
+                        //    }
+                        //}
 
-                        if (partConditions.ContainsKey(partIndex) || Mod.GetHealth(partIndex) < Mod.GetCurrentMaxHealth(partIndex))
-                        {
-                            fullPartConditions.Add(partIndex, new int[5]);
+                        //if (partConditions.ContainsKey(partIndex) || Mod.GetHealth(partIndex) < Mod.GetCurrentMaxHealth(partIndex))
+                        //{
+                        //    fullPartConditions.Add(partIndex, new int[5]);
 
-                            // Add to list
-                            GameObject partElement = Instantiate(medicalListContent.GetChild(0).gameObject, medicalListContent);
-                            partElement.transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.GetBodyPartName(partIndex);
-                            partElement.SetActive(true);
+                        //    // Add to list
+                        //    GameObject partElement = Instantiate(medicalListContent.GetChild(0).gameObject, medicalListContent);
+                        //    partElement.transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<Text>().text = Mod.GetBodyPartName(partIndex);
+                        //    partElement.SetActive(true);
 
-                            // Setup logic
-                            PointableButton pointableButton = partElement.transform.GetChild(0).gameObject.AddComponent<PointableButton>();
-                            pointableButton.SetButton();
-                            int currentPartIndex = partIndex;
-                            pointableButton.Button.onClick.AddListener(() => { ToggleMedicalPart(currentPartIndex); });
-                            pointableButton.MaxPointingRange = 20;
-                            //pointableButton.hoverSound = hoverAudio;
+                        //    // Setup logic
+                        //    PointableButton pointableButton = partElement.transform.GetChild(0).gameObject.AddComponent<PointableButton>();
+                        //    pointableButton.SetButton();
+                        //    int currentPartIndex = partIndex;
+                        //    pointableButton.Button.onClick.AddListener(() => { ToggleMedicalPart(currentPartIndex); });
+                        //    pointableButton.MaxPointingRange = 20;
+                        //    //pointableButton.hoverSound = hoverAudio;
 
-                            medicalPartElements.Add(partIndex, partElement);
+                        //    medicalPartElements.Add(partIndex, partElement);
 
-                            medicalListHeight += 27;
+                        //    medicalListHeight += 27;
 
-                            // Process health and destroyed
-                            int partTotalCost = 0;
-                            if (Mod.GetHealth(partIndex) < Mod.GetCurrentMaxHealth(partIndex))
-                            {
-                                if (Mod.GetHealth(partIndex) <= 0)
-                                {
-                                    int cost = (int)(breakPartPrice + healthPrice * Mod.GetCurrentMaxHealth(partIndex));
-                                    fullPartConditions[partIndex][4] = cost;
-                                    totalMedicalTreatmentPrice += cost;
-                                    partTotalCost += cost;
+                        //    // Process health and destroyed
+                        //    int partTotalCost = 0;
+                        //    if (Mod.GetHealth(partIndex) < Mod.GetCurrentMaxHealth(partIndex))
+                        //    {
+                        //        if (Mod.GetHealth(partIndex) <= 0)
+                        //        {
+                        //            int cost = (int)(breakPartPrice + healthPrice * Mod.GetCurrentMaxHealth(partIndex));
+                        //            fullPartConditions[partIndex][4] = cost;
+                        //            totalMedicalTreatmentPrice += cost;
+                        //            partTotalCost += cost;
 
-                                    partElement.transform.GetChild(5).gameObject.SetActive(true);
-                                    //partElement.transform.GetChild(5).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
+                        //            partElement.transform.GetChild(5).gameObject.SetActive(true);
+                        //            //partElement.transform.GetChild(5).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
 
-                                    PointableButton destroyedPartButton = partElement.transform.GetChild(5).gameObject.AddComponent<PointableButton>();
-                                    destroyedPartButton.SetButton();
-                                    destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 4); });
-                                    destroyedPartButton.MaxPointingRange = 20;
-                                    //destroyedPartButton.hoverSound = hoverAudio;
-                                }
-                                else // Not destroyed but damaged
-                                {
-                                    int hpToHeal = (int)(Mod.GetCurrentMaxHealth(partIndex) - Mod.GetHealth(partIndex));
-                                    int cost = healthPrice * hpToHeal;
-                                    fullPartConditions[partIndex][0] = cost;
-                                    totalMedicalTreatmentPrice += cost;
-                                    partTotalCost += cost;
+                        //            PointableButton destroyedPartButton = partElement.transform.GetChild(5).gameObject.AddComponent<PointableButton>();
+                        //            destroyedPartButton.SetButton();
+                        //            destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 4); });
+                        //            destroyedPartButton.MaxPointingRange = 20;
+                        //            //destroyedPartButton.hoverSound = hoverAudio;
+                        //        }
+                        //        else // Not destroyed but damaged
+                        //        {
+                        //            int hpToHeal = (int)(Mod.GetCurrentMaxHealth(partIndex) - Mod.GetHealth(partIndex));
+                        //            int cost = healthPrice * hpToHeal;
+                        //            fullPartConditions[partIndex][0] = cost;
+                        //            totalMedicalTreatmentPrice += cost;
+                        //            partTotalCost += cost;
 
-                                    partElement.transform.GetChild(1).gameObject.SetActive(true);
-                                    //partElement.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
-                                    partElement.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "Health (" + hpToHeal + ")";
+                        //            partElement.transform.GetChild(1).gameObject.SetActive(true);
+                        //            //partElement.transform.GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
+                        //            partElement.transform.GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = "Health (" + hpToHeal + ")";
 
-                                    PointableButton destroyedPartButton = partElement.transform.GetChild(1).gameObject.AddComponent<PointableButton>();
-                                    destroyedPartButton.SetButton();
-                                    destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 0); });
-                                    destroyedPartButton.MaxPointingRange = 20;
-                                    //destroyedPartButton.hoverSound = hoverAudio;
-                                }
+                        //            PointableButton destroyedPartButton = partElement.transform.GetChild(1).gameObject.AddComponent<PointableButton>();
+                        //            destroyedPartButton.SetButton();
+                        //            destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, 0); });
+                        //            destroyedPartButton.MaxPointingRange = 20;
+                        //            //destroyedPartButton.hoverSound = hoverAudio;
+                        //        }
 
-                                medicalListHeight += 22;
-                            }
+                        //        medicalListHeight += 22;
+                        //    }
 
-                            // Process other conditions
-                            if (partConditions.ContainsKey(partIndex))
-                            {
-                                for (int i = 0; i < 3; ++i)
-                                {
-                                    if (partConditions[partIndex][i])
-                                    {
-                                        int cost = otherConditionCosts[i];
-                                        fullPartConditions[partIndex][i + 1] = cost;
-                                        totalMedicalTreatmentPrice += cost;
-                                        partTotalCost += cost;
+                        //    // Process other conditions
+                        //    if (partConditions.ContainsKey(partIndex))
+                        //    {
+                        //        for (int i = 0; i < 3; ++i)
+                        //        {
+                        //            if (partConditions[partIndex][i])
+                        //            {
+                        //                int cost = otherConditionCosts[i];
+                        //                fullPartConditions[partIndex][i + 1] = cost;
+                        //                totalMedicalTreatmentPrice += cost;
+                        //                partTotalCost += cost;
 
-                                        partElement.transform.GetChild(i + 2).gameObject.SetActive(true);
-                                        //partElement.transform.GetChild(i + 2).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
+                        //                partElement.transform.GetChild(i + 2).gameObject.SetActive(true);
+                        //                //partElement.transform.GetChild(i + 2).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(cost);
 
-                                        PointableButton destroyedPartButton = partElement.transform.GetChild(i + 2).gameObject.AddComponent<PointableButton>();
-                                        destroyedPartButton.SetButton();
-                                        destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, i + 1); });
-                                        destroyedPartButton.MaxPointingRange = 20;
-                                        //destroyedPartButton.hoverSound = hoverAudio;
+                        //                PointableButton destroyedPartButton = partElement.transform.GetChild(i + 2).gameObject.AddComponent<PointableButton>();
+                        //                destroyedPartButton.SetButton();
+                        //                destroyedPartButton.Button.onClick.AddListener(() => { ToggleMedicalPartCondition(currentPartIndex, i + 1); });
+                        //                destroyedPartButton.MaxPointingRange = 20;
+                        //                //destroyedPartButton.hoverSound = hoverAudio;
 
-                                        medicalListHeight += 22;
-                                    }
-                                }
-                            }
+                        //                medicalListHeight += 22;
+                        //            }
+                        //        }
+                        //    }
 
-                            // Set part total cost
-                            //partElement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(partTotalCost);
-                        }
+                        //    // Set part total cost
+                        //    //partElement.transform.GetChild(0).GetChild(1).GetChild(1).GetComponent<Text>().text = MarketManager.FormatCompleteMoneyString(partTotalCost);
+                        //}
                     }
                     Mod.LogInfo("\tProcessed parts");
 
@@ -3545,28 +3541,28 @@ namespace EFM
                             }
                             else if (i == 1) // LightBleeding
                             {
-                                Effect.RemoveEffects(false, Effect.EffectType.LightBleeding, partElement.Key);
+                                Effect.RemoveEffects(Effect.EffectType.LightBleeding);
 
                                 // Update bleed icon
                                 transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(1).GetChild(partElement.Key).GetChild(3).GetChild(0).gameObject.SetActive(false);
                             }
                             else if (i == 2) // HeavyBleeding
                             {
-                                Effect.RemoveEffects(false, Effect.EffectType.HeavyBleeding, partElement.Key);
+                                Effect.RemoveEffects(Effect.EffectType.HeavyBleeding);
 
                                 // Update bleed icon
                                 transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(1).GetChild(partElement.Key).GetChild(3).GetChild(1).gameObject.SetActive(false);
                             }
                             else if (i == 3) // Fracture
                             {
-                                Effect.RemoveEffects(false, Effect.EffectType.Fracture, partElement.Key);
+                                Effect.RemoveEffects(Effect.EffectType.Fracture);
 
                                 // Update fracture icon
                                 transform.GetChild(0).GetChild(0).GetChild(13).GetChild(4).GetChild(1).GetChild(partElement.Key).GetChild(3).GetChild(2).gameObject.SetActive(false);
                             }
                             else if (i == 4) // DestroyedPart
                             {
-                                Effect.RemoveEffects(false, Effect.EffectType.DestroyedPart, partElement.Key);
+                                Effect.RemoveEffects(Effect.EffectType.DestroyedPart);
 
                                 Mod.SetHealth(partElement.Key, Mod.GetCurrentMaxHealth(partElement.Key));
 

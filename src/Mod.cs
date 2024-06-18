@@ -158,7 +158,6 @@ namespace EFM
         // Base health rates are based on solid value addition (bleed, healing, etc.) from bonuses, effects, and skills
         // Note that health rates are split into positive and negative because we only want to apply health regen bonus
         // to positive part of health rate
-        TODO: // Init these
         private static float[] basePositiveHealthRates;
         // Lethal healthrates will result in death if head or chest reach 0
         private static float[] baseNegativeHealthRates;
@@ -2221,6 +2220,11 @@ namespace EFM
         {
             // Setup player data
             health = new float[7];
+            basePositiveHealthRates = new float[7];
+            baseNegativeHealthRates = new float[7];
+            baseNonLethalHealthRates = new float[7];
+            currentHealthRates = new float[7];
+            currentNonLethalHealthRates = new float[7];
 
             // Instantiate lists
             ammoBoxesByRoundClassByRoundType = new Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>>();

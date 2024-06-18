@@ -1604,7 +1604,7 @@ namespace EFM
 
         public static object[] Damage(float amount, FVRPlayerHitbox hitbox = null, int partIndex = -1)
         {
-            if (hitbox == null & partIndex == -1)
+            if (hitbox == null && partIndex == -1)
             {
                 Mod.LogError("Damage() called without hitbox nor partindex specified");
                 return null;
@@ -1653,29 +1653,11 @@ namespace EFM
                     float chance = UnityEngine.Random.value;
                     if (chance <= heavyBleedChance)
                     {
-                        Mod.LogInfo("\t\tCaused heavy bleed");
-                        Effect heavyBleedEffect = new Effect();
-                        heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                        heavyBleedEffect.partIndex = 0;
-                        if (vitalityLevel >= 51)
-                        {
-                            heavyBleedEffect.hasTimer = true;
-                            heavyBleedEffect.timer = 30;
-                        }
-                        Effect.effects.Add(heavyBleedEffect);
+                        new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, 0, -1, true);
                     }
                     else if (chance <= lightBleedChance)
                     {
-                        Mod.LogInfo("\t\tCaused light bleed");
-                        Effect lightBleedEffect = new Effect();
-                        lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                        lightBleedEffect.partIndex = 0;
-                        if (vitalityLevel >= 51)
-                        {
-                            lightBleedEffect.hasTimer = true;
-                            lightBleedEffect.timer = 20;
-                        }
-                        Effect.effects.Add(lightBleedEffect);
+                        new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, 0, -1, true);
                     }
                 }
                 else if (hitbox.Type == FVRPlayerHitbox.PlayerHitBoxType.Torso)
@@ -1716,29 +1698,11 @@ namespace EFM
                         float bleedValue = UnityEngine.Random.value;
                         if (bleedValue <= heavyBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused heavy bleed");
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused light bleed");
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                     }
                     else if (partChance > thoraxChance && partChance <= stomachChance)
@@ -1762,29 +1726,11 @@ namespace EFM
                         float bleedValue = UnityEngine.Random.value;
                         if (bleedValue <= heavyBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused heavy bleed");
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused light bleed");
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                     }
                     else if (partChance > stomachChance && partChance <= rightArmChance)
@@ -1801,38 +1747,16 @@ namespace EFM
                         float bleedValue = UnityEngine.Random.value;
                         if (bleedValue <= heavyBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused heavy bleed");
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused light bleed");
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
 
                         if (UnityEngine.Random.value < fractureChance)
                         {
-                            Mod.LogInfo("\t\tCaused fracture");
-                            Effect fractureEffect = new Effect();
-                            fractureEffect.effectType = Effect.EffectType.Fracture;
-                            fractureEffect.partIndex = actualPartIndex;
-                            Effect.effects.Add(fractureEffect);
+                            new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                     }
                     else if (partChance > rightArmChance && partChance <= leftArmChance)
@@ -1849,38 +1773,16 @@ namespace EFM
                         float bleedValue = UnityEngine.Random.value;
                         if (bleedValue <= heavyBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused heavy bleed");
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused light bleed");
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
 
                         if (UnityEngine.Random.value < fractureChance)
                         {
-                            Mod.LogInfo("\t\tCaused fracture");
-                            Effect fractureEffect = new Effect();
-                            fractureEffect.effectType = Effect.EffectType.Fracture;
-                            fractureEffect.partIndex = actualPartIndex;
-                            Effect.effects.Add(fractureEffect);
+                            new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                     }
                     else if (partChance > leftArmChance && partChance <= rightLegChance)
@@ -1897,38 +1799,16 @@ namespace EFM
                         float bleedValue = UnityEngine.Random.value;
                         if (bleedValue <= heavyBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused heavy bleed");
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused light bleed");
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
 
                         if (UnityEngine.Random.value < fractureChance)
                         {
-                            Mod.LogInfo("\t\tCaused fracture");
-                            Effect fractureEffect = new Effect();
-                            fractureEffect.effectType = Effect.EffectType.Fracture;
-                            fractureEffect.partIndex = actualPartIndex;
-                            Effect.effects.Add(fractureEffect);
+                            new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                     }
                     else if (partChance > rightLegChance && partChance <= leftLegChance)
@@ -1945,38 +1825,16 @@ namespace EFM
                         float bleedValue = UnityEngine.Random.value;
                         if (bleedValue <= heavyBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused heavy bleed");
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValue <= lightBleedChance)
                         {
-                            Mod.LogInfo("\t\tCaused light bleed");
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
 
                         if (UnityEngine.Random.value < fractureChance)
                         {
-                            Mod.LogInfo("\t\tCaused fracture");
-                            Effect fractureEffect = new Effect();
-                            fractureEffect.effectType = Effect.EffectType.Fracture;
-                            fractureEffect.partIndex = actualPartIndex;
-                            Effect.effects.Add(fractureEffect);
+                            new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                     }
                 }
@@ -1997,38 +1855,16 @@ namespace EFM
                     float bleedValue = UnityEngine.Random.value;
                     if (bleedValue <= heavyBleedChance)
                     {
-                        Mod.LogInfo("\t\tCaused heavy bleed");
-                        Effect heavyBleedEffect = new Effect();
-                        heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                        heavyBleedEffect.partIndex = actualPartIndex;
-                        if (vitalityLevel >= 51)
-                        {
-                            heavyBleedEffect.hasTimer = true;
-                            heavyBleedEffect.timer = 30;
-                        }
-                        Effect.effects.Add(heavyBleedEffect);
+                        new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                     }
                     else if (bleedValue <= lightBleedChance)
                     {
-                        Mod.LogInfo("\t\tCaused light bleed");
-                        Effect lightBleedEffect = new Effect();
-                        lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                        lightBleedEffect.partIndex = actualPartIndex;
-                        if (vitalityLevel >= 51)
-                        {
-                            lightBleedEffect.hasTimer = true;
-                            lightBleedEffect.timer = 20;
-                        }
-                        Effect.effects.Add(lightBleedEffect);
+                        new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                     }
 
                     if (UnityEngine.Random.value < fractureChance)
                     {
-                        Mod.LogInfo("\t\tCaused fracture");
-                        Effect fractureEffect = new Effect();
-                        fractureEffect.effectType = Effect.EffectType.Fracture;
-                        fractureEffect.partIndex = actualPartIndex;
-                        Effect.effects.Add(fractureEffect);
+                        new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, actualPartIndex, -1, true);
                     }
                 }
             }
@@ -2057,27 +1893,11 @@ namespace EFM
                         float bleedValue0 = UnityEngine.Random.value;
                         if (bleedValue0 <= heavyBleedChance0)
                         {
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = 0;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, 0, -1, true);
                         }
                         else if (bleedValue0 <= lightBleedChance0)
                         {
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = 0;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, 0, -1, true);
                         }
                         break;
                     case 1: // Thorax
@@ -2101,27 +1921,11 @@ namespace EFM
                         float bleedValue1 = UnityEngine.Random.value;
                         if (bleedValue1 <= heavyBleedChance1)
                         {
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValue1 <= lightBleedChance1)
                         {
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         break;
                     case 2: // Stomach
@@ -2140,27 +1944,11 @@ namespace EFM
                         float bleedValue2 = UnityEngine.Random.value;
                         if (bleedValue2 <= heavyBleedChance2)
                         {
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValue2 <= lightBleedChance2)
                         {
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         break;
                     case 3: // Left arm
@@ -2173,36 +1961,16 @@ namespace EFM
                         float bleedValue3 = UnityEngine.Random.value;
                         if (bleedValue3 <= heavyBleedChanceArm)
                         {
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValue3 <= lightBleedChanceArm)
                         {
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
 
                         if (UnityEngine.Random.value < fractureChanceArm)
                         {
-                            Effect fractureEffect = new Effect();
-                            fractureEffect.effectType = Effect.EffectType.Fracture;
-                            fractureEffect.partIndex = actualPartIndex;
-                            Effect.effects.Add(fractureEffect);
-                            // TODO: Player fracture sound
+                            new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         break;
                     case 5:
@@ -2215,36 +1983,16 @@ namespace EFM
                         float bleedValueLeg = UnityEngine.Random.value;
                         if (bleedValueLeg <= heavyBleedChanceLeg)
                         {
-                            Effect heavyBleedEffect = new Effect();
-                            heavyBleedEffect.effectType = Effect.EffectType.HeavyBleeding;
-                            heavyBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                heavyBleedEffect.hasTimer = true;
-                                heavyBleedEffect.timer = 30;
-                            }
-                            Effect.effects.Add(heavyBleedEffect);
+                            new Effect(Effect.EffectType.HeavyBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         else if (bleedValueLeg <= lightBleedChanceLeg)
                         {
-                            Effect lightBleedEffect = new Effect();
-                            lightBleedEffect.effectType = Effect.EffectType.LightBleeding;
-                            lightBleedEffect.partIndex = actualPartIndex;
-                            if (vitalityLevel >= 51)
-                            {
-                                lightBleedEffect.hasTimer = true;
-                                lightBleedEffect.timer = 20;
-                            }
-                            Effect.effects.Add(lightBleedEffect);
+                            new Effect(Effect.EffectType.LightBleeding, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
 
                         if (UnityEngine.Random.value < fractureChanceLeg)
                         {
-                            Effect fractureEffect = new Effect();
-                            fractureEffect.effectType = Effect.EffectType.Fracture;
-                            fractureEffect.partIndex = actualPartIndex;
-                            Effect.effects.Add(fractureEffect);
-                            // TODO: Play fracture sound
+                            new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, actualPartIndex, -1, true);
                         }
                         break;
                 }
@@ -3927,21 +3675,13 @@ namespace EFM
                 {
                     float damage = s * damagePerMeter;
                     float distribution = UnityEngine.Random.value;
-                    if (UnityEngine.Random.value < 0.125 * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
+                    if (UnityEngine.Random.value < 0.125f * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
                     {
-                        Effect fractureEffect = new Effect();
-                        fractureEffect.effectType = Effect.EffectType.Fracture;
-                        fractureEffect.partIndex = 5;
-                        Effect.effects.Add(fractureEffect);
-                        // TODO: Play fracture sound
+                        new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, 5, -1, true);
                     }
-                    if (UnityEngine.Random.value < 0.125 * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
+                    if (UnityEngine.Random.value < 0.125f * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
                     {
-                        Effect fractureEffect = new Effect();
-                        fractureEffect.effectType = Effect.EffectType.Fracture;
-                        fractureEffect.partIndex = 6;
-                        Effect.effects.Add(fractureEffect);
-                        // TODO: Play fracture sound
+                        new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, 6, -1, true);
                     }
 
                     DamagePatch.RegisterPlayerHit(5, distribution * damage, true);

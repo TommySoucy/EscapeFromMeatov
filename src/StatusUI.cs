@@ -83,6 +83,8 @@ namespace EFM
             Mod.OnKIARaidCountChanged += OnKIARaidCountChanged;
             Effect.OnEffectActivated += OnEffectActivated;
             Effect.OnEffectDeactivated += OnEffectDeactivated;
+            Effect.OnInactiveTimerAdded += OnInactiveTimerAdded;
+            Effect.OnInactiveTimerRemoved += OnInactiveTimerRemoved;
 
             // Initialize UI
             Init();
@@ -575,7 +577,25 @@ namespace EFM
             }
         }
 
-        TODO: //HAve event for when we add a global timer so we can manage painciller icon
+        public void OnInactiveTimerAdded(Effect.EffectType effectType, float time)
+        {
+            switch (effectType)
+            {
+                case Effect.EffectType.Pain:
+                    effectIcons[2].SetActive(true);
+                    break;
+            }
+        }
+
+        public void OnInactiveTimerRemoved(Effect.EffectType effectType)
+        {
+            switch (effectType)
+            {
+                case Effect.EffectType.Pain:
+                    effectIcons[2].SetActive(Effect.inactiveTimersByType.ContainsKey(Effect.EffectType.Pain));
+                    break;
+            }
+        }
 
         public void SetExtractionLimitTimer(float raidTimeLeft)
         {
@@ -739,6 +759,8 @@ namespace EFM
             Mod.OnKIARaidCountChanged -= OnKIARaidCountChanged;
             Effect.OnEffectActivated -= OnEffectActivated;
             Effect.OnEffectDeactivated -= OnEffectDeactivated;
+            Effect.OnInactiveTimerAdded -= OnInactiveTimerAdded;
+            Effect.OnInactiveTimerRemoved -= OnInactiveTimerRemoved;
         }
     }
 }

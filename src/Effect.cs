@@ -68,6 +68,10 @@ namespace EFM
         public static event OnEffectDeactivatedDelegate OnEffectDeactivated;
         public delegate void OnEffectRemovedDelegate(Effect effect);
         public static event OnEffectRemovedDelegate OnEffectRemoved;
+        public delegate void OnInactiveTimerAddedDelegate(EffectType effectType, float time);
+        public static event OnInactiveTimerAddedDelegate OnInactiveTimerAdded;
+        public delegate void OnInactiveTimerRemovedDelegate(EffectType effectType);
+        public static event OnInactiveTimerRemovedDelegate OnInactiveTimerRemoved;
 
         public Effect(BuffEffect buffEffect, bool fromStimulator = true, int partIndex = -1, bool nonLethal = false, bool hideoutOnly = false)
         {
@@ -106,6 +110,8 @@ namespace EFM
             {
                 Activate();
             }
+
+            OnEffectAddedInvoke(this);
         }
 
         public Effect(EffectType effectType, float value, float timer, float delay, Effect parentEffect = null, bool fromStimulator = true,
@@ -144,6 +150,8 @@ namespace EFM
             {
                 Activate();
             }
+
+            OnEffectAddedInvoke(this);
         }
 
         public static void UpdateStatic()
@@ -164,7 +172,7 @@ namespace EFM
             }
             for(int i=0; i < toRemove.Count; ++i)
             {
-                inactiveTimersByType.Remove(toRemove[i]);
+                RemoveInactiveTimer(toRemove[i]);
             }
 
             // Update effect instances
@@ -222,6 +230,18 @@ namespace EFM
             }
 
             previousActive = active;
+        }
+
+        public static void AddInactiveTimer(EffectType effectType, float time)
+        {
+            inactiveTimersByType.Add(effectType, time);
+            OnInactiveTimerAddedInvoke(effectType, time);
+        }
+
+        public static void RemoveInactiveTimer(EffectType effectType)
+        {
+            inactiveTimersByType.Remove(effectType);
+            OnInactiveTimerRemovedInvoke(effectType);
         }
 
         public bool IsBuff()
@@ -299,7 +319,7 @@ namespace EFM
                     }
                     else
                     {
-                        inactiveTimersByType.Add(EffectType.LightBleeding, timer);
+                        AddInactiveTimer(EffectType.LightBleeding, timer);
                     }
                     if (effectsByType.TryGetValue(EffectType.LightBleeding, out List<Effect> lightBleedEffectList))
                     {
@@ -315,7 +335,7 @@ namespace EFM
                     }
                     else
                     {
-                        inactiveTimersByType.Add(EffectType.HeavyBleeding, timer);
+                        AddInactiveTimer(EffectType.HeavyBleeding, timer);
                     }
                     if (effectsByType.TryGetValue(EffectType.HeavyBleeding, out List<Effect> heavyBleedEffectList))
                     {
@@ -710,6 +730,19 @@ namespace EFM
             }
         }
 
+        public static void RemoveAllEffects()
+        {
+            List<EffectType> toRemove = new List<EffectType>();
+            foreach(KeyValuePair<EffectType, List<Effect>> entry in effectsByType)
+            {
+                toRemove.Add(entry.Key);
+            }
+            for(int i=0; i < toRemove.Count; ++i)
+            {
+                effectsByType.Remove(toRemove[i]);
+            }
+        }
+
         public static void OnEffectAddedInvoke(Effect effect)
         {
             if(OnEffectAdded != null)
@@ -739,6 +772,22 @@ namespace EFM
             if(OnEffectRemoved != null)
             {
                 OnEffectRemoved(effect);
+            }
+        }
+
+        public static void OnInactiveTimerAddedInvoke(EffectType effectType, float time)
+        {
+            if(OnInactiveTimerAdded != null)
+            {
+                OnInactiveTimerAdded(effectType, time);
+            }
+        }
+
+        public static void OnInactiveTimerRemovedInvoke(EffectType effectType)
+        {
+            if(OnInactiveTimerRemoved != null)
+            {
+                OnInactiveTimerRemoved(effectType);
             }
         }
     }
