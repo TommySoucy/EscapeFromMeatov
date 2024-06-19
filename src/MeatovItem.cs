@@ -1,5 +1,4 @@
 ﻿using FistVR;
-using FMOD;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;

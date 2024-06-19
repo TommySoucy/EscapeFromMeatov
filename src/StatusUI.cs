@@ -666,7 +666,7 @@ namespace EFM
                     new Effect(Effect.EffectType.OverweightFatigue, 0, 0, 0);
                 }
             }
-            else
+            else if(Effect.overweightFatigue)
             {
                 Effect.RemoveEffects(Effect.EffectType.OverweightFatigue);
             }
