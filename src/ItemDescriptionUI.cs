@@ -96,7 +96,7 @@ namespace EFM
                 descriptionPack.itemData.OnNeededForTaskTotalChanged -= OnNeededForTaskTotalChanged;
                 if(descriptionPack.item != null)
                 {
-                    descriptionPack.item.OnCurrentWeightChanged -= OnPropertiesChanged;
+                    descriptionPack.item.OnCurrentWeightChanged -= OnCurrentWeightChanged;
                     descriptionPack.item.OnModeChanged -= OnPropertiesChanged;
                     if (descriptionPack.item.containerVolume != null)
                     {
@@ -114,7 +114,7 @@ namespace EFM
             descriptionPack.itemData.OnNeededForTaskTotalChanged += OnNeededForTaskTotalChanged;
             if (descriptionPack.item != null)
             {
-                descriptionPack.item.OnCurrentWeightChanged += OnPropertiesChanged;
+                descriptionPack.item.OnCurrentWeightChanged += OnCurrentWeightChanged;
                 descriptionPack.item.OnModeChanged += OnPropertiesChanged;
                 if(descriptionPack.item.containerVolume != null)
                 {
@@ -747,6 +747,11 @@ namespace EFM
             summaryNeededText.text = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID).ToString() + "/" + descriptionPack.itemData.GetCurrentNeededForTotal();
         }
 
+        public void OnCurrentWeightChanged(MeatovItem item, int preValue)
+        {
+            OnPropertiesChanged();
+        }
+
         public void OnPropertiesChanged()
         {
             if(descriptionPack.item == null)
@@ -772,7 +777,7 @@ namespace EFM
                 descriptionPack.itemData.OnNeededForTaskTotalChanged -= OnNeededForTaskTotalChanged;
                 if (descriptionPack.item != null)
                 {
-                    descriptionPack.item.OnCurrentWeightChanged -= OnPropertiesChanged;
+                    descriptionPack.item.OnCurrentWeightChanged -= OnCurrentWeightChanged;
                     descriptionPack.item.OnModeChanged -= OnPropertiesChanged;
                     if (descriptionPack.item.containerVolume != null)
                     {

@@ -16,6 +16,7 @@ using static FistVR.SosigInventory;
 using FFmpeg.AutoGen;
 using FMOD;
 using Valve.VR.InteractionSystem;
+using static FistVR.BoomskeeManager;
 
 namespace EFM
 {
@@ -181,19 +182,26 @@ namespace EFM
             //PatchController.Verify(movementManagerTwinstickPatchOriginal, harmony, true);
             //harmony.Patch(movementManagerTwinstickPatchOriginal, new HarmonyMethod(movementManagerTwinstickPatchPrefix));
 
-            //// ChamberSetRoundPatch
-            //MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool) }, null);
-            //MethodInfo chamberSetRoundPatchPrefix = typeof(ChamberSetRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // ChamberSetRoundPatch
+            MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool) }, null);
+            MethodInfo chamberSetRoundPatchPrefix = typeof(ChamberSetRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(chamberSetRoundPatchOriginal, harmony, true);
-            //harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
+            PatchController.Verify(chamberSetRoundPatchOriginal, harmony, true);
+            harmony.Patch(chamberSetRoundPatchOriginal, new HarmonyMethod(chamberSetRoundPatchPrefix));
 
-            //// ChamberSetRoundGivenPatch
-            //MethodInfo chamberSetRoundGivenPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(Vector3), typeof(Quaternion) }, null);
-            //MethodInfo chamberSetRoundGivenPatchPrefix = typeof(ChamberSetRoundGivenPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // ChamberSetRoundGivenPatch
+            MethodInfo chamberSetRoundGivenPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(Vector3), typeof(Quaternion) }, null);
+            MethodInfo chamberSetRoundGivenPatchPrefix = typeof(ChamberSetRoundGivenPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(chamberSetRoundGivenPatchOriginal, harmony, true);
-            //harmony.Patch(chamberSetRoundGivenPatchOriginal, new HarmonyMethod(chamberSetRoundGivenPatchPrefix));
+            PatchController.Verify(chamberSetRoundGivenPatchOriginal, harmony, true);
+            harmony.Patch(chamberSetRoundGivenPatchOriginal, new HarmonyMethod(chamberSetRoundGivenPatchPrefix));
+
+            // ChamberSetRoundClassPatch
+            MethodInfo chamberSetRoundClassPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(Vector3), typeof(Quaternion) }, null);
+            MethodInfo chamberSetRoundClassPatchPrefix = typeof(ChamberSetRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(chamberSetRoundClassPatchOriginal, harmony, true);
+            harmony.Patch(chamberSetRoundClassPatchOriginal, new HarmonyMethod(chamberSetRoundClassPatchPrefix));
 
             // MagRemoveRoundPatch
             MethodInfo magRemoveRoundPatchOriginal = typeof(FVRFireArmMagazine).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
@@ -216,29 +224,26 @@ namespace EFM
             PatchController.Verify(magRemoveRoundIntPatchOriginal, harmony, true);
             harmony.Patch(magRemoveRoundIntPatchOriginal, new HarmonyMethod(magRemoveRoundIntPatchPrefix));
 
-            //// ClipRemoveRoundPatch
-            //MethodInfo clipRemoveRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
-            //MethodInfo clipRemoveRoundPatchPrefix = typeof(ClipRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo clipRemoveRoundPatchPostfix = typeof(ClipRemoveRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // ClipRemoveRoundPatch
+            MethodInfo clipRemoveRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { }, null);
+            MethodInfo clipRemoveRoundPatchPrefix = typeof(ClipRemoveRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(clipRemoveRoundPatchOriginal, harmony, true);
-            //harmony.Patch(clipRemoveRoundPatchOriginal, new HarmonyMethod(clipRemoveRoundPatchPrefix), new HarmonyMethod(clipRemoveRoundPatchPostfix));
+            PatchController.Verify(clipRemoveRoundPatchOriginal, harmony, true);
+            harmony.Patch(clipRemoveRoundPatchOriginal, new HarmonyMethod(clipRemoveRoundPatchPrefix));
 
-            //// ClipRemoveRoundBoolPatch
-            //MethodInfo clipRemoveRoundBoolPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
-            //MethodInfo clipRemoveRoundBoolPatchPrefix = typeof(ClipRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo clipRemoveRoundBoolPatchPostfix = typeof(ClipRemoveRoundBoolPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // ClipRemoveRoundBoolPatch
+            MethodInfo clipRemoveRoundBoolPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(bool) }, null);
+            MethodInfo clipRemoveRoundBoolPatchPrefix = typeof(ClipRemoveRoundBoolPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(clipRemoveRoundBoolPatchOriginal, harmony, true);
-            //harmony.Patch(clipRemoveRoundBoolPatchOriginal, new HarmonyMethod(clipRemoveRoundBoolPatchPrefix), new HarmonyMethod(clipRemoveRoundBoolPatchPostfix));
+            PatchController.Verify(clipRemoveRoundBoolPatchOriginal, harmony, true);
+            harmony.Patch(clipRemoveRoundBoolPatchOriginal, new HarmonyMethod(clipRemoveRoundBoolPatchPrefix));
 
-            //// ClipRemoveRoundClassPatch
-            //MethodInfo clipRemoveRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRoundReturnClass", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo clipRemoveRoundClassPatchPrefix = typeof(ClipRemoveRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo clipRemoveRoundClassPatchPostfix = typeof(ClipRemoveRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // ClipRemoveRoundClassPatch
+            MethodInfo clipRemoveRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("RemoveRoundReturnClass", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo clipRemoveRoundClassPatchPrefix = typeof(ClipRemoveRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(clipRemoveRoundClassPatchOriginal, harmony, true);
-            //harmony.Patch(clipRemoveRoundClassPatchOriginal, new HarmonyMethod(clipRemoveRoundClassPatchPrefix), new HarmonyMethod(clipRemoveRoundClassPatchPostfix));
+            PatchController.Verify(clipRemoveRoundClassPatchOriginal, harmony, true);
+            harmony.Patch(clipRemoveRoundClassPatchOriginal, new HarmonyMethod(clipRemoveRoundClassPatchPrefix));
 
             //// FireArmLoadMagPatch
             //MethodInfo fireArmLoadMagPatchOriginal = typeof(FVRFireArm).GetMethod("LoadMag", BindingFlags.Public | BindingFlags.Instance);
@@ -284,21 +289,59 @@ namespace EFM
             PatchController.Verify(magAddRoundClassPatchOriginal, harmony, true);
             harmony.Patch(magAddRoundClassPatchOriginal, new HarmonyMethod(magAddRoundClassPatchPrefix));
 
-            //// ClipAddRoundPatch
-            //MethodInfo clipAddRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool) }, null);
-            //MethodInfo clipAddRoundPatchPrefix = typeof(ClipAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo clipAddRoundPatchPostfix = typeof(ClipAddRoundPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // MagReloadMagWithTypePatch
+            MethodInfo magReloadMagWithTypeOriginal = typeof(FVRFireArmMagazine).GetMethod("ReloadMagWithType", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo magReloadMagWithTypePrefix = typeof(MagReloadMagWithTypePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo magReloadMagWithTypePostfix = typeof(MagReloadMagWithTypePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(clipAddRoundPatchOriginal, harmony, true);
-            //harmony.Patch(clipAddRoundPatchOriginal, new HarmonyMethod(clipAddRoundPatchPrefix), new HarmonyMethod(clipAddRoundPatchPostfix));
+            PatchController.Verify(magReloadMagWithTypeOriginal, harmony, true);
+            harmony.Patch(magReloadMagWithTypeOriginal, new HarmonyMethod(magReloadMagWithTypePrefix), new HarmonyMethod(magReloadMagWithTypePostfix));
 
-            //// ClipAddRoundClassPatch
-            //MethodInfo clipAddRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
-            //MethodInfo clipAddRoundClassPatchPrefix = typeof(ClipAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-            //MethodInfo clipAddRoundClassPatchPostfix = typeof(ClipAddRoundClassPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // MagReloadMagWithListPatch
+            MethodInfo magReloadMagWithListOriginal = typeof(FVRFireArmMagazine).GetMethod("ReloadMagWithList", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo magReloadMagWithListPrefix = typeof(MagReloadMagWithListPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo magReloadMagWithListPostfix = typeof(MagReloadMagWithListPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(clipAddRoundClassPatchOriginal, harmony, true);
-            //harmony.Patch(clipAddRoundClassPatchOriginal, new HarmonyMethod(clipAddRoundClassPatchPrefix), new HarmonyMethod(clipAddRoundClassPatchPostfix));
+            PatchController.Verify(magReloadMagWithListOriginal, harmony, true);
+            harmony.Patch(magReloadMagWithListOriginal, new HarmonyMethod(magReloadMagWithListPrefix), new HarmonyMethod(magReloadMagWithListPostfix));
+
+            // MagReloadMagWithTypeUpToPercentagePatch
+            MethodInfo magReloadMagWithTypeUpToPercentageOriginal = typeof(FVRFireArmMagazine).GetMethod("ReloadMagWithTypeUpToPercentage", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo magReloadMagWithTypeUpToPercentagePrefix = typeof(MagReloadMagWithTypeUpToPercentagePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo magReloadMagWithTypeUpToPercentagePostfix = typeof(MagReloadMagWithTypeUpToPercentagePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(magReloadMagWithTypeUpToPercentageOriginal, harmony, true);
+            harmony.Patch(magReloadMagWithTypeUpToPercentageOriginal, new HarmonyMethod(magReloadMagWithTypeUpToPercentagePrefix), new HarmonyMethod(magReloadMagWithTypeUpToPercentagePostfix));
+
+            // ClipAddRoundPatch
+            MethodInfo clipAddRoundPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool) }, null);
+            MethodInfo clipAddRoundPatchPrefix = typeof(ClipAddRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(clipAddRoundPatchOriginal, harmony, true);
+            harmony.Patch(clipAddRoundPatchOriginal, new HarmonyMethod(clipAddRoundPatchPrefix));
+
+            // ClipAddRoundClassPatch
+            MethodInfo clipAddRoundClassPatchOriginal = typeof(FVRFireArmClip).GetMethod("AddRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) }, null);
+            MethodInfo clipAddRoundClassPatchPrefix = typeof(ClipAddRoundClassPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(clipAddRoundClassPatchOriginal, harmony, true);
+            harmony.Patch(clipAddRoundClassPatchOriginal, new HarmonyMethod(clipAddRoundClassPatchPrefix));
+
+            // ClipReloadClipWithTypePatch
+            MethodInfo clipReloadClipWithTypeOriginal = typeof(FVRFireArmClip).GetMethod("ReloadClipWithType", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo clipReloadClipWithTypePrefix = typeof(ClipReloadClipWithTypePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo clipReloadClipWithTypePostfix = typeof(ClipReloadClipWithTypePatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(clipReloadClipWithTypeOriginal, harmony, true);
+            harmony.Patch(clipReloadClipWithTypeOriginal, new HarmonyMethod(clipReloadClipWithTypePrefix), new HarmonyMethod(clipReloadClipWithTypePostfix));
+
+            // ClipReloadClipWithListPatch
+            MethodInfo clipReloadClipWithListOriginal = typeof(FVRFireArmClip).GetMethod("ReloadClipWithList", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo clipReloadClipWithListPrefix = typeof(ClipReloadClipWithListPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo clipReloadClipWithListPostfix = typeof(ClipReloadClipWithListPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(clipReloadClipWithListOriginal, harmony, true);
+            harmony.Patch(clipReloadClipWithListOriginal, new HarmonyMethod(clipReloadClipWithListPrefix), new HarmonyMethod(clipReloadClipWithListPostfix));
 
             //// AttachmentMountRegisterPatch
             //MethodInfo attachmentMountRegisterPatchOriginal = typeof(FVRFireArmAttachmentMount).GetMethod("RegisterAttachment", BindingFlags.Public | BindingFlags.Instance);
@@ -3694,68 +3737,95 @@ namespace EFM
     // Patches FVRFireArmChamber.SetRound(round, bool) to keep track of weight in chamber
     class ChamberSetRoundPatch
     {
-        static void Prefix(ref FVRFireArmRound round, ref FVRFireArmChamber __instance)
+        static void Prefix(FVRFireArmRound round, FVRFireArmChamber __instance)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-
-            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-            // locationIndex so we know when to add/remove weight from player also
-            //if (__instance.IsFull && round == null)
-            //{
-            //    EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
-            //    VID.currentWeight -= 15;
-            //    if(VID.locationIndex == 0)
-            //    {
-            //        Mod.weight -= 15;
-            //    }
-            //}
-            //else
-            //{
-            //    EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
-            //    VID.currentWeight += 15;
-            //    if (VID.locationIndex == 0)
-            //    {
-            //        Mod.weight += 15;
-            //    }
-            //}
+            MeatovItem meatovItem = __instance.GetComponentInParent<MeatovItem>();
+            if (meatovItem != null)
+            {
+                if(round == null)
+                {
+                    if (__instance.GetRound() != null)
+                    {
+                        meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.GetRound().RoundType);
+                    }
+                }
+                else
+                {
+                    if (__instance.GetRound() == null)
+                    {
+                        meatovItem.currentWeight += Mod.GetRoundWeight(round.RoundType);
+                    }
+                }
+            }
         }
     }
 
     // Patches FVRFireArmChamber.SetRound(round, vector3, quaternion) to keep track of weight in chamber
     class ChamberSetRoundGivenPatch
     {
-        static void Prefix(ref FVRFireArmRound round, ref FVRFireArmChamber __instance)
+        static void Prefix(FVRFireArmRound round, FVRFireArmChamber __instance)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
+            MeatovItem meatovItem = __instance.GetComponentInParent<MeatovItem>();
+            if (meatovItem != null)
+            {
+                if (round == null)
+                {
+                    if (__instance.GetRound() != null)
+                    {
+                        meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.GetRound().RoundType);
+                    }
+                }
+                else
+                {
+                    if (__instance.GetRound() == null)
+                    {
+                        meatovItem.currentWeight += Mod.GetRoundWeight(round.RoundType);
+                    }
+                }
+            }
+        }
+    }
 
-            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-            // locationIndex so we know when to add/remove weight from player also
-            //if (__instance.IsFull && round == null)
-            //{
-            //    EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
-            //    VID.currentWeight -= 15;
-            //    if(VID.locationIndex == 0)
-            //    {
-            //        Mod.weight -= 15;
-            //    }
-            //}
-            //else
-            //{
-            //    EFM_VanillaItemDescriptor VID = __instance.Firearm.GetComponent<EFM_VanillaItemDescriptor>();
-            //    VID.currentWeight += 15;
-            //    if (VID.locationIndex == 0)
-            //    {
-            //        Mod.weight += 15;
-            //    }
-            //}
+    // Patches FVRFireArmChamber.SetRound(class, vector3, quaternion) to keep track of weight in chamber
+    class ChamberSetRoundClassPatch
+    {
+        static void Prefix(FireArmRoundClass rclass, FVRFireArmChamber __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            MeatovItem meatovItem = __instance.GetComponentInParent<MeatovItem>();
+            if (meatovItem != null)
+            {
+                GameObject gameObject = AM.GetRoundSelfPrefab(__instance.RoundType, rclass).GetGameObject();
+                FVRFireArmRound component = gameObject.GetComponent<FVRFireArmRound>();
+                if (component == null)
+                {
+                    if (__instance.GetRound() != null)
+                    {
+                        meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.GetRound().RoundType);
+                    }
+                }
+                else
+                {
+                    if (__instance.GetRound() == null)
+                    {
+                        meatovItem.currentWeight += Mod.GetRoundWeight(component.RoundType);
+                    }
+                }
+            }
         }
     }
 
@@ -3771,34 +3841,41 @@ namespace EFM
 
             if(__instance.m_numRounds > 0)
             {
-                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
-                if (ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if (meatovItem != null)
                 {
-                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
-                    if (ammoBox.locationIndex == 0) // Player
-                    {
-                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
-                    }
-                    else if (ammoBox.locationIndex == 1) // Hideout
-                    {
-                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
-                    }
-                    else // Raid
-                    {
-                        return;
-                    }
+                    // Manage weight
+                    meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
-                    FVRLoadedRound lr = __instance.LoadedRounds[__instance.m_numRounds - 1];
-                    --dictToUse[__instance.RoundType][lr.LR_Class][ammoBox];
-                    if (dictToUse[__instance.RoundType][lr.LR_Class][ammoBox] == 0)
+                    // Manage ammobox ammo
+                    if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
                     {
-                        dictToUse[__instance.RoundType][lr.LR_Class].Remove(ammoBox);
-                        if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
+                        Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                        if (meatovItem.locationIndex == 0) // Player
                         {
-                            dictToUse[__instance.RoundType].Remove(lr.LR_Class);
-                            if (dictToUse[__instance.RoundType].Count == 0)
+                            dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else if (meatovItem.locationIndex == 1) // Hideout
+                        {
+                            dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else // Raid
+                        {
+                            return;
+                        }
+
+                        FVRLoadedRound lr = __instance.LoadedRounds[__instance.m_numRounds - 1];
+                        --dictToUse[__instance.RoundType][lr.LR_Class][meatovItem];
+                        if (dictToUse[__instance.RoundType][lr.LR_Class][meatovItem] == 0)
+                        {
+                            dictToUse[__instance.RoundType][lr.LR_Class].Remove(meatovItem);
+                            if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
                             {
-                                dictToUse.Remove(__instance.RoundType);
+                                dictToUse[__instance.RoundType].Remove(lr.LR_Class);
+                                if (dictToUse[__instance.RoundType].Count == 0)
+                                {
+                                    dictToUse.Remove(__instance.RoundType);
+                                }
                             }
                         }
                     }
@@ -3820,34 +3897,41 @@ namespace EFM
 
             if (__instance.m_numRounds > 0)
             {
-                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
-                if (ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if (meatovItem != null)
                 {
-                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
-                    if (ammoBox.locationIndex == 0) // Player
-                    {
-                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
-                    }
-                    else if (ammoBox.locationIndex == 1) // Hideout
-                    {
-                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
-                    }
-                    else // Raid
-                    {
-                        return;
-                    }
+                    // Manage weight
+                    meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
-                    FVRLoadedRound lr = __instance.LoadedRounds[__instance.m_numRounds - 1];
-                    --dictToUse[__instance.RoundType][lr.LR_Class][ammoBox];
-                    if (dictToUse[__instance.RoundType][lr.LR_Class][ammoBox] == 0)
+                    // Manage ammobox ammo
+                    if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
                     {
-                        dictToUse[__instance.RoundType][lr.LR_Class].Remove(ammoBox);
-                        if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
+                        Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                        if (meatovItem.locationIndex == 0) // Player
                         {
-                            dictToUse[__instance.RoundType].Remove(lr.LR_Class);
-                            if (dictToUse[__instance.RoundType].Count == 0)
+                            dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else if (meatovItem.locationIndex == 1) // Hideout
+                        {
+                            dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else // Raid
+                        {
+                            return;
+                        }
+
+                        FVRLoadedRound lr = __instance.LoadedRounds[__instance.m_numRounds - 1];
+                        --dictToUse[__instance.RoundType][lr.LR_Class][meatovItem];
+                        if (dictToUse[__instance.RoundType][lr.LR_Class][meatovItem] == 0)
+                        {
+                            dictToUse[__instance.RoundType][lr.LR_Class].Remove(meatovItem);
+                            if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
                             {
-                                dictToUse.Remove(__instance.RoundType);
+                                dictToUse[__instance.RoundType].Remove(lr.LR_Class);
+                                if (dictToUse[__instance.RoundType].Count == 0)
+                                {
+                                    dictToUse.Remove(__instance.RoundType);
+                                }
                             }
                         }
                     }
@@ -3868,34 +3952,41 @@ namespace EFM
 
             if (__instance.m_numRounds > 0)
             {
-                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
-                if (ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if (meatovItem != null)
                 {
-                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
-                    if (ammoBox.locationIndex == 0) // Player
-                    {
-                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
-                    }
-                    else if (ammoBox.locationIndex == 1) // Hideout
-                    {
-                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
-                    }
-                    else // Raid
-                    {
-                        return;
-                    }
+                    // Manage weight
+                    meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
 
-                    FVRLoadedRound lr = __instance.LoadedRounds[__instance.m_numRounds - 1];
-                    --dictToUse[__instance.RoundType][lr.LR_Class][ammoBox];
-                    if (dictToUse[__instance.RoundType][lr.LR_Class][ammoBox] == 0)
+                    // Manage ammobox ammo
+                    if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
                     {
-                        dictToUse[__instance.RoundType][lr.LR_Class].Remove(ammoBox);
-                        if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
+                        Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                        if (meatovItem.locationIndex == 0) // Player
                         {
-                            dictToUse[__instance.RoundType].Remove(lr.LR_Class);
-                            if (dictToUse[__instance.RoundType].Count == 0)
+                            dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else if (meatovItem.locationIndex == 1) // Hideout
+                        {
+                            dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else // Raid
+                        {
+                            return;
+                        }
+
+                        FVRLoadedRound lr = __instance.LoadedRounds[__instance.m_numRounds - 1];
+                        --dictToUse[__instance.RoundType][lr.LR_Class][meatovItem];
+                        if (dictToUse[__instance.RoundType][lr.LR_Class][meatovItem] == 0)
+                        {
+                            dictToUse[__instance.RoundType][lr.LR_Class].Remove(meatovItem);
+                            if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
                             {
-                                dictToUse.Remove(__instance.RoundType);
+                                dictToUse[__instance.RoundType].Remove(lr.LR_Class);
+                                if (dictToUse[__instance.RoundType].Count == 0)
+                                {
+                                    dictToUse.Remove(__instance.RoundType);
+                                }
                             }
                         }
                     }
@@ -3907,36 +3998,22 @@ namespace EFM
     // Patches FVRFireArmClip.RemoveRound() to keep track of weight of ammo in clip
     class ClipRemoveRoundPatch
     {
-        static int preNumRounds = 0;
-
-        static void Prefix(int ___m_numRounds, ref FVRFireArmClip __instance)
+        static void Prefix(FVRFireArmClip __instance)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-            preNumRounds = ___m_numRounds;
-        }
-
-        static void Postfix(int ___m_numRounds, ref FVRFireArmClip __instance)
-        {
-            if (!Mod.inMeatovScene)
+            if (__instance.m_numRounds > 0)
             {
-                return;
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if (meatovItem != null)
+                {
+                    // Manage weight
+                    meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
+                }
             }
-
-            int postNumRounds = ___m_numRounds;
-
-            if (__instance.m_hand != null)
-            {
-                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
-            }
-
-
-            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-            // locationIndex so we know when to add/remove weight from player also
-            //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
         }
     }
 
@@ -3944,72 +4021,44 @@ namespace EFM
     // TODO: See if this could be used to do what we do in ClipUpdateInteractionPatch instead
     class ClipRemoveRoundBoolPatch
     {
-        static int preNumRounds = 0;
-
-        static void Prefix(int ___m_numRounds, ref FVRFireArmClip __instance)
+        static void Prefix(FVRFireArmClip __instance)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-            preNumRounds = ___m_numRounds;
-        }
-
-        static void Postfix(int ___m_numRounds, ref FVRFireArmClip __instance)
-        {
-            if (!Mod.inMeatovScene)
+            if (__instance.m_numRounds > 0)
             {
-                return;
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if (meatovItem != null)
+                {
+                    // Manage weight
+                    meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
+                }
             }
-
-            int postNumRounds = ___m_numRounds;
-
-            if (__instance.m_hand != null)
-            {
-                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
-            }
-
-
-            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-            // locationIndex so we know when to add/remove weight from player also
-            //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
         }
     }
 
     // Patches FVRFireArmClip.RemoveRoundReturnClass to keep track of weight of ammo in clip
     class ClipRemoveRoundClassPatch
     {
-        static int preNumRounds = 0;
-
-        static void Prefix(int ___m_numRounds, ref FVRFireArmClip __instance)
+        static void Prefix(FVRFireArmClip __instance)
         {
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-            preNumRounds = ___m_numRounds;
-        }
-
-        static void Postfix(int ___m_numRounds, ref FVRFireArmClip __instance)
-        {
-            if (!Mod.inMeatovScene)
+            if (__instance.m_numRounds > 0)
             {
-                return;
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if (meatovItem != null)
+                {
+                    // Manage weight
+                    meatovItem.currentWeight -= Mod.GetRoundWeight(__instance.RoundType);
+                }
             }
-
-            int postNumRounds = ___m_numRounds;
-
-            if (__instance.m_hand != null)
-            {
-                Mod.AddSkillExp(Skill.raidUnloadedAmmoAction, 31);
-            }
-
-
-            // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-            // locationIndex so we know when to add/remove weight from player also
-            //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight -= 15 * (preNumRounds - postNumRounds);
         }
     }
 
@@ -4277,27 +4326,33 @@ namespace EFM
         }
     }
 
-    // Patches FVRFirearmMagazine.AddRound(Round) to track ammo in ammo boxes
-    class MagAddRoundPatch
+    // Patches FVRFirearmMagazine.ReloadMagWithType to track ammo in mag
+    class MagReloadMagWithTypePatch
     {
-        static void Prefix(FVRFireArmMagazine __instance, FVRFireArmRound round)
+        static void Prefix(FVRFireArmMagazine __instance, FireArmRoundClass rClass)
         {
+            ++MagAddRoundPatch.magAddRoundSkip;
+
             if (!Mod.inMeatovScene)
             {
                 return;
             }
 
-            if (__instance.m_numRounds < __instance.m_capacity)
+            MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+            if(meatovItem != null)
             {
-                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
-                if(ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
+                // Manage weight
+                meatovItem.currentWeight = meatovItem.weight + Mod.GetRoundWeight(__instance.RoundType) * __instance.m_capacity;
+
+                // Manage ammoBox ammo
+                if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
                 {
                     Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
-                    if (ammoBox.locationIndex == 0) // Player
+                    if (meatovItem.locationIndex == 0) // Player
                     {
                         dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
                     }
-                    else if(ammoBox.locationIndex == 1) // Hideout
+                    else if (meatovItem.locationIndex == 1) // Hideout
                     {
                         dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
                     }
@@ -4306,36 +4361,402 @@ namespace EFM
                         return;
                     }
 
-                    if(dictToUse != null)
+                    if (dictToUse != null)
                     {
+                        // Remove current rounds
+                        for(int i=0; i < __instance.LoadedRounds.Length; ++i)
+                        {
+                            FVRLoadedRound lr = __instance.LoadedRounds[i];
+                            if (lr != null)
+                            {
+                                --dictToUse[__instance.RoundType][lr.LR_Class][meatovItem];
+                                if (dictToUse[__instance.RoundType][lr.LR_Class][meatovItem] == 0)
+                                {
+                                    dictToUse[__instance.RoundType][lr.LR_Class].Remove(meatovItem);
+                                    if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
+                                    {
+                                        dictToUse[__instance.RoundType].Remove(lr.LR_Class);
+                                        if (dictToUse[__instance.RoundType].Count == 0)
+                                        {
+                                            dictToUse.Remove(__instance.RoundType);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Add new rounds
                         if (dictToUse.TryGetValue(__instance.RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> midDict))
                         {
-                            if (midDict.TryGetValue(round.RoundClass, out Dictionary<MeatovItem, int> boxDict))
+                            if (midDict.TryGetValue(rClass, out Dictionary<MeatovItem, int> boxDict))
                             {
                                 int count = 0;
-                                if (boxDict.TryGetValue(ammoBox, out count))
+                                if (boxDict.TryGetValue(meatovItem, out count))
                                 {
-                                    ++boxDict[ammoBox];
+                                    boxDict[meatovItem] += __instance.m_capacity;
                                 }
                                 else
                                 {
-                                    boxDict.Add(ammoBox, 1);
+                                    boxDict.Add(meatovItem, __instance.m_capacity);
                                 }
                             }
                             else
                             {
                                 Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
-                                newBoxDict.Add(ammoBox, 1);
-                                midDict.Add(round.RoundClass, newBoxDict);
+                                newBoxDict.Add(meatovItem, __instance.m_capacity);
+                                midDict.Add(rClass, newBoxDict);
                             }
                         }
                         else
                         {
                             Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
-                            newBoxDict.Add(ammoBox, 1);
+                            newBoxDict.Add(meatovItem, __instance.m_capacity);
                             Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> newMidDict = new Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>();
-                            newMidDict.Add(round.RoundClass, newBoxDict);
+                            newMidDict.Add(rClass, newBoxDict);
                             dictToUse.Add(__instance.RoundType, newMidDict);
+                        }
+                    }
+                }
+            }
+        }
+
+        static void Postfix()
+        {
+            --MagAddRoundPatch.magAddRoundSkip;
+        }
+    }
+
+    // Patches FVRFirearmClip.ReloadClipWithType to track ammo in clip
+    class ClipReloadClipWithTypePatch
+    {
+        static void Prefix(FVRFireArmClip __instance, FireArmRoundClass rClass)
+        {
+            ++ClipAddRoundPatch.clipAddRoundSkip;
+
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+            if(meatovItem != null)
+            {
+                // Manage weight
+                meatovItem.currentWeight = meatovItem.weight + Mod.GetRoundWeight(__instance.RoundType) * __instance.m_capacity;
+            }
+        }
+
+        static void Postfix()
+        {
+            --ClipAddRoundPatch.clipAddRoundSkip;
+        }
+    }
+
+    // Patches FVRFirearmMagazine.ReloadMagWithList to track ammo in mag
+    class MagReloadMagWithListPatch
+    {
+        static void Prefix(FVRFireArmMagazine __instance, List<FireArmRoundClass> list)
+        {
+            ++MagAddRoundPatch.magAddRoundSkip;
+
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+            if(meatovItem != null)
+            {
+                // Manage weight
+                meatovItem.currentWeight = meatovItem.weight + Mod.GetRoundWeight(__instance.RoundType) * Mathf.Min(list.Count, __instance.m_capacity);
+
+                // Manage ammoBox ammo
+                if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
+                {
+                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                    if (meatovItem.locationIndex == 0) // Player
+                    {
+                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else if (meatovItem.locationIndex == 1) // Hideout
+                    {
+                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else // Raid
+                    {
+                        return;
+                    }
+
+                    if (dictToUse != null)
+                    {
+                        // Remove current rounds
+                        for(int i=0; i < __instance.LoadedRounds.Length; ++i)
+                        {
+                            FVRLoadedRound lr = __instance.LoadedRounds[i];
+                            if (lr != null)
+                            {
+                                --dictToUse[__instance.RoundType][lr.LR_Class][meatovItem];
+                                if (dictToUse[__instance.RoundType][lr.LR_Class][meatovItem] == 0)
+                                {
+                                    dictToUse[__instance.RoundType][lr.LR_Class].Remove(meatovItem);
+                                    if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
+                                    {
+                                        dictToUse[__instance.RoundType].Remove(lr.LR_Class);
+                                        if (dictToUse[__instance.RoundType].Count == 0)
+                                        {
+                                            dictToUse.Remove(__instance.RoundType);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Add new rounds
+                        for(int i=0; i < list.Count; ++i)
+                        {
+                            if (dictToUse.TryGetValue(__instance.RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> midDict))
+                            {
+                                if (midDict.TryGetValue(list[i], out Dictionary<MeatovItem, int> boxDict))
+                                {
+                                    int count = 0;
+                                    if (boxDict.TryGetValue(meatovItem, out count))
+                                    {
+                                        ++boxDict[meatovItem];
+                                    }
+                                    else
+                                    {
+                                        boxDict.Add(meatovItem, 1);
+                                    }
+                                }
+                                else
+                                {
+                                    Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                                    newBoxDict.Add(meatovItem, 1);
+                                    midDict.Add(list[i], newBoxDict);
+                                }
+                            }
+                            else
+                            {
+                                Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                                newBoxDict.Add(meatovItem, 1);
+                                Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> newMidDict = new Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>();
+                                newMidDict.Add(list[i], newBoxDict);
+                                dictToUse.Add(__instance.RoundType, newMidDict);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        static void Postfix()
+        {
+            --MagAddRoundPatch.magAddRoundSkip;
+        }
+    }
+
+    // Patches FVRFirearmClip.ReloadClipWithList to track ammo in mag
+    class ClipReloadClipWithListPatch
+    {
+        static void Prefix(FVRFireArmClip __instance, List<FireArmRoundClass> list)
+        {
+            ++ClipAddRoundPatch.clipAddRoundSkip;
+
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+            if(meatovItem != null)
+            {
+                // Manage weight
+                List<FireArmRoundClass> list2 = new List<FireArmRoundClass>();
+                int num = list.Count - __instance.m_capacity;
+                for (int i = num; i < list.Count; i++)
+                {
+                    list2.Add(list[i]);
+                }
+                int num2 = Mathf.Min(list2.Count, __instance.m_capacity);
+                meatovItem.currentWeight = meatovItem.weight + Mod.GetRoundWeight(__instance.RoundType) * num2;
+            }
+        }
+
+        static void Postfix()
+        {
+            --ClipAddRoundPatch.clipAddRoundSkip;
+        }
+    }
+
+    // Patches FVRFirearmMagazine.ReloadMagWithTypeUpToPercentage to track ammo in mag
+    class MagReloadMagWithTypeUpToPercentagePatch
+    {
+        static void Prefix(FVRFireArmMagazine __instance, FireArmRoundClass rClass, float percentage)
+        {
+            ++MagAddRoundPatch.magAddRoundSkip;
+
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+            if (meatovItem != null)
+            {
+                // Manage weight
+                int amount = Mathf.Clamp((int)((float)__instance.m_capacity * percentage), 1, __instance.m_capacity);
+                meatovItem.currentWeight = meatovItem.weight + Mod.GetRoundWeight(__instance.RoundType) * amount;
+
+                // Manage ammoBox ammo
+                if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
+                {
+                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                    if (meatovItem.locationIndex == 0) // Player
+                    {
+                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else if (meatovItem.locationIndex == 1) // Hideout
+                    {
+                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                    }
+                    else // Raid
+                    {
+                        return;
+                    }
+
+                    if (dictToUse != null)
+                    {
+                        // Remove current rounds
+                        for (int i = 0; i < __instance.LoadedRounds.Length; ++i)
+                        {
+                            FVRLoadedRound lr = __instance.LoadedRounds[i];
+                            if (lr != null)
+                            {
+                                --dictToUse[__instance.RoundType][lr.LR_Class][meatovItem];
+                                if (dictToUse[__instance.RoundType][lr.LR_Class][meatovItem] == 0)
+                                {
+                                    dictToUse[__instance.RoundType][lr.LR_Class].Remove(meatovItem);
+                                    if (dictToUse[__instance.RoundType][lr.LR_Class].Count == 0)
+                                    {
+                                        dictToUse[__instance.RoundType].Remove(lr.LR_Class);
+                                        if (dictToUse[__instance.RoundType].Count == 0)
+                                        {
+                                            dictToUse.Remove(__instance.RoundType);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Add new rounds
+                        if (dictToUse.TryGetValue(__instance.RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> midDict))
+                        {
+                            if (midDict.TryGetValue(rClass, out Dictionary<MeatovItem, int> boxDict))
+                            {
+                                int count = 0;
+                                if (boxDict.TryGetValue(meatovItem, out count))
+                                {
+                                    boxDict[meatovItem] += amount;
+                                }
+                                else
+                                {
+                                    boxDict.Add(meatovItem, amount);
+                                }
+                            }
+                            else
+                            {
+                                Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                                newBoxDict.Add(meatovItem, amount);
+                                midDict.Add(rClass, newBoxDict);
+                            }
+                        }
+                        else
+                        {
+                            Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                            newBoxDict.Add(meatovItem, amount);
+                            Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> newMidDict = new Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>();
+                            newMidDict.Add(rClass, newBoxDict);
+                            dictToUse.Add(__instance.RoundType, newMidDict);
+                        }
+                    }
+                }
+            }
+        }
+
+        static void Postfix()
+        {
+            --MagAddRoundPatch.magAddRoundSkip;
+        }
+    }
+
+    // Patches FVRFirearmMagazine.AddRound(Round) to track ammo in ammo boxes
+    class MagAddRoundPatch
+    {
+        public static int magAddRoundSkip;
+
+        static void Prefix(FVRFireArmMagazine __instance, FVRFireArmRound round)
+        {
+            if (!Mod.inMeatovScene || magAddRoundSkip > 0)
+            {
+                return;
+            }
+
+            if (__instance.m_numRounds < __instance.m_capacity)
+            {
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if(meatovItem != null)
+                {
+                    // Manage weight
+                    meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
+
+                    // Manage ammoBox ammo
+                    if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
+                    {
+                        Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                        if (meatovItem.locationIndex == 0) // Player
+                        {
+                            dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else if (meatovItem.locationIndex == 1) // Hideout
+                        {
+                            dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else // Raid
+                        {
+                            return;
+                        }
+
+                        if (dictToUse != null)
+                        {
+                            if (dictToUse.TryGetValue(__instance.RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> midDict))
+                            {
+                                if (midDict.TryGetValue(round.RoundClass, out Dictionary<MeatovItem, int> boxDict))
+                                {
+                                    int count = 0;
+                                    if (boxDict.TryGetValue(meatovItem, out count))
+                                    {
+                                        ++boxDict[meatovItem];
+                                    }
+                                    else
+                                    {
+                                        boxDict.Add(meatovItem, 1);
+                                    }
+                                }
+                                else
+                                {
+                                    Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                                    newBoxDict.Add(meatovItem, 1);
+                                    midDict.Add(round.RoundClass, newBoxDict);
+                                }
+                            }
+                            else
+                            {
+                                Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                                newBoxDict.Add(meatovItem, 1);
+                                Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> newMidDict = new Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>();
+                                newMidDict.Add(round.RoundClass, newBoxDict);
+                                dictToUse.Add(__instance.RoundType, newMidDict);
+                            }
                         }
                     }
                 }
@@ -4348,60 +4769,67 @@ namespace EFM
     {
         static void Prefix(FVRFireArmMagazine __instance, FireArmRoundClass rClass)
         {
-            if (!Mod.inMeatovScene)
+            if (!Mod.inMeatovScene || MagAddRoundPatch.magAddRoundSkip > 0)
             {
                 return;
             }
 
             if (__instance.m_numRounds < __instance.m_capacity)
             {
-                MeatovItem ammoBox = __instance.GetComponent<MeatovItem>();
-                if (ammoBox != null && ammoBox.itemType == MeatovItem.ItemType.AmmoBox)
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if (meatovItem != null)
                 {
-                    Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
-                    if (ammoBox.locationIndex == 0) // Player
-                    {
-                        dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
-                    }
-                    else if (ammoBox.locationIndex == 1) // Hideout
-                    {
-                        dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
-                    }
-                    else // Raid
-                    {
-                        return;
-                    }
+                    // Manage weight
+                    meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
 
-                    if (dictToUse != null)
+                    // Manage ammoBox ammo
+                    if (meatovItem.itemType == MeatovItem.ItemType.AmmoBox)
                     {
-                        if (dictToUse.TryGetValue(__instance.RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> midDict))
+                        Dictionary<FireArmRoundType, Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>> dictToUse = null;
+                        if (meatovItem.locationIndex == 0) // Player
                         {
-                            if (midDict.TryGetValue(rClass, out Dictionary<MeatovItem, int> boxDict))
+                            dictToUse = Mod.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else if (meatovItem.locationIndex == 1) // Hideout
+                        {
+                            dictToUse = HideoutController.instance.ammoBoxesByRoundClassByRoundType;
+                        }
+                        else // Raid
+                        {
+                            return;
+                        }
+
+                        if (dictToUse != null)
+                        {
+                            if (dictToUse.TryGetValue(__instance.RoundType, out Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> midDict))
                             {
-                                int count = 0;
-                                if (boxDict.TryGetValue(ammoBox, out count))
+                                if (midDict.TryGetValue(rClass, out Dictionary<MeatovItem, int> boxDict))
                                 {
-                                    ++boxDict[ammoBox];
+                                    int count = 0;
+                                    if (boxDict.TryGetValue(meatovItem, out count))
+                                    {
+                                        ++boxDict[meatovItem];
+                                    }
+                                    else
+                                    {
+                                        boxDict.Add(meatovItem, 1);
+                                    }
                                 }
                                 else
                                 {
-                                    boxDict.Add(ammoBox, 1);
+                                    Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
+                                    newBoxDict.Add(meatovItem, 1);
+                                    midDict.Add(rClass, newBoxDict);
                                 }
                             }
                             else
                             {
                                 Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
-                                newBoxDict.Add(ammoBox, 1);
-                                midDict.Add(rClass, newBoxDict);
+                                newBoxDict.Add(meatovItem, 1);
+                                Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> newMidDict = new Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>();
+                                newMidDict.Add(rClass, newBoxDict);
+                                dictToUse.Add(__instance.RoundType, newMidDict);
                             }
-                        }
-                        else
-                        {
-                            Dictionary<MeatovItem, int> newBoxDict = new Dictionary<MeatovItem, int>();
-                            newBoxDict.Add(ammoBox, 1);
-                            Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>> newMidDict = new Dictionary<FireArmRoundClass, Dictionary<MeatovItem, int>>();
-                            newMidDict.Add(rClass, newBoxDict);
-                            dictToUse.Add(__instance.RoundType, newMidDict);
                         }
                     }
                 }
@@ -4412,37 +4840,23 @@ namespace EFM
     // Patches FVRFirearmClip.AddRound(Round) to keep track of weight
     class ClipAddRoundPatch
     {
-        static bool addedRound = false;
+        public static int clipAddRoundSkip;
 
-        static void Prefix(ref FVRFireArmClip __instance)
+        static void Prefix(FVRFireArmClip __instance)
         {
-            if (!Mod.inMeatovScene)
+            if (!Mod.inMeatovScene || clipAddRoundSkip > 0)
             {
                 return;
             }
 
             if (__instance.m_numRounds < __instance.m_capacity)
             {
-                addedRound = true;
-            }
-        }
-
-        static void Postfix(ref FVRFireArmClip __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            Mod.AddSkillExp(Skill.raidLoadedAmmoAction, 31);
-
-            if (addedRound)
-            {
-                addedRound = false;
-
-                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-                // locationIndex so we know when to add/remove weight from player also
-                //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 15;
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if (meatovItem != null)
+                {
+                    // Manage weight
+                    meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
+                }
             }
         }
     }
@@ -4450,35 +4864,21 @@ namespace EFM
     // Patches FVRFirearmClip.AddRound(Class) to keep track of weight
     class ClipAddRoundClassPatch
     {
-        static bool addedRound = false;
-
-        static void Prefix(ref FVRFireArmClip __instance)
+        static void Prefix(FVRFireArmClip __instance)
         {
-            if (!Mod.inMeatovScene)
+            if (!Mod.inMeatovScene || ClipAddRoundPatch.clipAddRoundSkip > 0)
             {
                 return;
             }
 
             if (__instance.m_numRounds < __instance.m_capacity)
             {
-                addedRound = true;
-            }
-        }
-
-        static void Postfix(ref FVRFireArmClip __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return;
-            }
-
-            if (addedRound)
-            {
-                addedRound = false;
-
-                // TODO: Ammo container weight management will have to be reviewed. If we want to manage it, we will need to also keep track of the round and container's
-                // locationIndex so we know when to add/remove weight from player also
-                //__instance.GetComponent<EFM_VanillaItemDescriptor>().currentWeight += 15;
+                MeatovItem meatovItem = __instance.GetComponent<MeatovItem>();
+                if (meatovItem != null)
+                {
+                    // Manage weight
+                    meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
+                }
             }
         }
     }

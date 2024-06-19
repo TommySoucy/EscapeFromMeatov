@@ -62,7 +62,7 @@ namespace EFM
             Not_exist
         }
 
-        // Hiderarchy
+        // Hierarchy
         [NonSerialized]
         public MeatovItem parent;
         [NonSerialized]
@@ -83,7 +83,7 @@ namespace EFM
         public bool vanilla;
         public ItemType itemType;
 		public List<string> parents;
-        public int weight;
+        public int weight; // Weight of a single instance of this item
 		public int lootExperience;
         public bool canSellOnRagfair;
 		public ItemRarity rarity;
@@ -126,7 +126,7 @@ namespace EFM
                 }
 			}
 		}
-		private int _currentWeight; // Includes attachments and ammo containers attached to this item
+		private int _currentWeight; // Includes stack and children items
 		public int currentWeight
 		{
 			get { return _currentWeight; }
@@ -136,7 +136,11 @@ namespace EFM
 				_currentWeight = value;
                 if(preValue != _currentWeight)
                 {
-                    OnCurrentWeightChangedInvoke();
+                    if(parent != null)
+                    {
+                        parent.currentWeight += _currentWeight - preValue;
+                    }
+                    OnCurrentWeightChangedInvoke(this, preValue);
                 }
 			}
         }
@@ -284,9 +288,13 @@ namespace EFM
 			set {
                 int preValue = _stack;
 				_stack = value;
-				UpdateStackModel();
-                UpdateInventoryStacks(preValue);
-                OnStackChangedInvoke();
+                if(preValue != _stack)
+                {
+                    currentWeight += (_stack - preValue) * weight;
+                    UpdateStackModel();
+                    UpdateInventoryStacks(preValue);
+                    OnStackChangedInvoke();
+                }
 			}
 		}
 		public int maxStack;
@@ -358,7 +366,7 @@ namespace EFM
         // Events
         public delegate void OnInsuredChangedDelegate();
         public event OnInsuredChangedDelegate OnInsuredChanged;
-        public delegate void OnCurrentWeightChangedDelegate();
+        public delegate void OnCurrentWeightChangedDelegate(MeatovItem item, int preValue);
         public event OnCurrentWeightChangedDelegate OnCurrentWeightChanged;
         public delegate void OnFIRStatusChangedDelegate();
         public event OnFIRStatusChangedDelegate OnFIRStatusChanged;
@@ -2319,11 +2327,11 @@ namespace EFM
             }
         }
 
-        public void OnCurrentWeightChangedInvoke()
+        public void OnCurrentWeightChangedInvoke(MeatovItem item, int preValue)
         {
             if(OnCurrentWeightChanged != null)
             {
-                OnCurrentWeightChanged();
+                OnCurrentWeightChanged(item, preValue);
             }
         }
 
@@ -2418,6 +2426,7 @@ namespace EFM
                 // Remove from previous parent if necessary
                 if (parent != null)
                 {
+                    parent.currentWeight -= currentWeight;
                     parent.children[childIndex] = parent.children[parent.children.Count - 1];
                     parent.children[childIndex].childIndex = childIndex;
                     parent.children.RemoveAt(parent.children.Count - 1);
@@ -2449,6 +2458,7 @@ namespace EFM
                     parent = newParent;
                     childIndex = parent.children.Count;
                     parent.children.Add(this);
+                    parent.currentWeight += currentWeight;
                 }
             }
         }
@@ -2469,6 +2479,7 @@ namespace EFM
             // Remove from parent
             if (parent != null)
             {
+                parent.currentWeight -= currentWeight;
                 parent.children[childIndex] = parent.children[parent.children.Count - 1];
                 parent.children[childIndex].childIndex = childIndex;
                 parent.children.RemoveAt(parent.children.Count - 1);

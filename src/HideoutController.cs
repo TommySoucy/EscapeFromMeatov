@@ -1313,7 +1313,6 @@ namespace EFM
                 Mod.LogInfo("\t\tNot finished raid");
                 Mod.level = (int)loadedData["level"];
                 Mod.experience = (int)loadedData["experience"];
-                Mod.weight = (int)loadedData["weight"];
                 Mod.SetHealthArray(loadedData["health"].ToObject<float[]>());
                 Mod.LogInfo("\t\t0");
                 Mod.SetCurrentMaxHealthArray(loadedData["maxHealth"].ToObject<float[]>());

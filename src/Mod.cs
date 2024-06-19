@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
+using FFmpeg.AutoGen;
 
 namespace EFM
 {
@@ -1752,6 +1753,7 @@ namespace EFM
                 if (playerInventory.ContainsKey(item.H3ID))
                 {
                     playerInventory[item.H3ID] += stackDifference;
+                    // Note that we don't update player weight here, it will instead be updated on item's OnCurrentWeightChanged event when its stack changes
 
                     if(playerInventory[item.H3ID] <= 0)
                     {
@@ -1797,6 +1799,8 @@ namespace EFM
                     playerInventory.Add(item.H3ID, item.stack);
                     playerInventoryItems.Add(item.H3ID, new List<MeatovItem> { item });
                 }
+                weight += item.currentWeight;
+                item.OnCurrentWeightChanged += OnItemCurrentWeightChanged;
 
                 if (item.foundInRaid)
                 {
@@ -1896,6 +1900,8 @@ namespace EFM
                 playerInventory.Remove(item.H3ID);
                 playerInventoryItems.Remove(item.H3ID);
             }
+            weight -= item.currentWeight;
+            item.OnCurrentWeightChanged -= OnItemCurrentWeightChanged;
 
             if (item.foundInRaid)
             {
@@ -1967,6 +1973,11 @@ namespace EFM
                 playerFIRInventory.Remove(item.H3ID);
                 playerFIRInventoryItems.Remove(item.H3ID);
             }
+        }
+
+        public static void OnItemCurrentWeightChanged(MeatovItem item, int preValue)
+        {
+            weight += item.currentWeight - preValue;
         }
 
         public static void AddExperience(int xp, int type = 0 /*0: General (kill, raid result, etc.), 1: Looting, 2: Healing, 3: Exploration*/, string notifMsg = null)
@@ -2498,6 +2509,20 @@ namespace EFM
             else
             {
                 return vanillaItemData.TryGetValue(H3ID, out itemData);
+            }
+        }
+
+        public static int GetRoundWeight(FireArmRoundType roundType)
+        {
+            FVRFireArmRoundDisplayData.DisplayDataClass displayClass = AM.SRoundDisplayDataDic[roundType].GetDisplayClass(AM.GetDefaultRoundClass(roundType));
+            if(GetItemData(displayClass.ObjectID.ItemID, out MeatovItemData itemData))
+            {
+                return itemData.weight;
+            }
+            else
+            {
+                // Default 15g if couldn't find item data
+                return 15;
             }
         }
 
