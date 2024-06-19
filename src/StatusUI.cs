@@ -639,6 +639,7 @@ namespace EFM
         public void UpdateStamina()
         {
             Vector3 movementVector = GM.CurrentMovementManager.m_smoothLocoVelocity;
+            Vector2 movementVector2 = new Vector2(movementVector.x, movementVector.z);
             bool sprintEngaged = GM.CurrentMovementManager.m_sprintingEngaged;
 
             if (sprintEngaged)
@@ -657,7 +658,7 @@ namespace EFM
 
                 StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
             }
-            else if (movementVector.magnitude > 0 && Mod.weight > Mod.currentWeightLimit)
+            else if (movementVector2.magnitude > 0 && Mod.weight > Mod.currentWeightLimit)
             {
                 // Reset stamina timer
                 Mod.staminaTimer = 2;
