@@ -1667,8 +1667,7 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.LogWarning("DEV: Failed to get category name for parent: "+ parents[j]);
-                                name = parents[j] + " Name";
+                                name = GetCorrectCategoryName(itemDB[parents[j]]["_name"].ToString());
                             }
                             previousParentNode = new CategoryTreeNode(previousParentNode, parents[i], name);
                         }
@@ -1679,6 +1678,23 @@ namespace EFM
                         previousParentNode = currentParentNode;
                     }
                 }
+            }
+        }
+
+        public static string GetCorrectCategoryName(string name)
+        {
+            switch (name)
+            {
+                case "KeyMechanical":
+                    return "Mechanical Keys";
+                case "RepairKits":
+                    return "Repair Kits";
+                case "FaceCover":
+                    return "Face Covers";
+                case "RadioTransmitter":
+                    return "Radio Transmitters";
+                default:
+                    return name;
             }
         }
 
