@@ -764,7 +764,7 @@ namespace EFM
             {
                 summaryWeight.text = "Weight: " + (descriptionPack.item.currentWeight / 1000f).ToString("0.0") + "kg";
                 summaryVolume.text = "Volume: " + (descriptionPack.item.volumes[descriptionPack.item.mode] / 1000f).ToString("0.0") + "L";
-                propertiesText.text = "Weight: " + (descriptionPack.itemData.weight / 1000f).ToString("0.0") + "kg, Volume: " + (descriptionPack.item.volumes[descriptionPack.item.mode] / 1000f).ToString("0.0") + "L";
+                propertiesText.text = "Weight: " + (descriptionPack.item.currentWeight / 1000f).ToString("0.0") + "kg, Volume: " + (descriptionPack.item.volumes[descriptionPack.item.mode] / 1000f).ToString("0.0") + "L";
             }
         }
 
