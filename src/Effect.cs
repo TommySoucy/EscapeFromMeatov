@@ -9,7 +9,9 @@ namespace EFM
         public static Dictionary<EffectType, float> inactiveTimersByType = new Dictionary<EffectType, float>();
 
         public static float damageModifier;
-        public static bool overweightFatigue;
+        public static Effect fatigue;
+        public static Effect heavyFatigue;
+        public static Effect overweightFatigue;
 
         public enum EffectType
         {
@@ -276,10 +278,10 @@ namespace EFM
                     Mod.skills[skillIndex].currentProgress += value;
                     break;
                 case EffectType.EnergyRate:
-                    Mod.currentEnergyRate += value;
+                    Mod.baseEnergyRate += value;
                     break;
                 case EffectType.HydrationRate:
-                    Mod.currentHydrationRate += value;
+                    Mod.baseHydrationRate += value;
                     break;
                 case EffectType.MaxStamina:
                     Mod.currentMaxStamina += value;
@@ -453,6 +455,7 @@ namespace EFM
                         caused = new List<Effect>();
                         new Effect(EffectType.Pain, 0, 0, 0, this, false, partIndex);
                     }
+                    fatigue = this;
                     break;
                 case EffectType.HeavyFatigue:
                     if (caused == null)
@@ -464,6 +467,7 @@ namespace EFM
                             new Effect(EffectType.HealthRate, -0.0714f, 0, 0, this, false, i);
                         }
                     }
+                    heavyFatigue = this;
                     break;
                 case EffectType.OverweightFatigue:
                     if (caused == null)
@@ -471,7 +475,7 @@ namespace EFM
                         caused = new List<Effect>();
                         new Effect(EffectType.EnergyRate, -0.033f, 0, 0, this, false);
                     }
-                    overweightFatigue = true;
+                    overweightFatigue = this;
                     break;
                 case EffectType.RadExposure:
                     if (caused == null)
@@ -523,10 +527,10 @@ namespace EFM
                     Mod.skills[skillIndex].currentProgress -= value;
                     break;
                 case EffectType.EnergyRate:
-                    Mod.currentEnergyRate -= value;
+                    Mod.baseEnergyRate -= value;
                     break;
                 case EffectType.HydrationRate:
-                    Mod.currentHydrationRate -= value;
+                    Mod.baseHydrationRate -= value;
                     break;
                 case EffectType.MaxStamina:
                     Mod.currentMaxStamina -= value;
@@ -669,12 +673,14 @@ namespace EFM
                     break;
                 case EffectType.Fatigue:
                     // Do nothing, existence prevents sprint
+                    fatigue = null;
                     break;
                 case EffectType.HeavyFatigue:
                     // Do nothing, existence prevents sprint, also causes healthrate
+                    heavyFatigue = null;
                     break;
                 case EffectType.OverweightFatigue:
-                    overweightFatigue = false;
+                    overweightFatigue = null;
                     break;
                 case EffectType.RadExposure:
                     // Do nothing, really just there as a cause for other effects (Healthrate)

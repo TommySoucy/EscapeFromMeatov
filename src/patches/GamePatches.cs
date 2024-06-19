@@ -411,10 +411,10 @@ namespace EFM
 
             // HandCurrentInteractableSetPatch
             MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo handCurrentInteractableSetPatchPrefix = typeof(HandCurrentInteractableSetPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo handCurrentInteractableSetPatchPostfix = typeof(HandCurrentInteractableSetPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
 
             PatchController.Verify(handCurrentInteractableSetPatchOriginal, harmony, true);
-            harmony.Patch(handCurrentInteractableSetPatchOriginal, new HarmonyMethod(handCurrentInteractableSetPatchPrefix));
+            harmony.Patch(handCurrentInteractableSetPatchOriginal, null, new HarmonyMethod(handCurrentInteractableSetPatchPostfix));
 
             //// SosigLinkDamagePatch
             //MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
@@ -3280,14 +3280,101 @@ namespace EFM
         }
     }
 
-    // Patches FVRMovementManager.HandUpdateTwinstick to prevent sprinting in case of lack of stamina
-    // This completely replaces the original
-    class MovementManagerUpdatePatch
+    // Patches FVRMovementManager to prevent sprinting in case of lack of stamina and manage fall damage
+    TODO: // Apply patch HandUpdateTwinstick
+    TODO: // Apply patch HandUpdateTwoAxis
+    TODO: // Patch UpdateSmoothLocomotion to limit velocity (when we do base.transform.position = a6 + this.correctionDir * 1f + vector24;) 
+    TODO: // Make UpdateSmoothLocomotion Postfix to process fall damage 
+    public class MovementManagerPatch
     {
         private static bool wasGrounded = true;
         private static Vector3 previousVelocity;
         public static float damagePerMeter = 9;
         public static float safeHeight = 3;
+
+        public static bool ShouldEngageSprint(bool originalValue)
+        {
+            if (originalValue)
+            {
+                return Mod.stamina > 0 && Effect.fatigue == null && Effect.heavyFatigue == null;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static Vector3 LimitVelocity(Vector3 originalValue)
+        {
+            cont from ehre // In HandUpdateTwinstick, this.worldTPAxis *= GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex]; is the vector that decides how fast we will go with twinstick, see how much that is in game considering our setting s and limit the vecolition accordingly in this patch
+            float magnitude = Mathf.Sqrt(originalValue.x * originalValue.x + originalValue.z * originalValue.z);
+            if (magnitude > )
+            {
+                return Mod.stamina > 0 && Effect.fatigue == null && Effect.heavyFatigue == null;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        // Patches HandUpdateTwinstick
+        static IEnumerable<CodeInstruction> TwinstickTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
+            List<CodeInstruction> toInsert = new List<CodeInstruction>();
+            toInsert.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MovementManagerPatch), "ShouldEngageSprint")));
+
+            for (int i = 0; i < instructionList.Count; ++i)
+            {
+                CodeInstruction instruction = instructionList[i];
+                if (instruction.opcode == OpCodes.Stfld && instruction.operand.ToString().Contains("m_sprintingEngaged") &&
+                    (instructionList[i - 1].opcode == OpCodes.Ldc_I4_1 || instructionList[i - 1].opcode == OpCodes.Ceq))
+                {
+                    instructionList.InsertRange(i, toInsert);
+                }
+            }
+            return instructionList;
+        }
+
+        // Patches HandUpdateTwoAxis
+        static IEnumerable<CodeInstruction> TwoaxisTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
+            List<CodeInstruction> toInsert = new List<CodeInstruction>();
+            toInsert.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MovementManagerPatch), "ShouldEngageSprint")));
+
+            for (int i = 0; i < instructionList.Count; ++i)
+            {
+                CodeInstruction instruction = instructionList[i];
+                if (instruction.opcode == OpCodes.Stfld && instruction.operand.ToString().Contains("m_sprintingEngaged") &&
+                    instructionList[i - 1].opcode == OpCodes.Ldc_I4_1)
+                {
+                    instructionList.InsertRange(i, toInsert);
+                }
+            }
+            return instructionList;
+        }
+
+        // Patches UpdateSmoothLocomotion
+        // We set a vector to this.m_smoothLocoVelocity * Time.deltaTime
+        // Before this, we want to limit m_smoothLocoVelocity to below sprinting speed
+        static IEnumerable<CodeInstruction> UpdateTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
+            List<CodeInstruction> toInsert = new List<CodeInstruction>();
+            toInsert.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MovementManagerPatch), "LimitVelocity")));
+
+            for (int i = 0; i < instructionList.Count; ++i)
+            {
+                CodeInstruction instruction = instructionList[i];
+                if (instruction.opcode == OpCodes.Stloc_S && instruction.operand.ToString().Contains("108"))
+                {
+                    instructionList.InsertRange(i - 2, toInsert);
+                }
+            }
+            return instructionList;
+        }
 
         static bool Prefix(FVRViveHand hand, ref bool ___m_isRightHandActive, ref bool ___m_isLeftHandActive, ref GameObject ___m_twinStickArrowsRight,
                            ref bool ___m_isTwinStickSmoothTurningCounterClockwise, ref bool ___m_isTwinStickSmoothTurningClockwise, ref GameObject ___m_twinStickArrowsLeft,
@@ -5258,7 +5345,7 @@ namespace EFM
     // Patches FVRViveHand.CurrentInteractable.set to keep track of item held
     class HandCurrentInteractableSetPatch
     {
-        static void Prefix(ref FVRViveHand __instance, FVRInteractiveObject value, FVRInteractiveObject ___m_currentInteractable)
+        static void Postfix(FVRViveHand __instance, FVRInteractiveObject value, FVRInteractiveObject ___m_currentInteractable)
         {
             if (!Mod.inMeatovScene)
             {

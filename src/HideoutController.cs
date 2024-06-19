@@ -112,9 +112,7 @@ namespace EFM
         // Live data
         public static float[] defaultHealthRates;
         public static float defaultEnergyRate;
-        public static float currentEnergyRate;
         public static float defaultHydrationRate;
-        public static float currentHydrationRate;
         public static DateTime saveTime;
         public static double secondsSinceSave;
         public float time;
@@ -212,6 +210,15 @@ namespace EFM
                     switches[0].gameObjects.Add(area.UI.gameObject);
                     switches[1].negativeGameObjects.Add(area.UI.transform.parent.gameObject);
                     area.controller = areaController;
+
+                    for(int k=0; k < area.levels.Length; ++k)
+                    {
+                        if (area.levels[k].areaUpgradeCheckProcessors != null && area.levels[k].areaUpgradeCheckProcessors.Length > 0)
+                        {
+                            area.levels[k].areaUpgradeCheckProcessors[0].areaUI = area.UI;
+                            area.levels[k].areaUpgradeCheckProcessors[1].areaUI = area.UI;
+                        }
+                    }
                 }
             }
             areaController.areas = new Area[highestIndex + 1];
@@ -274,8 +281,21 @@ namespace EFM
             //    Mod.rewardsToGive = null;
             //}
 
-            Mod.justFinishedRaid = false;
+            if (Mod.justFinishedRaid)
+            {
+                // Remove raid rates
+                // TODO: // Will need to have RaidController setup
+            }
 
+            // Add hideout rates
+            for(int i=0; i<Mod.GetHealthCount(); ++i)
+            {
+                Mod.SetBasePositiveHealthRate(i, Mod.GetBasePositiveHealthRate(i) + defaultHealthRates[i]);
+            }
+            Mod.baseEnergyRate += defaultEnergyRate;
+            Mod.baseHydrationRate += defaultHydrationRate;
+
+            Mod.justFinishedRaid = false;
             init = true;
             Mod.LogInfo("\t0");
         }
@@ -294,6 +314,8 @@ namespace EFM
             Effect.UpdateStatic();
 
             //UpdateInsuredSets();
+
+            UpdateRates();
 
             // Handle raid loading process
             if (cancelRaidLoad)
@@ -372,6 +394,17 @@ namespace EFM
                     raidCountdown.text = (Mod.currentRaidBundleRequest.progress * 100).ToString() + "%";
                 }
             }
+        }
+
+        public void UpdateRates()
+        {
+            for(int i=0; i < Mod.GetHealthCount(); ++i)
+            {
+                // Min ensures we cannot lose health in hideout, but we cannot gain any if negative health rate is greater than positive
+                Mod.SetHealth(i, Mod.GetHealth(i) + Mathf.Min(0, Mod.GetCurrentHealthRate(i) + Mod.GetCurrentNonLethalHealthRate(i)) * Time.deltaTime);
+            }
+            Mod.hydration += Mod.currentHydrationRate * Time.deltaTime;
+            Mod.energy += Mod.currentEnergyRate * Time.deltaTime;
         }
 
         public void SetPage(int index)
@@ -1235,11 +1268,9 @@ namespace EFM
             // Consumable indicator
             Mod.consumeUI = Instantiate(Mod.consumeUIPrefab, GM.CurrentPlayerRoot).GetComponent<ConsumeUI>();
             Mod.consumeUI.gameObject.SetActive(false);
-            //// Stack split UI
-            //Mod.stackSplitUI = Instantiate(Mod.stackSplitUIPrefab, GM.CurrentPlayerRoot);
-            //Mod.stackSplitUIText = Mod.stackSplitUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
-            //Mod.stackSplitUICursor = Mod.stackSplitUI.transform.GetChild(0).GetChild(0).GetChild(1).GetChild(6);
-            //Mod.stackSplitUI.SetActive(false);
+            // Stack split UI
+            Mod.stackSplitUI = Instantiate(Mod.stackSplitUIPrefab, GM.CurrentPlayerRoot).GetComponent<StackSplitUI>();
+            Mod.stackSplitUI.gameObject.SetActive(false);
             //// Extraction UI
             //Mod.extractionUI = Instantiate(Mod.extractionUIPrefab, GM.CurrentPlayerRoot);
             //Mod.extractionUIText = Mod.extractionUI.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<Text>();
@@ -1250,13 +1281,6 @@ namespace EFM
             //Mod.extractionLimitUIText = Mod.extractionLimitUI.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>();
             //Mod.extractionLimitUI.transform.rotation = Quaternion.Euler(-25, 0, 0);
             //Mod.extractionLimitUI.SetActive(false);
-            //// ItemDescription UIs
-            //Mod.leftDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.LeftHand);
-            //Mod.leftDescriptionManager = Mod.leftDescriptionUI.AddComponent<DescriptionManager>();
-            //Mod.leftDescriptionManager.Init();
-            //Mod.rightDescriptionUI = Instantiate(Mod.itemDescriptionUIPrefab, GM.CurrentPlayerBody.RightHand);
-            //Mod.rightDescriptionManager = Mod.rightDescriptionUI.AddComponent<DescriptionManager>();
-            //Mod.rightDescriptionManager.Init();
             //// Stamina bar
             Mod.staminaBarUI = Instantiate(Mod.staminaBarPrefab, GM.CurrentPlayerBody.Head);
             Mod.staminaBarUI.transform.localRotation = Quaternion.Euler(-25, 0, 0);

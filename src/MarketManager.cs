@@ -230,8 +230,8 @@ namespace EFM
                     chosenAmount = Mathf.Max(1, (int)(Mathf.InverseLerp(-0.19f, 0.19f, distanceFromCenter) * maxBuyAmount));
                 }
 
-                Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
-                Mod.stackSplitUIText.text = chosenAmount.ToString() + "/" + maxBuyAmount;
+                Mod.stackSplitUI.arrow.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
+                Mod.stackSplitUI.amountText.text = chosenAmount.ToString() + "/" + maxBuyAmount;
             }
 
             // Update ragfair listings
@@ -958,7 +958,7 @@ namespace EFM
             ragFairSellAmountButtonCollider.enabled = false;
 
             // Start choosing amount
-            Mod.stackSplitUI.SetActive(true);
+            Mod.stackSplitUI.gameObject.SetActive(true);
             Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
             Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
             amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
@@ -1182,7 +1182,7 @@ namespace EFM
             ragFairSellAmountButtonCollider.enabled = false;
 
             // Start choosing amount
-            Mod.stackSplitUI.SetActive(true);
+            Mod.stackSplitUI.gameObject.SetActive(true);
             Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
             Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
             amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
@@ -1244,7 +1244,7 @@ namespace EFM
                         currentRagFairSellChance = GetRagFairSellChance(currentRagFairSellItem, currentRagFairSellPrice);
                         ragFairSellChance.text = "Sell Chance: " + (int)(currentRagFairSellChance * 100) + "%";
                     }
-                    Mod.stackSplitUI.SetActive(false);
+                    Mod.stackSplitUI.gameObject.SetActive(false);
 
                     // Reenable buy amount buttons
                     buyAmountButtonCollider.enabled = true;
@@ -1811,7 +1811,7 @@ namespace EFM
             ragFairSellAmountButtonCollider.enabled = false;
 
             // Start choosing amount
-            Mod.stackSplitUI.SetActive(true);
+            Mod.stackSplitUI.gameObject.SetActive(true);
             Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
             Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
             amountChoiceStartPosition = Mod.rightHand.transform.localPosition;

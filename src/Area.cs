@@ -1584,7 +1584,7 @@ namespace EFM
             {
                 case BonusType.EnergyRegeneration:
                     energyRegeneration += value;
-                    HideoutController.currentEnergyRate = HideoutController.defaultEnergyRate / 100 * energyRegeneration;
+                    Mod.currentEnergyRate = Mod.baseEnergyRate + Mod.baseEnergyRate / 100 * energyRegeneration;
                     break;
                 case BonusType.DebuffEndDelay:
                     debuffEndDelay += value;
@@ -1594,7 +1594,7 @@ namespace EFM
                     break;
                 case BonusType.HydrationRegeneration:
                     hydrationRegeneration += value;
-                    HideoutController.currentHydrationRate = HideoutController.defaultHydrationRate / 100 * hydrationRegeneration;
+                    Mod.currentHydrationRate = Mod.baseHydrationRate + Mod.baseHydrationRate / 100 * hydrationRegeneration;
                     break;
                 case BonusType.HealthRegeneration:
                     healthRegeneration += value;
@@ -1647,7 +1647,7 @@ namespace EFM
             {
                 case BonusType.EnergyRegeneration:
                     energyRegeneration -= value;
-                    HideoutController.currentEnergyRate = HideoutController.defaultEnergyRate / 100 * energyRegeneration;
+                    Mod.currentEnergyRate = Mod.baseEnergyRate + Mod.baseEnergyRate / 100 * energyRegeneration;
                     break;
                 case BonusType.DebuffEndDelay:
                     debuffEndDelay -= value;
@@ -1657,7 +1657,7 @@ namespace EFM
                     break;
                 case BonusType.HydrationRegeneration:
                     hydrationRegeneration -= value;
-                    HideoutController.currentHydrationRate = HideoutController.defaultHydrationRate / 100 * hydrationRegeneration;
+                    Mod.currentHydrationRate = Mod.baseHydrationRate + Mod.baseHydrationRate / 100 * hydrationRegeneration;
                     break;
                 case BonusType.HealthRegeneration:
                     healthRegeneration -= value;

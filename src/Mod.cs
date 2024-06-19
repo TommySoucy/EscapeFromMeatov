@@ -224,8 +224,25 @@ namespace EFM
         public static float currentMaxHydration;
         public static readonly float raidEnergyRate = -3.2f; // TODO: Move this to RaidController and set it on LoadDB globals>config>Health>Effects>Existence
         public static readonly float raidHydrationRate = -2.6f; // TODO: Move this to RaidController and set it on LoadDB globals>config>Health>Effects>Existence
+        private static float _baseEnergyRate;
+        public static float baseEnergyRate // Affect by solid values (Effects)
+        {
+            set
+            {
+                float preValue = _baseEnergyRate;
+                _baseEnergyRate = value;
+                if(preValue != _baseEnergyRate)
+                {
+                    currentEnergyRate = baseEnergyRate + baseEnergyRate / 100 * Bonus.energyRegeneration;
+                }
+            }
+            get
+            {
+                return _baseEnergyRate;
+            }
+        }
         private static float _currentEnergyRate;
-        public static float currentEnergyRate
+        public static float currentEnergyRate // Base affected by percentage values (Bonus, Skill)
         {
             set
             {
@@ -239,6 +256,23 @@ namespace EFM
             get
             {
                 return _currentEnergyRate;
+            }
+        }
+        private static float _baseHydrationRate;
+        public static float baseHydrationRate
+        {
+            set
+            {
+                float preValue = _baseHydrationRate;
+                _baseHydrationRate = value;
+                if (preValue != _baseHydrationRate)
+                {
+                    currentHydrationRate = baseHydrationRate + baseHydrationRate / 100 * Bonus.hydrationRegeneration;
+                }
+            }
+            get
+            {
+                return _baseHydrationRate;
             }
         }
         private static float _currentHydrationRate;
@@ -270,24 +304,15 @@ namespace EFM
         public static Skill[] skills;
         public static float sprintStaminaDrain = 4.1f;
         public static float overweightStaminaDrain = 4f;
-        public static float staminaRate = 4.4f;
-        public static float currentStaminaRate = 4.4f;
         public static float jumpStaminaDrain = 16;
-        public static float currentStaminaEffect = 0;
-        public static float effectWeightLimitBonus = 0;
-        public static float skillWeightLimitBonus = 0;
-        public static float currentDamageModifier = 1;
-        public static int stomachBloodLossCount = 0; // TODO: If this is 0, in hideout we will regen health otherwise not, in raid we will multiply energy and hydration rate by 5
-        public static float temperatureOffset = 0;
-        public static bool fatigue = false;
+        public static float staminaRate = 4.4f; // Affected by solid amounts
+        public static float currentStaminaRate = 4.4f; // Affected by based on staminaRate, affected further by percentages
         public static Effect dehydrationEffect;
         public static Effect fatigueEffect;
         public static Effect overweightFatigueEffect;
         public static ConsumeUI consumeUI;
         public static Text consumeUIText;
-        public static GameObject stackSplitUI;
-        public static Text stackSplitUIText;
-        public static Transform stackSplitUICursor;
+        public static StackSplitUI stackSplitUI;
         public static GameObject extractionUI;
         public static Text extractionUIText;
         public static GameObject extractionLimitUI;
@@ -1272,15 +1297,15 @@ namespace EFM
 
             JToken globalRegens = globalDB["config"]["Health"]["Effects"]["Regeneration"];
             HideoutController.defaultHealthRates = new float[7];
-            HideoutController.defaultHealthRates[0] = (float)globalRegens["BodyHealth"]["Head"]["Value"];
-            HideoutController.defaultHealthRates[1] = (float)globalRegens["BodyHealth"]["Chest"]["Value"];
-            HideoutController.defaultHealthRates[2] = (float)globalRegens["BodyHealth"]["Stomach"]["Value"];
-            HideoutController.defaultHealthRates[3] = (float)globalRegens["BodyHealth"]["LeftArm"]["Value"];
-            HideoutController.defaultHealthRates[4] = (float)globalRegens["BodyHealth"]["RightArm"]["Value"];
-            HideoutController.defaultHealthRates[5] = (float)globalRegens["BodyHealth"]["LeftLeg"]["Value"];
-            HideoutController.defaultHealthRates[6] = (float)globalRegens["BodyHealth"]["RightLeg"]["Value"];
-            HideoutController.defaultEnergyRate = (float)globalRegens["Energy"];
-            HideoutController.defaultHydrationRate = (float)globalRegens["Hydration"];
+            HideoutController.defaultHealthRates[0] = ((float)globalRegens["BodyHealth"]["Head"]["Value"]) / 60;
+            HideoutController.defaultHealthRates[1] = ((float)globalRegens["BodyHealth"]["Chest"]["Value"]) / 60;
+            HideoutController.defaultHealthRates[2] = ((float)globalRegens["BodyHealth"]["Stomach"]["Value"]) / 60;
+            HideoutController.defaultHealthRates[3] = ((float)globalRegens["BodyHealth"]["LeftArm"]["Value"]) / 60;
+            HideoutController.defaultHealthRates[4] = ((float)globalRegens["BodyHealth"]["RightArm"]["Value"]) / 60;
+            HideoutController.defaultHealthRates[5] = ((float)globalRegens["BodyHealth"]["LeftLeg"]["Value"]) / 60;
+            HideoutController.defaultHealthRates[6] = ((float)globalRegens["BodyHealth"]["RightLeg"]["Value"]) / 60;
+            HideoutController.defaultEnergyRate = ((float)globalRegens["Energy"]) / 60;
+            HideoutController.defaultHydrationRate = ((float)globalRegens["Hydration"]) / 60;
 
             JToken globalHealthFactors = globalDB["config"]["Health"]["ProfileHealthSettings"]["HealthFactorsSettings"];
             defaultMaxEnergy = (float)globalHealthFactors["Energy"]["Default"];
@@ -2136,8 +2161,8 @@ namespace EFM
             }
             else if (skillIndex == 1)
             {
-                Mod.skillWeightLimitBonus += (postLevel - preLevel);
-                Mod.currentWeightLimit = (int)(Mod.baseWeightLimit + Mod.effectWeightLimitBonus + Mod.skillWeightLimitBonus);
+                //Mod.skillWeightLimitBonus += (postLevel - preLevel);
+                Mod.currentWeightLimit = Mod.baseWeightLimit;
 
                 float healthAmount = Skill.skillProgress * actualAmountToAdd;
                 Mod.skills[3].progress += healthAmount;

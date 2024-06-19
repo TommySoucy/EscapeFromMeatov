@@ -209,18 +209,49 @@ namespace EFM
         public void OnHydrationChanged()
         {
             hydration.text = ((int)Mod.hydration).ToString() +"/"+(int)Mod.currentMaxHydration;
+            if(Mod.hydration == Mod.currentMaxHydration)
+            {
+                if (hydrationDelta.gameObject.activeSelf)
+                {
+                    hydrationDelta.gameObject.SetActive(false);
+                }
+            }
+            else if(Mod.currentHydrationRate != 0)
+            {
+                if (!hydrationDelta.gameObject.activeSelf)
+                {
+                    hydrationDelta.gameObject.SetActive(true);
+                }
+            }
         }
 
         public void OnEnergyChanged()
         {
             energy.text = ((int)Mod.energy).ToString() +"/"+(int)Mod.currentMaxEnergy;
+            if (Mod.hydration == Mod.currentMaxHydration)
+            {
+                if (energyDelta.gameObject.activeSelf)
+                {
+                    energyDelta.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                if (!energyDelta.gameObject.activeSelf)
+                {
+                    energyDelta.gameObject.SetActive(true);
+                }
+            }
         }
 
         public void OnHydrationRateChanged()
         {
-            if(Mod.currentHydrationRate == 0)
+            if(Mod.currentHydrationRate == 0 || Mod.hydration == Mod.currentMaxHydration)
             {
-                hydrationDelta.gameObject.SetActive(false);
+                if (hydrationDelta.gameObject.activeSelf)
+                {
+                    hydrationDelta.gameObject.SetActive(false);
+                }
             }
             else
             {
@@ -231,9 +262,12 @@ namespace EFM
 
         public void OnEnergyRateChanged()
         {
-            if(Mod.currentEnergyRate == 0)
+            if(Mod.currentEnergyRate == 0 || Mod.energy == Mod.currentMaxEnergy)
             {
-                energyDelta.gameObject.SetActive(false);
+                if (energyDelta.gameObject.activeSelf)
+                {
+                    energyDelta.gameObject.SetActive(false);
+                }
             }
             else
             {
@@ -602,7 +636,7 @@ namespace EFM
             extractionTimer.text = Mod.FormatTimeString(raidTimeLeft);
         }
 
-        private void UpdateStamina()
+        public void UpdateStamina()
         {
             Vector3 movementVector = GM.CurrentMovementManager.m_smoothLocoVelocity;
             bool sprintEngaged = GM.CurrentMovementManager.m_sprintingEngaged;
@@ -622,11 +656,6 @@ namespace EFM
                 Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
 
                 StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
-
-                //if(Mod.stamina == 0)
-                //{
-                // Dont need to do anything here, here movement manager, we will patch to make sure that sprint is disengaged when we reach 0 stamina
-                //}
             }
             else if (movementVector.magnitude > 0 && Mod.weight > Mod.currentWeightLimit)
             {
@@ -661,14 +690,14 @@ namespace EFM
             // If reach 0 stamina due to being overweight, activate overweight fatigue effect
             if (Mod.stamina == 0 && Mod.weight > Mod.currentWeightLimit)
             {
-                if (!Effect.overweightFatigue)
+                if (Effect.overweightFatigue == null)
                 {
-                    new Effect(Effect.EffectType.OverweightFatigue, 0, 0, 0);
+                    new Effect(Effect.EffectType.OverweightFatigue, 0, 300, 0);
                 }
-            }
-            else if(Effect.overweightFatigue)
-            {
-                Effect.RemoveEffects(Effect.EffectType.OverweightFatigue);
+                else
+                {
+                    Effect.overweightFatigue.timer = 300;
+                }
             }
         }
 

@@ -727,8 +727,8 @@ namespace EFM
 					splitAmount = Mathf.Max(1, (int)(Mathf.InverseLerp(-0.19f, 0.19f, distanceFromCenter) * stack));
 				}
 
-				Mod.stackSplitUICursor.transform.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
-				Mod.stackSplitUIText.text = splitAmount.ToString() + "/" + stack;
+				Mod.stackSplitUI.arrow.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
+				Mod.stackSplitUI.amountText.text = splitAmount.ToString() + "/" + stack;
 			}
 		}
 
@@ -884,7 +884,7 @@ namespace EFM
                             }
 
                             // Start splitting
-                            Mod.stackSplitUI.SetActive(true);
+                            Mod.stackSplitUI.gameObject.SetActive(true);
                             Mod.stackSplitUI.transform.position = hand.transform.position + hand.transform.forward * 0.2f;
                             Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, hand.transform.eulerAngles.y, 0);
                             stackSplitStartPosition = hand.transform.position;
@@ -1074,7 +1074,7 @@ namespace EFM
 
 		public void CancelSplit()
         {
-			Mod.stackSplitUI.SetActive(false);
+			Mod.stackSplitUI.gameObject.SetActive(false);
 			splittingStack = false;
 			Mod.amountChoiceUIUp = false;
 			Mod.splittingItem = null;
