@@ -846,7 +846,7 @@ namespace EFM
         {
             float preValue = health[index];
             health[index] = value;
-            if (value != preValue)
+            if ((int)value != (int)preValue)
             {
                 OnPartHealthChangedInvoke(index);
             }
@@ -855,11 +855,6 @@ namespace EFM
         public static void SetHealthArray(float[] value)
         {
             health = value;
-            Mod.LogInfo("Health array set: ");
-            for(int i=0;i<health.Length; ++i)
-            {
-                Mod.LogInfo("\t" + health[i]);
-            }
             OnPartHealthChangedInvoke(-1);
         }
 

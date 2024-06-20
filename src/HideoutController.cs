@@ -401,10 +401,10 @@ namespace EFM
             for(int i=0; i < Mod.GetHealthCount(); ++i)
             {
                 // Min ensures we cannot lose health in hideout, but we cannot gain any if negative health rate is greater than positive
-                Mod.SetHealth(i, Mod.GetHealth(i) + Mathf.Min(0, Mod.GetCurrentHealthRate(i) + Mod.GetCurrentNonLethalHealthRate(i)) * Time.deltaTime);
+                Mod.SetHealth(i, Mathf.Max(0, Mathf.Min(Mod.GetCurrentMaxHealth(i), Mod.GetHealth(i) + Mathf.Min(0, Mod.GetCurrentHealthRate(i) + Mod.GetCurrentNonLethalHealthRate(i)) * Time.deltaTime)));
             }
-            Mod.hydration += Mod.currentHydrationRate * Time.deltaTime;
-            Mod.energy += Mod.currentEnergyRate * Time.deltaTime;
+            Mod.hydration = Mathf.Max(0, Mathf.Min(Mod.currentMaxHydration, Mod.hydration + Mod.currentHydrationRate * Time.deltaTime));
+            Mod.energy = Mathf.Max(0, Mathf.Min(Mod.currentMaxEnergy, Mod.energy + Mod.currentEnergyRate * Time.deltaTime));
         }
 
         public void SetPage(int index)
