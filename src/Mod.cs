@@ -846,7 +846,6 @@ namespace EFM
         {
             float preValue = health[index];
             health[index] = value;
-            Mod.LogInfo("Health "+index+" set: "+ health[index]);
             if (value != preValue)
             {
                 OnPartHealthChangedInvoke(index);

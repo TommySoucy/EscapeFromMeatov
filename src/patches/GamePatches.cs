@@ -3322,7 +3322,6 @@ namespace EFM
                     (instructionList[i - 1].opcode == OpCodes.Ldc_I4_1 || instructionList[i - 1].opcode == OpCodes.Ceq))
                 {
                     instructionList.InsertRange(i, toInsert);
-                    Mod.LogInfo("HandUpdateTwinstick applied!");
                 }
             }
             return instructionList;
@@ -3342,7 +3341,6 @@ namespace EFM
                     instructionList[i - 1].opcode == OpCodes.Ldc_I4_1)
                 {
                     instructionList.InsertRange(i, toInsert);
-                    Mod.LogInfo("HandUpdateTwoAxis applied!");
                 }
             }
             return instructionList;
@@ -3363,7 +3361,6 @@ namespace EFM
                 if (instruction.opcode == OpCodes.Stloc_S && instruction.operand.ToString().Contains("108"))
                 {
                     instructionList.InsertRange(i - 2, toInsert);
-                    Mod.LogInfo("UpdateSmoothLocomotion applied!");
                     break;
                 }
             }
