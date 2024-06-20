@@ -299,14 +299,40 @@ namespace EFM
         //public static List<InsuredSet> insuredItems;
         public static float staminaTimer = 0;
         public static float stamina = 100;
-        public static float maxStamina = 100;
-        public static float currentMaxStamina = 100;
+        private static float _baseMaxStamina = 100; // Affected by solid amounts
+        public static float baseMaxStamina
+        {
+            get { return _baseMaxStamina; }
+            set
+            {
+                float preValue = _baseMaxStamina;
+                _baseMaxStamina = value;
+                if(preValue != _baseMaxStamina)
+                {
+                    currentMaxStamina = _baseMaxStamina;
+                }
+            }
+        }
+        public static float currentMaxStamina = 100; // Based on baseMaxStamina, affected further by percentages
         public static Skill[] skills;
         public static float sprintStaminaDrain = 4.1f;
         public static float overweightStaminaDrain = 4f;
         public static float jumpStaminaDrain = 16;
-        public static float staminaRate = 4.4f; // Affected by solid amounts
-        public static float currentStaminaRate = 4.4f; // Affected by based on staminaRate, affected further by percentages
+        private static float _baseStaminaRate = 4.4f; // Affected by solid amounts
+        public static float baseStaminaRate
+        {
+            get { return _baseStaminaRate; }
+            set
+            {
+                float preValue = _baseStaminaRate;
+                _baseStaminaRate = value;
+                if(preValue != _baseStaminaRate)
+                {
+                    currentStaminaRate = _baseStaminaRate;
+                }
+            }
+        }
+        public static float currentStaminaRate = 4.4f; // Based on staminaRate, affected further by percentages
         public static Effect dehydrationEffect;
         public static Effect fatigueEffect;
         public static Effect overweightFatigueEffect;
@@ -1285,6 +1311,10 @@ namespace EFM
         {
             globalDB = JObject.Parse(File.ReadAllText(path + "/database/globals.json"));
 
+            JToken globalFallingData = globalDB["config"]["Health"]["Falling"];
+            StatusUI.damagePerMeter = (float)globalFallingData["DamagePerMeter"];
+            StatusUI.safeHeight = (float)globalFallingData["SafeHeight"];
+
             JToken globalPartsHealth = globalDB["config"]["Health"]["ProfileHealthSettings"]["BodyPartsSettings"];
             defaultMaxHealth = new float[7];
             defaultMaxHealth[0] = (float)globalPartsHealth["Head"]["Default"];
@@ -2139,7 +2169,7 @@ namespace EFM
             // Skill specific stuff
             if (skillIndex == 0)
             {
-                Mod.maxStamina += (postLevel - preLevel);
+                Mod.baseMaxStamina += (postLevel - preLevel);
 
                 float healthAmount = Skill.skillProgress * actualAmountToAdd;
                 Mod.skills[3].progress += healthAmount;

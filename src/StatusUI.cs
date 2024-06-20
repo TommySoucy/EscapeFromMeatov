@@ -9,6 +9,12 @@ namespace EFM
     public class StatusUI : MonoBehaviour
     {
         public static StatusUI instance;
+
+        public static float damagePerMeter = 9;
+        public static float safeHeight = 3;
+        public Vector3 previousVelocity;
+        public bool wasGrounded;
+
         public GameObject canvas;
         public GameObject slotsParent;
         public EquipmentSlot[] equipmentSlots; // Backpack, BodyArmor, EarPiece, HeadWear, FaceCover, EyeWear, Rig, Pouch
@@ -181,6 +187,11 @@ namespace EFM
             }
 
             UpdateStamina();
+            UpdateFall();
+            UpdateMovement();
+
+            previousVelocity = GM.CurrentMovementManager.m_smoothLocoVelocity;
+            wasGrounded = GM.CurrentMovementManager.m_isGrounded;
         }
 
         public void AddTask(Task task)
@@ -321,7 +332,7 @@ namespace EFM
         public void OnPlayerWeightChanged()
         {
             weight.text = String.Format("{0:0.#}", Mod.weight / 1000.0f) + "/ " + String.Format("{0:0.#}", Mod.currentWeightLimit / 1000.0f);
-            if (Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100.0f * 20) // Current weight limit + 20%
+            if (Mod.weight > Mod.currentWeightLimit)
             {
                 weight.color = Color.red;
 
@@ -329,7 +340,7 @@ namespace EFM
                 effectIcons[6].SetActive(false);
                 effectIcons[7].SetActive(true);
             }
-            else if (Mod.weight > Mod.currentWeightLimit)
+            else if (Mod.weight > Mod.currentWeightLimit / 2)
             {
                 weight.color = Color.yellow;
 
@@ -636,13 +647,53 @@ namespace EFM
             extractionTimer.text = Mod.FormatTimeString(raidTimeLeft);
         }
 
+        public void UpdateMovement()
+        {
+            Vector3 sideMovement = GM.CurrentMovementManager.m_smoothLocoVelocity * Time.deltaTime;
+            sideMovement.y = 0;
+
+            if (GM.CurrentMovementManager.m_sprintingEngaged)
+            {
+                Mod.distanceTravelledSprinting += sideMovement.magnitude;
+            }
+            else if (sideMovement.magnitude > 0)
+            {
+                Mod.distanceTravelledWalking += sideMovement.magnitude;
+            }
+        }
+
+        public void UpdateFall()
+        {
+            if (GM.CurrentMovementManager.m_isGrounded && !wasGrounded)
+            {
+                // Considering realistic 1g of acceleration, t = (Vf-Vi)/a, and s = Vi * t + 0.5 * a * t ^ 2, s being distance fallen
+                float t = previousVelocity.y / -9.806f; // Note that here, velocity and a are negative, giving a positive time
+                float s = 4.903f * t * t; // Here a is positive to have a positive distance fallen
+                if (s > safeHeight)
+                {
+                    float damage = s * damagePerMeter;
+                    float distribution = UnityEngine.Random.value;
+                    if (UnityEngine.Random.value < 0.125f * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
+                    {
+                        new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, 5, -1, true);
+                    }
+                    if (UnityEngine.Random.value < 0.125f * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
+                    {
+                        new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, 6, -1, true);
+                    }
+
+                    DamagePatch.RegisterPlayerHit(5, distribution * damage, true);
+                    DamagePatch.RegisterPlayerHit(6, (1 - distribution) * damage, true);
+                }
+            }
+        }
+
         public void UpdateStamina()
         {
             Vector3 movementVector = GM.CurrentMovementManager.m_smoothLocoVelocity;
             Vector2 movementVector2 = new Vector2(movementVector.x, movementVector.z);
-            bool sprintEngaged = GM.CurrentMovementManager.m_sprintingEngaged;
 
-            if (sprintEngaged)
+            if ((GM.CurrentMovementManager.m_sprintingEngaged || movementVector2.magnitude > 1.6f) && GM.CurrentMovementManager.m_isGrounded)
             {
                 // Reset stamina timer
                 Mod.staminaTimer = 2;
@@ -656,9 +707,9 @@ namespace EFM
 
                 Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
 
-                StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
+                StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
             }
-            else if (movementVector2.magnitude > 0 && Mod.weight > Mod.currentWeightLimit)
+            else if (movementVector2.magnitude > 0 && GM.CurrentMovementManager.m_isGrounded && Mod.weight > Mod.currentWeightLimit / 2)
             {
                 // Reset stamina timer
                 Mod.staminaTimer = 2;
@@ -667,11 +718,11 @@ namespace EFM
 
                 Mod.stamina = Mathf.Max(Mod.stamina - currentStaminaDrain, 0);
 
-                StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
+                StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
             }
-            else if (Mod.weight > Mod.currentWeightLimit + Mod.currentWeightLimit / 100.0f * 20)
+            else if (Mod.weight > Mod.currentWeightLimit)
             {
-                // Reset stamina timer to prevent stamina regen even while not moving if we are 20% above max weight
+                // Reset stamina timer to prevent stamina regen even while not moving if we are above max weight
                 Mod.staminaTimer = 2;
             }
             else // Not using stamina
@@ -680,11 +731,11 @@ namespace EFM
                 {
                     Mod.staminaTimer -= Time.deltaTime;
                 }
-                else
+                else if(Mod.stamina <= Mod.currentMaxStamina)
                 {
-                    Mod.stamina = Mathf.Min(Mod.stamina + Mod.staminaRate * Time.deltaTime, Mod.currentMaxStamina);
+                    Mod.stamina = Mathf.Min(Mod.stamina + Mod.currentStaminaRate * Time.deltaTime, Mod.currentMaxStamina);
 
-                    StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
+                    StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
                 }
             }
 

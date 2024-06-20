@@ -361,7 +361,7 @@ namespace EFM
                         }
                         Mod.energy = Mod.defaultMaxEnergy;
                         Mod.hydration = Mod.defaultMaxHydration;
-                        Mod.stamina = Mod.maxStamina;
+                        Mod.stamina = Mod.baseMaxStamina;
                         Mod.weight = 0;
                     }
 
@@ -1343,8 +1343,8 @@ namespace EFM
                 Mod.currentMaxHydration = (float)loadedData["maxHydration"];
                 Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.defaultMaxHydration);
                 Mod.energy = Mathf.Min((float)loadedData["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.defaultMaxEnergy);
-                Mod.maxStamina = (float)loadedData["maxStamina"];
-                Mod.stamina = Mod.maxStamina;
+                Mod.baseMaxStamina = (float)loadedData["maxStamina"];
+                Mod.stamina = Mod.baseMaxStamina;
                 Mod.totalKillCount = (int)loadedData["totalKillCount"];
                 Mod.totalDeathCount = (int)loadedData["totalDeathCount"];
                 Mod.totalRaidCount = (int)loadedData["totalRaidCount"];
@@ -1365,10 +1365,10 @@ namespace EFM
 
                 // Set bonuses depending on skills
                 float enduranceLevel = Mod.skills[0].progress / 100;
-                Mod.maxStamina += Mod.maxStamina / 100 * enduranceLevel;
+                Mod.baseMaxStamina += Mod.baseMaxStamina / 100 * enduranceLevel;
                 if (enduranceLevel >= 51)
                 {
-                    Mod.maxStamina += 20;
+                    Mod.baseMaxStamina += 20;
                 }
 
                 // Player items
@@ -3705,7 +3705,7 @@ namespace EFM
             loadedData["hydration"] = Mod.hydration;
             loadedData["maxEnergy"] = Mod.defaultMaxEnergy;
             loadedData["energy"] = Mod.energy;
-            loadedData["maxStamina"] = Mod.maxStamina;
+            loadedData["maxStamina"] = Mod.baseMaxStamina;
             loadedData["weight"] = Mod.weight;
             loadedData["totalRaidCount"] = Mod.totalRaidCount;
             loadedData["runthroughRaidCount"] = Mod.runthroughRaidCount;

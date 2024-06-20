@@ -25,6 +25,13 @@ namespace EFM
 
             // Set to no quickbelt slot
             GM.CurrentPlayerBody.ConfigureQuickbelt(-4);
+
+            // Enforce specific options
+            GM.Options.MovementOptions.TPLocoSpeedIndex = 2; // Limits walk speed to 1.8, sprint to 3.6
+            GM.Options.SimulationOptions.ObjectGravityMode = SimulationOptions.GravityMode.Realistic;
+            GM.Options.SimulationOptions.PlayerGravityMode = SimulationOptions.GravityMode.Realistic;
+            GM.Options.SimulationOptions.BallisticGravityMode = SimulationOptions.GravityMode.Realistic;
+            GM.Options.SaveToFile();
         }
 
         public override void Update()

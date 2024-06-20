@@ -24,6 +24,21 @@ namespace EFM
     {
         public static void DoPatching(Harmony harmony)
         {
+            // MovementManagerPatch
+            MethodInfo movementManagerTwinstickOriginal = typeof(FVRMovementManager).GetMethod("HandUpdateTwinstick", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo movementManagerTwinstickTranspiler = typeof(MovementManagerPatch).GetMethod("TwinstickTranspiler", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo movementManagerTwoAxisOriginal = typeof(FVRMovementManager).GetMethod("HandUpdateTwoAxis", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo movementManagerTwoAxisTranspiler = typeof(MovementManagerPatch).GetMethod("TwoAxisTranspiler", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo movementManagerUpdateOriginal = typeof(FVRMovementManager).GetMethod("UpdateSmoothLocomotion", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo movementManagerUpdateTranspiler = typeof(MovementManagerPatch).GetMethod("UpdateTranspiler", BindingFlags.NonPublic | BindingFlags.Static);
+
+            PatchController.Verify(movementManagerTwinstickOriginal, harmony, true);
+            PatchController.Verify(movementManagerTwoAxisOriginal, harmony, true);
+            PatchController.Verify(movementManagerUpdateOriginal, harmony, true);
+            harmony.Patch(movementManagerTwinstickOriginal, null, null, new HarmonyMethod(movementManagerTwinstickTranspiler));
+            harmony.Patch(movementManagerTwoAxisOriginal, null, null, new HarmonyMethod(movementManagerTwoAxisTranspiler));
+            harmony.Patch(movementManagerUpdateOriginal, null, null, new HarmonyMethod(movementManagerUpdateTranspiler));
+
             //// LoadLevelBeginPatch
             //MethodInfo loadLevelBeginPatchOriginal = typeof(SteamVR_LoadLevel).GetMethod("Begin", BindingFlags.Public | BindingFlags.Static);
             //MethodInfo loadLevelBeginPatchPrefix = typeof(LoadLevelBeginPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -168,12 +183,12 @@ namespace EFM
             //PatchController.Verify(clipUpdateInteractionPatchOriginal, harmony, true);
             //harmony.Patch(clipUpdateInteractionPatchOriginal, null, new HarmonyMethod(clipUpdateInteractionPatchPostfix), new HarmonyMethod(clipUpdateInteractionPatchTranspiler));
 
-            //// MovementManagerJumpPatch
-            //MethodInfo movementManagerJumpPatchOriginal = typeof(FVRMovementManager).GetMethod("Jump", BindingFlags.NonPublic | BindingFlags.Instance);
-            //MethodInfo movementManagerJumpPatchPrefix = typeof(MovementManagerJumpPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // MovementManagerJumpPatch
+            MethodInfo movementManagerJumpOriginal = typeof(FVRMovementManager).GetMethod("Jump", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo movementManagerJumpPrefix = typeof(MovementManagerJumpPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(movementManagerJumpPatchOriginal, harmony, true);
-            //harmony.Patch(movementManagerJumpPatchOriginal, new HarmonyMethod(movementManagerJumpPatchPrefix));
+            PatchController.Verify(movementManagerJumpOriginal, harmony, true);
+            harmony.Patch(movementManagerJumpOriginal, new HarmonyMethod(movementManagerJumpPrefix));
 
             //// MovementManagerTwinstickPatch
             //MethodInfo movementManagerTwinstickPatchOriginal = typeof(FVRMovementManager).GetMethod("HandUpdateTwinstick", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -3223,7 +3238,7 @@ namespace EFM
     // This completely replaces the original
     class MovementManagerJumpPatch
     {
-        static bool Prefix(ref bool ___m_isGrounded, ref Vector3 ___m_smoothLocoVelocity, ref FVRMovementManager __instance)
+        static bool Prefix(FVRMovementManager __instance, ref bool ___m_isGrounded, ref Vector3 ___m_smoothLocoVelocity)
         {
             if (!Mod.inMeatovScene)
             {
@@ -3236,67 +3251,45 @@ namespace EFM
                 return false;
             }
 
-            if ((__instance.Mode == FVRMovementManager.MovementMode.Armswinger || __instance.Mode == FVRMovementManager.MovementMode.SingleTwoAxis || __instance.Mode == FVRMovementManager.MovementMode.TwinStick) && !___m_isGrounded)
-            {
-                return false;
-            }
-            __instance.DelayGround(0.1f);
-            float num = 0f;
-            switch (GM.Options.SimulationOptions.PlayerGravityMode)
-            {
-                case SimulationOptions.GravityMode.Realistic:
-                    num = 7.1f;
-                    break;
-                case SimulationOptions.GravityMode.Playful:
-                    num = 5f;
-                    break;
-                case SimulationOptions.GravityMode.OnTheMoon:
-                    num = 3f;
-                    break;
-                case SimulationOptions.GravityMode.None:
-                    num = 0.001f;
-                    break;
-            }
-            num *= 0.65f;
-            num += num * (0.004f * (Mod.skills[1].currentProgress / 100));
             if (__instance.Mode == FVRMovementManager.MovementMode.Armswinger || __instance.Mode == FVRMovementManager.MovementMode.SingleTwoAxis || __instance.Mode == FVRMovementManager.MovementMode.TwinStick)
             {
+                if (!___m_isGrounded)
+                {
+                    return false;
+                }
+
+                __instance.DelayGround(0.1f);
+                float num = 4.615f; // Corresponds to Realistic gravity mode in original * 0.65
                 __instance.DelayGround(0.25f);
                 ___m_smoothLocoVelocity.y = Mathf.Clamp(___m_smoothLocoVelocity.y, 0f, ___m_smoothLocoVelocity.y);
                 ___m_smoothLocoVelocity.y = num;
                 ___m_isGrounded = false;
+
+                // Use stamina
+                Mod.stamina = Mathf.Max(Mod.stamina - Mod.jumpStaminaDrain, 0);
+                StaminaUI.instance.barFill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina / Mod.currentMaxStamina * 100);
+
+                // Reset stamina timer
+                Mod.staminaTimer = 2;
             }
-
-            // Use stamina
-            Mod.stamina = Mathf.Max(Mod.stamina - (Mod.jumpStaminaDrain - Mod.jumpStaminaDrain * (0.006f * (Mod.skills[0].progress / 100))), 0);
-            Mod.staminaBarUI.transform.GetChild(0).GetChild(1).GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mod.stamina);
-
-            Mod.AddSkillExp(UnityEngine.Random.Range(Skill.pushUpMin, Skill.pushUpMax), 1);
-
-            // Reset stamina timer
-            Mod.staminaTimer = 2;
 
             return false;
         }
     }
 
-    // Patches FVRMovementManager to prevent sprinting in case of lack of stamina and manage fall damage
-    TODO: // Apply patch HandUpdateTwinstick
-    TODO: // Apply patch HandUpdateTwoAxis
-    TODO: // Patch UpdateSmoothLocomotion to limit velocity (when we do base.transform.position = a6 + this.correctionDir * 1f + vector24;) 
-    TODO: // Make UpdateSmoothLocomotion Postfix to process fall damage 
+    // Patches FVRMovementManager to prevent sprinting in case of lack of stamina and limit velocity
     public class MovementManagerPatch
     {
-        private static bool wasGrounded = true;
-        private static Vector3 previousVelocity;
-        public static float damagePerMeter = 9;
-        public static float safeHeight = 3;
-
         public static bool ShouldEngageSprint(bool originalValue)
         {
             if (originalValue)
             {
-                return Mod.stamina > 0 && Effect.fatigue == null && Effect.heavyFatigue == null;
+                // Can't sprint if,
+                // Not stamina
+                // Fatigued
+                // Heavy fatigued
+                // Weight above max carry weight
+                return Mod.stamina > 0 && Effect.fatigue == null && Effect.heavyFatigue == null && Mod.weight > Mod.currentWeightLimit;
             }
             else
             {
@@ -3306,15 +3299,19 @@ namespace EFM
 
         public static Vector3 LimitVelocity(Vector3 originalValue)
         {
-            cont from ehre // In HandUpdateTwinstick, this.worldTPAxis *= GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex]; is the vector that decides how fast we will go with twinstick, see how much that is in game considering our setting s and limit the vecolition accordingly in this patch
+            // Note that smoothLocoVelocity's magnitude in xz plane is limited to GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex]
+            // A good default is MovementOptions.TPLocoSpeedIndex = 2, for a TPLocoSpeeds of 1.8
+            // Is sprintingEngaged, vector is multiplied by 2 for total xz velocity of 3.6
+            float maxMagnitude = GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex] * 2;
             float magnitude = Mathf.Sqrt(originalValue.x * originalValue.x + originalValue.z * originalValue.z);
-            if (magnitude > )
+            if (magnitude > maxMagnitude)
             {
-                return Mod.stamina > 0 && Effect.fatigue == null && Effect.heavyFatigue == null;
+                float mult = maxMagnitude / magnitude;
+                return new Vector3(originalValue.x * mult, originalValue.y, originalValue.z * mult);
             }
             else
             {
-                return false;
+                return originalValue;
             }
         }
 
@@ -3332,6 +3329,7 @@ namespace EFM
                     (instructionList[i - 1].opcode == OpCodes.Ldc_I4_1 || instructionList[i - 1].opcode == OpCodes.Ceq))
                 {
                     instructionList.InsertRange(i, toInsert);
+                    Mod.LogInfo("HandUpdateTwinstick applied!");
                 }
             }
             return instructionList;
@@ -3351,6 +3349,7 @@ namespace EFM
                     instructionList[i - 1].opcode == OpCodes.Ldc_I4_1)
                 {
                     instructionList.InsertRange(i, toInsert);
+                    Mod.LogInfo("HandUpdateTwoAxis applied!");
                 }
             }
             return instructionList;
@@ -3371,453 +3370,11 @@ namespace EFM
                 if (instruction.opcode == OpCodes.Stloc_S && instruction.operand.ToString().Contains("108"))
                 {
                     instructionList.InsertRange(i - 2, toInsert);
+                    Mod.LogInfo("UpdateSmoothLocomotion applied!");
+                    break;
                 }
             }
             return instructionList;
-        }
-
-        static bool Prefix(FVRViveHand hand, ref bool ___m_isRightHandActive, ref bool ___m_isLeftHandActive, ref GameObject ___m_twinStickArrowsRight,
-                           ref bool ___m_isTwinStickSmoothTurningCounterClockwise, ref bool ___m_isTwinStickSmoothTurningClockwise, ref GameObject ___m_twinStickArrowsLeft,
-                           ref float ___m_timeSinceSprintDownClick, ref float ___m_timeSinceSnapTurn, ref bool ___m_sprintingEngaged, ref bool ___m_isGrounded,
-                           ref Vector3 ___m_smoothLocoVelocity, ref Vector3 ___worldTPAxis, ref FVRMovementManager __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            bool flag = hand.IsThisTheRightHand;
-            if (GM.Options.MovementOptions.TwinStickLeftRightState == MovementOptions.TwinStickLeftRightSetup.RightStickMove)
-            {
-                flag = !flag;
-            }
-            if (!hand.IsInStreamlinedMode && (hand.CMode == ControlMode.Vive || hand.CMode == ControlMode.Oculus))
-            {
-                // In meatov, the secondary hand should always be in movement mode if constols not streamlined
-                if (!___m_isLeftHandActive)
-                {
-                    ___m_isLeftHandActive = true;
-                }
-
-                if (hand.Input.BYButtonDown)
-                {
-                    if (flag)
-                    {
-                        ___m_isRightHandActive = !___m_isRightHandActive;
-                    }
-                    //if (!flag)
-                    //{
-                    //    ___m_isLeftHandActive = !___m_isLeftHandActive;
-                    //}
-                }
-            }
-            else
-            {
-                ___m_isLeftHandActive = true;
-                ___m_isRightHandActive = true;
-            }
-            if (flag && !___m_isRightHandActive)
-            {
-                if (___m_twinStickArrowsRight.activeSelf)
-                {
-                    ___m_twinStickArrowsRight.SetActive(false);
-                }
-                ___m_isTwinStickSmoothTurningCounterClockwise = false;
-                ___m_isTwinStickSmoothTurningClockwise = false;
-                return false;
-            }
-            if (!flag && !___m_isLeftHandActive)
-            {
-                if (___m_twinStickArrowsLeft.activeSelf)
-                {
-                    ___m_twinStickArrowsLeft.SetActive(false);
-                }
-                return false;
-            }
-            if (!hand.IsInStreamlinedMode && (hand.CMode == ControlMode.Vive || hand.CMode == ControlMode.Oculus))
-            {
-                if (flag)
-                {
-                    if (!___m_twinStickArrowsRight.activeSelf)
-                    {
-                        ___m_twinStickArrowsRight.SetActive(true);
-                    }
-                    if (___m_twinStickArrowsRight.transform.parent != hand.TouchpadArrowTarget)
-                    {
-                        ___m_twinStickArrowsRight.transform.SetParent(hand.TouchpadArrowTarget);
-                        ___m_twinStickArrowsRight.transform.localPosition = Vector3.zero;
-                        ___m_twinStickArrowsRight.transform.localRotation = Quaternion.identity;
-                    }
-                }
-                else
-                {
-                    if (!___m_twinStickArrowsLeft.activeSelf)
-                    {
-                        ___m_twinStickArrowsLeft.SetActive(true);
-                    }
-                    if (___m_twinStickArrowsLeft.transform.parent != hand.TouchpadArrowTarget)
-                    {
-                        ___m_twinStickArrowsLeft.transform.SetParent(hand.TouchpadArrowTarget);
-                        ___m_twinStickArrowsLeft.transform.localPosition = Vector3.zero;
-                        ___m_twinStickArrowsLeft.transform.localRotation = Quaternion.identity;
-                    }
-                }
-            }
-            if (___m_timeSinceSprintDownClick < 2f)
-            {
-                ___m_timeSinceSprintDownClick += Time.deltaTime;
-            }
-            if (___m_timeSinceSnapTurn < 2f)
-            {
-                ___m_timeSinceSnapTurn += Time.deltaTime;
-            }
-            bool flag3;
-            bool flag4;
-            Vector2 vector;
-            bool flag5;
-            bool flag6;
-            if (hand.CMode == ControlMode.Vive || hand.CMode == ControlMode.Oculus)
-            {
-                bool flag2 = hand.Input.TouchpadUp;
-                flag3 = hand.Input.TouchpadDown;
-                flag4 = hand.Input.TouchpadPressed;
-                vector = hand.Input.TouchpadAxes;
-                flag5 = hand.Input.TouchpadNorthDown;
-                flag6 = hand.Input.TouchpadNorthPressed;
-            }
-            else
-            {
-                bool flag2 = hand.Input.Secondary2AxisInputUp;
-                flag3 = hand.Input.Secondary2AxisInputDown;
-                flag4 = hand.Input.Secondary2AxisInputPressed;
-                vector = hand.Input.Secondary2AxisInputAxes;
-                flag5 = hand.Input.Secondary2AxisNorthDown;
-                flag6 = hand.Input.Secondary2AxisNorthPressed;
-            }
-            if (flag)
-            {
-                ___m_isTwinStickSmoothTurningCounterClockwise = false;
-                ___m_isTwinStickSmoothTurningClockwise = false;
-                if (GM.Options.MovementOptions.TwinStickSnapturnState == MovementOptions.TwinStickSnapturnMode.Enabled)
-                {
-                    if (hand.CMode == ControlMode.Oculus)
-                    {
-                        if (hand.Input.TouchpadWestDown)
-                        {
-                            __instance.TurnCounterClockWise();
-                        }
-                        else if (hand.Input.TouchpadEastDown)
-                        {
-                            __instance.TurnClockWise();
-                        }
-                    }
-                    else if (hand.CMode == ControlMode.Vive)
-                    {
-                        if (GM.Options.MovementOptions.Touchpad_Confirm == FVRMovementManager.TwoAxisMovementConfirm.OnClick)
-                        {
-                            if (hand.Input.TouchpadDown)
-                            {
-                                if (hand.Input.TouchpadWestPressed)
-                                {
-                                    __instance.TurnCounterClockWise();
-                                }
-                                else if (hand.Input.TouchpadEastPressed)
-                                {
-                                    __instance.TurnClockWise();
-                                }
-                            }
-                        }
-                        else if (hand.Input.TouchpadWestDown)
-                        {
-                            __instance.TurnCounterClockWise();
-                        }
-                        else if (hand.Input.TouchpadEastDown)
-                        {
-                            __instance.TurnClockWise();
-                        }
-                    }
-                    else if (hand.Input.Secondary2AxisWestDown)
-                    {
-                        __instance.TurnCounterClockWise();
-                    }
-                    else if (hand.Input.Secondary2AxisEastDown)
-                    {
-                        __instance.TurnClockWise();
-                    }
-                }
-                else if (GM.Options.MovementOptions.TwinStickSnapturnState == MovementOptions.TwinStickSnapturnMode.Smooth)
-                {
-                    if (hand.CMode == ControlMode.Oculus)
-                    {
-                        if (hand.Input.TouchpadWestPressed)
-                        {
-                            ___m_isTwinStickSmoothTurningCounterClockwise = true;
-                        }
-                        else if (hand.Input.TouchpadEastPressed)
-                        {
-                            ___m_isTwinStickSmoothTurningClockwise = true;
-                        }
-                    }
-                    else if (hand.CMode == ControlMode.Vive)
-                    {
-                        if (GM.Options.MovementOptions.Touchpad_Confirm == FVRMovementManager.TwoAxisMovementConfirm.OnClick)
-                        {
-                            if (hand.Input.TouchpadPressed)
-                            {
-                                if (hand.Input.TouchpadWestPressed)
-                                {
-                                    ___m_isTwinStickSmoothTurningCounterClockwise = true;
-                                }
-                                else if (hand.Input.TouchpadEastPressed)
-                                {
-                                    ___m_isTwinStickSmoothTurningClockwise = true;
-                                }
-                            }
-                        }
-                        else if (hand.Input.TouchpadWestPressed)
-                        {
-                            ___m_isTwinStickSmoothTurningCounterClockwise = true;
-                        }
-                        else if (hand.Input.TouchpadEastPressed)
-                        {
-                            ___m_isTwinStickSmoothTurningClockwise = true;
-                        }
-                    }
-                    else if (hand.Input.Secondary2AxisWestPressed)
-                    {
-                        ___m_isTwinStickSmoothTurningCounterClockwise = true;
-                    }
-                    else if (hand.Input.Secondary2AxisEastPressed)
-                    {
-                        ___m_isTwinStickSmoothTurningClockwise = true;
-                    }
-                }
-                MethodInfo jumpMethod = typeof(FVRMovementManager).GetMethod("Jump", BindingFlags.NonPublic | BindingFlags.Instance);
-                if (GM.Options.MovementOptions.TwinStickJumpState == MovementOptions.TwinStickJumpMode.Enabled)
-                {
-                    if (hand.CMode == ControlMode.Oculus)
-                    {
-                        if (hand.Input.TouchpadSouthDown)
-                        {
-                            jumpMethod.Invoke(__instance, null);
-                        }
-                    }
-                    else if (hand.CMode == ControlMode.Vive)
-                    {
-                        if (GM.Options.MovementOptions.Touchpad_Confirm == FVRMovementManager.TwoAxisMovementConfirm.OnClick)
-                        {
-                            if (hand.Input.TouchpadDown && hand.Input.TouchpadSouthPressed)
-                            {
-                                jumpMethod.Invoke(__instance, null);
-                            }
-                        }
-                        else if (hand.Input.TouchpadSouthDown)
-                        {
-                            jumpMethod.Invoke(__instance, null);
-                        }
-                    }
-                    else if (hand.Input.Secondary2AxisSouthDown)
-                    {
-                        jumpMethod.Invoke(__instance, null);
-                    }
-                }
-                if (GM.Options.MovementOptions.TwinStickSprintState == MovementOptions.TwinStickSprintMode.RightStickForward)
-                {
-                    if (GM.Options.MovementOptions.TwinStickSprintToggleState == MovementOptions.TwinStickSprintToggleMode.Disabled)
-                    {
-                        // Also check stamina for sprinting
-                        if (flag6 && Mod.stamina > 0)
-                        {
-                            ___m_sprintingEngaged = true;
-                        }
-                        else
-                        {
-                            ___m_sprintingEngaged = false;
-                        }
-                    }
-                    else if (flag5)
-                    {
-                        ___m_sprintingEngaged = !___m_sprintingEngaged;
-                    }
-                }
-            }
-            else
-            {
-                if (GM.Options.MovementOptions.TwinStickSprintState == MovementOptions.TwinStickSprintMode.LeftStickClick)
-                {
-                    if (GM.Options.MovementOptions.TwinStickSprintToggleState == MovementOptions.TwinStickSprintToggleMode.Disabled)
-                    {
-                        // Also check stamina for sprinting
-                        if (flag4 && Mod.stamina > 0)
-                        {
-                            ___m_sprintingEngaged = true;
-                        }
-                        else
-                        {
-                            ___m_sprintingEngaged = false;
-                        }
-                    }
-                    else if (flag3)
-                    {
-                        ___m_sprintingEngaged = !___m_sprintingEngaged;
-                    }
-                }
-                ___worldTPAxis = Vector3.zero;
-                float y = vector.y;
-                float x = vector.x;
-                switch (GM.Options.MovementOptions.Touchpad_MovementMode)
-                {
-                    case FVRMovementManager.TwoAxisMovementMode.Standard:
-                        ___worldTPAxis = y * hand.PointingTransform.forward + x * hand.PointingTransform.right * 0.75f;
-                        ___worldTPAxis.y = 0f;
-                        break;
-                    case FVRMovementManager.TwoAxisMovementMode.Onward:
-                        ___worldTPAxis = y * hand.Input.Forward + x * hand.Input.Right * 0.75f;
-                        break;
-                    case FVRMovementManager.TwoAxisMovementMode.LeveledHand:
-                        {
-                            Vector3 forward = hand.Input.Forward;
-                            forward.y = 0f;
-                            forward.Normalize();
-                            Vector3 right = hand.Input.Right;
-                            right.y = 0f;
-                            right.Normalize();
-                            ___worldTPAxis = y * forward + x * right * 0.75f;
-                            break;
-                        }
-                    case FVRMovementManager.TwoAxisMovementMode.LeveledHead:
-                        {
-                            Vector3 forward2 = GM.CurrentPlayerBody.Head.forward;
-                            forward2.y = 0f;
-                            forward2.Normalize();
-                            Vector3 right2 = GM.CurrentPlayerBody.Head.right;
-                            right2.y = 0f;
-                            right2.Normalize();
-                            ___worldTPAxis = y * forward2 + x * right2 * 0.75f;
-                            break;
-                        }
-                }
-                Vector3 normalized = ___worldTPAxis.normalized;
-                ___worldTPAxis *= GM.Options.MovementOptions.TPLocoSpeeds[GM.Options.MovementOptions.TPLocoSpeedIndex];
-                if (hand.CMode == ControlMode.Vive && GM.Options.MovementOptions.Touchpad_Confirm == FVRMovementManager.TwoAxisMovementConfirm.OnClick)
-                {
-                    if (!flag4)
-                    {
-                        ___worldTPAxis = Vector3.zero;
-                    }
-                    else if (___m_sprintingEngaged && GM.Options.MovementOptions.TPLocoSpeedIndex < 5)
-                    {
-                        ___worldTPAxis += normalized * 2f;
-                    }
-                }
-                else if (___m_sprintingEngaged && GM.Options.MovementOptions.TPLocoSpeedIndex < 5)
-                {
-                    ___worldTPAxis += normalized * 2f;
-                }
-                if (Mod.skills != null)
-                {
-                    ___worldTPAxis += ___worldTPAxis * (0.004f * (Mod.skills[1].currentProgress / 100));
-                }
-                if (___m_isGrounded)
-                {
-                    ___m_smoothLocoVelocity.x = ___worldTPAxis.x;
-                    ___m_smoothLocoVelocity.z = ___worldTPAxis.z;
-                    if (GM.CurrentSceneSettings.UsesMaxSpeedClamp)
-                    {
-                        Vector2 vector2 = new Vector2(___m_smoothLocoVelocity.x, ___m_smoothLocoVelocity.z);
-                        if (vector2.magnitude > GM.CurrentSceneSettings.MaxSpeedClamp)
-                        {
-                            vector2 = vector2.normalized * GM.CurrentSceneSettings.MaxSpeedClamp;
-                            ___m_smoothLocoVelocity.x = vector2.x;
-                            ___m_smoothLocoVelocity.z = vector2.y;
-                        }
-                    }
-                }
-                else if (GM.CurrentSceneSettings.DoesAllowAirControl)
-                {
-                    Vector3 vector3 = new Vector3(___m_smoothLocoVelocity.x, 0f, ___m_smoothLocoVelocity.z);
-                    ___m_smoothLocoVelocity.x = ___m_smoothLocoVelocity.x + ___worldTPAxis.x * Time.deltaTime;
-                    ___m_smoothLocoVelocity.z = ___m_smoothLocoVelocity.z + ___worldTPAxis.z * Time.deltaTime;
-                    Vector3 vector4 = new Vector3(___m_smoothLocoVelocity.x, 0f, ___m_smoothLocoVelocity.z);
-                    float maxLength = Mathf.Max(1f, vector3.magnitude);
-                    vector4 = Vector3.ClampMagnitude(vector4, maxLength);
-                    ___m_smoothLocoVelocity.x = vector4.x;
-                    ___m_smoothLocoVelocity.z = vector4.z;
-                }
-                else
-                {
-                    Vector3 vector5 = new Vector3(___m_smoothLocoVelocity.x, 0f, ___m_smoothLocoVelocity.z);
-                    ___m_smoothLocoVelocity.x = ___m_smoothLocoVelocity.x + ___worldTPAxis.x * Time.deltaTime * 0.3f;
-                    ___m_smoothLocoVelocity.z = ___m_smoothLocoVelocity.z + ___worldTPAxis.z * Time.deltaTime * 0.3f;
-                    Vector3 vector6 = new Vector3(___m_smoothLocoVelocity.x, 0f, ___m_smoothLocoVelocity.z);
-                    float maxLength2 = Mathf.Max(1f, vector5.magnitude);
-                    vector6 = Vector3.ClampMagnitude(vector6, maxLength2);
-                    ___m_smoothLocoVelocity.x = vector6.x;
-                    ___m_smoothLocoVelocity.z = vector6.z;
-                }
-                if (flag3)
-                {
-                    ___m_timeSinceSprintDownClick = 0f;
-                }
-            }
-
-            // Update fall damage depending on grounded and previous velocity
-            if (Mod.currentLocationIndex == 2)
-            {
-                UpdateFallDamage(___m_isGrounded);
-            }
-
-            if (Mod.skills != null)
-            {
-                UpdateMovementAction(___m_smoothLocoVelocity, ___m_sprintingEngaged);
-            }
-
-            wasGrounded = ___m_isGrounded;
-            previousVelocity = ___m_smoothLocoVelocity;
-
-            return false;
-        }
-
-        private static void UpdateMovementAction(Vector3 velocity, bool sprinting)
-        {
-            Vector3 sideMovement = velocity * Time.deltaTime;
-            sideMovement.y = 0;
-
-            if (sprinting)
-            {
-                Mod.distanceTravelledSprinting += sideMovement.magnitude;
-            }
-            else if (sideMovement.magnitude > 0)
-            {
-                Mod.distanceTravelledWalking += sideMovement.magnitude;
-            }
-            // TODO: else if do covert movement
-        }
-
-        private static void UpdateFallDamage(bool grounded)
-        {
-            if (grounded && !wasGrounded)
-            {
-                // Considering realistic 1g of acceleration, t = (Vf-Vi)/a, and s = Vi * t + 0.5 * a * t ^ 2, s being distance fallen
-                float t = previousVelocity.y / -9.806f; // Note that here, velocity and a are negative, giving a positive time
-                float s = 4.903f  * t * t; // Here a is positive to have a positive distance fallen
-                if (s > safeHeight)
-                {
-                    float damage = s * damagePerMeter;
-                    float distribution = UnityEngine.Random.value;
-                    if (UnityEngine.Random.value < 0.125f * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
-                    {
-                        new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, 5, -1, true);
-                    }
-                    if (UnityEngine.Random.value < 0.125f * (s - safeHeight)) // 100% chance of fracture 8+ meters fall above safe height
-                    {
-                        new Effect(Effect.EffectType.Fracture, 0, 0, 0, null, false, 6, -1, true);
-                    }
-
-                    DamagePatch.RegisterPlayerHit(5, distribution * damage, true);
-                    DamagePatch.RegisterPlayerHit(6, (1 - distribution) * damage, true);
-                }
-            }
         }
     }
 
