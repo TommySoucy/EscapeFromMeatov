@@ -1492,8 +1492,8 @@ namespace EFM
         public static int debuffEndDelay; // TODO: // Implement with effects
         public static int repairArmorBonus; // TODO: // Implement with armor repair
         public static int hydrationRegeneration;
-        public static int healthRegeneration;
         public static int maximumEnergyReserve;
+        public static int healthRegeneration;
         public static int scavCooldownTimer;
         public static int questMoneyReward;
         public static int insuranceReturnTime; // TODO: // Implement with insurance
@@ -1605,7 +1605,7 @@ namespace EFM
                     break;
                 case BonusType.MaximumEnergyReserve:
                     maximumEnergyReserve += value;
-                    Mod.currentMaxEnergy = Mod.defaultMaxEnergy + maximumEnergyReserve;
+                    Mod.baseMaxEnergy += value;
                     break;
                 case BonusType.ScavCooldownTimer:
                     scavCooldownTimer += value;
@@ -1668,7 +1668,7 @@ namespace EFM
                     break;
                 case BonusType.MaximumEnergyReserve:
                     maximumEnergyReserve -= value;
-                    Mod.currentMaxEnergy = Mod.defaultMaxEnergy + maximumEnergyReserve;
+                    Mod.baseMaxEnergy -= value;
                     break;
                 case BonusType.ScavCooldownTimer:
                     scavCooldownTimer -= value;

@@ -3278,11 +3278,11 @@ namespace EFM
             if (originalValue)
             {
                 // Can't sprint if,
-                // Not stamina
+                // No stamina
                 // Fatigued
                 // Heavy fatigued
                 // Weight above max carry weight
-                return Mod.stamina > 0 && Effect.fatigue == null && Effect.heavyFatigue == null && Mod.weight > Mod.currentWeightLimit;
+                return Mod.stamina > 0 && Effect.fatigue == null && Effect.heavyFatigue == null && Mod.weight < Mod.currentWeightLimit;
             }
             else
             {

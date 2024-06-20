@@ -185,7 +185,20 @@ namespace EFM
                 return _energy;
             }
         }
-        public static float defaultMaxEnergy;
+        private static float _baseMaxEnergy;
+        public static float baseMaxEnergy
+        {
+            get { return _baseMaxEnergy; }
+            set
+            {
+                float preValue = _baseMaxEnergy;
+                _baseMaxEnergy = value;
+                if(preValue != _baseMaxEnergy)
+                {
+                    currentMaxEnergy = _baseMaxEnergy + Bonus.maximumEnergyReserve;
+                }
+            }
+        }
         private static float _currentMaxEnergy;
         public static float currentMaxEnergy
         {
@@ -220,8 +233,37 @@ namespace EFM
                 return _hydration;
             }
         }
-        public static float defaultMaxHydration;
-        public static float currentMaxHydration;
+        private static float _baseMaxHydration;
+        public static float baseMaxHydration
+        {
+            get { return _baseMaxHydration; }
+            set
+            {
+                float preValue = _baseMaxHydration;
+                _baseMaxHydration = value;
+                if (preValue != _baseMaxHydration)
+                {
+                    currentMaxHydration = _baseMaxHydration;
+                }
+            }
+        }
+        private static float _currentMaxHydration;
+        public static float currentMaxHydration
+        {
+            get
+            {
+                return _currentMaxHydration;
+            }
+            set
+            {
+                float preValue = _currentMaxHydration;
+                _currentMaxHydration = value;
+                if ((int)preValue != (int)_currentMaxHydration)
+                {
+                    OnHydrationChangedInvoke();
+                }
+            }
+        }
         public static readonly float raidEnergyRate = -3.2f; // TODO: Move this to RaidController and set it on LoadDB globals>config>Health>Effects>Existence
         public static readonly float raidHydrationRate = -2.6f; // TODO: Move this to RaidController and set it on LoadDB globals>config>Health>Effects>Existence
         private static float _baseEnergyRate;
@@ -299,7 +341,7 @@ namespace EFM
         //public static List<InsuredSet> insuredItems;
         public static float staminaTimer = 0;
         public static float stamina = 100;
-        private static float _baseMaxStamina = 100; // Affected by solid amounts
+        private static float _baseMaxStamina; // Affected by solid amounts
         public static float baseMaxStamina
         {
             get { return _baseMaxStamina; }
@@ -313,12 +355,12 @@ namespace EFM
                 }
             }
         }
-        public static float currentMaxStamina = 100; // Based on baseMaxStamina, affected further by percentages
+        public static float currentMaxStamina; // Based on baseMaxStamina, affected further by percentages
         public static Skill[] skills;
-        public static float sprintStaminaDrain = 4.1f;
+        public static float sprintStaminaDrain;
         public static float overweightStaminaDrain = 4f;
-        public static float jumpStaminaDrain = 16;
-        private static float _baseStaminaRate = 4.4f; // Affected by solid amounts
+        public static float jumpStaminaDrain;
+        private static float _baseStaminaRate; // Affected by solid amounts
         public static float baseStaminaRate
         {
             get { return _baseStaminaRate; }
@@ -332,7 +374,7 @@ namespace EFM
                 }
             }
         }
-        public static float currentStaminaRate = 4.4f; // Based on staminaRate, affected further by percentages
+        public static float currentStaminaRate; // Based on staminaRate, affected further by percentages
         public static Effect dehydrationEffect;
         public static Effect fatigueEffect;
         public static Effect overweightFatigueEffect;
@@ -1332,8 +1374,14 @@ namespace EFM
             HideoutController.defaultHydrationRate = ((float)globalRegens["Hydration"]) / 60;
 
             JToken globalHealthFactors = globalDB["config"]["Health"]["ProfileHealthSettings"]["HealthFactorsSettings"];
-            defaultMaxEnergy = (float)globalHealthFactors["Energy"]["Default"];
-            defaultMaxHydration = (float)globalHealthFactors["Hydration"]["Default"];
+            baseMaxEnergy = (float)globalHealthFactors["Energy"]["Maximum"];
+            baseMaxHydration = (float)globalHealthFactors["Hydration"]["Maximum"];
+
+            JToken globalStaminaSettings = globalDB["config"]["Stamina"];
+            baseMaxStamina = (float)globalStaminaSettings["Capacity"];
+            baseStaminaRate = (float)globalStaminaSettings["BaseRestorationRate"];
+            jumpStaminaDrain = (float)globalStaminaSettings["JumpConsumption"];
+            sprintStaminaDrain = (float)globalStaminaSettings["SprintDrainRate"];
 
             skills = new Skill[64];
             for(int i=0; i < skills.Length; ++i)

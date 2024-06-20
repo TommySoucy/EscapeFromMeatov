@@ -359,8 +359,8 @@ namespace EFM
                         {
                             Mod.SetHealth(i, Mod.defaultMaxHealth[i]);
                         }
-                        Mod.energy = Mod.defaultMaxEnergy;
-                        Mod.hydration = Mod.defaultMaxHydration;
+                        Mod.energy = Mod.baseMaxEnergy;
+                        Mod.hydration = Mod.baseMaxHydration;
                         Mod.stamina = Mod.baseMaxStamina;
                         Mod.weight = 0;
                     }
@@ -1339,12 +1339,9 @@ namespace EFM
                 Mod.experience = (int)loadedData["experience"];
                 Mod.SetHealthArray(loadedData["health"].ToObject<float[]>());
                 Mod.LogInfo("\t\t0");
-                Mod.SetCurrentMaxHealthArray(loadedData["maxHealth"].ToObject<float[]>());
-                Mod.currentMaxHydration = (float)loadedData["maxHydration"];
-                Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.defaultMaxHydration);
-                Mod.energy = Mathf.Min((float)loadedData["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.defaultMaxEnergy);
-                Mod.baseMaxStamina = (float)loadedData["maxStamina"];
-                Mod.stamina = Mod.baseMaxStamina;
+                Mod.hydration = Mathf.Min((float)loadedData["hydration"] + Mod.currentHydrationRate * minutesSinceSave, Mod.currentMaxHydration);
+                Mod.energy = Mathf.Min((float)loadedData["energy"] + Mod.currentEnergyRate * minutesSinceSave, Mod.currentMaxEnergy);
+                Mod.stamina = Mod.currentMaxStamina;
                 Mod.totalKillCount = (int)loadedData["totalKillCount"];
                 Mod.totalDeathCount = (int)loadedData["totalDeathCount"];
                 Mod.totalRaidCount = (int)loadedData["totalRaidCount"];
@@ -1362,14 +1359,6 @@ namespace EFM
                     Mod.skills[i].raidProgress = 0;
                 }
                 Mod.LogInfo("\t\t0");
-
-                // Set bonuses depending on skills
-                float enduranceLevel = Mod.skills[0].progress / 100;
-                Mod.baseMaxStamina += Mod.baseMaxStamina / 100 * enduranceLevel;
-                if (enduranceLevel >= 51)
-                {
-                    Mod.baseMaxStamina += 20;
-                }
 
                 // Player items
                 if (Mod.playerInventory == null)
@@ -2804,8 +2793,8 @@ namespace EFM
                             Mod.SetHealth(i, 0.3f * Mod.GetCurrentMaxHealth(i));
                         }
 
-                        Mod.hydration = 0.3f * Mod.defaultMaxHydration;
-                        Mod.energy = 0.3f * Mod.defaultMaxEnergy;
+                        Mod.hydration = 0.3f * Mod.currentMaxHydration;
+                        Mod.energy = 0.3f * Mod.currentMaxEnergy;
 
                         // Remove all effects
                         Effect.RemoveAllEffects();
@@ -3700,12 +3689,8 @@ namespace EFM
             loadedData["level"] = Mod.level;
             loadedData["experience"] = Mod.experience;
             loadedData["health"] = JArray.FromObject(Mod.GetHealthArray());
-            loadedData["maxHealth"] = JArray.FromObject(Mod.GetCurrentMaxHealthArray());
-            loadedData["maxHydration"] = Mod.defaultMaxHydration;
             loadedData["hydration"] = Mod.hydration;
-            loadedData["maxEnergy"] = Mod.defaultMaxEnergy;
             loadedData["energy"] = Mod.energy;
-            loadedData["maxStamina"] = Mod.baseMaxStamina;
             loadedData["weight"] = Mod.weight;
             loadedData["totalRaidCount"] = Mod.totalRaidCount;
             loadedData["runthroughRaidCount"] = Mod.runthroughRaidCount;

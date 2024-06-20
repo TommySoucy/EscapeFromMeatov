@@ -257,6 +257,7 @@ namespace EFM
 
         public void OnHydrationRateChanged()
         {
+            Mod.LogInfo("StatusUI OnHydrationRateChanged");
             if(Mod.currentHydrationRate == 0 || Mod.hydration == Mod.currentMaxHydration)
             {
                 if (hydrationDelta.gameObject.activeSelf)
@@ -267,13 +268,14 @@ namespace EFM
             else
             {
                 hydrationDelta.gameObject.SetActive(true);
-                hydrationDelta.text = String.Format((Mod.currentHydrationRate < 0 ? "" : "+") + "{0:0.##}", Mod.currentHydrationRate);
+                hydrationDelta.text = String.Format((Mod.currentHydrationRate < 0 ? "" : "+") + "{0:0.##}/min", Mod.currentHydrationRate * 60);
             }
         }
 
         public void OnEnergyRateChanged()
         {
-            if(Mod.currentEnergyRate == 0 || Mod.energy == Mod.currentMaxEnergy)
+            Mod.LogInfo("StatusUI OnEnergyRateChanged");
+            if (Mod.currentEnergyRate == 0 || Mod.energy == Mod.currentMaxEnergy)
             {
                 if (energyDelta.gameObject.activeSelf)
                 {
@@ -283,7 +285,7 @@ namespace EFM
             else
             {
                 energyDelta.gameObject.SetActive(true);
-                energyDelta.text = String.Format((Mod.currentEnergyRate < 0 ? "" : "+") + "{0:0.##}", Mod.currentEnergyRate);
+                energyDelta.text = String.Format((Mod.currentEnergyRate < 0 ? "" : "+") + "{0:0.##}/min", Mod.currentEnergyRate * 60);
             }
         }
 
@@ -303,7 +305,7 @@ namespace EFM
             else
             {
                 healthDelta.gameObject.SetActive(true);
-                healthDelta.text = String.Format((total < 0 ? "" : "+") + "{0:0.##}", total);
+                healthDelta.text = String.Format((total < 0 ? "" : "+") + "{0:0.##}/min", total * 60);
             }
         }
 
@@ -693,7 +695,7 @@ namespace EFM
             Vector3 movementVector = GM.CurrentMovementManager.m_smoothLocoVelocity;
             Vector2 movementVector2 = new Vector2(movementVector.x, movementVector.z);
 
-            if ((GM.CurrentMovementManager.m_sprintingEngaged || movementVector2.magnitude > 1.6f) && GM.CurrentMovementManager.m_isGrounded)
+            if ((GM.CurrentMovementManager.m_sprintingEngaged || movementVector2.magnitude > 3.6f) && GM.CurrentMovementManager.m_isGrounded)
             {
                 // Reset stamina timer
                 Mod.staminaTimer = 2;
