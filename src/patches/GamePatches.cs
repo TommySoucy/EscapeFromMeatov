@@ -190,13 +190,6 @@ namespace EFM
             PatchController.Verify(movementManagerJumpOriginal, harmony, true);
             harmony.Patch(movementManagerJumpOriginal, new HarmonyMethod(movementManagerJumpPrefix));
 
-            //// MovementManagerTwinstickPatch
-            //MethodInfo movementManagerTwinstickPatchOriginal = typeof(FVRMovementManager).GetMethod("HandUpdateTwinstick", BindingFlags.NonPublic | BindingFlags.Instance);
-            //MethodInfo movementManagerTwinstickPatchPrefix = typeof(MovementManagerUpdatePatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-
-            //PatchController.Verify(movementManagerTwinstickPatchOriginal, harmony, true);
-            //harmony.Patch(movementManagerTwinstickPatchOriginal, new HarmonyMethod(movementManagerTwinstickPatchPrefix));
-
             // ChamberSetRoundPatch
             MethodInfo chamberSetRoundPatchOriginal = typeof(FVRFireArmChamber).GetMethod("SetRound", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Any, new Type[] { typeof(FVRFireArmRound), typeof(bool) }, null);
             MethodInfo chamberSetRoundPatchPrefix = typeof(ChamberSetRoundPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
@@ -3336,7 +3329,7 @@ namespace EFM
         }
 
         // Patches HandUpdateTwoAxis
-        static IEnumerable<CodeInstruction> TwoaxisTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        static IEnumerable<CodeInstruction> TwoAxisTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
             List<CodeInstruction> instructionList = new List<CodeInstruction>(instructions);
             List<CodeInstruction> toInsert = new List<CodeInstruction>();
