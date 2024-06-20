@@ -239,7 +239,7 @@ namespace EFM
         public void OnEnergyChanged()
         {
             energy.text = ((int)Mod.energy).ToString() +"/"+(int)Mod.currentMaxEnergy;
-            if (Mod.hydration == Mod.currentMaxHydration)
+            if (Mod.energy == Mod.currentMaxEnergy)
             {
                 if (energyDelta.gameObject.activeSelf)
                 {
@@ -292,13 +292,18 @@ namespace EFM
         public void OnCurrentHealthRateChanged(int index)
         {
             float total = 0;
+            float totalHealth = 0;
+            float totalMax = 0;
             for(int i=0; i < Mod.GetHealthCount(); ++i)
             {
                 total += Mod.GetCurrentHealthRate(i);
                 total += Mod.GetCurrentNonLethalHealthRate(i);
+
+                totalHealth += Mod.GetHealth(i);
+                totalMax += Mod.GetCurrentMaxHealth(i);
             }
 
-            if(total == 0)
+            if(total == 0 || totalHealth == totalMax)
             {
                 healthDelta.gameObject.SetActive(false);
             }
@@ -328,6 +333,20 @@ namespace EFM
             {
                 partImages[index].color = Color.Lerp(Color.red, Color.white, Mod.GetHealth(index) / Mod.GetCurrentMaxHealth(index));
                 partHealth[index].text = ((int)Mod.GetHealth(index)).ToString() + "/" + ((int)Mod.GetCurrentMaxHealth(index));
+            }
+
+            float total = 0;
+            float totalMax = 0;
+            for(int i=0; i < Mod.GetHealthCount(); ++i)
+            {
+                total += Mod.GetHealth(i);
+                totalMax += Mod.GetCurrentMaxHealth(i);
+            }
+            health.text = ((int)total).ToString() + "/" + ((int)totalMax);
+
+            if(total == totalMax)
+            {
+                healthDelta.gameObject.SetActive(false);
             }
         }
 
