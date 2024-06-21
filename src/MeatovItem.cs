@@ -458,6 +458,7 @@ namespace EFM
                     Mod.LogError("DEV: Custom item "+ H3ID+" does not have index set in asset!");
                     index = parsedIndex;
                     itemData = Mod.customItemData[index];
+                    SetData(itemData);
                 }
                 else
                 {
