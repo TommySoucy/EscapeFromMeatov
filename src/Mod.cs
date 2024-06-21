@@ -2380,22 +2380,19 @@ namespace EFM
                 }
                 else // Not loading into meatov scene
                 {
-                    if(securedMainSceneComponents != null)
-                    {
-                        // Unsecure scene components
-                        foreach (GameObject go in securedMainSceneComponents)
-                        {
-                            SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
-                        }
-                        securedMainSceneComponents.Clear();
-                    }
-
                     // Reset pixel light count
                     GM.RefreshQuality();
                 }
             }
             else // Done loading
             {
+                // No matter where we're going, don't want to keep objects secured
+                // This wouldn't have been a problem normally, just keep the main scene stuff secured
+                // as long as we are in meatov scenes, but problem arose when we start grabbing items,
+                // which get moved to DontDestroyedOnLoad and then get lost there
+                // The simplest solution is to keep things as unsecured as possible, only securing them when moving scenes
+                UnsecureMainSceneComponents();
+
                 inMeatovScene = H3MP.Patches.LoadLevelBeginPatch.loadingLevel.Contains("Meatov");
 
                 switch (H3MP.Patches.LoadLevelBeginPatch.loadingLevel)
@@ -2518,6 +2515,24 @@ namespace EFM
             GameObject floorHelper = GM.CurrentMovementManager.m_floorHelper;
             securedMainSceneComponents.Add(floorHelper);
             GameObject.DontDestroyOnLoad(floorHelper);
+        }
+
+        public static void UnsecureMainSceneComponents()
+        {
+            if (securedMainSceneComponents == null)
+            {
+                return;
+            }
+
+            for(int i=0; i < securedMainSceneComponents.Count; ++i)
+            {
+                if (securedMainSceneComponents[i].transform.parent == null)
+                {
+                    SceneManager.MoveGameObjectToScene(securedMainSceneComponents[i], SceneManager.GetActiveScene());
+                }
+            }
+
+            securedMainSceneComponents.Clear();
         }
 
         private void LoadMainMenu()

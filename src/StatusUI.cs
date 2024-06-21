@@ -257,7 +257,6 @@ namespace EFM
 
         public void OnHydrationRateChanged()
         {
-            Mod.LogInfo("StatusUI OnHydrationRateChanged");
             if(Mod.currentHydrationRate == 0 || Mod.hydration == Mod.currentMaxHydration)
             {
                 if (hydrationDelta.gameObject.activeSelf)
@@ -274,7 +273,6 @@ namespace EFM
 
         public void OnEnergyRateChanged()
         {
-            Mod.LogInfo("StatusUI OnEnergyRateChanged");
             if (Mod.currentEnergyRate == 0 || Mod.energy == Mod.currentMaxEnergy)
             {
                 if (energyDelta.gameObject.activeSelf)
