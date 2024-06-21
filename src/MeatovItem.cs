@@ -469,6 +469,11 @@ namespace EFM
             {
                 // Data already set, just need to set reference to data object
                 itemData = Mod.customItemData[index];
+
+                // Note that despite comment above, we will for now SetData
+                // I have realized that having the data set in asset is not optimal since
+                // whenever I want to modify something, I need to rebuild an entire bundle
+                SetData(itemData);
             }
             Mod.LogInfo("\t0");
 
