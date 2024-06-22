@@ -104,19 +104,19 @@ namespace EFM
             //PatchController.Verify(damageDealtPatchOriginal, harmony, true);
             //harmony.Patch(damageDealtPatchOriginal, new HarmonyMethod(damageDealtPatchPrefix));
 
-            //// HandTestColliderPatch
-            //MethodInfo handTestColliderPatchOriginal = typeof(FVRViveHand).GetMethod("TestCollider", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo handTestColliderPatchPrefix = typeof(HandTestColliderPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // HandTestColliderPatch
+            MethodInfo handTestColliderPatchOriginal = typeof(FVRViveHand).GetMethod("TestCollider", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo handTestColliderPatchPrefix = typeof(HandTestColliderPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(handTestColliderPatchOriginal, harmony, true);
-            //harmony.Patch(handTestColliderPatchOriginal, new HarmonyMethod(handTestColliderPatchPrefix));
+            PatchController.Verify(handTestColliderPatchOriginal, harmony, true);
+            harmony.Patch(handTestColliderPatchOriginal, new HarmonyMethod(handTestColliderPatchPrefix));
 
-            //// HandTriggerExitPatch
-            //MethodInfo handTriggerExitPatchOriginal = typeof(FVRViveHand).GetMethod("HandTriggerExit", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo handTriggerExitPatchPrefix = typeof(HandTriggerExitPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // HandTriggerExitPatch
+            MethodInfo handTriggerExitPatchOriginal = typeof(FVRViveHand).GetMethod("HandTriggerExit", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo handTriggerExitPatchPrefix = typeof(HandTriggerExitPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(handTriggerExitPatchOriginal, harmony, true);
-            //harmony.Patch(handTriggerExitPatchOriginal, new HarmonyMethod(handTriggerExitPatchPrefix));
+            PatchController.Verify(handTriggerExitPatchOriginal, harmony, true);
+            harmony.Patch(handTriggerExitPatchOriginal, new HarmonyMethod(handTriggerExitPatchPrefix));
 
             //// KeyForwardBackPatch
             //MethodInfo keyForwardBackPatchOriginal = typeof(SideHingedDestructibleDoorDeadBoltKey).GetMethod("KeyForwardBack", BindingFlags.Public | BindingFlags.Instance);
@@ -417,12 +417,23 @@ namespace EFM
             //PatchController.Verify(fireArmRecoilPatchOriginal, harmony, true);
             //harmony.Patch(fireArmRecoilPatchOriginal, new HarmonyMethod(fireArmRecoilPatchPrefix));
 
-            // HandCurrentInteractableSetPatch
-            MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo handCurrentInteractableSetPatchPostfix = typeof(HandCurrentInteractableSetPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+            // PhysicalObjectPatch
+            MethodInfo physicalObjectBeginInteractionOriginal = typeof(FVRPhysicalObject).GetMethod("BeginInteraction", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo physicalObjectBeginInteractionPostfix = typeof(PhysicalObjectPatch).GetMethod("BeginInteractionPostfix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo physicalObjectEndInteractionOriginal = typeof(FVRPhysicalObject).GetMethod("EndInteraction", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo physicalObjectEndInteractionPostfix = typeof(PhysicalObjectPatch).GetMethod("EndInteractionPostfix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            PatchController.Verify(handCurrentInteractableSetPatchOriginal, harmony, true);
-            harmony.Patch(handCurrentInteractableSetPatchOriginal, null, new HarmonyMethod(handCurrentInteractableSetPatchPostfix));
+            PatchController.Verify(physicalObjectBeginInteractionOriginal, harmony, true);
+            PatchController.Verify(physicalObjectEndInteractionOriginal, harmony, true);
+            harmony.Patch(physicalObjectBeginInteractionOriginal, null, new HarmonyMethod(physicalObjectBeginInteractionPostfix));
+            harmony.Patch(physicalObjectEndInteractionOriginal, null, new HarmonyMethod(physicalObjectEndInteractionPostfix));
+
+            //// HandCurrentInteractableSetPatch
+            //MethodInfo handCurrentInteractableSetPatchOriginal = typeof(FVRViveHand).GetMethod("set_CurrentInteractable", BindingFlags.Public | BindingFlags.Instance);
+            //MethodInfo handCurrentInteractableSetPatchPostfix = typeof(HandCurrentInteractableSetPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+
+            //PatchController.Verify(handCurrentInteractableSetPatchOriginal, harmony, true);
+            //harmony.Patch(handCurrentInteractableSetPatchOriginal, null, new HarmonyMethod(handCurrentInteractableSetPatchPostfix));
 
             //// SosigLinkDamagePatch
             //MethodInfo sosigLinkDamagePatchOriginal = typeof(SosigLink).GetMethod("Damage", BindingFlags.Public | BindingFlags.Instance);
@@ -2198,6 +2209,7 @@ namespace EFM
     }
 
     // Patches FVRViveHand.TestCollider() in order to be able to have interactable colliders on other gameobjects than the root
+    // by use of OtherInteractable
     // This completely replaces the original 
     class HandTestColliderPatch
     {
@@ -2229,14 +2241,13 @@ namespace EFM
 
             if (___m_state == FVRViveHand.HandState.Empty && interactiveObjectToUse != null)
             {
-                FVRInteractiveObject component2 = interactiveObjectToUse;
-                if (component2 != null && component2.IsInteractable() && !component2.IsSelectionRestricted())
+                if (interactiveObjectToUse != null && interactiveObjectToUse.IsInteractable() && !interactiveObjectToUse.IsSelectionRestricted())
                 {
                     float num = Vector3.Distance(interactiveObjectToUse.transform.position, __instance.Display_InteractionSphere.transform.position);
                     float num2 = Vector3.Distance(interactiveObjectToUse.transform.position, __instance.Display_InteractionSphere_Palm.transform.position);
                     if (__instance.ClosestPossibleInteractable == null)
                     {
-                        __instance.ClosestPossibleInteractable = component2;
+                        __instance.ClosestPossibleInteractable = interactiveObjectToUse;
                         if (num < num2)
                         {
                             ___m_isClosestInteractableInPalm = false;
@@ -2246,7 +2257,7 @@ namespace EFM
                             ___m_isClosestInteractableInPalm = true;
                         }
                     }
-                    else if (__instance.ClosestPossibleInteractable != component2)
+                    else if (__instance.ClosestPossibleInteractable != interactiveObjectToUse)
                     {
                         float num3 = Vector3.Distance(__instance.ClosestPossibleInteractable.transform.position, __instance.Display_InteractionSphere.transform.position);
                         float num4 = Vector3.Distance(__instance.ClosestPossibleInteractable.transform.position, __instance.Display_InteractionSphere_Palm.transform.position);
@@ -2258,12 +2269,12 @@ namespace EFM
                         if (flag && num2 < num4 && ___m_isClosestInteractableInPalm)
                         {
                             ___m_isClosestInteractableInPalm = true;
-                            __instance.ClosestPossibleInteractable = component2;
+                            __instance.ClosestPossibleInteractable = interactiveObjectToUse;
                         }
                         else if (!flag && num < num3)
                         {
                             ___m_isClosestInteractableInPalm = false;
-                            __instance.ClosestPossibleInteractable = component2;
+                            __instance.ClosestPossibleInteractable = interactiveObjectToUse;
                         }
                     }
                 }
@@ -4885,6 +4896,38 @@ namespace EFM
                 }
 
                 fromFire = false;
+            }
+        }
+    }
+
+    // Patches FVRPhysicalObject
+    class PhysicalObjectPatch
+    {
+        static void BeginInteractionPostfix(FVRPhysicalObject __instance, FVRViveHand hand)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+            Mod.LogInfo("BeginInteractionPostfix on " + __instance.name);
+
+            if (Mod.meatovItemByInteractive.TryGetValue(__instance, out MeatovItem meatovItem))
+            {
+                meatovItem.BeginInteraction(hand.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
+            }
+        }
+
+        static void EndInteractionPostfix(FVRPhysicalObject __instance, FVRViveHand hand)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+            Mod.LogInfo("EndInteractionPostfix on " + __instance.name);
+
+            if (Mod.meatovItemByInteractive.TryGetValue(__instance, out MeatovItem meatovItem))
+            {
+                meatovItem.EndInteraction(hand.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand);
             }
         }
     }

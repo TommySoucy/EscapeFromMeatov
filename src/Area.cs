@@ -789,6 +789,7 @@ namespace EFM
 
         public void BeginUpgrade()
         {
+            Mod.LogInfo("BeginUpgrade for area " + index);
             // Set into upgrade state
             upgrading = true;
             upgradeTimeLeft = constructionTimePerLevel[currentLevel + 1];
@@ -800,17 +801,21 @@ namespace EFM
                 {
                     Requirement itemRequirement = itemRequirements[i];
                     int countLeft = itemRequirement.itemCount;
+                    Mod.LogInfo("\tItem requirement " + itemRequirement.item.H3ID+", count left: "+ countLeft);
                     while (countLeft > 0)
                     {
+                        Mod.LogInfo("\t\tCount left: " + countLeft);
                         MeatovItem item = GetClosestItem(itemRequirement.item.H3ID);
                         if (item.stack > countLeft)
                         {
+                            Mod.LogInfo("\t\t\titem.stack covers count left: " + item.stack);
                             item.stack -= countLeft;
                             countLeft = 0;
                             break;
                         }
                         else
                         {
+                            Mod.LogInfo("\t\t\titem.stack does not cover count left: " + item.stack);
                             countLeft -= item.stack;
                             item.DetachChildren();
                             Destroy(item.gameObject);

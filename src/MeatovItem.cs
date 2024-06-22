@@ -522,21 +522,26 @@ namespace EFM
 
         public void UpdateInventories()
         {
+            Mod.LogInfo("Item " + H3ID + " UpdateInvetories called, current loc index: "+ locationIndex);
             // Find new location
             int newLocation = -1;
             if (parent != null)
             {
+                Mod.LogInfo("\tHas parent, location index: "+ parent.locationIndex);
                 newLocation = parent.locationIndex;
             }
             else
             {
+                Mod.LogInfo("\tNo parent");
                 if (physObj.m_hand != null
                     || (physObj.QuickbeltSlot != null && physObj.QuickbeltSlot.IsPlayer))
                 {
+                    Mod.LogInfo("\t\tPlayer, loc index 0");
                     newLocation = 0;
                 }
                 else
                 {
+                    Mod.LogInfo("\t\tNot player, loc index "+ Mod.currentLocationIndex);
                     newLocation = Mod.currentLocationIndex;
                 }
             }
@@ -544,21 +549,26 @@ namespace EFM
             // Update inventories only if location has changed
             if(locationIndex != newLocation)
             {
-                if(locationIndex == 0)
+                Mod.LogInfo("\tNew loc");
+                if (locationIndex == 0)
                 {
+                    Mod.LogInfo("\t\tRemoving from player inventory");
                     Mod.RemoveFromPlayerInventory(this);
                 }
                 else if(locationIndex == 1)
                 {
+                    Mod.LogInfo("\t\tRemoving from hideout inventory");
                     HideoutController.instance.RemoveFromInventory(this);
                 }
 
                 if (newLocation == 0)
                 {
+                    Mod.LogInfo("\t\tAdding to player inventory");
                     Mod.AddToPlayerInventory(this);
                 }
                 else if (newLocation == 1)
                 {
+                    Mod.LogInfo("\t\tAdding to hideout inventory");
                     HideoutController.instance.AddToInventory(this);
                 }
             }
@@ -1806,7 +1816,7 @@ namespace EFM
 
 		public void Highlight(Color color)
 		{
-			MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>();
+			MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>(true);
 			foreach (MeshRenderer mr in mrs)
 			{
 				mr.material.EnableKeyword("_RIM_ON");
@@ -1816,7 +1826,7 @@ namespace EFM
 
 		public void RemoveHighlight()
 		{
-			MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>();
+			MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>(true);
 			foreach (MeshRenderer mr in mrs)
 			{
 				mr.material.DisableKeyword("_RIM_ON");
