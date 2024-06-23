@@ -683,7 +683,7 @@ namespace EFM
 
         public void UpdateFall()
         {
-            if (GM.CurrentMovementManager.m_isGrounded && !wasGrounded)
+            if (Mod.currentLocationIndex == 2 && GM.CurrentMovementManager.m_isGrounded && !wasGrounded)
             {
                 // Considering realistic 1g of acceleration, t = (Vf-Vi)/a, and s = Vi * t + 0.5 * a * t ^ 2, s being distance fallen
                 float t = previousVelocity.y / -9.806f; // Note that here, velocity and a are negative, giving a positive time

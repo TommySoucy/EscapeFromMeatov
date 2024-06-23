@@ -131,8 +131,11 @@ namespace EFM
             this.nonLethal = nonLethal;
             this.hideoutOnly = hideoutOnly;
 
-            this.parentEffect = parentEffect;
-            parentEffect.caused.Add(this);
+            if(parentEffect != null)
+            {
+                this.parentEffect = parentEffect;
+                parentEffect.caused.Add(this);
+            }
 
             if (effectsByType.TryGetValue(effectType, out List<Effect> typeEffects))
             {
