@@ -588,7 +588,7 @@ namespace EFM
                                         // Add new requirement
                                         RequirementItemView itemRequirement = Instantiate(productionView.requirementItemViewPrefab, productionView.requirementsPanel).GetComponent<RequirementItemView>();
 
-                                        itemRequirement.itemView.SetItemData(currentProduction.requirements[k].item);
+                                        itemRequirement.itemView.SetItemData(currentProduction.requirements[k].item, hasToolOveride: true, isToolOverride: currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool);
 
                                         long itemInventoryCount = Mod.GetItemCountInInventories(currentProduction.requirements[k].item.H3ID);
                                         itemRequirement.amount.text = Extensions.Min(itemInventoryCount, currentProduction.requirements[k].itemCount).ToString() + "/" + currentProduction.requirements[k].itemCount;
@@ -984,7 +984,7 @@ namespace EFM
                         // Add new requirement
                         RequirementItemView itemRequirement = Instantiate(itemRequirementPrefab, currentItemRequirementParent).GetComponent<RequirementItemView>();
 
-                        itemRequirement.itemView.SetItemData(itemRequirements[i].item);
+                        itemRequirement.itemView.SetItemData(itemRequirements[i].item, hasToolOveride: true, isToolOverride: itemRequirements[i].requirementType == Requirement.RequirementType.Tool);
 
                         long itemInventoryCount = Mod.GetItemCountInInventories(itemRequirements[i].item.H3ID);
                         itemRequirement.amount.text = Extensions.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;
@@ -1142,7 +1142,7 @@ namespace EFM
                         // Add new requirement
                         RequirementItemView itemRequirement = Instantiate(futureItemRequirementPrefab, currentItemRequirementParent).GetComponent<RequirementItemView>();
 
-                        itemRequirement.itemView.SetItemData(itemRequirements[i].item);
+                        itemRequirement.itemView.SetItemData(itemRequirements[i].item, hasToolOveride: true, isToolOverride: itemRequirements[i].requirementType == Requirement.RequirementType.Tool);
 
                         long itemInventoryCount = Mod.GetItemCountInInventories(itemRequirements[i].item.H3ID);
                         itemRequirement.amount.text = Extensions.Min(itemInventoryCount, itemRequirements[i].itemCount).ToString() + "/" + itemRequirements[i].itemCount;

@@ -1116,7 +1116,8 @@ namespace EFM
                         }
                         else // Either we are area upgrade req or we are production but not continuous so not slot dependent
                         {
-                            HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                            item.OnHideoutItemInventoryChanged += OnInventoryChanged;
+                            item.OnPlayerItemInventoryChanged += OnInventoryChanged;
                         }
                         break;
                     case RequirementType.Area:
@@ -1165,11 +1166,8 @@ namespace EFM
                             return;
                         }
 
-                        if (production == null || !production.continuous)
-                        {
-                            HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
-                        }
-                        HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                        item.OnHideoutItemInventoryChanged += OnInventoryChanged;
+                        item.OnPlayerItemInventoryChanged += OnInventoryChanged;
                         break;
                     case RequirementType.Resource:
                         string resourceItemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
@@ -1203,7 +1201,8 @@ namespace EFM
                         }
                         else // Either we are area upgrade req or we are production but not continuous so not slot dependent
                         {
-                            HideoutController.instance.OnHideoutInventoryChanged += OnHideoutInventoryChanged;
+                            item.OnHideoutItemInventoryChanged += OnInventoryChanged;
+                            item.OnPlayerItemInventoryChanged += OnInventoryChanged;
                         }
                         break;
                     case RequirementType.QuestComplete:
@@ -1247,7 +1246,7 @@ namespace EFM
 
         public void UpdateFulfilled()
         {
-            OnHideoutInventoryChanged();
+            OnInventoryChanged(-1);
             OnAreaSlotContentChanged();
             OnAreaLevelChanged(area);
             OnTraderLevelChanged(null);
@@ -1255,7 +1254,7 @@ namespace EFM
             OnTaskStateChanged(null);
         }
 
-        public void OnHideoutInventoryChanged()
+        public void OnInventoryChanged(int difference)
         {
             switch (requirementType)
             {
