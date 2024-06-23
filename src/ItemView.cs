@@ -72,7 +72,7 @@ namespace EFM
             else if(item.maxVolume > 0)
             {
                 infoCountText.gameObject.SetActive(true);
-                infoCountText.text = item.containingVolume.ToString() + "/" + item.maxVolume;
+                infoCountText.text = (item.containingVolume / 1000f).ToString("0.##") + "/" + (item.maxVolume / 1000f).ToString("0.##");
             }
             else
             {
