@@ -524,26 +524,21 @@ namespace EFM
 
         public void UpdateInventories()
         {
-            Mod.LogInfo("Item " + H3ID + " UpdateInvetories called, current loc index: "+ locationIndex);
             // Find new location
             int newLocation = -1;
             if (parent != null)
             {
-                Mod.LogInfo("\tHas parent, location index: "+ parent.locationIndex);
                 newLocation = parent.locationIndex;
             }
             else
             {
-                Mod.LogInfo("\tNo parent");
                 if (physObj.m_hand != null
                     || (physObj.QuickbeltSlot != null && physObj.QuickbeltSlot.IsPlayer))
                 {
-                    Mod.LogInfo("\t\tPlayer, loc index 0");
                     newLocation = 0;
                 }
                 else
                 {
-                    Mod.LogInfo("\t\tNot player, loc index "+ Mod.currentLocationIndex);
                     newLocation = Mod.currentLocationIndex;
                 }
             }
@@ -551,26 +546,21 @@ namespace EFM
             // Update inventories only if location has changed
             if(locationIndex != newLocation)
             {
-                Mod.LogInfo("\tNew loc");
                 if (locationIndex == 0)
                 {
-                    Mod.LogInfo("\t\tRemoving from player inventory");
                     Mod.RemoveFromPlayerInventory(this);
                 }
                 else if(locationIndex == 1)
                 {
-                    Mod.LogInfo("\t\tRemoving from hideout inventory");
                     HideoutController.instance.RemoveFromInventory(this);
                 }
 
                 if (newLocation == 0)
                 {
-                    Mod.LogInfo("\t\tAdding to player inventory");
                     Mod.AddToPlayerInventory(this);
                 }
                 else if (newLocation == 1)
                 {
-                    Mod.LogInfo("\t\tAdding to hideout inventory");
                     HideoutController.instance.AddToInventory(this);
                 }
             }
@@ -1837,7 +1827,6 @@ namespace EFM
 
 		public void BeginInteraction(Hand hand)
 		{
-            Mod.LogInfo((hand.fvrHand.IsThisTheRightHand ? "Right" : "Left") + " hand began interacting with " + itemData.name);
             hand.heldItem = this;
             hand.hasScript = true;
 
@@ -1897,8 +1886,6 @@ namespace EFM
 
 		public void EndInteraction(Hand hand)
         {
-            Mod.LogInfo((hand.fvrHand.IsThisTheRightHand ? "Right" : "Left") + " hand stopped interacting with " + itemData.name);
-
             if (hand != null)
             {
                 hand.heldItem = null;
@@ -2482,7 +2469,6 @@ namespace EFM
 
         public void ProcessDestruction()
         {
-            Mod.LogInfo("On Destroy called for item " + H3ID + " with IID: " + GetInstanceID());
             Mod.meatovItemByInteractive.Remove(physObj);
 
             if (locationIndex == 0)
