@@ -1082,7 +1082,7 @@ namespace EFM
 
 					if (amount == 0)
 					{
-						Destroy(gameObject);
+						Destroy();
 					}
 				}
 			}
@@ -2478,15 +2478,16 @@ namespace EFM
             }
         }
 
-        public void OnDestroy()
+        public void ProcessDestruction()
         {
+            Mod.LogInfo("On Destroy called for item " + H3ID + " with IID: " + GetInstanceID());
             Mod.meatovItemByInteractive.Remove(physObj);
 
-            if(locationIndex == 0)
+            if (locationIndex == 0)
             {
                 Mod.RemoveFromPlayerInventory(this);
             }
-            else if(locationIndex == 1)
+            else if (locationIndex == 1)
             {
                 HideoutController.instance.RemoveFromInventory(this);
             }
@@ -2509,9 +2510,31 @@ namespace EFM
             }
 
             // Cancel split if necessary
-            if(Mod.splittingItem == this)
+            if (Mod.splittingItem == this)
             {
                 CancelSplit();
+            }
+        }
+
+        public void Destroy()
+        {
+            if (!destroyed)
+            {
+                ProcessDestruction();
+
+                destroyed = true;
+            }
+
+            Destroy(gameObject);
+        }
+
+        public void OnDestroy()
+        {
+            if (!destroyed)
+            {
+                ProcessDestruction();
+
+                destroyed = true;
             }
         }
 	}

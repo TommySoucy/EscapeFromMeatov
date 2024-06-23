@@ -1996,6 +1996,7 @@ namespace EFM
 
         public static void RemoveFromPlayerInventory(MeatovItem item)
         {
+            Mod.LogInfo("\tRemoving item " + item.H3ID + " with IID: " + item.GetInstanceID()+" from player inventory");
             int difference = -item.stack;
 
             if (playerInventory.ContainsKey(item.H3ID))

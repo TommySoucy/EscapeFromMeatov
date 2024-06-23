@@ -242,7 +242,7 @@ namespace EFM
                             if (!asSL.Chambers[j].IsLoaded)
                             {
                                 asSL.Chambers[j].Load(roundList[i].roundClass);
-                                Destroy(roundList[i].gameObject);
+                                roundList[i].Destroy();
                                 --entryCount;
                                 --countLeft;
                                 found = true;
@@ -302,7 +302,7 @@ namespace EFM
                             if (!asSL.Chambers[j].IsLoaded)
                             {
                                 asSL.Chambers[j].Load(hideoutRoundList[i].roundClass);
-                                Destroy(hideoutRoundList[i].gameObject);
+                                hideoutRoundList[i].Destroy();
                                 --entryCount;
                                 --countLeft;
                                 found = true;

@@ -815,10 +815,10 @@ namespace EFM
                         }
                         else
                         {
-                            Mod.LogInfo("\t\t\titem.stack does not cover count left: " + item.stack);
+                            Mod.LogInfo("\t\t\titem.stack does not cover count left: " + item.stack+", destroying "+ item.GetInstanceID());
                             countLeft -= item.stack;
                             item.DetachChildren();
-                            Destroy(item.gameObject);
+                            item.Destroy();
                         }
                     }
                 }
@@ -846,7 +846,7 @@ namespace EFM
                             {
                                 toolRequirement.serializedTool = item.Serialize();
                             }
-                            Destroy(item.gameObject);
+                            item.Destroy();
                         }
                     }
                 }
@@ -870,7 +870,7 @@ namespace EFM
                         {
                             countLeft -= item.amount;
                             item.DetachChildren();
-                            Destroy(item.gameObject);
+                            item.Destroy();
                         }
                     }
                 }
@@ -879,14 +879,18 @@ namespace EFM
 
         public MeatovItem GetClosestItem(string H3ID)
         {
+            Mod.LogInfo("Get closest item called for " + H3ID);
             if(HideoutController.instance.inventoryItems.TryGetValue(H3ID, out List<MeatovItem> items))
             {
+                Mod.LogInfo("\tGot a list of "+items.Count+" elements");
                 MeatovItem closest = null;
                 float closestDistance = float.MaxValue;
                 for(int i=0; i < items.Count; ++i)
                 {
+                    Mod.LogInfo("\t\tChecking item " + items[i].name+" with IID: " + items[i].GetInstanceID());
                     if (closest == null)
                     {
+                        Mod.LogInfo("\t\t\tClosest init");
                         closestDistance = Vector3.Distance(items[i].transform.position, transform.position - Vector3.down);
                         closest = items[i];
                     }
@@ -895,6 +899,7 @@ namespace EFM
                         float distance = Vector3.Distance(items[i].transform.position, transform.position - Vector3.down);
                         if(distance < closestDistance)
                         {
+                            Mod.LogInfo("\t\t\tNew closest");
                             closestDistance = distance;
                             closest = items[i];
                         }
@@ -2164,7 +2169,7 @@ namespace EFM
                         {
                             countLeft -= item.amount;
                             item.DetachChildren();
-                            GameObject.Destroy(item.gameObject);
+                            item.Destroy();
                         }
                     }
                 }
@@ -2188,7 +2193,7 @@ namespace EFM
                             {
                                 itemRequirement.serializedTool = item.Serialize();
                             }
-                            GameObject.Destroy(item.gameObject);
+                            item.Destroy();
                         }
                     }
                 }

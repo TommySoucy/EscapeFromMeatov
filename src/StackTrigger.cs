@@ -71,10 +71,9 @@ namespace EFM
                 otherStackTrigger.stacked = true;
 
                 Mod.weight -= otherItemWrapper.currentWeight;
-                otherItemWrapper.destroyed = true;
                 otherItemWrapper.physObj.ForceBreakInteraction();
 
-                Destroy(otherItemWrapper.gameObject);
+                otherItemWrapper.Destroy();
             }
             else
             {
@@ -94,10 +93,9 @@ namespace EFM
                 otherStackTrigger.stacked = true;
 
                 Mod.weight -= stackableWrapper.currentWeight;
-                stackableWrapper.destroyed = true;
                 stackableWrapper.physObj.ForceBreakInteraction();
 
-                Destroy(stackableWrapper.gameObject);
+                stackableWrapper.Destroy();
             }
             else
             {

@@ -2062,6 +2062,7 @@ namespace EFM
 
         public void RemoveFromInventory(MeatovItem item)
         {
+            Mod.LogInfo("\tRemoving item " + item.H3ID + " with IID: " + item.GetInstanceID() + " from hideout inventory");
             int difference = -item.stack;
 
             if (inventory.ContainsKey(item.H3ID))
@@ -3649,8 +3650,7 @@ namespace EFM
                         objectList.RemoveAt(objectList.Count - 1);
                         toCheck.physObj.SetQuickBeltSlot(null);
                         toCheck.physObj.ForceBreakInteraction();
-                        toCheck.destroyed = true;
-                        Destroy(toCheck);
+                        toCheck.Destroy();
                         Mod.weight -= toCheck.currentWeight;
                     }
                 }

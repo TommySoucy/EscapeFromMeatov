@@ -1837,7 +1837,7 @@ namespace EFM
                     if (Mod.traders[currentTraderIndex].ItemSellable(meatovItem.itemData))
                     {
                         meatovItem.DetachChildren();
-                        Destroy(meatovItem.gameObject);
+                        meatovItem.Destroy();
                     }
                 }
             }
@@ -2288,11 +2288,11 @@ namespace EFM
                 else if(item.stack < amountToRemove)
                 {
                     amountToRemove -= item.stack;
-                    Destroy(item.gameObject);
+                    item.Destroy();
                 }
                 else // item.stack == amountToRemove
                 {
-                    Destroy(item.gameObject);
+                    item.Destroy();
                     break;
                 }
             }
