@@ -475,6 +475,8 @@ namespace EFM
                 // whenever I want to modify something, I need to rebuild an entire bundle
                 SetData(itemData);
             }
+
+            currentWeight = weight;
             Mod.LogInfo("\t0");
 
             Mod.meatovItemByInteractive.Add(physObj, this);
