@@ -563,6 +563,7 @@ namespace EFM
         public static bool assetLoaded;
         public static GameObject scenePrefab_Menu;
         public static GameObject mainMenuPointable;
+        public static Material highlightMaterial;
         public static Material quickSlotHoverMaterial;
         public static Material quickSlotConstantMaterial;
         public static GameObject doorLeftPrefab;

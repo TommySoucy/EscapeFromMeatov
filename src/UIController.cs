@@ -158,6 +158,7 @@ namespace EFM
                     Mod.extractionLimitUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ExtractionLimitUI");
                     Mod.itemDescriptionUIPrefab = Mod.playerBundle.LoadAsset<GameObject>("ItemDescriptionUI");
                     Mod.devItemSpawnerPrefab = Mod.playerBundle.LoadAsset<GameObject>("DevItemSpawner");
+                    Mod.highlightMaterial = Mod.playerBundle.LoadAsset<Material>("Highlight");
 
                     Mod.quickbeltConfigurationIndices = new Dictionary<int, int>();
                     Mod.pocketsConfigIndex = GM.Instance.QuickbeltConfigurations.Length;
