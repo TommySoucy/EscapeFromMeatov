@@ -136,7 +136,7 @@ namespace EFM
                                             descriptionPack.currencyIconIndexOverride, descriptionPack.valueOverride, descriptionPack.hasToolOveride, descriptionPack.isToolOverride);
             }
             summaryName.text = descriptionPack.itemData.name;
-            summaryNeededText.text = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID).ToString()+"/"+descriptionPack.itemData.GetCurrentNeededForTotal();
+            UpdateSummaryTotalNeeded();
             summaryWishlist.gameObject.SetActive(descriptionPack.itemData.onWishlist);
             summaryWishlist.color = Mod.neededForColors[2];
 
@@ -176,6 +176,11 @@ namespace EFM
             needed |= UpdateNeededForWishlist();
 
             neededForNone.SetActive(!needed);
+        }
+
+        public void UpdateSummaryTotalNeeded()
+        {
+            summaryNeededText.text = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID).ToString() + "/" + descriptionPack.itemData.GetCurrentNeededForTotal();
         }
 
         public void OnToggleAreasClicked()
@@ -739,12 +744,12 @@ namespace EFM
 
         public void OnNeededForAreaTotalChanged()
         {
-            summaryNeededText.text = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID).ToString() + "/" + descriptionPack.itemData.GetCurrentNeededForTotal();
+            UpdateSummaryTotalNeeded();
         }
 
         public void OnNeededForTaskTotalChanged()
         {
-            summaryNeededText.text = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID).ToString() + "/" + descriptionPack.itemData.GetCurrentNeededForTotal();
+            UpdateSummaryTotalNeeded();
         }
 
         public void OnCurrentWeightChanged(MeatovItem item, int preValue)

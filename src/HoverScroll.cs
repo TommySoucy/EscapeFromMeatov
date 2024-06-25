@@ -14,6 +14,30 @@ namespace EFM
         public float rate; // fraction of entire scrollview height/s
 		private bool scrolling;
 
+        public void Start()
+        {
+            if(Button != null)
+            {
+                Button.onClick.AddListener(OnClick);
+            }
+        }
+
+        public void OnClick()
+        {
+            if (up)
+            {
+                scrollbar.value = 1;
+                scrolling = false;
+                gameObject.SetActive(false);
+            }
+            else
+            {
+                scrollbar.value = 0;
+                scrolling = false;
+                gameObject.SetActive(false);
+            }
+        }
+
 		public override void Update()
         {
             base.Update();
