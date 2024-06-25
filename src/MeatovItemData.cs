@@ -217,8 +217,8 @@ namespace EFM
             weight = (int)data["weight"];
             volumes = data["volumes"].ToObject<int[]>();
             lootExperience = (int)data["lootExperience"];
-            name = data["name"].ToString();
-            description = data["description"].ToString();
+            name = data["name"].ToString().Replace("\\","");
+            description = data["description"].ToString().Replace("\\", "");
             canSellOnRagfair = (bool)data["canSellOnRagfair"];
             bool gotValue = Mod.itemValues.TryGetValue(tarkovID, out value);
             if(!gotValue)
