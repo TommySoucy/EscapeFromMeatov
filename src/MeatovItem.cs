@@ -98,6 +98,8 @@ namespace EFM
         [NonSerialized]
         public int upgradeWarnCount = 0;
         [NonSerialized]
+        public List<GameObject> highlightObjects;
+        [NonSerialized]
         public int compatibilityValue; // 0: Does not need mag or round, 1: Needs mag, 2: Needs round, 3: Needs both
         [NonSerialized]
         public bool usesMags; // Could be clip
@@ -1797,23 +1799,71 @@ namespace EFM
 		}
 
 		public void Highlight(Color color)
-		{
-			MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>(true);
-			foreach (MeshRenderer mr in mrs)
-			{
-				mr.material.EnableKeyword("_RIM_ON");
-				mr.material.SetColor("_RimColor", color);
-			}
-		}
+        {
+            if (highlightObjects == null)
+            {
+                BuidHighlightList();
+            }
+
+            for(int i=0; i < highlightObjects.Count; ++i)
+            {
+                highlightObjects[i].SetActive(true);
+            }
+            
+            //MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>(true);
+            //foreach (MeshRenderer mr in mrs)
+            //{
+            //	mr.material.EnableKeyword("_RIM_ON");
+            //	mr.material.SetColor("_RimColor", color);
+            //}
+        }
+
+        public void BuidHighlightList()
+        {
+            highlightObjects = new List<GameObject>();
+
+            MakeHighlightCopy(transform);
+        }
+
+        public void MakeHighlightCopy(Transform t)
+        {
+            MeshRenderer mr = t.GetComponent<MeshRenderer>();
+            MeshFilter mf = t.GetComponent<MeshFilter>();
+            if(mr != null && mf != null)
+            {
+                GameObject go = new GameObject();
+                go.transform.parent = t.parent;
+                go.transform.localPosition = t.localPosition;
+                go.transform.localRotation = t.localRotation;
+
+                MeshRenderer newMR = go.AddComponent<MeshRenderer>();
+                MeshFilter newMF = go.AddComponent<MeshFilter>();
+
+                newMF.mesh = mf.mesh;
+                newMR.material = Mod.highlightMaterial;
+
+                highlightObjects.Add(go);
+            }
+
+            foreach(Transform child in t)
+            {
+                MakeHighlightCopy(child);
+            }
+        }
 
 		public void RemoveHighlight()
-		{
-			MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>(true);
-			foreach (MeshRenderer mr in mrs)
-			{
-				mr.material.DisableKeyword("_RIM_ON");
-			}
-		}
+        {
+            for (int i = 0; i < highlightObjects.Count; ++i)
+            {
+                highlightObjects[i].SetActive(false);
+            }
+
+            //MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>(true);
+            //foreach (MeshRenderer mr in mrs)
+            //{
+            //	mr.material.DisableKeyword("_RIM_ON");
+            //}
+        }
 
 		public void BeginInteraction(Hand hand)
 		{

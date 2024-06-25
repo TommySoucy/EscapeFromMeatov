@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
-using FFmpeg.AutoGen;
 
 namespace EFM
 {
