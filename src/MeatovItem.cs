@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
+using static RootMotion.FinalIK.RagdollUtility;
 
 namespace EFM
 {
@@ -98,7 +99,7 @@ namespace EFM
         [NonSerialized]
         public int upgradeWarnCount = 0;
         [NonSerialized]
-        public List<GameObject> highlightObjects;
+        public List<MeshRenderer> highlightRenderers;
         [NonSerialized]
         public int compatibilityValue; // 0: Does not need mag or round, 1: Needs mag, 2: Needs round, 3: Needs both
         [NonSerialized]
@@ -1800,14 +1801,15 @@ namespace EFM
 
 		public void Highlight(Color color)
         {
-            if (highlightObjects == null)
+            if (highlightRenderers == null)
             {
                 BuidHighlightList();
             }
 
-            for(int i=0; i < highlightObjects.Count; ++i)
+            for(int i=0; i < highlightRenderers.Count; ++i)
             {
-                highlightObjects[i].SetActive(true);
+                highlightRenderers[i].gameObject.SetActive(true);
+                highlightRenderers[i].material.color = color;
             }
             
             //MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>(true);
@@ -1820,42 +1822,35 @@ namespace EFM
 
         public void BuidHighlightList()
         {
-            highlightObjects = new List<GameObject>();
+            highlightRenderers = new List<MeshRenderer>();
 
-            MakeHighlightCopy(transform);
-        }
-
-        public void MakeHighlightCopy(Transform t)
-        {
-            MeshRenderer mr = t.GetComponent<MeshRenderer>();
-            MeshFilter mf = t.GetComponent<MeshFilter>();
-            if(mr != null && mf != null)
+            MeshRenderer[] mrs = GetComponentsInChildren<MeshRenderer>();
+            for(int i=0; i < mrs.Length; ++i)
             {
-                GameObject go = new GameObject();
-                go.transform.parent = t.parent;
-                go.transform.localPosition = t.localPosition;
-                go.transform.localRotation = t.localRotation;
+                MeshFilter mf = mrs[i].GetComponent<MeshFilter>();
+                if (mf != null)
+                {
+                    GameObject go = new GameObject();
+                    go.transform.parent = mrs[i].transform.parent;
+                    go.transform.localPosition = mrs[i].transform.localPosition;
+                    go.transform.localRotation = mrs[i].transform.localRotation;
 
-                MeshRenderer newMR = go.AddComponent<MeshRenderer>();
-                MeshFilter newMF = go.AddComponent<MeshFilter>();
+                    MeshRenderer newMR = go.AddComponent<MeshRenderer>();
+                    MeshFilter newMF = go.AddComponent<MeshFilter>();
 
-                newMF.mesh = mf.mesh;
-                newMR.material = Mod.highlightMaterial;
+                    newMF.mesh = mf.mesh;
+                    newMR.material = Mod.highlightMaterial;
 
-                highlightObjects.Add(go);
-            }
-
-            foreach(Transform child in t)
-            {
-                MakeHighlightCopy(child);
+                    highlightRenderers.Add(newMR);
+                }
             }
         }
 
 		public void RemoveHighlight()
         {
-            for (int i = 0; i < highlightObjects.Count; ++i)
+            for (int i = 0; i < highlightRenderers.Count; ++i)
             {
-                highlightObjects[i].SetActive(false);
+                highlightRenderers[i].gameObject.SetActive(false);
             }
 
             //MeshRenderer[] mrs = gameObject.GetComponentsInChildren<MeshRenderer>(true);

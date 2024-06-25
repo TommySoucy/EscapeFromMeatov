@@ -43,7 +43,9 @@ namespace EFM
                         // Set to block and add to items
                         item.upgradeCheckBlockedIndex = items.Count;
                         items.Add(item);
-                        item.Highlight(Color.red);
+                        Color color = Color.red;
+                        color.a = 0.2f;
+                        item.Highlight(color);
 
                         areaUI.blockDialog.SetActive(true);
                         areaUI.warningDialog.SetActive(false);
@@ -64,7 +66,9 @@ namespace EFM
                         if(item.upgradeBlockCount <= 0)
                         {
                             // Only highlight if not blocking because blocking gets priority
-                            item.Highlight(Color.yellow);
+                            Color color = Color.yellow;
+                            color.a = 0.2f;
+                            item.Highlight(color);
                         }
 
                         // Only have warning dialog if not blocking because blocking gets priority
@@ -97,7 +101,9 @@ namespace EFM
                         }
                         else
                         {
-                            item.Highlight(Color.yellow);
+                            Color color = Color.yellow;
+                            color.a = 0.2f;
+                            item.Highlight(color);
                         }
 
                         RemovedBlock();

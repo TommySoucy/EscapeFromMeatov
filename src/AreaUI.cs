@@ -444,6 +444,7 @@ namespace EFM
                             scavCaseProduction.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                             ScavCaseView scavCaseProductionView = scavCaseProduction.GetComponent<ScavCaseView>();
                             currentProduction.scavCaseUI = scavCaseProductionView;
+                            scavCaseProductionView.production = currentProduction;
                             scavCaseProductionView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
 
                             // Add requirements
@@ -510,6 +511,7 @@ namespace EFM
                                 farmingProduction.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                                 FarmingView farmingView = farmingProduction.GetComponent<FarmingView>();
                                 currentProduction.farmingUI = farmingView;
+                                farmingView.production = currentProduction;
                                 farmingView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
 
                                 // Set requirement
@@ -587,6 +589,7 @@ namespace EFM
                                 productionObject.SetActive(currentProduction.AllUnlockRequirementsFulfilled());
                                 ProductionView productionView = productionObject.GetComponent<ProductionView>();
                                 currentProduction.productionUI = productionView;
+                                productionView.production = currentProduction;
                                 productionView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
 
                                 // Add requirements
