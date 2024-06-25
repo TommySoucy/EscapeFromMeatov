@@ -89,7 +89,7 @@ namespace EFM
 
         public void SetDescriptionPack(DescriptionPack pack)
         {
-            if(descriptionPack != null)
+            if(descriptionPack != null && descriptionPack.itemData != null)
             {
                 descriptionPack.itemData.OnNeededForChanged -= OnNeededForChanged;
                 descriptionPack.itemData.OnNeededForAreaTotalChanged -= OnNeededForAreaTotalChanged;
@@ -496,7 +496,7 @@ namespace EFM
             // Fill new list if necessary
             if (descriptionPack.itemData.neededForProductionByLevelByAreaCurrent.Count > 0)
             {
-                neededForBarters.SetActive(true);
+                neededForProductions.SetActive(true);
                 int total = 0;
                 long currentCount = Mod.GetItemCountInInventories(descriptionPack.itemData.H3ID);
                 foreach (KeyValuePair<int, Dictionary<int, Dictionary<Production, int>>> areaEntry in descriptionPack.itemData.neededForProductionByLevelByAreaCurrent)
@@ -518,7 +518,7 @@ namespace EFM
             }
             else
             {
-                neededForBarters.SetActive(false);
+                neededForProductions.SetActive(false);
                 return false;
             }
         }

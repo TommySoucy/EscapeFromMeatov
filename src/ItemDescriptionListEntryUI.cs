@@ -92,7 +92,7 @@ namespace EFM
                 unfulfilledIcon.SetActive(true);
             }
             amount.text = currentCount.ToString() + "/" + neededCount;
-            entryName.text = production.endProduct.name;
+            entryName.text = production.endProduct == null ? "NULL ENDPRODUCT" : production.endProduct.name;
             entryName.color = Mod.neededForColors[4];
             entryInfo.text = Area.IndexToName(areaIndex) + " lvl " + level;
         }

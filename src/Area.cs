@@ -1096,12 +1096,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.LogError("DEV: "+(production == null ? "Area":"Prodution") +" item requirement targets item " + itemID + " for which we do not have data");
+                                Mod.LogError("DEV: "+(production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + itemID + " for which we do not have data");
                             }
                         }
                         if(item == null)
                         {
-                            Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " item requirement targets item " + itemID + " but found data was null");
+                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + itemID + " but found data was null");
                             return;
                         }
 
@@ -1157,12 +1157,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " tool requirement targets item " + toolItemID + " for which we do not have data");
+                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + toolItemID + " for which we do not have data");
                             }
                         }
                         if (item == null)
                         {
-                            Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " tool requirement targets item " + toolItemID + " but found data was null");
+                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + toolItemID + " but found data was null");
                             return;
                         }
 
@@ -1184,12 +1184,12 @@ namespace EFM
                             }
                             else
                             {
-                                Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " item requirement targets item " + resourceItemID + " for which we do not have data");
+                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + resourceItemID + " for which we do not have data");
                             }
                         }
                         if (item == null)
                         {
-                            Mod.LogError("DEV: " + (production == null ? "Area" : "Prodution") + " resource requirement targets item " + resourceItemID + " but found data was null");
+                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " resource requirement targets item " + resourceItemID + " but found data was null");
                             return;
                         }
 
@@ -1256,6 +1256,11 @@ namespace EFM
 
         public void OnInventoryChanged(int difference)
         {
+            if(item == null)
+            {
+                return;
+            }
+
             switch (requirementType)
             {
                 case RequirementType.Item:
@@ -1885,6 +1890,8 @@ namespace EFM
                     areaLevel = newRequirement.areaLevel;
                     foundProductionAreaRequirement = true;
                 }
+
+                requirements.Add(newRequirement);
             }
 
             // Bitcoin farm special case

@@ -465,6 +465,7 @@ namespace EFM
                                     itemRequirement.gameObject.SetActive(true);
                                 }
                             }
+                            scavCaseProductionView.requirementsPanel.gameObject.SetActive(true);
 
                             // Set buttons
                             if (currentProduction.readyCount > 0)
@@ -497,6 +498,12 @@ namespace EFM
                         }
                         else
                         {
+                            if(currentProduction.endProduct == null)
+                            {
+                                Mod.LogWarning("Area " + area.index + " production " + currentProduction.ID + " endproduct missing item data");
+                                continue;
+                            }
+
                             if (currentProduction.continuous) // Farming
                             {
                                 GameObject farmingProduction = Instantiate(farmingViewPrefab, productionPanelContainer.transform);
@@ -569,6 +576,10 @@ namespace EFM
                                     farmingView.productionStatus.SetActive(false);
                                     farmingView.timePanel.percentage.gameObject.SetActive(false);
                                 }
+
+                                // Set result
+                                farmingView.resultItemView.itemView.SetItemData(currentProduction.endProduct);
+                                farmingView.resultItemView.amount.text = currentProduction.count.ToString();
                             }
                             else // Normal production
                             {
@@ -579,12 +590,18 @@ namespace EFM
                                 productionView.timePanel.requiredTime.text = Mod.FormatTimeString(currentProduction.progressBaseTime);
 
                                 // Add requirements
+                                int addedCount = 0;
                                 for (int k = 0; k < currentProduction.requirements.Count; ++k)
                                 {
                                     if (currentProduction.requirements[k].requirementType == Requirement.RequirementType.Item
                                         || currentProduction.requirements[k].requirementType == Requirement.RequirementType.Resource
                                         || currentProduction.requirements[k].requirementType == Requirement.RequirementType.Tool)
                                     {
+                                        if(currentProduction.requirements[k].item == null)
+                                        {
+                                            Mod.LogWarning("Area "+area.index+" production "+ currentProduction.ID+" requirement "+k+" missing item data");
+                                            continue;
+                                        }
                                         // Add new requirement
                                         RequirementItemView itemRequirement = Instantiate(productionView.requirementItemViewPrefab, productionView.requirementsPanel).GetComponent<RequirementItemView>();
 
@@ -597,8 +614,19 @@ namespace EFM
 
                                         currentProduction.requirements[k].itemRequirementUI = itemRequirement;
                                         itemRequirement.gameObject.SetActive(true);
+
+                                        ++addedCount;
                                     }
                                 }
+
+                                if(addedCount == 0)
+                                {
+                                    Destroy(productionObject);
+                                    Mod.LogWarning("Area " + area.index + " production " + currentProduction.ID + " is missing all requirement item data");
+                                    continue;
+                                }
+
+                                productionView.requirementsPanel.gameObject.SetActive(true);
 
                                 // Set buttons
                                 if (currentProduction.readyCount > 0)
@@ -628,6 +656,10 @@ namespace EFM
                                     productionView.productionStatus.SetActive(false);
                                     productionView.timePanel.percentage.gameObject.SetActive(false);
                                 }
+
+                                // Set result
+                                productionView.resultItemView.itemView.SetItemData(currentProduction.endProduct);
+                                productionView.resultItemView.amount.text = currentProduction.count.ToString();
                             }
                         }
                     }

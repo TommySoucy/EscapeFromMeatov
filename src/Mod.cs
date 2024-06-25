@@ -2820,7 +2820,21 @@ namespace EFM
             int parsedID = -1;
             if (int.TryParse(itemID, out parsedID))
             {
-                icon.sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
+                Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
+                if(sprite == null)
+                {
+                    Mod.LogError("Mod.SetIcon could not load custom item " + itemID + " icon, trying directly");
+                    UnityEngine.Object obj = Mod.itemIconsBundle.LoadAsset("Item" + parsedID + "_Icon");
+                    if(obj != null)
+                    {
+                        Mod.LogError("\tLoaded directly as "+ obj.GetType());
+                    }
+                }
+                else
+                {
+                    icon.sprite = sprite;
+                }
+
             }
             else
             {
