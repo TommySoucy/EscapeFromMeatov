@@ -244,7 +244,6 @@ namespace EFM
         public ContainerVolume containerVolume;
         public Transform containerItemRoot;
 		public GameObject mainContainer;
-		public Renderer[] mainContainerRenderers;
 		public bool canInsertItems = true;
 		public Text volumeIndicatorText;
 		public GameObject volumeIndicator;
@@ -737,15 +736,6 @@ namespace EFM
 
 				Mod.stackSplitUI.arrow.localPosition = new Vector3(distanceFromCenter * 100, -2.14f, 0);
 				Mod.stackSplitUI.amountText.text = splitAmount.ToString() + "/" + stack;
-			}
-		}
-
-		public void SetContainerHovered(bool hovered)
-		{
-			Material matToUse = hovered ? Mod.quickSlotHoverMaterial : Mod.quickSlotConstantMaterial;
-			foreach (Renderer r in mainContainerRenderers)
-			{
-				r.material = matToUse;
 			}
 		}
 

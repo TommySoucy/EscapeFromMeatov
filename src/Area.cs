@@ -1101,6 +1101,7 @@ namespace EFM
                         }
                         if(item == null)
                         {
+                            fulfilled = true;
                             Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + itemID + " but found data was null");
                             return;
                         }
@@ -1162,6 +1163,7 @@ namespace EFM
                         }
                         if (item == null)
                         {
+                            fulfilled = true;
                             Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + toolItemID + " but found data was null");
                             return;
                         }
@@ -1189,6 +1191,7 @@ namespace EFM
                         }
                         if (item == null)
                         {
+                            fulfilled = true;
                             Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " resource requirement targets item " + resourceItemID + " but found data was null");
                             return;
                         }
