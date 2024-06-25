@@ -587,8 +587,8 @@ namespace EFM
                                             subscribed = true;
                                         }
 
-                                        // Needed for production if this requirement's level is a future one and (we want future productions or this requirement's level is next)
-                                        bool currentNeededFor = j > area.currentLevel && (Mod.checkmarkFutureProductions || j == (area.currentLevel + 1));
+                                        // Needed for production if want future productions, or this requirement's level is a previous or current one
+                                        bool currentNeededFor = Mod.checkmarkFutureProductions || j <= area.currentLevel;
                                         neededFor[4] |= currentNeededFor;
                                         if (currentNeededFor)
                                         {
@@ -988,6 +988,7 @@ namespace EFM
 
         public void OnAreaLevelChanged(Area area)
         {
+            Mod.LogInfo("OnAreaLevelChanged on item " + H3ID);
             bool preNeededForArea = neededFor[1];
             bool preNeededForProduction = neededFor[4];
 
@@ -1027,7 +1028,7 @@ namespace EFM
                             if(neededForLevelByAreaCurrent.TryGetValue(area.index, out Dictionary<int, int> neededForLevelsCurrent))
                             {
                                 // Note that we don't check if area.currentLevel + 1 is already in the dict 
-                                // It shouldn't be since !Mod.checkmarkFutureAreas
+                                // It shouldn't be since !Mod.checkmarkFutureAreas and an item will ever only be needed by one item req per level
                                 neededForLevelsCurrent.Add(area.currentLevel + 1, neededForValue);
                             }
                             else
@@ -1042,15 +1043,17 @@ namespace EFM
                 {
                     if(neededForProductionByLevelByArea.TryGetValue(area.index, out Dictionary<int, Dictionary<Production, int>> neededForLevels))
                     {
-                        if(neededForLevels.TryGetValue(area.currentLevel + 1, out Dictionary<Production, int> neededForProductions))
+                        if(neededForLevels.TryGetValue(area.currentLevel, out Dictionary<Production, int> neededForProductions))
                         {
                             if(neededForProductionByLevelByAreaCurrent.TryGetValue(area.index, out Dictionary<int, Dictionary<Production, int>> neededForLevelsCurrent))
                             {
-                                neededForLevelsCurrent.Add(area.currentLevel + 1, neededForProductions);
+                                Mod.LogInfo("Adding " + area.index + " production to currently needed for level " + area.currentLevel + " on item " + H3ID);
+                                neededForLevelsCurrent.Add(area.currentLevel, neededForProductions);
+                                Mod.LogInfo("0");
                             }
                             else
                             {
-                                neededForProductionByLevelByAreaCurrent.Add(area.index, new Dictionary<int, Dictionary<Production, int>>() { { area.currentLevel + 1, neededForProductions } });
+                                neededForProductionByLevelByAreaCurrent.Add(area.index, new Dictionary<int, Dictionary<Production, int>>() { { area.currentLevel, neededForProductions } });
                             }
                         }
                     }
@@ -1070,21 +1073,11 @@ namespace EFM
                     }
                 }
 
-                if (neededForProductionByLevelByAreaCurrent.TryGetValue(area.index, out Dictionary<int,Dictionary<Production,int>> currentProductionDict))
-                {
-                    if (currentProductionDict.ContainsKey(area.currentLevel))
-                    {
-                        currentProductionDict.Remove(area.currentLevel);
-                    }
-                    if (neededForProductionByLevelByAreaCurrent[area.index].Count == 0)
-                    {
-                        neededForProductionByLevelByAreaCurrent.Remove(area.index);
-                    }
-                }
+                // Note that we don't remove from production dicts because same productions will still exist on higher levels
 
                 // Note that here we only sub if Mod.checkmarkFutureAreas and not in current, because if !Mod.checkmarkFutureAreas current dicts
                 // can become empty but refill later
-                if (Mod.checkmarkFutureAreas && Mod.checkmarkFutureProductions && !neededForLevelByAreaCurrent.ContainsKey(area.index) && !neededForProductionByLevelByAreaCurrent.ContainsKey(area.index))
+                if (Mod.checkmarkFutureAreas && Mod.checkmarkFutureProductions && !neededForLevelByAreaCurrent.ContainsKey(area.index))
                 {
                     area.OnAreaLevelChanged -= OnAreaLevelChanged;
                 }
