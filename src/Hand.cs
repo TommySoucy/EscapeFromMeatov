@@ -99,11 +99,14 @@ namespace EFM
 
         private void OnTriggerEnter(Collider collider)
         {
+            Mod.LogInfo("Hand " + (fvrHand.IsThisTheRightHand ? "right" : "left") + " OnTriggerEnter");
             ContainmentVolume volume = collider.GetComponent<ContainmentVolume>();
             if (volume != null)
             {
+                Mod.LogInfo("\tGot volume");
                 if (heldItem != null && volumeCollider == null && (otherHand.collidingVolume == null || otherHand.collidingVolume != volume) && volume.Offer(heldItem))
                 {
+                    Mod.LogInfo("\t\t\t\tItem offered: "+heldItem.itemName);
                     collidingVolume = volume;
                     volumeCollider = collider;
                     fvrHand.Buzz(fvrHand.Buzzer.Buzz_OnHoverInteractive);

@@ -472,7 +472,7 @@ namespace EFM
                             if (currentProduction.readyCount > 0)
                             {
                                 scavCaseProductionView.getButton.SetActive(true);
-                                if (currentProduction.readyCount < currentProduction.limit)
+                                if (currentProduction.limit != 0 && currentProduction.readyCount < currentProduction.limit)
                                 {
                                     scavCaseProductionView.startButton.SetActive(false);
                                 }
@@ -635,7 +635,7 @@ namespace EFM
                                 if (currentProduction.readyCount > 0)
                                 {
                                     productionView.getButton.SetActive(true);
-                                    if (currentProduction.readyCount < currentProduction.limit)
+                                    if (currentProduction.limit != 0 && currentProduction.readyCount < currentProduction.limit)
                                     {
                                         productionView.startButton.SetActive(false);
                                     }

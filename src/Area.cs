@@ -1461,7 +1461,7 @@ namespace EFM
                             production.inProduction = production.AllRequirementsFulfilled();
                         }
                     }
-                    else if (!production.inProduction && production.limit > production.readyCount)
+                    else if (!production.inProduction && (production.limit == 0 || production.limit > production.readyCount))
                     {
                         production.productionUI.startButton.SetActive(production.AllRequirementsFulfilled());
                     }
@@ -1777,7 +1777,7 @@ namespace EFM
         public MeatovItemData endProduct;
         public Vector2Int[] endProductRarities; // 0: Common, 1: Rare, 2: Superrare
         public bool continuous;
-        public int limit;
+        public int limit; // 0 means no limit
         public int count;
         public List<Requirement> requirements;
 
@@ -1983,7 +1983,7 @@ namespace EFM
                         }
                     }
 
-                    if (readyCount == limit)
+                    if (limit != 0 && readyCount == limit)
                     {
                         inProduction = false;
                         if (scavCase)
@@ -2172,7 +2172,8 @@ namespace EFM
                         }
                     }
                 }
-                else
+                else if (itemRequirement.requirementType == Requirement.RequirementType.Item
+                         || itemRequirement.requirementType == Requirement.RequirementType.Tool)
                 {
                     int countLeft = itemRequirement.itemCount;
                     while (countLeft > 0)
