@@ -11,7 +11,20 @@ namespace EFM
         public bool hasMaxVolume;
         public int maxVolume;
         [NonSerialized]
-        public int volume;
+        private int _volume;
+        public int volume
+        {
+            get { return _volume; }
+            set
+            {
+                int preValue = _volume;
+                _volume = value;
+                if(preValue != _volume)
+                {
+                    OnVolumeChangedInvoke();
+                }
+            }
+        }
         public List<string> whitelist;
         public List<string> blacklist;
         public GameObject staticVolume;
@@ -32,6 +45,8 @@ namespace EFM
         public event OnItemRemovedDelegate OnItemRemoved;
         public delegate void OnItemStackChangedDelegate(MeatovItem item, int difference);
         public event OnItemStackChangedDelegate OnItemStackChanged;
+        public delegate void OnVolumeChangedDelegate();
+        public event OnVolumeChangedDelegate OnVolumeChanged;
 
         public bool AddItem(MeatovItem item)
         {
@@ -41,6 +56,7 @@ namespace EFM
             bool fits = Mod.IDDescribedInList(item.H3ID, item.parents, whitelist, blacklist) && (!hasMaxVolume || item.volumes[item.mode] <= (maxVolume - volume));
             if (fits)
             {
+                item.physObj.StoreAndDestroyRigidbody();
                 item.physObj.SetParentage(itemRoot.transform);
                 if (item.physObj.IsAltHeld)
                 {
@@ -128,6 +144,7 @@ namespace EFM
 
                 volume -= item.volumes[item.mode];
                 item.parentVolume = null;
+                item.physObj.RecoverRigidbody();
 
                 OnItemRemovedInvoke(item);
             }
@@ -358,6 +375,14 @@ namespace EFM
             if(OnItemStackChanged != null)
             {
                 OnItemStackChanged(item, difference);
+            }
+        }
+
+        public void OnVolumeChangedInvoke()
+        {
+            if(OnVolumeChanged != null)
+            {
+                OnVolumeChanged();
             }
         }
     }

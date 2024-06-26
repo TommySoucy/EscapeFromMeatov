@@ -450,6 +450,7 @@ namespace EFM
                 containerVolume.maxVolume = data.maxVolume;
                 containerVolume.whitelist = data.whiteList;
                 containerVolume.blacklist = data.blackList;
+                containerVolume.OnVolumeChanged += OnVolumeChanged;
             }
         }
 
@@ -2416,6 +2417,11 @@ namespace EFM
             }
         }
 
+        public void OnVolumeChanged()
+        {
+            containingVolume = containerVolume.volume;
+        }
+
         public void DetachChildren()
         {
             if (parentVolume == null)
@@ -2474,24 +2480,6 @@ namespace EFM
                     parent = null;
                     childIndex = -1;
                 }
-                
-                // If was in a volume, must check if still correct one
-                // because of the order in which this parent changed event is called and when we call
-                // EndInteraction on the item to add it to a volume,
-                // if we call this after for any reason, we obviously don't want to remove from volume we just added this item to
-                if (parentVolume != null)
-                {
-                    MeatovItem ownerItem = null;
-                    if (parentVolume is ContainerVolume)
-                    {
-                        ownerItem = (parentVolume as ContainerVolume).ownerItem;
-                    }
-
-                    if(newParent == null || ownerItem != parent)
-                    {
-                        parentVolume.RemoveItem(this);
-                    }
-                }
 
                 // Add to new parent
                 if (newParent != null)
@@ -2500,6 +2488,17 @@ namespace EFM
                     childIndex = parent.children.Count;
                     parent.children.Add(this);
                     parent.currentWeight += currentWeight;
+                }
+            }
+
+            // If was in a volume, must check if still correct one
+            if (parentVolume != null)
+            {
+                // When an item is added to a volume, it is parented to the volume's itemRoot
+                // If our new transform parent is not the volume's root, then this volume is not our parent volume anymore
+                if(parentVolume.itemRoot.transform != transform.parent)
+                {
+                    parentVolume.RemoveItem(this);
                 }
             }
         }
