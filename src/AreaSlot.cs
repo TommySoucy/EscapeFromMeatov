@@ -16,7 +16,33 @@ namespace EFM
         public GameObject activeVolume;
 
         [NonSerialized]
-        public MeatovItem item;
+        private MeatovItem _item;
+        public MeatovItem item
+        {
+            get { return _item; }
+            set
+            {
+                MeatovItem preValue = _item;
+                _item = value;
+                if(preValue != _item)
+                {
+                    area.OnSlotContentChangedInvoke();
+                }
+                if(preValue != null)
+                {
+                    preValue.OnAmountChanged -= OnItemAmountChanged;
+                }
+                if(_item != null)
+                {
+                    preValue.OnAmountChanged += OnItemAmountChanged;
+                }
+            }
+        }
+
+        public void OnItemAmountChanged()
+        {
+            area.OnSlotContentChangedInvoke();
+        }
 
         [Serializable]
         public class PoseOverridePair

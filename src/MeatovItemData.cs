@@ -50,6 +50,8 @@ namespace EFM
         public int mediumSlotCount;
         // Containers
         public int maxVolume;
+        public List<string> whiteList;
+        public List<string> blackList;
         // Ammo box
         public string cartridge; // The item ID
         public FireArmRoundClass roundClass;
@@ -254,6 +256,14 @@ namespace EFM
             mediumSlotCount = (int)data["mediumSlotCount"];
 
             maxVolume = (int)data["maxVolume"];
+            if (data["whiteList"] != null)
+            {
+                whiteList = data["whiteList"].ToObject<List<string>>();
+            }
+            if (data["blackList"] != null)
+            {
+                blackList = data["blackList"].ToObject<List<string>>();
+            }
 
             cartridge = data["cartridge"].ToString();
             roundClass = (FireArmRoundClass)Enum.Parse(typeof(FireArmRoundClass), data["roundClass"].ToString());

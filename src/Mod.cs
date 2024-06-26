@@ -2775,33 +2775,55 @@ namespace EFM
             }
 
             // Check ancestors
-            for (int i = 0; i < parentsToUse.Count; ++i)
+            if(whiteList == null || whiteList.Count == 0)
             {
-                // If whitelist contains the ancestor ID
-                if (whiteList.Contains(parentsToUse[i]))
+                // Note whitelist, return true as long as item not described in blacklist
+                if (blackList == null || blackList.Count == 0)
                 {
-                    if(blackList == null)
+                    return true;
+                }
+                else
+                {
+                    // Must check if any prior ancestor IDs are in the blacklist
+                    // If an prior ancestor or the item's ID is found in the blacklist, return false, the item does not fit
+                    for (int j = 0; j < parentsToUse.Count; ++j)
                     {
-                        return true;
-                    }
-                    else
-                    {
-                        // Must check if any prior ancestor IDs are in the blacklist
-                        // If an prior ancestor or the item's ID is found in the blacklist, return false, the item does not fit
-                        for (int j = 0; j < i; ++j)
+                        if (blackList.Contains(parentsToUse[j]))
                         {
-                            if (blackList.Contains(parentsToUse[j]))
-                            {
-                                return false;
-                            }
+                            return false;
                         }
-                        return !blackList.Contains(IDToUse);
+                    }
+                    return !blackList.Contains(IDToUse);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < parentsToUse.Count; ++i)
+                {
+                    // If whitelist contains the ancestor ID
+                    if (whiteList.Contains(parentsToUse[i]))
+                    {
+                        if (blackList == null || blackList.Count == 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            // Must check if any prior ancestor IDs are in the blacklist
+                            // If an prior ancestor or the item's ID is found in the blacklist, return false, the item does not fit
+                            for (int j = 0; j < i; ++j)
+                            {
+                                if (blackList.Contains(parentsToUse[j]))
+                                {
+                                    return false;
+                                }
+                            }
+                            return !blackList.Contains(IDToUse);
+                        }
                     }
                 }
             }
 
-            // Getting this far would mean that the item's ID nor any of its ancestors are in the whitelist, so doesn't fit
-            // Note that this means anything that uses a whitelist should at least specify the global item ID 54009119af1c881c07000029
             return false;
         }
 

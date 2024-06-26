@@ -1055,6 +1055,8 @@ namespace EFM
 
         // Resource
         public int resourceCount;
+        public float resourceConsumptionTime = -1;
+        public float resourceConsumptionTimer;
 
         // Area
         public int areaIndex;
@@ -1946,7 +1948,7 @@ namespace EFM
             data["progress"] = progress;
             data["readyCount"] = readyCount;
         }
-
+        
         public void Update()
         {
             if (inProduction)
@@ -2040,16 +2042,67 @@ namespace EFM
                     {
                         farmingUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
                         farmingUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
+
+                        if (!farmingUI.productionStatus.activeSelf)
+                        {
+                            farmingUI.productionStatus.SetActive(true);
+                        }
+                        if (!farmingUI.timePanel.percentage.gameObject.activeSelf)
+                        {
+                            farmingUI.timePanel.percentage.gameObject.SetActive(true);
+                        }
+
+                        UpdateContinuousResourceConsumption();
                     }
                     else
                     {
                         productionUI.productionStatusText.text = "Producing\n(" + Mod.FormatTimeString(timeLeft) + ")...";
                         productionUI.timePanel.percentage.text = ((int)progress).ToString() + "%";
+
+                        if (!productionUI.productionStatus.activeSelf)
+                        {
+                            productionUI.productionStatus.SetActive(true);
+                        }
+                        if (!productionUI.timePanel.percentage.gameObject.activeSelf)
+                        {
+                            productionUI.timePanel.percentage.gameObject.SetActive(true);
+                        }
                     }
                 }
             }
 
             previousInProduction = inProduction;
+        }
+
+        public void UpdateContinuousResourceConsumption()
+        {
+            for (int i = 0; i < requirements.Count; ++i) 
+            {
+                if (requirements[i].requirementType == Requirement.RequirementType.Resource)
+                {
+                    if(requirements[i].resourceConsumptionTime == -1)
+                    {
+                        requirements[i].resourceConsumptionTime = time / requirements[i].resourceCount;
+                    }
+
+                    requirements[i].resourceConsumptionTimer -= Time.deltaTime;
+                    if(requirements[i].resourceConsumptionTimer <= 0)
+                    {
+                        for(int j=0; j < area.levels[area.currentLevel].areaSlots.Length; ++j)
+                        {
+                            if (area.levels[area.currentLevel].areaSlots[j].item != null
+                                && area.levels[area.currentLevel].areaSlots[j].item.itemData == requirements[i].item
+                                && area.levels[area.currentLevel].areaSlots[j].item.amount > 0)
+                            {
+                                --area.levels[area.currentLevel].areaSlots[j].item.amount;
+
+                                requirements[i].resourceConsumptionTimer = requirements[i].resourceConsumptionTime;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public void ReturnTools()
@@ -2140,6 +2193,8 @@ namespace EFM
                     area.levels[area.currentLevel].areaVolumes[0].SpawnItem(endProduct, count);
                 }
             }
+
+            --readyCount;
         }
 
         public void BeginProduction()

@@ -19,12 +19,16 @@ namespace EFM
         public void OnStartClicked()
         {
             production.BeginProduction();
+
+            startButton.SetActive(false);
         }
 
         public void OnGetClicked()
         {
             production.ReturnTools();
             production.SpawnProduct();
+
+            getButton.SetActive(production.readyCount > 0);
         }
     }
 }

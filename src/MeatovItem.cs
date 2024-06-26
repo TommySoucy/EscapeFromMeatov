@@ -426,6 +426,8 @@ namespace EFM
             maxArmor = data.maxArmor;
 
             maxVolume = data.maxVolume;
+            whiteList = data.whiteList;
+            blackList = data.blackList;
 
             cartridge = data.cartridge;
             roundClass = data.roundClass;
@@ -441,6 +443,14 @@ namespace EFM
 
             dogtagLevel = data.dogtagLevel;
             dogtagName = data.dogtagName;
+
+
+            if(containerVolume != null)
+            {
+                containerVolume.maxVolume = data.maxVolume;
+                containerVolume.whitelist = data.whiteList;
+                containerVolume.blacklist = data.blackList;
+            }
         }
 
         private void Awake()
@@ -457,10 +467,8 @@ namespace EFM
                 int parsedIndex = -1;
                 if(int.TryParse(H3ID, out parsedIndex))
                 {
-                    Mod.LogError("DEV: Custom item "+ H3ID+" does not have index set in asset!");
                     index = parsedIndex;
-                    itemData = Mod.customItemData[index];
-                    SetData(itemData);
+                    SetData(Mod.customItemData[index]);
                 }
                 else
                 {
@@ -469,13 +477,7 @@ namespace EFM
             }
             else // Custom, index will already have been set in asset
             {
-                // Data already set, just need to set reference to data object
-                itemData = Mod.customItemData[index];
-
-                // Note that despite comment above, we will for now SetData
-                // I have realized that having the data set in asset is not optimal since
-                // whenever I want to modify something, I need to rebuild an entire bundle
-                SetData(itemData);
+                SetData(Mod.customItemData[index]);
             }
 
             currentWeight = weight;

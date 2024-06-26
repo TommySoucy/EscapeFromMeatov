@@ -1378,7 +1378,6 @@ namespace EFM
                     if(asAreaSlot.item == item)
                     {
                         asAreaSlot.item = null;
-                        asAreaSlot.area.OnSlotContentChangedInvoke();
                     }
                 }
                 else
@@ -1511,7 +1510,6 @@ namespace EFM
             {
                 AreaSlot asAreaSlot = __instance.QuickbeltSlot as AreaSlot;
                 asAreaSlot.item = item;
-                asAreaSlot.area.OnSlotContentChangedInvoke();
 
                 asAreaSlot.area.UI.PlaySlotInputSound();
 
