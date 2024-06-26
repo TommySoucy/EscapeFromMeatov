@@ -1948,6 +1948,7 @@ namespace EFM
                 // Add to new volume
                 hand.collidingVolume.AddItem(this);
                 hand.collidingVolume.Unoffer();
+                hand.collidingVolume = null;
                 hand.volumeCollider = null;
             }
 
