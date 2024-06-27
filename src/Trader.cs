@@ -141,7 +141,7 @@ namespace EFM
             repairAvailable = Mod.traderBaseDB[index]["repair"] == null ? false : (bool)Mod.traderBaseDB[index]["repair"]["availability"];
             if (repairAvailable)
             {
-                repairCurrency = Mod.ItemIDToCurrencyIndex(Mod.traderBaseDB[index]["repair"]["currency"].ToString());
+                Mod.ItemIDToCurrencyIndex(Mod.traderBaseDB[index]["repair"]["currency"].ToString(), out repairCurrency);
                 repairCurrencyCoef = (int)Mod.traderBaseDB[index]["repair"]["currency_coefficient"];
                 List<string> tempRepairExcludedList = new List<string>();
                 JArray repairExcludedArray = Mod.traderBaseDB[index]["repair"]["excluded_category"] as JArray;

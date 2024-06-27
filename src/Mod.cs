@@ -2898,19 +2898,25 @@ namespace EFM
             modInstance.Logger.LogError(message);
         }
 
-        public static int ItemIDToCurrencyIndex(string itemID)
+        public static bool ItemIDToCurrencyIndex(string itemID, out int index)
         {
             switch (itemID)
             {
                 case "5449016a4bdc2d6f028b456f":
-                    return 0;
+                case "203":
+                    index = 0;
+                    return true;
                 case "5696686a4bdc2da3298b456a":
-                    return 1;
+                case "201":
+                    index = 1;
+                    return true;
                 case "569668774bdc2da2298b4568":
-                    return 2;
+                case "202":
+                    index = 2;
+                    return true;
                 default:
-                    Mod.LogError("DEV: ItemIDToCurrencyIndex could not find index for given ID: " + itemID);
-                    return 0;
+                    index = -1;
+                    return false;
             }
         }
 

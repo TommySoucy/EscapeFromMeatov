@@ -10,10 +10,11 @@ namespace EFM
 		public AudioSource clickSound;
 		public TraderTab[] tabs;
 		public GameObject page;
+        public GameObject selected;
 
 		public bool active;
 
-		public override void BeginHoverDisplay()
+        public override void BeginHoverDisplay()
 		{
 			base.BeginHoverDisplay();
 
@@ -31,11 +32,9 @@ namespace EFM
 
 		public void OnClick(int index)
         {
-            TODO: // Set in asset
 			if (!active)
 			{
-                TODO0: // Set selected in asset instead of using getchild
-				transform.GetChild(1).gameObject.SetActive(true);
+                selected.SetActive(true);
 				page.SetActive(true);
 
 				// Reorder the tabs and deactivate any other active ones
@@ -47,7 +46,7 @@ namespace EFM
                         if (tabs[i].active)
                         {
 							tabs[i].active = false;
-							tabs[i].transform.GetChild(1).gameObject.SetActive(false);
+                            tabs[i].selected.SetActive(false);
 							tabs[i].page.SetActive(false);
                         }
                     }

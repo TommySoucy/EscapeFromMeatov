@@ -925,6 +925,8 @@ namespace EFM
                 RagFairBuyItemView currentItemView = buyItemElement.GetComponent<RagFairBuyItemView>();
                 currentItemView.SetBarter(category.barters[i]);
             }
+
+            ragFairBuyItemsHoverScrollProcessor.mustUpdateMiddleHeight = 1;
         }
 
         public void OnRagFairBuyDealClicked()
@@ -1271,6 +1273,7 @@ namespace EFM
         {
             RagFairCategory categoryUI = Instantiate(ragFairBuyCategoryPrefab, currentParent).GetComponent<RagFairCategory>();
             categoryUI.SetCategory(category, step);
+            categoryUI.gameObject.SetActive(true);
 
             for(int i=0; i < category.children.Count; ++i)
             {
@@ -1285,6 +1288,7 @@ namespace EFM
 
             // Buy
             AddRagFairCategories(Mod.itemCategories, ragFairBuyCategoriesParent);
+            ragFairCategoriesHoverScrollProcessor.mustUpdateMiddleHeight = 1;
 
             // Sell
             // Setup selling price display
@@ -1454,11 +1458,36 @@ namespace EFM
                 {
                     for (int i = 0; i <= trader.level; ++i)
                     {
-                        List<Barter> barters = trader.bartersByLevel[i];
+                        List<Barter> barters = trader.bartersByLevel[i + 1];
 
                         for (int j = 0; j < barters.Count; ++j)
                         {
                             Barter currentBarter = barters[j];
+
+                            // Skip if missing item data
+                            if (currentBarter.itemData == null)
+                            {
+                                Mod.LogWarning("Trader " + trader.name + " with ID " + trader.ID + " has barter "+j+" at level "+i+" with missing itemdata");
+                                continue;
+                            }
+                            int priceCount = 0;
+                            int firstValidPrice = -1;
+                            for (int k = 0; k < currentBarter.prices.Length; ++k)
+                            {
+                                if (currentBarter.prices[k].itemData != null)
+                                {
+                                    ++priceCount;
+                                    if (firstValidPrice == -1)
+                                    {
+                                        firstValidPrice = k;
+                                    }
+                                }
+                            }
+                            if (priceCount == 0)
+                            {
+                                Mod.LogWarning("Trader " + trader.name + " with ID " + trader.ID + " has barter " + j + " at level " + i + " with no price itemdata");
+                                continue;
+                            }
 
                             // Skip if this barter is locked
                             if (currentBarter.needUnlock && !trader.rewardBarters[currentBarter.itemData.H3ID])
@@ -1491,7 +1520,10 @@ namespace EFM
                             }
                             else
                             {
-                                currencyToUse = Mod.ItemIDToCurrencyIndex(currentBarter.prices[0].itemData.H3ID);
+                                if (!Mod.ItemIDToCurrencyIndex(currentBarter.prices[firstValidPrice].itemData.H3ID, out currencyToUse))
+                                {
+                                    currencyToUse = 3;
+                                }
                             }
                             itemView.SetItemData(currentBarter.itemData, false, false, false, null, true, currencyToUse, valueToUse, false, false);
 
@@ -1742,7 +1774,7 @@ namespace EFM
                     Mod.LogInfo("\tSetting price: " + price.itemData.H3ID);
                     Transform priceElement = Instantiate(buyPricePrefab, buyPricesContent).transform;
                     priceElement.gameObject.SetActive(true);
-                    PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
+                    PriceItemView currentPriceView = priceElement.GetComponentInChildren<PriceItemView>();
                     currentPriceView.price = price;
                     price.priceItemView = currentPriceView;
 

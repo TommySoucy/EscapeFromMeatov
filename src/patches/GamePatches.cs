@@ -2795,18 +2795,28 @@ namespace EFM
                     }
 
                     // Update description visibility
-                    if (__instance.IsThisTheRightHand)
+                    Hand handToUse = __instance.IsThisTheRightHand ? Mod.rightHand : Mod.leftHand;
+                    if (handToUse != null && handToUse.description != null)
                     {
-                        if(Mod.rightHand != null && Mod.rightHand.description != null && Mod.rightHand.description.gameObject.activeSelf != (describable != null))
+                        if(describable == null)
                         {
-                            Mod.rightHand.description.gameObject.SetActive(describable != null);
+                            if (handToUse.description.gameObject.activeSelf)
+                            {
+                                handToUse.description.gameObject.SetActive(false);
+
+                                // We set currentDescribable to null on deactivation
+                                // This will cause describable's GetDescriptionPack to be called every time description 
+                                // is reactivated. The point is that if an itemView's item changes but it was already our previous
+                                // describable, the description pack will be refetched when we get description again
+                                handToUse.currentDescribable = null;
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (Mod.leftHand != null && Mod.leftHand.description != null && Mod.leftHand.description.gameObject.activeSelf != (describable != null))
+                        else
                         {
-                            Mod.leftHand.description.gameObject.SetActive(describable != null);
+                            if (!handToUse.description.gameObject.activeSelf)
+                            {
+                                handToUse.description.gameObject.SetActive(true);
+                            }
                         }
                     }
                 }
@@ -2824,6 +2834,7 @@ namespace EFM
                     if (hand != null && hand.description != null && hand.description.gameObject.activeSelf)
                     {
                         hand.description.gameObject.SetActive(false);
+                        hand.currentDescribable = null;
                     }
                 }
             }
@@ -2854,11 +2865,13 @@ namespace EFM
                         else if (hand.description != null && hand.description.gameObject.activeSelf)
                         {
                             hand.description.gameObject.SetActive(false);
+                            hand.currentDescribable = null;
                         }
                     }
                     else if (hand.description != null && hand.description.gameObject.activeSelf) // Not holding anything, no grab laser, deactivate description
                     {
                         hand.description.gameObject.SetActive(false);
+                        hand.currentDescribable = null;
                     }
                 }
             }

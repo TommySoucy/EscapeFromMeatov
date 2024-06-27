@@ -132,6 +132,7 @@ namespace EFM
                 infoInsuredIcon.SetActive(false);
                 insuredBorder.SetActive(false);
                 infoCountText.text = "";
+                infoValue.SetActive(false);
                 infoValueIcon.gameObject.SetActive(false);
                 infoValueText.gameObject.SetActive(false);
                 toolIcon.SetActive(false);
@@ -179,6 +180,7 @@ namespace EFM
                 }
                 if (hasValueOverride)
                 {
+                    infoValue.SetActive(true);
                     infoValueIcon.gameObject.SetActive(true);
                     infoValueIcon.sprite = currencyIcons[currencyIconIndexOverride];
                     infoValueText.gameObject.SetActive(true);
@@ -186,6 +188,7 @@ namespace EFM
                 }
                 else
                 {
+                    infoValue.SetActive(false);
                     infoValueIcon.gameObject.SetActive(false);
                     infoValueText.gameObject.SetActive(false);
                 }

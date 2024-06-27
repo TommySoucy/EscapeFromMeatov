@@ -159,7 +159,7 @@ namespace EFM
 
         public void SetDescribable(IDescribable describable)
         {
-            if(currentDescribable == describable)
+            if (currentDescribable == describable)
             {
                 return;
             }
