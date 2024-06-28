@@ -1185,9 +1185,9 @@ namespace EFM
 
             // Start choosing amount
             Mod.stackSplitUI.gameObject.SetActive(true);
-            Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
-            Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
-            amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
+            Mod.stackSplitUI.transform.position = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.2f;
+            Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, Mod.rightHand.transform.eulerAngles.y, 0);
+            amountChoiceStartPosition = Mod.rightHand.transform.position;
             amountChoiceRightVector = Mod.rightHand.transform.right;
             amountChoiceRightVector.y = 0;
 
@@ -1454,83 +1454,81 @@ namespace EFM
                 {
                     GenerateFenceAssort();
                 }
-                else
+
+                for (int i = 0; i <= trader.level; ++i)
                 {
-                    for (int i = 0; i <= trader.level; ++i)
+                    List<Barter> barters = trader.bartersByLevel[i + 1];
+
+                    for (int j = 0; j < barters.Count; ++j)
                     {
-                        List<Barter> barters = trader.bartersByLevel[i + 1];
+                        Barter currentBarter = barters[j];
 
-                        for (int j = 0; j < barters.Count; ++j)
+                        // Skip if missing item data
+                        if (currentBarter.itemData == null)
                         {
-                            Barter currentBarter = barters[j];
-
-                            // Skip if missing item data
-                            if (currentBarter.itemData == null)
-                            {
-                                Mod.LogWarning("Trader " + trader.name + " with ID " + trader.ID + " has barter "+j+" at level "+i+" with missing itemdata");
-                                continue;
-                            }
-                            int priceCount = 0;
-                            int firstValidPrice = -1;
-                            for (int k = 0; k < currentBarter.prices.Length; ++k)
-                            {
-                                if (currentBarter.prices[k].itemData != null)
-                                {
-                                    ++priceCount;
-                                    if (firstValidPrice == -1)
-                                    {
-                                        firstValidPrice = k;
-                                    }
-                                }
-                            }
-                            if (priceCount == 0)
-                            {
-                                Mod.LogWarning("Trader " + trader.name + " with ID " + trader.ID + " has barter " + j + " at level " + i + " with no price itemdata");
-                                continue;
-                            }
-
-                            // Skip if this barter is locked
-                            if (currentBarter.needUnlock && !trader.rewardBarters[currentBarter.itemData.H3ID])
-                            {
-                                continue;
-                            }
-
-                            // Add new row if necessary
-                            Transform currentRow = buyShowcaseContent.GetChild(buyShowcaseContent.childCount - 1);
-                            if (buyShowcaseContent.childCount == 1 || currentRow.childCount == 7) 
-                            {
-                                currentRow = GameObject.Instantiate(buyShowcaseRowPrefab, buyShowcaseContent).transform;
-                                currentRow.gameObject.SetActive(true);
-                            }
-
-                            GameObject currentItemView = GameObject.Instantiate(buyShowcaseItemViewPrefab, currentRow);
-                            currentItemView.SetActive(true);
-
-                            // Setup ItemView
-                            ItemView itemView = currentItemView.GetComponent<ItemView>();
-                            int valueToUse = 0;
-                            int currencyToUse = 0;
-                            for (int k = 0; k < currentBarter.prices.Length; ++k)
-                            {
-                                valueToUse += currentBarter.prices[k].count;
-                            }
-                            if (currentBarter.prices.Length > 1)
-                            {
-                                currencyToUse = 3; // Item trade icon
-                            }
-                            else
-                            {
-                                if (!Mod.ItemIDToCurrencyIndex(currentBarter.prices[firstValidPrice].itemData.H3ID, out currencyToUse))
-                                {
-                                    currencyToUse = 3;
-                                }
-                            }
-                            itemView.SetItemData(currentBarter.itemData, false, false, false, null, true, currencyToUse, valueToUse, false, false);
-
-                            // Setup button
-                            PointableButton pointableButton = currentItemView.GetComponent<PointableButton>();
-                            pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(currentBarter.itemData, currentBarter.prices); });
+                            Mod.LogWarning("Trader " + trader.name + " with ID " + trader.ID + " has barter "+j+" at level "+i+" with missing itemdata");
+                            continue;
                         }
+                        int priceCount = 0;
+                        int firstValidPrice = -1;
+                        for (int k = 0; k < currentBarter.prices.Length; ++k)
+                        {
+                            if (currentBarter.prices[k].itemData != null)
+                            {
+                                ++priceCount;
+                                if (firstValidPrice == -1)
+                                {
+                                    firstValidPrice = k;
+                                }
+                            }
+                        }
+                        if (priceCount == 0)
+                        {
+                            Mod.LogWarning("Trader " + trader.name + " with ID " + trader.ID + " has barter " + j + " at level " + i + " with no price itemdata");
+                            continue;
+                        }
+
+                        // Skip if this barter is locked
+                        if (currentBarter.needUnlock && !trader.rewardBarters[currentBarter.itemData.H3ID])
+                        {
+                            continue;
+                        }
+
+                        // Add new row if necessary
+                        Transform currentRow = buyShowcaseContent.GetChild(buyShowcaseContent.childCount - 1);
+                        if (buyShowcaseContent.childCount == 1 || currentRow.childCount == 7) 
+                        {
+                            currentRow = GameObject.Instantiate(buyShowcaseRowPrefab, buyShowcaseContent).transform;
+                            currentRow.gameObject.SetActive(true);
+                        }
+
+                        GameObject currentItemView = GameObject.Instantiate(buyShowcaseItemViewPrefab, currentRow);
+                        currentItemView.SetActive(true);
+
+                        // Setup ItemView
+                        ItemView itemView = currentItemView.GetComponent<ItemView>();
+                        int valueToUse = 0;
+                        int currencyToUse = 0;
+                        for (int k = 0; k < currentBarter.prices.Length; ++k)
+                        {
+                            valueToUse += currentBarter.prices[k].count;
+                        }
+                        if (currentBarter.prices.Length > 1)
+                        {
+                            currencyToUse = 3; // Item trade icon
+                        }
+                        else
+                        {
+                            if (!Mod.ItemIDToCurrencyIndex(currentBarter.prices[firstValidPrice].itemData.H3ID, out currencyToUse))
+                            {
+                                currencyToUse = 3;
+                            }
+                        }
+                        itemView.SetItemData(currentBarter.itemData, false, false, false, null, true, currencyToUse, valueToUse, false, false);
+
+                        // Setup button
+                        PointableButton pointableButton = currentItemView.GetComponent<PointableButton>();
+                        pointableButton.Button.onClick.AddListener(() => { OnBuyItemClick(currentBarter.itemData, currentBarter.prices); });
                     }
                 }
             }
@@ -1627,7 +1625,6 @@ namespace EFM
 
         public void GenerateFenceAssort()
         {
-            Mod.LogInfo("Generating fence barters");
             Trader fence = Mod.traders[2];
 
             // Remove existing barters from categories
@@ -1666,17 +1663,14 @@ namespace EFM
 
             // Generate 25-50 random barters from fence's buyCategories and buyBlacklist
             int generateCount = UnityEngine.Random.Range(25, 51);
-            Mod.LogInfo("\tInit done, geenrate count: "+ generateCount);
             for (int i=0; i < generateCount; ++i)
             {
                 CategoryTreeNode randomCategory = Mod.itemCategories.FindChild(fence.buyCategories[UnityEngine.Random.Range(0, fence.buyCategories.Length)]);
-                Mod.LogInfo("\t\tAttempt " + i+", buy categ: "+ (randomCategory == null ? "null" : randomCategory.name));
                 if (randomCategory != null)
                 {
                     if(Mod.itemsByParents.TryGetValue(randomCategory.ID, out List<MeatovItemData> items))
                     {
                         MeatovItemData randomItem = items[UnityEngine.Random.Range(0, items.Count)];
-                        Mod.LogInfo("\t\t\tGot " + items.Count + " items of this category, random item: "+ randomItem.name);
 
                         // Note that fence should only ever have a single barter for a specific item since they would all have the same price anyway
                         if (!fence.bartersByItemID.ContainsKey(randomItem.H3ID))
@@ -1689,15 +1683,14 @@ namespace EFM
                             // Barter price will be a little lower than ragfair if can sell on ragfair, or 1.5x higher if can't
                             barter.prices[0].count = randomItem.canSellOnRagfair ? (int)(randomItem.value * FENCE_PRICE_MULT) : (int)(randomItem.value * FENCE_PRICE_MULT * 1.5f);
 
-                            Mod.LogInfo("\t\t\t\tAdding barter with price: "+ barter.prices[0].count);
                             randomCategory.barters.Add(barter);
-                            if (fence.bartersByLevel.TryGetValue(0, out List<Barter> levelBarters))
+                            if (fence.bartersByLevel.TryGetValue(1, out List<Barter> levelBarters))
                             {
                                 levelBarters.Add(barter);
                             }
                             else
                             {
-                                fence.bartersByLevel.Add(0, new List<Barter>() { barter });
+                                fence.bartersByLevel.Add(1, new List<Barter>() { barter });
                             }
 
                             fence.bartersByItemID.Add(randomItem.H3ID, new List<Barter>() { barter });
@@ -1849,9 +1842,9 @@ namespace EFM
 
             // Start choosing amount
             Mod.stackSplitUI.gameObject.SetActive(true);
-            Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
-            Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
-            amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
+            Mod.stackSplitUI.transform.position = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.2f;
+            Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, Mod.rightHand.transform.eulerAngles.y, 0);
+            amountChoiceStartPosition = Mod.rightHand.transform.position;
             amountChoiceRightVector = Mod.rightHand.transform.right;
             amountChoiceRightVector.y = 0;
 
