@@ -212,7 +212,7 @@ namespace EFM
             // Update based on splitting stack
             if (choosingBuyAmount || choosingRagfairBuyAmount || choosingRagFairSellAmount)
             {
-                Vector3 handVector = Mod.rightHand.transform.localPosition - amountChoiceStartPosition;
+                Vector3 handVector = Mod.rightHand.transform.position - amountChoiceStartPosition;
                 float angle = Vector3.Angle(amountChoiceRightVector, handVector);
                 float distanceFromCenter = Mathf.Clamp(handVector.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad), -0.19f, 0.19f);
 
@@ -873,7 +873,7 @@ namespace EFM
             {
                 Transform priceElement = Instantiate(ragFairBuyPricePrefab, ragFairBuyPricesParent).transform;
                 priceElement.gameObject.SetActive(true);
-                PriceItemView currentPriceView = priceElement.GetComponent<PriceItemView>();
+                PriceItemView currentPriceView = priceElement.GetComponentInChildren<PriceItemView>();
                 currentPriceView.price = price;
                 price.priceItemView = currentPriceView;
 
@@ -961,9 +961,9 @@ namespace EFM
 
             // Start choosing amount
             Mod.stackSplitUI.gameObject.SetActive(true);
-            Mod.stackSplitUI.transform.localPosition = Mod.rightHand.transform.localPosition + Mod.rightHand.transform.forward * 0.2f;
-            Mod.stackSplitUI.transform.localRotation = Quaternion.Euler(0, Mod.rightHand.transform.localRotation.eulerAngles.y, 0);
-            amountChoiceStartPosition = Mod.rightHand.transform.localPosition;
+            Mod.stackSplitUI.transform.position = Mod.rightHand.transform.position + Mod.rightHand.transform.forward * 0.2f;
+            Mod.stackSplitUI.transform.rotation = Quaternion.Euler(0, Mod.rightHand.transform.eulerAngles.y, 0);
+            amountChoiceStartPosition = Mod.rightHand.transform.position;
             amountChoiceRightVector = Mod.rightHand.transform.right;
             amountChoiceRightVector.y = 0;
 
@@ -1627,6 +1627,7 @@ namespace EFM
 
         public void GenerateFenceAssort()
         {
+            Mod.LogInfo("Generating fence barters");
             Trader fence = Mod.traders[2];
 
             // Remove existing barters from categories
@@ -1665,14 +1666,17 @@ namespace EFM
 
             // Generate 25-50 random barters from fence's buyCategories and buyBlacklist
             int generateCount = UnityEngine.Random.Range(25, 51);
-            for(int i=0; i < generateCount; ++i)
+            Mod.LogInfo("\tInit done, geenrate count: "+ generateCount);
+            for (int i=0; i < generateCount; ++i)
             {
                 CategoryTreeNode randomCategory = Mod.itemCategories.FindChild(fence.buyCategories[UnityEngine.Random.Range(0, fence.buyCategories.Length)]);
-                if(randomCategory != null)
+                Mod.LogInfo("\t\tAttempt " + i+", buy categ: "+ (randomCategory == null ? "null" : randomCategory.name));
+                if (randomCategory != null)
                 {
                     if(Mod.itemsByParents.TryGetValue(randomCategory.ID, out List<MeatovItemData> items))
                     {
                         MeatovItemData randomItem = items[UnityEngine.Random.Range(0, items.Count)];
+                        Mod.LogInfo("\t\t\tGot " + items.Count + " items of this category, random item: "+ randomItem.name);
 
                         // Note that fence should only ever have a single barter for a specific item since they would all have the same price anyway
                         if (!fence.bartersByItemID.ContainsKey(randomItem.H3ID))
@@ -1685,6 +1689,7 @@ namespace EFM
                             // Barter price will be a little lower than ragfair if can sell on ragfair, or 1.5x higher if can't
                             barter.prices[0].count = randomItem.canSellOnRagfair ? (int)(randomItem.value * FENCE_PRICE_MULT) : (int)(randomItem.value * FENCE_PRICE_MULT * 1.5f);
 
+                            Mod.LogInfo("\t\t\t\tAdding barter with price: "+ barter.prices[0].count);
                             randomCategory.barters.Add(barter);
                             if (fence.bartersByLevel.TryGetValue(0, out List<Barter> levelBarters))
                             {

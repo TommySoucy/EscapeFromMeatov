@@ -34,6 +34,8 @@ namespace EFM
             subList.SetActive(!subList.activeSelf);
             openArrow.SetActive(!subList.activeSelf);
             closeArrow.SetActive(subList.activeSelf);
+
+            HideoutController.instance.marketManager.ragFairCategoriesHoverScrollProcessor.mustUpdateMiddleHeight = 1;
         }
 
         public void OnClicked()

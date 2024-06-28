@@ -1392,6 +1392,10 @@ namespace EFM
                 inventoryItems = new Dictionary<string, List<MeatovItem>>();
                 FIRInventory = new Dictionary<string, int>();
                 FIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
+                marketManager.inventory = new Dictionary<string, int>();
+                marketManager.inventoryItems = new Dictionary<string, List<MeatovItem>>();
+                marketManager.FIRInventory = new Dictionary<string, int>();
+                marketManager.FIRInventoryItems = new Dictionary<string, List<MeatovItem>>();
             }
             else
             {
@@ -1399,6 +1403,10 @@ namespace EFM
                 inventoryItems.Clear();
                 FIRInventory.Clear();
                 FIRInventoryItems.Clear();
+                marketManager.inventory.Clear();
+                marketManager.inventoryItems.Clear();
+                marketManager.FIRInventory.Clear();
+                marketManager.FIRInventoryItems.Clear();
             }
 
             LoadHideoutItems();

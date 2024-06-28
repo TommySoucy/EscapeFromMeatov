@@ -56,6 +56,8 @@ namespace EFM
             bool fits = Mod.IDDescribedInList(item.H3ID, item.parents, whitelist, blacklist) && (!hasMaxVolume || item.volumes[item.mode] <= (maxVolume - volume));
             if (fits)
             {
+                TODO: // Consider only toggling cols if we are not a container's, it could be realistic to not disable them in a backpack and forcing players to manage position of the items
+                item.physObj.SetAllCollidersToLayer(false, "NoCol");
                 item.physObj.StoreAndDestroyRigidbody();
                 item.physObj.SetParentage(itemRoot.transform);
                 if (item.physObj.IsAltHeld)
@@ -145,6 +147,7 @@ namespace EFM
                 volume -= item.volumes[item.mode];
                 item.parentVolume = null;
                 item.physObj.RecoverRigidbody();
+                item.physObj.SetAllCollidersToLayer(false, "Default");
 
                 OnItemRemovedInvoke(item);
             }
