@@ -268,11 +268,56 @@ namespace EFM
                         JArray currentScheme = schemes[i] as JArray;
                         for(int j=0; j < currentScheme.Count; ++j)
                         {
-                            BarterPrice currentBarterPrice = new BarterPrice();
-                            Mod.GetItemData(Mod.TarkovIDtoH3ID(currentScheme[j]["_tpl"].ToString()), out currentBarterPrice.itemData);
-                            currentBarterPrice.count = (int)currentScheme[j]["count"];
+                            Mod.GetItemData(Mod.TarkovIDtoH3ID(currentScheme[j]["_tpl"].ToString()), out MeatovItemData barterPriceItemData);
+                            if(barterPriceItemData == null)
+                            {
+                                Mod.LogWarning("DEV: Trader " + index + ": " + ID + ": Couldn't get price "+j+" Item ID for barter with ID: " + barterLevelEntry.Key);
 
-                            tempBarterPrices.Add(currentBarterPrice);
+                                // Make null item price
+                                BarterPrice currentBarterPrice = new BarterPrice();
+                                currentBarterPrice.count = (int)currentScheme[j]["count"];
+                                tempBarterPrices.Add(currentBarterPrice);
+                            }
+                            else
+                            {
+                                int dogtagLevel = -1;
+                                ConditionCounter.EnemyTarget dogtagSide = ConditionCounter.EnemyTarget.Any;
+                                if(barterPriceItemData.itemType == MeatovItem.ItemType.DogTag)
+                                {
+                                    dogtagLevel = (int)currentScheme[j]["level"];
+                                    dogtagSide = (ConditionCounter.EnemyTarget)Enum.Parse(typeof(ConditionCounter.EnemyTarget), currentScheme[j]["side"].ToString());
+                                }
+                                BarterPrice foundPrice = null;
+                                for (int k = 0; k < tempBarterPrices.Count; ++k)
+                                {
+                                    if (tempBarterPrices[k].itemData == barterPriceItemData
+                                        && (barterPriceItemData.itemType != MeatovItem.ItemType.DogTag 
+                                            || (dogtagLevel == tempBarterPrices[k].dogTagLevel 
+                                                && dogtagSide == tempBarterPrices[k].side)))
+                                    {
+                                        foundPrice = tempBarterPrices[k];
+                                        break;
+                                    }
+                                }
+
+                                // If already have a barter price for this item, just add to the count
+                                if (foundPrice == null)
+                                {
+                                    BarterPrice currentBarterPrice = new BarterPrice();
+                                    currentBarterPrice.itemData = barterPriceItemData;
+                                    if(barterPriceItemData.itemType == MeatovItem.ItemType.DogTag)
+                                    {
+                                        currentBarterPrice.dogTagLevel = dogtagLevel;
+                                        currentBarterPrice.side = dogtagSide;
+                                    }
+                                    currentBarterPrice.count = (int)currentScheme[j]["count"];
+                                    tempBarterPrices.Add(currentBarterPrice);
+                                }
+                                else
+                                {
+                                    foundPrice.count += (int)currentScheme[j]["count"];
+                                }
+                            }
                         }
                         currentBarter.prices = tempBarterPrices.ToArray();
 
@@ -518,5 +563,6 @@ namespace EFM
 
         // DogTag specific
         public int dogTagLevel;
+        public ConditionCounter.EnemyTarget side;
     }
 }

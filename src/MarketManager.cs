@@ -659,8 +659,8 @@ namespace EFM
                 bool prefulfilled = itemView.fulfilledIcon.activeSelf;
                 int count = 0;
                 tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
-                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + itemView.price.count.ToString();
-                if (count >= itemView.price.count)
+                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + (itemView.price.count * cartItemCount).ToString();
+                if (count >= itemView.price.count * cartItemCount)
                 {
                     itemView.fulfilledIcon.SetActive(true);
                     itemView.unfulfilledIcon.SetActive(false);
@@ -671,7 +671,7 @@ namespace EFM
                         for (int i = 0; i < buyPrices.Count; ++i)
                         {
                             int currentCount = 0;
-                            allFulfilled |= tradeVolume.inventory.TryGetValue(buyPrices[i].itemData.H3ID, out currentCount) && currentCount >= buyPrices[i].count;
+                            allFulfilled |= tradeVolume.inventory.TryGetValue(buyPrices[i].itemData.H3ID, out currentCount) && currentCount >= buyPrices[i].count * cartItemCount;
                         }
                         buyDealButton.SetActive(allFulfilled);
                     }
@@ -981,8 +981,8 @@ namespace EFM
                 bool prefulfilled = itemView.fulfilledIcon.activeSelf;
                 int count = 0;
                 tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
-                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + itemView.price.count.ToString();
-                if (count >= itemView.price.count)
+                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + (itemView.price.count * ragFairCartItemCount).ToString();
+                if (count >= itemView.price.count * ragFairCartItemCount)
                 {
                     itemView.fulfilledIcon.SetActive(true);
                     itemView.unfulfilledIcon.SetActive(false);
@@ -993,7 +993,7 @@ namespace EFM
                         for (int i = 0; i < ragFairBuyPrices.Count; ++i)
                         {
                             int currentCount = 0;
-                            allFulfilled |= tradeVolume.inventory.TryGetValue(ragFairBuyPrices[i].itemData.H3ID, out currentCount) && currentCount >= ragFairBuyPrices[i].count;
+                            allFulfilled |= tradeVolume.inventory.TryGetValue(ragFairBuyPrices[i].itemData.H3ID, out currentCount) && currentCount >= ragFairBuyPrices[i].count * ragFairCartItemCount;
                         }
                         ragFairBuyDealButton.SetActive(allFulfilled);
                     }
@@ -1019,11 +1019,11 @@ namespace EFM
             Transform currentRow = ragFairSellShowcaseParent.GetChild(ragFairSellShowcaseParent.childCount - 1);
             if (ragFairSellShowcaseParent.childCount == 1 || currentRow.childCount == 6) // If dont even have a single horizontal yet, add it
             {
-                currentRow = GameObject.Instantiate(sellShowcaseRowPrefab, ragFairSellShowcaseParent).transform;
+                currentRow = GameObject.Instantiate(ragFairSellRowPrefab, ragFairSellShowcaseParent).transform;
                 currentRow.gameObject.SetActive(true);
             }
 
-            GameObject currentItemView = GameObject.Instantiate(sellShowcaseItemViewPrefab, currentRow);
+            GameObject currentItemView = GameObject.Instantiate(ragFairSellItemPrefab, currentRow);
             currentItemView.SetActive(true);
 
             // Setup ItemView
