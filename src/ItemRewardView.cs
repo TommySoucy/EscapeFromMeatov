@@ -12,11 +12,11 @@ namespace EFM
         public Text itemName;
         public GameObject unlockIcon;
 
-        public void SetItem(MeatovItemData item)
+        public void SetItem(MeatovItemData item, bool foundInRaid)
         {
             this.item = item;
 
-            itemView.SetItemData(item);
+            itemView.SetItemData(item, hasFIROverride: foundInRaid, isFIROverride: foundInRaid);
         }
     }
 }

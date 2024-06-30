@@ -66,13 +66,13 @@ namespace EFM
             }
         }
 
-        public void SpawnItem(MeatovItemData itemData, int amount)
+        public void SpawnItem(MeatovItemData itemData, int amount, bool foundInRaid = false)
         {
             int amountToSpawn = amount;
             if (itemData.index == -1)
             {
                 // Spawn vanilla item will handle the updating of proper elements
-                AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn));
+                AnvilManager.Run(SpawnVanillaItem(itemData, amountToSpawn, foundInRaid));
             }
             else
             {
@@ -82,6 +82,7 @@ namespace EFM
                 {
                     GameObject spawnedItem = Instantiate(itemPrefab);
                     MeatovItem meatovItem = spawnedItem.GetComponent<MeatovItem>();
+                    meatovItem.foundInRaid = foundInRaid;
                     objectsList.Add(spawnedItem);
 
                     // Set stack and remove amount to spawn
@@ -118,7 +119,7 @@ namespace EFM
             }
         }
 
-        public IEnumerator SpawnVanillaItem(MeatovItemData itemData, int count)
+        public IEnumerator SpawnVanillaItem(MeatovItemData itemData, int count, bool foundInRaid = false)
         {
             yield return IM.OD[itemData.H3ID].GetGameObjectAsync();
             GameObject itemPrefab = IM.OD[itemData.H3ID].GetGameObject();
@@ -160,6 +161,7 @@ namespace EFM
                     }
 
                     MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+                    meatovItem.foundInRaid = foundInRaid;
                     FVRFireArmMagazine asMagazine = meatovItem.physObj as FVRFireArmMagazine;
                     FVRFireArmRound round = physObj as FVRFireArmRound;
                     asMagazine.RoundType = round.RoundType;
@@ -191,6 +193,7 @@ namespace EFM
                     itemObject = GameObject.Instantiate(itemPrefab);
 
                     MeatovItem meatovItem = itemObject.GetComponent<MeatovItem>();
+                    meatovItem.foundInRaid = foundInRaid;
 
                     // Add item to QBS
                     meatovItem.physObj.SetQuickBeltSlot(this);

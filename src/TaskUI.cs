@@ -98,7 +98,7 @@ namespace EFM
                             ItemRewardView itemRewardView = currentInitEquipItemElement.GetComponent<ItemRewardView>();
                             if(reward.itemIDs.Count > 0)
                             {
-                                itemRewardView.SetItem(reward.itemIDs[0]);
+                                itemRewardView.SetItem(reward.itemIDs[0], false);
                                 if (reward.amount > 1)
                                 {
                                     itemRewardView.count.gameObject.SetActive(true);
@@ -142,7 +142,7 @@ namespace EFM
                             ItemRewardView barterRewardView = currentInitEquipBarterElement.GetComponent<ItemRewardView>();
                             if (reward.itemIDs.Count > 0)
                             {
-                                barterRewardView.SetItem(reward.itemIDs[0]);
+                                barterRewardView.SetItem(reward.itemIDs[0], false);
                                 if (reward.amount > 1)
                                 {
                                     barterRewardView.count.gameObject.SetActive(true);
@@ -174,7 +174,7 @@ namespace EFM
                             ItemRewardView prodRewardView = currentInitEquipProdElement.GetComponent<ItemRewardView>();
                             if (reward.itemIDs.Count > 0)
                             {
-                                prodRewardView.SetItem(reward.itemIDs[0]);
+                                prodRewardView.SetItem(reward.itemIDs[0], true);
                                 if (reward.amount > 1)
                                 {
                                     prodRewardView.count.gameObject.SetActive(true);
@@ -226,7 +226,7 @@ namespace EFM
                             ItemRewardView itemRewardView = currentRewardItemElement.GetComponent<ItemRewardView>();
                             if(reward.itemIDs.Count > 0)
                             {
-                                itemRewardView.SetItem(reward.itemIDs[0]);
+                                itemRewardView.SetItem(reward.itemIDs[0], true);
                                 if (reward.amount > 1)
                                 {
                                     itemRewardView.count.gameObject.SetActive(true);
@@ -270,7 +270,7 @@ namespace EFM
                             ItemRewardView barterRewardView = currentRewardBarterElement.GetComponent<ItemRewardView>();
                             if (reward.itemIDs.Count > 0)
                             {
-                                barterRewardView.SetItem(reward.itemIDs[0]);
+                                barterRewardView.SetItem(reward.itemIDs[0], false);
                                 if (reward.amount > 1)
                                 {
                                     barterRewardView.count.gameObject.SetActive(true);
@@ -302,7 +302,7 @@ namespace EFM
                             ItemRewardView prodRewardView = currentRewardProdElement.GetComponent<ItemRewardView>();
                             if (reward.itemIDs.Count > 0)
                             {
-                                prodRewardView.SetItem(reward.itemIDs[0]);
+                                prodRewardView.SetItem(reward.itemIDs[0], true);
                                 if (reward.amount > 1)
                                 {
                                     prodRewardView.count.gameObject.SetActive(true);
@@ -356,7 +356,7 @@ namespace EFM
                             ItemRewardView itemRewardView = currentFailItemElement.GetComponent<ItemRewardView>();
                             if (reward.itemIDs.Count > 0)
                             {
-                                itemRewardView.SetItem(reward.itemIDs[0]);
+                                itemRewardView.SetItem(reward.itemIDs[0], true);
                                 if (reward.amount > 1)
                                 {
                                     itemRewardView.count.gameObject.SetActive(true);
@@ -400,7 +400,7 @@ namespace EFM
                             ItemRewardView barterRewardView = currentFailBarterElement.GetComponent<ItemRewardView>();
                             if (reward.itemIDs.Count > 0)
                             {
-                                barterRewardView.SetItem(reward.itemIDs[0]);
+                                barterRewardView.SetItem(reward.itemIDs[0], false);
                                 if (reward.amount > 1)
                                 {
                                     barterRewardView.count.gameObject.SetActive(true);
@@ -432,7 +432,7 @@ namespace EFM
                             ItemRewardView prodRewardView = currentFailProdElement.GetComponent<ItemRewardView>();
                             if (reward.itemIDs.Count > 0)
                             {
-                                prodRewardView.SetItem(reward.itemIDs[0]);
+                                prodRewardView.SetItem(reward.itemIDs[0], true);
                                 if (reward.amount > 1)
                                 {
                                     prodRewardView.count.gameObject.SetActive(true);

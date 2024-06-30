@@ -2160,7 +2160,7 @@ namespace EFM
                     for (int i = 0; i < commonCount; ++i)
                     {
                         MeatovItemData randomCommon = commonList[UnityEngine.Random.Range(0, commonList.Count)];
-                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomCommon, 1);
+                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomCommon, 1, true);
                     }
                 }
                 if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Rare, out List<MeatovItemData> rareList))
@@ -2169,7 +2169,7 @@ namespace EFM
                     for (int i = 0; i < rareCount; ++i)
                     {
                         MeatovItemData randomRare = rareList[UnityEngine.Random.Range(0, rareList.Count)];
-                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomRare, 1);
+                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomRare, 1, true);
                     }
                 }
                 if(Mod.itemsByRarity.TryGetValue(MeatovItem.ItemRarity.Rare, out List<MeatovItemData> superRareList))
@@ -2178,7 +2178,7 @@ namespace EFM
                     for (int i = 0; i < superRareCount; ++i)
                     {
                         MeatovItemData randomSuperRare = superRareList[UnityEngine.Random.Range(0, superRareList.Count)];
-                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomSuperRare, 1);
+                        area.levels[area.currentLevel].areaVolumes[0].SpawnItem(randomSuperRare, 1, true);
                     }
                 }
             }
@@ -2186,11 +2186,11 @@ namespace EFM
             {
                 if (area.craftOuputSlot)
                 {
-                    area.levels[area.currentLevel].areaSlots[0].SpawnItem(endProduct, count);
+                    area.levels[area.currentLevel].areaSlots[0].SpawnItem(endProduct, count, true);
                 }
                 else
                 {
-                    area.levels[area.currentLevel].areaVolumes[0].SpawnItem(endProduct, count);
+                    area.levels[area.currentLevel].areaVolumes[0].SpawnItem(endProduct, count, true);
                 }
             }
 

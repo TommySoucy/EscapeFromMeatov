@@ -24,9 +24,18 @@ namespace EFM
         public HoverScrollProcessor fullHoverScrollProcessor;
         public ItemView fullItemView;
         public Text fullName;
+        public Text dogtagName;
         public Text propertiesText;
-        public GameObject containsParent;
-        public Text contentText;
+        public GameObject effects;
+        public GameObject effectsOpenIcon;
+        public GameObject effectsCloseIcon;
+        public GameObject effectsParent;
+        public GameObject effectsEntryPrefab;
+        public GameObject contents;
+        public GameObject contentsOpenIcon;
+        public GameObject contentsCloseIcon;
+        public GameObject contentsParent;
+        public GameObject contentsEntryPrefab;
         public GameObject neededForTitle;
         public GameObject neededForNone;
         public Text neededForWishlist;
@@ -133,7 +142,8 @@ namespace EFM
             {
                 summaryItemView.SetItemData(descriptionPack.itemData, descriptionPack.hasInsuredOverride, descriptionPack.insuredOverride,
                                             descriptionPack.hasCountOverride, descriptionPack.countOverride, descriptionPack.hasValueOverride,
-                                            descriptionPack.currencyIconIndexOverride, descriptionPack.valueOverride, descriptionPack.hasToolOveride, descriptionPack.isToolOverride);
+                                            descriptionPack.currencyIconIndexOverride, descriptionPack.valueOverride, descriptionPack.hasToolOveride, descriptionPack.isToolOverride,
+                                            descriptionPack.hasFIROverride, descriptionPack.isFIROverride);
             }
             summaryName.text = descriptionPack.itemData.name;
             UpdateSummaryTotalNeeded();
@@ -144,16 +154,32 @@ namespace EFM
             if(descriptionPack.item != null)
             {
                 fullItemView.SetItem(descriptionPack.item);
+
+                if(descriptionPack.item.itemType == MeatovItem.ItemType.DogTag)
+                {
+                    dogtagName.gameObject.SetActive(true);
+                    dogtagName.text = descriptionPack.item.dogtagName;
+                }
+                else
+                {
+                    dogtagName.gameObject.SetActive(false);
+                }
             }
             else
             {
                 fullItemView.SetItemData(descriptionPack.itemData, descriptionPack.hasInsuredOverride, descriptionPack.insuredOverride,
                                          descriptionPack.hasCountOverride, descriptionPack.countOverride, descriptionPack.hasValueOverride,
-                                         descriptionPack.currencyIconIndexOverride, descriptionPack.valueOverride, descriptionPack.hasToolOveride, descriptionPack.isToolOverride);
+                                         descriptionPack.currencyIconIndexOverride, descriptionPack.valueOverride, descriptionPack.hasToolOveride, descriptionPack.isToolOverride,
+                                         descriptionPack.hasFIROverride, descriptionPack.isFIROverride);
             }
             fullName.text = descriptionPack.itemData.name;
-            containsParent.SetActive(descriptionPack.item != null && descriptionPack.item.containerVolume != null);
-            if (containsParent.activeSelf)
+            effects.SetActive((descriptionPack.itemData.consumeEffects != null && descriptionPack.itemData.consumeEffects.Count > 0) || (descriptionPack.itemData.effects != null && descriptionPack.itemData.effects.Count > 0));
+            if (effects.activeSelf)
+            {
+                SetEffects();
+            }
+            contents.SetActive(descriptionPack.item != null && descriptionPack.item.containerVolume != null);
+            if (contents.activeSelf)
             {
                 OnContentChanged();
             }
@@ -283,28 +309,262 @@ namespace EFM
 
         public void OnContentChanged()
         {
-            string contentString = "";
-            bool firstIt = true;
+            while(contentsParent.transform.childCount > 1)
+            {
+                Transform currentChild = contentsParent.transform.GetChild(contentsParent.transform.childCount - 1);
+                currentChild.SetParent(null);
+                Destroy(currentChild.gameObject);
+            }
+
             foreach(KeyValuePair<string, int> contentEntry in descriptionPack.item.containerVolume.inventory)
             {
-                if (firstIt)
+                ItemDescriptionListEntryUI entry = Instantiate(contentsEntryPrefab, contentsParent.transform).GetComponent<ItemDescriptionListEntryUI>();
+                entry.gameObject.SetActive(true);
+
+                Mod.GetItemData(contentEntry.Key, out MeatovItemData itemData);
+                entry.entryName.text = itemData.name;
+                entry.amount.text = "x" + contentEntry.Value;
+            }
+        }
+
+        public void SetEffects()
+        {
+            while(effectsParent.transform.childCount > 1)
+            {
+                Transform currentChild = effectsParent.transform.GetChild(effectsParent.transform.childCount - 1);
+                currentChild.SetParent(null);
+                Destroy(currentChild.gameObject);
+            }
+
+            if(descriptionPack.itemData.consumeEffects != null)
+            {
+                for (int i = 0; i< descriptionPack.itemData.consumeEffects.Count; ++i)
                 {
-                    firstIt = false;
-                }
-                else
-                {
-                    contentString += "\n";
-                }
-                if(Mod.GetItemData(contentEntry.Key, out MeatovItemData itemData))
-                {
-                    contentString += ("- " + itemData.name + " (" + contentEntry.Value + ")");
-                }
-                else
-                {
-                    contentString += "NO DATA "+ contentEntry.Key;
+                    ItemDescriptionListEntryUI entry = Instantiate(effectsEntryPrefab, effectsParent.transform).GetComponent<ItemDescriptionListEntryUI>();
+                    entry.gameObject.SetActive(true);
+
+                    ConsumableEffect effect = descriptionPack.itemData.consumeEffects[i];
+                    string effectType = effect.GetFormattedType();
+                    if(effect.effectType == ConsumableEffect.ConsumableEffectType.Hydration || effect.effectType == ConsumableEffect.ConsumableEffectType.Energy)
+                    {
+                        entry.entryName.text = effectType;
+                        if(effect.value > 0)
+                        {
+                            entry.amount.color = Color.green;
+                            entry.amount.text = "+" + effect.value;
+                        }
+                        else
+                        {
+                            entry.amount.color = Color.red;
+                            entry.amount.text = effect.value.ToString();
+                        }
+                        entry.amount.gameObject.SetActive(true);
+                    }
+                    else if(effect.effectType == ConsumableEffect.ConsumableEffectType.DestroyedPart)
+                    {
+                        entry.entryName.text = "Heals " + effectType;
+                        entry.amount.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        entry.entryName.text = "Remove " + effectType;
+
+                        entry.amount.text = "";
+                        if (effect.delay > 0)
+                        {
+                            entry.amount.text = "Delay: " + effect.delay;
+                            entry.amount.gameObject.SetActive(true);
+                        }
+
+                        if(effect.duration > 0)
+                        {
+                            if (entry.amount.text.Equals(""))
+                            {
+                                entry.amount.text = "Duration: " + effect.duration+"s";
+                                entry.amount.gameObject.SetActive(true);
+                            }
+                            else
+                            {
+                                entry.amount.text = entry.amount.text + ", Duration: " + effect.duration + "s";
+                            }
+                        }
+
+                        if(effect.cost > 0)
+                        {
+                            entry.entryInfo.text = effect.cost.ToString();
+                            entry.entryInfo.color = Color.red;
+                            entry.entryInfo.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            entry.entryInfo.gameObject.SetActive(false);
+                        }
+                    }
                 }
             }
-            contentText.text = contentString;
+
+            if(descriptionPack.itemData.effects != null)
+            {
+                for (int i = 0; i< descriptionPack.itemData.effects.Count; ++i)
+                {
+                    ItemDescriptionListEntryUI entry = Instantiate(effectsEntryPrefab, effectsParent.transform).GetComponent<ItemDescriptionListEntryUI>();
+                    entry.gameObject.SetActive(true);
+
+                    BuffEffect effect = descriptionPack.itemData.effects[i];
+                    bool negative = false;
+                    bool percentValue = false;
+                    if(effect.effectType == Effect.EffectType.SkillRate)
+                    {
+                        entry.entryName.text = Mod.skills[effect.skillIndex].displayName + " level";
+                    }
+                    else if(effect.effectType == Effect.EffectType.EnergyRate)
+                    {
+                        entry.entryName.text = "Energy Rate";
+                    }
+                    else if(effect.effectType == Effect.EffectType.HydrationRate)
+                    {
+                        entry.entryName.text = "Hydration Rate";
+                    }
+                    else if(effect.effectType == Effect.EffectType.MaxStamina)
+                    {
+                        entry.entryName.text = "Max Stamina";
+                    }
+                    else if(effect.effectType == Effect.EffectType.StaminaRate)
+                    {
+                        entry.entryName.text = "Stamina Rate";
+                    }
+                    else if(effect.effectType == Effect.EffectType.HandsTremor)
+                    {
+                        entry.entryName.text = "Hand Tremors";
+                    }
+                    else if(effect.effectType == Effect.EffectType.QuantumTunnelling)
+                    {
+                        entry.entryName.text = "Tunnel Vision";
+                    }
+                    else if(effect.effectType == Effect.EffectType.HealthRate)
+                    {
+                        entry.entryName.text = "Health Rate";
+                    }
+                    else if(effect.effectType == Effect.EffectType.RemoveAllBloodLosses)
+                    {
+                        entry.entryName.text = "Remove All Blood Losses";
+                    }
+                    else if(effect.effectType == Effect.EffectType.Contusion)
+                    {
+                        entry.entryName.text = "Concussion";
+                    }
+                    else if(effect.effectType == Effect.EffectType.WeightLimit)
+                    {
+                        entry.entryName.text = "Weight Limit";
+                        percentValue = true;
+                    }
+                    else if(effect.effectType == Effect.EffectType.DamageModifier)
+                    {
+                        entry.entryName.text = "Damage Taken Modifier";
+                        negative = true;
+                        percentValue = true;
+                    }
+                    else if(effect.effectType == Effect.EffectType.StomachBloodloss)
+                    {
+                        entry.entryName.text = "Stomach Blood Loss";
+                    }
+                    else if(effect.effectType == Effect.EffectType.UnknownToxin)
+                    {
+                        entry.entryName.text = "Unknown Toxin";
+                    }
+                    else if(effect.effectType == Effect.EffectType.BodyTemperature)
+                    {
+                        entry.entryName.text = "Body Temperature";
+                    }
+                    else if(effect.effectType == Effect.EffectType.Antidote)
+                    {
+                        entry.entryName.text = "Antidote";
+                    }
+                    else if(effect.effectType == Effect.EffectType.LightBleeding)
+                    {
+                        entry.entryName.text = "Light Bleeding";
+                    }
+                    else if(effect.effectType == Effect.EffectType.HeavyBleeding)
+                    {
+                        entry.entryName.text = "Heavy Bleeding";
+                    }
+                    else if(effect.effectType == Effect.EffectType.Fracture)
+                    {
+                        entry.entryName.text = "Fracture";
+                    }
+                    else if(effect.effectType == Effect.EffectType.Dehydration)
+                    {
+                        entry.entryName.text = "Dehydration";
+                    }
+                    else if(effect.effectType == Effect.EffectType.HeavyDehydration)
+                    {
+                        entry.entryName.text = "Heavy Dehydration";
+                    }
+                    else if(effect.effectType == Effect.EffectType.Fatigue)
+                    {
+                        entry.entryName.text = "Fatigue";
+                    }
+                    else if(effect.effectType == Effect.EffectType.HeavyFatigue)
+                    {
+                        entry.entryName.text = "Heavy Fatigue";
+                    }
+                    else if(effect.effectType == Effect.EffectType.OverweightFatigue)
+                    {
+                        entry.entryName.text = "Overweight Fatigue";
+                    }
+                    else if(effect.effectType == Effect.EffectType.RadExposure)
+                    {
+                        entry.entryName.text = "Radiation Exposure";
+                    }
+                    else if(effect.effectType == Effect.EffectType.Intoxication)
+                    {
+                        entry.entryName.text = "Intoxication";
+                    }
+                    else if(effect.effectType == Effect.EffectType.DestroyedPart)
+                    {
+                        entry.entryName.text = "Destroyed Part";
+                    }
+
+                    entry.amount.text = "";
+                    entry.amount.gameObject.SetActive(true);
+                    if (effect.value > 0)
+                    {
+                        entry.amount.color = negative ? Color.red : Color.green;
+                        entry.amount.text = "+" + effect.value * (percentValue ? 100 : 1) + (percentValue ? "%" : "");
+                    }
+                    else if(effect.value < 0)
+                    {
+                        entry.amount.color = negative ? Color.green : Color.red;
+                        entry.amount.text = (effect.value * (percentValue ? 100 : 1)).ToString() + (percentValue ? "%" : "");
+                    }
+
+                    if (effect.delay > 0)
+                    {
+                        if (entry.amount.text.Equals(""))
+                        {
+                            entry.amount.text = "Delay: " + effect.delay + "s";
+                            entry.amount.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            entry.amount.text = entry.amount.text + ", Delay: " + effect.delay + "s";
+                        }
+                    }
+
+                    if (effect.duration > 0)
+                    {
+                        if (entry.amount.text.Equals(""))
+                        {
+                            entry.amount.text = "Duration: " + effect.duration + "s";
+                            entry.amount.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            entry.amount.text = entry.amount.text + ", Duration: " + effect.duration + "s";
+                        }
+                    }
+                }
+            }
         }
 
         public void OnItemAdded(MeatovItem item)

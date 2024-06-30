@@ -907,6 +907,8 @@ namespace EFM
             }
 
             ragFairBuyDealButton.SetActive(canDeal);
+
+            ragFairPricesHoverScrollProcessor.mustUpdateMiddleHeight = 1;
         }
 
         public void SetRagFairBuyCategory(CategoryTreeNode category)

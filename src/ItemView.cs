@@ -31,6 +31,18 @@ namespace EFM
         public GameObject toolIcon;
         public GameObject toolBorder;
 
+        public bool hasInsuredOverride = false;
+        public bool insuredOverride = false;
+        public bool hasCountOverride = false;
+        public string countOverride = null;
+        public bool hasValueOverride = false;
+        public int currencyIconIndexOverride = 0;
+        public int valueOverride = 0;
+        public bool hasToolOveride = false;
+        public bool isToolOverride = false;
+        public bool hasFIROverride = false;
+        public bool isFIROverride = false;
+
         public void SetItem(MeatovItem item, bool displayValue = false, int currencyIndex = 0, int valueOverride = -1)
         {
             if(this.item != null)
@@ -58,11 +70,25 @@ namespace EFM
             infoCountText.text = item.maxAmount > 0 ? item.amount.ToString() : item.stack.ToString();
             infoValueIcon.gameObject.SetActive(displayValue);
             infoValueText.gameObject.SetActive(displayValue);
-            infoValueText.text = (valueOverride == -1 ? item.itemData.value : valueOverride).ToString();
+            hasValueOverride = valueOverride != -1;
+            if (hasValueOverride)
+            {
+                infoValueText.text = item.itemData.value.ToString();
+            }
+            else
+            {
+                infoValueText.text = valueOverride.ToString();
+                this.valueOverride = valueOverride;
+            }
             if(item.itemType == MeatovItem.ItemType.Consumable)
             {
                 infoCountText.gameObject.SetActive(true);
                 infoCountText.text = item.amount.ToString()+"/"+item.maxAmount;
+            }
+            else if(item.itemType == MeatovItem.ItemType.DogTag)
+            {
+                infoCountText.gameObject.SetActive(true);
+                infoCountText.text = "lvl. "+item.dogtagLevel;
             }
             else if(item.maxStack > 1)
             {
@@ -111,7 +137,8 @@ namespace EFM
                                 bool hasInsuredOverride = false, bool insuredOverride = false,
                                 bool hasCountOverride = false, string countOverride = null,
                                 bool hasValueOverride = false, int currencyIconIndexOverride = 0, int valueOverride = 0, 
-                                bool hasToolOveride = false, bool isToolOverride = false)
+                                bool hasToolOveride = false, bool isToolOverride = false,
+                                bool hasFIROverride = false, bool isFIROverride = false)
         {
             if (this.itemData != null)
             {
@@ -159,6 +186,17 @@ namespace EFM
                 itemData.OnPlayerItemInventoryChanged += OnItemInventoryChanged;
 
                 // Set overrides
+                this.hasInsuredOverride = hasInsuredOverride;
+                this.insuredOverride = insuredOverride;
+                this.hasCountOverride = hasCountOverride;
+                this.countOverride = countOverride;
+                this.hasValueOverride = hasValueOverride;
+                this.currencyIconIndexOverride = currencyIconIndexOverride;
+                this.valueOverride = valueOverride;
+                this.hasToolOveride = hasToolOveride;
+                this.isToolOverride = isToolOverride;
+                this.hasFIROverride = hasFIROverride;
+                this.isFIROverride = isFIROverride;
                 if (hasInsuredOverride)
                 {
                     infoInsuredIcon.SetActive(insuredOverride);
@@ -202,6 +240,10 @@ namespace EFM
                     toolIcon.SetActive(false);
                     toolBorder.SetActive(false);
                 }
+                if (hasFIROverride)
+                {
+                    infoFoundInRaidCheckmark.SetActive(isFIROverride);
+                }
             }
         }
 
@@ -211,6 +253,18 @@ namespace EFM
 
             newPack.itemData = itemData;
             newPack.item = item; // Note that item could be null
+
+            newPack.hasInsuredOverride = hasInsuredOverride;
+            newPack.insuredOverride = insuredOverride;
+            newPack.hasCountOverride = hasCountOverride;
+            newPack.countOverride = countOverride;
+            newPack.hasValueOverride = hasValueOverride;
+            newPack.currencyIconIndexOverride = currencyIconIndexOverride;
+            newPack.valueOverride = valueOverride;
+            newPack.hasToolOveride = hasToolOveride;
+            newPack.isToolOverride = isToolOverride;
+            newPack.hasFIROverride = hasFIROverride;
+            newPack.isFIROverride = isFIROverride;
 
             return newPack;
         }

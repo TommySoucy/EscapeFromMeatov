@@ -20,5 +20,7 @@
         public int valueOverride = 0;
         public bool hasToolOveride = false;
         public bool isToolOverride = false;
+        public bool hasFIROverride = false;
+        public bool isFIROverride = false;
     }
 }

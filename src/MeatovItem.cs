@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.Newtonsoft.Json.Linq;
-using static RootMotion.FinalIK.RagdollUtility;
 
 namespace EFM
 {

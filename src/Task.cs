@@ -2112,12 +2112,12 @@ namespace EFM
                         {
                             actualAmount += (int)(amount / 100.0f * Bonus.questMoneyReward);
                         }
-                        HideoutController.instance.marketManager.tradeVolume.SpawnItem(itemIDs[0], actualAmount);
+                        HideoutController.instance.marketManager.tradeVolume.SpawnItem(itemIDs[0], actualAmount, true);
                         if (itemIDs.Count > 1)
                         {
                             for (int i = 1; i < itemIDs.Count; ++i)
                             {
-                                HideoutController.instance.marketManager.tradeVolume.SpawnItem(itemIDs[i], 1);
+                                HideoutController.instance.marketManager.tradeVolume.SpawnItem(itemIDs[i], 1, true);
                             }
                         }
                     }

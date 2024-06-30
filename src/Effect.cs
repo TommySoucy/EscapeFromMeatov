@@ -844,5 +844,24 @@ namespace EFM
 
         // Health
         public float value;
+
+        public string GetFormattedType()
+        {
+            switch (effectType)
+            {
+                case ConsumableEffectType.RadExposure:
+                    return "Radiation Exposure";
+                case ConsumableEffectType.Contusion:
+                    return "Concussion";
+                case ConsumableEffectType.LightBleeding:
+                    return "Ligh Bleeding";
+                case ConsumableEffectType.HeavyBleeding:
+                    return "Heavy Bleeding";
+                case ConsumableEffectType.DestroyedPart:
+                    return "Destroyed Part";
+                default:
+                    return effectType.ToString();
+            }
+        }
     }
 }

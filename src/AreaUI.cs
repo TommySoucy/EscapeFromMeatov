@@ -580,7 +580,7 @@ namespace EFM
                                 }
 
                                 // Set result
-                                farmingView.resultItemView.itemView.SetItemData(currentProduction.endProduct);
+                                farmingView.resultItemView.itemView.SetItemData(currentProduction.endProduct, hasFIROverride: true, isFIROverride: true);
                                 farmingView.resultItemView.amount.text = currentProduction.count.ToString();
                             }
                             else // Normal production
@@ -661,7 +661,7 @@ namespace EFM
                                 }
 
                                 // Set result
-                                productionView.resultItemView.itemView.SetItemData(currentProduction.endProduct);
+                                productionView.resultItemView.itemView.SetItemData(currentProduction.endProduct, hasFIROverride: true, isFIROverride: true);
                                 productionView.resultItemView.amount.text = currentProduction.count.ToString();
                             }
                         }
