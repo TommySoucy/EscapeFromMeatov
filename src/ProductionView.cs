@@ -29,6 +29,9 @@ namespace EFM
             production.SpawnProduct();
 
             getButton.SetActive(production.readyCount > 0);
+
+            production.area.UI.UpdateStatusIcons();
+            production.area.UI.UpdateStatusTexts();
         }
     }
 }

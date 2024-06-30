@@ -252,9 +252,9 @@ namespace EFM
             }
             else
             {
-                summaryIconProductionBackground.SetActive(area.hasReadyProduction);
+                summaryIconProductionBackground.SetActive(area.readyProdutionCount > 0);
                 summaryIconProgressBackground.SetActive(false);
-                fullIconProductionBackground.SetActive(area.hasReadyProduction);
+                fullIconProductionBackground.SetActive(area.readyProdutionCount > 0);
                 fullIconProgressBackground.SetActive(false);
             }
 
@@ -327,14 +327,6 @@ namespace EFM
             }
 
             // Top left, power
-            summaryIconConstructing.SetActive(false);
-            summaryIconReadyToUpgrade.SetActive(false);
-            summaryIconUpgrading.SetActive(false);
-            summaryIconProducingPanel.SetActive(false);
-            fullIconConstructing.SetActive(false);
-            fullIconReadyToUpgrade.SetActive(false);
-            fullIconUpgrading.SetActive(false);
-            fullIconProducingPanel.SetActive(false);
             if (area.currentLevel > area.startLevel && area.requiresPower)
             {
                 if (area.powered)

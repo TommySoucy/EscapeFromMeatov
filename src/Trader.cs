@@ -262,6 +262,7 @@ namespace EFM
                     {
                         Barter currentBarter = new Barter();
                         currentBarter.level = barterLevelEntry.Value;
+                        currentBarter.trader = this;
                         Mod.GetItemData(barterItemID, out currentBarter.itemData);
 
                         List<BarterPrice> tempBarterPrices = new List<BarterPrice>();
@@ -547,6 +548,7 @@ namespace EFM
         // Static data
         public MeatovItemData itemData;
         public int level;
+        public Trader trader;
         public BarterPrice[] prices;
         public bool needUnlock;
 

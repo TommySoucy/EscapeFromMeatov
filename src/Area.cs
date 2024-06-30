@@ -24,7 +24,7 @@ namespace EFM
         public List<List<Production>> productionsPerLevel;
         public Dictionary<string, Production> productionsByID;
         public Dictionary<string, List<Production>> productionsByProductID;
-        public bool hasReadyProduction;
+        public int readyProdutionCount;
 
         // Live
         private int _currentLevel;
@@ -757,15 +757,8 @@ namespace EFM
         {
             activeProductions.Remove(production);
 
-            if(production.readyCount > 0)
-            {
-                hasReadyProduction = true;
-                if (!upgrading)
-                {
-                    UI.summaryIconProductionBackground.SetActive(true);
-                    UI.fullIconProductionBackground.SetActive(true);
-                }
-            }
+            UI.UpdateStatusIcons();
+            UI.UpdateStatusTexts();
         }
 
         public List<Production> GetActiveProductions()
@@ -1935,10 +1928,7 @@ namespace EFM
                 inProduction = (bool)productionData["inProduction"];
                 progress = (float)productionData["progress"];
                 readyCount = (int)productionData["readyCount"];
-            }
-            if (readyCount > 0)
-            {
-                area.hasReadyProduction = true;
+                area.readyProdutionCount += readyCount;
             }
         }
 
@@ -1968,6 +1958,7 @@ namespace EFM
                 timeLeft -= Time.deltaTime;
                 if(timeLeft <= 0)
                 {
+                    ++area.readyProdutionCount;
                     ++readyCount;
                     if (scavCase)
                     {
@@ -2194,6 +2185,7 @@ namespace EFM
                 }
             }
 
+            --area.readyProdutionCount;
             --readyCount;
         }
 

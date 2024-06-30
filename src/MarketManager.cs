@@ -99,7 +99,7 @@ namespace EFM
         public HoverScrollProcessor ragFairPricesHoverScrollProcessor;
         public GameObject ragFairBuyPricePrefab;
         public GameObject ragFairBuyDealButton;
-        public Dictionary<string, PriceItemView> ragFairBuyItemPriceViewsByH3ID;
+        public Dictionary<string, List<PriceItemView>> ragFairBuyItemPriceViewsByH3ID;
         public Text ragFairBuyItemCount;
         public Collider ragFairBuyAmountButtonCollider;
 
@@ -848,7 +848,7 @@ namespace EFM
 
             if (ragFairBuyItemPriceViewsByH3ID == null)
             {
-                ragFairBuyItemPriceViewsByH3ID = new Dictionary<string, PriceItemView>();
+                ragFairBuyItemPriceViewsByH3ID = new Dictionary<string, List<PriceItemView>>();
             }
             else
             { 
@@ -903,7 +903,18 @@ namespace EFM
                     currentPriceView.unfulfilledIcon.SetActive(true);
                     canDeal = false;
                 }
-                ragFairBuyItemPriceViewsByH3ID.Add(price.itemData.H3ID, currentPriceView);
+
+                // Note that there should only be a single price of a specific item
+                // but items like dogtags will be counted as different if the price is of different level
+                // So there may be multiple price views per item ID
+                if(ragFairBuyItemPriceViewsByH3ID.TryGetValue(price.itemData.H3ID, out List<PriceItemView> priceItemViewList))
+                {
+                    priceItemViewList.Add(currentPriceView);
+                }
+                else
+                {
+                    ragFairBuyItemPriceViewsByH3ID.Add(price.itemData.H3ID, new List<PriceItemView> { currentPriceView });
+                }
             }
 
             ragFairBuyDealButton.SetActive(canDeal);
@@ -922,10 +933,13 @@ namespace EFM
 
             for (int i = 0; i < category.barters.Count; ++i) 
             {
-                Transform buyItemElement = Instantiate(ragFairBuyItemPrefab, ragFairBuyItemParent).transform;
-                buyItemElement.gameObject.SetActive(true);
-                RagFairBuyItemView currentItemView = buyItemElement.GetComponent<RagFairBuyItemView>();
-                currentItemView.SetBarter(category.barters[i]);
+                if (!category.barters[i].locked && (category.barters[i].trader == null || category.barters[i].level <= category.barters[i].trader.level))
+                {
+                    Transform buyItemElement = Instantiate(ragFairBuyItemPrefab, ragFairBuyItemParent).transform;
+                    buyItemElement.gameObject.SetActive(true);
+                    RagFairBuyItemView currentItemView = buyItemElement.GetComponent<RagFairBuyItemView>();
+                    currentItemView.SetBarter(category.barters[i]);
+                }
             }
 
             ragFairBuyItemsHoverScrollProcessor.mustUpdateMiddleHeight = 1;
@@ -978,33 +992,37 @@ namespace EFM
 
         public void UpdateRagFairBuyPriceForItem(MeatovItemData itemData)
         {
-            if (ragFairBuyItemPriceViewsByH3ID.TryGetValue(itemData.H3ID, out PriceItemView itemView))
+            if (ragFairBuyItemPriceViewsByH3ID.TryGetValue(itemData.H3ID, out List<PriceItemView> itemViews))
             {
-                bool prefulfilled = itemView.fulfilledIcon.activeSelf;
-                int count = 0;
-                tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
-                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + (itemView.price.count * ragFairCartItemCount).ToString();
-                if (count >= itemView.price.count * ragFairCartItemCount)
+                for(int j=0; j< itemViews.Count; ++j)
                 {
-                    itemView.fulfilledIcon.SetActive(true);
-                    itemView.unfulfilledIcon.SetActive(false);
-                    if (!prefulfilled)
+                    PriceItemView itemView = itemViews[j];
+                    bool prefulfilled = itemView.fulfilledIcon.activeSelf;
+                    int count = 0;
+                    tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
+                    itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + (itemView.price.count * ragFairCartItemCount).ToString();
+                    if (count >= itemView.price.count * ragFairCartItemCount)
                     {
-                        // Newly fulfilled, we might now be able to buy, check if all prices fulfilled
-                        bool allFulfilled = true;
-                        for (int i = 0; i < ragFairBuyPrices.Count; ++i)
+                        itemView.fulfilledIcon.SetActive(true);
+                        itemView.unfulfilledIcon.SetActive(false);
+                        if (!prefulfilled)
                         {
-                            int currentCount = 0;
-                            allFulfilled |= tradeVolume.inventory.TryGetValue(ragFairBuyPrices[i].itemData.H3ID, out currentCount) && currentCount >= ragFairBuyPrices[i].count * ragFairCartItemCount;
+                            // Newly fulfilled, we might now be able to buy, check if all prices fulfilled
+                            bool allFulfilled = true;
+                            for (int i = 0; i < ragFairBuyPrices.Count; ++i)
+                            {
+                                int currentCount = 0;
+                                allFulfilled |= tradeVolume.inventory.TryGetValue(ragFairBuyPrices[i].itemData.H3ID, out currentCount) && currentCount >= ragFairBuyPrices[i].count * ragFairCartItemCount;
+                            }
+                            ragFairBuyDealButton.SetActive(allFulfilled);
                         }
-                        ragFairBuyDealButton.SetActive(allFulfilled);
                     }
-                }
-                else
-                {
-                    itemView.fulfilledIcon.SetActive(false);
-                    itemView.unfulfilledIcon.SetActive(true);
-                    ragFairBuyDealButton.SetActive(false);
+                    else
+                    {
+                        itemView.fulfilledIcon.SetActive(false);
+                        itemView.unfulfilledIcon.SetActive(true);
+                        ragFairBuyDealButton.SetActive(false);
+                    }
                 }
             }
         }

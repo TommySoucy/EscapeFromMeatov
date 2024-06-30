@@ -275,6 +275,28 @@ namespace EFM
             clickAudio.Play();
         }
 
+        public void OnToggleContentsClicked()
+        {
+            // open is the new state
+            bool open = !contentsParent.activeSelf;
+            contentsParent.SetActive(open);
+            contentsOpenIcon.SetActive(!open);
+            contentsCloseIcon.SetActive(open);
+            fullHoverScrollProcessor.mustUpdateMiddleHeight = 1;
+            clickAudio.Play();
+        }
+
+        public void OnToggleEffectsClicked()
+        {
+            // open is the new state
+            bool open = !effectsParent.activeSelf;
+            effectsParent.SetActive(open);
+            effectsOpenIcon.SetActive(!open);
+            effectsCloseIcon.SetActive(open);
+            fullHoverScrollProcessor.mustUpdateMiddleHeight = 1;
+            clickAudio.Play();
+        }
+
         public void OnOpenFullClicked()
         {
             clickAudio.Play();
@@ -368,6 +390,7 @@ namespace EFM
                     else
                     {
                         entry.entryName.text = "Remove " + effectType;
+                        entry.entryName.color = Color.green;
 
                         entry.amount.text = "";
                         if (effect.delay > 0)
@@ -436,10 +459,12 @@ namespace EFM
                     else if(effect.effectType == Effect.EffectType.HandsTremor)
                     {
                         entry.entryName.text = "Hand Tremors";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.QuantumTunnelling)
                     {
                         entry.entryName.text = "Tunnel Vision";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.HealthRate)
                     {
@@ -448,10 +473,12 @@ namespace EFM
                     else if(effect.effectType == Effect.EffectType.RemoveAllBloodLosses)
                     {
                         entry.entryName.text = "Remove All Blood Losses";
+                        entry.entryName.color = Color.green;
                     }
                     else if(effect.effectType == Effect.EffectType.Contusion)
                     {
                         entry.entryName.text = "Concussion";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.WeightLimit)
                     {
@@ -467,10 +494,12 @@ namespace EFM
                     else if(effect.effectType == Effect.EffectType.StomachBloodloss)
                     {
                         entry.entryName.text = "Stomach Blood Loss";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.UnknownToxin)
                     {
                         entry.entryName.text = "Unknown Toxin";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.BodyTemperature)
                     {
@@ -479,50 +508,62 @@ namespace EFM
                     else if(effect.effectType == Effect.EffectType.Antidote)
                     {
                         entry.entryName.text = "Antidote";
+                        entry.entryName.color = Color.green;
                     }
                     else if(effect.effectType == Effect.EffectType.LightBleeding)
                     {
                         entry.entryName.text = "Light Bleeding";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.HeavyBleeding)
                     {
                         entry.entryName.text = "Heavy Bleeding";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.Fracture)
                     {
                         entry.entryName.text = "Fracture";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.Dehydration)
                     {
                         entry.entryName.text = "Dehydration";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.HeavyDehydration)
                     {
                         entry.entryName.text = "Heavy Dehydration";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.Fatigue)
                     {
                         entry.entryName.text = "Fatigue";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.HeavyFatigue)
                     {
                         entry.entryName.text = "Heavy Fatigue";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.OverweightFatigue)
                     {
                         entry.entryName.text = "Overweight Fatigue";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.RadExposure)
                     {
                         entry.entryName.text = "Radiation Exposure";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.Intoxication)
                     {
                         entry.entryName.text = "Intoxication";
+                        entry.entryName.color = Color.red;
                     }
                     else if(effect.effectType == Effect.EffectType.DestroyedPart)
                     {
                         entry.entryName.text = "Destroyed Part";
+                        entry.entryName.color = Color.red;
                     }
 
                     entry.amount.text = "";
@@ -538,7 +579,7 @@ namespace EFM
                         entry.amount.text = (effect.value * (percentValue ? 100 : 1)).ToString() + (percentValue ? "%" : "");
                     }
 
-                    if (effect.delay > 0)
+                    if (effect.delay > 1)
                     {
                         if (entry.amount.text.Equals(""))
                         {

@@ -314,7 +314,7 @@ namespace EFM
         public void OnContainingVolumeChanged()
         {
             infoCountText.gameObject.SetActive(true);
-            infoCountText.text = item.containingVolume.ToString() + "/" + item.maxVolume;
+            infoCountText.text = (item.containingVolume / 1000f).ToString("0.##") + "/" + (item.maxVolume / 1000f).ToString("0.##");
         }
 
         public void OnStackChanged()
