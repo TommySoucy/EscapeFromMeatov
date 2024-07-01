@@ -8,6 +8,9 @@ namespace EFM
         public List<CategoryTreeNode> children;
         public List<Barter> barters;
 
+        public RagFairCategory UI;
+        public bool uncollapsed;
+
         public string ID;
         public string name;
 
@@ -29,6 +32,8 @@ namespace EFM
             {
                 for (int i = 0; i < items.Count; ++i)
                 {
+                    bool added = false;
+
                     // Find trader barters for this item
                     for (int j = 0; j < Mod.traders.Length; ++j)
                     {
@@ -37,11 +42,12 @@ namespace EFM
                             for (int k = 0; k < traderBarters.Count; ++k)
                             {
                                 barters.Add(traderBarters[k]);
+                                added = true;
                             }
                         }
                     }
                     // Only add a barter if there aren't any trader barters and if the item canSellOnRagFair
-                    if (barters.Count == 0 && items[i].canSellOnRagfair)
+                    if (!added && items[i].canSellOnRagfair)
                     {
                         Barter barter = new Barter();
                         barter.itemData = items[i];

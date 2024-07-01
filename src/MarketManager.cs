@@ -57,7 +57,7 @@ namespace EFM
         public GameObject buyShowcaseItemViewPrefab;
         public Text buyItemName;
         public PriceItemView buyItemView;
-        public Dictionary<string, PriceItemView> buyItemPriceViewsByH3ID;
+        public Dictionary<string, List<PriceItemView>> buyItemPriceViewsByH3ID;
         public Text buyItemCount;
         public Transform buyPricesContent;
         public HoverScrollProcessor buyPricesHoverScrollProcessor;
@@ -199,6 +199,11 @@ namespace EFM
             tradeVolume.OnItemAdded += OnTradeVolumeItemAdded;
             tradeVolume.OnItemRemoved += OnItemRemoved;
             MeatovItemData.OnAddedToWishlist += OnItemAddedToWishlist;
+            Mod.OnPlayerLevelChanged += OnPlayerLevelChanged;
+            for(int i=0; i < Mod.traders.Length; ++i)
+            {
+                Mod.traders[i].OnTraderLevelChanged += OnTraderLevelChanged;
+            }
             
             // Initialize everything
             SetTrader(0);
@@ -268,9 +273,6 @@ namespace EFM
             }
             else
             {
-                // Generate new fence assort
-                GenerateFenceAssort();
-
                 // Reset trader if necessary
                 if (currentTraderIndex == 2)
                 {
@@ -320,6 +322,22 @@ namespace EFM
                     break;
                 }
             }
+        }
+
+        public void OnTraderLevelChanged(Trader trader)
+        {
+            if(currentTraderIndex == trader.index)
+            {
+                SetTrader(currentTraderIndex);
+            }
+
+            UpdateCategories();
+        }
+
+        public void OnPlayerLevelChanged()
+        {
+            traderDetailsPlayerRankIcon.sprite = playerRankIcons[Mod.level / 5];
+            traderDetailsPlayerRankText.text = Mod.level.ToString();
         }
 
         public void OnTradeVolumeItemAdded(MeatovItem item)
@@ -654,33 +672,37 @@ namespace EFM
 
         public void UpdateBuyPriceForItem(MeatovItemData itemData)
         {
-            if (buyItemPriceViewsByH3ID.TryGetValue(itemData.H3ID, out PriceItemView itemView))
+            if (buyItemPriceViewsByH3ID.TryGetValue(itemData.H3ID, out List<PriceItemView> itemViews))
             {
-                bool prefulfilled = itemView.fulfilledIcon.activeSelf;
-                int count = 0;
-                tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
-                itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + (itemView.price.count * cartItemCount).ToString();
-                if (count >= itemView.price.count * cartItemCount)
+                for(int j=0; j< itemViews.Count; ++j)
                 {
-                    itemView.fulfilledIcon.SetActive(true);
-                    itemView.unfulfilledIcon.SetActive(false);
-                    if (!prefulfilled)
+                    PriceItemView itemView = itemViews[j];
+                    bool prefulfilled = itemView.fulfilledIcon.activeSelf;
+                    int count = 0;
+                    tradeVolume.inventory.TryGetValue(itemData.H3ID, out count);
+                    itemView.amount.text = Mathf.Min(itemView.price.count, count).ToString() + "/" + (itemView.price.count * cartItemCount).ToString();
+                    if (count >= itemView.price.count * cartItemCount)
                     {
-                        // Newly fulfilled, we might now be able to buy, check if all prices fulfilled
-                        bool allFulfilled = true;
-                        for (int i = 0; i < buyPrices.Count; ++i)
+                        itemView.fulfilledIcon.SetActive(true);
+                        itemView.unfulfilledIcon.SetActive(false);
+                        if (!prefulfilled)
                         {
-                            int currentCount = 0;
-                            allFulfilled |= tradeVolume.inventory.TryGetValue(buyPrices[i].itemData.H3ID, out currentCount) && currentCount >= buyPrices[i].count * cartItemCount;
+                            // Newly fulfilled, we might now be able to buy, check if all prices fulfilled
+                            bool allFulfilled = true;
+                            for (int i = 0; i < buyPrices.Count; ++i)
+                            {
+                                int currentCount = 0;
+                                allFulfilled |= tradeVolume.inventory.TryGetValue(buyPrices[i].itemData.H3ID, out currentCount) && currentCount >= buyPrices[i].count * cartItemCount;
+                            }
+                            buyDealButton.SetActive(allFulfilled);
                         }
-                        buyDealButton.SetActive(allFulfilled);
                     }
-                }
-                else
-                {
-                    itemView.fulfilledIcon.SetActive(false);
-                    itemView.unfulfilledIcon.SetActive(true);
-                    buyDealButton.SetActive(false);
+                    else
+                    {
+                        itemView.fulfilledIcon.SetActive(false);
+                        itemView.unfulfilledIcon.SetActive(true);
+                        buyDealButton.SetActive(false);
+                    }
                 }
             }
         }
@@ -871,6 +893,11 @@ namespace EFM
             bool canDeal = true;
             foreach (BarterPrice price in ragFairBarter.prices)
             {
+                if (price.itemData == null)
+                {
+                    continue;
+                }
+
                 Transform priceElement = Instantiate(ragFairBuyPricePrefab, ragFairBuyPricesParent).transform;
                 priceElement.gameObject.SetActive(true);
                 PriceItemView currentPriceView = priceElement.GetComponentInChildren<PriceItemView>();
@@ -933,7 +960,10 @@ namespace EFM
 
             for (int i = 0; i < category.barters.Count; ++i) 
             {
-                if (!category.barters[i].locked && (category.barters[i].trader == null || category.barters[i].level <= category.barters[i].trader.level))
+                if (category.barters[i].trader == null 
+                    || (category.barters[i].level <= category.barters[i].trader.level
+                        && (!category.barters[i].trader.rewardBarters.TryGetValue(category.barters[i].itemData.H3ID, out bool unlocked)
+                            || unlocked)))
                 {
                     Transform buyItemElement = Instantiate(ragFairBuyItemPrefab, ragFairBuyItemParent).transform;
                     buyItemElement.gameObject.SetActive(true);
@@ -1299,6 +1329,12 @@ namespace EFM
             {
                 AddRagFairCategories(category.children[i], categoryUI.subList.transform, step + 1);
             }
+
+            categoryUI.toggle.SetActive(categoryUI.subList.transform.childCount > 0);
+            if (categoryUI.toggle.activeSelf && category.uncollapsed && !categoryUI.subList.activeSelf)
+            {
+                categoryUI.OnToggleClicked();
+            }
         }
 
         public void InitRagFair()
@@ -1307,7 +1343,7 @@ namespace EFM
             ragFairListings = new List<RagFairListing>();
 
             // Buy
-            AddRagFairCategories(Mod.itemCategories, ragFairBuyCategoriesParent);
+            UpdateCategories();
             ragFairCategoriesHoverScrollProcessor.mustUpdateMiddleHeight = 1;
 
             // Sell
@@ -1719,6 +1755,11 @@ namespace EFM
                 }
             }
 
+            UpdateCategories();
+        }
+
+        public void UpdateCategories()
+        {
             ClearRagFairCategories();
             AddRagFairCategories(Mod.itemCategories, ragFairBuyCategoriesParent);
         }
@@ -1742,7 +1783,7 @@ namespace EFM
 
             if (buyItemPriceViewsByH3ID == null)
             {
-                buyItemPriceViewsByH3ID = new Dictionary<string, PriceItemView>();
+                buyItemPriceViewsByH3ID = new Dictionary<string, List<PriceItemView>>();
             }
             else
             {
@@ -1789,6 +1830,11 @@ namespace EFM
                 bool canDeal = true;
                 foreach (BarterPrice price in priceList)
                 {
+                    if(price.itemData == null)
+                    {
+                        continue;
+                    }
+
                     Mod.LogInfo("\tSetting price: " + price.itemData.H3ID);
                     Transform priceElement = Instantiate(buyPricePrefab, buyPricesContent).transform;
                     priceElement.gameObject.SetActive(true);
@@ -1823,7 +1869,14 @@ namespace EFM
                         canDeal = false;
                     }
 
-                    buyItemPriceViewsByH3ID.Add(price.itemData.H3ID, currentPriceView);
+                    if(buyItemPriceViewsByH3ID.TryGetValue(price.itemData.H3ID, out List<PriceItemView> itemViews))
+                    {
+                        itemViews.Add(currentPriceView);
+                    }
+                    else
+                    {
+                        buyItemPriceViewsByH3ID.Add(price.itemData.H3ID, new List<PriceItemView> { currentPriceView });
+                    }
                 }
 
                 buyDealButton.SetActive(canDeal);
@@ -3232,6 +3285,12 @@ namespace EFM
             // Unsubscribe to events
             tradeVolume.OnItemAdded -= OnTradeVolumeItemAdded;
             tradeVolume.OnItemRemoved -= OnItemRemoved;
+            MeatovItemData.OnAddedToWishlist -= OnItemAddedToWishlist;
+            Mod.OnPlayerLevelChanged -= OnPlayerLevelChanged;
+            for (int i = 0; i < Mod.traders.Length; ++i)
+            {
+                Mod.traders[i].OnTraderLevelChanged -= OnTraderLevelChanged;
+            }
         }
     }
 }

@@ -493,6 +493,15 @@ namespace EFM
             // We do nothing else here, everything updates through OnTaskStateChanged event
             // Which is invoked by the task.taskState property setter
             task.taskState = Task.TaskState.Active;
+
+            for (int i = 0; i < task.startRewards.Count; ++i)
+            {
+                if (task.startRewards[i].rewardType == Reward.RewardType.AssortmentUnlock)
+                {
+                    HideoutController.instance.marketManager.UpdateCategories();
+                    break;
+                }
+            }
         }
 
         public void OnFinishClicked()
@@ -501,6 +510,15 @@ namespace EFM
             // We do nothing else here, everything updates through OnTaskStateChanged event
             // Which is invoked by the task.taskState property setter
             task.taskState = Task.TaskState.Success;
+
+            for(int i=0; i < task.finishRewards.Count; ++i)
+            {
+                if (task.finishRewards[i].rewardType == Reward.RewardType.AssortmentUnlock)
+                {
+                    HideoutController.instance.marketManager.UpdateCategories();
+                    break;
+                }
+            }
         }
 
         public void OnTaskStateChanged(Task task)
@@ -511,6 +529,15 @@ namespace EFM
                 case Task.TaskState.Success:
                 case Task.TaskState.Fail:
                     Destroy(gameObject);
+
+                    for (int i = 0; i < task.failRewards.Count; ++i)
+                    {
+                        if (task.failRewards[i].rewardType == Reward.RewardType.AssortmentUnlock)
+                        {
+                            HideoutController.instance.marketManager.UpdateCategories();
+                            break;
+                        }
+                    }
                     break;
                 case Task.TaskState.Available:
                     if (!market)

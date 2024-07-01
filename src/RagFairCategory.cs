@@ -21,12 +21,25 @@ namespace EFM
         public void SetCategory(CategoryTreeNode category, int step)
         {
             this.category = category;
+            category.UI = this;
 
             categoryName.text = category.name;
-            count.text = "("+ category.barters.Count+")";
 
             layoutGroup.padding.left = 10 * step;
             mainCollider.size = new Vector3(mainCollider.size.x - 10 * step, mainCollider.size.y, mainCollider.size.z);
+
+            int actualBarterCount = 0;
+            for (int i = 0; i < category.barters.Count; ++i)
+            {
+                if (category.barters[i].trader == null
+                    || (category.barters[i].level <= category.barters[i].trader.level
+                        && (!category.barters[i].trader.rewardBarters.TryGetValue(category.barters[i].itemData.H3ID, out bool unlocked)
+                            || unlocked)))
+                {
+                    ++actualBarterCount;
+                }
+            }
+            count.text = "(" + actualBarterCount + ")";
         }
 
         public void OnToggleClicked()
@@ -36,6 +49,8 @@ namespace EFM
             closeArrow.SetActive(subList.activeSelf);
 
             HideoutController.instance.marketManager.ragFairCategoriesHoverScrollProcessor.mustUpdateMiddleHeight = 1;
+
+            category.uncollapsed = subList.activeSelf;
         }
 
         public void OnClicked()

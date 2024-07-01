@@ -551,9 +551,6 @@ namespace EFM
         public Trader trader;
         public BarterPrice[] prices;
         public bool needUnlock;
-
-        // Live data
-        public bool locked;
     }
 
     public class BarterPrice
