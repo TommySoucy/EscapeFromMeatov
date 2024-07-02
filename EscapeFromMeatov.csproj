@@ -148,6 +148,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>F:\VR\H3VR Modding\H3MP\H3MP\H3MP\bin\Debug\H3MP.dll</HintPath>
     </Reference>
+    <Reference Include="ModularWorkshop">
+      <HintPath>K:\Users\vipki\AppData\Roaming\R2ModMan\H3VR\profiles\EFM\BepInEx\plugins\cityrobo-ModularWorkshop\ModularWorkshop.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.dll</HintPath>
     </Reference>

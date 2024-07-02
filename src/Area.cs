@@ -1078,26 +1078,10 @@ namespace EFM
                 {
                     case RequirementType.Item:
                         string itemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                        int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if(!Mod.GetItemData(itemID, out item))
                         {
-                            item = Mod.customItemData[parsedIndex];
-                        }
-                        else
-                        {
-                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                item = Mod.vanillaItemData[itemID];
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: "+(production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + itemID + " for which we do not have data");
-                            }
-                        }
-                        if(item == null)
-                        {
+                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + itemID + " for which we do not have data");
                             fulfilled = true;
-                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + itemID + " but found data was null");
                             return;
                         }
 
@@ -1140,26 +1124,10 @@ namespace EFM
                         break;
                     case RequirementType.Tool:
                         string toolItemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                        int toolParsedIndex = -1;
-                        if (int.TryParse(toolItemID, out toolParsedIndex))
+                        if (!Mod.GetItemData(toolItemID, out item))
                         {
-                            item = Mod.customItemData[toolParsedIndex];
-                        }
-                        else
-                        {
-                            if (Mod.vanillaItemData.TryGetValue(toolItemID, out MeatovItemData itemData))
-                            {
-                                item = Mod.vanillaItemData[toolItemID];
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + toolItemID + " for which we do not have data");
-                            }
-                        }
-                        if (item == null)
-                        {
+                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + toolItemID + " for which we do not have data");
                             fulfilled = true;
-                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " tool requirement targets item " + toolItemID + " but found data was null");
                             return;
                         }
 
@@ -1168,26 +1136,10 @@ namespace EFM
                         break;
                     case RequirementType.Resource:
                         string resourceItemID = Mod.TarkovIDtoH3ID(requirementData["templateId"].ToString());
-                        int resourceParsedIndex = -1;
-                        if (int.TryParse(resourceItemID, out resourceParsedIndex))
+                        if (!Mod.GetItemData(resourceItemID, out item))
                         {
-                            item = Mod.customItemData[resourceParsedIndex];
-                        }
-                        else
-                        {
-                            if (Mod.vanillaItemData.TryGetValue(resourceItemID, out MeatovItemData itemData))
-                            {
-                                item = Mod.vanillaItemData[resourceItemID];
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + resourceItemID + " for which we do not have data");
-                            }
-                        }
-                        if (item == null)
-                        {
+                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " item requirement targets item " + resourceItemID + " for which we do not have data");
                             fulfilled = true;
-                            Mod.LogError("DEV: " + (production == null ? "Area " + area.index : "Prodution " + production.ID) + " resource requirement targets item " + resourceItemID + " but found data was null");
                             return;
                         }
 

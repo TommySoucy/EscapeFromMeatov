@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
 using Valve.VR;
 using UnityEngine.UI;
+using ModularWorkshop;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace EFM
 {
@@ -610,6 +612,7 @@ namespace EFM
         public static Dictionary<string, int> itemValues;
         public static MeatovItemData[] customItemData;
         public static Dictionary<string, MeatovItemData> vanillaItemData;
+        public static Dictionary<string, Dictionary<string, MeatovItemData>> modItemData;
         public static Dictionary<string, JObject> lootContainersByName;
         public static Dictionary<string, AudioClip[]> itemSounds;
 
@@ -857,9 +860,27 @@ namespace EFM
                                 break;
                             case 17: // Dump item IDs
                                 Mod.LogInfo("\tDebug: Dumping item IDs");
+                                foreach (KeyValuePair<string, FVRObject> entry in IM.OD)
+                                {
+                                    Mod.LogInfo(entry.Key);
+                                }
+                                break;
+                            case 18: // Dump spawner IDs
+                                Mod.LogInfo("\tDebug: Dumping spawner IDs");
                                 foreach (KeyValuePair<string, ItemSpawnerID> entry in IM.Instance.SpawnerIDDic)
                                 {
                                     Mod.LogInfo(entry.Key);
+                                }
+                                break;
+                            case 19: // Dump modul parts
+                                Mod.LogInfo("\tDebug: Dumping modul parts");
+                                foreach (KeyValuePair<string, ModularWorkshopPartsDefinition> entry in ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary)
+                                {
+                                    Mod.LogInfo(entry.Key);
+                                    foreach (KeyValuePair<string, GameObject> innerEntry in entry.Value.PartsDictionary)
+                                    {
+                                        Mod.LogInfo("\t"+innerEntry.Key);
+                                    }
                                 }
                                 break;
                         }
@@ -1705,6 +1726,20 @@ namespace EFM
             {
                 vanillaItemData.Add(entry.Key, new MeatovItemData(entry.Value));
             }
+
+            Dictionary<string, JToken> partGroupData = data["modItemData"].ToObject<Dictionary<string, JToken>>();
+            modItemData = new Dictionary<string, Dictionary<string, MeatovItemData>>();
+            foreach (KeyValuePair<string, JToken> groupEntry in partGroupData) 
+            {
+                Dictionary<string, MeatovItemData> currentDict = new Dictionary<string, MeatovItemData>();
+                modItemData.Add(groupEntry.Key, currentDict);
+
+                Dictionary<string, JToken> partData = groupEntry.Value.ToObject<Dictionary<string, JToken>>();
+                foreach (KeyValuePair<string, JToken> partEntry in partData)
+                {
+                    currentDict.Add(partEntry.Key, new MeatovItemData(partEntry.Value));
+                }
+            }
         }
 
         private void ParseItemMap()
@@ -1717,9 +1752,13 @@ namespace EFM
             {
                 ItemMapEntry newEntry = new ItemMapEntry();
                 newEntry.ID = item.Value["H3ID"].ToString();
-                newEntry.moddedID = item.Value["OtherMod"].ToString();
 
-                newEntry.modded = newEntry.moddedID != null && !newEntry.moddedID.Equals("") && IM.OD.ContainsKey(newEntry.moddedID);
+                newEntry.modul = newEntry.ID.Equals("868");
+                if (newEntry.modul)
+                {
+                    newEntry.modulGroup = item.Value["ModulGroup"].ToString();
+                    newEntry.modulPart = item.Value["ModulPart"].ToString();
+                }
 
                 itemMap.Add(item.Key, newEntry);
             }
@@ -2639,6 +2678,8 @@ namespace EFM
             {
                 return vanillaItemData.TryGetValue(H3ID, out itemData);
             }
+
+            TODO e: // Also look through mod item data if ID starts with 868
         }
 
         public static int GetRoundWeight(FireArmRoundType roundType)
@@ -2839,6 +2880,7 @@ namespace EFM
 
         public static void SetIcon(string itemID, Image icon)
         {
+            TODO e: // Handle 868
             int parsedID = -1;
             if (int.TryParse(itemID, out parsedID))
             {
@@ -2922,11 +2964,12 @@ namespace EFM
 
         public static string TarkovIDtoH3ID(string tarkovID)
         {
+            TODO e: // Handle modul wherever we call this
             if(itemMap.TryGetValue(tarkovID, out ItemMapEntry entry))
             {
-                if (entry.modded)
+                if (entry.modul)
                 {
-                    return entry.moddedID;
+                    return "868:"+entry.modulGroup+":"+entry.modulPart;
                 }
                 else
                 {
@@ -3006,10 +3049,11 @@ namespace EFM
 
     public class ItemMapEntry
     {
-        public bool modded;
-
         public string ID;
-        public string moddedID;
+
+        public bool modul;
+        public string modulGroup;
+        public string modulPart;
     }
 
     public class Vector2Int

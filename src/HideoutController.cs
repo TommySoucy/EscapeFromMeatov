@@ -1512,6 +1512,7 @@ namespace EFM
             {
                 vanillaItemDataEntry.Value.InitCheckmarkData();
             }
+            TODO e: // Init 868 mod items
             Mod.LogInfo("\t0");
 
             // Load areas

@@ -36,6 +36,8 @@ namespace EFM
             DogTag = 17,
 
             Firearm = 18,
+
+            Mod = 19,
         }
 
         public enum WeaponClass
@@ -359,6 +361,14 @@ namespace EFM
         [NonSerialized]
         public string dogtagName;
 
+        // Mod
+        [Header("Mod data")]
+        public Image modIcon;
+        [NonSerialized]
+        public string partsGroupID;
+        [NonSerialized]
+        public string modID;
+
         // Weapon
         [NonSerialized]
         public WeaponClass weaponClass;
@@ -389,10 +399,11 @@ namespace EFM
         {
             itemData = data;
 
-            TODO: // Maybe instead of having default data in MeatovItem,
-            //       we could leave it all in MeatovItemData, and this class would instead only be used
-            //       for live data
-            //       When we need access to default data from an object instance, we can just access it through item.itemData
+            // NOTE: We are setting these values in the item itself (instead of just keeping them in itemData and keeping a reference to that)
+            //       because these values may be changed live. 
+            //       This is important for the Mod item, which is a single item, that can describe any mod in the game.
+            //       For that specific case, the item's description may be changed, in which case we obviously want to display that instead of the 
+            //       default itemData one
             tarkovID = data.tarkovID;
             H3ID = data.H3ID;
             H3SpawnerID = data.H3SpawnerID;
@@ -462,6 +473,7 @@ namespace EFM
             }
 
             // Set data based on default data
+            TODO e: // Handle item 868
             if (index == -1) // Vanilla, index will not be set
             {
                 int parsedIndex = -1;

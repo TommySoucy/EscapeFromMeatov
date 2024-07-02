@@ -1,4 +1,5 @@
 ﻿using FistVR;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using Valve.Newtonsoft.Json.Linq;
@@ -514,23 +515,14 @@ namespace EFM
                     for (int i = 0; i < handoverItemTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(handoverItemTargetItemIDs[i]);
-                        int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if (Mod.GetItemData(itemID, out MeatovItemData handoverTargetItem))
                         {
-                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItems.Add(handoverTargetItem);
                             targetItemIDs.Add(itemID);
                         }
                         else
                         {
-                            if(Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                targetItems.Add(Mod.vanillaItemData[itemID]);
-                                targetItemIDs.Add(itemID);
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Task " + task.ID + " handoveritem condition " + ID + " targets item " + itemID + " for which we do not have data");
-                            }
+                            Mod.LogError("DEV: Task " + task.ID + " handoveritem condition " + ID + " targets item " + itemID + " for which we do not have data");
                         }
                     }
                     break;
@@ -551,23 +543,14 @@ namespace EFM
                     for (int i = 0; i < findItemTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(findItemTargetItemIDs[i]);
-                        int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if (Mod.GetItemData(itemID, out MeatovItemData findTargetItem))
                         {
-                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItems.Add(findTargetItem);
                             targetItemIDs.Add(itemID);
                         }
                         else
                         {
-                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                targetItems.Add(Mod.vanillaItemData[itemID]);
-                                targetItemIDs.Add(itemID);
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Task " + task.ID + " find item condition " + ID + " targets item " + itemID + " for which we do not have data");
-                            }
+                            Mod.LogError("DEV: Task " + task.ID + " find item condition " + ID + " targets item " + itemID + " for which we do not have data");
                         }
                     }
                     findItemCountInRaid = (bool)properties["countInRaid"];
@@ -613,23 +596,14 @@ namespace EFM
                     for (int i = 0; i < leaveItemTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(leaveItemTargetItemIDs[i]);
-                        int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if (Mod.GetItemData(itemID, out MeatovItemData leaveTargetItem))
                         {
-                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItems.Add(leaveTargetItem);
                             targetItemIDs.Add(itemID);
                         }
                         else
                         {
-                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                targetItems.Add(Mod.vanillaItemData[itemID]);
-                                targetItemIDs.Add(itemID);
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Task " + task.ID + " leave item condition " + ID + " targets item " + itemID + " for which we do not have data");
-                            }
+                            Mod.LogError("DEV: Task " + task.ID + " leave item condition " + ID + " targets item " + itemID + " for which we do not have data");
                         }
                     }
                     plantTime = (int)properties["plantTime"];
@@ -643,23 +617,14 @@ namespace EFM
                     for (int i = 0; i < leaveBeaconTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(leaveBeaconTargetItemIDs[i]);
-                        int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if (Mod.GetItemData(itemID, out MeatovItemData beaconItem))
                         {
-                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItems.Add(beaconItem);
                             targetItemIDs.Add(itemID);
                         }
                         else
                         {
-                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                targetItems.Add(Mod.vanillaItemData[itemID]);
-                                targetItemIDs.Add(itemID);
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Task " + task.ID + " leave beacon condition " + ID + " targets item " + itemID + " for which we do not have data");
-                            }
+                            Mod.LogError("DEV: Task " + task.ID + " leave beacon condition " + ID + " targets item " + itemID + " for which we do not have data");
                         }
                     }
                     plantTime = (int)properties["plantTime"];
@@ -706,23 +671,14 @@ namespace EFM
                     for (int i = 0; i < weaponAssemblyTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(weaponAssemblyTargetItemIDs[i]);
-                        int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if (Mod.GetItemData(itemID, out MeatovItemData assemblyItem))
                         {
-                            targetItems.Add(Mod.customItemData[parsedIndex]);
+                            targetItems.Add(assemblyItem);
                             targetItemIDs.Add(itemID);
                         }
                         else
                         {
-                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                targetItems.Add(Mod.vanillaItemData[itemID]);
-                                targetItemIDs.Add(itemID);
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Task " + task.ID + " weapon assembly condition " + ID + " targets item " + itemID + " for which we do not have data");
-                            }
+                            Mod.LogError("DEV: Task " + task.ID + " weapon assembly condition " + ID + " targets item " + itemID + " for which we do not have data");
                         }
                     }
                     List<string> weaponAssemblyContainsTargetItemIDs = properties["containsItems"].ToObject<List<string>>();
@@ -730,21 +686,13 @@ namespace EFM
                     for (int i = 0; i < weaponAssemblyContainsTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(weaponAssemblyContainsTargetItemIDs[i]);
-                        int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if (Mod.GetItemData(itemID, out MeatovItemData assemblyItem))
                         {
-                            containsItems.Add(Mod.customItemData[parsedIndex]);
+                            containsItems.Add(assemblyItem);
                         }
                         else
                         {
-                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                containsItems.Add(Mod.vanillaItemData[itemID]);
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Task " + task.ID + " weapon assembly contains condition " + ID + " targets item " + itemID + " for which we do not have data");
-                            }
+                            Mod.LogError("DEV: Task " + task.ID + " weapon assembly contains condition " + ID + " targets item " + itemID + " for which we do not have data");
                         }
                     }
                     hasItemFromCategories = properties["hasItemFromCategory"].ToObject<List<string>>();
@@ -1591,20 +1539,13 @@ namespace EFM
                     {
                         string itemID = Mod.TarkovIDtoH3ID(useItemTargetItemIDs[i]);
                         int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if (Mod.GetItemData(itemID, out MeatovItemData useItem))
                         {
-                            useItemTargets.Add(Mod.customItemData[parsedIndex]);
+                            useItemTargets.Add(useItem);
                         }
                         else
                         {
-                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                useItemTargets.Add(Mod.vanillaItemData[itemID]);
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Task " +condition.task.ID + " use item counter condition from condition " + condition.ID + " targets item " + itemID + " for which we do not have data");
-                            }
+                            Mod.LogError("DEV: Task " +condition.task.ID + " use item counter condition from condition " + condition.ID + " targets item " + itemID + " for which we do not have data");
                         }
                     }
                     useItemValue = (int)properties["value"];
@@ -2014,21 +1955,13 @@ namespace EFM
                     for (int i=0; i < itemsArray.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(itemsArray[i]["_tpl"].ToString());
-                        int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if (Mod.GetItemData(itemID, out MeatovItemData rewardItem))
                         {
-                            itemIDs.Add(Mod.customItemData[parsedIndex]);
+                            itemIDs.Add(rewardItem);
                         }
                         else
                         {
-                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                itemIDs.Add(Mod.vanillaItemData[itemID]);
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemID + " for which we do not have data");
-                            }
+                            Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemID + " for which we do not have data");
                         }
                     }
                     amount = (int)data["value"];
@@ -2072,21 +2005,9 @@ namespace EFM
                     {
                         // Note that here we just take the first item in the array
                         string itemID = Mod.TarkovIDtoH3ID(productionItemsArray[0]["_tpl"].ToString());
-                        int parsedIndex = -1;
-                        if (int.TryParse(itemID, out parsedIndex))
+                        if (!Mod.GetItemData(itemID, out productionProduct))
                         {
-                            productionProduct = Mod.customItemData[parsedIndex];
-                        }
-                        else
-                        {
-                            if (Mod.vanillaItemData.TryGetValue(itemID, out MeatovItemData itemData))
-                            {
-                                productionProduct = Mod.vanillaItemData[itemID];
-                            }
-                            else
-                            {
-                                Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemID + " for which we do not have data");
-                            }
+                            Mod.LogError("DEV: Task " + task.ID + " reward " + ID + " targets item " + itemID + " for which we do not have data");
                         }
                     }
                     break;
