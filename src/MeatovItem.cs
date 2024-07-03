@@ -544,9 +544,10 @@ namespace EFM
                 containerVolume.blacklist = data.blackList;
                 containerVolume.OnVolumeChanged += OnVolumeChanged;
             }
-            if(modIcon != null)
+            if(index == 868)
             {
                 Mod.SetIcon(H3ID, modIcon);
+                UpdateInventories();
             }
         }
 
@@ -625,7 +626,12 @@ namespace EFM
             UpdateErgonomics();
             UpdateSightingRange();
 
-            UpdateInventories();
+            // Update inventory
+            // Special case: 868 (Generic Moddul mod item), we don't want to manage inventory of the generic 868, we will instead do it on SetData
+            if(index == 868)
+            {
+                UpdateInventories();
+            }
 		}
 
         public void UpdateRecoil()
