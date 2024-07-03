@@ -36,6 +36,14 @@ namespace EFM
         public GameObject contentsCloseIcon;
         public GameObject contentsParent;
         public GameObject contentsEntryPrefab;
+        public GameObject stats;
+        public GameObject statsOpenIcon;
+        public GameObject statsCloseIcon;
+        public GameObject statsParent;
+        public ItemDescriptionListEntryUI statsRecoilHorizontalEntry;
+        public ItemDescriptionListEntryUI statsRecoilVerticalEntry;
+        public ItemDescriptionListEntryUI statsErgonomicsEntry;
+        public ItemDescriptionListEntryUI statsSightingRangeEntry;
         public GameObject neededForTitle;
         public GameObject neededForNone;
         public Text neededForWishlist;
@@ -113,6 +121,12 @@ namespace EFM
                         descriptionPack.item.containerVolume.OnItemRemoved -= OnItemRemoved;
                         descriptionPack.item.containerVolume.OnItemStackChanged -= OnItemStackChanged;
                     }
+                    if(descriptionPack.itemData.itemType == MeatovItem.ItemType.Weapon)
+                    {
+                        descriptionPack.item.OnRecoilChanged -= OnRecoilChanged;
+                        descriptionPack.item.OnErgonomicsChanged -= OnErgonomicsChanged;
+                        descriptionPack.item.OnSightingRangeChanged -= OnSightingRangeChanged;
+                    }
                 }
             }
 
@@ -130,6 +144,12 @@ namespace EFM
                     descriptionPack.item.containerVolume.OnItemAdded += OnItemAdded;
                     descriptionPack.item.containerVolume.OnItemRemoved += OnItemRemoved;
                     descriptionPack.item.containerVolume.OnItemStackChanged += OnItemStackChanged;
+                }
+                if (descriptionPack.itemData.itemType == MeatovItem.ItemType.Weapon)
+                {
+                    descriptionPack.item.OnRecoilChanged += OnRecoilChanged;
+                    descriptionPack.item.OnErgonomicsChanged += OnErgonomicsChanged;
+                    descriptionPack.item.OnSightingRangeChanged += OnSightingRangeChanged;
                 }
             }
 
@@ -182,6 +202,11 @@ namespace EFM
             if (contents.activeSelf)
             {
                 OnContentChanged();
+            }
+            stats.SetActive(descriptionPack.itemData.itemType == MeatovItem.ItemType.Weapon || descriptionPack.itemData.itemType == MeatovItem.ItemType.Mod);
+            if (stats.activeSelf)
+            {
+                SetStats();
             }
             bool needed = false;
             needed |= UpdateNeededForTasks();
@@ -297,6 +322,17 @@ namespace EFM
             clickAudio.Play();
         }
 
+        public void OnToggleStatsClicked()
+        {
+            // open is the new state
+            bool open = !statsParent.activeSelf;
+            statsParent.SetActive(open);
+            statsOpenIcon.SetActive(!open);
+            statsCloseIcon.SetActive(open);
+            fullHoverScrollProcessor.mustUpdateMiddleHeight = 1;
+            clickAudio.Play();
+        }
+
         public void OnOpenFullClicked()
         {
             clickAudio.Play();
@@ -346,6 +382,123 @@ namespace EFM
                 Mod.GetItemData(contentEntry.Key, out MeatovItemData itemData);
                 entry.entryName.text = itemData.name;
                 entry.amount.text = "x" + contentEntry.Value;
+            }
+        }
+
+        public void OnRecoilChanged()
+        {
+            statsRecoilVerticalEntry.gameObject.SetActive(true);
+            statsRecoilVerticalEntry.entryName.text = "Vertical Recoil: " + descriptionPack.item.currentRecoilVertical;
+            statsRecoilVerticalEntry.amount.gameObject.SetActive(false);
+
+            statsRecoilHorizontalEntry.gameObject.SetActive(true);
+            statsRecoilHorizontalEntry.entryName.text = "Horizontal Recoil: " + descriptionPack.item.currentRecoilHorizontal;
+            statsRecoilHorizontalEntry.amount.gameObject.SetActive(false);
+        }
+
+        public void OnErgonomicsChanged()
+        {
+            statsErgonomicsEntry.gameObject.SetActive(true);
+            statsErgonomicsEntry.entryName.text = "Ergonomics: " + descriptionPack.item.ergonomics;
+            statsErgonomicsEntry.amount.gameObject.SetActive(false);
+        }
+
+        public void OnSightingRangeChanged()
+        {
+            statsSightingRangeEntry.gameObject.SetActive(true);
+            statsSightingRangeEntry.entryName.text = "Sighting Range: " + descriptionPack.item.currentSightingRange;
+            statsSightingRangeEntry.amount.gameObject.SetActive(false);
+        }
+
+        public void SetStats()
+        {
+            while(statsParent.transform.childCount > 1)
+            {
+                Transform currentChild = statsParent.transform.GetChild(statsParent.transform.childCount - 1);
+                currentChild.SetParent(null);
+                Destroy(currentChild.gameObject);
+            }
+
+            if(descriptionPack.itemData.itemType == MeatovItem.ItemType.Weapon)
+            {
+                if(descriptionPack.item == null)
+                {
+                    // Display base weapon stats
+                    statsRecoilVerticalEntry.gameObject.SetActive(true);
+                    statsRecoilVerticalEntry.entryName.text = "Vertical Recoil: "+ descriptionPack.itemData.recoilVertical;
+                    statsRecoilVerticalEntry.amount.gameObject.SetActive(false);
+
+                    statsRecoilHorizontalEntry.gameObject.SetActive(true);
+                    statsRecoilHorizontalEntry.entryName.text = "Horizontal Recoil: "+ descriptionPack.itemData.recoilHorizontal;
+                    statsRecoilHorizontalEntry.amount.gameObject.SetActive(false);
+
+                    statsSightingRangeEntry.gameObject.SetActive(true);
+                    statsSightingRangeEntry.entryName.text = "Sighting Range: "+ descriptionPack.itemData.sightingRange;
+                    statsSightingRangeEntry.amount.gameObject.SetActive(false);
+                }
+                else
+                {
+                    // Display current weapon stats
+                    statsRecoilVerticalEntry.gameObject.SetActive(true);
+                    statsRecoilVerticalEntry.entryName.text = "Vertical Recoil: " + descriptionPack.item.currentRecoilVertical;
+                    statsRecoilVerticalEntry.amount.gameObject.SetActive(false);
+
+                    statsRecoilHorizontalEntry.gameObject.SetActive(true);
+                    statsRecoilHorizontalEntry.entryName.text = "Horizontal Recoil: " + descriptionPack.item.currentRecoilHorizontal;
+                    statsRecoilHorizontalEntry.amount.gameObject.SetActive(false);
+
+                    statsSightingRangeEntry.gameObject.SetActive(true);
+                    statsSightingRangeEntry.entryName.text = "Sighting Range: " + descriptionPack.item.currentSightingRange;
+                    statsSightingRangeEntry.amount.gameObject.SetActive(false);
+
+                    statsErgonomicsEntry.gameObject.SetActive(true);
+                    statsErgonomicsEntry.entryName.text = "Ergonomics: " + descriptionPack.item.ergonomics;
+                    statsErgonomicsEntry.amount.gameObject.SetActive(false);
+                }
+            }
+            else // Mod
+            {
+                // Display mod stats
+                statsRecoilVerticalEntry.gameObject.SetActive(false);
+                if (descriptionPack.itemData.recoilModifier > 0)
+                {
+                    statsRecoilHorizontalEntry.gameObject.SetActive(true);
+                    statsRecoilHorizontalEntry.entryName.text = "Recoil:";
+                    statsRecoilHorizontalEntry.amount.text = "+" + descriptionPack.itemData.recoilModifier + "%";
+                    statsRecoilHorizontalEntry.amount.color = Color.green;
+                    statsRecoilHorizontalEntry.amount.gameObject.SetActive(true);
+                }
+                else if(descriptionPack.itemData.recoilModifier < 0)
+                {
+                    statsRecoilHorizontalEntry.gameObject.SetActive(true);
+                    statsRecoilHorizontalEntry.entryName.text = "Recoil:";
+                    statsRecoilHorizontalEntry.amount.text = descriptionPack.itemData.recoilModifier + "%";
+                    statsRecoilHorizontalEntry.amount.color = Color.red;
+                    statsRecoilHorizontalEntry.amount.gameObject.SetActive(true);
+                }
+
+                statsSightingRangeEntry.gameObject.SetActive(true);
+                statsSightingRangeEntry.entryName.text = "Sighting Range:";
+                statsSightingRangeEntry.amount.text = descriptionPack.itemData.sightingRange.ToString();
+                statsSightingRangeEntry.amount.color = Color.white;
+                statsSightingRangeEntry.amount.gameObject.SetActive(true);
+
+                if (descriptionPack.itemData.ergonomicsModifier > 0)
+                {
+                    statsErgonomicsEntry.gameObject.SetActive(true);
+                    statsErgonomicsEntry.entryName.text = "Ergonomics:";
+                    statsErgonomicsEntry.amount.text = "+" + descriptionPack.itemData.ergonomicsModifier;
+                    statsErgonomicsEntry.amount.color = Color.green;
+                    statsErgonomicsEntry.amount.gameObject.SetActive(true);
+                }
+                else if (descriptionPack.itemData.ergonomicsModifier < 0)
+                {
+                    statsErgonomicsEntry.gameObject.SetActive(true);
+                    statsErgonomicsEntry.entryName.text = "Ergonomics:";
+                    statsErgonomicsEntry.amount.text = descriptionPack.itemData.ergonomicsModifier.ToString();
+                    statsErgonomicsEntry.amount.color = Color.red;
+                    statsErgonomicsEntry.amount.gameObject.SetActive(true);
+                }
             }
         }
 
@@ -1090,6 +1243,12 @@ namespace EFM
                         descriptionPack.item.containerVolume.OnItemAdded -= OnItemAdded;
                         descriptionPack.item.containerVolume.OnItemRemoved -= OnItemRemoved;
                         descriptionPack.item.containerVolume.OnItemStackChanged -= OnItemStackChanged;
+                    }
+                    if (descriptionPack.itemData.itemType == MeatovItem.ItemType.Weapon)
+                    {
+                        descriptionPack.item.OnRecoilChanged -= OnRecoilChanged;
+                        descriptionPack.item.OnErgonomicsChanged -= OnErgonomicsChanged;
+                        descriptionPack.item.OnSightingRangeChanged -= OnSightingRangeChanged;
                     }
                 }
             }

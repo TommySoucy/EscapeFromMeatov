@@ -1538,7 +1538,6 @@ namespace EFM
                     for (int i = 0; i < useItemTargetItemIDs.Count; ++i)
                     {
                         string itemID = Mod.TarkovIDtoH3ID(useItemTargetItemIDs[i]);
-                        int parsedIndex = -1;
                         if (Mod.GetItemData(itemID, out MeatovItemData useItem))
                         {
                             useItemTargets.Add(useItem);

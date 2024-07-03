@@ -227,6 +227,10 @@ namespace EFM
                 {
                     GameObject spawnedItem = Instantiate(itemPrefab);
                     MeatovItem meatovItem = spawnedItem.GetComponent<MeatovItem>();
+                    if(itemData.index == 868)
+                    {
+                        meatovItem.SetData(itemData);
+                    }
                     meatovItem.foundInRaid = foundInRaid;
                     objectsList.Add(spawnedItem);
 

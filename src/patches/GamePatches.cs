@@ -1,22 +1,13 @@
 ﻿using FistVR;
-using H3MP.Tracking;
-using H3MP;
 using HarmonyLib;
+using ModularWorkshop;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using H3MP.Patches;
-using H3MP.Scripts;
-using System.Net.Mail;
-using static FistVR.SosigInventory;
-using FFmpeg.AutoGen;
-using FMOD;
-using Valve.VR.InteractionSystem;
-using static FistVR.BoomskeeManager;
+using static EFM.MeatovItem;
 
 namespace EFM
 {
@@ -351,19 +342,16 @@ namespace EFM
             PatchController.Verify(clipReloadClipWithListOriginal, harmony, true);
             harmony.Patch(clipReloadClipWithListOriginal, new HarmonyMethod(clipReloadClipWithListPrefix), new HarmonyMethod(clipReloadClipWithListPostfix));
 
-            //// AttachmentMountRegisterPatch
-            //MethodInfo attachmentMountRegisterPatchOriginal = typeof(FVRFireArmAttachmentMount).GetMethod("RegisterAttachment", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo attachmentMountRegisterPatchPrefix = typeof(AttachmentMountRegisterPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
+            // ModularWeaponPartPatch
+            MethodInfo modularWeaponPartEnableOriginal = typeof(ModularWeaponPart).GetMethod("EnablePart", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo modularWeaponPartEnablePrefix = typeof(ModularWeaponPartPatch).GetMethod("EnablePrefix", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo modularWeaponPartDisableOriginal = typeof(ModularWeaponPart).GetMethod("DisablePart", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo modularWeaponPartDisablePrefix = typeof(ModularWeaponPartPatch).GetMethod("DisablePrefix", BindingFlags.NonPublic | BindingFlags.Static);
 
-            //PatchController.Verify(attachmentMountRegisterPatchOriginal, harmony, true);
-            //harmony.Patch(attachmentMountRegisterPatchOriginal, new HarmonyMethod(attachmentMountRegisterPatchPrefix));
-
-            //// AttachmentMountDeRegisterPatch
-            //MethodInfo attachmentMountDeRegisterPatchOriginal = typeof(FVRFireArmAttachmentMount).GetMethod("DeRegisterAttachment", BindingFlags.Public | BindingFlags.Instance);
-            //MethodInfo attachmentMountDeRegisterPatchPrefix = typeof(AttachmentMountDeRegisterPatch).GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Static);
-
-            //PatchController.Verify(attachmentMountDeRegisterPatchOriginal, harmony, true);
-            //harmony.Patch(attachmentMountDeRegisterPatchOriginal, new HarmonyMethod(attachmentMountDeRegisterPatchPrefix));
+            PatchController.Verify(modularWeaponPartEnableOriginal, harmony, true);
+            PatchController.Verify(modularWeaponPartDisableOriginal, harmony, true);
+            harmony.Patch(modularWeaponPartEnableOriginal, new HarmonyMethod(modularWeaponPartEnablePrefix));
+            harmony.Patch(modularWeaponPartDisableOriginal, new HarmonyMethod(modularWeaponPartDisablePrefix));
 
             //// EntityCheckPatch
             //MethodInfo entityCheckPatchOriginal = typeof(AIManager).GetMethod("EntityCheck", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -1264,7 +1252,7 @@ namespace EFM
                             {
                                 __instance.CurrentHoveredQuickbeltSlot = StatusUI.instance.equipmentSlots[0];
                             }
-                            else if ((fvrquickBeltSlot as ShoulderStorage).right && (item.itemType == MeatovItem.ItemType.Firearm || fvrphysicalObject is FVRMeleeWeapon))
+                            else if ((fvrquickBeltSlot as ShoulderStorage).right && (item.itemType == MeatovItem.ItemType.Weapon || fvrphysicalObject is FVRMeleeWeapon))
                             {
                                 __instance.CurrentHoveredQuickbeltSlot = fvrquickBeltSlot;
                             }
@@ -4244,6 +4232,108 @@ namespace EFM
         }
     }
 
+    // Patches ModularWeaponPart
+    class ModularWeaponPartPatch
+    {
+        // To track activation to apply stats to weapon
+        // Note that by now, we assume the part's attachment point's selectedPart and modularWeaponPartsAttachmentPoint.ModularPartPoint fields have been set
+        static void EnablePrefix(ModularWeaponPart __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            TODO: // This is way too complicated, having ModularWeaponPart just keep a ref to the point it is currently attached to would
+            //       let us skip having to find the point by iterating over all of them, fix it, make pull request
+
+            // First find the first weapon meatov item in our hierarchy
+            MeatovItem item = __instance.GetComponentInParent<MeatovItem>();
+            while (item != null && item.itemType != ItemType.Weapon)
+            {
+                item = item.parent;
+            }
+            if (item != null)
+            {
+                // Get the modular weapon this part is attached to
+                IModularWeapon modularWeapon = __instance.GetComponentInParent<IModularWeapon>();
+                if (modularWeapon != null)
+                {
+                    // Go through all of the attachment points to find which one this part is attached to
+                    for(int i=0; i < modularWeapon.ModularWeaponPartsAttachmentPoints.Length; ++i)
+                    {
+                        // Find data for this part
+                        if (modularWeapon.ModularWeaponPartsAttachmentPoints[i].ModularPartPoint == __instance.transform
+                            && Mod.modItemData.TryGetValue(modularWeapon.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> groupDict)
+                            && groupDict.TryGetValue(modularWeapon.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData partData))
+                        {
+                            if (partData.recoilModifier != 0)
+                            {
+                                item.currentRecoilHorizontal += (int)(item.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
+                            }
+                            if (partData.ergonomicsModifier != 0)
+                            {
+                                item.ergonomics += partData.ergonomicsModifier;
+                            }
+                            if (partData.sightingRange > item.currentSightingRange)
+                            {
+                                item.currentSightingRange = partData.sightingRange;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // To track deactivation to unapply stats from weapon
+        static void DisablePrefix(ModularWeaponPart __instance)
+        {
+            if (!Mod.inMeatovScene)
+            {
+                return;
+            }
+
+            // First find the first weapon meatov item in our hierarchy
+            MeatovItem item = __instance.GetComponentInParent<MeatovItem>();
+            while (item != null && item.itemType != ItemType.Weapon)
+            {
+                item = item.parent;
+            }
+            if (item != null)
+            {
+                // Get the modular weapon this part is attached to
+                IModularWeapon modularWeapon = __instance.GetComponentInParent<IModularWeapon>();
+                if (modularWeapon != null)
+                {
+                    // Go through all of the attachment points to find which one this part is attached to
+                    for (int i = 0; i < modularWeapon.ModularWeaponPartsAttachmentPoints.Length; ++i)
+                    {
+                        // Find data for this part
+                        if (modularWeapon.ModularWeaponPartsAttachmentPoints[i].ModularPartPoint == __instance.transform
+                            && Mod.modItemData.TryGetValue(modularWeapon.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> groupDict)
+                            && groupDict.TryGetValue(modularWeapon.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData partData))
+                        {
+                            if (partData.recoilModifier != 0)
+                            {
+                                item.currentRecoilHorizontal += (int)(item.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
+                            }
+                            if (partData.ergonomicsModifier != 0)
+                            {
+                                item.ergonomics += partData.ergonomicsModifier;
+                            }
+                            if (partData.sightingRange == item.currentSightingRange)
+                            {
+                                item.UpdateSightingRange(partData);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Patches FVRFirearmMagazine.ReloadMagWithTypeUpToPercentage to track ammo in mag
     class MagReloadMagWithTypeUpToPercentagePatch
     {
@@ -4536,64 +4626,6 @@ namespace EFM
                     meatovItem.currentWeight += Mod.GetRoundWeight(__instance.RoundType);
                 }
             }
-        }
-    }
-
-    // Patches FVRFireArmAttachmentMount.RegisterAttachment to keep track of weight
-    // This completely replaces the original
-    class AttachmentMountRegisterPatch
-    {
-        static bool Prefix(FVRFireArmAttachment attachment, ref HashSet<FVRFireArmAttachment> ___AttachmentsHash, ref FVRFireArmAttachmentMount __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            if (___AttachmentsHash.Add(attachment))
-            {
-                __instance.AttachmentsList.Add(attachment);
-                if (__instance.HasHoverDisablePiece && __instance.DisableOnHover.activeSelf)
-                {
-                    __instance.DisableOnHover.SetActive(false);
-                }
-
-                // Add weight to parent
-                MeatovItem parentMI = __instance.Parent.GetComponent<MeatovItem>();
-                MeatovItem attachmentMI = __instance.Parent.GetComponent<MeatovItem>();
-                parentMI.currentWeight += attachmentMI.currentWeight;
-
-                attachmentMI.UpdateInventories();
-            }
-
-            return false;
-        }
-    }
-
-    // Patches FVRFireArmAttachmentMount.DeRegisterAttachment to keep track of weight
-    // This completely replaces the original
-    class AttachmentMountDeRegisterPatch
-    {
-        static bool Prefix(FVRFireArmAttachment attachment, ref HashSet<FVRFireArmAttachment> ___AttachmentsHash, ref FVRFireArmAttachmentMount __instance)
-        {
-            if (!Mod.inMeatovScene)
-            {
-                return true;
-            }
-
-            if (___AttachmentsHash.Remove(attachment))
-            {
-                __instance.AttachmentsList.Remove(attachment);
-
-                // Remove weight from parent
-                MeatovItem parentMI = __instance.Parent.GetComponent<MeatovItem>();
-                MeatovItem attachmentMI = __instance.Parent.GetComponent<MeatovItem>();
-                parentMI.currentWeight -= attachmentMI.currentWeight;
-
-                attachmentMI.UpdateInventories();
-            }
-
-            return false;
         }
     }
 

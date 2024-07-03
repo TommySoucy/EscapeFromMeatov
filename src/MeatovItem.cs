@@ -1,5 +1,6 @@
 ﻿using FistVR;
 using HarmonyLib;
+using ModularWorkshop;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,7 +36,7 @@ namespace EFM
 
             DogTag = 17,
 
-            Firearm = 18,
+            Weapon = 18,
 
             Mod = 19,
         }
@@ -372,6 +373,75 @@ namespace EFM
         // Weapon
         [NonSerialized]
         public WeaponClass weaponClass;
+        [NonSerialized]
+        private int _ergonomics;
+        public int ergonomics
+        {
+            get { return _ergonomics; }
+            set
+            {
+                int preValue = _ergonomics;
+                _ergonomics = value;
+                if(preValue != _ergonomics)
+                {
+                    OnErgonomicsChangedInvoke();
+                }
+            }
+        }
+        public int baseRecoilVertical;
+        [NonSerialized]
+        private int _currentRecoilVertical;
+        public int currentRecoilVertical
+        {
+            get { return _currentRecoilVertical; }
+            set
+            {
+                int preValue = _currentRecoilVertical;
+                _currentRecoilVertical = value;
+                if (preValue != _currentRecoilVertical)
+                {
+                    OnRecoilChangedInvoke();
+                }
+            }
+        }
+        public int baseRecoilHorizontal;
+        [NonSerialized]
+        private int _currentRecoilHorizontal;
+        public int currentRecoilHorizontal
+        {
+            get { return _currentRecoilHorizontal; }
+            set
+            {
+                int preValue = _currentRecoilHorizontal;
+                _currentRecoilHorizontal = value;
+                if (preValue != _currentRecoilHorizontal)
+                {
+                    OnRecoilChangedInvoke();
+                }
+            }
+        }
+
+        // Weapon / Mod
+        public int baseSightingRange;
+        [NonSerialized]
+        private int _currentSightingRange;
+        public int currentSightingRange
+        {
+            get { return _currentSightingRange; }
+            set
+            {
+                int preValue = _currentSightingRange;
+                _currentSightingRange = value;
+                if (preValue != _currentSightingRange)
+                {
+                    OnSightingRangeChangedInvoke();
+                }
+            }
+        }
+
+        // Mod
+        public int ergonomicsModifier;
+        public int recoilModifier;
 
         // Events
         public delegate void OnInsuredChangedDelegate();
@@ -388,6 +458,12 @@ namespace EFM
         public event OnStackChangedDelegate OnStackChanged;
         public delegate void OnAmountChangedDelegate();
         public event OnAmountChangedDelegate OnAmountChanged;
+        public delegate void OnErgonomicsChangedDelegate();
+        public event OnErgonomicsChangedDelegate OnErgonomicsChanged;
+        public delegate void OnRecoilChangedDelegate();
+        public event OnRecoilChangedDelegate OnRecoilChanged;
+        public delegate void OnSightingRangeChangedDelegate();
+        public event OnSightingRangeChangedDelegate OnSightingRangeChanged;
 
         public static void Setup(FVRPhysicalObject physicalObject)
         {
@@ -425,6 +501,12 @@ namespace EFM
             clipType = data.clipType;
             roundType = data.roundType;
             weaponClass = data.weaponclass;
+            baseRecoilHorizontal = data.recoilHorizontal;
+            baseRecoilVertical = data.recoilVertical;
+            baseSightingRange = data.sightingRange;
+
+            ergonomicsModifier = data.ergonomicsModifier;
+            recoilModifier = data.recoilModifier;
 
             blocksEarpiece = data.blocksEarpiece;
             blocksEyewear = data.blocksEyewear;
@@ -462,6 +544,10 @@ namespace EFM
                 containerVolume.blacklist = data.blackList;
                 containerVolume.OnVolumeChanged += OnVolumeChanged;
             }
+            if(modIcon != null)
+            {
+                Mod.SetIcon(H3ID, modIcon);
+            }
         }
 
         private void Awake()
@@ -473,7 +559,6 @@ namespace EFM
             }
 
             // Set data based on default data
-            TODO e: // Handle item 868
             if (index == -1) // Vanilla, index will not be set
             {
                 int parsedIndex = -1;
@@ -535,8 +620,64 @@ namespace EFM
             }
             Mod.LogInfo("\t0");
 
+            // Calculate weapon stats based on current attachments (recoil, ergonomics, sightingRange)
+            UpdateRecoil();
+            UpdateErgonomics();
+            UpdateSightingRange();
+
             UpdateInventories();
 		}
+
+        public void UpdateRecoil()
+        {
+            int currentHorizontal = baseRecoilHorizontal;
+            int currentVertical = baseRecoilVertical;
+            IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
+            for(int i=0; i < modularWeaponInterface.ModularWeaponPartsAttachmentPoints.Length; ++i)
+            {
+                if (Mod.modItemData.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> group)
+                    && group.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData itemData)
+                    && itemData.recoilModifier != 0)
+                {
+                    currentHorizontal = currentHorizontal + (int)(baseRecoilHorizontal / 100.0f * itemData.recoilModifier);
+                    currentVertical = currentVertical + (int)(baseRecoilVertical / 100.0f * itemData.recoilModifier);
+                }
+            }
+            currentRecoilHorizontal = Mathf.Max(0, currentHorizontal);
+            currentRecoilVertical = Mathf.Max(0, currentVertical);
+        }
+
+        public void UpdateErgonomics()
+        {
+            int current = 0;
+            IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
+            for(int i=0; i < modularWeaponInterface.ModularWeaponPartsAttachmentPoints.Length; ++i)
+            {
+                if (Mod.modItemData.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> group)
+                    && group.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData itemData)
+                    && itemData.ergonomicsModifier != 0)
+                {
+                    current += ergonomicsModifier;
+                }
+            }
+            ergonomics = Mathf.Max(0, current);
+        }
+
+        public void UpdateSightingRange(MeatovItemData exclude = null)
+        {
+            int current = baseSightingRange;
+            IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
+            for(int i=0; i < modularWeaponInterface.ModularWeaponPartsAttachmentPoints.Length; ++i)
+            {
+                if (Mod.modItemData.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> group)
+                    && group.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData itemData)
+                    && (exclude == null || exclude != itemData))
+                {
+                    current = Mathf.Max(current, itemData.sightingRange);
+                }
+            }
+            currentSightingRange = current;
+        }
 
         public void UpdateInventories()
         {
@@ -2228,6 +2369,11 @@ namespace EFM
                     GameObject itemInstance = Instantiate(itemPrefab);
                     MeatovItem item = itemInstance.GetComponent<MeatovItem>();
 
+                    if(itemData.index == 868)
+                    {
+                        item.SetData(itemData);
+                    }
+
                     item.insured = (bool)serialized["insured"];
                     item.looted = (bool)serialized["looted"];
                     item.foundInRaid = (bool)serialized["foundInRaid"];
@@ -2429,6 +2575,30 @@ namespace EFM
             }
         }
 
+        public void OnErgonomicsChangedInvoke()
+        {
+            if(OnErgonomicsChanged != null)
+            {
+                OnErgonomicsChanged();
+            }
+        }
+
+        public void OnRecoilChangedInvoke()
+        {
+            if(OnRecoilChanged != null)
+            {
+                OnRecoilChanged();
+            }
+        }
+
+        public void OnSightingRangeChangedInvoke()
+        {
+            if(OnSightingRangeChanged != null)
+            {
+                OnSightingRangeChanged();
+            }
+        }
+
         public void OnVolumeChanged()
         {
             containingVolume = containerVolume.volume;
@@ -2489,6 +2659,30 @@ namespace EFM
                     parent.children[childIndex] = parent.children[parent.children.Count - 1];
                     parent.children[childIndex].childIndex = childIndex;
                     parent.children.RemoveAt(parent.children.Count - 1);
+                    // If mod, we want to find first weapon parent to affect stats of
+                    if (itemType == ItemType.Mod)
+                    {
+                        MeatovItem weaponParent = parent;
+                        while (weaponParent != null && weaponParent.itemType != ItemType.Weapon)
+                        {
+                            weaponParent = weaponParent.parent;
+                        }
+                        if (weaponParent != null)
+                        {
+                            if (recoilModifier != 0)
+                            {
+                                weaponParent.currentRecoilHorizontal -= (int)(weaponParent.baseRecoilHorizontal / 100.0f * recoilModifier);
+                            }
+                            if (ergonomicsModifier != 0)
+                            {
+                                weaponParent.ergonomics -= ergonomicsModifier;
+                            }
+                            if (baseSightingRange == weaponParent.currentSightingRange)
+                            {
+                                weaponParent.UpdateSightingRange(itemData);
+                            }
+                        }
+                    }
                     parent = null;
                     childIndex = -1;
                 }
@@ -2497,6 +2691,30 @@ namespace EFM
                 if (newParent != null)
                 {
                     parent = newParent;
+                    // If mod, we want to find first weapon parent to affect stats of
+                    if (itemType == ItemType.Mod)
+                    {
+                        MeatovItem weaponParent = parent;
+                        while (weaponParent != null && weaponParent.itemType != ItemType.Weapon)
+                        {
+                            weaponParent = weaponParent.parent;
+                        }
+                        if (weaponParent != null)
+                        {
+                            if (recoilModifier != 0)
+                            {
+                                weaponParent.currentRecoilHorizontal += (int)(weaponParent.baseRecoilHorizontal / 100.0f * recoilModifier);
+                            }
+                            if (ergonomicsModifier != 0)
+                            {
+                                weaponParent.ergonomics += ergonomicsModifier;
+                            }
+                            if (baseSightingRange > weaponParent.currentSightingRange)
+                            {
+                                weaponParent.currentSightingRange = baseSightingRange;
+                            }
+                        }
+                    }
                     childIndex = parent.children.Count;
                     parent.children.Add(this);
                     parent.currentWeight += currentWeight;
@@ -2535,6 +2753,30 @@ namespace EFM
                 parent.children[childIndex] = parent.children[parent.children.Count - 1];
                 parent.children[childIndex].childIndex = childIndex;
                 parent.children.RemoveAt(parent.children.Count - 1);
+                // If mod, we want to find first weapon parent to affect stats of
+                if(itemType == ItemType.Mod)
+                {
+                    MeatovItem weaponParent = parent;
+                    while (weaponParent != null && weaponParent.itemType != ItemType.Weapon)
+                    {
+                        weaponParent = weaponParent.parent;
+                    }
+                    if(weaponParent != null)
+                    {
+                        if (recoilModifier != 0)
+                        {
+                            weaponParent.currentRecoilHorizontal -= (int)(weaponParent.baseRecoilHorizontal / 100.0f * recoilModifier);
+                        }
+                        if (ergonomicsModifier != 0)
+                        {
+                            weaponParent.ergonomics -= ergonomicsModifier;
+                        }
+                        if (baseSightingRange == weaponParent.currentSightingRange)
+                        {
+                            weaponParent.UpdateSightingRange(itemData);
+                        }
+                    }
+                }
                 parent = null;
                 childIndex = -1;
             }

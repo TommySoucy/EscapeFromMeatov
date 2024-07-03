@@ -36,6 +36,12 @@ namespace EFM
         public FireArmClipType clipType;
         public FireArmRoundType roundType; // Caliber
         public MeatovItem.WeaponClass weaponclass;
+        public int recoilVertical;
+        public int recoilHorizontal;
+        public int sightingRange; // Max
+        // Mod
+        public int ergonomicsModifier; // Addition
+        public int recoilModifier; // Percentage
         // Head equipment
         public bool blocksEarpiece;
         public bool blocksEyewear;
@@ -241,7 +247,16 @@ namespace EFM
             magType = (FireArmMagazineType)Enum.Parse(typeof(FireArmMagazineType), data["magType"].ToString());
             clipType = (FireArmClipType)Enum.Parse(typeof(FireArmClipType), data["clipType"].ToString());
             roundType = (FireArmRoundType)Enum.Parse(typeof(FireArmRoundType), data["roundType"].ToString());
+
             weaponclass = (MeatovItem.WeaponClass)Enum.Parse(typeof(MeatovItem.WeaponClass), data["weaponclass"].ToString());
+            if(data["recoilVertical"] != null)
+            {
+                recoilVertical = (int)data["recoilVertical"];
+                recoilHorizontal = (int)data["recoilHorizontal"];
+                sightingRange = (int)data["sightingRange"];
+                ergonomicsModifier = (int)data["ergonomicsModifier"];
+                recoilModifier = (int)data["recoilModifier"];
+            }
 
             blocksEarpiece = (bool)data["blocksEarpiece"];
             blocksEyewear = (bool)data["blocksEyewear"];

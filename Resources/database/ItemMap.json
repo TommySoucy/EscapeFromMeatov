@@ -4389,6 +4389,14 @@
     "Modul": [],
     "OtherMod": ""
   },
+  "5447a9cd4bdc2dbd208b4567": {
+    "H3ID": "ModulM4A1"
+  },
+  "5c0e2ff6d174af02a1659d4a": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "ADAR 2-15 Stock"
+  },
   "61605e13ffa6e502ac5e7eef": {
     "H3ID": "Rangefinder7x25",
     "Modul": [],
@@ -4501,11 +4509,6 @@
   },
   "5bb2475ed4351e00853264e3": {
     "H3ID": "H416",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5447a9cd4bdc2dbd208b4567": {
-    "H3ID": "M4A1v2Rightie",
     "Modul": [],
     "OtherMod": ""
   },

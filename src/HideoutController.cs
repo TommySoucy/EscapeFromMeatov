@@ -1512,7 +1512,13 @@ namespace EFM
             {
                 vanillaItemDataEntry.Value.InitCheckmarkData();
             }
-            TODO e: // Init 868 mod items
+            foreach(KeyValuePair<string, Dictionary<string, MeatovItemData>> partGroupEntry in Mod.modItemData)
+            {
+                foreach(KeyValuePair<string, MeatovItemData> partEntry in partGroupEntry.Value)
+                {
+                    partEntry.Value.InitCheckmarkData();
+                }
+            }
             Mod.LogInfo("\t0");
 
             // Load areas

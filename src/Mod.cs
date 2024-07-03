@@ -2668,18 +2668,26 @@ namespace EFM
 
         public static bool GetItemData(string H3ID, out MeatovItemData itemData)
         {
+            string[] split = H3ID.Split(':');
+
             int index = -1;
-            if(int.TryParse(H3ID, out index))
+            if (int.TryParse(split[0], out index))
             {
-                itemData = customItemData[index];
+                if(index == 868)
+                {
+                    itemData = null;
+                    return modItemData.TryGetValue(split[1], out Dictionary<string, MeatovItemData> partsDict) && partsDict.TryGetValue(split[2], out itemData);
+                }
+                else
+                {
+                    itemData = customItemData[index];
+                }
                 return itemData != null;
             }
             else
             {
                 return vanillaItemData.TryGetValue(H3ID, out itemData);
             }
-
-            TODO e: // Also look through mod item data if ID starts with 868
         }
 
         public static int GetRoundWeight(FireArmRoundType roundType)
@@ -2880,20 +2888,42 @@ namespace EFM
 
         public static void SetIcon(string itemID, Image icon)
         {
-            TODO e: // Handle 868
+            string[] split = itemID.Split(':');
             int parsedID = -1;
-            if (int.TryParse(itemID, out parsedID))
+            if (int.TryParse(split[0], out parsedID))
             {
-                Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
-                if(sprite == null)
+                if(parsedID == 868)
                 {
-                    Mod.LogError("Mod.SetIcon could not load custom item " + itemID + " icon");
+                    bool gotIcon = false;
+                    if(ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary.TryGetValue(split[1], out ModularWorkshopPartsDefinition partDef))
+                    {
+                        if (partDef.PartsDictionary.TryGetValue(split[2], out GameObject weaponPart))
+                        {
+                            ModularWeaponPart weaponPartScript = weaponPart.GetComponent<ModularWeaponPart>();
+                            if(weaponPartScript != null)
+                            {
+                                icon.sprite = weaponPartScript.Icon;
+                                gotIcon = true;
+                            }
+                        }
+                    }
+                    if (!gotIcon)
+                    {
+                        Mod.LogError("Mod.SetIcon could not load modul mod " + itemID + " icon");
+                    }
                 }
                 else
                 {
-                    icon.sprite = sprite;
+                    Sprite sprite = Mod.itemIconsBundle.LoadAsset<Sprite>("Item" + parsedID + "_Icon");
+                    if (sprite == null)
+                    {
+                        Mod.LogError("Mod.SetIcon could not load custom item " + itemID + " icon");
+                    }
+                    else
+                    {
+                        icon.sprite = sprite;
+                    }
                 }
-
             }
             else
             {
@@ -2964,7 +2994,6 @@ namespace EFM
 
         public static string TarkovIDtoH3ID(string tarkovID)
         {
-            TODO e: // Handle modul wherever we call this
             if(itemMap.TryGetValue(tarkovID, out ItemMapEntry entry))
             {
                 if (entry.modul)

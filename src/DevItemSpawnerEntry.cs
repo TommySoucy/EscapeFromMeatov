@@ -1,8 +1,4 @@
 ﻿using FistVR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,6 +17,10 @@ namespace EFM
             if(item.index != -1)
             {
                 spawnedItem = Instantiate(Mod.GetItemPrefab(item.index), spawner.transform.position + spawner.transform.forward * -0.2f, Quaternion.identity).GetComponent<MeatovItem>();
+                if(item.index == 868)
+                {
+                    spawnedItem.SetData(item);
+                }
             }
             else // Vanilla
             {

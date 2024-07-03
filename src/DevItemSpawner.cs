@@ -65,17 +65,31 @@ namespace EFM
                     items.Add(Mod.customItemData[i]);
                 }
             }
-            Mod.LogInfo("Finding vanilla items containing "+s);
             foreach (KeyValuePair<string, MeatovItemData> dataEntry in Mod.vanillaItemData)
             {
-                if(dataEntry.Value != null)
-                {
-                    Mod.LogInfo("\t"+ dataEntry.Key+" : "+ dataEntry.Value.name);
-                }
                 if (dataEntry.Value != null && (dataEntry.Key.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0 || dataEntry.Value.name.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0))
                 {
-                    Mod.LogInfo("\t\tAdded");
                     items.Add(dataEntry.Value);
+                }
+            }
+            foreach (KeyValuePair<string, Dictionary<string, MeatovItemData>> dataEntry in Mod.modItemData)
+            {
+                if (dataEntry.Key.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    foreach(KeyValuePair<string, MeatovItemData> innerDataEntry in dataEntry.Value)
+                    {
+                        items.Add(innerDataEntry.Value);
+                    }
+                }
+                else
+                {
+                    foreach (KeyValuePair<string, MeatovItemData> innerDataEntry in dataEntry.Value)
+                    {
+                        if (innerDataEntry.Key.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            items.Add(innerDataEntry.Value);
+                        }
+                    }
                 }
             }
         }

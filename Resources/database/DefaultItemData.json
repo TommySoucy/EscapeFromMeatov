@@ -416,7 +416,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 600
+      "value": 600
     },
     {
       "tarkovID": "59f32c3b86f77472a31742f0",
@@ -462,7 +462,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 600
+      "value": 600
     },
     {
       "tarkovID": "590a373286f774287540368b",
@@ -1273,7 +1273,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 4500
+      "value": 4500
     },
     {
       "H3ID": "Item missing MI",
@@ -2315,7 +2315,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 330000
+      "value": 330000
     },
     {
       "tarkovID": "5c05308086f7746b2101e90b",
@@ -3532,7 +3532,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 17562
+      "value": 17562
     },
     {
       "tarkovID": "59e361e886f774176c10a2a5",
@@ -5049,7 +5049,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":150000
+      "value": 150000
     },
     {
       "tarkovID": "59e3658a86f7741776641ac4",
@@ -5320,7 +5320,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 663
+      "value": 663
     },
     {
       "tarkovID": "5df8a72c86f77412640e2e83",
@@ -5366,7 +5366,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 663
+      "value": 663
     },
     {
       "tarkovID": "5df8a77486f77412672a1e3f",
@@ -5412,7 +5412,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 663
+      "value": 663
     },
     {
       "tarkovID": "5c1267ee86f77416ec610f72",
@@ -5687,7 +5687,11 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "5c164d2286f774194c5e69fa",
+        "543be5dd4bdc2deb348b4569"
+      ]
     },
     {
       "tarkovID": "59fafd4b86f7745ca07e1232",
@@ -5732,7 +5736,10 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "5c99f98d86f7745c314214b3"
+      ]
     },
     {
       "tarkovID": "590a3cd386f77436f20848cb",
@@ -7000,7 +7007,11 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "5c164d2286f774194c5e69fa",
+        "543be5dd4bdc2deb348b4569"
+      ]
     },
     {
       "tarkovID": "590c5bbd86f774785762df04",
@@ -7137,7 +7148,42 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":663000
+      "value": 663000,
+      "whiteList": [
+        "5448eb774bdc2d0a728b4567",
+        "543be5f84bdc2dd4348b456a",
+        "5448fe124bdc2da5018b4567",
+        "129",
+        "742",
+        "743",
+        "130",
+        "169",
+        "174",
+        "189",
+        "160",
+        "543be6674bdc2df1348b4569",
+        "5448ecbe4bdc2d60728b4568",
+        "543be5e94bdc2df1348b4568",
+        "5447e1d04bdc2dff2f8b4567",
+        "567849dd4bdc2d150f8b456e",
+        "543be5664bdc2dd4348b4569",
+        "5447e0e74bdc2d3c308b4567",
+        "5661632d4bdc2d903d8b456b",
+        "543be5cb4bdc2deb348b4568",
+        "543be6564bdc2df4348b4568"
+      ],
+      "blackList": [
+        "5a341c4086f77401f2541505",
+        "55818aeb4bdc2ddc698b456a",
+        "5b3b6dc75acfc47a8773fb1e",
+        "5a1ead28fcdbcb001912fa9f",
+        "RailAdapterRussianToPicatinny",
+        "5c0695860db834001b735461",
+        "5a16b93dfcdbcbcae6687261",
+        "5a16b8a9fcdbcb00165aa6ca",
+        "5c11046cd174af02a012e42b",
+        "5448bf274bdc2dfc2f8b456a"
+      ]
     },
     {
       "tarkovID": "5aafbde786f774389d0cbc0f",
@@ -7182,7 +7228,11 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "5485a8684bdc2da71d8b4567",
+        "543be5cb4bdc2deb348b4568"
+      ]
     },
     {
       "tarkovID": "5c093db286f7740a1b2617e3",
@@ -7228,7 +7278,13 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 26544
+      "value": 26544,
+      "whiteList": [
+        "94",
+        "96",
+        "99",
+        "543be6674bdc2df1348b4569"
+      ]
     },
     {
       "tarkovID": "5e2af55f86f7746d4159f07c",
@@ -7273,7 +7329,19 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "100",
+        "Cartridge_40x46Grenade_M381",
+        "Cartridge_40x46Grenade_M381",
+        "Cartridge_40x46Grenade_M381",
+        "Cartridge_40x46Grenade_M397",
+        "Cartridge_40x53mmGrenade_M430A1_HEDP",
+        "Cartridge_40x46Grenade_M397",
+        "Cartridge_40x46Grenade_M576",
+        "5ede47641cf3836a88318df1",
+        "543be6564bdc2df4348b4568"
+      ]
     },
     {
       "tarkovID": "5c0a840b86f7742ffa4f2482",
@@ -7319,7 +7387,41 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 2530000
+      "value": 2530000,
+      "whiteList": [
+        "5448eb774bdc2d0a728b4567",
+        "543be5f84bdc2dd4348b456a",
+        "5645bcb74bdc2ded0b8b4578",
+        "178",
+        "5448fe124bdc2da5018b4567",
+        "5448e53e4bdc2d60728b4567",
+        "5448e5284bdc2dcb718b4567",
+        "129",
+        "164",
+        "742",
+        "165",
+        "166",
+        "743",
+        "130",
+        "169",
+        "170",
+        "171",
+        "172",
+        "174",
+        "177",
+        "189",
+        "160",
+        "5422acb9af1c889c16000029",
+        "543be6674bdc2df1348b4569",
+        "5448ecbe4bdc2d60728b4568",
+        "543be5e94bdc2df1348b4568",
+        "5447e1d04bdc2dff2f8b4567",
+        "567849dd4bdc2d150f8b456e",
+        "543be5664bdc2dd4348b4569",
+        "5447e0e74bdc2d3c308b4567",
+        "5661632d4bdc2d903d8b456b",
+        "543be6564bdc2df4348b4568"
+      ]
     },
     {
       "tarkovID": "5b7c710788a4506dec015957",
@@ -7365,7 +7467,12 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":1105000
+      "value": 1105000,
+      "whiteList": [
+        "5448eb774bdc2d0a728b4567",
+        "5448ecbe4bdc2d60728b4568",
+        "5447e0e74bdc2d3c308b4567"
+      ]
     },
     {
       "tarkovID": "5d235bb686f77443f4331278",
@@ -7411,7 +7518,19 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 15000
+      "value": 15000,
+      "whiteList": [
+        "114",
+        "118",
+        "97",
+        "123",
+        "126",
+        "11",
+        "12",
+        "186",
+        "543be5e94bdc2df1348b4568",
+        "543be5dd4bdc2deb348b4569"
+      ]
     },
     {
       "tarkovID": "5c127c4486f7745625356c13",
@@ -7456,7 +7575,10 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "5448bc234bdc2d3c308b4569"
+      ]
     },
     {
       "tarkovID": "5aafbcd986f7745e590fff23",
@@ -7502,7 +7624,11 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value" : 12000
+      "value": 12000,
+      "whiteList": [
+        "57864c8c245977548867e7f1",
+        "543be5664bdc2dd4348b4569"
+      ]
     },
     {
       "tarkovID": "59fb016586f7746d0d4b423a",
@@ -7548,7 +7674,12 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":25000
+      "value": 25000,
+      "whiteList": [
+        "114",
+        "118",
+        "543be5dd4bdc2deb348b4569"
+      ]
     },
     {
       "tarkovID": "5c093ca986f7740a1867ab12",
@@ -7595,7 +7726,40 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":1200000
+      "value": 1200000,
+      "whiteList": [
+        "5448eb774bdc2d0a728b4567",
+        "5448fe124bdc2da5018b4567",
+        "129",
+        "742",
+        "743",
+        "130",
+        "169",
+        "174",
+        "189",
+        "160",
+        "543be6674bdc2df1348b4569",
+        "5448ecbe4bdc2d60728b4568",
+        "543be5e94bdc2df1348b4568",
+        "5447e1d04bdc2dff2f8b4567",
+        "567849dd4bdc2d150f8b456e",
+        "543be5664bdc2dd4348b4569",
+        "5447e0e74bdc2d3c308b4567",
+        "5661632d4bdc2d903d8b456b",
+        "543be6564bdc2df4348b4568"
+      ],
+      "blackList": [
+        "5a341c4086f77401f2541505",
+        "55818aeb4bdc2ddc698b456a",
+        "5b3b6dc75acfc47a8773fb1e",
+        "5a1ead28fcdbcb001912fa9f",
+        "RailAdapterRussianToPicatinny",
+        "5c0695860db834001b735461",
+        "5a16b93dfcdbcbcae6687261",
+        "5a16b8a9fcdbcb00165aa6ca",
+        "5c11046cd174af02a012e42b",
+        "5448bf274bdc2dfc2f8b456a"
+      ]
     },
     {
       "tarkovID": "5c093e3486f77430cb02e593",
@@ -7640,7 +7804,11 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "11",
+        "12"
+      ]
     },
     {
       "tarkovID": "59fb042886f7746c5005a7b2",
@@ -7686,7 +7854,40 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 1600000
+      "value": 1600000,
+      "whiteList": [
+        "5448eb774bdc2d0a728b4567",
+        "543be5f84bdc2dd4348b456a",
+        "5645bcb74bdc2ded0b8b4578",
+        "5448fe124bdc2da5018b4567",
+        "5448e53e4bdc2d60728b4567",
+        "5448e5284bdc2dcb718b4567",
+        "129",
+        "164",
+        "742",
+        "165",
+        "166",
+        "743",
+        "130",
+        "169",
+        "170",
+        "171",
+        "172",
+        "174",
+        "177",
+        "189",
+        "160",
+        "5422acb9af1c889c16000029",
+        "543be6674bdc2df1348b4569",
+        "5448ecbe4bdc2d60728b4568",
+        "543be5e94bdc2df1348b4568",
+        "5447e1d04bdc2dff2f8b4567",
+        "567849dd4bdc2d150f8b456e",
+        "543be5664bdc2dd4348b4569",
+        "5447e0e74bdc2d3c308b4567",
+        "5661632d4bdc2d903d8b456b",
+        "543be6564bdc2df4348b4568"
+      ]
     },
     {
       "tarkovID": "5b6d9ce188a4501afc1b2b25",
@@ -7732,7 +7933,13 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 2100000
+      "value": 2100000,
+      "whiteList": [
+        "5448fe124bdc2da5018b4567",
+        "5422acb9af1c889c16000029",
+        "5485a8684bdc2da71d8b4567",
+        "543be5cb4bdc2deb348b4568"
+      ]
     },
     {
       "tarkovID": "59fb023c86f7746d0d4b423c",
@@ -7777,7 +7984,13 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "5448fe124bdc2da5018b4567",
+        "5422acb9af1c889c16000029",
+        "5485a8684bdc2da71d8b4567",
+        "543be5cb4bdc2deb348b4568"
+      ]
     },
     {
       "tarkovID": "567143bf4bdc2d1a0f8b4567",
@@ -7822,7 +8035,13 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "5448bc234bdc2d3c308b4569",
+        "5447b5cf4bdc2d65278b4567",
+        "5485a8684bdc2da71d8b4567",
+        "543be5cb4bdc2deb348b4568"
+      ]
     },
     {
       "tarkovID": "5857a8bc2459772bad15db29",
@@ -7869,7 +8088,43 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 820000
+      "value": 820000,
+      "whiteList": [
+        "5448eb774bdc2d0a728b4567",
+        "543be5f84bdc2dd4348b456a",
+        "5448fe124bdc2da5018b4567",
+        "129",
+        "742",
+        "743",
+        "130",
+        "169",
+        "174",
+        "189",
+        "160",
+        "543be6674bdc2df1348b4569",
+        "5448ecbe4bdc2d60728b4568",
+        "543be5e94bdc2df1348b4568",
+        "5447e1d04bdc2dff2f8b4567",
+        "567849dd4bdc2d150f8b456e",
+        "543be5664bdc2dd4348b4569",
+        "5447e0e74bdc2d3c308b4567",
+        "5661632d4bdc2d903d8b456b",
+        "543be5cb4bdc2deb348b4568",
+        "543be6564bdc2df4348b4568"
+      ],
+      "blackList": [
+        "5448e54d4bdc2dcc718b4568",
+        "5a341c4086f77401f2541505",
+        "55818aeb4bdc2ddc698b456a",
+        "5b3b6dc75acfc47a8773fb1e",
+        "5a1ead28fcdbcb001912fa9f",
+        "RailAdapterRussianToPicatinny",
+        "5c0695860db834001b735461",
+        "5a16b93dfcdbcbcae6687261",
+        "5a16b8a9fcdbcb00165aa6ca",
+        "5c11046cd174af02a012e42b",
+        "5448bf274bdc2dfc2f8b456a"
+      ]
     },
     {
       "tarkovID": "5d403f9186f7743cac3f229b",
@@ -8644,7 +8899,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value" : 420
+      "value": 420
     },
     {
       "tarkovID": "5eff135be0d3331e9d282b7b",
@@ -8689,7 +8944,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":420
+      "value": 420
     },
     {
       "tarkovID": "590c60fc86f77412b13fddcf",
@@ -8734,7 +8989,17 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "114",
+        "118",
+        "97",
+        "742",
+        "5448ecbe4bdc2d60728b4568",
+        "543be5e94bdc2df1348b4568",
+        "567849dd4bdc2d150f8b456e",
+        "543be5dd4bdc2deb348b4569"
+      ]
     },
     {
       "tarkovID": "5c12613b86f7743bbe2c3f76",
@@ -8823,7 +9088,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":800
+      "value": 800
     },
     {
       "tarkovID": "60a3b5b05f84d429b732e934",
@@ -8868,7 +9133,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":800
+      "value": 800
     },
     {
       "tarkovID": "60915994c49cf53e4772cc38",
@@ -8913,7 +9178,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":1000
+      "value": 1000
     },
     {
       "tarkovID": "60a3b6359c427533db36cf84",
@@ -8958,7 +9223,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":1000
+      "value": 1000
     },
     {
       "tarkovID": "60a3b65c27adf161da7b6e14",
@@ -9003,7 +9268,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":1000
+      "value": 1000
     },
     {
       "tarkovID": "590c639286f774151567fa95",
@@ -9182,7 +9447,42 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 433000
+      "value": 433000,
+      "whiteList": [
+        "5448eb774bdc2d0a728b4567",
+        "543be5f84bdc2dd4348b456a",
+        "5448fe124bdc2da5018b4567",
+        "129",
+        "742",
+        "743",
+        "130",
+        "169",
+        "174",
+        "189",
+        "160",
+        "543be6674bdc2df1348b4569",
+        "5448ecbe4bdc2d60728b4568",
+        "543be5e94bdc2df1348b4568",
+        "5447e1d04bdc2dff2f8b4567",
+        "567849dd4bdc2d150f8b456e",
+        "543be5664bdc2dd4348b4569",
+        "5447e0e74bdc2d3c308b4567",
+        "5661632d4bdc2d903d8b456b",
+        "543be5cb4bdc2deb348b4568",
+        "543be6564bdc2df4348b4568"
+      ],
+      "blackList": [
+        "5a341c4086f77401f2541505",
+        "55818aeb4bdc2ddc698b456a",
+        "5b3b6dc75acfc47a8773fb1e",
+        "5a1ead28fcdbcb001912fa9f",
+        "RailAdapterRussianToPicatinny",
+        "5c0695860db834001b735461",
+        "5a16b93dfcdbcbcae6687261",
+        "5a16b8a9fcdbcb00165aa6ca",
+        "5c11046cd174af02a012e42b",
+        "5448bf274bdc2dfc2f8b456a"
+      ]
     },
     {
       "tarkovID": "5af0454c86f7746bf20992e8",
@@ -9286,7 +9586,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 120
+      "value": 120
     },
     {
       "tarkovID": "569668774bdc2da2298b4568",
@@ -9334,7 +9634,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":135
+      "value": 135
     },
     {
       "tarkovID": "5449016a4bdc2d6f028b456f",
@@ -9382,7 +9682,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":1
+      "value": 1
     },
     {
       "tarkovID": "59136f6f86f774447a1ed173",
@@ -9563,7 +9863,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":3000
+      "value": 3000
     },
     {
       "tarkovID": "5b43237186f7742f3a4ab252",
@@ -9609,7 +9909,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":4500
+      "value": 4500
     },
     {
       "tarkovID": "5910922b86f7747d96753483",
@@ -9655,7 +9955,10 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 23000
+      "value": 23000,
+      "whiteList": [
+        "543be5dd4bdc2deb348b4569"
+      ]
     },
     {
       "tarkovID": "590dde5786f77405e71908b2",
@@ -9701,7 +10004,10 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":53000
+      "value": 53000,
+      "whiteList": [
+        "543be5dd4bdc2deb348b4569"
+      ]
     },
     {
       "tarkovID": "5d3ec50586f774183a607442",
@@ -9746,7 +10052,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":200
+      "value": 200
     },
     {
       "tarkovID": "5b43575a86f77424f443fe62",
@@ -9836,7 +10142,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":512000
+      "value": 512000
     },
     {
       "tarkovID": "5d357d6b86f7745b606e3508",
@@ -9881,7 +10187,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":600
+      "value": 600
     },
     {
       "tarkovID": "5937ee6486f77408994ba448",
@@ -9927,7 +10233,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5300
+      "value": 5300
     },
     {
       "tarkovID": "5e42c81886f7742a01529f57",
@@ -10018,7 +10324,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":8500
+      "value": 8500
     },
     {
       "tarkovID": "5ae9a3f586f7740aab00e4e6",
@@ -10063,7 +10369,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":200
+      "value": 200
     },
     {
       "tarkovID": "5ae9a4fc86f7746e381e1753",
@@ -10108,7 +10414,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":200
+      "value": 200
     },
     {
       "tarkovID": "5939e5a786f77461f11c0098",
@@ -10153,7 +10459,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "5938188786f77474f723e87f",
@@ -10198,7 +10504,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "593965cf86f774087a77e1b6",
@@ -10243,7 +10549,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "5938878586f7741b797c562f",
@@ -10288,7 +10594,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "591092ef86f7747bb8703422",
@@ -10333,7 +10639,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "591093bb86f7747caa7bb2ee",
@@ -10378,7 +10684,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":4300
+      "value": 4300
     },
     {
       "tarkovID": "5939e9b286f77462a709572c",
@@ -10423,7 +10729,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "5ae9a25386f7746dd946e6d9",
@@ -10468,7 +10774,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "5ae9a0dd86f7742e5f454a05",
@@ -10513,7 +10819,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "619268ad78f4fa33f173dbe5",
@@ -10558,7 +10864,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "5ae9a18586f7746e381e16a3",
@@ -10603,7 +10909,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5600
+      "value": 5600
     },
     {
       "tarkovID": "5e42c83786f7742a021fdf3c",
@@ -11227,7 +11533,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":56000
+      "value": 56000
     },
     {
       "tarkovID": "5910968f86f77425cf569c32",
@@ -14153,7 +14459,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":2600
+      "value": 2600
     },
     {
       "tarkovID": "5913915886f774123603c392",
@@ -15144,7 +15450,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5100
+      "value": 5100
     },
     {
       "tarkovID": "5a0ea69f86f7741cd5406619",
@@ -17370,7 +17676,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":29000
+      "value": 29000
     },
     {
       "tarkovID": "5c0e5bab86f77461f55ed1f3",
@@ -17515,7 +17821,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":27000
+      "value": 27000
     },
     {
       "tarkovID": "5d5d87f786f77427997cfaef",
@@ -17564,7 +17870,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 31000
+      "value": 31000
     },
     {
       "tarkovID": "5fd4c474dd870108a754b241",
@@ -17613,7 +17919,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 26000
+      "value": 26000
     },
     {
       "tarkovID": "609e8540d5c319764c2bc2e9",
@@ -17710,7 +18016,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 32000
+      "value": 32000
     },
     {
       "tarkovID": "5e9dacf986f774054d6b89f4",
@@ -17759,7 +18065,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 32000
+      "value": 32000
     },
     {
       "tarkovID": "5ab8e79e86f7742d8b372e78",
@@ -17808,7 +18114,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 32000
+      "value": 32000
     },
     {
       "tarkovID": "5b44cd8b86f774503d30cba2",
@@ -17857,7 +18163,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 32000
+      "value": 32000
     },
     {
       "tarkovID": "5b44cf1486f77431723e3d05",
@@ -17906,7 +18212,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 32000
+      "value": 32000
     },
     {
       "tarkovID": "5b44d0de86f774503d30cba8",
@@ -17955,7 +18261,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 32000
+      "value": 32000
     },
     {
       "tarkovID": "5b44d22286f774172b0c9de8",
@@ -18004,7 +18310,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 32000
+      "value": 32000
     },
     {
       "tarkovID": "5f5f41476bdad616ad46d631",
@@ -18053,7 +18359,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 32000
+      "value": 32000
     },
     {
       "tarkovID": "59e7635f86f7742cbf2c1095",
@@ -18246,7 +18552,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":29000
+      "value": 29000
     },
     {
       "tarkovID": "5ca21c6986f77479963115a7",
@@ -18295,7 +18601,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":29000
+      "value": 29000
     },
     {
       "tarkovID": "5e4abb5086f77406975c9342",
@@ -18344,7 +18650,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":29000
+      "value": 29000
     },
     {
       "tarkovID": "6038b4ca92ec1c3103795a0d",
@@ -18393,7 +18699,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":29000
+      "value": 29000
     },
     {
       "tarkovID": "6038b4b292ec1c3103795a0b",
@@ -18442,7 +18748,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":29000
+      "value": 29000
     },
     {
       "tarkovID": "5c0e655586f774045612eeb2",
@@ -18635,7 +18941,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":31000
+      "value": 31000
     },
     {
       "tarkovID": "5df8a4d786f77412672a1e3b",
@@ -18684,7 +18990,22 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":25000
+      "value": 25000,
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "544a5cde4bdc2d39388b456b",
@@ -18732,7 +19053,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "56e335e4d2720b6c058b456d",
@@ -18780,7 +19116,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5732ee6a24597719ae0c0281",
@@ -18829,7 +19180,40 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":6100
+      "value": 6100,
+      "whiteList": [
+        "5448eb774bdc2d0a728b4567",
+        "543be5f84bdc2dd4348b456a",
+        "5448fe124bdc2da5018b4567",
+        "742",
+        "743",
+        "130",
+        "169",
+        "174",
+        "189",
+        "160",
+        "543be6674bdc2df1348b4569",
+        "5448ecbe4bdc2d60728b4568",
+        "543be5e94bdc2df1348b4568",
+        "5447e1d04bdc2dff2f8b4567",
+        "567849dd4bdc2d150f8b456e",
+        "543be5664bdc2dd4348b4569",
+        "5447e0e74bdc2d3c308b4567",
+        "5661632d4bdc2d903d8b456b",
+        "543be5cb4bdc2deb348b4568"
+      ],
+      "blackList": [
+        "5a341c4086f77401f2541505",
+        "55818aeb4bdc2ddc698b456a",
+        "5b3b6dc75acfc47a8773fb1e",
+        "5a1ead28fcdbcb001912fa9f",
+        "RailAdapterRussianToPicatinny",
+        "5c0695860db834001b735461",
+        "5a16b93dfcdbcbcae6687261",
+        "5a16b8a9fcdbcb00165aa6ca",
+        "5c11046cd174af02a012e42b",
+        "5448bf274bdc2dfc2f8b456a"
+      ]
     },
     {
       "tarkovID": "5b44c6ae86f7742d1627baea",
@@ -18877,7 +19261,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5c0e774286f77468413cc5b2",
@@ -18926,7 +19325,22 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":26000
+      "value": 26000,
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5e9dcf5986f7746c417435b3",
@@ -18974,7 +19388,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "60a272cc93ef783291411d8e",
@@ -19022,7 +19451,23 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "414",
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5f5e46b96bdad616ad46d613",
@@ -19071,7 +19516,22 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":23000
+      "value": 23000,
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5f5e467b0bc58666c37e7821",
@@ -19119,7 +19579,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "6034d2d697633951dc245ea6",
@@ -19168,7 +19643,22 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":32000
+      "value": 32000,
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "619cf0335771dd3c390269ae",
@@ -19216,7 +19706,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "618bb76513f5097c8d5aa2d5",
@@ -19264,7 +19769,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "618cfae774bb2d036a049e7c",
@@ -19312,7 +19832,24 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "419",
+        "420",
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5d5d940f86f7742797262046",
@@ -19360,7 +19897,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5e4abc6786f77406812bd572",
@@ -19408,7 +19960,11 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "57864c8c245977548867e7f1",
+        "543be5664bdc2dd4348b4569"
+      ]
     },
     {
       "tarkovID": "5ab8f04f86f774585f4237d8",
@@ -19456,7 +20012,17 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "167",
+        "168",
+        "175",
+        "176"
+      ]
     },
     {
       "tarkovID": "5c0e805e86f774683f3dd637",
@@ -19505,7 +20071,22 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":35000
+      "value": 35000,
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "59e763f286f7742ee57895da",
@@ -19554,7 +20135,22 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":25000
+      "value": 25000,
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "60a2828e8689911a226117f9",
@@ -19602,7 +20198,28 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "409",
+        "413",
+        "426",
+        "427",
+        "436",
+        "408",
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5f5e45cc5021ce62144be7aa",
@@ -19650,7 +20267,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5e997f0b86f7741ac73993e2",
@@ -19698,7 +20330,17 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "167",
+        "168",
+        "175",
+        "176"
+      ]
     },
     {
       "tarkovID": "56e33634d2720bd8058b456b",
@@ -19746,7 +20388,17 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "167",
+        "168",
+        "175",
+        "176"
+      ]
     },
     {
       "tarkovID": "5ab8ebf186f7742d8b372e80",
@@ -19795,7 +20447,22 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value": 27000
+      "value": 27000,
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "56e33680d2720be2748b4576",
@@ -19843,7 +20510,17 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "167",
+        "168",
+        "175",
+        "176"
+      ]
     },
     {
       "tarkovID": "6034d103ca006d2dca39b3f0",
@@ -19891,7 +20568,24 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "433",
+        "432",
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "6038d614d10cbf667352dd44",
@@ -19939,7 +20633,24 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "433",
+        "432",
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "545cdae64bdc2d39198b4568",
@@ -19987,7 +20698,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "5ab8ee7786f7742d8f33f0b9",
@@ -20035,7 +20761,17 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "167",
+        "168",
+        "175",
+        "176"
+      ]
     },
     {
       "tarkovID": "5ca20d5986f774331e7c9602",
@@ -20083,7 +20819,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "572b7f1624597762ae139822",
@@ -20266,7 +21017,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":3000
+      "value": 3000
     },
     {
       "tarkovID": "607f201b3c672b3b3a24a800",
@@ -21301,7 +22052,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":26000
+      "value": 26000
     },
     {
       "tarkovID": "60a7ad2a2198820d95707a2e",
@@ -21349,7 +22100,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":26000
+      "value": 26000
     },
     {
       "tarkovID": "5b432be65acfc433000ed01f",
@@ -22055,7 +22806,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5000
+      "value": 5000
     },
     {
       "tarkovID": "5b40e5e25acfc4001a599bea",
@@ -22620,7 +23371,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":2800
+      "value": 2800
     },
     {
       "tarkovID": "572b7fa124597762b472f9d2",
@@ -22762,7 +23513,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":3000
+      "value": 3000
     },
     {
       "tarkovID": "5aa2b89be5b5b0001569311f",
@@ -24213,7 +24964,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":15000
+      "value": 15000
     },
     {
       "tarkovID": "5c17a7ed2e2216152142459c",
@@ -24261,7 +25012,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":16000
+      "value": 16000
     },
     {
       "tarkovID": "5ea17ca01412a1425304d1c0",
@@ -24356,7 +25107,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":18000
+      "value": 18000
     },
     {
       "tarkovID": "5ea05cf85ad9772e6624305d",
@@ -24639,7 +25390,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":15000
+      "value": 15000
     },
     {
       "tarkovID": "5c0e874186f7745dc7616606",
@@ -24687,7 +25438,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":15000
+      "value": 15000
     },
     {
       "tarkovID": "5d5e7d28a4b936645d161203",
@@ -24829,7 +25580,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":15000
+      "value": 15000
     },
     {
       "tarkovID": "5ac8d6885acfc400180ae7b0",
@@ -24877,7 +25628,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":15000
+      "value": 15000
     },
     {
       "tarkovID": "5c0d2727d174af02a012cf58",
@@ -24972,7 +25723,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":16000
+      "value": 16000
     },
     {
       "tarkovID": "5aa7d193e5b5b000171d063f",
@@ -25208,7 +25959,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":16000
+      "value": 16000
     },
     {
       "tarkovID": "5e01ef6886f77445f643baa4",
@@ -25256,7 +26007,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":16000
+      "value": 16000
     },
     {
       "tarkovID": "5df8a58286f77412631087ed",
@@ -25492,7 +26243,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":16000
+      "value": 16000
     },
     {
       "tarkovID": "5aa7e454e5b5b0214e506fa2",
@@ -25825,7 +26576,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":22000
+      "value": 22000
     },
     {
       "tarkovID": "603648ff5a45383c122086ac",
@@ -26210,7 +26961,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":22000
+      "value": 22000
     },
     {
       "tarkovID": "5b44c8ea86f7742d1627baf1",
@@ -26355,7 +27106,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":22000
+      "value": 22000
     },
     {
       "tarkovID": "6034d0230ca681766b6a0fb5",
@@ -26500,7 +27251,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":22000
+      "value": 22000
     },
     {
       "tarkovID": "60a3c68c37ea821725773ef5",
@@ -26549,7 +27300,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":22000
+      "value": 22000
     },
     {
       "tarkovID": "5d5d85c586f774279a21cbdb",
@@ -27030,7 +27781,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":22000
+      "value": 22000
     },
     {
       "tarkovID": "5e4abfed86f77406a2713cf7",
@@ -27271,7 +28022,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":22000
+      "value": 22000
     },
     {
       "tarkovID": "6034cf5fffd42c541047f72e",
@@ -29875,7 +30626,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":6000
+      "value": 6000
     },
     {
       "tarkovID": "5e831507ea0a7c419c2f9bd9",
@@ -34237,7 +34988,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":191650
+      "value": 191650
     },
     {
       "tarkovID": "57372b832459776701014e41",
@@ -34328,7 +35079,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":191650
+      "value": 191650
     },
     {
       "tarkovID": "57372c21245977670937c6c2",
@@ -34419,7 +35170,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":120000
+      "value": 120000
     },
     {
       "tarkovID": "57372d1b2459776862260581",
@@ -34600,7 +35351,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":130000
+      "value": 130000
     },
     {
       "tarkovID": "57372e73245977685d4159b4",
@@ -34691,7 +35442,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":130000
+      "value": 130000
     },
     {
       "tarkovID": "57372ee1245977685d4159b5",
@@ -34782,7 +35533,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":125000
+      "value": 125000
     },
     {
       "tarkovID": "57372f7d245977699b53e301",
@@ -35009,7 +35760,42 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":191650
+      "value": 191650,
+      "whiteList": [
+        "5a341c4086f77401f2541505",
+        "55818aeb4bdc2ddc698b456a",
+        "5b3b6dc75acfc47a8773fb1e",
+        "5a1ead28fcdbcb001912fa9f",
+        "RailAdapterRussianToPicatinny",
+        "5c0695860db834001b735461",
+        "5a16b93dfcdbcbcae6687261",
+        "5a16b8a9fcdbcb00165aa6ca",
+        "5c11046cd174af02a012e42b",
+        "5448bf274bdc2dfc2f8b456a"
+      ],
+      "blackList": [
+        "5448eb774bdc2d0a728b4567",
+        "543be5f84bdc2dd4348b456a",
+        "5448fe124bdc2da5018b4567",
+        "129",
+        "742",
+        "743",
+        "130",
+        "169",
+        "174",
+        "189",
+        "160",
+        "543be6674bdc2df1348b4569",
+        "5448ecbe4bdc2d60728b4568",
+        "543be5e94bdc2df1348b4568",
+        "5447e1d04bdc2dff2f8b4567",
+        "567849dd4bdc2d150f8b456e",
+        "543be5664bdc2dd4348b4569",
+        "5447e0e74bdc2d3c308b4567",
+        "5661632d4bdc2d903d8b456b",
+        "543be5cb4bdc2deb348b4568",
+        "543be6564bdc2df4348b4568"
+      ]
     },
     {
       "tarkovID": "000000000000000000000001",
@@ -35051,7 +35837,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":191650
+      "value": 191650
     },
     {
       "tarkovID": "000000000000000000000002",
@@ -35093,7 +35879,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":191650
+      "value": 191650
     },
     {
       "tarkovID": "5c12301c86f77419522ba7e4",
@@ -35138,7 +35924,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":200
+      "value": 200
     },
     {
       "tarkovID": "5a29276886f77435ed1b117c",
@@ -35184,7 +35970,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":32000
+      "value": 32000
     },
     {
       "tarkovID": "5a29357286f77409c705e025",
@@ -35229,7 +36015,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":2000
+      "value": 2000
     },
     {
       "tarkovID": "5798a2832459774b53341029",
@@ -35675,7 +36461,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":2000
+      "value": 2000
     },
     {
       "tarkovID": "619252352be33f26043400a7",
@@ -35721,7 +36507,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":20000
+      "value": 20000
     },
     {
       "tarkovID": "60b0f93284c20f0feb453da7",
@@ -35843,7 +36629,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":2000
+      "value": 2000
     },
     {
       "tarkovID": "5b4c81a086f77417d26be63f",
@@ -35889,7 +36675,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":2000
+      "value": 2000
     },
     {
       "tarkovID": "5b4c81bd86f77418a75ae159",
@@ -35935,7 +36721,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":2000
+      "value": 2000
     },
     {
       "tarkovID": "5b4c72b386f7745b453af9c0",
@@ -35981,7 +36767,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":25000
+      "value": 25000
     },
     {
       "tarkovID": "5b4c72c686f77462ac37e907",
@@ -36027,7 +36813,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":25000
+      "value": 25000
     },
     {
       "tarkovID": "609267a2bb3f46069c3e6c7d",
@@ -36073,7 +36859,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":26000
+      "value": 26000
     },
     {
       "tarkovID": "60c080eb991ac167ad1c3ad4",
@@ -36119,7 +36905,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":58000
+      "value": 58000
     },
     {
       "tarkovID": "619268de2be33f2604340159",
@@ -36164,7 +36950,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5000
+      "value": 5000
     },
     {
       "tarkovID": "5ae9a1b886f77404c8537c62",
@@ -36209,7 +36995,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":2000
+      "value": 2000
     },
     {
       "tarkovID": "61904c9df62c89219a56e034",
@@ -36254,7 +37040,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":2000
+      "value": 2000
     },
     {
       "tarkovID": "619cbf9e0a7c3a1a2731940a",
@@ -36299,7 +37085,10 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "5c164d2286f774194c5e69fa"
+      ]
     },
     {
       "tarkovID": "619cbf7d23893217ec30b689",
@@ -36344,7 +37133,11 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "638",
+        "5448f3a64bdc2d60728b456a"
+      ]
     },
     {
       "tarkovID": "61b9e1aaef9a1b5d6a79899a",
@@ -36393,7 +37186,22 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":53000
+      "value": 53000,
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "61c18d83b00456371a66814b",
@@ -36583,7 +37391,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":26000
+      "value": 26000
     },
     {
       "tarkovID": "61bcc89aef0f505f0c6cd0fc",
@@ -36632,7 +37440,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":26000
+      "value": 26000
     },
     {
       "tarkovID": "61a00bcb177fb945751bbe6a",
@@ -36677,7 +37485,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":5000
+      "value": 5000
     },
     {
       "tarkovID": "62a09ee4cf4a99369e262453",
@@ -37170,7 +37978,10 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "5c99f98d86f7745c314214b3"
+      ]
     },
     {
       "tarkovID": "62a09e73af34e73a266d932a",
@@ -37400,7 +38211,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "628bc7fb408e2b2e9c0801b1",
@@ -37448,7 +38259,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "628e1ffc83ec92260c0f437f",
@@ -37496,7 +38322,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "62a1b7fbc30cfa1d366af586",
@@ -37544,7 +38385,22 @@
       "useTime": 0.0,
       "amountRate": -1.0,
       "consumeEffects": [],
-      "buffEffects": []
+      "buffEffects": [],
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "62963c18dbc8ab5f0d382d0b",
@@ -37592,7 +38448,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":16000
+      "value": 16000
     },
     {
       "tarkovID": "62a09e08de7ac81993580532",
@@ -37828,7 +38684,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":7000
+      "value": 7000
     },
     {
       "tarkovID": "62a09e410b9d3c46de5b6e78",
@@ -38111,7 +38967,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "628d0618d1ba6e4fa07ce5a4",
@@ -38160,7 +39016,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "628baf0b967de16aab5a4f36",
@@ -38257,7 +39113,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "628cd624459354321c4b7fa2",
@@ -38306,7 +39162,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "62a09f32621468534a797acb",
@@ -38421,7 +39277,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "639346cc1c8f182ad90c8972",
@@ -38470,7 +39326,22 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000,
+      "whiteList": [
+        "54009119af1c881c07000029"
+      ],
+      "blackList": [
+        "5448bf274bdc2dfc2f8b456a",
+        "165",
+        "166",
+        "167",
+        "168",
+        "171",
+        "172",
+        "175",
+        "177",
+        "176"
+      ]
     },
     {
       "tarkovID": "64a5366719bab53bd203bf33",
@@ -38519,7 +39390,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "64a536392d2c4e6e970f4121",
@@ -38568,7 +39439,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "639343fce101f4caa40a4ef3",
@@ -38617,7 +39488,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "64be7095047e826eae02b0c1",
@@ -38666,7 +39537,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "64be7110bf597ba84a0a41ea",
@@ -38715,7 +39586,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "63611865ba5b90db0c0399d1",
@@ -40575,7 +41446,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":28000
+      "value": 28000
     },
     {
       "tarkovID": "63a71eb5b7f4570d3a29316b",
@@ -40666,7 +41537,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":15000
+      "value": 15000
     },
     {
       "tarkovID": "63a39dfe3901f439517cafba",
@@ -40802,7 +41673,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ccc1ec1779ad6ba200a137",
@@ -40848,7 +41719,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ccc1f4ff54fb38131acf27",
@@ -40894,7 +41765,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ccc1fe088064307e14a6f7",
@@ -40940,7 +41811,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ccc206793ca11c8f450a38",
@@ -40986,7 +41857,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ce572331dd890873175115",
@@ -41032,7 +41903,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ccc268c41e91416064ebc7",
@@ -41078,7 +41949,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ccc25f95763a1ae376e447",
@@ -41124,7 +41995,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ccc24de61ea448b507d34d",
@@ -41170,7 +42041,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ccc246ff54fb38131acf29",
@@ -41216,7 +42087,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "64ccc2111779ad6ba200a139",
@@ -41262,7 +42133,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "6391fcf5744e45201147080f",
@@ -41308,7 +42179,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "6389c6463485cf0eeb260715",
@@ -41444,7 +42315,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "6389c7f115805221fb410466",
@@ -41490,7 +42361,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "6389c7750ef44505c87f5996",
@@ -41536,7 +42407,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "6389c92d52123d5dd17f8876",
@@ -41581,7 +42452,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":3000
+      "value": 3000
     },
     {
       "tarkovID": "6389c8fb46b54c634724d847",
@@ -41626,7 +42497,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":4000
+      "value": 4000
     },
     {
       "tarkovID": "6389c8c5dbfd5e4b95197e6b",
@@ -41716,7 +42587,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "5f4f9eb969cdc30ff33f09db",
@@ -41806,7 +42677,7 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": [],
-	  "value":40000
+      "value": 40000
     },
     {
       "tarkovID": "637b620db7afa97bfc3d7009",
@@ -42444,14 +43315,114 @@
         }
       ],
       "buffEffects": []
+    },
+    {
+      "tarkovID": "000000000000000000000003",
+      "H3ID": "868",
+      "index": 868,
+      "itemType": "Mod",
+      "rarity": "Not_exist",
+      "parents": [
+        "54009119af1c881c07000029"
+      ],
+      "weight": 1,
+      "volumes": [
+        1
+      ],
+      "lootExperience": 10,
+      "name": "Generic Mod",
+      "description": "A generic mod",
+      "canSellOnRagfair": true,
+      "compatibilityValue": 0,
+      "usesMags": false,
+      "usesAmmoContainers": false,
+      "magType": "mNone",
+      "clipType": "None",
+      "roundType": "a22_LR",
+      "weaponclass": "Pistol",
+      "blocksEarpiece": false,
+      "blocksEyewear": false,
+      "blocksFaceCover": false,
+      "blocksHeadwear": false,
+      "coverage": 0.0,
+      "damageResist": 0.0,
+      "maxArmor": 0.0,
+      "smallSlotCount": 0,
+      "mediumSlotCount": 0,
+      "maxVolume": 0,
+      "cartridge": "",
+      "roundClass": "Ball",
+      "maxStack": 1,
+      "maxAmount": 1,
+      "useTime": 5.0,
+      "amountRate": -1.0,
+      "consumeEffects": [],
+      "buffEffects": []
     }
   ],
+  "modItemData": {
+	  "BufferTubes_AR":{
+		  "ADAR 2-15 Stock": {
+			  "tarkovID": "5c0e2ff6d174af02a1659d4a",
+			  "H3ID": "868:BufferTubes_AR:ADAR 2-15 Stock",
+			  "H3SpawnerID": "",
+			  "index": 868,
+			  "name": "AR-15 ADAR 2-15 wooden stock",
+			  "description": "A wooden SVD-style stock for ADAR 2-15 carbines.",
+			  "lootExperience": 10,
+			  "parents": [
+				"55818a594bdc2db9688b456a",
+				"55802f3e4bdc2de7118b4584",
+				"5448fe124bdc2da5018b4567",
+				"566162e44bdc2d3f298b4573",
+				"54009119af1c881c07000029"
+			  ],
+			  "itemType": "Mod",
+			  "rarity": "Rare",
+			  "weight": 695,
+			  "volumes": [
+				1929
+			  ],
+			  "canSellOnRagfair": true,
+			  "compatibilityValue": 0,
+			  "usesMags": false,
+			  "usesAmmoContainers": false,
+			  "magType": "mNatoStanag_556",
+			  "clipType": "None",
+			  "roundType": "a556_45_Nato",
+			  "weaponclass": "Assault",
+			  "blocksEarpiece": false,
+			  "blocksEyewear": false,
+			  "blocksFaceCover": false,
+			  "blocksHeadwear": false,
+			  "coverage": 0.0,
+			  "damageResist": 0.0,
+			  "maxArmor": 0.0,
+			  "smallSlotCount": 0,
+			  "mediumSlotCount": 0,
+			  "maxVolume": 0,
+			  "cartridge": "a556_45_Nato",
+			  "roundClass": "FMJ",
+			  "maxStack": 1,
+			  "maxAmount": 0,
+			  "useTime": 0.0,
+			  "amountRate": -1.0,
+			  "consumeEffects": [],
+			  "buffEffects": [],
+			  "recoilVertical": 0,
+			  "recoilHorizontal": 0,
+			  "sightingRange": 0,
+			  "ergonomicsModifier": 13,
+			  "recoilModifier": -28
+		  }
+	  }
+  },
   "vanillaItemData": {
-	"DingPack": {
+    "DingPack": {
       "tarkovID": "573476d324597737da2adc13",
       "H3ID": "DingPack",
       "H3SpawnerID": null,
-      "index": -1,
+      "index": 0,
       "name": "Ding Pack",
       "description": "Really just a pack of mini sausages. This world's equivalent of cigarettes. Seemingly the only brand available.",
       "lootExperience": 20,
@@ -42460,7 +43431,6 @@
         "5448eb774bdc2d0a728b4567",
         "54009119af1c881c07000029"
       ],
-      "index": 0,
       "itemType": "Generic",
       "rarity": "Common",
       "weight": 20,
@@ -42468,7 +43438,7 @@
         109
       ],
       "canSellOnRagfair": true,
-	  "compatibilityValue": 0,
+      "compatibilityValue": 0,
       "usesMags": false,
       "usesAmmoContainers": false,
       "magType": "mNone",
@@ -42498,7 +43468,7 @@
       "tarkovID": "57347b8b24597737dd42e192",
       "H3ID": "Matchbox",
       "H3SpawnerID": "MiscUtMatches",
-      "index": -1,
+      "index": 0,
       "name": "Matchbox",
       "description": "A matchbox full of safety matches. Lighters are more reliable and easier to use, but that's exactly why everybody tries to keep them hidden when asked for a light.",
       "lootExperience": 5,
@@ -42507,7 +43477,6 @@
         "5448eb774bdc2d0a728b4567",
         "54009119af1c881c07000029"
       ],
-      "index": 0,
       "itemType": "Generic",
       "rarity": "Common",
       "weight": 5,
@@ -42515,7 +43484,7 @@
         25
       ],
       "canSellOnRagfair": true,
-	  "compatibilityValue": 0,
+      "compatibilityValue": 0,
       "usesMags": false,
       "usesAmmoContainers": false,
       "magType": "mNone",
@@ -42561,7 +43530,7 @@
         27
       ],
       "canSellOnRagfair": true,
-	  "compatibilityValue": 0,
+      "compatibilityValue": 0,
       "usesMags": false,
       "usesAmmoContainers": false,
       "magType": "mNone",
@@ -42587,7 +43556,7 @@
       "consumeEffects": [],
       "buffEffects": []
     },
-	"HairsprayCan": {
+    "HairsprayCan": {
       "tarkovID": "59e3596386f774176c10a2a2",
       "H3ID": "HairsprayCan",
       "name": "Hairspray Can",
@@ -42607,7 +43576,7 @@
         1293
       ],
       "canSellOnRagfair": true,
-	  "compatibilityValue": 0,
+      "compatibilityValue": 0,
       "usesMags": false,
       "usesAmmoContainers": false,
       "magType": "mNone",
@@ -42653,7 +43622,7 @@
         3270
       ],
       "canSellOnRagfair": true,
-	  "compatibilityValue": 0,
+      "compatibilityValue": 0,
       "usesMags": false,
       "usesAmmoContainers": false,
       "magType": "mNone",
@@ -42693,14 +43662,14 @@
         "566162e44bdc2d3f298b4573",
         "54009119af1c881c07000029"
       ],
-      "itemType": "Firearm",
+      "itemType": "Weapon",
       "rarity": "Rare",
       "weight": 2092,
       "volumes": [
         3658
       ],
       "canSellOnRagfair": true,
-	  "compatibilityValue": 1,
+      "compatibilityValue": 1,
       "usesMags": true,
       "usesAmmoContainers": true,
       "magType": "mAK74U_545_39mm",
@@ -42746,7 +43715,7 @@
         2
       ],
       "canSellOnRagfair": true,
-	  "compatibilityValue": 1,
+      "compatibilityValue": 1,
       "usesMags": true,
       "usesAmmoContainers": true,
       "magType": "mAK74U_545_39mm",
@@ -42794,7 +43763,7 @@
         189
       ],
       "canSellOnRagfair": true,
-	  "compatibilityValue": 1,
+      "compatibilityValue": 1,
       "usesMags": true,
       "usesAmmoContainers": true,
       "magType": "mAK74U_545_39mm",
@@ -42819,6 +43788,58 @@
       "amountRate": -1.0,
       "consumeEffects": [],
       "buffEffects": []
-    }
+    },
+	"ModulM4A1": {
+      "tarkovID": "5447a9cd4bdc2dbd208b4567",
+      "H3ID": "ModulM4A1",
+      "H3SpawnerID": "ModulM4A1",
+      "index": -1,
+      "name": "Colt M4A1 5.56x45 assault rifle",
+      "description": "The Colt M4A1 carbine is a fully automatic variant of the basic M4 Carbine and was primarily designed for special operations use.\nHowever, U.S. Special Operations Command (USSOCOM) was soon to adopt the M4A1 for almost all special operations units, followed later by general introduction of the M4A1 into service with the U.S. Army and Marine Corps.",
+      "lootExperience": 30,
+      "parents": [
+        "5447b5f14bdc2d61278b4567",
+        "5422acb9af1c889c16000029",
+        "566162e44bdc2d3f298b4573",
+        "54009119af1c881c07000029"
+      ],
+      "itemType": "Weapon",
+      "rarity": "Rare",
+      "weight": 2934,
+      "volumes": [
+        3342
+      ],
+      "canSellOnRagfair": true,
+      "compatibilityValue": 1,
+      "usesMags": true,
+      "usesAmmoContainers": true,
+      "magType": "mNatoStanag_556",
+      "clipType": "None",
+      "roundType": "a556_45_Nato",
+      "weaponclass": "Assault",
+      "blocksEarpiece": false,
+      "blocksEyewear": false,
+      "blocksFaceCover": false,
+      "blocksHeadwear": false,
+      "coverage": 0.0,
+      "damageResist": 0.0,
+      "maxArmor": 0.0,
+      "smallSlotCount": 0,
+      "mediumSlotCount": 0,
+      "maxVolume": 0,
+      "cartridge": "a556_45_Nato",
+      "roundClass": "FMJ",
+      "maxStack": 1,
+      "maxAmount": 0,
+      "useTime": 0.0,
+      "amountRate": -1.0,
+      "consumeEffects": [],
+      "buffEffects": [],
+	  "recoilVertical": 119,
+	  "recoilHorizontal": 381,
+	  "sightingRange": 100,
+	  "ergonomicsModifier": 0,
+	  "recoilModifier": 0
+	}
   }
 }
