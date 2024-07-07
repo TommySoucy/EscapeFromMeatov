@@ -465,7 +465,7 @@ namespace EFM
                     statsRecoilHorizontalEntry.gameObject.SetActive(true);
                     statsRecoilHorizontalEntry.entryName.text = "Recoil:";
                     statsRecoilHorizontalEntry.amount.text = "+" + descriptionPack.itemData.recoilModifier + "%";
-                    statsRecoilHorizontalEntry.amount.color = Color.green;
+                    statsRecoilHorizontalEntry.amount.color = Color.red;
                     statsRecoilHorizontalEntry.amount.gameObject.SetActive(true);
                 }
                 else if(descriptionPack.itemData.recoilModifier < 0)
@@ -473,7 +473,7 @@ namespace EFM
                     statsRecoilHorizontalEntry.gameObject.SetActive(true);
                     statsRecoilHorizontalEntry.entryName.text = "Recoil:";
                     statsRecoilHorizontalEntry.amount.text = descriptionPack.itemData.recoilModifier + "%";
-                    statsRecoilHorizontalEntry.amount.color = Color.red;
+                    statsRecoilHorizontalEntry.amount.color = Color.green;
                     statsRecoilHorizontalEntry.amount.gameObject.SetActive(true);
                 }
 

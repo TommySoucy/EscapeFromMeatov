@@ -1,6 +1,8 @@
-﻿using FistVR;
+﻿using ErosionBrushPlugin;
+using FistVR;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 
@@ -42,6 +44,8 @@ namespace EFM
         // Mod
         public int ergonomicsModifier; // Addition
         public int recoilModifier; // Percentage
+        public Vector3 dimensions;
+        public Color color;
         // Head equipment
         public bool blocksEarpiece;
         public bool blocksEyewear;
@@ -195,7 +199,7 @@ namespace EFM
             }
             
             tarkovID = data["tarkovID"].ToString();
-            H3ID = data["H3ID"].ToString();
+            H3ID = Regex.Unescape(data["H3ID"].ToString());
             H3SpawnerID = data["H3SpawnerID"] == null ? null : data["H3SpawnerID"].ToString();
             index = data["index"] == null ? -1 : (int)data["index"];
 
@@ -225,8 +229,8 @@ namespace EFM
             weight = (int)data["weight"];
             volumes = data["volumes"].ToObject<int[]>();
             lootExperience = (int)data["lootExperience"];
-            name = data["name"].ToString().Replace("\\","");
-            description = data["description"].ToString().Replace("\\", "");
+            name = Regex.Unescape(data["name"].ToString());
+            description = Regex.Unescape(data["description"].ToString());
             canSellOnRagfair = (bool)data["canSellOnRagfair"];
             bool gotValue = Mod.itemValues.TryGetValue(tarkovID, out value);
             if(!gotValue)
@@ -257,6 +261,23 @@ namespace EFM
                 ergonomicsModifier = (int)data["ergonomicsModifier"];
                 recoilModifier = (int)data["recoilModifier"];
             }
+            if (data["dimensions"] != null)
+            {
+                dimensions = new Vector3(Mathf.Min(0.15f, (float)data["dimensions"][0]), Mathf.Min(0.05f, (float)data["dimensions"][1]), Mathf.Min(0.15f, (float)data["dimensions"][2]));
+            }
+            else
+            {
+                dimensions = new Vector3(0.1f, 0.05f, 0.1f);
+            }
+            if (data["color"] != null)
+            {
+                color = new Color((float)data["color"][0], (float)data["color"][1], (float)data["color"][2], 1);
+            }
+            else
+            {
+                color = new Color(0.12f, 0.12f, 0.12f, 1);
+            }
+
 
             blocksEarpiece = (bool)data["blocksEarpiece"];
             blocksEyewear = (bool)data["blocksEyewear"];

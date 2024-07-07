@@ -11,6 +11,7 @@ using Valve.VR;
 using UnityEngine.UI;
 using ModularWorkshop;
 using static UnityEngine.EventSystems.EventTrigger;
+using System.Text.RegularExpressions;
 
 namespace EFM
 {
@@ -1357,6 +1358,15 @@ namespace EFM
             }
         }
 
+        public void DumpModulParts(IModularWeapon weapon)
+        {
+            Mod.LogInfo("Dumping modular parts");
+            foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> point in weapon.AllAttachmentPoints)
+            {
+                Mod.LogInfo("\t"+point.Key+":"+point.Value.SelectedModularWeaponPart);
+            }
+        }
+
         private void LoadConfig()
         {
             LogInfo("Loading config...", false);
@@ -1732,12 +1742,12 @@ namespace EFM
             foreach (KeyValuePair<string, JToken> groupEntry in partGroupData) 
             {
                 Dictionary<string, MeatovItemData> currentDict = new Dictionary<string, MeatovItemData>();
-                modItemData.Add(groupEntry.Key, currentDict);
+                modItemData.Add(Regex.Unescape(groupEntry.Key), currentDict);
 
                 Dictionary<string, JToken> partData = groupEntry.Value.ToObject<Dictionary<string, JToken>>();
                 foreach (KeyValuePair<string, JToken> partEntry in partData)
                 {
-                    currentDict.Add(partEntry.Key, new MeatovItemData(partEntry.Value));
+                    currentDict.Add(Regex.Unescape(partEntry.Key), new MeatovItemData(partEntry.Value));
                 }
             }
         }

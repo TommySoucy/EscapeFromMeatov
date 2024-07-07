@@ -4260,12 +4260,12 @@ namespace EFM
                 if (modularWeapon != null)
                 {
                     // Go through all of the attachment points to find which one this part is attached to
-                    for(int i=0; i < modularWeapon.ModularWeaponPartsAttachmentPoints.Length; ++i)
+                    foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeapon.AllAttachmentPoints)
                     {
                         // Find data for this part
-                        if (modularWeapon.ModularWeaponPartsAttachmentPoints[i].ModularPartPoint == __instance.transform
-                            && Mod.modItemData.TryGetValue(modularWeapon.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> groupDict)
-                            && groupDict.TryGetValue(modularWeapon.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData partData))
+                        if (pointEntry.Value.ModularPartPoint == __instance.transform
+                            && Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> groupDict)
+                            && groupDict.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData partData))
                         {
                             if (partData.recoilModifier != 0)
                             {
@@ -4307,20 +4307,20 @@ namespace EFM
                 if (modularWeapon != null)
                 {
                     // Go through all of the attachment points to find which one this part is attached to
-                    for (int i = 0; i < modularWeapon.ModularWeaponPartsAttachmentPoints.Length; ++i)
+                    foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeapon.AllAttachmentPoints)
                     {
                         // Find data for this part
-                        if (modularWeapon.ModularWeaponPartsAttachmentPoints[i].ModularPartPoint == __instance.transform
-                            && Mod.modItemData.TryGetValue(modularWeapon.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> groupDict)
-                            && groupDict.TryGetValue(modularWeapon.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData partData))
+                        if (pointEntry.Value.ModularPartPoint == __instance.transform
+                            && Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> groupDict)
+                            && groupDict.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData partData))
                         {
                             if (partData.recoilModifier != 0)
                             {
-                                item.currentRecoilHorizontal += (int)(item.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
+                                item.currentRecoilHorizontal -= (int)(item.baseRecoilHorizontal / 100.0f * partData.recoilModifier);
                             }
                             if (partData.ergonomicsModifier != 0)
                             {
-                                item.ergonomics += partData.ergonomicsModifier;
+                                item.ergonomics -= partData.ergonomicsModifier;
                             }
                             if (partData.sightingRange == item.currentSightingRange)
                             {

@@ -365,10 +365,11 @@ namespace EFM
         // Mod
         [Header("Mod data")]
         public Image modIcon;
-        [NonSerialized]
-        public string partsGroupID;
-        [NonSerialized]
-        public string modID;
+        public Transform modBox;
+        public Transform modInteractive;
+        public MeshRenderer modRenderer;
+        public int ergonomicsModifier;
+        public int recoilModifier;
 
         // Weapon
         [NonSerialized]
@@ -438,10 +439,6 @@ namespace EFM
                 }
             }
         }
-
-        // Mod
-        public int ergonomicsModifier;
-        public int recoilModifier;
 
         // Events
         public delegate void OnInsuredChangedDelegate();
@@ -547,6 +544,9 @@ namespace EFM
             if(index == 868)
             {
                 Mod.SetIcon(H3ID, modIcon);
+                modBox.localScale = data.dimensions;
+                modInteractive.localScale = data.dimensions;
+                modRenderer.material.color = data.color;
                 UpdateInventories();
             }
         }
@@ -639,50 +639,155 @@ namespace EFM
             int currentHorizontal = baseRecoilHorizontal;
             int currentVertical = baseRecoilVertical;
             IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
-            for(int i=0; i < modularWeaponInterface.ModularWeaponPartsAttachmentPoints.Length; ++i)
+            foreach(KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
             {
-                if (Mod.modItemData.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> group)
-                    && group.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData itemData)
+                if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
+                    && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData)
                     && itemData.recoilModifier != 0)
                 {
                     currentHorizontal = currentHorizontal + (int)(baseRecoilHorizontal / 100.0f * itemData.recoilModifier);
                     currentVertical = currentVertical + (int)(baseRecoilVertical / 100.0f * itemData.recoilModifier);
                 }
             }
+
+            if(children != null)
+            {
+                for (int i = 0; i < children.Count; ++i)
+                {
+                    AddAttachmentRecoil(children[i], ref currentHorizontal, ref currentVertical);
+                }
+            }
             currentRecoilHorizontal = Mathf.Max(0, currentHorizontal);
             currentRecoilVertical = Mathf.Max(0, currentVertical);
+        }
+
+        public void AddAttachmentRecoil(MeatovItem currentItem, ref int currentHorizontal, ref int currentVertical)
+        {
+            // We don't want to count children weapon attachments
+            // Attachments to a child weapon will affect the child weapon, not us
+            if(currentItem == null || currentItem.itemType == ItemType.Weapon)
+            {
+                return;
+            }
+
+            if(currentItem.itemData.recoilModifier != 0)
+            {
+                currentHorizontal = currentHorizontal + (int)(baseRecoilHorizontal / 100.0f * currentItem.itemData.recoilModifier);
+                currentVertical = currentVertical + (int)(baseRecoilVertical / 100.0f * currentItem.itemData.recoilModifier);
+            }
+
+            if (currentItem.children != null)
+            {
+                for (int i = 0; i < currentItem.children.Count; ++i)
+                {
+                    AddAttachmentRecoil(currentItem.children[i], ref currentHorizontal, ref currentVertical);
+                }
+            }
         }
 
         public void UpdateErgonomics()
         {
             int current = 0;
             IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
-            for(int i=0; i < modularWeaponInterface.ModularWeaponPartsAttachmentPoints.Length; ++i)
+            foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
             {
-                if (Mod.modItemData.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> group)
-                    && group.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData itemData)
+                if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
+                    && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData)
                     && itemData.ergonomicsModifier != 0)
                 {
-                    current += ergonomicsModifier;
+                    current += itemData.ergonomicsModifier;
+                }
+            }
+
+            if (children != null)
+            {
+                for (int i = 0; i < children.Count; ++i)
+                {
+                    AddAttachmentErgonomics(children[i], ref current);
                 }
             }
             ergonomics = Mathf.Max(0, current);
         }
 
+        public void AddAttachmentErgonomics(MeatovItem currentItem, ref int current)
+        {
+            // We don't want to count children weapon attachments
+            // Attachments to a child weapon will affect the child weapon, not us
+            if (currentItem == null || currentItem.itemType == ItemType.Weapon)
+            {
+                return;
+            }
+
+            if (currentItem.itemData.ergonomicsModifier != 0)
+            {
+                current += currentItem.itemData.ergonomicsModifier;
+            }
+
+            if (currentItem.children != null)
+            {
+                for (int i = 0; i < currentItem.children.Count; ++i)
+                {
+                    AddAttachmentErgonomics(currentItem.children[i], ref current);
+                }
+            }
+        }
+
         public void UpdateSightingRange(MeatovItemData exclude = null)
         {
             int current = baseSightingRange;
+            bool excluded = false;
             IModularWeapon modularWeaponInterface = GetComponent<IModularWeapon>();
-            for(int i=0; i < modularWeaponInterface.ModularWeaponPartsAttachmentPoints.Length; ++i)
+            foreach (KeyValuePair<string, ModularWeaponPartsAttachmentPoint> pointEntry in modularWeaponInterface.AllAttachmentPoints)
             {
-                if (Mod.modItemData.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].ModularPartsGroupID, out Dictionary<string, MeatovItemData> group)
-                    && group.TryGetValue(modularWeaponInterface.ModularWeaponPartsAttachmentPoints[i].SelectedModularWeaponPart, out MeatovItemData itemData)
-                    && (exclude == null || exclude != itemData))
+                if (Mod.modItemData.TryGetValue(pointEntry.Key, out Dictionary<string, MeatovItemData> group)
+                    && group.TryGetValue(pointEntry.Value.SelectedModularWeaponPart, out MeatovItemData itemData))
                 {
-                    current = Mathf.Max(current, itemData.sightingRange);
+                    if(!excluded && itemData == exclude)
+                    {
+                        excluded = true;
+                    }
+                    else
+                    {
+                        current = Mathf.Max(current, itemData.sightingRange);
+                    }
+                }
+            }
+
+            if (children != null)
+            {
+                for (int i = 0; i < children.Count; ++i)
+                {
+                    AddAttachmentSightingRange(children[i], ref current, exclude, ref excluded);
                 }
             }
             currentSightingRange = current;
+        }
+
+        public void AddAttachmentSightingRange(MeatovItem currentItem, ref int current, MeatovItemData exclude, ref bool excluded)
+        {
+            // We don't want to count children weapon attachments
+            // Attachments to a child weapon will affect the child weapon, not us
+            if (currentItem == null || currentItem.itemType == ItemType.Weapon)
+            {
+                return;
+            }
+
+            if (!excluded && currentItem.itemData == exclude)
+            {
+                excluded = true;
+            }
+            else
+            {
+                current = Mathf.Max(current, currentItem.itemData.sightingRange);
+            }
+
+            if (currentItem.children != null)
+            {
+                for (int i = 0; i < currentItem.children.Count; ++i)
+                {
+                    AddAttachmentSightingRange(currentItem.children[i], ref current, exclude, ref excluded);
+                }
+            }
         }
 
         public void UpdateInventories()
