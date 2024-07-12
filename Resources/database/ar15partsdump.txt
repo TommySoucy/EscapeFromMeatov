@@ -145,6 +145,7 @@
 [Info   :EscapeFromMeatov]      Radian Vertex Trigger
 [Info   :EscapeFromMeatov]      Rise Armament RA-434 Trigger
 [Info   :EscapeFromMeatov]      Triggertech Flat Trigger
+[Info   :EscapeFromMeatov]      MCX LT Trigger
 [Info   :EscapeFromMeatov] Selectors_AR
 [Info   :EscapeFromMeatov]      AR15 Selector
 [Info   :EscapeFromMeatov]      Anodized Selector
@@ -157,6 +158,8 @@
 [Info   :EscapeFromMeatov]      Radian Talon Selector
 [Info   :EscapeFromMeatov]      Strike Industries Switch
 [Info   :EscapeFromMeatov]      M16 Selector
+[Info   :EscapeFromMeatov]      MCX Selector
+[Info   :EscapeFromMeatov]      MCX LT Selector
 [Info   :EscapeFromMeatov] TriggerGuards_AR
 [Info   :EscapeFromMeatov]      Aero Precision Billet Trigger Guard
 [Info   :EscapeFromMeatov]      AR15 Trigger Guard
@@ -227,6 +230,10 @@
 [Info   :EscapeFromMeatov]      Tango Down Battle Grip
 [Info   :EscapeFromMeatov]      Tyrant Designs MOD v2 Pistol Grip
 [Info   :EscapeFromMeatov]      Tyrant Designs Concept One Pistol Grip
+[Info   :EscapeFromMeatov]      MCX Grip
+[Info   :EscapeFromMeatov]      MCX Legacy Grip
+[Info   :EscapeFromMeatov]      MCX LT Grip
+[Info   :EscapeFromMeatov]      MCX Rattler Grip
 [Info   :EscapeFromMeatov] Handguards_AR
 [Info   :EscapeFromMeatov]      No Handguard
 [Info   :EscapeFromMeatov]      ADAR 2-15 Handguard
@@ -392,7 +399,62 @@
 [Info   :EscapeFromMeatov]      5.56x45mm
 [Info   :EscapeFromMeatov]      .300 Blackout
 [Info   :EscapeFromMeatov]      9mm Uzi Magazines
+[Info   :EscapeFromMeatov]      7.62x39mm
 [Info   :EscapeFromMeatov] Dustcover_AR15
 [Info   :EscapeFromMeatov]      AR15 Dustcover
 [Info   :EscapeFromMeatov]      Daniel Defense Dustcover
 [Info   :EscapeFromMeatov]      Strike Industries Dustcover
+[Info   :EscapeFromMeatov] Uppers_MCX
+[Info   :EscapeFromMeatov]      MCX Virtus Upper
+[Info   :EscapeFromMeatov]      MCX LT Upper
+[Info   :EscapeFromMeatov]      MCX LT Rattler Upper
+[Info   :EscapeFromMeatov]      MCX Rattler Upper
+[Info   :EscapeFromMeatov] Charging_MCX
+[Info   :EscapeFromMeatov]      MCX Ambi
+[Info   :EscapeFromMeatov]      Fortis Hammer
+[Info   :EscapeFromMeatov]      Geissele Super Charging Handle
+[Info   :EscapeFromMeatov]      Radian Raptor
+[Info   :EscapeFromMeatov] Barrels_MCX
+[Info   :EscapeFromMeatov]      MCX Legacy 6.75" Barrel
+[Info   :EscapeFromMeatov]      MCX Legacy 9" Barrel
+[Info   :EscapeFromMeatov]      MCX Legacy 11.5" Barrel
+[Info   :EscapeFromMeatov]      MCX Legacy 16" Barrel
+[Info   :EscapeFromMeatov]      MCX 5.5" Barrel
+[Info   :EscapeFromMeatov]      MCX 6.75" Barrel
+[Info   :EscapeFromMeatov]      MCX 7.75" Barrel
+[Info   :EscapeFromMeatov]      MCX 9" Barrel
+[Info   :EscapeFromMeatov]      MCX 11.5" Barrel
+[Info   :EscapeFromMeatov]      MCX 16" Barrel
+[Info   :EscapeFromMeatov]      MCX LT 9" Barrel
+[Info   :EscapeFromMeatov]      MCX LT 11" Barrel
+[Info   :EscapeFromMeatov]      MCX LT 16" Barrel
+[Info   :EscapeFromMeatov] Chamber_MCX
+[Info   :EscapeFromMeatov]      5.56x45mm
+[Info   :EscapeFromMeatov]      .300 Blackout
+[Info   :EscapeFromMeatov] Handguards_MCX
+[Info   :EscapeFromMeatov]      MCX Virtus 8" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 10" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 10" SD Handguard
+[Info   :EscapeFromMeatov]      MCX SURG 10" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 12" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 12" SD Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 16" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 16" SD Handguard
+[Info   :EscapeFromMeatov]      MCX Lancer 10" Handguard
+[Info   :EscapeFromMeatov]      MCX Lancer 12" Handguard
+[Info   :EscapeFromMeatov]      MCX Lancer 18" Handguard
+[Info   :EscapeFromMeatov]      MCX LT Rattler Handguard
+[Info   :EscapeFromMeatov]      MCX LT 7" Handguard
+[Info   :EscapeFromMeatov]      MCX LT 8" Handguard
+[Info   :EscapeFromMeatov]      MCX LT 10" Handguard
+[Info   :EscapeFromMeatov]      MCX LT 11.5" SD Handguard
+[Info   :EscapeFromMeatov]      MCX LT 13" Handguard
+[Info   :EscapeFromMeatov]      MCX LVAW Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries MCX 10.5" Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries MCX 15" Handguard
+[Info   :EscapeFromMeatov]      MCX Rattler Handguard
+[Info   :EscapeFromMeatov]      MCX Rattler Canebrake Handguard
+[Info   :EscapeFromMeatov] Chamber_MCXLT
+[Info   :EscapeFromMeatov]      7.62x39mm
+[Info   :EscapeFromMeatov]      5.56x45mm
+[Info   :EscapeFromMeatov]      .300 Blackout

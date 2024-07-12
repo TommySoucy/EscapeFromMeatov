@@ -3004,11 +3004,6 @@
     "Modul": [],
     "OtherMod": ""
   },
-  "57d17c5e2459775a5c57d17d": {
-    "H3ID": "UtilityFlashlight",
-    "Modul": [],
-    "OtherMod": ""
-  },
   "590c695186f7741e566b64a2": {
     "H3ID": "592",
     "Modul": [],
@@ -4389,6 +4384,517 @@
     "Modul": [],
     "OtherMod": ""
   },
+  "572b7d8524597762b472f9d1": {
+    "H3ID": "869"
+  },
+  "57372fc52459776998772ca1": {
+    "H3ID": "870"
+  },
+  "576165642459773c7a400233": {
+    "H3ID": "Saiga12_Base",
+	"Note": "Should be MW"
+  },
+  "576169e62459773c69055191": {
+    "H3ID": "Saiga Fore",
+	"Note": "Should be MW"
+  },
+  "57616c112459773cce774d66": {
+    "H3ID": "SaigaDustcover",
+	"Note": "Should be MW"
+  },
+  "57616ca52459773c69055192": {
+    "H3ID": "Saiga 12 Stock",
+	"Note": "Should be MW"
+  },
+  "576167ab2459773cad038c43": {
+	"Note": "Missing, should be included with Modul 576165642459773c7a400233/Saiga12"
+  },
+  "57616a9e2459773c7a400234": {
+    "H3ID": "MagazineSaiga12k5rnd"
+  },
+  "57838ad32459774a17445cd2": {
+    "H3ID": "NWValBuilt",
+	"Note": "Should be MW"
+  },
+  "57838c962459774a1651ec63": {
+    "H3ID": "NWValSup",
+	"Note": "Should be MW"
+  },
+  "57838e1b2459774a256959b1": {
+    "H3ID": "NWValRS",
+	"Note": "Should be MW"
+  },
+  "578395402459774a256959b5": {
+    "H3ID": "NWVSSDust",
+	"Note": "Should be MW"
+  },
+  "578395e82459774a0e553c7b": {
+    "H3ID": "NWVSSStock",
+	"Note": "Should be MW"
+  },
+  "57a3459f245977764a01f703": {
+    "H3ID": "NWB3",
+	"Note": "Should be MW"
+  },
+  "57838f0b2459774a256959b2": {
+    "H3ID": "NWVSS10"
+  },
+  "57838f9f2459774a150289a0": {
+    "H3ID": "NWVAL20"
+  },
+  "57a0dfb82459774d3078b56c": {
+    "H3ID": "9x39mmCartridgeFMJ",
+	"Note": "9x39mm SP-5 gs"
+  },
+  "57a0e5022459774d1673f889": {
+    "H3ID": "9x39mmCartridgeAP",
+	"Note": "9x39mm SP-6 gs"
+  },
+  "5c0d668f86f7747ccb7f13b2": {
+    "H3ID": "9x39mmCartridgeFMJ",
+	"Note": "9x39mm SPP gs"
+  },
+  "5c0d688c86f77413ae3407b2": {
+    "H3ID": "9x39mmCartridgeAP",
+	"Note": "9x39mm BP gs"
+  },
+  "61962d879bb3d20b0946d385": {
+    "H3ID": "9x39mmCartridgeAP",
+	"Note": "9x39mm PAB-9 gs"
+  },
+  "574d967124597745970e7c94": {
+    "H3ID": "sksbasedupe",
+	"Note": "Should be MW"
+  },
+  "574dad8024597745964bf05c": {
+    "H3ID": "sks_strddupe",
+	"Note": "Should be MW"
+  },
+  "574db213245977459a2f3f5d": {
+	"Note": "Integrated in receiver, should probably be modul"
+  },
+  "5644bd2b4bdc2d3b4c8b4572": {
+    "H3ID": "ModulAK74NFactory",
+	"Note": "Should be MW"
+  },
+  "56dfef82d2720bbd668b4567": {
+    "H3ID": "545x39mmCartridgeAP",
+	"Note": "Should be 5.45x39mm BP gs"
+  },
+  "56dff026d2720bb8668b4567": {
+    "H3ID": "545x39mmCartridgeAP",
+	"Note": "Should be 5.45x39mm BS gs"
+  },
+  "56dff061d2720bb5668b4567": {
+    "H3ID": "545x39mmCartridgeTracer",
+	"Note": "Should be 5.45x39mm BT gs"
+  },
+  "56dff0bed2720bb0668b4567": {
+    "H3ID": "545x39mmCartridgeFMJ"
+  },
+  "56dff216d2720bbd668b4568": {
+    "H3ID": "545x39mmCartridgeJHP"
+  },
+  "56dff2ced2720bb4668b4567": {
+    "H3ID": "545x39mmCartridgeFMJ",
+	"Note": "Should be 5.45x39mm PP gs"
+  },
+  "56dff338d2720bbd668b4569": {
+    "H3ID": "545x39mmCartridgeFMJ",
+	"Note": "Should be 5.45x39mm PRS gs"
+  },
+  "56dff3afd2720bba668b4567": {
+    "H3ID": "545x39mmCartridgeFMJ",
+	"Note": "Should be 5.45x39mm PS gs"
+  },
+  "56dff421d2720b5f5a8b4567": {
+    "H3ID": "545x39mmCartridgeJHP",
+	"Note": "Should be 5.45x39mm SP"
+  },
+  "56dff4a2d2720bbd668b456a": {
+    "H3ID": "545x39mmCartridgeTracer",
+	"Note": "Should be 5.45x39mm T gs"
+  },
+  "56dff4ecd2720b5f5a8b4568": {
+    "H3ID": "545x39mmCartridgeFMJ",
+	"Note": "Should be 5.45x39mm US gs"
+  },
+  "564ca9df4bdc2d35148b4569": {
+    "H3ID": "Magazine6L18"
+  },
+  "564ca99c4bdc2d16268b4589": {
+    "H3ID": "Magazine6L20"
+  },
+  "55d480c04bdc2d1d4e8b456a": {
+    "H3ID": "Magazine6L23"
+  },
+  "55d481904bdc2d8c2f8b456a": {
+    "H3ID": "Magazine6L26"
+  },
+  "55d482194bdc2d1d4e8b456b": {
+    "H3ID": "Magazine6L31"
+  },
+  "564caa3d4bdc2d17108b458e": {
+    "H3ID": "AttSuppressorAKTGPA"
+  },
+  "5649aa744bdc2ded0b8b457e": {
+    "H3ID": "MuzzleAK74m"
+  },
+  "5649ab884bdc2ded0b8b457f": {
+    "H3ID": "MuzzleBrakeCharon",
+	"Note": "Should be AK Zenit DTK-1 7.62x39/5.45x39 muzzle brake-compensator"
+  },
+  "5648ac824bdc2ded0b8b457d": {
+	"H3ID": "AKMiscRP1",
+	"Note": "Should be MW"
+  },
+  "5648ae314bdc2d3d1c8b457f": {
+	"H3ID": "AKForeQuadRail",
+	"Note": "Should be MW"
+  },
+  "5648b0744bdc2d363b8b4578": {
+	"H3ID": "AKFore74Wood",
+	"Note": "Should be MW"
+  },
+  "5648b1504bdc2d9d488b4584": {
+	"H3ID": "AKForePlastic",
+	"Note": "Should be MW"
+  },
+  "5648b4534bdc2d3d1c8b4580": {
+	"H3ID": "AKForeB19",
+	"Note": "Should be MW"
+  },
+  "59e6318286f77444dd62c4cc": {
+	"H3ID": "AKGrip74Bakelite",
+	"Note": "Should be MW"
+  },
+  "5649ad3f4bdc2df8348b4585": {
+	"H3ID": "AKGripBorderGreen",
+	"Note": "Should be Bakelite 6P1"
+  },
+  "5649ade84bdc2d1b2b8b4587": {
+	"H3ID": "AKGrip74Polymer",
+	"Note": "Should be MW"
+  },
+  "5649ae4a4bdc2d1b2b8b4588": {
+	"H3ID": "AKGripRK3",
+	"Note": "Should be MW"
+  },
+  "5649af094bdc2df8348b4586": {
+	"H3ID": "AKDustcover74",
+	"Note": "Should be MW"
+  },
+  "5649af884bdc2d1b2b8b4589": {
+	"H3ID": "AKDustcoverB33",
+	"Note": "Should be MW"
+  },
+  "5649b0544bdc2d1b2b8b458a": {
+	"Note": "Should be Modul part of AK systems"
+  },
+  "5649b0fc4bdc2d17108b4588": {
+	"H3ID": "AKStock74blk",
+	"Note": "Should be MW"
+  },
+  "5649b1c04bdc2d16268b457c": {
+	"H3ID": "AKStock74Wood",
+	"Note": "Should be MW"
+  },
+  "5649b2314bdc2d79388b4576": {
+	"H3ID": "AKStockAKTSFold",
+	"Note": "Should be MW"
+  },
+  "5649d9a14bdc2d79388b4580": {
+	"H3ID": "AKDustcoverRail",
+	"Note": "Should be separate Taktika Tula rail and dust cover, currently single item"
+  },
+  "57486e672459770abd687134": {
+	"H3ID": "ReflexKobra",
+	"Note": "Should be dovetail OKP-7, but we only have picatinny OKP-7, kobra is dovetail, figured it made more sense for now"
+  },
+  "5656eb674bdc2d35148b457c": {
+    "H3ID": "Cartridge_40mmCaseless_HEF",
+	"Note": "Should be 40mm VOG-25 grenade"
+  },
+  "5656d7c34bdc2d9d198b4587": {
+    "H3ID": "762x39mmCartridgeFMJ",
+	"Note": "Should be 7.62x39mm PS gzh"
+  },
+  "5580223e4bdc2d1c128b457f": {
+    "H3ID": "HammerlessLong",
+	"Note": "Should be MP-43-1C"
+  },
+  "5580169d4bdc2d9d138b4585": {
+    "Note": "Should be modul part for 5580223e4bdc2d1c128b457f/MP-43-1C"
+  },
+  "55d447bb4bdc2d892f8b456f": {
+    "Note": "Should be modul part for 5580223e4bdc2d1c128b457f/MP-43-1C"
+  },
+  "54491c4f4bdc2db1078b4568": {
+    "H3ID": "Modul133Dupe",
+	"Note": "Should be MW"
+  },
+  "56dee2bdd2720bc8328b4567": {
+    "H3ID": "Modul153Dupe",
+	"Note": "Should be MW"
+  },
+  "606dae0ab0e443224b421bb7": {
+    "H3ID": "Modul155Dupe",
+	"Note": "Should be MW"
+  },
+  "56deec93d2720bec348b4568": {
+    "H3ID": "AttSuppBar153750",
+	"Note": "Should be MW"
+  },
+  "56deed6ed2720b4c698b4583": {
+    "H3ID": "153ForeP",
+	"Note": "Should be MW"
+  },
+  "56deee15d2720bee328b4567": {
+	"Note": "Missing, it is the default part, just gets replaced by an attachment"
+  },
+  "56deeefcd2720bc8328b4568": {
+    "H3ID": "AttDecMag1338",
+	"Note": "Should be MW"
+  },
+  "55d448594bdc2d8c2f8b4569": {
+    "H3ID": "AttSuppBarrel133610",
+	"Note": "Should be MW"
+  },
+  "55d4491a4bdc2d882f8b456e": {
+    "H3ID": "AttSuppBarrel133510",
+	"Note": "Should be MW"
+  },
+  "55d449444bdc2d962f8b456d": {
+    "H3ID": "AttSuppBarrel133610Rib",
+	"Note": "Should be MW"
+  },
+  "55d45d3f4bdc2d972f8b456c": {
+    "H3ID": "AttForeGrip133W",
+	"Note": "Should be MW"
+  },
+  "55d45f484bdc2d972f8b456d": {
+    "H3ID": "AttForeGrip133P",
+	"Note": "Should be MW"
+  },
+  "55d484b44bdc2d1d4e8b456d": {
+    "H3ID": "AttDecMag1336",
+	"Note": "Should be MW"
+  },
+  "55d485804bdc2d8c2f8b456b": {
+    "H3ID": "AttDecMag1338",
+	"Note": "Should be MW"
+  },
+  "560835c74bdc2dc8488b456f": {
+    "H3ID": "AttSuppBarrel133510Rib",
+	"Note": "Should be MW"
+  },
+  "560836484bdc2d20478b456e": {
+    "H3ID": "AttSuppBarrel133540",
+	"Note": "Should be MW"
+  },
+  "560836b64bdc2d57468b4567": {
+    "H3ID": "AttSuppBarrel133540Rib",
+	"Note": "Should be MW"
+  },
+  "560836fb4bdc2d773f8b4569": {
+    "H3ID": "AttSuppBarrel133660Rib",
+	"Note": "Should be Non-Rib variant"
+  },
+  "560837154bdc2da74d8b4568": {
+    "H3ID": "AttSuppBarrel133660Rib",
+	"Note": "Should be MW"
+  },
+  "5608373c4bdc2dc8488b4570": {
+    "H3ID": "AttSuppBarrel133710Rib",
+	"Note": "Should be Non-Rib variant"
+  },
+  "560837544bdc2de22e8b456e": {
+    "H3ID": "AttSuppBarrel133710Rib",
+	"Note": "Should be MW"
+  },
+  "560837824bdc2d57468b4568": {
+    "H3ID": "AttSuppBarrel133750Rib",
+	"Note": "Should be Non-Rib variant"
+  },
+  "5608379a4bdc2d26448b4569": {
+    "H3ID": "AttSuppBarrel133750Rib",
+	"Note": "Should be MW"
+  },
+  "56083a334bdc2dc8488b4571": {
+    "H3ID": "AttStock133Pis",
+	"Note": "Should be MW"
+  },
+  "56083be64bdc2d20478b456f": {
+    "H3ID": "AttStock133P",
+	"Note": "Should be MW"
+  },
+  "56083cba4bdc2de22e8b456f": {
+    "H3ID": "AttStock133W",
+	"Note": "Should be MW"
+  },
+  "55d48a634bdc2d8b2f8b456a": {
+    "H3ID": "M4Rail",
+	"Note": "Should be MW"
+  },
+  "55d48ebc4bdc2d8c2f8b456c": {
+	"Note": "Missing, should have compatible attachment point on MP-133/153, or should be modul part for them"
+  },
+  "55801eed4bdc2d89578b4588": {
+    "H3ID": "SV98",
+	"Note": "Should be Modul"
+  },
+  "56ea8222d2720b69698b4567": {
+	"Note": "Integrated in SV98, should be modul part"
+  },
+  "559ba5b34bdc2d1f1a8b4582": {
+    "H3ID": "MagazineSV98"
+  },
+  "56083e1b4bdc2dc8488b4572": {
+	"Note": "Missing, should be included with Modul 55801eed4bdc2d89578b4588/SV-98"
+  },
+  "56083eab4bdc2d26448b456a": {
+	"Note": "Should be Modul part of 55801eed4bdc2d89578b4588/SV-98"
+  },
+  "560d61e84bdc2da74d8b4571": {
+    "H3ID": "NW762R-SNB"
+  },
+  "560d5e524bdc2d25448b4571": {
+    "H3ID": "12GaugeShellNo2Buckshot"
+  },
+  "54527a984bdc2d4e668b4567": {
+    "H3ID": "NWM855"
+  },
+  "54527ac44bdc2d36668b4567": {
+    "H3ID": "NWM855A1"
+  },
+  "5448be9a4bdc2dfd2f8b456a": {
+    "H3ID": "PinnedGrenadeRG5"
+  },
+  "5710c24ad2720bc3458b45a3": {
+    "H3ID": "PinnedGrenadeF1Russia"
+  },
+  "571a12c42459771f627b58a0": {
+    "H3ID": "TTframedupe",
+	"Note": "Should be MW"
+  },
+  "571a279b24597720b4066566": {
+    "H3ID": "ttbarduoe",
+	"Note": "Should be MW"
+  },
+  "571a282c2459771fb2755a69": {
+    "H3ID": "TTstanddupe",
+	"Note": "Should be MW"
+  },
+  "571a28e524597720b4066567": {
+    "H3ID": "TTsil"
+  },
+  "5735fdcd2459776445391d61": {
+    "H3ID": "762x25mmCartridgeFMJ",
+	"Note": "Should be 7.62x25mm TT AKBS"
+  },
+  "5735ff5c245977640e39ba7e": {
+    "H3ID": "762x25mmCartridgeFMJ"
+  },
+  "573601b42459776410737435": {
+    "H3ID": "762x25mmCartridgeJHP",
+	"Note": "Should be 7.62x25mm TT LRN"
+  },
+  "573602322459776445391df1": {
+    "H3ID": "762x25mmCartridgeJHP",
+	"Note": "Should be 7.62x25mm TT LRNPC"
+  },
+  "5736026a245977644601dc61": {
+    "H3ID": "762x25mmCartridgeFMJ",
+	"Note": "Should be 7.62x25mm TT P gl"
+  },
+  "573603562459776430731618": {
+    "H3ID": "762x25mmCartridgeFMJ",
+	"Note": "Should be 7.62x25mm TT Pst gzh"
+  },
+  "573603c924597764442bd9cb": {
+    "H3ID": "762x25mmCartridgeTracer",
+	"Note": "Should be 7.62x25mm TT PT gzh"
+  },
+  "571a29dc2459771fb2755a6a": {
+    "H3ID": "TTmagdupe"
+  },
+  "571a26d524597720680fbe8a": {
+	"Note": "Is default part, replaced by attachment"
+  },
+  "579204f224597773d619e051": {
+    "H3ID": "Makarov",
+	"Note": "Should be modul"
+  },
+  "5448bd6b4bdc2dfc2f8b4569": {
+    "H3ID": "Makarov",
+	"Note": "Should be modul"
+  },
+  "573718ba2459775a75491131": {
+    "H3ID": "9x18mmCartridgeJHP",
+	"Note": "Should be 9x18mm PM BZhT gzh"
+  },
+  "573719762459775a626ccbc1": {
+    "H3ID": "9x18mmCartridgeFMJ",
+	"Note": "Should be 9x18mm PM P gzh"
+  },
+  "573719df2459775a626ccbc2": {
+    "H3ID": "9x18mmCartridgeFMJ",
+	"Note": "Should be 9x18mm PM PBM gzh"
+  },
+  "57371aab2459775a77142f22": {
+    "H3ID": "9x18mmCartridgeFMJ",
+	"Note": "Should be 9x18mm PMM PstM gzh"
+  },
+  "57371b192459775a9f58a5e0": {
+    "H3ID": "9x18mmCartridgeJHP",
+	"Note": "Should be 9x18mm PM PPe gzh"
+  },
+  "57371e4124597760ff7b25f1": {
+    "H3ID": "9x18mmCartridgeTracer",
+	"Note": "Should be 9x18mm PM PPT gzh"
+  },
+  "57371eb62459776125652ac1": {
+    "H3ID": "9x18mmCartridgeJHP",
+	"Note": "Should be 9x18mm PM PRS gs"
+  },
+  "57371f2b24597761224311f1": {
+    "H3ID": "9x18mmCartridgeJHP",
+	"Note": "Should be 9x18mm PM PS gs PPO"
+  },
+  "57371f8d24597761006c6a81": {
+    "H3ID": "9x18mmCartridgeJHP",
+	"Note": "Should be 9x18mm PM PSO gzh"
+  },
+  "5737201124597760fc4431f1": {
+    "H3ID": "9x18mmCartridgeFMJ",
+	"Note": "Should be 9x18mm PM Pst gzh"
+  },
+  "5737207f24597760ff7b25f2": {
+    "H3ID": "9x18mmCartridgeFMJ",
+	"Note": "Should be 9x18mm PM PSV"
+  },
+  "573720e02459776143012541": {
+    "H3ID": "9x18mmCartridgeFMJ",
+	"Note": "Should be 9x18mm PM RG028 gzh"
+  },
+  "57372140245977611f70ee91": {
+    "H3ID": "9x18mmCartridgeJHP",
+	"Note": "Should be 9x18mm PM SP7 gzh"
+  },
+  "5737218f245977612125ba51": {
+    "H3ID": "9x18mmCartridgeJHP",
+	"Note": "Should be 9x18mm PM SP8 gzh"
+  },
+  "5448c12b4bdc2d02308b456f": {
+    "H3ID": "MagazineMakarov"
+  },
+  "55d485be4bdc2d962f8b456f": {
+    "H3ID": "MagazineMakarovDrum"
+  },
+  "58948c8e86f77409493f7266": {
+    "H3ID": "ModularMPXDupe",
+	"Note": "Should be MW"
+  },
   "5447a9cd4bdc2dbd208b4567": {
     "H3ID": "ModulM4A1"
   },
@@ -4397,3749 +4903,1442 @@
     "ModulGroup": "BufferTubes_AR",
     "ModulPart": "ADAR 2-15 Stock"
   },
-  "61605e13ffa6e502ac5e7eef": {
-    "H3ID": "Rangefinder7x25",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c07c60e0db834002330051f": {
-    "H3ID": "AR180",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac66cb05acfc40198510a10": {
-    "H3ID": "AK101",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac66d015acfc400180ae6e4": {
-    "H3ID": "AK101",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac66d2e5acfc43b321d4b53": {
-    "H3ID": "AKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac66d725acfc43b321d4b60": {
-    "H3ID": "AKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac66d9b5acfc4001633997a": {
-    "H3ID": "AK74N",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bf3e03b0db834001d2c4a9c": {
-    "H3ID": "AK74N",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5644bd2b4bdc2d3b4c8b4572": {
-    "H3ID": "AK74N",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59d6088586f774275f37482f": {
-    "H3ID": "AKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a0ec13bfcdbcb00165aa685": {
-    "H3ID": "AKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5abcbc27d8ce8700182eceeb": {
-    "H3ID": "AKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59ff346386f77477562ff5e2": {
-    "H3ID": "AKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57dc2fa62459775949412633": {
-    "H3ID": "AKS74U",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "583990e32459771419544dd2": {
-    "H3ID": "AKS74U",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5839a40f24597726f856b511": {
-    "H3ID": "AKS74U",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ab8e9fcd8ce870019439434": {
-    "H3ID": "AKS74U",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bf3e0490db83400196199af": {
-    "H3ID": "AKS74U",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cadfbf7ae92152ac412eeef": {
-    "H3ID": "L85A2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "606587252535c57a13424cfd": {
-    "H3ID": "Bren807",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c488a752e221602b412af63": {
-    "H3ID": "AugA3",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5dcbd56fdbd3d91b3e5468d5": {
-    "H3ID": "Mk17CQC",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bb2475ed4351e00853264e3": {
-    "H3ID": "H416",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fbcc1d9016cce60e8341ab3": {
-    "H3ID": "AR15SBR",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b0bbe4e5acfc40dc528a72d": {
-    "H3ID": "FaTactical",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6165ac306ef05c2ce828ef74": {
-    "H3ID": "Mk17",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6183afd850224f204c1da514": {
-    "H3ID": "Mk17",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6184055050224f204c1da540": {
-    "H3ID": "Mk16Mod0",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "618428466ef05c2ce828f218": {
-    "H3ID": "Mk16Mod0",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d43021ca4b9362eab4b5e25": {
-    "H3ID": "Bubba15",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e6152586f77473dc057aa1": {
-    "H3ID": "AKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e6687d86f77411d949b251": {
-    "H3ID": "AKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57c44b372459772d2b39b8ce": {
-    "H3ID": "ASVAL",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "587e02ff24597743df3deaeb": {
-    "H3ID": "SKSModern",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "574d967124597745970e7c94": {
-    "H3ID": "SKSClassic",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c501a4d2e221602b412b540": {
-    "H3ID": "M14",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5beed0f50db834001c062b12": {
-    "H3ID": "AK12",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5926bb2186f7744b1c6c6e60": {
-    "H3ID": "MP5A4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d2f0d8048f0356c925bc3b0": {
-    "H3ID": "MP5KA4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba26383d4351e00334c93d9": {
-    "H3ID": "Mp7a1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bd70322209c4d00d7167b8f": {
-    "H3ID": "Mp7a1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de7bd7bfd6b4e6e2276dc25": {
-    "H3ID": "Mp9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e00903ae9dc277128008b87": {
-    "H3ID": "Mp9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58948c8e86f77409493f7266": {
-    "H3ID": "APC9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc82d76e24e8d00134b4b83": {
-    "H3ID": "P90",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59984ab886f7743e98271174": {
-    "H3ID": "PP19Vityaz",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57f4c844245977379d5c14d1": {
-    "H3ID": "PP91KEDR",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57d14d2524597714373db789": {
-    "H3ID": "PP91KEDR",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57f3c6bd24597738e730fa2f": {
-    "H3ID": "PP91KEDR",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ea03f7400685063ec28bfa8": {
-    "H3ID": "PPSh41",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59f9cabd86f7743a10721f46": {
-    "H3ID": "PP19Vityaz",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "60339954d62c9b14ed777c06": {
-    "H3ID": "QC9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc3e272f8b6a877a729eac5": {
-    "H3ID": "UMP45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fb64bc92b1b027b1f50bcf2": {
-    "H3ID": "Vector45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc3f2d5900b1d5091531e57": {
-    "H3ID": "MX4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e870397991fd70db46995c8": {
-    "H3ID": "MB590A1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e848cc2988a8701445df1e8": {
-    "H3ID": "KS23",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7828548dc32e5a9c28b516": {
-    "H3ID": "MB590A1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "54491c4f4bdc2db1078b4568": {
-    "H3ID": "M1897Trench",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dee2bdd2720bc8328b4567": {
-    "H3ID": "M2ThreeGun",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "606dae0ab0e443224b421bb7": {
-    "H3ID": "M1014",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5580223e4bdc2d1c128b457f": {
-    "H3ID": "HammerlessLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "60db29ce99594040e04c4a27": {
-    "H3ID": "MTs255",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "576165642459773c7a400233": {
-    "H3ID": "Saiga12k",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a38e6bac4a2826c6e06d79b": {
-    "H3ID": "Toz106",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6176aca650224f204c1da3fb": {
-    "H3ID": "FaTactical",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5aafa857e5b5b00018480968": {
-    "H3ID": "M1Shorty16",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc22d7c187fea44d52eda44": {
-    "H3ID": "MRAD",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f2a9575926fd9352339381f": {
-    "H3ID": "H51K",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a367e5dc4a282000e49738f": {
-    "H3ID": "P762",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5df8ce05b11454561e39243b": {
-    "H3ID": "FaTactical",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c46fbd72e2216398b5a8c9c": {
-    "H3ID": "Dragonuv",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57838ad32459774a17445cd2": {
-    "H3ID": "VSSVintorez",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "588892092459774ac91d4b11": {
-    "H3ID": "PSG1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bfea6e90db834001b7347f3": {
-    "H3ID": "FRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ae08f0a5acfc408fb1398a1": {
-    "H3ID": "Mosin91_30",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bfd297f0db834001a669119": {
-    "H3ID": "MosinM1891",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55801eed4bdc2d89578b4588": {
-    "H3ID": "SV98",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5df24cf80dee1b22f862e9bc": {
-    "H3ID": "Scout",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de652c31b7e3716273428be": {
-    "H3ID": "M40A1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e81ebcd8e146c7080625e15": {
-    "H3ID": "RGM40_Kastet",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5abccb7dd8ce87001773e277": {
-    "H3ID": "APS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a17f98cfcdbcb0980087290": {
-    "H3ID": "APS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d3eb3b0a4b93615055e84d2": {
-    "H3ID": "FiveSevenFDE",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d67abc1a4b93614ec50137f": {
-    "H3ID": "FiveSevenFDE",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7ae0c351dfba0017554310": {
-    "H3ID": "G17",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b1fa9b25acfc40018633c01": {
-    "H3ID": "G18C",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e81c3cbac2bb513793cdc75": {
-    "H3ID": "M1911Modern",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f36a0e5fbf956000b716b65": {
-    "H3ID": "Defender45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cadc190ae921500103bb3b6": {
-    "H3ID": "M9A3",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "576a581d2459771e7b1bc4f1": {
-    "H3ID": "CZ75Shadow",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56d59856d2720bd8418b456a": {
-    "H3ID": "P226",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56e0598dd2720bb5668b45a6": {
-    "H3ID": "F12",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "602a9740da11d6478d5a06dc": {
-    "H3ID": "PL14",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "579204f224597773d619e051": {
-    "H3ID": "PMM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5448bd6b4bdc2dfc2f8b4569": {
-    "H3ID": "Makarov",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59f98b4986f7746f546d2cef": {
-    "H3ID": "PX4Storm",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "571a12c42459771f627b58a0": {
-    "H3ID": "TT33",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b3b713c5acfc4330140bd8d": {
-    "H3ID": "M1911Gold",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6193a720f8ee7e52e42109ed": {
-    "H3ID": "USPTactical",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bffdc370db834001d23eca8": {
-    "H3ID": "BayonetAK",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bc9c1e2d4351e00367fbcf0": {
-    "H3ID": "Medieval_GermanicAxe1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57e26fc7245977162a14b800": {
-    "H3ID": "CombatKnife",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57e26ea924597715ca604a09": {
-    "H3ID": "M3TrenchKnife",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c012ffc0db834001d23f03f": {
-    "H3ID": "FarmTool_WoodAxe",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bffe7930db834001b734a39": {
-    "H3ID": "Hatchet",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc64ea372b0dd78d51159dc": {
-    "H3ID": "Karambit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "54491bb74bdc2d09088b4567": {
-    "H3ID": "BayonetM9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c07df7f0db834001b73588a": {
-    "H3ID": "Crowbar",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57cd379a24597778e7682ecf": {
-    "H3ID": "Tactical_Tomahawk",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bffdd7e0db834001b734a1a": {
-    "H3ID": "Tanto",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bead2e00db834001c062938": {
-    "H3ID": "GarageTool_DustPan",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0126f40db834002a125382": {
-    "H3ID": "Improvised_ClimbingAxe",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c010e350db83400232feec7": {
-    "H3ID": "MX8",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6087e570b998180e9f76dc24": {
-    "H3ID": "GarageTool_SledgeHammer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "601948682627df266209af05": {
-    "H3ID": "SurvivalKnife",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5710c24ad2720bc3458b45a3": {
-    "H3ID": "PinnedGrenadeF1Russia",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58d3db5386f77426186285a0": {
-    "H3ID": "PinnedGrenadeM67",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5448be9a4bdc2dfd2f8b456a": {
-    "H3ID": "PinnedGrenadeRG5",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "617fd91e5539a84ec44ce155": {
-    "H3ID": "PinnedGrenadeRGN",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "618a431df1eb8e24b8741deb": {
-    "H3ID": "PinnedGrenadeRGO",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e32f56fcb6d5863cc5e5ee4": {
-    "H3ID": "PinnedGrenadeM26",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e340dcdcb6d5863cc5e5efb": {
-    "H3ID": "PinnedGrenadeRG42",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "617aa4dd8166f034d57de9c5": {
-    "H3ID": "PinnedGrenadeM18SmokeGrenadeWhite",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a2a57cfc4a2826c6e06d44a": {
-    "H3ID": "PinnedGrenadeM18SmokeGrenadeWhite",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "619256e5f8af2c1a4e1f5d92": {
-    "H3ID": "PinnedGrenadeXM84",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a0c27731526d80618476ac4": {
-    "H3ID": "PinnedGrenadeXM84",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5735fdcd2459776445391d61": {
-    "H3ID": "762x25mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5735ff5c245977640e39ba7e": {
-    "H3ID": "762x25mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "573601b42459776410737435": {
-    "H3ID": "762x25mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "573602322459776445391df1": {
-    "H3ID": "762x25mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5736026a245977644601dc61": {
-    "H3ID": "762x25mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "573603562459776430731618": {
-    "H3ID": "762x25mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "573603c924597764442bd9cb": {
-    "H3ID": "762x25mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "573718ba2459775a75491131": {
-    "H3ID": "9x18mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "573719762459775a626ccbc1": {
-    "H3ID": "9x18mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "573719df2459775a626ccbc2": {
-    "H3ID": "9x18mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57371aab2459775a77142f22": {
-    "H3ID": "9x18mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57371b192459775a9f58a5e0": {
-    "H3ID": "9x18mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57371e4124597760ff7b25f1": {
-    "H3ID": "9x18mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57371eb62459776125652ac1": {
-    "H3ID": "9x18mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57371f2b24597761224311f1": {
-    "H3ID": "9x18mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57371f8d24597761006c6a81": {
-    "H3ID": "9x18mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5737201124597760fc4431f1": {
-    "H3ID": "9x18mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5737207f24597760ff7b25f2": {
-    "H3ID": "9x18mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "573720e02459776143012541": {
-    "H3ID": "9x18mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57372140245977611f70ee91": {
-    "H3ID": "9x18mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5737218f245977612125ba51": {
-    "H3ID": "9x18mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5efb0da7a29a85116f6ea05f": {
-    "H3ID": "9x19mmCartridge+PAPI",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c925fa22e221601da359b7b": {
-    "H3ID": "9x19mmCartridge+PAPI",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c3df7d588a4501f290594e5": {
-    "H3ID": "9x19mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a3c16fe86f77452b62de32a": {
-    "H3ID": "9x19mmCartridge+PFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58864a4f2459770fcc257101": {
-    "H3ID": "9x19mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
+  "5c0faeddd174af02a962601f": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "ADAR 2-15 Stock"
+  },
+  "63d3ce0446bd475bcb50f55f": {
+    "H3ID": "868",
+    "ModulGroup": "Barrels_AR15",
+    "ModulPart": "AR15 13.7\" Barrel"
+  },
+  "55d3632e4bdc2d972f8b4569": {
+    "H3ID": "868",
+    "ModulGroup": "Barrels_AR15",
+    "ModulPart": "AR15 14.5\" Barrel"
+  },
+  "55d35ee94bdc2d61338b4568": {
+    "H3ID": "868",
+    "ModulGroup": "Barrels_AR15",
+    "ModulPart": "AR15 10.5\" Barrel"
+  },
+  "63d3d44a2a49307baf09386d": {
+    "H3ID": "868",
+    "ModulGroup": "Barrels_AR15",
+    "ModulPart": "AR15 16\" Ballistic Advantage Barrel"
+  },
+  "5c0e2f94d174af029f650d56": {
+    "H3ID": "868",
+    "ModulGroup": "Barrels_AR15",
+    "ModulPart": "AR15 16\" Barrel"
+  },
+  "5d440b93a4b9364276578d4b": {
+    "H3ID": "868",
+    "ModulGroup": "Barrels_AR15",
+    "ModulPart": "AR15 18\" Barrel"
+  },
+  "5d440b9fa4b93601354d480c": {
+    "H3ID": "868",
+    "ModulGroup": "Barrels_AR15",
+    "ModulPart": "AR15 20\" Barrel"
+  },
+  "55d4b9964bdc2d1d4e8b456e": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "A2 Pistol Grip"
+  },
+  "571659bb2459771fb2755a12": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Geissele A22 Pistol Grip"
+  },
+  "602e71bd53a60014f9705bfa": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Magpul K2 Pistol Grip"
+  },
+  "6113c3586c780c1e710c90bc": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "F1 ST1 Pistol Grip"
+  },
+  "6113cc78d3a39d50044c065a": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "F1 ST2 Paracord Pistol Grip"
+  },
+  "6113cce3d92c473c770200c7": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "F1 ST2 Pistol Grip"
+  },
+  "5cc9bcaed7f00c011c04e179": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Hera Arms HG15 Pistol Grip"
+  },
+  "5bb20e18d4351e00320205d5": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "HK Battlegrip Pistol Grip"
+  },
+  "5bb20e0ed4351e3bac1212dc": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "HK Beavertail Pistol Grip"
+  },
+  "6193dcd0f8ee7e52e4210a28": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "HK Beavertail Pistol Grip"
+  },
+  "5d025cc1d7ad1a53845279ef": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "ERGO PSG1 Pistol Grip"
+  },
+  "5c6d7b3d2e221600114c9b7d": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "HK v2 Pistol Grip"
+  },
+  "57c55efc2459772d2c6271e7": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Hogue Overmolded Pistol Grip"
+  },
+  "57af48872459771f0b2ebf11": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Hogue Overmolded Pistol Grip"
+  },
+  "57c55f092459772d291a8463": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Hogue Overmolded Pistol Grip"
+  },
+  "57c55f112459772d28133310": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Hogue Overmolded Pistol Grip"
+  },
+  "57c55f172459772d27602381": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Hogue Overmolded Pistol Grip"
+  },
+  "5a339805c4a2826c6e06d73d": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Magpul MIAD Pistol Grip"
+  },
+  "55802f5d4bdc2dac148b458f": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Magpul MOE Pistol Grip"
+  },
+  "5d15cf3bd7ad1a67e71518b2": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Magpul MOE Pistol Grip"
+  },
+  "59db3a1d86f77429e05b4e92": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Naroh GRAL-S Pistol Grip"
+  },
+  "5fbcbd6c187fea44d52eda14": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Reptilia CQG Pistol Grip"
+  },
+  "59db3acc86f7742a2c4ab912": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Stark Pistol Grip"
+  },
+  "59db3b0886f77429d72fb895": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Stark Pistol Grip"
+  },
+  "615d8faecabb9b7ad90f4d5d": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Tactical Dynamics Hex Pistol Grip"
+  },
+  "5b07db875acfc40dc528a5f6": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Tactical Dynamics Skeletonized Pistol Grip"
+  },
+  "63f5feead259b42f0b4d6d0f": {
+    "H3ID": "868",
+    "ModulGroup": "Grips_AR",
+    "ModulPart": "Aeroknox Orion Pistol Grip"
+  },
+  "5ae30db85acfc408fb139a05": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "M4A1 Standard Handguard"
+  },
+  "637f57a68d137b27f70c4968": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "M4A1 Standard Handguard"
+  },
+  "5c0e2f5cd174af02a012cfc9": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "ADAR 2-15 Handguard"
+  },
+  "640b20359ab20e15ee445fa9": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Aeroknox 15.8\" AX15//Handguard"
+  },
+  "63f4ba71f31d4a33b87bd046": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Aeroknox 4\" AX15//Handguard"
+  },
+  "619b5db699fb192e7430664f": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Aeroknox 10.5\" AX15//Handguard"
+  },
+  "5c78f2492e221600114c9f04": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "SAI QD Carbine Length Handguard"
+  },
+  "5c78f2612e221600114c9f0d": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "SAI QD CQB Length Handguard"
+  },
+  "5b2cfa535acfc432ff4db7a0": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Magpul MOE Carbine Handguard"
+  },
+  "5c78f26f2e221601da3581d1": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Mapgul MOE SL Rifle Handguard"
+  },
+  "5c78f2792e221600106f4683": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Mapgul MOE SL Carbine Handguard"
+  },
+  "5d123102d7ad1a004e475fe5": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "KAC URX3 8\" Handguard"
+  },
+  "637f57d2f5ef8c33840d36c4": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "KAC URX3 8\" Handguard"
+  },
+  "5d4405f0a4b9361e6a4e6bd9": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Lone Star Armory TX-15 Handguard"
+  },
+  "55f84c3c4bdc2d5f408b4576": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Daniel Defense RISII 9.5\" Handguard"
+  },
+  "638f1ff84822287cad04be9d": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Daniel Defense RISII 9.5\" Handguard"
+  },
+  "6396aaa9a52ace83df0840ab": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Daniel Defense RISII 9.5\" Handguard"
+  },
+  "588b56d02459771481110ae2": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Daniel Defense RISII 9.5\" Handguard"
+  },
+  "5c9a26332e2216001219ea70": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Daniel Defense RISII 9.5\" FSP Handguard"
+  },
+  "5c9a25172e2216000f20314e": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Daniel Defense RISII 12.5\" Handguard"
+  },
+  "638f2003bbd47aeb9e0ff637": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Daniel Defense RISII 12.5\" Handguard"
+  },
+  "5ea16ada09aa976f2e7a51be": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Geissele MK16 13.5\" Handguard"
+  },
+  "5ea16acdfadf1d18c87b0784": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Geissele MK16 9.3\" Handguard"
+  },
+  "55d459824bdc2d892f8b4573": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "KAC M4 RIS Handguard"
+  },
+  "637f57b78d137b27f70c496a": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "KAC M4 RIS Handguard"
+  },
+  "5d122e7bd7ad1a07102d6d7f": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "KAC URX3.1 10.75\" Handguard"
+  },
+  "637f57c532b66e7e320a6676": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "KAC URX3.1 10.75\" Handguard"
+  },
+  "6034e3d953a60014f970617b": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Aero Precision Atlas S-One Handguard"
+  },
+  "6034e3e20ddce744014cb878": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Aero Precision Enhanced 12\" Handguard"
+  },
+  "6034e3cb0ddce744014cb870": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Aero Precision Enhanced 12\" Handguard"
+  },
+  "5c6d5d8b2e221644fc630b39": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "STNGR VYPR 10\" Handguard"
+  },
+  "5d00e0cbd7ad1a6c6566a42d": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Strike Industries Carbine Handguard"
+  },
+  "637f589af5ef8c33840d36d3": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Strike Industries Carbine Handguard"
+  },
+  "63969c9019971040b005049b": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Strike Industries Carbine Handguard"
+  },
+  "5d00f63bd7ad1a59283b1c1e": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Strike Industries Carbine Handguard"
+  },
+  "6087e0336d0bd7580617bb7a": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Unique ARs Wing & Skull Handguard"
+  },
+  "595cfa8b86f77427437e845b": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Warsport LVOA-C Handguard"
+  },
+  "595cf16b86f77427440c32e2": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Warsport LVOA-S Handguard"
+  },
+  "63888bbd28e5cc32cc09d2b6": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "PRI Gen III Handguard"
+  },
+  "5b0800175acfc400153aebd4": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Ergo F93 Stock"
+  },
+  "5947e98b86f774778f1448bc": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Magpul UBR Gen2"
+  },
+  "5947eab886f77475961d96c5": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Magpul UBR Gen2"
+  },
+  "602e3f1254072b51b239f713": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Enhanced Buffertube"
+  },
+  "5c793fb92e221644f31bfb64": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Strike Industries Buffertube"
+  },
+  "5c793fc42e221600114ca25d": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Strike Industries Buffertube"
+  },
+  "591aef7986f774139d495f03": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Troy PDW Stock"
+  },
+  "591af10186f774139d495f0e": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Troy PDW Stock"
+  },
+  "627254cc9c563e6e442c398f": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Strike Industries PDW Stock"
+  },
+  "638de3603a1a4031d8260b8c": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Enhanced Buffertube"
+  },
+  "5649be884bdc2d79388b4577": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "A2 Buffertube"
+  },
+  "5d120a10d7ad1a4e1026ba85": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "DoubleStar SOCOM Stock"
+  },
+  "5a33ca0fc4a282000d72292f": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "A2 Buffertube"
+  },
+  "5d44069ca4b9361ebd26fc37": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Magpul PRS Gen3"
+  },
+  "5d4406a8a4b9361e4f6eb8b7": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Magpul PRS Gen3"
+  },
+  "5a33cae9c4a28232980eb086": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Magpul PRS Lite"
+  },
+  "55d44fd14bdc2d962f8b456e": {
+    "H3ID": "868",
+    "ModulGroup": "Charging_AR15",
+    "ModulPart": "AR15 Charging Handle"
+  },
+  "5bb20dbcd4351e44f824c04e": {
+    "H3ID": "868",
+    "ModulGroup": "Charging_AR15",
+    "ModulPart": "C7 Claw Charging Handle"
+  },
+  "5c0faf68d174af02a96260b8": {
+    "H3ID": "868",
+    "ModulGroup": "Charging_AR15",
+    "ModulPart": "C7 Claw Charging Handle"
+  },
+  "56ea7165d2720b6e518b4583": {
+    "H3ID": "868",
+    "ModulGroup": "Charging_AR15",
+    "ModulPart": "Badger Ordinance Charging Handle"
+  },
+  "5ea16d4d5aad6446a939753d": {
+    "H3ID": "868",
+    "ModulGroup": "Charging_AR15",
+    "ModulPart": "Geissele ACH Charging Handle"
+  },
+  "6033749e88382f4fab3fd2c5": {
+    "H3ID": "868",
+    "ModulGroup": "Charging_AR15",
+    "ModulPart": "Falkor MACH15 Charging Handle"
+  },
+  "5b2240bf5acfc40dc528af69": {
+    "H3ID": "868",
+    "ModulGroup": "Charging_AR15",
+    "ModulPart": "Radian Raptor Charging Handle"
+  },
+  "5d44334ba4b9362b346d1948": {
+    "H3ID": "868",
+    "ModulGroup": "Charging_AR15",
+    "ModulPart": "Radian Raptor Charging Handle"
+  },
+  "5f633ff5c444ce7e3c30a006": {
+    "H3ID": "868",
+    "ModulGroup": "Charging_AR15",
+    "ModulPart": "Rainier Arms Avalanche Charging Handle"
+  },
+  "55d355e64bdc2d962f8b4569": {
+    "H3ID": "868",
+    "ModulGroup": "Uppers_AR",
+    "ModulPart": "M4A1 Upper"
+  },
+  "5c0e2f26d174af02a9625114": {
+    "H3ID": "868",
+    "ModulGroup": "Uppers_AR",
+    "ModulPart": "KAC Upper"
+  },
+  "5d4405aaa4b9361e6a4e6bd3": {
+    "H3ID": "868",
+    "ModulGroup": "Uppers_AR",
+    "ModulPart": "Lone Star Upper"
+  },
+  "5c07a8770db8340023300450": {
+    "H3ID": "868",
+    "ModulGroup": "Uppers_AR",
+    "ModulPart": "Noveske Gen3 Upper"
+  },
+  "59bfe68886f7746004266202": {
+    "H3ID": "868",
+    "ModulGroup": "Uppers_AR",
+    "ModulPart": "VLTOR MUR-1S Upper"
+  },
+  "63f5ed14534b2c3d5479a677": {
+    "H3ID": "868",
+    "ModulGroup": "Uppers_AR",
+    "ModulPart": "Aeroknox AX//15 Upper"
+  },
+  "5ae30e795acfc408fb139a0b": {
+    "H3ID": "868",
+    "ModulGroup": "GasBlocks_AR",
+    "ModulPart": "M4 Front Post Gas Block"
+  },
+  "56eabcd4d2720b66698b4574": {
+    "H3ID": "868",
+    "ModulGroup": "GasBlocks_AR",
+    "ModulPart": "Daniel Defense Low Profile Gas Block"
+  },
+  "5d00ec68d7ad1a04a067e5be": {
+    "H3ID": "868",
+    "ModulGroup": "GasBlocks_AR",
+    "ModulPart": "JP Gas Block"
+  },
+  "56ea8d2fd2720b7c698b4570": {
+    "H3ID": "868",
+    "ModulGroup": "GasBlocks_AR",
+    "ModulPart": "Windham Weaponry Railed Gas Block"
+  },
+  "63d3ce281fe77d0f2801859e": {
+    "H3ID": "868",
+    "ModulGroup": "GasBlocks_AR",
+    "ModulPart": "Ballistic Advantage Gas Block"
+  },
+  "55d4ae6c4bdc2d8b2f8b456e": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "M4A1 Standard Stock"
+  },
+  "5fc2369685fd526b824a5713": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "B5 Precision Stock"
+  },
+  "606587d11246154cad35d635": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "MFT BMS"
+  },
+  "5a9eb32da2750c00171b3f9c": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Fab Defense GL Shock Stock"
+  },
+  "5bfe86df0db834001b734685": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Fab Defense GLR16 Stock"
+  },
+  "5c87a07c2e2216001219d4a2": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "HK E1 Stock"
+  },
+  "5bb20e70d4351e0035629f8f": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "HK Slimline Stock"
+  },
+  "5beec8c20db834001d2c465c": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "AK12 Stock"
+  },
+  "5ae30c9a5acfc408fb139a03": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "LMT SOPMOD Stock"
+  },
+  "5d135e83d7ad1a21b83f42d8": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Magpul CTR Stock"
+  },
+  "5d135ecbd7ad1a21c176542e": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Magpul CTR Stock"
+  },
+  "56eabf3bd2720b75698b4569": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Magpul MOE Stock"
+  },
+  "58d2946386f774496974c37e": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Magpul MOE Stock"
+  },
+  "58d2946c86f7744e271174b5": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Magpul MOE Stock"
+  },
+  "58d2947686f774485c6a1ee5": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Magpul MOE Stock"
+  },
+  "58d2947e86f77447aa070d53": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Magpul MOE Stock"
+  },
+  "5947c73886f7747701588af5": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "MFT BUS"
+  },
+  "5c793fde2e221601da358614": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Strike Industries Viper Stock"
+  },
+  "5b39f8db5acfc40016387a1b": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "VLTOR EMOD Stock"
+  },
+  "628a85ee6b1d481ff772e9d5": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "SBA3 Pistol Brace"
+  },
+  "602e620f9b513876d4338d9a": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Fab Defense GL-Core CP Stock"
+  },
+  "5fce16961f152d4312622bc9": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Kriss DS150 Stock"
+  },
+  "5fbbaa86f9986c4cff3fe5f6": {
+    "H3ID": "868",
+    "ModulGroup": "BufferStocks_AR",
+    "ModulPart": "Kriss DS150 Stock"
+  },
+  "5a33e75ac4a2826c6e06d759": {
+    "H3ID": "868",
+    "ModulGroup": "BufferTubes_AR",
+    "ModulPart": "Hera Arms CQR Stock"
   },
   "56d59d3ad2720bdb418b4577": {
-    "H3ID": "9x19mmCartridge+PFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5efb0e16aeb21837e749c7ff": {
-    "H3ID": "9x19mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0d56a986f774449d5de529": {
-    "H3ID": "9x19mmCartridge+PJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5efb0cabfb3e451d70735af5": {
-    "H3ID": "45ACPCartridge+PFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e81f423763d9f754677bf2e": {
-    "H3ID": "45ACPCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5efb0fc6aeb21837e749c801": {
-    "H3ID": "45ACPCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5efb0d4f4bc50b58e81710f3": {
-    "H3ID": "45ACPCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ea2a8e200685063ec28c05a": {
-    "H3ID": "45ACPCartridge+PJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba26812d4351e003201fef1": {
-    "H3ID": "46x30mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba26835d4351e0035628ff5": {
-    "H3ID": "46x30mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba2678ad4351e44f824b344": {
-    "H3ID": "46x30mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba26844d4351e00334c9475": {
-    "H3ID": "46x30mmCartridgeIncendiary",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc80f53e4a949000e1ea4f8": {
-    "H3ID": "57x28mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc86832d7f00c000d3a6e6c": {
-    "H3ID": "57x28mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc86840d7f00c002412c56c": {
-    "H3ID": "57x28mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc80f67e4a949035e43bbba": {
-    "H3ID": "57x28mmCartridgeIncendiary",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc80f38e4a949001152b560": {
-    "H3ID": "57x28mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc80f8fe4a949033b0224a2": {
-    "H3ID": "57x28mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc80f79e4a949033c7343b2": {
-    "H3ID": "57x28mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61962b617c6c7b169525f168": {
-    "H3ID": "545x39mmCartridgeAPIncendiary",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0d5e4486f77478390952fe": {
-    "H3ID": "545x39mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dfef82d2720bbd668b4567": {
-    "H3ID": "545x39mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff026d2720bb8668b4567": {
-    "H3ID": "545x39mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff061d2720bb5668b4567": {
-    "H3ID": "545x39mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff0bed2720bb0668b4567": {
-    "H3ID": "545x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff216d2720bbd668b4568": {
-    "H3ID": "545x39mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff2ced2720bb4668b4567": {
-    "H3ID": "545x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff338d2720bbd668b4569": {
-    "H3ID": "545x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff3afd2720bba668b4567": {
-    "H3ID": "545x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff421d2720b5f5a8b4567": {
-    "H3ID": "545x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff4a2d2720bbd668b456a": {
-    "H3ID": "545x39mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56dff4ecd2720b5f5a8b4568": {
-    "H3ID": "545x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e6920f86f77411d82aa167": {
-    "H3ID": "556x45mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e6927d86f77411da468256": {
-    "H3ID": "556x45mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "54527a984bdc2d4e668b4567": {
-    "H3ID": "556x45mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "54527ac44bdc2d36668b4567": {
-    "H3ID": "556x45mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e68f6f86f7746c9f75e846": {
-    "H3ID": "556x45mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e6906286f7746c9f75e847": {
-    "H3ID": "556x45mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e690b686f7746c9f75e848": {
-    "H3ID": "556x45mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e6918f86f7746c9f75e849": {
-    "H3ID": "556x45mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "60194943740c5d77f6705eea": {
-    "H3ID": "556x45mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "601949593ae8f707c4608daa": {
-    "H3ID": "556x45mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0d5ae286f7741e46554302": {
-    "H3ID": "556x45mmCartridgeIncendiary",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fd20ff893a8961fc660a954": {
-    "H3ID": "300BlackoutCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fbe3ffdf8b6a877a729ea82": {
-    "H3ID": "300BlackoutCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "619636be6db0f2477964e710": {
-    "H3ID": "300BlackoutCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6196364158ef8c428c287d9f": {
-    "H3ID": "300BlackoutCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6196365d58ef8c428c287da1": {
-    "H3ID": "300BlackoutCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e0d99486f7744a32234762": {
-    "H3ID": "762x39mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e4d3d286f774176a36250a": {
-    "H3ID": "762x39mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "601aa3d2b2bcb34913271e6d": {
-    "H3ID": "762x39mmCartridgeAPIncendiary",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5656d7c34bdc2d9d198b4587": {
-    "H3ID": "762x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e4cf5286f7741778269d8a": {
-    "H3ID": "762x39mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e4d24686f7741776641ac7": {
-    "H3ID": "762x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e023e53d4353e3302577c4c": {
-    "H3ID": "762x51mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a6086ea4f39f99cd479502f": {
-    "H3ID": "762x51mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a608bf24f39f98ffc77720e": {
-    "H3ID": "762x51mmCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58dd3ad986f77403051cba8f": {
-    "H3ID": "762x51mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5efb0c1bd79ff02a1f5e68d9": {
-    "H3ID": "762x51mmCartridgeAPIncendiary",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e023e6e34d52a55c3304f71": {
-    "H3ID": "762x51mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e023e88277cce2b522ff2b1": {
-    "H3ID": "762x51mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e023d34e8a400319a28ed44": {
-    "H3ID": "762x54mmRCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e77a2386f7742ee578960a": {
-    "H3ID": "762x54mmRCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e023d48186a883be655e551": {
-    "H3ID": "762x54mmRCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5887431f2459777e1612938f": {
-    "H3ID": "762x54mmRCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "560d61e84bdc2da74d8b4571": {
-    "H3ID": "762x54mmRCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e023cf8186a883be655e54f": {
-    "H3ID": "762x54mmRCartridgeTracer",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc382a9d724d907e2077dab": {
-    "H3ID": "338LapuaCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc275cf85fd526b824a571a": {
-    "H3ID": "338LapuaCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc382b6d6fa9c00c571bbc3": {
-    "H3ID": "338LapuaCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc382c1016cce60e8341b20": {
-    "H3ID": "338LapuaCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0d688c86f77413ae3407b2": {
-    "H3ID": "9x39mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61962d879bb3d20b0946d385": {
-    "H3ID": "9x39mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57a0dfb82459774d3078b56c": {
-    "H3ID": "9x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57a0e5022459774d1673f889": {
-    "H3ID": "9x39mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0d668f86f7747ccb7f13b2": {
-    "H3ID": "9x39mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f0596629e22f464da6bbdd9": {
-    "H3ID": "762x39mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e655cb86f77411dc52a77b": {
-    "H3ID": "762x39mmCartridgeFMJ",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e6542b86f77411dc52a77a": {
-    "H3ID": "762x39mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e6658b86f77411d949b250": {
-    "H3ID": "762x39mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cadf6ddae9215051e1c23b2": {
-    "H3ID": "556x45mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cadf6e5ae921500113bb973": {
-    "H3ID": "556x45mmCartridgeJHP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cadf6eeae921500134b2799": {
-    "H3ID": "556x45mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cde8864d7f00c0010373be1": {
-    "H3ID": "762x51mmCartridgeAPIncendiary",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d2f2ab648f03550091993ca": {
-    "H3ID": "762x51mmCartridgeAPIncendiary",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e6891a4b9361bd473feea": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e689ca4b9361bc8618956": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e6772a4b936088465b17c": {
-    "H3ID": "12GaugeShellNo4Buckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e6806a4b936088465b17e": {
-    "H3ID": "12GaugeShell00Buckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e68a8a4b9360b6c0d54e2": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e68dea4b9361bcc29e659": {
-    "H3ID": "12GaugeShellTripleHit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e6911a4b9361bd5780d52": {
-    "H3ID": "12GaugeShellFlechette",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e68e6a4b9361c140bcfe0": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e6869a4b9361c140bcfde": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e68d1a4b93622fe60e845": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e68b3a4b9361bca7e50b5": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e67fba4b9361bc73bc779": {
-    "H3ID": "12GaugeShellNo2Buckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "560d5e524bdc2d25448b4571": {
-    "H3ID": "12GaugeShellNo2Buckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58820d1224597753c90aeb13": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0d591486f7744c505b416f": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e68c4a4b9361b93413f79": {
-    "H3ID": "12GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e695fa4b936359b35d852": {
-    "H3ID": "20GaugeShellBuckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e69b9a4b9361bc8618958": {
-    "H3ID": "20GaugeShellBuckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e69c7a4b9360b6c0d54e4": {
-    "H3ID": "20GaugeShellBuckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e6a5fa4b93614ec501745": {
-    "H3ID": "20GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e6a53a4b9361bd473feec": {
-    "H3ID": "20GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e6a42a4b9364f07165f52": {
-    "H3ID": "20GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d6e6a05a4b93618084f58d0": {
-    "H3ID": "20GaugeShellSlug",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a38ebd9c4a282000d722a5b": {
-    "H3ID": "20GaugeShellBuckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e85aa1a988a8701445df1f5": {
-    "H3ID": "23x75mmR_Barricade",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e85a9f4add9fe03027d9bf1": {
-    "H3ID": "23x75mmR_Flash",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e85a9a6eacf8c039e4e2ac1": {
-    "H3ID": "23x75mmR_Buckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f647f31b6238e5dd066e196": {
-    "H3ID": "23x75mmR_Buckshot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d70e500a4b9364de70d38ce": {
-    "H3ID": "Cartridge_40x46Grenade_M381",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ede474b0c226a66f5402622": {
-    "H3ID": "Cartridge_40x46Grenade_M381",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ede475b549eed7c6d5c18fb": {
-    "H3ID": "Cartridge_40x46Grenade_M381",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5656eb674bdc2d35148b457c": {
-    "H3ID": "Cartridge_40x46Grenade_M381",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ede4739e0350d05467f73e8": {
-    "H3ID": "Cartridge_40x46Grenade_M397",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f0c892565703e5c461894e9": {
-    "H3ID": "Cartridge_40x53mmGrenade_M430A1_HEDP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ede47405b097655935d7d16": {
-    "H3ID": "Cartridge_40x46Grenade_M397",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ede475339ee016e8c534742": {
-    "H3ID": "Cartridge_40x46Grenade_M576",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56ea8222d2720b69698b4567": {
-    "H3ID": "AttachableBipodA",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5888961624597754281f93f3": {
-    "H3ID": "MuzzleBipod",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "619386379fb0c665d5490dbe": {
-    "H3ID": "ForegripTStyle",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "615d8fd3290d254f5e6b2edc": {
-    "H3ID": "ForegripMVG",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c87ca002e221600114cb150": {
-    "H3ID": "ForegripKnight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c7fc87d2e221644f31c0298": {
-    "H3ID": "ForegripMX4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c791e872e2216001219c40a": {
-    "H3ID": "ForegripShroud",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57cffb66245977632f391a99": {
-    "H3ID": "ForegripAngledBlack",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57cffcd624597763133760c5": {
-    "H3ID": "ForegripAngledBlack",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57cffcdd24597763f5110006": {
-    "H3ID": "ForegripAngledTan",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57cffce524597763b31685d8": {
-    "H3ID": "ForegripAngledTan",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7dbfc1159bd40016548fde": {
-    "H3ID": "ForegripShiftShorty",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59f8a37386f7747af3328f06": {
-    "H3ID": "ForegripShift",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "588226d124597767ad33f787": {
-    "H3ID": "ForegripAngledBlack",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "588226dd24597767ad33f789": {
-    "H3ID": "ForegripAngledBlack",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "588226e62459776e3e094af7": {
-    "H3ID": "ForegripAngledTan",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "588226ef24597767af46e39c": {
-    "H3ID": "ForegripAngledTan",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59fc48e086f77463b1118392": {
-    "H3ID": "ForegripQC9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fce0cf655375d18a253eff0": {
-    "H3ID": "ForegripQC9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b057b4f5acfc4771e1bd3e9": {
-    "H3ID": "ForegripThompson",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "558032614bdc2de7118b4585": {
-    "H3ID": "ForegripVector45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58c157be86f77403c74b2bb6": {
-    "H3ID": "ForegripVector45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58c157c886f774032749fb06": {
-    "H3ID": "ForegripVector45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "591af28e86f77414a27a9e1d": {
-    "H3ID": "ForegripLDAG",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c1bc4812e22164bef5cfde7": {
-    "H3ID": "ForegripRKO",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c1bc5612e221602b5429350": {
-    "H3ID": "ForegripRKO",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c1cd46f2e22164bef5cfedb": {
-    "H3ID": "ForegripOffset",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c1bc5af2e221602b412949b": {
-    "H3ID": "ForegripStand",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c1bc5fb2e221602b1779b32": {
-    "H3ID": "ForegripRKO",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c1bc7432e221602b412949d": {
-    "H3ID": "ForegripMini",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c1bc7752e221602b1779b34": {
-    "H3ID": "ForegripValk",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cda9bcfd7f00c0c0b53e900": {
-    "H3ID": "ForegripZG106",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cf4fb76d7f00c065703d3ac": {
-    "H3ID": "ForegripSerb",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de8fbad2fbe23140d3ee9c4": {
-    "H3ID": "ForegripSG",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5df36948bb49d91fb446d5ad": {
-    "H3ID": "ForegripLarge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f6340d3ca442212f4047eb2": {
-    "H3ID": "ForegripShift",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc0f9b5d724d907e2077d82": {
-    "H3ID": "ForegripTStyle",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc0f9cbd6fa9c00c571bb90": {
-    "H3ID": "ForegripRKO",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59d790f486f77403cb06aec6": {
-    "H3ID": "TacticalFlashlight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61605d88ffa6e502ac5e7eeb": {
-    "H3ID": "LAMMK23",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c5952732e2216398b5abda2": {
-    "H3ID": "Perst3Laser",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a5f1ce64f39f90b401987bc": {
-    "H3ID": "TacticalLaser4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "560d657b4bdc2da74d8b4572": {
-    "H3ID": "TacticalLaser4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b3a337e5acfc4704b4a19a0": {
-    "H3ID": "KlashLight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "544909bb4bdc2d6f028b4577": {
-    "H3ID": "ANPEQ15",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a800961159bd4315e3a1657": {
-    "H3ID": "TacticalLaser4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57fd23e32459772d0805bcf1": {
-    "H3ID": "Perst3Laser",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c06595c0db834001a66af6c": {
-    "H3ID": "ANPEQ15",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b07dd285acfc4001754240d": {
-    "H3ID": "SureglowLight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7b483fe899ef0016170d15": {
-    "H3ID": "TacticalLaser4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56def37dd2720bec348b456a": {
-    "H3ID": "TacticalLaser4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc9c20cd7f00c001336c65d": {
-    "H3ID": "TacticalLaser1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d10b49bd7ad1a1a560708b0": {
-    "H3ID": "ANPEQ15",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d2369418abbc306c62e0c80": {
-    "H3ID": "Perst3Laser",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c079ed60db834001a66b372": {
-    "H3ID": "LAMMK23",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d123a3cd7ad1a004e476058": {
-    "H3ID": "HandstopQC9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d123b70d7ad1a0ee35e0754": {
-    "H3ID": "HandstopKAG",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d123b7dd7ad1a004f01b262": {
-    "H3ID": "HandstopLTac",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d124c01d7ad1a115c7d59fb": {
-    "H3ID": "RailCoverLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d124c0ed7ad1a10d168dd9b": {
-    "H3ID": "RailCoverMedium",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d124c1ad7ad1a12227c53a7": {
-    "H3ID": "RailCoverShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "619d36da53b4d42ee724fae4": {
-    "H3ID": "BarrelExtenderThinLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b363dea5acfc4771e1c5e7e": {
-    "H3ID": "BarrelExtenderThinMedium",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b363e1b5acfc4771e1c5e80": {
-    "H3ID": "BarrelExtenderThinShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0111ab0db834001966914d": {
-    "H3ID": "ShroudMac10",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57f3c7e024597738ea4ba286": {
-    "H3ID": "Vector45Shroud",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "612e0e3c290d254f5e6b291d": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "612e0e55a112697a4b3a66e7": {
-    "H3ID": "MuzzleBrakeBomber",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6130c43c67085e45ef1405a1": {
-    "H3ID": "MuzzleBrakeCharon",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "615d8df08004cc50514c3236": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "612e0d3767085e45ef14057f": {
-    "H3ID": "MuzzleBrakeOrbit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "612e0cfc8004cc50514c2d9e": {
-    "H3ID": "MuzzleBrakeTruepoint",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "612e0d81290d254f5e6b291a": {
-    "H3ID": "MuzzleBrakeCobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "615d8f5dd92c473c770212ef": {
-    "H3ID": "CompensatorCutts",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "607ffb988900dc2d9a55b6e4": {
-    "H3ID": "MuzzleBrakeSledge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6065c6e7132d4d12c81fd8e1": {
-    "H3ID": "MuzzleBrakeTruepoint",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59d64fc686f774171b243fe2": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e61eb386f77440d64f5daf": {
-    "H3ID": "CompensatorCutts",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7037338dc32e000d46d257": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7ad0c451dfba0013379712": {
-    "H3ID": "MuzzleBrakeCharon",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a705e128dc32e000d46d258": {
-    "H3ID": "MuzzleBrakeTruepoint",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7ad1fb51dfba0013379715": {
-    "H3ID": "CompensatorCutts",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7b32a2e899ef00135e345a": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c878ebb2e2216001219d48a": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c78f2882e22165df16b832e": {
-    "H3ID": "MuzzleBrakeOrbit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c878e9d2e2216000f201903": {
-    "H3ID": "MuzzleBrakeBomber",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c471bfc2e221602b21d4e17": {
-    "H3ID": "MuzzleBrakeSledge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c4ee3d62e2216152006f302": {
-    "H3ID": "CompensatorCutts",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c7951452e221644f31bfd5c": {
-    "H3ID": "MuzzleBrakeCobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c6beec32e221601da3578f2": {
-    "H3ID": "MuzzleBrakeTruepoint",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c07c5ed0db834001b73571c": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bffd7ed0db834001d23ebf9": {
-    "H3ID": "MuzzleBrakeTruepoint",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5beec3420db834001b095429": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bbdb8bdd4351e4502011460": {
-    "H3ID": "MuzzleBrakeOrbit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bbdb83fd4351e44f824c44b": {
-    "H3ID": "MuzzleBrakeCobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bc5a35cd4351e450201232f": {
-    "H3ID": "MuzzleBrakeTruepoint",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b7d68af5acfc400170e30c3": {
-    "H3ID": "MuzzleBrakeSledge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b7d693d5acfc43bca706a3d": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5addbbb25acfc40015621bd9": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5addbba15acfc400185c2854": {
-    "H3ID": "MuzzleBrakeTruepoint",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5addbb6e5acfc408fb1393fd": {
-    "H3ID": "MuzzleBrakeCharon",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5addbb825acfc408fb139400": {
-    "H3ID": "MuzzleBrakeOrbit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5addbb945acfc4001a5fc44e": {
-    "H3ID": "MuzzleBrakeCobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5649aa744bdc2ded0b8b457e": {
-    "H3ID": "MuzzleBrakeSledge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5649ab884bdc2ded0b8b457f": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57dc324a24597759501edc20": {
-    "H3ID": "MuzzleBrakeCharon",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5943ee5a86f77413872d25ec": {
-    "H3ID": "MuzzleBrakeOrbit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7c147ce899ef00150bd8b8": {
-    "H3ID": "MuzzleBrakeBomber",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5998598e86f7740b3f498a86": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5943eeeb86f77412d6384f6b": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5888996c24597754281f9419": {
-    "H3ID": "CompensatorCutts",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59fb137a86f7740adb646af1": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58272d7f2459774f6311ddfd": {
-    "H3ID": "MuzzleBrakeSledge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ab3afb2d8ce87001660304d": {
-    "H3ID": "MuzzleBrakeOrbit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac72e615acfc43f67248aa0": {
-    "H3ID": "CompensatorCutts",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac7655e5acfc40016339a19": {
-    "H3ID": "MuzzleBrakeCharon",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac72e945acfc43f3b691116": {
-    "H3ID": "MuzzleBrakeCobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac72e895acfc43b321d4bd5": {
-    "H3ID": "MuzzleBrakeBomber",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac72e7d5acfc40016339a02": {
-    "H3ID": "MuzzleBrakeSledge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac72e725acfc400180ae701": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5aafa1c2e5b5b00015042a56": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a9ea27ca2750c00137fa672": {
-    "H3ID": "MuzzleBrakeCharon",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bc5a351d4351e003477a414": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d026791d7ad1a04a067ea63": {
-    "H3ID": "CompensatorCutts",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5caf17c9ae92150b30006be1": {
-    "H3ID": "MuzzleBrakeOrbit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc9a96cd7f00c011c04e04a": {
-    "H3ID": "MuzzleBrakeTruepoint",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc9ad73d7f00c000e2579d4": {
-    "H3ID": "MuzzleBrakeCobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc9b815d7f00c000e2579d6": {
-    "H3ID": "MuzzleBrakeCharon",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cdd7685d7f00c000f260ed2": {
-    "H3ID": "MuzzleBrakeSledge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cdd7693d7f00c0010373aa5": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cf6935bd7f00c06585fb791": {
-    "H3ID": "MuzzleBrakeSledge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cf6937cd7f00c056c53fb39": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d02677ad7ad1a04a15c0f95": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d02676dd7ad1a049e54f6dc": {
-    "H3ID": "MuzzleBrakeBomber",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cff9e5ed7ad1a09407397d4": {
-    "H3ID": "MuzzleBrakeOrbit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d1f819086f7744b355c219b": {
-    "H3ID": "MuzzleBrakeCobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d440625a4b9361eec4ae6c5": {
-    "H3ID": "MuzzleBrakeCharon",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d443f8fa4b93678dd4a01aa": {
-    "H3ID": "MuzzleBrakeSledge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5df35e7f2a78646d96665dd4": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ef61964ec7f42238c31e0c1": {
-    "H3ID": "MuzzleBrakeTruepoint",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f6372e2865db925d54f3869": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f633f68f5750b524b45f112": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f633f791b231926f2329f13": {
-    "H3ID": "MuzzleBrakeCharon",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc23636016cce60e8341b05": {
-    "H3ID": "MuzzleBrakeOrbit",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fbcbd02900b1d5091531dd3": {
-    "H3ID": "MuzzleBrakeImpact",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fbcbd10ab884124df0cd563": {
-    "H3ID": "MuzzleBrakeCobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "60337f5dce399e10262255d1": {
-    "H3ID": "MuzzleBrakeTriad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6130c4d51cb55961fa0fd49f": {
-    "H3ID": "SuppressorAim5",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6171367e1cb55961fa0fdb36": {
-    "H3ID": "SuppressorG19",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "615d8f8567085e45ef1409ca": {
-    "H3ID": "SuppressorBottle",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "60926df0132d4d12c81fd9df": {
-    "H3ID": "SuppressorOber",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c7955c22e221644f31bfd5e": {
-    "H3ID": "SuppressorCordedTan",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c7e8fab2e22165df16b889b": {
-    "H3ID": "MaximSilencerLargeB",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c6165902e22160010261b28": {
-    "H3ID": "SuppressorM9A1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c4eecc32e221602b412b440": {
-    "H3ID": "SuppressorQuadrant",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55d614004bdc2d86028b4568": {
-    "H3ID": "MaximSilencerSmallB",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55d6190f4bdc2d87028b4567": {
-    "H3ID": "SuppressorGepard",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba26ae8d4351e00367f9bdb": {
-    "H3ID": "SuppressorBoxy",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b86a0e586f7745b600ccb23": {
-    "H3ID": "SuppressorAPS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59c0ec5b86f77435b128bfca": {
-    "H3ID": "SuppressorHitman",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57ffb0e42459777d047111c5": {
-    "H3ID": "SuppressorPBS4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "593d493f86f7745e6b2ceb22": {
-    "H3ID": "SuppressorMk22Mod0",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "593d490386f7745ee97a1555": {
-    "H3ID": "MaximSilencerMediumA",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59fb257e86f7742981561852": {
-    "H3ID": "MaximSilencerSmallA",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "593d489686f7745c6255d58a": {
-    "H3ID": "SuppressorCorded",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a9fb739a2750c003215717f": {
-    "H3ID": "SuppressorOilFilter",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a9fbacda2750c00141e080f": {
-    "H3ID": "SuppressorNagant",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a9fbb74a2750c0032157181": {
-    "H3ID": "MaximSilencerLargeB",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a9fbb84a2750c00137fa685": {
-    "H3ID": "SuppressorChungus",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5abcc328d8ce8700194394f3": {
-    "H3ID": "SuppressorOperator",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b363dd25acfc4001a598fd2": {
-    "H3ID": "SuppressorAim5",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5926d33d86f77410de68ebc0": {
-    "H3ID": "SuppressorPBS1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a34fe59c4a282000b1521a2": {
-    "H3ID": "SuppressorQC9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a32a064c4a28200741e22de": {
-    "H3ID": "SuppressorMac10",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a27b6bec4a282000e496f78": {
-    "H3ID": "SuppressorMk2Hex",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59bffbb386f77435b379b9c2": {
-    "H3ID": "MaximSilencerLargeA",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59bfc5c886f7743bf6794e62": {
-    "H3ID": "SuppressorCobray",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "571a28e524597720b4066567": {
-    "H3ID": "SuppressorHexBolter",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7ad74e51dfba0015068f45": {
-    "H3ID": "MaximSilencerSmallA",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a33a8ebc4a282000c5a950d": {
-    "H3ID": "MaximSilencerMediumA",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57da93632459771cb65bf83f": {
-    "H3ID": "SuppressorModel27",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57dbb57e2459774673234890": {
-    "H3ID": "SuppressorModel27",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58aeac1b86f77457c419f475": {
-    "H3ID": "MaximSilencerLargeA",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57838c962459774a1651ec63": {
-    "H3ID": "MaximSilencerSmallB",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a0d63621526d8dba31fe3bf": {
-    "H3ID": "SuppressorG19",
-    "Modul": [],
-    "OtherMod": ""
+    "H3ID": "9x19mmCartridgeFMJ",
+	"Note": "Should be 9x19mm Pst gzh"
+  },
+  "56e0598dd2720bb5668b45a6": {
+    "H3ID": "pbpistoldupe",
+	"Note": "Should be MW"
   },
   "56e05b06d2720bb2668b4586": {
-    "H3ID": "SuppressorTriad",
-    "Modul": [],
-    "OtherMod": ""
+    "H3ID": "pbsuppressor"
   },
-  "564caa3d4bdc2d17108b458e": {
-    "H3ID": "SuppressorSalvo",
-    "Modul": [],
-    "OtherMod": ""
+  "56e05a6ed2720bd0748b4567": {
+	"Note": "Missing, it is default, replaced by attachment"
   },
-  "57c44dd02459772d2e0ae249": {
-    "H3ID": "MaximSilencerMediumB",
-    "Modul": [],
-    "OtherMod": ""
+  "576a581d2459771e7b1bc4f1": {
+    "H3ID": "NWMPGrach",
+	"Note": "Should be Modul"
   },
-  "57f3c8cc2459773ec4480328": {
-    "H3ID": "SuppressorBoxy",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5caf187cae92157c28402e43": {
-    "H3ID": "SuppressorHitman",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cebec00d7f00c065c53522a": {
-    "H3ID": "SuppressorSR3M",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cff9e84d7ad1a049e54ed55": {
-    "H3ID": "SuppressorAPS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d3ef698a4b9361182109872": {
-    "H3ID": "SuppressorHexBolter",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d44064fa4b9361e4f6eb8b5": {
-    "H3ID": "SuppressorMUS1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5dfa3d2b0dee1b22f862eade": {
-    "H3ID": "MaximSilencerMediumB",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e01ea19e9dc277128008c0b": {
-    "H3ID": "SuppressorTruefire",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de8f237bbaf010b10528a70": {
-    "H3ID": "SuppressorGepard",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e208b9842457a4a7a33d074": {
-    "H3ID": "SuppressorHitman",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ea17bbc09aa976f2e7a51cd": {
-    "H3ID": "SuppressorCorded",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f63407e1b231926f2329f15": {
-    "H3ID": "SuppressorHitman",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de8f2d5b74cd90030650c72": {
-    "H3ID": "SuppressorHitman",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fbe7618d6fa9c00c571bb6c": {
-    "H3ID": "SuppressorMp9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fbe760793164a5b6278efc8": {
-    "H3ID": "SuppressorWrapped",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc4b9b17283c4046c5814d7": {
-    "H3ID": "SuppressorCordedTan",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "602a97060ddce744014caf6f": {
-    "H3ID": "SuppressorCobray",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57ac965c24597706be5f975c": {
-    "H3ID": "MagnifierGhostDR",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57aca93d2459771f2c7e26db": {
-    "H3ID": "MagnifierGhostDR",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "544a3a774bdc2d3a388b4567": {
-    "H3ID": "ScopeHAMComboScope4x24",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c1cdd512e22161b267d91ae": {
-    "H3ID": "Magnifier2x",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57adff4f24597737f373b6e6": {
-    "H3ID": "ScopeBR4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59db7e1086f77448be30ddf3": {
-    "H3ID": "ScopeAcog4x32",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c05293e0db83400232fff80": {
-    "H3ID": "ScopeAcog4x32",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0517910db83400232ffee5": {
-    "H3ID": "ScopeM145",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d2dc3e548f035404a1a4798": {
-    "H3ID": "ScopeM145",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6165ac8c290d254f5e6b2f6c": {
-    "H3ID": "ReflexKDRRedDot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6113d6c3290d254f5e6b27db": {
-    "H3ID": "ReflexPK01VS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "618a5d5852ecee1505530b2a": {
-    "H3ID": "ReflexPK01VS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61659f79d92c473c770213ee": {
-    "H3ID": "ReflexGamepointRDS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "609b9e31506cf869cf3eaf41": {
-    "H3ID": "SustenanceMp7Reflex",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c7d55de2e221644f31bff68": {
-    "H3ID": "ReflexKDRRedDot",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5947db3f86f77447880cf76f": {
-    "H3ID": "ReflexKobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "591c4efa86f7741030027726": {
-    "H3ID": "ReflexPK120",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "570fd6c2d2720bc6458b457f": {
-    "H3ID": "ReflexHolosightLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "558022b54bdc2dac148b458d": {
-    "H3ID": "ReflexHolosightShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c07dd120db834001c39092d": {
-    "H3ID": "ReflexHolosightShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0a2cec0db834001b7ce47d": {
-    "H3ID": "ReflexHolosightShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58491f3324597764bc48fa02": {
-    "H3ID": "ReflexHolosightShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "584924ec24597768f12ae244": {
-    "H3ID": "ReflexHolosightShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b30b0dc5acfc400153b7124": {
-    "H3ID": "ReflexMT1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "570fd79bd2720bc7458b4583": {
-    "H3ID": "ReflexOKP7OSA",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57486e672459770abd687134": {
-    "H3ID": "ReflexOKP7OSA",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "584984812459776a704a82a6": {
-    "H3ID": "ReflexRedDotStandard",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0505e00db834001b735073": {
-    "H3ID": "ReflexHolosightLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "609a63b6e2ff132951242d09": {
-    "H3ID": "ReflexHolosightLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59f9d81586f7744c7506ee62": {
-    "H3ID": "ReflexLCO",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "570fd721d2720bc5458b4596": {
-    "H3ID": "ReflexMRS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cebec38d7f00c00110a652a": {
-    "H3ID": "ReflexArco",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "60a23797a37c940de7062d02": {
-    "H3ID": "ReflexRedDotTall",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d2da1e948f035477b1ce2ba": {
-    "H3ID": "ReflexSRS2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61657230d92c473c770213d7": {
-    "H3ID": "ReflexGamepointRDS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "616442e4faa1272e43152193": {
-    "H3ID": "ReflexArco",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57ae0171245977343c27bfcf": {
-    "H3ID": "ReflexSRO2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58d399e486f77442e0016fe7": {
-    "H3ID": "ReflexMT1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "577d141e24597739c5255e01": {
-    "H3ID": "ReflexRedDotStandard",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "58d268fc86f774111273f8c2": {
-    "H3ID": "ReflexRedDotStandard",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a32aa8bc4a2826c6e06d737": {
-    "H3ID": "ReflexRedDotStandard",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b3116595acfc40019476364": {
-    "H3ID": "ReflexSRS2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61816fcad92c473c770215cc": {
-    "H3ID": "KnightSightForward",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61817865d3a39d50044c13a4": {
-    "H3ID": "KnightSightRearward",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6194f35c18a3974e5e7421e6": {
-    "H3ID": "GlowringFrontSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6194f3286db0f2477964e67d": {
-    "H3ID": "GlowringFrontSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6194f2df645b5d229654ad77": {
-    "H3ID": "GlowringRearSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6194f2912d2c397d6600348d": {
-    "H3ID": "GlowringRearSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c1780312e221602b66cc189": {
-    "H3ID": "IronRearSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bb20e49d4351e3bac1212de": {
-    "H3ID": "IronRearSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba26b17d4351e00367f9bdd": {
-    "H3ID": "IronRearSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c17804b2e2216152006c02f": {
-    "H3ID": "IronFrontSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba26b01d4351e0085325a51": {
-    "H3ID": "IronFrontSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bc09a30d4351e00367fb7c8": {
-    "H3ID": "MPIronsFront",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c18b90d2e2216152142466b": {
-    "H3ID": "MPIronsFront",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c18b9192e2216398b5a8104": {
-    "H3ID": "MPIronsRear",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bc09a18d4351e003562b68e": {
-    "H3ID": "MPIronsRear",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55d4af3a4bdc2d972f8b456f": {
-    "H3ID": "IronSightsA2Front",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55d5f46a4bdc2d1b198b4567": {
-    "H3ID": "IronSightsA2Rear",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5926d2be86f774134d668e4e": {
-    "H3ID": "H416IronsRear",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5aafa49ae5b5b00015042a58": {
-    "H3ID": "H416IronsFront",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5894a73486f77426d259076c": {
-    "H3ID": "ScorpionSightsFront",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5894a81786f77427140b8347": {
-    "H3ID": "ScorpionSightsRear",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7d9122159bd4001438dbf4": {
-    "H3ID": "CantedSightsFront",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de8fb539f98ac2bc659513a": {
-    "H3ID": "CantedSightsRear",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f3e7897ddc4f03b010e204a": {
-    "H3ID": "FabarmIronSight",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ae30bad5acfc400185c2dc4": {
-    "H3ID": "HandleSightM16A4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "618a75f0bd321d49084cd399": {
-    "H3ID": "ScopeAR18",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "618ba27d9008e4636a67f61d": {
-    "H3ID": "Scope_G3SG1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61714eec290d254f5e6b2ffc": {
-    "H3ID": "Scope3-12x",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "617151c1d92c473c770214ab": {
-    "H3ID": "ScopeFlamenco61-6xLPVO",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b3f7c1c5acfc40dc5296b1d": {
-    "H3ID": "ScopeSusat",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5aa66be6e5b5b0214e506e97": {
-    "H3ID": "ScopeNXS8-32x",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a37cb10c4a282329a73b4e7": {
-    "H3ID": "ScopeM2231-24x",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57c5ac0824597754771e88a9": {
-    "H3ID": "ScopeM2231-24x",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56ea70acd2720b844b8b4594": {
-    "H3ID": "Scope3-12x",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c82342f2e221644f31c060e": {
-    "H3ID": "MagnifierPSO1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c82343a2e221644f31c0611": {
-    "H3ID": "MagnifierPSO1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "576fd4ec2459777f0b518431": {
-    "H3ID": "MagnifierPSO1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b3b99475acfc432ff4dcbee": {
-    "H3ID": "ScopeVD11-6xLPVO",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b2388675acfc4771e1be0be": {
-    "H3ID": "Scope_WA2000",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cf638cbd7f00c06595bc936": {
-    "H3ID": "ReflexKobra",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d0a3a58d7ad1a669c15ca14": {
-    "H3ID": "Scope3-12x",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d0a3e8cd7ad1a6f6a3d35bd": {
-    "H3ID": "Scope3-12x",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5dff772da3651922b360bf91": {
-    "H3ID": "ScopeAcog4x32",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5dfe6104585a0c3e995c7b82": {
-    "H3ID": "ScopeHAMComboScope4x24",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "617131a4568c120fdd29482d": {
-    "H3ID": "MagazineFal20rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6193d338de3cdf1d2614a6fc": {
-    "H3ID": "MagazineUSP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61840bedd92c473c77021635": {
-    "H3ID": "MagazineStanag2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61840d85568c120fdd2962a5": {
-    "H3ID": "MagazineStanag2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "618168dc8004cc50514c34fc": {
-    "H3ID": "MagazineMk17Mod020rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6183d53f1cb55961fa0fdcda": {
-    "H3ID": "MagazineMk17Mod020rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61695095d92c473c7702147a": {
-    "H3ID": "MagazineSKSModern20rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6193d3149fb0c665d5490e32": {
-    "H3ID": "MagazineUSP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "617130016c780c1e710c9a24": {
-    "H3ID": "MagazineFal10rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c5db6742e2216000f1b2852": {
-    "H3ID": "MagazineAPC9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c6d46132e221601da357d56": {
-    "H3ID": "MagazineStanag2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c5970672e221602b21d7855": {
-    "H3ID": "MagazineSKSModern20rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c5db6652e221600113fba51": {
-    "H3ID": "MagazineAPC9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c503ad32e2216398b5aada2": {
-    "H3ID": "MagazineM1420rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c6161fb2e221600113fbde5": {
-    "H3ID": "MagazineToz106",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c88f24b2e22160bc12c69a6": {
-    "H3ID": "MagazineDragonuv",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c503ac82e221602b21d6e9a": {
-    "H3ID": "MagazineM1420rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c6175362e221600133e3b94": {
-    "H3ID": "MagazineAKMDrum",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c920e902e221644f31c3c99": {
-    "H3ID": "MagazineP226Extended",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c6d450c2e221600114c997d": {
-    "H3ID": "MagazineStanag2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "587df3a12459772c28142567": {
-    "H3ID": "MagazineSKSModern10rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c471c442e221602b542a6f8": {
-    "H3ID": "MagazineDragonuv",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c6d42cb2e2216000e69d7d1": {
-    "H3ID": "MagazineStanag2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c6592372e221600133e47d7": {
-    "H3ID": "MagazineStanag100rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c5db6552e2216001026119d": {
-    "H3ID": "MagazineAPC9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0673fb0db8340023300271": {
-    "H3ID": "MagazinePP19Vityaz30rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0672ed0db834001b7353f3": {
-    "H3ID": "MagazinePP19Vityaz30rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0548ae0db834001966a3c2": {
-    "H3ID": "MagazineAK102",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c05413a0db834001c390617": {
-    "H3ID": "MagazineStanag2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bfea7ad0db834001c38f1ee": {
-    "H3ID": "MagazineFRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bfeaa0f0db834001b734927": {
-    "H3ID": "MagazineFRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bed625c0db834001c062946": {
-    "H3ID": "MagazineAK74Drum",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bed61680db834001d2c45ab": {
-    "H3ID": "MagazineAK74N",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bae13ded4351e44f824bf38": {
-    "H3ID": "762x54mmRStripperClip",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b7d37845acfc400170e2f87": {
-    "H3ID": "MagazineFal30rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5addccf45acfc400185c2989": {
-    "H3ID": "MagazineM1430rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5addcce35acfc4001a5fc635": {
-    "H3ID": "MagazineM1430rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ae0973a5acfc4001562206c": {
-    "H3ID": "762x54mmRStripperClip",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d1340b3d7ad1a0b52682ed7": {
-    "H3ID": "MagazineStanag3",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5aaa5dfee5b5b000140293d3": {
-    "H3ID": "MagazineStanag3",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac66c5d5acfc4001718d314": {
-    "H3ID": "MagazineAK102",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ac66bea5acfc43b321d4aec": {
-    "H3ID": "MagazineAKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5aaf8a0be5b5b00015693243": {
-    "H3ID": "MagazineM1Shorty1610rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5aaa5e60e5b5b000140293d6": {
-    "H3ID": "MagazineStanag10rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5aaa4194e5b5b055d06310a5": {
-    "H3ID": "MagazineAK74N",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a9e81fba2750c00164f6b11": {
-    "H3ID": "MagazineSR3M30rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a966f51a2750c00156aacf6": {
-    "H3ID": "MagazineSaiga12k12rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a01c29586f77474660c694c": {
-    "H3ID": "MagazineAKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e5d83b86f7745aed03d262": {
-    "H3ID": "MagazineAKMTactical10rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59f99a7d86f7745b134aa97b": {
-    "H3ID": "MagazinePX4",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "56d59948d2720bb7418b4582": {
-    "H3ID": "MagazineP226",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57838f9f2459774a150289a0": {
-    "H3ID": "MagazineASVal20Rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57838f0b2459774a256959b2": {
-    "H3ID": "MagazineASVal20Rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55d480c04bdc2d1d4e8b456a": {
-    "H3ID": "MagazineAK102",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55d481904bdc2d8c2f8b456a": {
-    "H3ID": "MagazineAK74N",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5888988e24597752fe43a6fa": {
-    "H3ID": "MagazinePSG110rnd",
-    "Modul": [],
-    "OtherMod": ""
+  "576a7c512459771e796e0e17": {
+    "H3ID": "NWB8Mount",
+	"Note": "Should be MW"
   },
   "576a5ed62459771e9c2096cb": {
-    "H3ID": "MagazineCZ75Shadow",
-    "Modul": [],
-    "OtherMod": ""
+    "H3ID": "NWGrach18"
   },
-  "5926c3b286f774640d189b6b": {
-    "H3ID": "MagazineMp530rndStraight",
-    "Modul": [],
-    "OtherMod": ""
+  "576a63cd2459771e796e0e11": {
+    "Note": "Missing, should be included as modul part to 576a581d2459771e7b1bc4f1/MP-443 grach"
   },
-  "5a718b548dc32e000d46d262": {
-    "H3ID": "MagazineG17Standard",
-    "Modul": [],
-    "OtherMod": ""
+  "56d59856d2720bd8418b456a": {
+    "H3ID": "FTW.gun.p226frameDupe",
+	"Note": "Should be MW"
   },
-  "5894a05586f774094708ef75": {
-    "H3ID": "MagazineAPC9",
-    "Modul": [],
-    "OtherMod": ""
+  "56d59948d2720bb7418b4582": {
+    "H3ID": "FTW.gun.Mag15"
   },
-  "5a351711c4a282000b1521a4": {
-    "H3ID": "MagazineMp5100rnd",
-    "Modul": [],
-    "OtherMod": ""
+  "56d5a1f7d2720bb3418b456a": {
+	"Note": "Missing, is default, just gets replaced by attachment barrel, should probably be its own part"
   },
-  "55d482194bdc2d1d4e8b456b": {
-    "H3ID": "MagazineAK74Drum",
-    "Modul": [],
-    "OtherMod": ""
+  "587de4282459771bca0ec90b": {
+    "H3ID": "FTW.gun.unthreadedbarrel.p226",
+	"Note": "Should be MW"
   },
-  "59fafc5086f7740dbe19f6c3": {
-    "H3ID": "MagazineAKMTactical",
-    "Modul": [],
-    "OtherMod": ""
+  "56d5a2bbd2720bb8418b456a": {
+    "H3ID": "FTW.gun.StdBlk",
+	"Note": "Should be MW"
   },
-  "571a29dc2459771fb2755a6a": {
-    "H3ID": "MagazineTT33",
-    "Modul": [],
-    "OtherMod": ""
+  "56d5a407d2720bb3418b456b": {
+    "H3ID": "FTW.gun.StdBlkS",
+	"Note": "Should be MW"
   },
-  "55d485be4bdc2d962f8b456f": {
-    "H3ID": "MagazineMakarovDrum",
-    "Modul": [],
-    "OtherMod": ""
+  "56d5a661d2720bd8418b456b": {
+    "H3ID": "FTW.gun.StdSight",
+	"Note": "Should be just front sight, this includes both front and rear"
   },
-  "5448c12b4bdc2d02308b456f": {
-    "H3ID": "MagazineMakarov",
-    "Modul": [],
-    "OtherMod": ""
+  "56d5a77ed2720b90418b4568": {
+    "H3ID": "FTW.gun.StdSight",
+	"Note": "Should be just rear sight, this includes both front and rear"
   },
-  "57616a9e2459773c7a400234": {
-    "H3ID": "MagazineSaiga12k5rnd",
-    "Modul": [],
-    "OtherMod": ""
+  "56ea7293d2720b8d4b8b45ba": {
+    "H3ID": "FTW.gun.PicRail",
+	"Note": "Should be just rear rail, this includes both front sight and rail"
   },
-  "587df583245977373c4f1129": {
-    "H3ID": "MagazineSKSModern20rnd",
-    "Modul": [],
-    "OtherMod": ""
+  "6388c4ac8d895f557a0c6515": {
+    "H3ID": "MLokToPicRail2Slot"
   },
-  "564ca99c4bdc2d16268b4589": {
-    "H3ID": "MagazineAKS74U",
-    "Modul": [],
-    "OtherMod": ""
+  "6388c5d19c00405f4717c0f0": {
+    "H3ID": "MLokToPicRail3Slot"
   },
-  "564ca9df4bdc2d35148b4569": {
-    "H3ID": "MagazineAKS74U",
-    "Modul": [],
-    "OtherMod": ""
+  "6388c4478d895f557a0c6512": {
+    "H3ID": "MLokToPicRail1HalfSlot"
   },
-  "59d625f086f774661516605d": {
-    "H3ID": "MagazineAKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a0060fc86f7745793204432": {
-    "H3ID": "MagazineAKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55d4837c4bdc2d1d4e8b456c": {
-    "H3ID": "MagazineAK74_10rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "559ba5b34bdc2d1f1a8b4582": {
-    "H3ID": "MagazineSV98",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59e5f5a486f7746c530b3ce2": {
-    "H3ID": "MagazineAKMTactical",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e21a3c67e40bd02257a008a": {
-    "H3ID": "MagazineAKMTactical",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a17fb03fcdbcbcae668728f": {
-    "H3ID": "MagazineAPS",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5998529a86f774647f44f421": {
-    "H3ID": "MagazinePP19Vityaz30rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "599860ac86f77436b225ed1a": {
-    "H3ID": "MagazinePP19Vityaz30rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57d14e1724597714010c3f4b": {
-    "H3ID": "MagazinePP91",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57d1519e24597714373db79d": {
-    "H3ID": "MagazinePP91",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55d4887d4bdc2d962f8b4570": {
-    "H3ID": "MagazineStanag2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "59c1383d86f774290a37e0ca": {
-    "H3ID": "MagazineStanag60rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5448c1d04bdc2dff2f8b4569": {
-    "H3ID": "MagazineStanag20rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "544a378f4bdc2d30388b4567": {
-    "H3ID": "MagazineStanag60rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "55802d5f4bdc2dac148b458e": {
-    "H3ID": "MagazineStanag3",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "544a37c44bdc2d25388b4567": {
-    "H3ID": "MagazineStanag60rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a3501acc4a282000d72293a": {
-    "H3ID": "MagazineP76220rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a38ee51c4a282000c5a955c": {
-    "H3ID": "MagazineToz106",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a38ed75c4a28232996e40c6": {
-    "H3ID": "MagazineToz106",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a718da68dc32e000d46d264": {
-    "H3ID": "MagazineG18Standard",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a718f958dc32e00094b97e7": {
-    "H3ID": "MagazineG17Drum",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7ad2e851dfba0016153692": {
-    "H3ID": "MagazineG18Standard",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b099ac65acfc400186331e1": {
-    "H3ID": "MagazineFal20rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b7bef5d5acfc43bca7067a3": {
-    "H3ID": "MagazineFal30rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b7bef1e5acfc43d82528402": {
-    "H3ID": "MagazineFal10rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b7bef9c5acfc43d102852ec": {
-    "H3ID": "MagazineFal30rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b7c2d1d5acfc43d1028532a": {
-    "H3ID": "MagazineP76220rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b1fb3e15acfc4001637f068": {
-    "H3ID": "MagazineAKM",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b1fd4e35acfc40018633c39": {
-    "H3ID": "MagazineAKMTactical10rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba264f6d4351e0034777d52": {
-    "H3ID": "MagazineMp7",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba2657ed4351e0035628ff2": {
-    "H3ID": "MagazineMp7",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ba26586d4351e44f824b340": {
-    "H3ID": "MagazineMp7",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cadc2e0ae9215051e1c21e7": {
-    "H3ID": "MagazineM9A1",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5caf1041ae92157c28402e3f": {
-    "H3ID": "MagazineStanag10rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5caf1109ae9215753c44119f": {
-    "H3ID": "MagazineStanag20rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cfe8010d7ad1a59283b14c6": {
-    "H3ID": "MagazineAKMDrum",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cbdc23eae9215001136a407": {
-    "H3ID": "MagazineAKMDrum",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cc70093e4a949033c734312": {
-    "H3ID": "MagazineP90",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ce69cbad7f00c00b61c5098": {
-    "H3ID": "MagazineFRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d25af8f8abbc3055079fec5": {
-    "H3ID": "MagazineFRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cf12a15d7f00c05464b293f": {
-    "H3ID": "MagazineFRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5cf8f3b0d7f00c00217872ef": {
-    "H3ID": "MagazineSaiga12k20rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d25a4a98abbc30b917421a4": {
-    "H3ID": "MagazineFRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d25a6538abbc306c62e630d": {
-    "H3ID": "MagazineFRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d25a6a48abbc306c62e6310": {
-    "H3ID": "MagazineFRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d25a7b88abbc3054f3e60bc": {
-    "H3ID": "MagazineFRF2",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d2f213448f0355009199284": {
-    "H3ID": "MagazineMp515rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5d3eb5eca4b9363b1f22f8e4": {
-    "H3ID": "MagazineFiveSeven",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de8e8dafd6b4e6e2276dc32": {
-    "H3ID": "MagazineMp9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de8ea8ffd6b4e6e2276dc35": {
-    "H3ID": "MagazineMp9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de8eaadbbaf010b10528a6d": {
-    "H3ID": "MagazineMp9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de8eac42a78646d96665d91": {
-    "H3ID": "MagazineMp9",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5df8f535bb49d91fb446d6b0": {
-    "H3ID": "MagazineFal10rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5df8f541c41b2312ea3335e3": {
-    "H3ID": "MagazineFal20rnd",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5de653abf76fdc1ce94a5a2a": {
-    "H3ID": "762x51mmCartridgeAP",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5df25b6c0b92095fd441e4cf": {
-    "H3ID": "MagazineScout",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ea034eb5aad6446a939737b": {
-    "H3ID": "MagazinePPSH41",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ea034f65aad6446a939737e": {
-    "H3ID": "MagazinePPSH41Drum",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5e81c4ca763d9f754677befa": {
-    "H3ID": "MagazineM1911",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ef3448ab37dfd6af863525c": {
-    "H3ID": "MagazineM1911Tactical",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5f3e77b26cda304dcc634057": {
-    "H3ID": "MagazineDefender45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fb651b52b1b027b1f50bcff": {
-    "H3ID": "MagazineVector45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fb651dc85f90547f674b6f4": {
-    "H3ID": "MagazineVector45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc3e466187fea44d52eda90": {
-    "H3ID": "MagazineUMP45",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5fc23426900b1d5091531e15": {
-    "H3ID": "MagazineMRAD",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "602286df23506e50807090c6": {
-    "H3ID": "MagazinePL14",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "618b9682a3884f56c957ca78": {
-    "H3ID": "MP5PicatinnyAdapter",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61714b2467085e45ef140b2c": {
-    "H3ID": "RailAxisTilt",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6171407e50224f204c1da3c5": {
-    "H3ID": "RailAdapterHandgunLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61713cc4d8e3106d9806c109": {
-    "H3ID": "RailAdapterHandgunShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "618a75c9a3884f56c957ca1b": {
-    "H3ID": "RailAdapterRussianToPicatinny",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6196255558ef8c428c287d1c": {
-    "H3ID": "RailRiserShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "615d8da4d3a39d50044c10e8": {
-    "H3ID": "RailRiserTall",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "618b9643526131765025ab35": {
-    "H3ID": "RailAdapterCantedSingle",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61816dfa6ef05c2ce828f1ad": {
-    "H3ID": "RailAdapterCantedDoubleLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61965d9058ef8c428c287e0d": {
-    "H3ID": "RailAdapterCantedDoubleShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "619666f4af1f5202c57a952d": {
-    "H3ID": "RailExtenderLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "61816df1d3a39d50044c139e": {
-    "H3ID": "RailExtenderShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "615d8d878004cc50514c3233": {
-    "H3ID": "RailAxisTiltDoubleSided",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "6086b5392535c57a13424d70": {
-    "H3ID": "RailedBarrelExtenderLarge",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "607ea812232e5a31c233d53c": {
-    "H3ID": "RailedBarrelExtenderMiniQuad",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "60785ce5132d4d12c81fd918": {
-    "H3ID": "RailedBarrelExtenderMiniSingle",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "609a4b4fe2ff132951242d04": {
-    "H3ID": "RailedBarrelExtenderSingle",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c7d560b2e22160bc12c6139": {
-    "H3ID": "RailedBarrelExtenderTallDouble",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c471c2d2e22164bef5d077f": {
-    "H3ID": "RailedBarrelExtenderTallSingle",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c6162682e22160010261a2b": {
-    "H3ID": "RailAdapterRussianToPicatinny",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c90c3622e221601da359851": {
-    "H3ID": "RailAdapterRussianToPicatinny",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c61a40d2e2216001403158d": {
-    "H3ID": "RailAdapterRussianToPicatinny",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "591ee00d86f774592f7b841e": {
-    "H3ID": "RailAdapterRussianToPicatinny",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "57acb6222459771ec34b5cb0": {
-    "H3ID": "RailAdapterRussianToPicatinny",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "587e08ee245977446b4410cf": {
-    "H3ID": "RailAdapterRussianToPicatinny",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5649a2464bdc2d91118b45a8": {
-    "H3ID": "RailAdapterCantedSingle",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a27bad7c4a282000b15184b": {
-    "H3ID": "RailAdapterHandgunShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7ad4af51dfba0013379717": {
-    "H3ID": "RailAdapterHandgunLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a7b4900e899ef197b331a2a": {
-    "H3ID": "RailAdapterHandgunShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b3a08b25acfc4001754880c": {
-    "H3ID": "RailAdapterHandgunShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5ef5d994dfbc9f3c660ded95": {
-    "H3ID": "RailAdapterHandgunLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5c0102b20db834001d23eebc": {
-    "H3ID": "RailExtenderShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5bc5a372d4351e44f824d17f": {
-    "H3ID": "RailExtenderLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b800ebc86f774394e230a90": {
-    "H3ID": "RailExtenderLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b4736b986f77405cb415c10": {
-    "H3ID": "RailExtenderShort",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5b30bc285acfc47a8608615d": {
-    "H3ID": "RailExtenderLong",
-    "Modul": [],
-    "OtherMod": ""
-  },
-  "5a9d6d00a2750c5c985b5305": {
-    "H3ID": "RailExtenderShort",
-    "Modul": [],
-    "OtherMod": ""
+  "623c2f652febb22c2777d8d7": {
+    "H3ID": "MLokToPicRail1HalfSlot"
   },
   "59e0be5d86f7742d48765bd2": {
-    "H3ID": "RailExtenderShort",
-    "Modul": [],
-    "OtherMod": ""
+    "H3ID": "MLokToPicRail2Slot"
+  },
+  "59e0bdb186f774156f04ce82": {
+    "H3ID": "MLokToPicRail1HalfSlot"
   },
   "59e0bed186f774156f04ce84": {
-    "H3ID": "RailExtenderLong",
-    "Modul": [],
-    "OtherMod": ""
+    "H3ID": "MLokToPicRail3Slot"
   },
-  "5df35eb2b11454561e3923e2": {
-    "H3ID": "RailExtenderShort",
-    "Modul": [],
-    "OtherMod": ""
+  "5d123b7dd7ad1a004f01b262": {
+    "H3ID": "HandstopKAG"
   },
-  "5df35ea9c41b2312ea3334d8": {
-    "H3ID": "RailExtenderLong",
-    "Modul": [],
-    "OtherMod": ""
+  "5d124c1ad7ad1a12227c53a7": {
+    "H3ID": "HandstopKAG"
   },
-  "57ffa9f4245977728561e844": {
-    "H3ID": "AKForeB10",
-    "Modul": [],
-    "OtherMod": ""
+  "5d133067d7ad1a33013f95b4": {
+    "H3ID": "MLokToPicRail2Slot"
   },
-  "5d2c829448f0353a5c7d6674": {
-    "H3ID": "AKForeRomanian",
-    "Modul": [],
-    "OtherMod": ""
+  "5d123b70d7ad1a0ee35e0754": {
+    "H3ID": "RailCoverLong"
   },
-  "59e898ee86f77427614bd225": {
-    "H3ID": "AKForeShark",
-    "Modul": [],
-    "OtherMod": ""
+  "5d124c0ed7ad1a10d168dd9b": {
+    "H3ID": "RailCoverLong"
   },
-  "5a9548c9159bd400133e97b3": {
-    "H3ID": "MP5Fore_RIS",
-    "Modul": [],
-    "OtherMod": ""
+  "5d123a3cd7ad1a004e476058": {
+    "H3ID": "RailCoverShort"
   },
-  "5926c36d86f77467a92a8629": {
-    "H3ID": "MP5Fore_FlashLight",
-    "Modul": [],
-    "OtherMod": ""
+  "5d124c01d7ad1a115c7d59fb": {
+    "H3ID": "RailCoverShort"
   },
-  "5d2f259b48f0355a844acd74": {
-    "H3ID": "MP5KFore_Proto",
-    "Modul": [],
-    "OtherMod": ""
+  "5b30bc165acfc40016387293": {
+    "H3ID": "MLokToPicRail1HalfSlot"
+  },
+  "5b30bc285acfc47a8608615d": {
+    "H3ID": "MLokToPicRail3Slot"
+  },
+  "5a7dbfc1159bd40016548fde": {
+    "H3ID": "ForegripSG"
+  },
+  "558032614bdc2de7118b4585": {
+    "H3ID": "ForegripVector45"
+  },
+  "58c157c886f774032749fb06": {
+    "H3ID": "ForegripVector45"
+  },
+  "58c157be86f77403c74b2bb6": {
+    "H3ID": "ForegripVector45"
+  },
+  "5c791e872e2216001219c40a": {
+    "H3ID": "ForegripAngledBlack"
+  },
+  "5b057b4f5acfc4771e1bd3e9": {
+    "H3ID": "ForegripThompson"
+  },
+  "5cf4fb76d7f00c065703d3ac": {
+    "H3ID": "ForegripRKO"
+  },
+  "59fc48e086f77463b1118392": {
+    "H3ID": "ForegripMX4"
+  },
+  "5fce0cf655375d18a253eff0": {
+    "H3ID": "ForegripMX4"
+  },
+  "588226d124597767ad33f787": {
+    "H3ID": "ForegripAngledBlack"
+  },
+  "588226ef24597767af46e39c": {
+    "H3ID": "ForegripAngledTan"
+  },
+  "588226e62459776e3e094af7": {
+    "H3ID": "ForegripAngledBlack"
+  },
+  "588226dd24597767ad33f789": {
+    "H3ID": "ForegripAngledTan"
+  },
+  "5c87ca002e221600114cb150": {
+    "H3ID": "ForegripKTVertBlack"
+  },
+  "619386379fb0c665d5490dbe": {
+    "H3ID": "ForegripTStyle"
+  },
+  "59f8a37386f7747af3328f06": {
+    "H3ID": "ForegripShift"
+  },
+  "5f6340d3ca442212f4047eb2": {
+    "H3ID": "ForegripShift"
+  },
+  "5cda9bcfd7f00c0c0b53e900": {
+    "H3ID": "ForegripKTVertBlack"
+  },
+  "5c7fc87d2e221644f31c0298": {
+    "H3ID": "ForegripMX4"
+  },
+  "5b7be4895acfc400170e2dd5": {
+    "H3ID": "MLokToPicRail2HalfSlot"
+  },
+  "57cffce524597763b31685d8": {
+    "H3ID": "ForeGripMPLokAngledBlack"
+  },
+  "57cffcdd24597763f5110006": {
+    "H3ID": "ForeGripMPLokAngledFDE"
+  },
+  "57cffcd624597763133760c5": {
+    "H3ID": "ForeGripMPLokAngledFDE"
+  },
+  "57cffb66245977632f391a99": {
+    "H3ID": "ForeGripMPLokAngledBlack"
+  },
+  "591af28e86f77414a27a9e1d": {
+    "H3ID": "ForegripShiftShorty"
+  },
+  "5c1cd46f2e22164bef5cfedb": {
+    "H3ID": "ForegripOffset"
+  },
+  "5c1bc4812e22164bef5cfde7": {
+    "H3ID": "ForegripRKO"
+  },
+  "5c1bc5612e221602b5429350": {
+    "H3ID": "ForegripRKO"
+  },
+  "5c1bc5af2e221602b412949b": {
+    "H3ID": "ForegripStand"
+  },
+  "5c1bc5fb2e221602b1779b32": {
+    "H3ID": "ForegripAPC"
+  },
+  "5c1bc7432e221602b412949d": {
+    "H3ID": "ForegripValk"
+  },
+  "5c1bc7752e221602b1779b34": {
+    "H3ID": "ForegripLDAG"
+  },
+  "5649a2464bdc2d91118b45a8": {
+    "H3ID": "RailAdapterCantedSingle"
+  },
+  "6269545d0e57f218e4548ca2": {
+    "H3ID": "RailAdapterCantedSingle"
+  },
+  "6269220d70b6c02e665f2635": {
+    "H3ID": "MLokToPicRail1Slot"
+  },
+  "644a3df63b0b6f03e101e065": {
+    "H3ID": "TacticalLaser4"
+  },
+  "626becf9582c3e319310b837": {
+    "H3ID": "SureglowLight"
+  },
+  "57d17c5e2459775a5c57d17d": {
+    "H3ID": "TacticalFlashlight"
+  },
+  "59d790f486f77403cb06aec6": {
+    "H3ID": "TacticalFlashlight"
+  },
+  "5c5952732e2216398b5abda2": {
+    "H3ID": "Perst3Laser"
+  },
+  "5b3a337e5acfc4704b4a19a0": {
+    "H3ID": "KlashLight"
+  },
+  "560d657b4bdc2da74d8b4572": {
+    "H3ID": "KlashLight"
+  },
+  "5a5f1ce64f39f90b401987bc": {
+    "H3ID": "Perst3Laser"
+  },
+  "5d2369418abbc306c62e0c80": {
+    "H3ID": "TacticalLaser4"
+  },
+  "5c06595c0db834001a66af6c": {
+    "H3ID": "Perst3Laser"
+  },
+  "544909bb4bdc2d6f028b4577": {
+    "H3ID": "ANPEQ15"
+  },
+  "57fd23e32459772d0805bcf1": {
+    "H3ID": "ANPEQ15"
+  },
+  "5d10b49bd7ad1a1a560708b0": {
+    "H3ID": "ANPEQ15"
+  },
+  "5b7be47f5acfc400170e2dd2": {
+    "H3ID": "MLokToPicRail1HalfSlot"
+  },
+  "6357c98711fb55120211f7e1": {
+    "H3ID": "M203Classic"
+  },
+  "5c1780312e221602b66cc189": {
+    "H3ID": "Sight_Rear_KAC"
+  },
+  "5dfa3d7ac41b2312ea33362a": {
+    "H3ID": "Sight_Rear_KACMicro"
+  },
+  "5bb20e49d4351e3bac1212de": {
+    "H3ID": "MTRearSight"
+  },
+  "55d5f46a4bdc2d1b198b4567": {
+    "H3ID": "Sight_Rear_A2"
+  },
+  "55d4af3a4bdc2d972f8b456f": {
+    "H3ID": "Sight_Front_A2"
+  },
+  "5894a81786f77427140b8347": {
+    "H3ID": "MPIronsRear"
+  },
+  "5894a73486f77426d259076c": {
+    "H3ID": "MPIronsFront"
+  },
+  "5fc0fa957283c4046c58147e": {
+    "H3ID": "SIGRearSight"
+  },
+  "5fc0fa362770a0045c59c677": {
+    "H3ID": "SIGFrontSight"
+  },
+  "5c18b90d2e2216152142466b": {
+    "H3ID": "Sight_Front_MagpulMBUSFDE"
+  },
+  "5c18b9192e2216398b5a8104": {
+    "H3ID": "Sight_Rear_MagpulMBUSFDE"
+  },
+  "5bc09a18d4351e003562b68e": {
+    "H3ID": "Sight_Rear_MagpulMBUS"
+  },
+  "5bc09a30d4351e00367fb7c8": {
+    "H3ID": "Sight_Front_MagpulMBUS"
+  },
+  "5fb6567747ce63734e3fa1dc": {
+    "H3ID": "Sight_Front_MagpulMBUSPRO"
+  },
+  "5fb6564947ce63734e3fa1da": {
+    "H3ID": "Sight_Rear_MagpulMBUSPRO"
+  },
+  "5c17804b2e2216152006c02f": {
+    "H3ID": "Sight_Front_KAC"
+  },
+  "5ba26b17d4351e00367f9bdd": {
+    "H3ID": "Sight_Rear_Saint"
+  },
+  "5ba26b01d4351e0085325a51": {
+    "H3ID": "Sight_Front_Saint"
+  },
+  "5dfa3d950dee1b22f862eae0": {
+    "H3ID": "Sight_Front_KACMicro"
+  },
+  "5ae30bad5acfc400185c2dc4": {
+    "H3ID": "Sight_Rear_M4CarryHandle"
+  },
+  "544a38634bdc2d58388b4568": {
+    "H3ID": "MuzzleBrake_A2"
+  },
+  "55d4887d4bdc2d962f8b4570": {
+    "H3ID": "MagazineStanagHBoat30rnd"
+  },
+  "61840bedd92c473c77021635": {
+    "H3ID": "MagazineStanagUSGI30rnd"
+  },
+  "61840d85568c120fdd2962a5": {
+    "H3ID": "MagazineStanagUSGI30rnd"
+  },
+  "5c05413a0db834001c390617": {
+    "H3ID": "MagazineStanagHBoat30rnd"
+  },
+  "5c6d450c2e221600114c997d": {
+    "H3ID": "Magazine_HK_Gen2"
+  },
+  "5c6d42cb2e2216000e69d7d1": {
+    "H3ID": "MagazineStanagCanadian30rnd"
+  },
+  "59c1383d86f774290a37e0ca": {
+    "H3ID": "Magazine_PMAG_D60"
+  },
+  "5aaa5e60e5b5b000140293d6": {
+    "H3ID": "MagazineStanagPM10rnd"
+  },
+  "5448c1d04bdc2dff2f8b4569": {
+    "H3ID": "MagazineStanagPM20rnd"
+  },
+  "5aaa5dfee5b5b000140293d3": {
+    "H3ID": "MagazineStanagPM30rnd"
+  },
+  "5d1340b3d7ad1a0b52682ed7": {
+    "H3ID": "MagazineStanagPM30rndFDE"
+  },
+  "544a378f4bdc2d30388b4567": {
+    "H3ID": "MagazineStanagPM40rnd"
+  },
+  "5d1340bdd7ad1a0e8d245aab": {
+    "H3ID": "MagazineStanagPM40rndFDE"
+  },
+  "55802d5f4bdc2dac148b458e": {
+    "H3ID": "MagazineStanagPMWindow30rnd"
+  },
+  "5d1340cad7ad1a0b0b249869": {
+    "H3ID": "MagazineStanagPMWindow30rndFDE"
+  },
+  "6241c2c2117ad530666a5108": {
+    "H3ID": "MagazineStanagPM30rndFDE"
+  },
+  "5c6592372e221600133e47d7": {
+    "H3ID": "MagazineStanagSM100rnd"
+  },
+  "544a37c44bdc2d25388b4567": {
+    "H3ID": "MagazineStanagSM60rnd"
+  },
+  "5c6d46132e221601da357d56": {
+    "H3ID": "Magazine_Troy_Battlemag"
+  },
+  "57ac965c24597706be5f975c": {
+    "H3ID": "MagnifierGhostDR"
+  },
+  "57aca93d2459771f2c7e26db": {
+    "H3ID": "MagnifierGhostDRFDE"
+  },
+  "544a3f024bdc2d1d388b4568": {
+    "H3ID": "MagnifierGhostDR"
+  },
+  "576fd4ec2459777f0b518431": {
+    "H3ID": "MagnifierPSO1"
+  },
+  "544a3a774bdc2d3a388b4567": {
+    "H3ID": "ScopeHAMComboScope4x24"
+  },
+  "58d268fc86f774111273f8c2": {
+    "H3ID": "ReflexRedDotStandard"
+  },
+  "5d2dc3e548f035404a1a4798": {
+    "H3ID": "ReflexVSPrism1x"
+  },
+  "57adff4f24597737f373b6e6": {
+    "H3ID": "ScopeBR4"
+  },
+  "57ae0171245977343c27bfcf": {
+    "H3ID": "ReflexSRO2"
+  },
+  "61657230d92c473c770213d7": {
+    "H3ID": "ReflexMT1"
+  },
+  "58d399e486f77442e0016fe7": {
+    "H3ID": "ReflexMT1"
+  },
+  "5b3116595acfc40019476364": {
+    "H3ID": "ReflexMT1"
+  },
+  "58d39d3d86f77445bb794ae7": {
+    "H3ID": "RailRiserShort"
+  },
+  "58d39b0386f77443380bf13c": {
+    "H3ID": "RailRiserTall"
+  },
+  "577d128124597739d65d0e56": {
+    "H3ID": "RailRiserShort"
+  },
+  "577d141e24597739c5255e01": {
+    "H3ID": "ReflexRedDotStandard"
+  },
+  "58d2664f86f7747fec5834f6": {
+    "H3ID": "RailRiserShort"
+  },
+  "5a33b2c9c4a282000c5a9511": {
+    "H3ID": "RailRiserShort"
+  },
+  "5a32aa8bc4a2826c6e06d737": {
+    "H3ID": "ReflexRedDotStandard"
+  },
+  "5c0517910db83400232ffee5": {
+    "H3ID": "MagnifierGhostDR"
+  },
+  "591c4efa86f7741030027726": {
+    "H3ID": "ReflexPK120"
+  },
+  "570fd79bd2720bc7458b4583": {
+    "H3ID": "ReflexOKP7OSA"
+  },
+  "570fd6c2d2720bc6458b457f": {
+    "H3ID": "ReflexHolosightLong"
+  },
+  "558022b54bdc2dac148b458d": {
+    "H3ID": "ReflexHolosightShort"
+  },
+  "5c07dd120db834001c39092d": {
+    "H3ID": "MagnifierGamepoint3x"
+  },
+  "5c0a2cec0db834001b7ce47d": {
+    "H3ID": "MagnifierGamepoint3x"
+  },
+  "58491f3324597764bc48fa02": {
+    "H3ID": "ReflexHolosightShort"
+  },
+  "584924ec24597768f12ae244": {
+    "H3ID": "ReflexHolosightShort"
+  },
+  "5b30b0dc5acfc400153b7124": {
+    "H3ID": "ReflexGamepointRDS"
+  },
+  "6165ac8c290d254f5e6b2f6c": {
+    "H3ID": "ReflexKDRRedDot"
+  },
+  "60a23797a37c940de7062d02": {
+    "H3ID": "ReflexEG1"
+  },
+  "5d2da1e948f035477b1ce2ba": {
+    "H3ID": "ReflexSRS2"
+  },
+  "5c0505e00db834001b735073": {
+    "H3ID": "ReflexPK120"
+  },
+  "609a63b6e2ff132951242d09": {
+    "H3ID": "ReflexPK120"
+  },
+  "584984812459776a704a82a6": {
+    "H3ID": "ReflexRedDotStandard"
+  },
+  "59f9d81586f7744c7506ee62": {
+    "H3ID": "ReflexLCO"
+  },
+  "570fd721d2720bc5458b4596": {
+    "H3ID": "ReflexMRS"
+  },
+  "5dfe6104585a0c3e995c7b82": {
+    "H3ID": "ScopeLT3x9Scope"
+  },
+  "544a3d0a4bdc2d1b388b4567": {
+    "H3ID": "ScopeEVU110x28mm"
+  },
+  "616554fe50224f204c1da2aa": {
+    "H3ID": "RailRiserShort"
+  },
+  "5c7d55f52e221644f31bff6a": {
+    "H3ID": "RailRiserShort"
+  },
+  "61659f79d92c473c770213ee": {
+    "H3ID": "ReflexGamepointRDS"
+  },
+  "5c7d55de2e221644f31bff68": {
+    "H3ID": "ReflexKDRRedDot"
+  },
+  "5c7d560b2e22160bc12c6139": {
+    "H3ID": "RailRiserMed"
+  },
+  "616584766ef05c2ce828ef57": {
+    "H3ID": "RailRiserShort"
+  },
+  "5b3b6dc75acfc47a8773fb1e": {
+    "H3ID": "RailRiserMed"
+  },
+  "615d8d878004cc50514c3233": {
+    "H3ID": "RailRiserTall"
+  },
+  "616442e4faa1272e43152193": {
+    "H3ID": "ReflexArco"
+  },
+  "5b2388675acfc4771e1be0be": {
+    "H3ID": "MagnifierGhostDR"
+  },
+  "5b3b99475acfc432ff4dcbee": {
+    "H3ID": "MagnifierGhostDR"
+  },
+  "5a37cb10c4a282329a73b4e7": {
+    "H3ID": "ScopeM2231-24x"
+  },
+  "57c5ac0824597754771e88a9": {
+    "H3ID": "ScopeM2231-24x"
+  },
+  "618ba27d9008e4636a67f61d": {
+    "H3ID": "MagnifierGhostDR"
+  },
+  "617151c1d92c473c770214ab": {
+    "H3ID": "MagnifierGhostDR"
+  },
+  "56ea70acd2720b844b8b4594": {
+    "H3ID": "Scope_WA2000"
+  },
+  "5aa66be6e5b5b0214e506e97": {
+    "H3ID": "Scope3-12x"
+  },
+  "61714eec290d254f5e6b2ffc": {
+    "H3ID": "Scope_WA2000"
+  },
+  "5d0a3a58d7ad1a669c15ca14": {
+    "H3ID": "ScopeLT3x9Scope"
+  },
+  "5d0a3e8cd7ad1a6f6a3d35bd": {
+    "H3ID": "ScopeLT3x9Scope"
+  },
+  "5c064c400db834001d23f468": {
+    "H3ID": "RailExtenderLong"
+  },
+  "62850c28da09541f43158cca": {
+    "H3ID": "Scope3-12x"
+  },
+  "61605d88ffa6e502ac5e7eeb": {
+    "H3ID": "Rangefinder7x25"
+  },
+  "5c1cdd302e221602b3137250": {
+    "H3ID": "AR15HandleRailFlat"
+  },
+  "5c1cdd512e22161b267d91ae": {
+    "H3ID": "ScopeLion2-5x"
+  },
+  "5c05293e0db83400232fff80": {
+    "H3ID": "ScopeAcog4x32"
+  },
+  "5c052a900db834001a66acbd": {
+    "H3ID": "ScopeAcog4x32"
+  },
+  "59db7e1086f77448be30ddf3": {
+    "H3ID": "ScopeAcog4x32"
+  },
+  "5dff772da3651922b360bf91": {
+    "H3ID": "ScopeVRZ_6_36x56mmBlack"
+  },
+  "626bb8532c923541184624b4": {
+    "H3ID": "DeagleScope"
+  },
+  "5a800961159bd4315e3a1657": {
+    "H3ID": "TacticalLaser4"
+  },
+  "5cc9c20cd7f00c001336c65d": {
+    "H3ID": "TacticalLaser1"
+  },
+  "6272370ee4013c5d7e31f418": {
+    "H3ID": "TacticalLaser2"
+  },
+  "6272379924e29f06af4d5ecb": {
+    "H3ID": "TacticalLaser3"
+  },
+  "5b07dd285acfc4001754240d": {
+    "H3ID": "SureglowLight"
+  },
+  "56def37dd2720bec348b456a": {
+    "H3ID": "CompactFlashlight2"
+  },
+  "6477772ea8a38bb2050ed4db": {
+    "H3ID": "ReflexPK23"
+  },
+  "64785e7c19d732620e045e15": {
+    "H3ID": "ReflexLCO"
+  },
+  "5c78f2882e22165df16b832e": {
+    "H3ID": "MuzzleBrake_JailBreak"
+  },
+  "5b3a16655acfc40016387a2a": {
+    "H3ID": "MuzzleBrakeCharon"
+  },
+  "5c7e5f112e221600106f4ede": {
+    "H3ID": "MuzzleBrake_DeadAirKeyMoFlashHider"
+  },
+  "5a34fe59c4a282000b1521a2": {
+    "H3ID": "SupDeadAirSierra5"
+  },
+  "5c0fafb6d174af02a96260ba": {
+    "H3ID": "MuzzleBrake_KACM4QD"
+  },
+  "638612b607dfed1ccb7206ba": {
+    "H3ID": "SupKACQDBlk"
+  },
+  "612e0cfc8004cc50514c2d9e": {
+    "H3ID": "MuzzleBrake_DeadAirKeyMo"
+  },
+  "612e0e04568c120fdd294258": {
+    "H3ID": "MuzzleBrake_DeadAirPyro"
+  },
+  "63877c99e785640d436458ea": {
+    "H3ID": "SupDeadAirSMSBlk"
+  },
+  "5cf6937cd7f00c056c53fb39": {
+    "H3ID": "MuzzleBrake_TTIGMInterceptor"
+  },
+  "5cff9e5ed7ad1a09407397d4": {
+    "H3ID": "MuzzleBrake_DD"
+  },
+  "5cff9e84d7ad1a049e54ed55": {
+    "H3ID": "SupDDWave"
+  },
+  "5c48a2a42e221602b66d1e07": {
+    "H3ID": "MuzzleBrake_StrikeIndVenom"
+  },
+  "5f6372e2865db925d54f3869": {
+    "H3ID": "MuzzleBrake_DeadAirKeyMo"
+  },
+  "5f6339d53ada5942720e2dc3": {
+    "H3ID": "MuzzleBrake_DeadAirPyro"
+  },
+  "615d8e2f1cb55961fa0fd9a4": {
+    "H3ID": "MuzzleBrake_OdinWorksAtlas7"
+  },
+  "56ea8180d2720bf2698b456a": {
+    "H3ID": "MuzzleBrake_KACM4QD"
+  },
+  "57da93632459771cb65bf83f": {
+    "H3ID": "SupKACQDBlk"
+  },
+  "57dbb57e2459774673234890": {
+    "H3ID": "SupKACQDFDE"
+  },
+  "5d02676dd7ad1a049e54f6dc": {
+    "H3ID": "MuzzleBrake_TaccomPCC"
+  },
+  "56ea6fafd2720b844b8b4593": {
+    "H3ID": "MuzzleBrake_XM177"
+  },
+  "5943ee5a86f77413872d25ec": {
+    "H3ID": "MuzzleBrake_CobaltBAMF"
+  },
+  "609269c3b0e443224b421cc1": {
+    "H3ID": "MuzzleBrake_SurefireWarcomp"
+  },
+  "60926df0132d4d12c81fd9df": {
+    "H3ID": "SupSurefireSocomMonster"
+  },
+  "5c7fb51d2e2216001219ce11": {
+    "H3ID": "MuzzleBrake_SurefireWarcomp"
+  },
+  "55d6190f4bdc2d87028b4567": {
+    "H3ID": "SupSurefireSocomMiniMonster"
+  },
+  "55d614004bdc2d86028b4568": {
+    "H3ID": "SupSurefireSocomMonster"
+  },
+  "5ea17bbc09aa976f2e7a51cd": {
+    "H3ID": "SupSurefireSocomFDE"
+  },
+  "5ea172e498dacb342978818e": {
+    "H3ID": "MuzzleBrake_SurefireWarcomp"
+  },
+  "5c6d710d2e22165df16b81e7": {
+    "H3ID": "MuzzleBrake_SurefireWarcomp"
+  },
+  "612e0e55a112697a4b3a66e7": {
+    "H3ID": "MuzzleBrake_Phase5Hex"
+  },
+  "5d440625a4b9361eec4ae6c5": {
+    "H3ID": "MuzzleBrake_DD"
+  },
+  "5d44064fa4b9361e4f6eb8b5": {
+    "H3ID": "SupDDWave"
+  },
+  "5cc9b815d7f00c000e2579d6": {
+    "H3ID": "MuzzleBrake_KVPLinear"
+  },
+  "5a7c147ce899ef00150bd8b8": {
+    "H3ID": "MuzzleBrake_VP09"
+  },
+  "5c7955c22e221644f31bfd5e": {
+    "H3ID": "SuppressorMk2Hex"
+  },
+  "59bffbb386f77435b379b9c2": {
+    "H3ID": "SuppressorAM4"
+  },
+  "5a9fbb84a2750c00137fa685": {
+    "H3ID": "SuppressorSRCBlack"
+  },
+  "626667e87379c44d557b7550": {
+    "H3ID": "MuzzleBrake_KAC556QD"
+  },
+  "626673016f1edc06f30cf6d5": {
+    "H3ID": "SupKACPRS"
+  },
+  "62669bccdb9ebb4daa44cd14": {
+    "H3ID": "MuzzleBrake_StrikeIndOppressor"
+  },
+  "626a74340be03179a165e30c": {
+    "H3ID": "MuzzleBrake_DDFlashSuppressor"
+  },
+  "6386120cd6baa055ad1e201c": {
+    "H3ID": "MuzzleBrake_HUXWRX_QDFlash"
+  },
+  "63ac5c9658d0485fc039f0b8": {
+    "H3ID": "MuzzleBrake_APWRaptor"
+  },
+  "6405ff6bd4578826ec3e377a": {
+    "H3ID": "MuzzleBrake_CobaltProfessional"
+  },
+  "560838c94bdc2d77798b4569": {
+    "H3ID": "MuzzleBrake_VSevenHeliosTi"
+  },
+  "560e620e4bdc2d724b8b456b": {
+    "H3ID": "CompensatorCutts"
+  },
+  "5648b62b4bdc2d9d488b4585": {
+    "H3ID": "GP25_Classic"
+  },
+  "54490a4d4bdc2dbc018b4573": {
+    "Note": "Unused in Tarkov"
+  },
+  "5580239d4bdc2de7118b4583": {
+    "Note": "Unused in Tarkov"
+  },
+  "55d617094bdc2d89028b4568": {
+    "Note": "Unused in Tarkov"
+  },
+  "54491bb74bdc2d09088b4567": {
+    "H3ID": "BayonetH416",
+	"Note": "Should be ER FULCRUM"
   }
 }

@@ -1,0 +1,20 @@
+Dumping modular parts
+[Info   :EscapeFromMeatov]      Barrels_AR15:AR15 14.5" Barrel
+[Info   :EscapeFromMeatov]      Handguards_AR:M4A1 Standard Handguard
+[Info   :EscapeFromMeatov]      BufferTubes_AR:A2 Buffertube
+[Info   :EscapeFromMeatov]      Bolts_AR15:AR15 Bolt
+[Info   :EscapeFromMeatov]      Chamber_AR:5.56x45mm
+[Info   :EscapeFromMeatov]      Charging_AR15:AR15 Charging Handle
+[Info   :EscapeFromMeatov]      Grips_AR:A2 Pistol Grip
+[Info   :EscapeFromMeatov]      Uppers_AR:M4A1 Upper
+[Info   :EscapeFromMeatov]      Catches_AR:M4A1 Bolt Catch
+[Info   :EscapeFromMeatov]      Triggers_AR:Milspec Trigger
+[Info   :EscapeFromMeatov]      Releases_AR:AR15 Mag Release
+[Info   :EscapeFromMeatov]      Selectors_AR:AR15 Selector
+[Info   :EscapeFromMeatov]      TriggerGuards_AR:AR15 Trigger Guard
+[Info   :EscapeFromMeatov]      Endplates_AR:AR15 Endplate
+[Info   :EscapeFromMeatov]      Magwells_AR:No Magwell
+[Info   :EscapeFromMeatov]      GasBlocks_AR:M4 Front Post Gas Block
+[Info   :EscapeFromMeatov]      BufferStocks_AR:M4A1 Standard Stock
+[Info   :EscapeFromMeatov]      CastleNut_AR:AR15 Castle Nut
+[Info   :EscapeFromMeatov]      Dustcover_AR15:AR15 Dustcover

@@ -1,0 +1,18 @@
+[Info   :EscapeFromMeatov] m19barrels
+[Info   :EscapeFromMeatov]      Default Barrel
+[Info   :EscapeFromMeatov]      A9-16 Vented Barrel
+[Info   :EscapeFromMeatov]      XRK-V Extended Barrel
+[Info   :EscapeFromMeatov] m19triggers
+[Info   :EscapeFromMeatov]      Default Trigger
+[Info   :EscapeFromMeatov]      Lightweight Trigger
+[Info   :EscapeFromMeatov]      Match Trigger
+[Info   :EscapeFromMeatov]      Hair Trigger
+[Info   :EscapeFromMeatov] m19grips
+[Info   :EscapeFromMeatov]      No Grip
+[Info   :EscapeFromMeatov]      Rubberized Grip
+[Info   :EscapeFromMeatov]      Stippled Grip
+[Info   :EscapeFromMeatov]      Granulated Grip
+[Info   :EscapeFromMeatov] m19slides
+[Info   :EscapeFromMeatov]      Default Slide
+[Info   :EscapeFromMeatov]      A9-16 Lightweight
+[Info   :EscapeFromMeatov]      XRK-V Extended

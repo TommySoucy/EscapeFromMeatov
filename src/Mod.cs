@@ -861,10 +861,12 @@ namespace EFM
                                 break;
                             case 17: // Dump item IDs
                                 Mod.LogInfo("\tDebug: Dumping item IDs");
+                                List<string> lines = new List<string>();
                                 foreach (KeyValuePair<string, FVRObject> entry in IM.OD)
                                 {
-                                    Mod.LogInfo(entry.Key);
+                                    lines.Add(entry.Key);
                                 }
+                                File.WriteAllLines(path + "/database/itemiddump.txt", lines.ToArray());
                                 break;
                             case 18: // Dump spawner IDs
                                 Mod.LogInfo("\tDebug: Dumping spawner IDs");
@@ -878,11 +880,23 @@ namespace EFM
                                 foreach (KeyValuePair<string, ModularWorkshopPartsDefinition> entry in ModularWorkshopManager.ModularWorkshopPartsGroupsDictionary)
                                 {
                                     Mod.LogInfo(entry.Key);
-                                    foreach (KeyValuePair<string, GameObject> innerEntry in entry.Value.PartsDictionary)
+                                    if (entry.Value != null)
                                     {
-                                        Mod.LogInfo("\t"+innerEntry.Key);
+                                        try
+                                        {
+                                            Dictionary<string, GameObject> partsDict = entry.Value.PartsDictionary;
+                                            foreach (KeyValuePair<string, GameObject> innerEntry in partsDict)
+                                            {
+                                                Mod.LogInfo("\t" + innerEntry.Key);
+                                            }
+                                        }
+                                        catch { }
                                     }
                                 }
+                                break;
+                            case 20: // Go to indoor range
+                                Mod.LogInfo("\tDebug: Loading indoor range");
+                                SteamVR_LoadLevel.Begin("IndoorRange", false, 0.5f, 0f, 0f, 0f, 1f);
                                 break;
                         }
                     }
@@ -1760,17 +1774,20 @@ namespace EFM
 
             foreach(KeyValuePair<string, JObject> item in itemMapData)
             {
-                ItemMapEntry newEntry = new ItemMapEntry();
-                newEntry.ID = item.Value["H3ID"].ToString();
-
-                newEntry.modul = newEntry.ID.Equals("868");
-                if (newEntry.modul)
+                if (item.Value["H3ID"] != null)
                 {
-                    newEntry.modulGroup = item.Value["ModulGroup"].ToString();
-                    newEntry.modulPart = item.Value["ModulPart"].ToString();
-                }
+                    ItemMapEntry newEntry = new ItemMapEntry();
+                    newEntry.ID = item.Value["H3ID"].ToString();
 
-                itemMap.Add(item.Key, newEntry);
+                    newEntry.modul = newEntry.ID.Equals("868");
+                    if (newEntry.modul)
+                    {
+                        newEntry.modulGroup = item.Value["ModulGroup"].ToString();
+                        newEntry.modulPart = item.Value["ModulPart"].ToString();
+                    }
+
+                    itemMap.Add(item.Key, newEntry);
+                }
             }
         }
 
