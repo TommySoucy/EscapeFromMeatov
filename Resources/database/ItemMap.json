@@ -4398,6 +4398,14 @@
     "H3ID": "Saiga Fore",
 	"Note": "Should be MW"
   },
+  "5827272a24597748c74bdeea": {
+    "H3ID": "Saiga Fore Long",
+	"Note": "Should be MW"
+  },
+  "58272b392459774b4c7b3ccd": {
+    "H3ID": "Saiga Fore Short",
+	"Note": "Should be MW"
+  },
   "57616c112459773cce774d66": {
     "H3ID": "SaigaDustcover",
 	"Note": "Should be MW"
@@ -4406,18 +4414,40 @@
     "H3ID": "Saiga 12 Stock",
 	"Note": "Should be MW"
   },
+  "58272d7f2459774f6311ddfd": {
+    "H3ID": "MuzzleBrake_GK2",
+	"Note": "Should be MW"
+  },
   "576167ab2459773cad038c43": {
 	"Note": "Missing, should be included with Modul 576165642459773c7a400233/Saiga12"
   },
+  "58272b842459774abc128d50": {
+	"Note": "Missing, should be included with Modul 576165642459773c7a400233/Saiga12"
+  },
+  "57a9b9ce2459770ee926038d": {
+	"Note": "Integrated in 576165642459773c7a400233/Saiga12_Base receiver, should probably be modul part"
+  },
   "57616a9e2459773c7a400234": {
     "H3ID": "MagazineSaiga12k5rnd"
+  },
+  "57c44b372459772d2b39b8ce": {
+    "H3ID": "NWValBuilt",
+	"Note": "Should be MW"
   },
   "57838ad32459774a17445cd2": {
     "H3ID": "NWValBuilt",
 	"Note": "Should be MW"
   },
+  "57c44dd02459772d2e0ae249": {
+    "H3ID": "NWValSup",
+	"Note": "Should be MW"
+  },
   "57838c962459774a1651ec63": {
     "H3ID": "NWValSup",
+	"Note": "Should be MW"
+  },
+  "57c44e7b2459772d28133248": {
+    "H3ID": "NWValRS",
 	"Note": "Should be MW"
   },
   "57838e1b2459774a256959b1": {
@@ -4428,8 +4458,20 @@
     "H3ID": "NWVSSDust",
 	"Note": "Should be MW"
   },
+  "57c44f4f2459772d2c627113": {
+    "H3ID": "NWVSSDust",
+	"Note": "Should be MW"
+  },
   "578395e82459774a0e553c7b": {
     "H3ID": "NWVSSStock",
+	"Note": "Should be MW"
+  },
+  "57c44fa82459772d2d75e415": {
+    "H3ID": "NWValGrip",
+	"Note": "Should be MW"
+  },
+  "57c450252459772d28133253": {
+    "H3ID": "NWValStock",
 	"Note": "Should be MW"
   },
   "57a3459f245977764a01f703": {
@@ -4466,6 +4508,24 @@
     "H3ID": "sksbasedupe",
 	"Note": "Should be MW"
   },
+  "587e02ff24597743df3deaeb": {
+    "H3ID": "sksbasedupe",
+	"Note": "Should be OP-SKS"
+  },
+  "587e08ee245977446b4410cf": {
+	"Note": "Missing, included on sksbasedupe"
+  },
+  "587e0531245977466077a0f7": {
+    "H3ID": "opstockdupe",
+	"Note": "Should be MW"
+  },
+  "587df3a12459772c28142567": {
+    "H3ID": "sksimagdupe",
+	"Note": "Should be MW"
+  },
+  "587df583245977373c4f1129": {
+    "H3ID": "promag20dupe"
+  },
   "574dad8024597745964bf05c": {
     "H3ID": "sks_strddupe",
 	"Note": "Should be MW"
@@ -4473,9 +4533,115 @@
   "574db213245977459a2f3f5d": {
 	"Note": "Integrated in receiver, should probably be modul"
   },
+  "57d14d2524597714373db789": {
+    "H3ID": "PP91KEDR",
+	"Note": "Should be Modul"
+  },
+  "57f3c6bd24597738e730fa2f": {
+    "H3ID": "PP91KEDR",
+	"Note": "Should be PP-91-01 \"Kedr-B\""
+  },
+  "57f4c844245977379d5c14d1": {
+    "H3ID": "PP91KEDR",
+	"Note": "Should be PP-9 \"Klin\""
+  },
+  "57f3c8cc2459773ec4480328": {
+    "H3ID": "SuppressorMUS1",
+	"Note": "Should be PP-91-01 \"Kedr-B\" 9x18PM sound suppressor, but this is the one included with the vanilla kedr"
+  },
+  "57f3c7e024597738ea4ba286": {
+	"Note": "Should be Modul part of 57f3c6bd24597738e730fa2f"
+  },
+  "57d152ec245977144076ccdf": {
+	"Note": "Should be Modul part of 57d14d2524597714373db789/PP91KEDR"
+  },
+  "57ee59b42459771c7b045da5": {
+	"Note": "Should be Modul part of 57d14d2524597714373db789/PP91KEDR"
+  },
+  "57d1519e24597714373db79d": {
+    "H3ID": "MagazinePP91"
+  },
+  "57d14e1724597714010c3f4b": {
+    "H3ID": "MagazinePP91",
+	"Note": "Missing, should be 20 round mag, the only one available is 30"
+  },
+  "57dc2fa62459775949412633": {
+    "H3ID": "ModulAKSDupe",
+	"Note": "Should be AKS-74U, this one is AKS-74UN which has the dovetail mount"
+  },
+  "583990e32459771419544dd2": {
+    "H3ID": "ModulAKSDupe",
+	"Note": "Should be MW"
+  },
+  "5839a40f24597726f856b511": {
+    "H3ID": "ModulAKSDupe",
+	"Note": "Should be AKS-74UB, but isn't that just N with a PSB4 included? And subsonic sight I guess"
+  },
+  "57dc324a24597759501edc20": {
+    "H3ID": "MuzzleAKS74"
+  },
+  "57dc32dc245977596d4ef3d3": {
+    "H3ID": "AKSForeAKS",
+	"Note": "Should be modul"
+  },
+  "57ffa9f4245977728561e844": {
+    "H3ID": "AKSForeB11",
+	"Note": "Should be modul"
+  },
+  "57ffb0062459777a045af529": {
+    "H3ID": "AKMiscB18Mount",
+	"Note": "Should be modul"
+  },
+  "57ffb0e42459777d047111c5": {
+    "H3ID": "AttSuppressorAKPBS4"
+  },
+  "57ffaea724597779f52b3a4d": {
+    "H3ID": "AKForeQuadRail",
+	"Note": "Should be B-12, which would result in 4 rails, figured this would be best fit for now"
+  },
+  "57dc334d245977597164366f": {
+    "H3ID": "AKSDustcover2",
+	"Note": "Should be modul"
+  },
+  "5839a7742459773cf9693481": {
+    "H3ID": "AKSDustcover2",
+	"Note": "Should be modul"
+  },
+  "57dc347d245977596754e7a1": {
+    "H3ID": "AKStockAKS",
+	"Note": "Should be modul"
+  },
   "5644bd2b4bdc2d3b4c8b4572": {
     "H3ID": "ModulAK74NFactory",
 	"Note": "Should be MW"
+  },
+  "57cff947245977638e6f2a19": {
+    "H3ID": "AKForeMOEblk",
+	"Note": "Should be MW"
+  },
+  "57cffd8224597763b03fc609": {
+    "H3ID": "AKForeMOEFDE",
+	"Note": "Should be MW"
+  },
+  "57cffddc24597763133760c6": {
+    "H3ID": "AKForeMOEod",
+	"Note": "Should be MW"
+  },
+  "57cffe0024597763b03fc60b": {
+    "H3ID": "AKForeMOEplm",
+	"Note": "Should be MW"
+  },
+  "57cffe20245977632f391a9d": {
+    "H3ID": "AKForeMOEgry",
+	"Note": "Should be MW"
+  },
+  "57ade1442459771557167e15": {
+    "H3ID": "AR15StockUltralite",
+	"Note": "Should be Armacon Baskak stock"
+  },
+  "57acb6222459771ec34b5cb0": {
+    "H3ID": "AKMiscAKRS",
+	"Note": "Should be VOMZ Pilad 043-02 dovetail mount"
   },
   "56dfef82d2720bbd668b4567": {
     "H3ID": "545x39mmCartridgeAP",
@@ -4580,6 +4746,10 @@
 	"H3ID": "AKGripRK3",
 	"Note": "Should be MW"
   },
+  "57e3dba62459770f0c32322b": {
+	"H3ID": "AKGripAKSBL",
+	"Note": "Should be MW"
+  },
   "5649af094bdc2df8348b4586": {
 	"H3ID": "AKDustcover74",
 	"Note": "Should be MW"
@@ -4639,6 +4809,36 @@
   },
   "606dae0ab0e443224b421bb7": {
     "H3ID": "Modul155Dupe",
+	"Note": "Should be MW"
+  },
+  "58820d1224597753c90aeb13": {
+    "H3ID": "12GaugeShellSlug"
+  },
+  "560d5e524bdc2d25448b4571": {
+    "H3ID": "12GaugeShellNo2Buckshot"
+  },
+  "5882163224597757561aa920": {
+    "H3ID": "AttDecMag153_7",
+	"Note": "Should be MW"
+  },
+  "5882163824597757561aa922": {
+    "H3ID": "AttDecMag1336",
+	"Note": "Should be MW"
+  },
+  "5882163e24597758206fee8c": {
+    "H3ID": "AttDecMag153_5",
+	"Note": "Should be MW"
+  },
+  "588200af24597742fa221dfb": {
+    "H3ID": "AttSuppBar153610",
+	"Note": "Should be MW"
+  },
+  "588200c224597743990da9ed": {
+    "H3ID": "AttSuppBar153660",
+	"Note": "Should be MW"
+  },
+  "588200cf2459774414733d55": {
+    "H3ID": "AttSuppBar153710",
 	"Note": "Should be MW"
   },
   "56deec93d2720bec348b4568": {
@@ -4757,9 +4957,6 @@
   },
   "560d61e84bdc2da74d8b4571": {
     "H3ID": "NW762R-SNB"
-  },
-  "560d5e524bdc2d25448b4571": {
-    "H3ID": "12GaugeShellNo2Buckshot"
   },
   "54527a984bdc2d4e668b4567": {
     "H3ID": "NWM855"
@@ -5611,6 +5808,9 @@
   "56d5a1f7d2720bb3418b456a": {
 	"Note": "Missing, is default, just gets replaced by attachment barrel, should probably be its own part"
   },
+  "587de5ba2459771c0f1e8a58": {
+	"Note": "Missing, should be included with modul P226"
+  },
   "587de4282459771bca0ec90b": {
     "H3ID": "FTW.gun.unthreadedbarrel.p226",
 	"Note": "Should be MW"
@@ -5634,6 +5834,10 @@
   "56ea7293d2720b8d4b8b45ba": {
     "H3ID": "FTW.gun.PicRail",
 	"Note": "Should be just rear rail, this includes both front sight and rail"
+  },
+  "57c9a89124597704ee6faec1": {
+    "H3ID": "FTW.gun.StdFde",
+	"Note": "Should be MW"
   },
   "6388c4ac8d895f557a0c6515": {
     "H3ID": "MLokToPicRail2Slot"
@@ -5964,6 +6168,15 @@
   },
   "576fd4ec2459777f0b518431": {
     "H3ID": "MagnifierPSO1"
+  },
+  "57f3a5ae2459772b0e0bf19e": {
+    "Note": "Missing eyecup for MagnifierPSO1"
+  },
+  "57c69dd424597774c03b7bbc": {
+    "Note": "Missing, all scopes already have their mount"
+  },
+  "57d17e212459775a1179a0f5": {
+    "Note": "Missing, all accessories already have their mount"
   },
   "544a3a774bdc2d3a388b4567": {
     "H3ID": "ScopeHAMComboScope4x24"
@@ -6340,5 +6553,16 @@
   "54491bb74bdc2d09088b4567": {
     "H3ID": "BayonetH416",
 	"Note": "Should be ER FULCRUM"
+  },
+  "57cd379a24597778e7682ecf": {
+    "H3ID": "ftw.melee.kiba"
+  },
+  "57e26ea924597715ca604a09": {
+    "H3ID": "Tanto",
+	"Note": "Should be Bars A-2607 Damascus knife"
+  },
+  "57e26fc7245977162a14b800": {
+    "H3ID": "CombatKnife",
+	"Note": "Should be Bars A-2607 95Kh18 knife"
   }
 }
