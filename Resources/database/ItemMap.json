@@ -4955,6 +4955,34 @@
   "56083eab4bdc2d26448b456a": {
 	"Note": "Should be Modul part of 55801eed4bdc2d89578b4588/SV-98"
   },
+  "588892092459774ac91d4b11": {
+    "H3ID": "NWDVL10Rifle",
+	"Note": "Should be Modul"
+  },
+  "5888945a2459774bf43ba385": {
+	"Note": "Missing, should be Modul part of 588892092459774ac91d4b11/DVL-10"
+  },
+  "5888956924597752983e182d": {
+	"Note": "Missing, should be Modul part of 588892092459774ac91d4b11/DVL-10"
+  },
+  "5888976c24597754281f93f5": {
+	"Note": "Missing, should be Modul part of 588892092459774ac91d4b11/DVL-10"
+  },
+  "58889c7324597754281f9439": {
+	"Note": "Missing, should be included with modul 588892092459774ac91d4b11/DVL-10"
+  },
+  "58889d0c2459775bc215d981": {
+	"Note": "Missing, should be included with modul 588892092459774ac91d4b11/DVL-10"
+  },
+  "5888996c24597754281f9419": {
+    "H3ID": "NWDVLMuzzle"
+  },
+  "5888988e24597752fe43a6fa": {
+    "H3ID": "NWDVL10Mag"
+  },
+  "5887431f2459777e1612938f": {
+    "H3ID": "NW762R-LPS"
+  },
   "560d61e84bdc2da74d8b4571": {
     "H3ID": "NW762R-SNB"
   },
@@ -4963,6 +4991,9 @@
   },
   "54527ac44bdc2d36668b4567": {
     "H3ID": "NWM855A1"
+  },
+  "58d3db5386f77426186285a0": {
+    "H3ID": "PinnedGrenadeM67"
   },
   "5448be9a4bdc2dfd2f8b456a": {
     "H3ID": "PinnedGrenadeRG5"
@@ -4984,6 +5015,18 @@
   },
   "571a28e524597720b4066567": {
     "H3ID": "TTsil"
+  },
+  "58dd3ad986f77403051cba8f": {
+    "H3ID": "762x51mmCartridgeFMJ",
+	"Note": "Should be 7.62x51mm M80"
+  },
+  "59e4cf5286f7741778269d8a": {
+    "H3ID": "762x39mmCartridgeTracer",
+	"Note": "Should be 7.62x39mm T-45M1 gzh"
+  },
+  "59e0d99486f7744a32234762": {
+    "H3ID": "762x39mmCartridgeAP",
+	"Note": "Should be 7.62x39mm BP gzh"
   },
   "5735fdcd2459776445391d61": {
     "H3ID": "762x25mmCartridgeFMJ",
@@ -5090,6 +5133,30 @@
   },
   "58948c8e86f77409493f7266": {
     "H3ID": "ModularMPXDupe",
+	"Note": "Should be MW"
+  },
+  "58949dea86f77409483e16a8": {
+    "H3ID": "MuzzleMPX",
+	"Note": "Should be MW"
+  },
+  "5894a05586f774094708ef75": {
+    "H3ID": "MPXMag30",
+	"Note": "Should be MW"
+  },
+  "5894a13e86f7742405482982": {
+    "H3ID": "MCXStockTelescoping",
+	"Note": "Should be MW"
+  },
+  "5894a2c386f77427140b8342": {
+    "H3ID": "MPXBarrel203",
+	"Note": "Should be MW"
+  },
+  "5894a42086f77426d2590762": {
+    "H3ID": "MPXForegen1",
+	"Note": "Should be MW"
+  },
+  "5894a51286f77426d13baf02": {
+    "H3ID": "MPXGrippistol",
 	"Note": "Should be MW"
   },
   "5447a9cd4bdc2dbd208b4567": {
@@ -5773,6 +5840,10 @@
   "56d59d3ad2720bdb418b4577": {
     "H3ID": "9x19mmCartridgeFMJ",
 	"Note": "Should be 9x19mm Pst gzh"
+  },
+  "58864a4f2459770fcc257101": {
+    "H3ID": "9x19mmCartridgeFMJ",
+	"Note": "Should be 9x19mm PSO gzh"
   },
   "56e0598dd2720bb5668b45a6": {
     "H3ID": "pbpistoldupe",

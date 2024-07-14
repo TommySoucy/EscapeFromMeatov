@@ -1,21 +1,5 @@
-58864a4f2459770fcc257101:9x19mm PSO gzh
-5887431f2459777e1612938f:7.62x54mm R LPS gzh
-588892092459774ac91d4b11:Lobaev Arms DVL-10 7.62x51 bolt-action sniper rifle
-5888945a2459774bf43ba385:DVL-10 7.62x51 500mm barrel
-5888956924597752983e182d:DVL-10 M2 7.62x51 660mm barrel
-5888976c24597754281f93f5:DVL-10 M2 handguard
-5888988e24597752fe43a6fa:DVL-10 7.62x51 10-round magazine
-5888996c24597754281f9419:DVL-10 M2 7.62x51 muzzle brake
-58889c7324597754281f9439:DVL-10 7.62x51 muzzle device
-58889d0c2459775bc215d981:Lobaev Arms stock
-58949dea86f77409483e16a8:MPX A2 9x19 flash hider
 58949edd86f77409483e16a9:MPX double latch charging handle
 58949fac86f77409483e16aa:MPX single latch charging handle
-5894a05586f774094708ef75:MPX 9x19 30-round magazine
-5894a13e86f7742405482982:MPX/MCX collapsing/telescoping stock
-5894a2c386f77427140b8342:MPX 9x19 203mm barrel
-5894a42086f77426d2590762:MPX GEN1 handguard
-5894a51286f77426d13baf02:MPX pistol grip
 5894a5b586f77426d2590767:MPX GEN1 9x19 upper receiver
 58a56f8d86f774651579314c:MPX GEN1 handguard 2 inch rail
 58a5c12e86f7745d585a2b9e:MPX GEN1 handguard 4 inch rail
@@ -24,8 +8,7 @@
 58aeaaa886f7744fc1560f81:MPX-SD 9x19 165mm barrel
 58aeac1b86f77457c419f475:MPX-SD 9x19 integrated sound suppressor
 58d2912286f7744e27117493:Magpul MOE Carbine rubber buttpad
-58d3db5386f77426186285a0:M67 hand grenade
-58dd3ad986f77403051cba8f:7.62x51mm M80
+
 590de92486f77423d9312a33:Gold pocket watch on a chain
 591c4e1186f77410354b316e:Axion Kobra sight shade
 591ee00d86f774592f7b841e:Axion Kobra dovetail mount
@@ -79,8 +62,7 @@
 59d650cf86f7741b846413a4:AKM rear sight (6P1 Sb.2-1)
 59d6514b86f774171a068a08:AKM wooden stock (6P1 Sb.5)
 59db7eed86f77461f8380365:Trijicon TA51 sight mount
-59e0d99486f7744a32234762:7.62x39mm BP gzh
-59e4cf5286f7741778269d8a:7.62x39mm T-45M1 gzh
+
 59e4d24686f7741776641ac7:7.62x39mm US gzh
 59e4d3d286f774176a36250a:7.62x39mm HP
 59e5d83b86f7745aed03d262:AK 7.62x39 ribbed metal 10-round magazine
