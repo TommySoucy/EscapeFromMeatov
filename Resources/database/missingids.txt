@@ -8,7 +8,6 @@
 58aeaaa886f7744fc1560f81:MPX-SD 9x19 165mm barrel
 58aeac1b86f77457c419f475:MPX-SD 9x19 integrated sound suppressor
 58d2912286f7744e27117493:Magpul MOE Carbine rubber buttpad
-
 590de92486f77423d9312a33:Gold pocket watch on a chain
 591c4e1186f77410354b316e:Axion Kobra sight shade
 591ee00d86f774592f7b841e:Axion Kobra dovetail mount
@@ -62,9 +61,6 @@
 59d650cf86f7741b846413a4:AKM rear sight (6P1 Sb.2-1)
 59d6514b86f774171a068a08:AKM wooden stock (6P1 Sb.5)
 59db7eed86f77461f8380365:Trijicon TA51 sight mount
-
-59e4d24686f7741776641ac7:7.62x39mm US gzh
-59e4d3d286f774176a36250a:7.62x39mm HP
 59e5d83b86f7745aed03d262:AK 7.62x39 ribbed metal 10-round magazine
 59e5f5a486f7746c530b3ce2:AK 7.62x39 Molot 40-round magazine (6P2.Sb-11)
 59e6152586f77473dc057aa1:Molot VPO-136 "Vepr-KM" 7.62x39 carbine
@@ -75,17 +71,9 @@
 59e6318286f77444dd62c4cc:AK bakelite pistol grip
 59e6449086f7746c9f75e822:Molot AKM-type dust cover
 59e649f986f77411d949b246:Molot AKM-type gas tube
-59e6542b86f77411dc52a77a:.366 TKM FMJ
 59e655cb86f77411dc52a77b:.366 TKM EKO
 59e6658b86f77411d949b250:.366 TKM Geksa
 59e6687d86f77411d949b251:Molot VPO-209 .366 TKM carbine
-59e68f6f86f7746c9f75e846:5.56x45mm M856
-59e6906286f7746c9f75e847:5.56x45mm M856A1
-59e690b686f7746c9f75e848:5.56x45mm M995
-59e6918f86f7746c9f75e849:5.56x45mm MK 255 Mod 0 (RRLP)
-59e6920f86f77411d82aa167:5.56x45mm FMJ
-59e6927d86f77411da468256:5.56x45mm HP
-59e77a2386f7742ee578960a:7.62x54mm R PS gzh
 59e8977386f77415a553c453:VPO-209 rear sight
 59e898ee86f77427614bd225:VPO-209 wooden handguard
 59e89d0986f77427600d226e:VPO-209 wooden stock
@@ -129,8 +117,7 @@
 5a1eaa87fcdbcb001865f75e:Trijicon REAP-IR thermal scope
 5a1eacb3fcdbcb09800872be:Trijicon REAP-IR scope eyecup
 5a1ead28fcdbcb001912fa9f:UNV DLOC-IRD sight mount
-5a269f97c4a282000b151807:9x21mm PS gzh
-5a26abfac4a28232980eabff:9x21mm P gzh
+
 5a26ac06c4a282000c5a90a8:9x21mm PE gzh
 5a26ac0ec4a28200741e1e18:9x21mm BT gzh
 5a27b281c4a28200741e1e52:SR-1MP single rail mount

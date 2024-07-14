@@ -4986,11 +4986,33 @@
   "560d61e84bdc2da74d8b4571": {
     "H3ID": "NW762R-SNB"
   },
+  "59e77a2386f7742ee578960a": {
+    "H3ID": "NW762R-PS"
+  },
   "54527a984bdc2d4e668b4567": {
     "H3ID": "NWM855"
   },
   "54527ac44bdc2d36668b4567": {
     "H3ID": "NWM855A1"
+  },
+  "59e68f6f86f7746c9f75e846": {
+    "H3ID": "NWM856"
+  },
+  "59e6906286f7746c9f75e847": {
+    "H3ID": "NWM856A1"
+  },
+  "59e690b686f7746c9f75e848": {
+    "H3ID": "NWM995"
+  },
+  "59e6918f86f7746c9f75e849": {
+    "H3ID": "556x45mmCartridgeFMJ",
+	"Note": "Should be 5.56x45mm MK 255 Mod 0 (RRLP)"
+  },
+  "59e6920f86f77411d82aa167": {
+    "H3ID": "556x45mmCartridgeFMJ"
+  },
+  "59e6927d86f77411da468256": {
+    "H3ID": "556x45mmCartridgeJHP"
   },
   "58d3db5386f77426186285a0": {
     "H3ID": "PinnedGrenadeM67"
@@ -5016,9 +5038,20 @@
   "571a28e524597720b4066567": {
     "H3ID": "TTsil"
   },
+  "59e6542b86f77411dc52a77a": {
+    "H3ID": "366UltraMagnumFMJ",
+	"Note": "Should be .366 TKM FMJ"
+  },
   "58dd3ad986f77403051cba8f": {
     "H3ID": "762x51mmCartridgeFMJ",
 	"Note": "Should be 7.62x51mm M80"
+  },
+  "59e4d3d286f774176a36250a": {
+    "H3ID": "762x39mmCartridgeJHP"
+  },
+  "59e4d24686f7741776641ac7": {
+    "H3ID": "762x39mmCartridgeFMJ",
+	"Note": "Should be 7.62x39mm US gzh"
   },
   "59e4cf5286f7741778269d8a": {
     "H3ID": "762x39mmCartridgeTracer",
@@ -5836,6 +5869,12 @@
     "H3ID": "868",
     "ModulGroup": "BufferTubes_AR",
     "ModulPart": "Hera Arms CQR Stock"
+  },
+  "5a26abfac4a28232980eabff": {
+    "H3ID": "NW9x21-SP11"
+  },
+  "5a269f97c4a282000b151807": {
+    "H3ID": "NW9x21-SP10"
   },
   "56d59d3ad2720bdb418b4577": {
     "H3ID": "9x19mmCartridgeFMJ",
