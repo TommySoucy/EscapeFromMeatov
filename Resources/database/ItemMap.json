@@ -4817,6 +4817,9 @@
   "560d5e524bdc2d25448b4571": {
     "H3ID": "12GaugeShellNo2Buckshot"
   },
+  "5a38ebd9c4a282000d722a5b": {
+    "H3ID": "Cartridge20GaugeBuckshot"
+  },
   "5882163224597757561aa920": {
     "H3ID": "AttDecMag153_7",
 	"Note": "Should be MW"
@@ -4988,6 +4991,35 @@
   },
   "59e77a2386f7742ee578960a": {
     "H3ID": "NW762R-PS"
+  },
+  "5e023cf8186a883be655e54f": {
+    "H3ID": "NW762R-T46M"
+  },
+  "5e023d34e8a400319a28ed44": {
+    "H3ID": "NW762R-BT"
+  },
+  "5e023d48186a883be655e551": {
+    "H3ID": "NW762R-BS"
+  },
+  "5e023e53d4353e3302577c4c": {
+    "H3ID": "762x51mmCartridgeFMJ",
+	"Note": "7.62x51mm BCP FMJ"
+  },
+  "5a6086ea4f39f99cd479502f": {
+    "H3ID": "762x51mmCartridgeAP",
+	"Note": "7.62x51mm M61"
+  },
+  "5a608bf24f39f98ffc77720e": {
+    "H3ID": "762x51mmCartridgeTracer",
+	"Note": "7.62x51mm M62 Tracer"
+  },
+  "5e023e6e34d52a55c3304f71": {
+    "H3ID": "762x51mmCartridgeJHP",
+	"Note": "7.62x51mm TCW SP"
+  },
+  "5e023e88277cce2b522ff2b1": {
+    "H3ID": "762x51mmCartridgeJHP",
+	"Note": "7.62x51mm Ultra Nosler"
   },
   "54527a984bdc2d4e668b4567": {
     "H3ID": "NWM855"
@@ -5870,11 +5902,25 @@
     "ModulGroup": "BufferTubes_AR",
     "ModulPart": "Hera Arms CQR Stock"
   },
+  "5a26ac0ec4a28200741e1e18": {
+    "H3ID": "NW9x21-SP13"
+  },
+  "5a26ac06c4a282000c5a90a8": {
+    "H3ID": "NW9x21-SP12"
+  },
   "5a26abfac4a28232980eabff": {
     "H3ID": "NW9x21-SP11"
   },
   "5a269f97c4a282000b151807": {
     "H3ID": "NW9x21-SP10"
+  },
+  "5c925fa22e221601da359b7b": {
+    "H3ID": "9x19mmCartridgeAP",
+	"Note": "Should be 9x19mm AP 6.3"
+  },
+  "5a3c16fe86f77452b62de32a": {
+    "H3ID": "9x19mmCartridgeJHP",
+	"Note": "Should be 9x19mm Luger CCI"
   },
   "56d59d3ad2720bdb418b4577": {
     "H3ID": "9x19mmCartridgeFMJ",
@@ -5883,6 +5929,34 @@
   "58864a4f2459770fcc257101": {
     "H3ID": "9x19mmCartridgeFMJ",
 	"Note": "Should be 9x19mm PSO gzh"
+  },
+  "5cc80f38e4a949001152b560": {
+    "H3ID": "57x28mmCartridgeAP",
+	"Note": "Should be 5.7x28mm SS190"
+  },
+  "5cc80f53e4a949000e1ea4f8": {
+    "H3ID": "57x28mmCartridgeTracer",
+	"Note": "Should be 5.7x28mm L191"
+  },
+  "5cc80f67e4a949035e43bbba": {
+    "H3ID": "57x28mmCartridgeFMJ",
+	"Note": "Should be 5.7x28mm SB193"
+  },
+  "5cc80f79e4a949033c7343b2": {
+    "H3ID": "57x28mmCartridgeFMJ",
+	"Note": "Should be 5.7x28mm SS198SLF"
+  },
+  "5cc80f8fe4a949033b0224a2": {
+    "H3ID": "57x28mmCartridgeFMJ",
+	"Note": "Should be 5.7x28mm SS197SR"
+  },
+  "5cc86832d7f00c000d3a6e6c": {
+    "H3ID": "57x28mmCartridgeJHP",
+	"Note": "Should be 5.7x28mm R37.F"
+  },
+  "5cc86840d7f00c002412c56c": {
+    "H3ID": "57x28mmCartridgeJHP",
+	"Note": "Should be 5.7x28mm R37.X"
   },
   "56e0598dd2720bb5668b45a6": {
     "H3ID": "pbpistoldupe",

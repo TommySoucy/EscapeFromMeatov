@@ -117,9 +117,6 @@
 5a1eaa87fcdbcb001865f75e:Trijicon REAP-IR thermal scope
 5a1eacb3fcdbcb09800872be:Trijicon REAP-IR scope eyecup
 5a1ead28fcdbcb001912fa9f:UNV DLOC-IRD sight mount
-
-5a26ac06c4a282000c5a90a8:9x21mm PE gzh
-5a26ac0ec4a28200741e1e18:9x21mm BT gzh
 5a27b281c4a28200741e1e52:SR-1MP single rail mount
 5a27b3d0c4a282000d721ec1:SR-1MP sound suppressor mount
 5a27b6bec4a282000e496f78:SR-1MP 9x21 sound suppressor
@@ -140,16 +137,12 @@
 5a367e5dc4a282000e49738f:Remington R11 RSASS 7.62x51 marksman rifle
 5a37ca54c4a282000d72296a:JP Enterprises Flat-Top 30mm ring scope mount
 5a38e6bac4a2826c6e06d79b:TOZ-106 20ga bolt-action shotgun
-5a38ebd9c4a282000d722a5b:20/70 7.5mm buckshot
 5a38ed75c4a28232996e40c6:TOZ-106 20ga MTs 20-01 Sb.3 4-shot magazine
 5a38ee51c4a282000c5a955c:TOZ-106 20ga MTs 20-01 Sb.3 2-shot magazine
 5a38eecdc4a282329a73b512:TOZ-106 002 pistol grip
 5a38ef1fc4a282000b1521f6:TOZ-106 stock
 5a398ab9c4a282000c5a9842:Ops-Core Single Clamp Rail Adapter mount
 5a398b75c4a282000a51a266:Ops-Core Picatinny Rail Adapter mount
-5a3c16fe86f77452b62de32a:9x19mm Luger CCI
-5a6086ea4f39f99cd479502f:7.62x51mm M61
-5a608bf24f39f98ffc77720e:7.62x51mm M62 Tracer
 5a69a2ed8dc32e000d46d1f1:AS VAL Rotor 43 pistol grip & buffer tube
 5a6b585a8dc32e5a9c28b4f1:Glock 9x19 Lone Wolf AlphaWolf thread protector
 5a6b592c8dc32e00094b97bf:Glock 9x19 Double Diamond thread protector
@@ -574,7 +567,6 @@
 5c88f24b2e22160bc12c69a6:SVD 7.62x54R 20-round magazine
 5c90c3622e221601da359851:Zenit B-13V "Klassika" dovetail rail platform
 5c920e902e221644f31c3c99:P226 9x19 20-round extended magazine
-5c925fa22e221601da359b7b:9x19mm AP 6.3
 5c99f3592e221644fc633070:TOZ-106 custom cut Mosin stock
 5c9a07572e221644f31c4b32:AK Magpul Zhukov-U handguard (Black)
 5c9a1c3a2e2216000e69fb6a:AK Magpul Zhukov-U handguard (FDE)
@@ -589,6 +581,8 @@
 5cadd919ae921500126a77f3:M9A3 front sight
 5cadd940ae9215051e1c2316:M9A3 rear sight
 5cadd954ae921500103bb3c2:M9A3 Sight Mount rear sight rail
+
+INSTALL Meats ASh12 FOR THE ASH12 AND THE 12.7x55 AMMO
 5cadf6ddae9215051e1c23b2:12.7x55mm PS12
 5cadf6e5ae921500113bb973:12.7x55mm PS12A
 5cadf6eeae921500134b2799:12.7x55mm PS12B
@@ -617,15 +611,8 @@
 5cc7015ae4a949001152b4c6:FN P90 upper receiver top rail
 5cc701aae4a949000e1ea45c:FN P90 5.7x28 10.5 inch barrel
 5cc701d7e4a94900100ac4e7:FN P90 5.7x28 16 inch barrel
-5cc80f38e4a949001152b560:5.7x28mm SS190
-5cc80f53e4a949000e1ea4f8:5.7x28mm L191
-5cc80f67e4a949035e43bbba:5.7x28mm SB193
-5cc80f79e4a949033c7343b2:5.7x28mm SS198LF
-5cc80f8fe4a949033b0224a2:5.7x28mm SS197SR
 5cc82796e24e8d000f5859a8:FN P90 5.7x28 flash hider
 5cc82d76e24e8d00134b4b83:FN P90 5.7x28 submachine gun
-5cc86832d7f00c000d3a6e6c:5.7x28mm R37.F
-5cc86840d7f00c002412c56c:5.7x28mm R37.X
 5cc9a96cd7f00c011c04e04a:AK-74 SRVV MBR Jet 5.45x39 muzzle brake
 5cc9ad73d7f00c000e2579d4:AK SRVV 7.62x39 muzzle brake-compensator
 5cdaa99dd7f00c002412d0b2:ASh-12 polymer handguard
@@ -814,12 +801,7 @@
 5e01ea19e9dc277128008c0b:Rotor 43 7.62x54R muzzle brake-compensator
 5e01f31d86f77465cf261343:Team Wendy EXFIL Ear Covers (Coyote Brown)
 5e01f37686f774773c6f6c15:Team Wendy EXFIL Ballistic face shield (Coyote Brown)
-5e023cf8186a883be655e54f:7.62x54mm R T-46M gzh
-5e023d34e8a400319a28ed44:7.62x54mm R BT gzh
-5e023d48186a883be655e551:7.62x54mm R BS gs
-5e023e53d4353e3302577c4c:7.62x51mm BCP FMJ
-5e023e6e34d52a55c3304f71:7.62x51mm TCW SP
-5e023e88277cce2b522ff2b1:7.62x51mm Ultra Nosler
+
 5e208b9842457a4a7a33d074:AK Hexagon DTKP MK.2 7.62x39 sound suppressor
 5e217ba4c1434648c13568cd:AKM/AK-74 Hexagon "Kocherga" stock (Anodized Red)
 5e2192a498a36665e8337386:AK KGB MG-47 pistol grip (Anodized Red)
