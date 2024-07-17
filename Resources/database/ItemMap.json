@@ -4478,6 +4478,10 @@
     "H3ID": "NWB3",
 	"Note": "Should be MW"
   },
+  "59eb7ebe86f7740b373438ce": {
+    "H3ID": "NWTozRail",
+	"Note": "Should be MW"
+  },
   "57838f0b2459774a256959b2": {
     "H3ID": "NWVSS10"
   },
@@ -4511,6 +4515,10 @@
   "587e02ff24597743df3deaeb": {
     "H3ID": "sksbasedupe",
 	"Note": "Should be OP-SKS"
+  },
+  "593d1fa786f7746da62d61ac": {
+    "H3ID": "utgraildupe",
+	"Note": "Should be modul part of MW SKS"
   },
   "587e08ee245977446b4410cf": {
 	"Note": "Missing, included on sksbasedupe"
@@ -4580,6 +4588,13 @@
   "57dc324a24597759501edc20": {
     "H3ID": "MuzzleAKS74"
   },
+  "59ecc28286f7746d7a68aa8c": {
+	"Note": "Missing, integrated into relevant stocks"
+  },
+  "59ecc3dd86f7746dc827481c": {
+    "H3ID": "AKStockPT3",
+	"Note": "Should be MW"
+  },
   "57dc32dc245977596d4ef3d3": {
     "H3ID": "AKSForeAKS",
 	"Note": "Should be modul"
@@ -4592,8 +4607,36 @@
     "H3ID": "AKMiscB18Mount",
 	"Note": "Should be modul"
   },
+  "5a0d716f1526d8000d26b1e2": {
+    "H3ID": "MuzzleAKML"
+  },
   "57ffb0e42459777d047111c5": {
     "H3ID": "AttSuppressorAKPBS4"
+  },
+  "5a0d63621526d8dba31fe3bf": {
+    "H3ID": "AttSuppressorAKPBS1"
+  },
+  "5e208b9842457a4a7a33d074": {
+    "H3ID": "AttSuppressorAKDTKP"
+  },
+  "59fb257e86f7742981561852": {
+    "H3ID": "AttSuppressorAKDTK4"
+  },
+  "593d489686f7745c6255d58a": {
+    "H3ID": "SuppressorMk2Hex",
+	"Note": "Should be AKM Hexagon 7.62x39 sound suppressor"
+  },
+  "5943eeeb86f77412d6384f6b": {
+    "H3ID": "AR15MuzzleSynergyBlk",
+	"Note": "Should be AK-74 PWS CQB 74 5.45x39 muzzle brake"
+  },
+  "593d493f86f7745e6b2ceb22": {
+    "H3ID": "SuppressorMk2Hex",
+	"Note": "Should be AK-74 Hexagon 5.45x39 sound suppressor"
+  },
+  "593d490386f7745ee97a1555": {
+    "H3ID": "SuppressorHexBolter",
+	"Note": "Should be SKS Hexagon 7.62x39 sound suppressor"
   },
   "57ffaea724597779f52b3a4d": {
     "H3ID": "AKForeQuadRail",
@@ -4613,6 +4656,79 @@
   },
   "5644bd2b4bdc2d3b4c8b4572": {
     "H3ID": "ModulAK74NFactory",
+	"Note": "Should be MW"
+  },
+  "59d6088586f774275f37482f": {
+    "H3ID": "ModulAKMDupe",
+	"Note": "Should be MW"
+  },
+  "59ff346386f77477562ff5e2": {
+    "H3ID": "ModulAKMSNDupe",
+	"Note": "Should be MW, should also be AKMS, which is the same but without the dovetail, this in the only varient included with ModulAK"
+  },
+  "5a0ec13bfcdbcb00165aa685": {
+	"Note": "Missing, should be Kalashnikov AKMN 7.62x39 assault rifle, didn't want to map it to AKM instead because then player would be able to get the AKM under different conditions"
+  },
+  "59ff3b6a86f77477562ff5ed": {
+	"Note": "Missing, integrated stock of 59ff346386f77477562ff5e2/ALMSN and cannot be removed"
+  },
+  "59e6152586f77473dc057aa1": {
+	"Note": "Missing, should be Molot VPO-136 \"Vepr-KM\" 7.62x39 carbine, didn't want to map it to AKM instead because then player would be able to get the AKM under different conditions"
+  },
+  "59e61eb386f77440d64f5daf": {
+	"Note": "Missing, would be included with 59e6152586f77473dc057aa1/VPO-136"
+  },
+  "59e6227d86f77440d64f5dc2": {
+	"Note": "Missing, would be included with 59e6152586f77473dc057aa1/VPO-136"
+  },
+  "59e6284f86f77440d569536f": {
+	"Note": "Missing, would be included with 59e6152586f77473dc057aa1/VPO-136"
+  },
+  "5a0ed824fcdbcb0176308b0d": {
+	"Note": "Missing, should be included with ModulAK"
+  },
+  "5a0f096dfcdbcb0176308b15": {
+	"Note": "Missing, should be included with ModulAK"
+  },
+  "59ccfdba86f7747f2109a587": {
+    "H3ID": "AKForeUltimak",
+	"Note": "Should be MW, should only have top rail, this one has all the rails, but is the correct one"
+  },
+  "59fb375986f7741b681b81a6": {
+    "H3ID": "AKForeKrebsCustom",
+	"Note": "Should be MW"
+  },
+  "59c6633186f7740cf0493bb9": {
+	"Note": "Missing, integrated in handguards"
+  },
+  "59ccd11386f77428f24a488f": {
+	"Note": "Missing, integrated in handguards"
+  },
+  "59d36a0086f7747e673f3946": {
+	"Note": "Missing, integrated in handguards"
+  },
+  "59d64ec286f774171d1e0a42": {
+	"Note": "Missing, integrated in handguards"
+  },
+  "59e649f986f77411d949b246": {
+	"Note": "Missing, integrated in handguards"
+  },
+  "5a01ad4786f77450561fda02": {
+	"Note": "Missing, integrated in handguards"
+  },
+  "5a0abb6e1526d8000a025282": {
+	"Note": "Missing, no need for muzzle adapters"
+  },
+  "5a0071d486f77404e23a12b2": {
+    "H3ID": "AKGripAKM",
+	"Note": "Should be MW"
+  },
+  "5947f92f86f77427344a76b1": {
+    "H3ID": "AKGripSAWblk",
+	"Note": "Should be MW"
+  },
+  "5947fa2486f77425b47c1a9b": {
+    "H3ID": "AKGripSAWFDE",
 	"Note": "Should be MW"
   },
   "57cff947245977638e6f2a19": {
@@ -4635,6 +4751,27 @@
     "H3ID": "AKForeMOEgry",
 	"Note": "Should be MW"
   },
+  "59d64f2f86f77417193ef8b3": {
+    "H3ID": "AKForeAKM",
+	"Note": "Should be MW"
+  },
+  "59d6514b86f774171a068a08": {
+    "H3ID": "AKStockAKM",
+	"Note": "Should be MW"
+  },
+  "59d64fc686f774171b243fe2": {
+	"Note": "Missing, default, integrated into akm receiver"
+  },
+  "59d6507c86f7741b846413a2": {
+    "H3ID": "AKDustcover74",
+	"Note": "Should be MW, should also be AKM dust cover (6P1 0-1) but modul ak reuses the 74"
+  },
+  "59d650cf86f7741b846413a4": {
+	"Note": "Missing, integrated with dust cover"
+  },
+  "5a0eb980fcdbcb001a3b00a6": {
+	"Note": "Missing, integrated with dust cover"
+  },
   "57ade1442459771557167e15": {
     "H3ID": "AR15StockUltralite",
 	"Note": "Should be Armacon Baskak stock"
@@ -4642,6 +4779,34 @@
   "57acb6222459771ec34b5cb0": {
     "H3ID": "AKMiscAKRS",
 	"Note": "Should be VOMZ Pilad 043-02 dovetail mount"
+  },
+  "591ee00d86f774592f7b841e": {
+    "H3ID": "RailAdapterRussianToPicatinny",
+	"Note": "Should be Axion Kobra dovetail mount"
+  },
+  "5a01c29586f77474660c694c": {
+    "H3ID": "Magazine6L10"
+  },
+  "5a0060fc86f7745793204432": {
+    "H3ID": "MagazineAKMAluminum"
+  },
+  "59d625f086f774661516605d": {
+    "H3ID": "MagazineAKMStd"
+  },
+  "59d6272486f77466146386ff": {
+    "H3ID": "MagazineAKMPmag"
+  },
+  "59e5d83b86f7745aed03d262": {
+    "H3ID": "MagazineAKM10"
+  },
+  "59e5f5a486f7746c530b3ce2": {
+    "H3ID": "MagazineRPK40"
+  },
+  "59fafc5086f7740dbe19f6c3": {
+    "H3ID": "MagazinePalmBLK"
+  },
+  "59fafc9386f774067d462453": {
+    "H3ID": "MagazinePalmFDE"
   },
   "56dfef82d2720bbd668b4567": {
     "H3ID": "545x39mmCartridgeAP",
@@ -4750,7 +4915,19 @@
 	"H3ID": "AKGripAKSBL",
 	"Note": "Should be MW"
   },
+  "59e62cc886f77440d40b52a1": {
+	"H3ID": "AKGripGlossWood",
+	"Note": "Should be MW"
+  },
+  "59e6318286f77444dd62c4cc": {
+	"H3ID": "AKGrip74Bakelite",
+	"Note": "Should be MW"
+  },
   "5649af094bdc2df8348b4586": {
+	"H3ID": "AKDustcover74",
+	"Note": "Should be MW"
+  },
+  "59e6449086f7746c9f75e822": {
 	"H3ID": "AKDustcover74",
 	"Note": "Should be MW"
   },
@@ -4777,6 +4954,9 @@
 	"H3ID": "AKDustcoverRail",
 	"Note": "Should be separate Taktika Tula rail and dust cover, currently single item"
   },
+  "5947db3f86f77447880cf76f": {
+	"H3ID": "ReflexKobra"
+  },
   "57486e672459770abd687134": {
 	"H3ID": "ReflexKobra",
 	"Note": "Should be dovetail OKP-7, but we only have picatinny OKP-7, kobra is dovetail, figured it made more sense for now"
@@ -4785,9 +4965,43 @@
     "H3ID": "Cartridge_40mmCaseless_HEF",
 	"Note": "Should be 40mm VOG-25 grenade"
   },
+  "5cadf6ddae9215051e1c23b2": {
+    "H3ID": "Ammo_12,7x55LP",
+	"Note": "Should be 12.7x55mm PS12"
+  },
+  "5cadf6e5ae921500113bb973": {
+    "H3ID": "Ammo_12,7x55TP",
+	"Note": "Should be 12.7x55mm PS12A"
+  },
+  "5cadf6eeae921500134b2799": {
+    "H3ID": "Ammo_12,7x55BP",
+	"Note": "Should be 12.7x55mm PS12B"
+  },
   "5656d7c34bdc2d9d198b4587": {
     "H3ID": "762x39mmCartridgeFMJ",
 	"Note": "Should be 7.62x39mm PS gzh"
+  },
+  "59e8a00d86f7742ad93b569c": {
+    "Note": "Missing, should be included with"
+  },
+  "59e89d0986f77427600d226e": {
+    "Note": "Missing, should be modul part included with 59e6687d86f77411d949b251/VPO-209"
+  },
+  "59e898ee86f77427614bd225": {
+    "Note": "Missing, should be modul part included with 59e6687d86f77411d949b251/VPO-209"
+  },
+  "59e8977386f77415a553c453": {
+    "Note": "Missing, should be modul part included with 59e6687d86f77411d949b251/VPO-209"
+  },
+  "59e6687d86f77411d949b251": {
+    "H3ID": "VPO209.Muzz",
+    "Note": "Should be MW"
+  },
+  "59e655cb86f77411dc52a77b": {
+    "H3ID": "ftw.366.eko"
+  },
+  "59e6658b86f77411d949b250": {
+    "H3ID": "ftw.366.geksa"
   },
   "5580223e4bdc2d1c128b457f": {
     "H3ID": "HammerlessLong",
@@ -4810,6 +5024,12 @@
   "606dae0ab0e443224b421bb7": {
     "H3ID": "Modul155Dupe",
 	"Note": "Should be MW"
+  },
+  "59fb137a86f7740adb646af1": {
+    "H3ID": "MuzzleBrake_MonsterClaw"
+  },
+  "59c0ec5b86f77435b128bfca": {
+    "H3ID": "SupHexagon12"
   },
   "58820d1224597753c90aeb13": {
     "H3ID": "12GaugeShellSlug"
@@ -5046,6 +5266,14 @@
   "59e6927d86f77411da468256": {
     "H3ID": "556x45mmCartridgeJHP"
   },
+  "5a2a57cfc4a2826c6e06d44a": {
+    "H3ID": "PinnedGrenadeM18SmokeGrenadeWhite",
+	"Note": "Should be RDG-2B smoke grenade"
+  },
+  "5a0c27731526d80618476ac4": {
+    "H3ID": "PinnedGrenadeXM84",
+	"Note": "Should be Zarya stun grenade, XM84 is the only stun grenade in the game"
+  },
   "58d3db5386f77426186285a0": {
     "H3ID": "PinnedGrenadeM67"
   },
@@ -5196,6 +5424,57 @@
   "55d485be4bdc2d962f8b456f": {
     "H3ID": "MagazineMakarovDrum"
   },
+  "59984ab886f7743e98271174": {
+    "H3ID": "ModulPP19Dupe",
+	"Note": "Should be MW"
+  },
+  "59f9cabd86f7743a10721f46": {
+    "H3ID": "ModulSaiga9",
+	"Note": "Should be MW"
+  },
+  "5998517986f7746017232f7e": {
+	"H3ID": "AKGripPP19",
+	"Note": "Should be MW"
+  },
+  "599851db86f77467372f0a18": {
+	"H3ID": "AKStockAKS",
+	"Note": "Should be skeletonized stock specific to PP-19, for some reason its a different item in tarkov"
+  },
+  "5a0c59791526d8dba737bba7": {
+	"H3ID": "AKMiscGP25",
+	"Note": "Should be MW"
+  },
+  "59985a8086f77414ec448d1a": {
+	"H3ID": "PP19Dustcover",
+	"Note": "Should be MW"
+  },
+  "59985a6c86f77414ec448d17": {
+	"H3ID": "PP19DustcoverSN",
+	"Note": "Should be MW"
+  },
+  "599860e986f7743bb57573a6": {
+	"Note": "Missing, integrated into relevant dust covers"
+  },
+  "5998597786f77414ea6da093": {
+	"H3ID": "MuzzlePP19"
+  },
+  "59bfc5c886f7743bf6794e62": {
+	"H3ID": "SuppressorPBS1",
+	"Note": "PP-19-01 \"Vityaz\" 9x19 sound suppressor"
+  },
+  "5998598e86f7740b3f498a86": {
+	"H3ID": "MuzzlePP19",
+	"Note": "Should be Saiga-9 9x19 muzzle brake-compensator"
+  },
+  "5998529a86f774647f44f421": {
+	"H3ID": "MagazineSaiga9"
+  },
+  "599860ac86f77436b225ed1a": {
+	"H3ID": "MagazinePP19"
+  },
+  "59bffc1f86f77435b128b872": {
+	"Note": "Missing, supressors don't need thread adapters, should be SilencerCo Hybrid 46 Direct Thread Mount adapter"
+  },
   "58948c8e86f77409493f7266": {
     "H3ID": "ModularMPXDupe",
 	"Note": "Should be MW"
@@ -5223,6 +5502,81 @@
   "5894a51286f77426d13baf02": {
     "H3ID": "MPXGrippistol",
 	"Note": "Should be MW"
+  },
+  "58ac1bf086f77420ed183f9f": {
+    "H3ID": "MPXStockKnuckle",
+	"Note": "Should be MW"
+  },
+  "58aeaaa886f7744fc1560f81": {
+    "H3ID": "MPXBarrel165",
+	"Note": "Should be MW"
+  },
+  "58aeac1b86f77457c419f475": {
+    "H3ID": "SupTI16",
+	"Note": "Should be MPX-SD 9x19 integrated sound suppressor"
+  },
+  "5a32a064c4a28200741e22de": {
+    "H3ID": "SuppressorOperator"
+  },
+  "5c6165902e22160010261b28": {
+    "H3ID": "MCXSRDMIL",
+	"Note": "Should be SIG Sauer SRD9 9x19 sound suppressor"
+  },
+  "5fbe760793164a5b6278efc8": {
+    "H3ID": "SupSRDQD"
+  },
+  "5fbc22ccf24b94483f726483": {
+    "H3ID": "MuzzleBrake_SRD"
+  },
+  "58949fac86f77409483e16aa": {
+	"Note": "Missing, integrated into receiver, double latch only"
+  },
+  "58949edd86f77409483e16a9": {
+	"Note": "Missing, integrated into receiver, double latch only"
+  },
+  "5894a5b586f77426d2590767": {
+	"Note": "Missing, upper and lower and together"
+  },
+  "58a56f8d86f774651579314c": {
+	"Note": "Missing, integrated with handguards"
+  },
+  "58a5c12e86f7745d585a2b9e": {
+	"Note": "Missing, integrated with handguards"
+  },
+  "58d2912286f7744e27117493": {
+	"Note": "Missing, integrated with relevant stocks"
+  },
+  "591c4e1186f77410354b316e": {
+	"Note": "Missing, integrated with relevant sights"
+  },
+  "59db7eed86f77461f8380365": {
+	"Note": "Missing, integrated with relevant sights"
+  },
+  "5a37ca54c4a282000d72296a": {
+	"Note": "Missing, integrated with relevant sights"
+  },
+  "5a367e5dc4a282000e49738f": {
+    "H3ID": "ModulAR10SandDupe",
+	"Note": "Should be MW, should also be Remington R11 RSASS 7.62x51 marksman rifle, while this is jsut an AR-10, which might acutally be the same thing"
+  },
+  "5a34f7f1c4a2826c6e06d75d": {
+    "H3ID": "AR10Barrel457",
+	"Note": "Should be MW"
+  },
+  "5a34fae7c4a2826c6e06d760": {
+    "H3ID": "AR10Barrel558",
+	"Note": "Should be MW"
+  },
+  "5a3501acc4a282000d72293a": {
+    "H3ID": "AR10PMagBlk"
+  },
+  "5a34fbadc4a28200741e230a": {
+    "H3ID": "AR15GasBlockJPRail",
+	"Note": "Should be MW"
+  },
+  "5a34fd2bc4a282329a73b4c5": {
+    "H3ID": "AR15MuzzleWarcomp",
+	"Note": "Should be AR-10 AAC Blackout 51T 7.62x51 flash hider"
   },
   "5447a9cd4bdc2dbd208b4567": {
     "H3ID": "ModulM4A1"
@@ -5602,6 +5956,11 @@
     "ModulGroup": "Handguards_AR",
     "ModulPart": "PRI Gen III Handguard"
   },
+  "5a329052c4a28200741e22d3": {
+    "H3ID": "868",
+    "ModulGroup": "Handguards_AR",
+    "ModulPart": "Remington RSASS Forend"
+  },
   "5b0800175acfc400153aebd4": {
     "H3ID": "868",
     "ModulGroup": "BufferTubes_AR",
@@ -5914,6 +6273,54 @@
   "5a269f97c4a282000b151807": {
     "H3ID": "NW9x21-SP10"
   },
+  "5926bb2186f7744b1c6c6e60": {
+    "H3ID": "MP5A4",
+	"Note": "Should be Modul"
+  },
+  "5926f2e086f7745aae644231": {
+    "H3ID": "MP5SD5",
+	"Note": "Should be Modul, this is the tarkov ID for upper receiver only, but for our purposes will map to the H3 SD variant for now"
+  },
+  "59c63b4486f7747afb151c1c": {
+	"Note": "Missing, should be included with modul MP5"
+  },
+  "5926dad986f7741f82604363": {
+    "H3ID": "MP5PicatinnyAdapter"
+  },
+  "5926c0df86f77462f647f764": {
+	"Note": "Missing, should be modul part of 5926bb2186f7744b1c6c6e60/MP5A4"
+  },
+  "5926e16e86f7742f5a0f7ecb": {
+	"Note": "Missing, should be modul part of 5926bb2186f7744b1c6c6e60/MP5A4"
+  },
+  "5926c32286f774616e42de99": {
+	"Note": "Missing, should be modul part of 5926bb2186f7744b1c6c6e60/MP5A4"
+  },
+  "5926c36d86f77467a92a8629": {
+	"Note": "Missing, default part, should be modul part of 5926bb2186f7744b1c6c6e60/MP5A4"
+  },
+  "5926d2be86f774134d668e4e": {
+	"Note": "Missing, default part, should be modul part of 5926bb2186f7744b1c6c6e60/MP5A4"
+  },
+  "5926d3c686f77410de68ebc8": {
+	"Note": "Missing, default part, should be modul part of 5926bb2186f7744b1c6c6e60/MP5A4"
+  },
+  "5926d40686f7740f152b6b7e": {
+	"Note": "Missing, default part, should be modul part of 5926bb2186f7744b1c6c6e60/MP5A4"
+  },
+  "5926d33d86f77410de68ebc0": {
+	"Note": "Missing, default part, should be modul part of 5926f2e086f7745aae644231/MP5SD5"
+  },
+  "5926f34786f77469195bfe92": {
+	"Note": "Missing, default part, should be modul part of 5926f2e086f7745aae644231/MP5SD5"
+  },
+  "5926c3b286f774640d189b6b": {
+    "H3ID": "MagazineMp530rnd"
+  },
+  "5a351711c4a282000b1521a4": {
+    "H3ID": "MagazineMp5100rnd",
+	"Note": "Should be HK MP5 9x19 X Products X-5 50-round drum magazine, this one is 100 rounds"
+  },
   "5c925fa22e221601da359b7b": {
     "H3ID": "9x19mmCartridgeAP",
 	"Note": "Should be 9x19mm AP 6.3"
@@ -5982,6 +6389,43 @@
   "576a63cd2459771e796e0e11": {
     "Note": "Missing, should be included as modul part to 576a581d2459771e7b1bc4f1/MP-443 grach"
   },
+  "5a17f98cfcdbcb0980087290": {
+    "H3ID": "APS",
+	"Note": "Should be Modul"
+  },
+  "5a17fb9dfcdbcbcae6687291": {
+    "H3ID": "StockAPSWire",
+	"Note": "Should be Modul part of 5a17f98cfcdbcb0980087290/APS"
+  },
+  "5a17fc70fcdbcb0176308b3d": {
+	"Note": "Missing, should be Modul part of 5a17f98cfcdbcb0980087290/APS"
+  },
+  "5a17fb03fcdbcbcae668728f": {
+    "H3ID": "MagazineAPS"
+  },
+  "59f98b4986f7746f546d2cef": {
+    "H3ID": "SR1MP",
+	"Note": "Should be Modul"
+  },
+  "5a27b281c4a28200741e1e52": {
+    "H3ID": "SR1Rail",
+	"Note": "Should be Modul part of 59f98b4986f7746f546d2cef/SR1MP"
+  },
+  "5a27bad7c4a282000b15184b": {
+    "H3ID": "SR4Rail",
+	"Note": "Should be Modul part of 59f98b4986f7746f546d2cef/SR1MP"
+  },
+  "5a27b3d0c4a282000d721ec1": {
+    "H3ID": "SR1MP_Adapter",
+	"Note": "Should be Modul part of 59f98b4986f7746f546d2cef/SR1MP"
+  },
+  "5a27b6bec4a282000e496f78": {
+    "H3ID": "SR1MP_Sil",
+	"Note": "Prefab inactive by default"
+  },
+  "59f9cabd86f7743a10721f46": {
+    "H3ID": "SR1MPMag"
+  },
   "56d59856d2720bd8418b456a": {
     "H3ID": "FTW.gun.p226frameDupe",
 	"Note": "Should be MW"
@@ -5994,6 +6438,18 @@
   },
   "587de5ba2459771c0f1e8a58": {
 	"Note": "Missing, should be included with modul P226"
+  },
+  "5a32aa0cc4a28232996e405f": {
+	"Note": "Missing, should be included with modul P226"
+  },
+  "5a33a8ebc4a282000c5a950d": {
+	"Note": "Missing, and we don't have a supressor with a rail on top to  use as alternative"
+  },
+  "5a33b652c4a28232996e407c": {
+	"Note": "Missing, no need for this mount"
+  },
+  "5a33bab6c4a28200741e22f8": {
+	"Note": "Missing, no need for this mount"
   },
   "587de4282459771bca0ec90b": {
     "H3ID": "FTW.gun.unthreadedbarrel.p226",
@@ -6593,6 +7049,9 @@
   "5c7e5f112e221600106f4ede": {
     "H3ID": "MuzzleBrake_DeadAirKeyMoFlashHider"
   },
+  "5a34fd2bc4a282329a73b4c5": {
+    "H3ID": "AR15MuzzleWarcomp"
+  },
   "5a34fe59c4a282000b1521a2": {
     "H3ID": "SupDeadAirSierra5"
   },
@@ -6751,5 +7210,17 @@
   "57e26fc7245977162a14b800": {
     "H3ID": "CombatKnife",
 	"Note": "Should be Bars A-2607 95Kh18 knife"
+  },
+  "5a1eaa87fcdbcb001865f75e": {
+	"Note": "Missing, waiting for next H3 release with NV and thermals"
+  },
+  "5a1eacb3fcdbcb09800872be": {
+	"Note": "Missing, will probably not be an individual item on NV/thermal H3 release though"
+  },
+  "5a1ead28fcdbcb001912fa9f": {
+	"Note": "Missing, mount for thermal scrope, will probably not be an individual item on NV/thermal H3 release though"
+  },
+  "58ac60eb86f77401897560ff": {
+	"Note": "Dev item, unused"
   }
 }

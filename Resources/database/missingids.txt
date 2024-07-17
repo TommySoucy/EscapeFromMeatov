@@ -1,141 +1,12 @@
-58949edd86f77409483e16a9:MPX double latch charging handle
-58949fac86f77409483e16aa:MPX single latch charging handle
-5894a5b586f77426d2590767:MPX GEN1 9x19 upper receiver
-58a56f8d86f774651579314c:MPX GEN1 handguard 2 inch rail
-58a5c12e86f7745d585a2b9e:MPX GEN1 handguard 4 inch rail
-58ac1bf086f77420ed183f9f:MPX/MCX retractable stock pipe adapter
-58ac60eb86f77401897560ff:Balaclava_dev
-58aeaaa886f7744fc1560f81:MPX-SD 9x19 165mm barrel
-58aeac1b86f77457c419f475:MPX-SD 9x19 integrated sound suppressor
-58d2912286f7744e27117493:Magpul MOE Carbine rubber buttpad
 590de92486f77423d9312a33:Gold pocket watch on a chain
-591c4e1186f77410354b316e:Axion Kobra sight shade
-591ee00d86f774592f7b841e:Axion Kobra dovetail mount
-5926bb2186f7744b1c6c6e60:HK MP5 9x19 submachine gun (Navy 3 Round Burst)
-5926c0df86f77462f647f764:HK MP5 9x19 upper receiver
-5926c32286f774616e42de99:HK MP5 cocking handle
-5926c36d86f77467a92a8629:HK MP5 Wide Tropical polymer handguard
-5926c3b286f774640d189b6b:HK MP5 9x19 30-round magazine
-5926d2be86f774134d668e4e:HK MP5 Drum rear sight
-5926d33d86f77410de68ebc0:HK MP5SD 9x19 sound suppressor
-5926d3c686f77410de68ebc8:HK MP5 A2 stock
-5926d40686f7740f152b6b7e:HK MP5 A3 old model stock
-5926dad986f7741f82604363:HK MP5 MFI HK universal low profile scope mount
-5926e16e86f7742f5a0f7ecb:HK MP5 3-lug thread protector
-5926f2e086f7745aae644231:HK MP5SD 9x19 upper receiver
-5926f34786f77469195bfe92:HK MP5SD polymer handguard
 5937fc6786f7742cab753590:Silver pocket watch on a chain
-593d1fa786f7746da62d61ac:SKS Leapers UTG SOCOM rail mount
-593d489686f7745c6255d58a:AKM Hexagon 7.62x39 sound suppressor
-593d490386f7745ee97a1555:SKS Hexagon 7.62x39 sound suppressor
-593d493f86f7745e6b2ceb22:AK-74 Hexagon 5.45x39 sound suppressor
-5943eeeb86f77412d6384f6b:AK-74 PWS CQB 74 5.45x39 muzzle brake
-5947db3f86f77447880cf76f:Axion Kobra EKP-8-02 reflex sight (Dovetail)
-5947f92f86f77427344a76b1:AK TAPCO SAW-Style pistol grip (Black)
-5947fa2486f77425b47c1a9b:AK TAPCO SAW-Style pistol grip (FDE)
-59984ab886f7743e98271174:PP-19-01 "Vityaz" 9x19 submachine gun
-5998517986f7746017232f7e:PP-19-01 "Vityaz" pistol grip
-599851db86f77467372f0a18:PP-19-01 "Vityaz" metal skeleton stock
-5998529a86f774647f44f421:Saiga-9 9x19 sb.7 10-round magazine
-5998597786f77414ea6da093:PP-19-01 "Vityaz" 9x19 muzzle brake-compensator
-5998598e86f7740b3f498a86:Saiga-9 9x19 muzzle brake-compensator
-59985a6c86f77414ec448d17:PP-19-01 "Vityaz-SN" dust cover
-59985a8086f77414ec448d1a:PP-19-01 "Vityaz" dust cover
-599860ac86f77436b225ed1a:PP-19-01 "Vityaz" 9x19 30-round magazine
-599860e986f7743bb57573a6:PP-19-01 "Vityaz" rear sight
-59bfc5c886f7743bf6794e62:PP-19-01 "Vityaz" 9x19 sound suppressor
-59bffc1f86f77435b128b872:SilencerCo Hybrid 46 Direct Thread Mount adapter
-59c0ec5b86f77435b128bfca:Hexagon 12K 12ga sound suppressor
-59c63b4486f7747afb151c1c:HK MP5SD B&T tri-rail ring mount
-59c6633186f7740cf0493bb9:AK-74 gas tube (6P20 Sb.1-2)
-59ccd11386f77428f24a488f:PP-19-01 "Vityaz" gas tube
-59ccfdba86f7747f2109a587:AK UltiMAK M1-B gas tube & handguard
-59d36a0086f7747e673f3946:AKS-74U gas tube (6P26 Sb.1-2)
-59d6088586f774275f37482f:Kalashnikov AKM 7.62x39 assault rifle
-59d625f086f774661516605d:AK 7.62x39 30-round magazine (issued '55 or later)
-59d6272486f77466146386ff:AK 7.62x39 Magpul PMAG 30 GEN M3 30-round magazine
-59d64ec286f774171d1e0a42:AKM gas tube (6P1 Sb.1-2)
-59d64f2f86f77417193ef8b3:AKM wooden handguard (6P1 Sb.6-1)
-59d64fc686f774171b243fe2:AKM 7.62x39 muzzle brake-compensator (6P1 0-14)
-59d6507c86f7741b846413a2:AKM dust cover (6P1 0-1)
-59d650cf86f7741b846413a4:AKM rear sight (6P1 Sb.2-1)
-59d6514b86f774171a068a08:AKM wooden stock (6P1 Sb.5)
-59db7eed86f77461f8380365:Trijicon TA51 sight mount
-59e5d83b86f7745aed03d262:AK 7.62x39 ribbed metal 10-round magazine
-59e5f5a486f7746c530b3ce2:AK 7.62x39 Molot 40-round magazine (6P2.Sb-11)
-59e6152586f77473dc057aa1:Molot VPO-136 "Vepr-KM" 7.62x39 carbine
-59e61eb386f77440d64f5daf:VPO-136 "Vepr-KM" 7.62x39 muzzle brake-compensator
-59e6227d86f77440d64f5dc2:VPO-136 "Vepr-KM" wooden stock
-59e6284f86f77440d569536f:VPO-136 "Vepr-KM" wooden handguard
-59e62cc886f77440d40b52a1:AKM bakelite pistol grip
-59e6318286f77444dd62c4cc:AK bakelite pistol grip
-59e6449086f7746c9f75e822:Molot AKM-type dust cover
-59e649f986f77411d949b246:Molot AKM-type gas tube
-59e655cb86f77411dc52a77b:.366 TKM EKO
-59e6658b86f77411d949b250:.366 TKM Geksa
-59e6687d86f77411d949b251:Molot VPO-209 .366 TKM carbine
-59e8977386f77415a553c453:VPO-209 rear sight
-59e898ee86f77427614bd225:VPO-209 wooden handguard
-59e89d0986f77427600d226e:VPO-209 wooden stock
-59e8a00d86f7742ad93b569c:VPO-209 thread protector
-59eb7ebe86f7740b373438ce:VSS/VAL TOZ 6P29M mount
-59ecc28286f7746d7a68aa8c:AKS-74/AKS-74U Zenit PT Lock
-59ecc3dd86f7746dc827481c:AK Zenit PT-3 "Klassika" stock
-59f98b4986f7746f546d2cef:Serdyukov SR-1MP Gyurza 9x21 pistol
-59f99a7d86f7745b134aa97b:SR-1MP 9x21 18-round magazine
-59f9cabd86f7743a10721f46:Saiga-9 9x19 carbine
-59fafc5086f7740dbe19f6c3:AK 7.62x39 US Palm "AK30" 30-round magazine (Black)
-59fafc9386f774067d462453:AK 7.62x39 US Palm "AK30" 30-round magazine (FDE)
-59fb137a86f7740adb646af1:Tromix Monster Claw 12ga muzzle brake
-59fb257e86f7742981561852:AKM Zenit DTK-4M 7.62x39 sound suppressor
-59fb375986f7741b681b81a6:AK Krebs Custom UFM KeyMod handguard
-59ff346386f77477562ff5e2:Kalashnikov AKMS 7.62x39 assault rifle
-59ff3b6a86f77477562ff5ed:AKMS shoulder piece (6P4 Sb.1-19)
-5a0060fc86f7745793204432:AKMS 7.62x39 aluminium 30-round magazine
-5a0071d486f77404e23a12b2:AKM wooden pistol grip
-5a01ad4786f77450561fda02:AK Kiba Arms VDM CS gas tube
-5a01c29586f77474660c694c:AK 7.62x39 6L10 30-round magazine
-5a0abb6e1526d8000a025282:AK 7.62x39 Taktika Tula muzzle adapter
-5a0c27731526d80618476ac4:"Zarya" stun grenade
-5a0c59791526d8dba737bba7:AK GP-25 accessory kit recoil pad
-5a0d63621526d8dba31fe3bf:AKM PBS-1 7.62x39 sound suppressor
-5a0d716f1526d8000d26b1e2:AKML system 7.62x39 flash hider
-5a0eb980fcdbcb001a3b00a6:AKMB system rear sight
-5a0ec13bfcdbcb00165aa685:Kalashnikov AKMN 7.62x39 assault rifle
-5a0ed824fcdbcb0176308b0d:AKMP system rear sight device
-5a0f096dfcdbcb0176308b15:AKMP system front sight device
 5a16b672fcdbcb001912fa83:Ops-Core FAST Visor
 5a16b7e1fcdbcb00165aa6c9:Ops-Core FAST multi-hit ballistic face shield
 5a16b8a9fcdbcb00165aa6ca:Norotos Titanium Advanced Tactical Mount
 5a16b93dfcdbcbcae6687261:AN/PVS-14 Dual Dovetail Mount
 5a16ba61fcdbcb098008728a:Ops-Core FAST Gunsight Mandible
 5a16badafcdbcb001865f72d:Ops-Core FAST Side Armor
-5a17f98cfcdbcb0980087290:Stechkin APS 9x18PM machine pistol
-5a17fb03fcdbcbcae668728f:APS 9x18PM 20-round magazine
-5a17fb9dfcdbcbcae6687291:APB detachable wire stock
-5a17fc70fcdbcb0176308b3d:APS bakelite side-pieces
-5a1eaa87fcdbcb001865f75e:Trijicon REAP-IR thermal scope
-5a1eacb3fcdbcb09800872be:Trijicon REAP-IR scope eyecup
-5a1ead28fcdbcb001912fa9f:UNV DLOC-IRD sight mount
-5a27b281c4a28200741e1e52:SR-1MP single rail mount
-5a27b3d0c4a282000d721ec1:SR-1MP sound suppressor mount
-5a27b6bec4a282000e496f78:SR-1MP 9x21 sound suppressor
-5a27bad7c4a282000b15184b:SR-1MP quad rail mount
-5a2a57cfc4a2826c6e06d44a:RDG-2B smoke grenade
-5a329052c4a28200741e22d3:R11 RSASS handguard
-5a32a064c4a28200741e22de:SilencerCo Osprey 9 9x19 sound suppressor
-5a32aa0cc4a28232996e405f:P226 Trijicon RMR mount
-5a33a8ebc4a282000c5a950d:Alpha Dog Alpha 9 9x19 sound suppressor
-5a33b652c4a28232996e407c:Trijicon RMR high profile mount
-5a33bab6c4a28200741e22f8:Trijicon RMR mount for ACOG scopes
-5a34f7f1c4a2826c6e06d75d:AR-10 7.62x51 18 inch barrel
-5a34fae7c4a2826c6e06d760:AR-10 7.62x51 22 inch barrel
-5a34fbadc4a28200741e230a:AR-10 JP Enterprises Gas System-6
-5a34fd2bc4a282329a73b4c5:AR-10 AAC Blackout 51T 7.62x51 flash hider
-5a3501acc4a282000d72293a:AR-10 7.62x51 Magpul PMAG 20 SR-LR GEN M3 20-round magazine
-5a351711c4a282000b1521a4:HK MP5 9x19 X Products X-5 50-round drum magazine
-5a367e5dc4a282000e49738f:Remington R11 RSASS 7.62x51 marksman rifle
-5a37ca54c4a282000d72296a:JP Enterprises Flat-Top 30mm ring scope mount
+
 5a38e6bac4a2826c6e06d79b:TOZ-106 20ga bolt-action shotgun
 5a38ed75c4a28232996e40c6:TOZ-106 20ga MTs 20-01 Sb.3 4-shot magazine
 5a38ee51c4a282000c5a955c:TOZ-106 20ga MTs 20-01 Sb.3 2-shot magazine
@@ -544,7 +415,6 @@
 5c6161fb2e221600113fbde5:TOZ-106 20ga MTs 20-01 Sb.3 5-shot magazine
 5c6162682e22160010261a2b:TOZ-106 dovetail mount
 5c61627a2e22160012542c55:TOZ-106 rail scope mount
-5c6165902e22160010261b28:SIG Sauer SRD9 9x19 sound suppressor
 5c6175362e221600133e3b94:AK 7.62x39 ProMag AK-A-16 73-round drum magazine
 5c617a5f2e2216000f1e81b3:AK Zenit B-10 Handguard
 5c61a40d2e2216001403158d:Zenit B-13 "Klassika" dovetail rail platform
@@ -581,11 +451,6 @@
 5cadd919ae921500126a77f3:M9A3 front sight
 5cadd940ae9215051e1c2316:M9A3 rear sight
 5cadd954ae921500103bb3c2:M9A3 Sight Mount rear sight rail
-
-INSTALL Meats ASh12 FOR THE ASH12 AND THE 12.7x55 AMMO
-5cadf6ddae9215051e1c23b2:12.7x55mm PS12
-5cadf6e5ae921500113bb973:12.7x55mm PS12A
-5cadf6eeae921500134b2799:12.7x55mm PS12B
 5cadfbf7ae92152ac412eeef:ASh-12 12.7x55 assault rifle
 5caf1041ae92157c28402e3f:ASh-12 12.7x55 10-round magazine
 5caf1109ae9215753c44119f:ASh-12 12.7x55 20-round magazine
@@ -801,8 +666,6 @@ INSTALL Meats ASh12 FOR THE ASH12 AND THE 12.7x55 AMMO
 5e01ea19e9dc277128008c0b:Rotor 43 7.62x54R muzzle brake-compensator
 5e01f31d86f77465cf261343:Team Wendy EXFIL Ear Covers (Coyote Brown)
 5e01f37686f774773c6f6c15:Team Wendy EXFIL Ballistic face shield (Coyote Brown)
-
-5e208b9842457a4a7a33d074:AK Hexagon DTKP MK.2 7.62x39 sound suppressor
 5e217ba4c1434648c13568cd:AKM/AK-74 Hexagon "Kocherga" stock (Anodized Red)
 5e2192a498a36665e8337386:AK KGB MG-47 pistol grip (Anodized Red)
 5e21a3c67e40bd02257a008a:AK 7.62x39 Magpul PMAG 30 GEN M3 30-round magazine (Banana)
@@ -938,7 +801,6 @@ INSTALL Meats ASh12 FOR THE ASH12 AND THE 12.7x55 AMMO
 5fbc210bf24b94483f726481:MCX gas block
 5fbc226eca32ed67276c155d:MCX GEN1 KeyMod 8 inch handguard
 5fbc227aa56d053a3543f79e:MCX GEN1 KeyMod 12 inch handguard
-5fbc22ccf24b94483f726483:SIG Sauer Taper-LOK 7.62x51/.300 BLK muzzle adapter
 5fbcbcf593164a5b6278efb2:SIG Sauer 7.62x51 3-prong flash hider
 5fbcbd02900b1d5091531dd3:SIG Sauer Micro Brake 7.62x51 muzzle brake
 5fbcbd10ab884124df0cd563:SIG Sauer Two Port Brake 7.62x51 muzzle brake
@@ -948,7 +810,6 @@ INSTALL Meats ASh12 FOR THE ASH12 AND THE 12.7x55 AMMO
 5fbcc437d724d907e2077d5c:MPX/MCX lightweight stock
 5fbcc640016cce60e8341acc:MCX charging handle
 5fbe3ffdf8b6a877a729ea82:.300 Blackout BCP FMJ
-5fbe760793164a5b6278efc8:SIG Sauer SRD762-QD 7.62x51 sound suppressor
 5fbe7618d6fa9c00c571bb6c:SIG Sauer SRD762Ti 7.62x51 sound suppressor
 5fc0f9b5d724d907e2077d82:A3 Tactical MVF001 KeyMod vertical foregrip (Black)
 5fc0f9cbd6fa9c00c571bb90:SIG Sauer Vertical Foregrip KeyMod (Black)
