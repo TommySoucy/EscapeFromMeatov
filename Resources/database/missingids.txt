@@ -6,154 +6,25 @@
 5a16b93dfcdbcbcae6687261:AN/PVS-14 Dual Dovetail Mount
 5a16ba61fcdbcb098008728a:Ops-Core FAST Gunsight Mandible
 5a16badafcdbcb001865f72d:Ops-Core FAST Side Armor
-
-5a38e6bac4a2826c6e06d79b:TOZ-106 20ga bolt-action shotgun
-5a38ed75c4a28232996e40c6:TOZ-106 20ga MTs 20-01 Sb.3 4-shot magazine
-5a38ee51c4a282000c5a955c:TOZ-106 20ga MTs 20-01 Sb.3 2-shot magazine
-5a38eecdc4a282329a73b512:TOZ-106 002 pistol grip
-5a38ef1fc4a282000b1521f6:TOZ-106 stock
 5a398ab9c4a282000c5a9842:Ops-Core Single Clamp Rail Adapter mount
 5a398b75c4a282000a51a266:Ops-Core Picatinny Rail Adapter mount
-5a69a2ed8dc32e000d46d1f1:AS VAL Rotor 43 pistol grip & buffer tube
-5a6b585a8dc32e5a9c28b4f1:Glock 9x19 Lone Wolf AlphaWolf thread protector
-5a6b592c8dc32e00094b97bf:Glock 9x19 Double Diamond thread protector
-5a6b59a08dc32e000b452fb7:Glock SAI 9x19 thread protector
-5a6b5b8a8dc32e001207faf3:Glock 9x19 Lone Wolf AlphaWolf threaded barrel
-5a6b5e468dc32e001207faf5:Glock 9x19 Double Diamond threaded barrel
-5a6b5ed88dc32e000c52ec86:Glock 9x19 SAI threaded barrel
-5a6b5f868dc32e000a311389:Glock 17 9x19 barrel
-5a6b60158dc32e000a31138b:Glock 17 9x19 barrel with a compensator
-5a6f58f68dc32e000a311390:Glock front sight
-5a6f5d528dc32e00094b97d9:Glock rear sight
-5a6f5e048dc32e00094b97da:Glock 17 9x19 pistol slide
-5a6f5f078dc32e00094b97dd:Glock Viper Cut pistol slide
-5a702d198dc32e000b452fc3:Glock Lone Wolf AlphaWolf pistol slide
-5a7033908dc32e000a311392:Glock Lone Wolf AlphaWolf Custom pistol slide
-5a70366c8dc32e001207fb06:Glock 9x19 Double Diamond flash hider
-5a7037338dc32e000d46d257:Glock 9x19 CARVER Custom Decelerator 3 Port compensator
-5a705e128dc32e000d46d258:Glock 9x19 Lone Wolf AlphaWolf Bullnose compensator
-5a718b548dc32e000d46d262:Glock 9x19 17-round magazine
-5a718da68dc32e000d46d264:Glock 9x19 Magpul PMAG GL9 21-round magazine
-5a718f958dc32e00094b97e7:Glock 9x19 SGM Tactical 50-round drum magazine
-5a71e0048dc32e000c52ecc8:Glock ZEV Tech front sight
-5a71e0fb8dc32e00094b97f2:Glock ZEV Tech rear sight
-5a71e1868dc32e00094b97f3:Glock ZEV Tech sight mount cap
-5a71e22f8dc32e00094b97f4:Glock ZEV Tech HEX Gen3 RMR pistol slide
-5a71e4f48dc32e001207fb26:Glock ZEV Tech HEX Spartan RMR pistol slide
-5a7828548dc32e5a9c28b516:Remington Model 870 12ga pump-action shotgun
-5a787ebcc5856700142fdd98:M870 12ga 508mm barrel with a fixed sight
-5a787f25c5856700186c4ab9:M870 12ga 355mm barrel
-5a787f7ac5856700177af660:M870 12ga 508mm barrel
-5a787fadc5856700155a6ca1:M870 12ga 660mm vent rib barrel
-5a787fdfc5856700142fdd9a:M870 12ga sawed-off 325mm barrel
-5a788031c585673f2b5c1c79:M870 FAB Defense PR-870 forestock
-5a788068c5856700137e4c8f:M870 Magpul MOE handguard
-5a788089c5856700142fdd9c:M870 SpeedFeed Short handguard
-5a7880d0c5856700142fdd9d:M870 SPS polymer stock
-5a78813bc5856700186c4abe:M870 Magpul SGA polymer stock
-5a788169c5856700142fdd9e:M870 Shockwave Raptor grip
-5a7882dcc5856700177af662:M870 12ga 4-shell magazine cap
-5a78830bc5856700137e4c90:M870 12ga 7-shell magazine
-5a78832ec5856700155a6ca3:M870 12ga 10-shell magazine
-5a789261c5856700186c65d3:M870 Mesa Tactical magazine clamp
-5a7893c1c585673f2b5c374d:M870 Leapers UTG PRO MTU-028SG rail
-5a78948ec5856700177b1124:M870 XS SHOTRAIL rail with Ghost Ring rear sight
-5a7ad0c451dfba0013379712:Glock 9x19 CARVER Custom 4 Port compensator
-5a7ad1fb51dfba0013379715:Glock 9x19 Lone Wolf LWD-COMP9 compensator
-5a7ad2e851dfba0016153692:Glock 9x19 "Big Stick" 33-round magazine
-5a7ad4af51dfba0013379717:Glock Aimtech mount base
-5a7ad55551dfba0015068f42:Glock Aimtech Tiger Shark sight mount
-5a7ad74e51dfba0015068f45:Glock 9x19 Fischer Development FD917 sound suppressor
-5a7ae0c351dfba0017554310:Glock 17 9x19 pistol
-5a7afa25e899ef00135e31b0:Glock Polymer80 PS9 pistol slide
-5a7b32a2e899ef00135e345a:Glock 9x19 Strike Industries G4 SlideComp compensator
-5a7b483fe899ef0016170d15:SureFire XC1 tactical flashlight
-5a7b4900e899ef197b331a2a:UM Tactical UM3 pistol sight mount
-5a7b4960e899ef197b331a2d:Glock Pachmayr Tactical Grip Glove
 5a7c74b3e899ef0014332c29:NSPU-M night vision scope
-5a7d90eb159bd400165484f1:Glock Dead Ringer Snake Eye front sight
-5a7d9104159bd400134c8c21:Glock TruGlo TFX front sight
-5a7d9122159bd4001438dbf4:Glock Dead Ringer Snake Eye rear sight
-5a7d912f159bd400165484f3:Glock TruGlo TFX rear sight
-5a9548c9159bd400133e97b3:HK MP5 B&T TL-99 aluminum handguard
-5a957c3fa2750c00137fa5f7:AKS-74U CAA XRSU47SU tactical handguard
-5a966ec8a2750c00171b3f36:HK MP5 B&T tri-rail receiver mount
-5a966f51a2750c00156aacf6:SOK-12 12/76 SAI-02 10-round magazine
-5a9685b1a2750c0032157104:Glock 9x19 Moto Cut pistol slide
-5a9d56c8a2750c0032157146:AK Strike Industries TRAX 1 handguard
-5a9d6d00a2750c5c985b5305:Strike Industries KeyMod 4 inch rail
-5a9d6d13a2750c00164f6b03:Strike Industries KeyMod 6 inch rail
-5a9d6d21a2750c00137fa649:Strike Industries TRAX bridge rail
-5a9d6d34a2750c00141e07da:AK Strike Industries TRAX 2 handguard extension
-5a9e81fba2750c00164f6b11:9x39 SR3M.130 30-round magazine
-5a9ea27ca2750c00137fa672:AK Spikes Tactical Dynacomp 7.62x39 muzzle brake-compensator
-5a9fb739a2750c003215717f:Rotor 43 9x19 muzzle brake-compensator
-5a9fbacda2750c00141e080f:Rotor 43 7.62x39 muzzle brake-compensator
-5a9fbb74a2750c0032157181:Rotor 43 .366 TKM muzzle brake-compensator
-5a9fc7e6a2750c0032157184:VSS/VAL Zenit B-3 mount combo
-5aa66a9be5b5b0214e506e89:Nightforce Magmount 34mm ring scope mount
-5aa66c72e5b5b00016327c93:Nightforce Magmount 34mm ring scope mount with Ruggedized Accessory Platform
 5aa7e373e5b5b000137b76f0:Altyn face shield
 5aa7e3abe5b5b000171d064d:ZSh-1-2M face shield
-5aaa4194e5b5b055d06310a5:AK-74 5.45x39 Magpul PMAG 30 GEN M3 30-round magazine
-5aaf8a0be5b5b00015693243:M1A 7.62x51 20-round magazine
-5aaf8e43e5b5b00015693246:M1A SOCOM 16 stock
-5aaf9d53e5b5b00015042a52:M1A 7.62x51 16 inch barrel
-5aafa1c2e5b5b00015042a56:M1A SOCOM 16 7.62x51 muzzle brake-compensator
-5aafa49ae5b5b00015042a58:M1A SA XS Post .125 Blade front sight
-5aafa857e5b5b00018480968:Springfield Armory M1A 7.62x51 rifle
-5ab24ef9e5b5b00fe93c9209:M1A SOCOM 16 upper part
-5ab372a310e891001717f0d8:M14 TROY S.A.S.S. Chassis stock
-5ab3afb2d8ce87001660304d:M1A Smith Enterprise SOCOM 16 7.62x51 threaded muzzle brake & gas block
-5ab626e4d8ce87272e4c6e43:AKS-74 metal skeletonized stock (6P21 Sb.5)
-5ab8e9fcd8ce870019439434:Kalashnikov AKS-74N 5.45x39 assault rifle
+
+5cf50fc5d7f00c056c53f83c:AK-74M CAA AKTS AK74 buffer tube
+5cbdaf89ae9215000e5b9c94:AK-74 5.45x39 6L23 "Plum" 30-round magazine
+5cbdb1b0ae9215000d50e105:AK-74 "Plum" polymer stock (6P20 Sb.7)
+5cbdc23eae9215001136a407:AK 7.62x39 Molot 75-round drum magazine
+5c7951452e221644f31bfd5c:AK Venom Tactical Antidote 7.62x39 muzzle brake-compensator
+5c61a40d2e2216001403158d:Zenit B-13 "Klassika" dovetail rail platform
 5aba62f8d8ce87001943946b:APS front sight
 5aba637ad8ce87001773e17f:APS rear sight
 5aba639ed8ce8700182ece67:APB rear sight
 5abcbb20d8ce87001773e258:M14 SA Enlarged Military Aperture rear sight
-5abcbc27d8ce8700182eceeb:Kalashnikov AKMSN 7.62x39 assault rifle
 5abcc328d8ce8700194394f3:APB 9x18PM sound suppressor
 5abccb7dd8ce87001773e277:APB 9x18PM silenced machine pistol
-5abcd472d8ce8700166032ae:AKMSN shoulder piece (6P4N Sb.1-19)
 5ac4c50d5acfc40019262e87:Kolpak-1S face shield
-5ac4cd105acfc40016339859:Kalashnikov AK-74M 5.45x39 assault rifle
-5ac50c185acfc400163398d4:AK-74M polymer stock (6P34 Sb.15)
-5ac50da15acfc4001718d287:AK-74M dust cover (6P34 0-1)
-5ac66bea5acfc43b321d4aec:AK-103 7.62x39 30-round magazine
-5ac66c5d5acfc4001718d314:AK-101 5.56x45 6L29 30-round magazine
-5ac66cb05acfc40198510a10:Kalashnikov AK-101 5.56x45 assault rifle
-5ac66d015acfc400180ae6e4:Kalashnikov AK-102 5.56x45 assault rifle
-5ac66d2e5acfc43b321d4b53:Kalashnikov AK-103 7.62x39 assault rifle
-5ac66d725acfc43b321d4b60:Kalashnikov AK-104 7.62x39 assault rifle
-5ac66d9b5acfc4001633997a:Kalashnikov AK-105 5.45x39 assault rifle
-5ac72e475acfc400180ae6fe:AK-74M rear sight (6P20 Sb.2)
-5ac72e615acfc43f67248aa0:AK-101 5.56x45 muzzle brake-compensator
-5ac72e725acfc400180ae701:AK-102 5.56x45 muzzle brake-compensator (6P44 0-20)
-5ac72e7d5acfc40016339a02:AK-103 7.62x39 muzzle brake-compensator
-5ac72e895acfc43b321d4bd5:AK-104 7.62x39 muzzle brake-compensator (6P46 0-20)
-5ac72e945acfc43f3b691116:AK-105 5.45x39 muzzle brake-compensator (6P44 0-20)
-5ac733a45acfc400192630e2:AK-105 rear sight (6P44 Sb.1-30)
-5ac7655e5acfc40016339a19:AK-74M 5.45x39 muzzle brake-compensator (6P20 0-20)
-5ac78eaf5acfc4001926317a:AK-74M/AK-100 Zenit PT Lock
-5addba3e5acfc4001669f0ab:M1A SA National Match .062 Blade front sight
-5addbac75acfc400194dbc56:M1A 7.62x51 22 inch barrel
-5addbb6e5acfc408fb1393fd:M1A National Match 7.62x51 flash suppressor
-5addbb825acfc408fb139400:M14 JP Enterprises 7.62x51 Tactical Compensator
-5addbb945acfc4001a5fc44e:M14 Smith Enterprise Good Iron 7.62x51 muzzle brake
-5addbba15acfc400185c2854:M14 Smith Enterprise Vortex 7.62x51 muzzle brake
-5addbbb25acfc40015621bd9:M14 Yankee Hill Phantom 7.62x51 flash hider
-5addbf175acfc408fb13965b:M1A ProMag Archangel chassis
-5addbfbb5acfc400194dbcf7:M14 UltiMAK M8 Forward Optic mount
-5addbfd15acfc40015621bde:M14 Amega Mini Scout Mount system
-5addbfe15acfc4001a5fc58b:M14 A.R.M.S. #18 scope mount
-5addbfef5acfc400185c2857:M14 Leapers UTG 4-Point Locking Deluxe mount
-5addbffe5acfc4001714dfac:M14 SAGE International DCSB mount
-5addc00b5acfc4001669f144:M14 Vltor CASV-14 rail system
-5addc7005acfc4001669f275:M14 SAGE International M14ALCS chassis
-5addc7ac5acfc400194dbd90:M14 SAGE International M14ALCS (MOD-0) stock
-5addc7db5acfc4001669f279:M14 SAGE International M14ALCS (MOD-0) pistol grip
-5addcce35acfc4001a5fc635:M14 7.62x51 30-round magazine
-5addccf45acfc400185c2989:M14 7.62x51 X Products X-14 50-round drum magazine
 5adf23995acfc400185c2aeb:MTs 20-01 stock
 5ae08f0a5acfc408fb1398a1:Mosin 7.62x54R bolt-action rifle (Sniper)
 5ae096d95acfc400185c2c81:Mosin Rifle standard stock
@@ -175,17 +46,10 @@
 5b099bf25acfc4001637e683:SA-58 buffer tube adapter
 5b0bbe4e5acfc40dc528a72d:DS Arms SA-58 7.62x51 assault rifle
 5b0bc22d5acfc47a8607f085:SA-58 Holland Type rear sight
-5b0e794b5acfc47a877359b2:AKM/AK-74 Magpul Zhukov-S stock
 5b1fa9b25acfc40018633c01:Glock 18C 9x19 machine pistol
 5b1fa9ea5acfc40018633c0a:Glock 18C 9x19 barrel with a compensator
 5b1faa0f5acfc40dc528aeb5:Glock 18C 9x19 pistol slide
-5b1fb3e15acfc4001637f068:AK 7.62x39 bakelite 40-round magazine
-5b1fd4e35acfc40018633c39:AK 7.62x39 aluminium 10-round magazine
-5b222d335acfc4771e1be099:AKM/AK-74 Zenit PT Lock
-5b222d405acfc400153af4fe:AK Zenit PT-1 "Klassika" stock
-5b237e425acfc4771e1be0b6:AK TROY Full Length Rail handguard & gas tube combo
 5b2389515acfc4771e1be0c0:Burris AR-P.E.P.R. 30mm ring scope mount
-5b30ac585acfc433000eb79c:AK Magpul MOE pistol grip (Black)
 5b31163c5acfc400153b71cb:SIG Sauer ROMEO sight mount
 5b363dd25acfc4001a598fd2:SilencerCo Salvo 12 12ga sound suppressor
 5b363dea5acfc4771e1c5e7e:SilencerCo Salvo 12 choke adapter
@@ -236,10 +100,8 @@
 5b7d68af5acfc400170e30c3:SA-58 Austrian Style 7.62x51 muzzle brake
 5b7d693d5acfc43bca706a3d:AR-10 2A Armanent X3 7.62x51 compensator
 5b7d6c105acfc40015109a5f:FAL standard dust cover
-5b800e9286f7747a8b04f3ff:AK Hexagon tubular handguard
 5b800ebc86f774394e230a90:Hexagon medium length rail
 5b800ed086f7747baf6e2f9e:Hexagon short length rail
-5b80242286f77429445e0b47:AK Hexagon tubular handguard (Anodized Red)
 5b84038986f774774913b0c1:Hexagon short length rail (Anodized Red)
 5b8403a086f7747ff856f4e2:Hexagon medium length rail (Anodized Red)
 5b86a0e586f7745b600ccb23:Mosin Rifle Bramit 7.62x54R sound suppressor
@@ -415,32 +277,23 @@
 5c6161fb2e221600113fbde5:TOZ-106 20ga MTs 20-01 Sb.3 5-shot magazine
 5c6162682e22160010261a2b:TOZ-106 dovetail mount
 5c61627a2e22160012542c55:TOZ-106 rail scope mount
-5c6175362e221600133e3b94:AK 7.62x39 ProMag AK-A-16 73-round drum magazine
-5c617a5f2e2216000f1e81b3:AK Zenit B-10 Handguard
-5c61a40d2e2216001403158d:Zenit B-13 "Klassika" dovetail rail platform
 5c6beec32e221601da3578f2:P226 TJ's Custom 9x19 compensator
-5c6bf4aa2e2216001219b0ae:AK US Palm pistol grip
 5c6c2c9c2e2216000f2002e4:HK 416A5 TROY M-LOK 13 inch handguard
 5c6d10e82e221601da357b07:HK 416A5 MRS KeyMod 14 inch handguard
 5c6d10fa2e221600106f3f23:HK 416A5 Midwest Industries 9 inch M-LOK handguard
 5c6d11072e2216000e69d2e4:HK 416A5 Midwest Industries 13.5 inch M-LOK handguard
 5c6d11152e2216000f2003e7:HK 416A5 Strike Industries CRUX 15 inch M-LOK handguard
 5c6d85e02e22165df16b81f4:HK 416A5 5.56x45 10.6 inch barrel
-5c7951452e221644f31bfd5c:AK Venom Tactical Antidote 7.62x39 muzzle brake-compensator
 5c7954d52e221600106f4cc7:Gemtech ONE Direct Thread Mount adapter
 5c7e8fab2e22165df16b889b:AAC Illusion 9 9x19 sound suppressor
 5c82342f2e221644f31c060e:BelOMO PSO-1 4x24 scope
 5c82343a2e221644f31c0611:BelOMO PSO-1M2 4x24 scope
 5c86592b2e2216000e69e77c:IEA Mil-Optics KH/F 34mm one-piece magmount
 5c878e9d2e2216000f201903:AR-10 Lantac Dragon 7.62x51 muzzle brake-compensator
-5c878ebb2e2216001219d48a:AK Lantac Drakon 7.62x39 muzzle brake
 5c88f24b2e22160bc12c69a6:SVD 7.62x54R 20-round magazine
 5c90c3622e221601da359851:Zenit B-13V "Klassika" dovetail rail platform
 5c920e902e221644f31c3c99:P226 9x19 20-round extended magazine
 5c99f3592e221644fc633070:TOZ-106 custom cut Mosin stock
-5c9a07572e221644f31c4b32:AK Magpul Zhukov-U handguard (Black)
-5c9a1c3a2e2216000e69fb6a:AK Magpul Zhukov-U handguard (FDE)
-5c9a1c422e221600106f69f0:AK Magpul Zhukov-U handguard (Plum)
 5ca2113f86f7740b2547e1d2:Vulkan-5 face shield
 5cadc190ae921500103bb3b6:Beretta M9A3 9x19 pistol
 5cadc1c6ae9215000f2775a4:M9A3 9x19 threaded barrel
@@ -458,11 +311,6 @@
 5caf16a2ae92152ac412efbc:ASh-12 folding front sight
 5caf17c9ae92150b30006be1:ASh-12 12.7x55 muzzle brake-compensator
 5caf187cae92157c28402e43:ASh-12 12.7x55 sound suppressor
-5cbda392ae92155f3c17c39f:AK 100-series polymer handguard
-5cbda9f4ae9215000e5b9bfc:AK-74 "Plum" polymer handguard (6P20 Sb.9)
-5cbdaf89ae9215000e5b9c94:AK-74 5.45x39 6L23 "Plum" 30-round magazine
-5cbdb1b0ae9215000d50e105:AK-74 "Plum" polymer stock (6P20 Sb.7)
-5cbdc23eae9215001136a407:AK 7.62x39 Molot 75-round drum magazine
 5cc6ea78e4a949000e1ea3c1:FN P90 charging handle
 5cc6ea85e4a949000e1ea3c3:FN P90 K&M The Handler charging handle
 5cc70093e4a949033c734312:FN P90 5.7x28 50-round magazine
@@ -499,10 +347,6 @@
 5cebec38d7f00c00110a652a:FN P90 Ring Sight reflex sight
 5cf12a15d7f00c05464b293f:M700 7.62x51 ProMag AA-70 20-round magazine
 5cf13123d7f00c1085616a50:M700 ProMag Archangel chassis
-5cf4e3f3d7f00c06595bc7f0:AK 5.45 Design Aggressor handguard
-5cf50850d7f00c056e24104c:AK Strike Industries Enhanced Pistol Grip (Black)
-5cf508bfd7f00c056e24104e:AK Strike Industries Enhanced Pistol Grip (FDE)
-5cf50fc5d7f00c056c53f83c:AK-74M CAA AKTS AK74 buffer tube
 5cf518cfd7f00c065b422214:AKM/AK-74 CAA AKTS buffer tube
 5cf54404d7f00c108840b2ef:AK KGB MG-47 pistol grip
 5cf638cbd7f00c06595bc936:NPZ USP-1 "Tyulpan" 4x scope
