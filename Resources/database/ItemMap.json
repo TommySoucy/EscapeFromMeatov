@@ -4438,6 +4438,10 @@
     "H3ID": "FTW.Gun.m1autodupe",
 	"Note": "Should be MW"
   },
+  "64b9e2037fdfb81df81e3c25": {
+    "H3ID": "FTW.Gun.20rnd",
+	"Note": "Should be 10 round mag"
+  },
   "5aaf8a0be5b5b00015693243": {
     "H3ID": "FTW.Gun.20rnd"
   },
@@ -4515,6 +4519,10 @@
   "5addbb825acfc408fb139400": {
     "H3ID": "MuzzleBrakeTruepoint",
 	"Note": "Should be M14 JP Enterprises 7.62x51 Tactical Compensator, this is the one that looked the most like it, unfortunately missing the front sight attachment point"
+  },
+  "5abcbb20d8ce87001773e258": {
+    "H3ID": "FTW.Gun.RearSight",
+	"Note": "Should be MW"
   },
   "5aafa1c2e5b5b00015042a56": {
 	"Note": "Missing, should be included with modul M1A"
@@ -4954,6 +4962,9 @@
     "H3ID": "AKStock74m",
 	"Note": "Should be MW"
   },
+  "5c61a40d2e2216001403158d": {
+    "H3ID": "AKMiscB13"
+  },
   "59d64fc686f774171b243fe2": {
 	"Note": "Missing, default, integrated into akm receiver"
   },
@@ -4989,6 +5000,9 @@
   "5a9ea27ca2750c00137fa672": {
     "H3ID": "MuzzleSpike"
   },
+  "5c7951452e221644f31bfd5c": {
+    "H3ID": "MuzzleVenom"
+  },
   "5b1fd4e35acfc40018633c39": {
     "H3ID": "MagazineAKM10",
 	"Note": "Should be MagazineAKMAluminum but with a 10 round capacity"
@@ -4999,6 +5013,13 @@
   "5c6175362e221600133e3b94": {
     "H3ID": "MagazineAKMDrum",
 	"Note": "Should be AK 7.62x39 ProMag AK-A-16 73-round drum magazine"
+  },
+  "5cbdc23eae9215001136a407": {
+    "H3ID": "MagazineAKMDrum",
+	"Note": "Should be AK 7.62x39 Molot 75-round drum magazine"
+  },
+  "5cbdaf89ae9215000e5b9c94": {
+    "H3ID": "Magazine6L23Plum"
   },
   "5ac66c5d5acfc4001718d314": {
     "H3ID": "Magazine6L29"
@@ -5224,6 +5245,10 @@
   "5649b0544bdc2d1b2b8b458a": {
 	"Note": "Should be Modul part of AK systems"
   },
+  "5cbdb1b0ae9215000d50e105": {
+	"H3ID": "AKStock74plm",
+	"Note": "Should be MW"
+  },
   "5cf50fc5d7f00c056c53f83c": {
 	"H3ID": "AKStockAKTSFold",
 	"Note": "Should be MW"
@@ -5311,6 +5336,10 @@
     "H3ID": "FSCE.FoldStockTOZ",
 	"Note": "Should be MW"
   },
+  "5adf23995acfc400185c2aeb": {
+    "H3ID": "FSCE.FullStockTOZ",
+	"Note": "Should be MW"
+  },
   "5a38eecdc4a282329a73b512": {
     "Note": "Missing, should be modul part of 5a38e6bac4a2826c6e06d79b/TOZ-106"
   },
@@ -5319,6 +5348,104 @@
   },
   "5a38ed75c4a28232996e40c6": {
     "H3ID": "FSCE.Mag4rndTOZ"
+  },
+  "5ae08f0a5acfc408fb1398a1": {
+    "H3ID": "FSCE.Mosin.Mosin"
+  },
+  "5bfd297f0db834001a669119": {
+    "H3ID": "FSCE.Mosin.Mosin"
+  },
+  "5ae0973a5acfc4001562206c": {
+    "Note": "Missing, integrated with receivers"
+  },
+  "5ae099875acfc4001714e593": {
+    "Note": "Missing, integrated with barrels"
+  },
+  "5b3f7bf05acfc433000ecf6b": {
+    "Note": "Missing, should be modul part of Mosin"
+  },
+  "5bae13ded4351e44f824bf38": {
+    "Note": "Missing, should be modul part of Mosin"
+  },
+  "5bbde409d4351e003562b036": {
+    "Note": "Missing, should be modul part of Mosin"
+  },
+  "5bbde41ed4351e003562b038": {
+    "Note": "Missing, should be modul part of Mosin"
+  },
+  "5bc5a35cd4351e450201232f": {
+    "Note": "Missing, should be modul part of Mosin"
+  },
+  "5ae096d95acfc400185c2c81": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Stocks",
+    "ModulPart": "Infantry Stock"
+  },
+  "5bfd35380db83400232fe5cc": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Stocks",
+    "ModulPart": "Infantry Carbine Stock"
+  },
+  "5bfd36290db834001966869a": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Stocks",
+    "ModulPart": "Sniper Stock (Sawn-Off)"
+  },
+  "5bfd36ad0db834001c38ef66": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Stocks",
+    "ModulPart": "Infantry Carbine Stock (Sawn-Off)"
+  },
+  "5bfd37c80db834001d23e842": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Stocks",
+    "ModulPart": "Sniper Stock"
+  },
+  "5bbdb870d4351e00367fb67d": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Stocks",
+    "ModulPart": "Monte Carlo Stock"
+  },
+  "5bae13bad4351e00320204af": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Stocks",
+    "ModulPart": "Vanguard RN Stock",
+	"Note": "Should be Mosin Rifle ProMag Archangel OPFOR PRS chassis"
+  },
+  "5ae099925acfc4001a5fc7b3": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Ironsights",
+    "ModulPart": "Default Irons"
+  },
+  "5bbdb811d4351e45020113c7": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Ironsights",
+    "ModulPart": "Tri-Rail"
+  },
+  "5bc5a372d4351e44f824d17f": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Ironsights",
+    "ModulPart": "Rear Sight Mount"
+  },
+  "5ae09bff5acfc4001562219d": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Barrels",
+    "ModulPart": "730mm Barrel"
+  },
+  "5b86a0e586f7745b600ccb23": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Muzzles",
+    "ModulPart": "Bramit Suppressor"
+  },
+  "5bbdb83fd4351e44f824c44b": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Muzzles",
+    "ModulPart": "Tanker Muzzle Brake"
+  },
+  "5bc5a351d4351e003477a414": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Muzzles",
+    "ModulPart": "Clamp-On Muzzle Brake"
   },
   "5a7828548dc32e5a9c28b516": {
     "H3ID": "Modul870Dupe",
@@ -6792,6 +6919,22 @@
   "5a17f98cfcdbcb0980087290": {
     "H3ID": "APS",
 	"Note": "Should be Modul"
+  },
+  "5abccb7dd8ce87001773e277": {
+    "H3ID": "APS",
+	"Note": "Should be APB 9x18PM silenced machine pistol, but isn't taht just a silenced version of the APS?"
+  },
+  "5abcc328d8ce8700194394f3": {
+    "H3ID": "SuppressorAPS"
+  },
+  "5aba639ed8ce8700182ece67": {
+	"Note": "Missing, Should be Modul part of APS"
+  },
+  "5aba62f8d8ce87001943946b": {
+	"Note": "Missing, Should be Modul part of APS"
+  },
+  "5aba637ad8ce87001773e17f": {
+	"Note": "Missing, Should be Modul part of APS"
   },
   "5a17fb9dfcdbcbcae6687291": {
     "H3ID": "StockAPSWire",

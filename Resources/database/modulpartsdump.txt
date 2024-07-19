@@ -1,0 +1,514 @@
+[Info   :EscapeFromMeatov] FSCE.Mosin.Ironsights
+[Info   :EscapeFromMeatov]      Default Irons
+[Info   :EscapeFromMeatov]      Tannenberg Custom Irons
+[Info   :EscapeFromMeatov]      Rear Sight Mount
+[Info   :EscapeFromMeatov]      Tri-Rail
+[Info   :EscapeFromMeatov] FSCE.Mosin.Barrels
+[Info   :EscapeFromMeatov]      200mm Barrel
+[Info   :EscapeFromMeatov]      220mm Barrel
+[Info   :EscapeFromMeatov]      550mm Barrel
+[Info   :EscapeFromMeatov]      730mm Barrel
+[Info   :EscapeFromMeatov] FSCE.Mosin.Recievers
+[Info   :EscapeFromMeatov]      Infantry Reciever
+[Info   :EscapeFromMeatov]      Sniper Reciever
+[Info   :EscapeFromMeatov]      Finnish M91 Reciever
+[Info   :EscapeFromMeatov] FSCE.Mosin.Muzzles
+[Info   :EscapeFromMeatov]      No Muzzle Brake
+[Info   :EscapeFromMeatov]      Clamp-On Muzzle Brake
+[Info   :EscapeFromMeatov]      Thread Adapter
+[Info   :EscapeFromMeatov]      Tanker Muzzle Brake
+[Info   :EscapeFromMeatov]      Bramit Suppressor
+[Info   :EscapeFromMeatov] FSCE.Mosin.Bolt
+[Info   :EscapeFromMeatov]      Infantry Bolt
+[Info   :EscapeFromMeatov]      Sniper Bolt
+[Info   :EscapeFromMeatov] FSCE.Mosin.Stocks
+[Info   :EscapeFromMeatov]      Infantry Carbine Stock
+[Info   :EscapeFromMeatov]      Infantry Carbine Stock (Sawn-Off)
+[Info   :EscapeFromMeatov]      Infantry Stock
+[Info   :EscapeFromMeatov]      Monte Carlo Stock
+[Info   :EscapeFromMeatov]      Vanguard HV Stock
+[Info   :EscapeFromMeatov]      Vanguard MK Stock
+[Info   :EscapeFromMeatov]      Vanguard RN Stock
+[Info   :EscapeFromMeatov]      Vanguard SN Stock
+[Info   :EscapeFromMeatov]      Vanguard WS Stock
+[Info   :EscapeFromMeatov]      Sniper Stock (Sawn-Off)
+[Info   :EscapeFromMeatov]      Sniper Stock
+[Info   :EscapeFromMeatov]      Obrez Grip
+[Info   :EscapeFromMeatov] Grips_AR
+[Info   :EscapeFromMeatov]      No Pistol Grip
+[Info   :EscapeFromMeatov]      Pistol Grip
+[Info   :EscapeFromMeatov]      No Grip
+[Info   :EscapeFromMeatov]      A2 Pistol Grip
+[Info   :EscapeFromMeatov]      Aeroknox Orion Pistol Grip
+[Info   :EscapeFromMeatov]      B5 P23 Pistol Grip
+[Info   :EscapeFromMeatov]      BCM Mod 0 Pistol Grip
+[Info   :EscapeFromMeatov]      BCM Mod 3 Pistol Grip
+[Info   :EscapeFromMeatov]      Daniel Defense Pistol Grip
+[Info   :EscapeFromMeatov]      ERGO Pistol Grip
+[Info   :EscapeFromMeatov]      ERGO PSG1 Pistol Grip
+[Info   :EscapeFromMeatov]      F1 ST1 Pistol Grip
+[Info   :EscapeFromMeatov]      F1 ST2 Pistol Grip
+[Info   :EscapeFromMeatov]      F1 ST2 Paracord Pistol Grip
+[Info   :EscapeFromMeatov]      Fortis Torque Pistol Grip
+[Info   :EscapeFromMeatov]      Geissele A22 Pistol Grip
+[Info   :EscapeFromMeatov]      Hera Arms HG15 Pistol Grip
+[Info   :EscapeFromMeatov]      HK Battlegrip Pistol Grip
+[Info   :EscapeFromMeatov]      HK Beavertail Pistol Grip
+[Info   :EscapeFromMeatov]      HK v2 Pistol Grip
+[Info   :EscapeFromMeatov]      Hogue 15 Pistol Grip
+[Info   :EscapeFromMeatov]      Hogue Overmolded Pistol Grip
+[Info   :EscapeFromMeatov]      A1 Pistol Grip
+[Info   :EscapeFromMeatov]      Magpul K2 Pistol Grip
+[Info   :EscapeFromMeatov]      Magpul MIAD Pistol Grip
+[Info   :EscapeFromMeatov]      Magpul MIAD Full Pistol Grip
+[Info   :EscapeFromMeatov]      Magpul MOE Pistol Grip
+[Info   :EscapeFromMeatov]      Naroh GRAL-S Pistol Grip
+[Info   :EscapeFromMeatov]      Reptilia CQG Pistol Grip
+[Info   :EscapeFromMeatov]      Stark Pistol Grip
+[Info   :EscapeFromMeatov]      Tactical Dynamics Hex Pistol Grip
+[Info   :EscapeFromMeatov]      Tactical Dynamics Skeletonized Pistol Grip
+[Info   :EscapeFromMeatov]      Tango Down Battle Grip
+[Info   :EscapeFromMeatov]      Tyrant Designs MOD v2 Pistol Grip
+[Info   :EscapeFromMeatov]      Tyrant Designs Concept One Pistol Grip
+[Info   :EscapeFromMeatov]      MCX Grip
+[Info   :EscapeFromMeatov]      MCX Legacy Grip
+[Info   :EscapeFromMeatov]      MCX LT Grip
+[Info   :EscapeFromMeatov]      MCX Rattler Grip
+[Info   :EscapeFromMeatov] Magwells_AR
+[Info   :EscapeFromMeatov]      No Magwell
+[Info   :EscapeFromMeatov]      HRF RCM
+[Info   :EscapeFromMeatov]      Fab Defense Mojo
+[Info   :EscapeFromMeatov]      NCStar BlastAR Magwell
+[Info   :EscapeFromMeatov] Barrels_AR15
+[Info   :EscapeFromMeatov]      No Barrel
+[Info   :EscapeFromMeatov]      AR15 3" Barrel
+[Info   :EscapeFromMeatov]      AR15 5" Barrel
+[Info   :EscapeFromMeatov]      AR15 6" Saint Edge PDW Barrel
+[Info   :EscapeFromMeatov]      AR15 7.5" Barrel
+[Info   :EscapeFromMeatov]      AR15 9" Barrel
+[Info   :EscapeFromMeatov]      AR15 10.5" Barrel
+[Info   :EscapeFromMeatov]      AR15 11.5" Barrel
+[Info   :EscapeFromMeatov]      AR15 12.5" Barrel
+[Info   :EscapeFromMeatov]      AR15 13.7" Barrel
+[Info   :EscapeFromMeatov]      AR15 13.9" Ballistic Advantage Barrel
+[Info   :EscapeFromMeatov]      AR15 14.5" Barrel
+[Info   :EscapeFromMeatov]      AR15 16" Carbine Gas Barrel
+[Info   :EscapeFromMeatov]      AR15 16" Barrel
+[Info   :EscapeFromMeatov]      AR15 16" Ballistic Advantage Barrel
+[Info   :EscapeFromMeatov]      AR15 16" Dissipator Barrel
+[Info   :EscapeFromMeatov]      AR15 18" Barrel
+[Info   :EscapeFromMeatov]      AR15 20" Barrel
+[Info   :EscapeFromMeatov]      AR15 24" Barrel
+[Info   :EscapeFromMeatov] GasBlocks_AR
+[Info   :EscapeFromMeatov]      Ballistic Advantage Gas Block
+[Info   :EscapeFromMeatov]      Daniel Defense Low Profile Gas Block
+[Info   :EscapeFromMeatov]      Flip Sight Gas Block
+[Info   :EscapeFromMeatov]      JP Gas Block
+[Info   :EscapeFromMeatov]      JP Railed Gas Block
+[Info   :EscapeFromMeatov]      KAC Mod2 Gas Block
+[Info   :EscapeFromMeatov]      M4 Front Post Gas Block
+[Info   :EscapeFromMeatov]      M4 Front Post Gas Block (No Sling)
+[Info   :EscapeFromMeatov]      TRIAD Gas Block
+[Info   :EscapeFromMeatov]      Windham Weaponry Railed Gas Block
+[Info   :EscapeFromMeatov] BufferStocks_AR
+[Info   :EscapeFromMeatov]      No Stock
+[Info   :EscapeFromMeatov]      AK12 Stock
+[Info   :EscapeFromMeatov]      B5 Bravo Stock
+[Info   :EscapeFromMeatov]      B5 Precision Stock
+[Info   :EscapeFromMeatov]      BCM MOD0 Stock
+[Info   :EscapeFromMeatov]      BCM SOPMOD Stock
+[Info   :EscapeFromMeatov]      Brownells CAR15 Stock
+[Info   :EscapeFromMeatov]      Daniel Defense Stock
+[Info   :EscapeFromMeatov]      Fab Defense GL-Core CP Stock
+[Info   :EscapeFromMeatov]      Fab Defense GLR16 Stock
+[Info   :EscapeFromMeatov]      Fab Defense GL Shock Stock
+[Info   :EscapeFromMeatov]      Foam Buffertube Cover
+[Info   :EscapeFromMeatov]      HK E1 Stock
+[Info   :EscapeFromMeatov]      HK Slimline Stock
+[Info   :EscapeFromMeatov]      Hogue Overmolded Stock
+[Info   :EscapeFromMeatov]      Kriss DS150 Stock
+[Info   :EscapeFromMeatov]      LMT SOPMOD Stock
+[Info   :EscapeFromMeatov]      M4A1 Standard Stock
+[Info   :EscapeFromMeatov]      Magpul ACS-L Stock
+[Info   :EscapeFromMeatov]      Magpul CTR Stock
+[Info   :EscapeFromMeatov]      Magpul MOE Stock
+[Info   :EscapeFromMeatov]      Magpul MOE SL Stock
+[Info   :EscapeFromMeatov]      Magpul MOE SL-K Stock
+[Info   :EscapeFromMeatov]      Magpul MOE SL-M Stock
+[Info   :EscapeFromMeatov]      Magpul MOE SL-S Stock
+[Info   :EscapeFromMeatov]      Magpul STR Stock
+[Info   :EscapeFromMeatov]      MFT BMS
+[Info   :EscapeFromMeatov]      MFT BUS
+[Info   :EscapeFromMeatov]      SBA3 Pistol Brace
+[Info   :EscapeFromMeatov]      Strike Industries Viper Stock
+[Info   :EscapeFromMeatov]      UTG Pro S1 Stock
+[Info   :EscapeFromMeatov]      UTG Pro S3 Stock
+[Info   :EscapeFromMeatov]      VLTOR EMOD Stock
+[Info   :EscapeFromMeatov]      VLTOR IMOD Stock
+[Info   :EscapeFromMeatov] BufferTubes_AR
+[Info   :EscapeFromMeatov]      No Buffertube
+[Info   :EscapeFromMeatov]      A2 Buffertube
+[Info   :EscapeFromMeatov]      Enhanced Buffertube
+[Info   :EscapeFromMeatov]      Strike Industries Buffertube
+[Info   :EscapeFromMeatov]      ADAR 2-15 Stock
+[Info   :EscapeFromMeatov]      DoubleStar SOCOM Stock
+[Info   :EscapeFromMeatov]      DoubleStar Ultralite Stock
+[Info   :EscapeFromMeatov]      Ergo F93 Stock
+[Info   :EscapeFromMeatov]      Hera Arms CQR Stock
+[Info   :EscapeFromMeatov]      Law Tactical Folder
+[Info   :EscapeFromMeatov]      M16A1 Fixed Stock
+[Info   :EscapeFromMeatov]      M16A2 Fixed Stock
+[Info   :EscapeFromMeatov]      Magpul Fixed Carbine Stock
+[Info   :EscapeFromMeatov]      Magpul PRS Gen3
+[Info   :EscapeFromMeatov]      Magpul PRS Lite
+[Info   :EscapeFromMeatov]      Magpul UBR Gen1
+[Info   :EscapeFromMeatov]      Magpul UBR Gen2
+[Info   :EscapeFromMeatov]      Maxim CQB Pistol Brace
+[Info   :EscapeFromMeatov]      Maxim SCW Stock
+[Info   :EscapeFromMeatov]      NCStar BlastAR Stock
+[Info   :EscapeFromMeatov]      ODIN Works Zulu Stock
+[Info   :EscapeFromMeatov]      Strike Industries Modular Fixed Stock
+[Info   :EscapeFromMeatov]      Strike Industries PDW Stock
+[Info   :EscapeFromMeatov]      Troy PDW Stock
+[Info   :EscapeFromMeatov] Endplates_AR
+[Info   :EscapeFromMeatov]      AR15 Endplate
+[Info   :EscapeFromMeatov]      Daniel Defense Endplate
+[Info   :EscapeFromMeatov]      KAC QD Endplate
+[Info   :EscapeFromMeatov]      Magpul ASAP Endplate
+[Info   :EscapeFromMeatov]      PWS Ratcheting Endplate
+[Info   :EscapeFromMeatov]      QD Endplate
+[Info   :EscapeFromMeatov]      Sling Endplate
+[Info   :EscapeFromMeatov]      Ambi Sling Endplate
+[Info   :EscapeFromMeatov] LawFolderEndplates_AR
+[Info   :EscapeFromMeatov]      AR15 Endplate
+[Info   :EscapeFromMeatov]      Daniel Defense Endplate
+[Info   :EscapeFromMeatov]      KAC QD Endplate
+[Info   :EscapeFromMeatov]      PWS Ratcheting Endplate
+[Info   :EscapeFromMeatov]      QD Endplate
+[Info   :EscapeFromMeatov]      Sling Endplate
+[Info   :EscapeFromMeatov]      Ambi Sling Endplate
+[Info   :EscapeFromMeatov] CastleNut_AR
+[Info   :EscapeFromMeatov]      AR15 Castle Nut
+[Info   :EscapeFromMeatov] LawFolderBufferTubes_AR
+[Info   :EscapeFromMeatov]      No Buffertube
+[Info   :EscapeFromMeatov]      A2 Buffertube
+[Info   :EscapeFromMeatov]      Enhanced Buffertube
+[Info   :EscapeFromMeatov]      Strike Industries Buffertube
+[Info   :EscapeFromMeatov]      DoubleStar SOCOM Stock
+[Info   :EscapeFromMeatov]      DoubleStar Ultralite Stock
+[Info   :EscapeFromMeatov]      Ergo F93 Stock
+[Info   :EscapeFromMeatov]      M16A1 Fixed Stock
+[Info   :EscapeFromMeatov]      M16A2 Fixed Stock
+[Info   :EscapeFromMeatov]      Magpul Fixed Carbine Stock
+[Info   :EscapeFromMeatov]      Magpul PRS Gen3
+[Info   :EscapeFromMeatov]      Magpul PRS Lite
+[Info   :EscapeFromMeatov]      Magpul UBR Gen1
+[Info   :EscapeFromMeatov]      Magpul UBR Gen2
+[Info   :EscapeFromMeatov]      ODIN Works Zulu Stock
+[Info   :EscapeFromMeatov]      Strike Industries Modular Fixed Stock
+[Info   :EscapeFromMeatov] Triggers_AR
+[Info   :EscapeFromMeatov]      AR15 Trigger
+[Info   :EscapeFromMeatov]      Airborne Compact Talon Trigger
+[Info   :EscapeFromMeatov]      Airborne Geronimo Trigger
+[Info   :EscapeFromMeatov]      ATC Gold Trigger
+[Info   :EscapeFromMeatov]      CMC Flat Trigger
+[Info   :EscapeFromMeatov]      Geissele Super Dynamic Trigger
+[Info   :EscapeFromMeatov]      Geissele Super Semi Auto Trigger
+[Info   :EscapeFromMeatov]      Hiperfire Reflex Match Trigger
+[Info   :EscapeFromMeatov]      JP Roller Trigger
+[Info   :EscapeFromMeatov]      Light Trigger
+[Info   :EscapeFromMeatov]      Milspec Trigger
+[Info   :EscapeFromMeatov]      Radian Vertex Trigger
+[Info   :EscapeFromMeatov]      Rise Armament RA-434 Trigger
+[Info   :EscapeFromMeatov]      Triggertech Flat Trigger
+[Info   :EscapeFromMeatov]      MCX LT Trigger
+[Info   :EscapeFromMeatov] Selectors_AR
+[Info   :EscapeFromMeatov]      AR15 Selector
+[Info   :EscapeFromMeatov]      Anodized Selector
+[Info   :EscapeFromMeatov]      Daniel Defense Ambi Selector
+[Info   :EscapeFromMeatov]      Enhanced AR15 Selector
+[Info   :EscapeFromMeatov]      JP Adjustable Selector
+[Info   :EscapeFromMeatov]      KAC Ambi Selector
+[Info   :EscapeFromMeatov]      Low Profile Selector
+[Info   :EscapeFromMeatov]      Magpul/Noveske STS Selector
+[Info   :EscapeFromMeatov]      Radian Talon Selector
+[Info   :EscapeFromMeatov]      Strike Industries Switch
+[Info   :EscapeFromMeatov]      M16 Selector
+[Info   :EscapeFromMeatov]      MCX Selector
+[Info   :EscapeFromMeatov]      MCX LT Selector
+[Info   :EscapeFromMeatov] TriggerGuards_AR
+[Info   :EscapeFromMeatov]      Aero Precision Billet Trigger Guard
+[Info   :EscapeFromMeatov]      AR15 Trigger Guard
+[Info   :EscapeFromMeatov]      BCM Gunfighter Mod0 Trigger Guard
+[Info   :EscapeFromMeatov]      Daniel Defense Trigger Guard
+[Info   :EscapeFromMeatov]      Geissele UltraPrecision Trigger Guard
+[Info   :EscapeFromMeatov]      KAC Trigger Guard
+[Info   :EscapeFromMeatov]      M16 Trigger Guard
+[Info   :EscapeFromMeatov]      Magpul MOE Trigger Guard
+[Info   :EscapeFromMeatov]      Spikes Tactical Gen II Trigger Guard
+[Info   :EscapeFromMeatov]      Strike Industries Cobra Trigger Guard
+[Info   :EscapeFromMeatov]      Strike Industries Fang Trigger Guard
+[Info   :EscapeFromMeatov] Releases_AR
+[Info   :EscapeFromMeatov]      AR15 Mag Release
+[Info   :EscapeFromMeatov]      AR15 Ambidextrous Mag Release
+[Info   :EscapeFromMeatov]      Armaspec TCB Mag Release
+[Info   :EscapeFromMeatov]      BAD EMMR
+[Info   :EscapeFromMeatov]      Extended Ambidextrous Mag Release
+[Info   :EscapeFromMeatov]      Knurled Mag Release
+[Info   :EscapeFromMeatov]      Sig Sauer Tread Mag Release
+[Info   :EscapeFromMeatov]      M16 Mag Release
+[Info   :EscapeFromMeatov]      SR16 Mag Release
+[Info   :EscapeFromMeatov] Catches_AR
+[Info   :EscapeFromMeatov]      AR15 Bolt Catch
+[Info   :EscapeFromMeatov]      AR15 Bolt Catch BAD
+[Info   :EscapeFromMeatov]      AR15 Bolt Catch BAD Lite
+[Info   :EscapeFromMeatov]      AR15 Bolt Catch DD4
+[Info   :EscapeFromMeatov]      AR15 Bolt Catch EBC
+[Info   :EscapeFromMeatov]      AR15 Bolt Catch EMR
+[Info   :EscapeFromMeatov]      AR15 Bolt Catch Enhanced
+[Info   :EscapeFromMeatov]      M4A1 Bolt Catch
+[Info   :EscapeFromMeatov]      M16 Bolt Catch
+[Info   :EscapeFromMeatov]      AR15 Bolt Catch Maritime
+[Info   :EscapeFromMeatov]      Radian Extended Bolt Catch
+[Info   :EscapeFromMeatov]      Sig Sauer Tread Bolt Catch
+[Info   :EscapeFromMeatov]      AR15 Bolt Catch Strike Enhanced
+[Info   :EscapeFromMeatov] Handguards_AR
+[Info   :EscapeFromMeatov]      No Handguard
+[Info   :EscapeFromMeatov]      ADAR 2-15 Handguard
+[Info   :EscapeFromMeatov]      Aero Precision Atlas S-One Handguard
+[Info   :EscapeFromMeatov]      Aero Precision Enhanced 12" Handguard
+[Info   :EscapeFromMeatov]      Aeroknox 4" AX15//Handguard
+[Info   :EscapeFromMeatov]      Aeroknox 10.5" AX15//Handguard
+[Info   :EscapeFromMeatov]      Aeroknox 15.8" AX15//Handguard
+[Info   :EscapeFromMeatov]      BAD Rigid Rail 6.7" Handguard
+[Info   :EscapeFromMeatov]      BAD Rigid Rail 9.5" Handguard
+[Info   :EscapeFromMeatov]      BAD Rigid Rail 13" Handguard
+[Info   :EscapeFromMeatov]      BAD Rigid Rail 15" Handguard
+[Info   :EscapeFromMeatov]      BAD Rigid Rail 17" Handguard
+[Info   :EscapeFromMeatov]      BCM 13" KMR Handguard
+[Info   :EscapeFromMeatov]      BCM 7" MCMR Handguard
+[Info   :EscapeFromMeatov]      BCM 9" MCMR Handguard
+[Info   :EscapeFromMeatov]      BCM 13" MCMR Handguard
+[Info   :EscapeFromMeatov]      BCM 15" MCMR Handguard
+[Info   :EscapeFromMeatov]      Brownells CAR15 Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense MFR XL 6" Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense MFR XL 8" Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense RISII 9.5" Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense RISII 9.5" FSP Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense RISII 12.5" Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense RISII 12.5" FSP Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense RISIII 9.5" Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense RISIII 10.5" Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense RISIII 12.5" Handguard
+[Info   :EscapeFromMeatov]      Daniel Defense RISIII 13" FSP Handguard
+[Info   :EscapeFromMeatov]      Geissele MK4 7" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK4 9.3" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK4 13" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK4 15" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK8 7" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK8 9.3" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK8 13" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK8 15" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK16 9.3" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK16 10.5" Handguard
+[Info   :EscapeFromMeatov]      Geissele MK16 13.5" Handguard
+[Info   :EscapeFromMeatov]      Hera Arms IRS 7" Handguard
+[Info   :EscapeFromMeatov]      Hogue Overmolded Handguard
+[Info   :EscapeFromMeatov]      KAC M4 RIS Handguard
+[Info   :EscapeFromMeatov]      KAC M5 RAS Handguard
+[Info   :EscapeFromMeatov]      KAC URX3 8" Handguard
+[Info   :EscapeFromMeatov]      KAC URX3.1 10.75" Handguard
+[Info   :EscapeFromMeatov]      KAC URX 4 8.5" Handguard
+[Info   :EscapeFromMeatov]      KAC URX 4 10" Handguard
+[Info   :EscapeFromMeatov]      KAC URX 4 10.75" Handguard
+[Info   :EscapeFromMeatov]      KAC URX 4 13" Handguard
+[Info   :EscapeFromMeatov]      KAC URX 4 14.5" Handguard
+[Info   :EscapeFromMeatov]      L119A2 10.3" Monolithic
+[Info   :EscapeFromMeatov]      L119A2 12.7" Monolithic
+[Info   :EscapeFromMeatov]      Lancer LCH7 7" Handguard
+[Info   :EscapeFromMeatov]      Lancer LCH7 12.5" Handguard
+[Info   :EscapeFromMeatov]      Lone Star Armory TX-15 Handguard
+[Info   :EscapeFromMeatov]      LWRCI Arm-R 7" Handguard
+[Info   :EscapeFromMeatov]      LWRCI Arm-R 9" Handguard
+[Info   :EscapeFromMeatov]      M4A1 Standard Handguard
+[Info   :EscapeFromMeatov]      M16A1 Handguard
+[Info   :EscapeFromMeatov]      M16A1 M203 Handguard
+[Info   :EscapeFromMeatov]      M16A2 Handguard
+[Info   :EscapeFromMeatov]      Magpul MOE Carbine Handguard
+[Info   :EscapeFromMeatov]      Magpul MOE Rifle Handguard
+[Info   :EscapeFromMeatov]      Mapgul MOE SL Carbine Handguard
+[Info   :EscapeFromMeatov]      Mapgul MOE SL Rifle Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries CRM 4" Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries CRM 7" Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries CRM 10.5" Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries CRM 13.375" Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries CRM 15" Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries CRM 25" Handguard
+[Info   :EscapeFromMeatov]      NCStar BlastAR Handguard
+[Info   :EscapeFromMeatov]      Noveske Quad Rail 10.5" Handguard
+[Info   :EscapeFromMeatov]      PRI Gen III Handguard
+[Info   :EscapeFromMeatov]      Radian 8.5" Monolithic
+[Info   :EscapeFromMeatov]      Radian 14.5" Monolithic
+[Info   :EscapeFromMeatov]      Remington RSASS Forend
+[Info   :EscapeFromMeatov]      SAI QD Carbine Length Handguard
+[Info   :EscapeFromMeatov]      SAI QD CQB Length Handguard
+[Info   :EscapeFromMeatov]      Skeletonized Handguard
+[Info   :EscapeFromMeatov]      SLR ION Hybrid 9.7" Handguard
+[Info   :EscapeFromMeatov]      SOT Javelin 7" Handguard
+[Info   :EscapeFromMeatov]      SOT Javelin 12" Handguard
+[Info   :EscapeFromMeatov]      SOT Javelin 14" Handguard
+[Info   :EscapeFromMeatov]      SOT Javelin 16" Handguard
+[Info   :EscapeFromMeatov]      Spike's Tactical BAR2 9" Handguard
+[Info   :EscapeFromMeatov]      Springfield Saint Edge Handguard
+[Info   :EscapeFromMeatov]      STNGR VYPR 10" Handguard
+[Info   :EscapeFromMeatov]      Strike Industries Carbine Handguard
+[Info   :EscapeFromMeatov]      Strike Industries Gridlok Handguard
+[Info   :EscapeFromMeatov]      Troy 9" Alpha Handguard
+[Info   :EscapeFromMeatov]      Unique ARs Wing & Skull Handguard
+[Info   :EscapeFromMeatov]      VLTOR CASV-EL
+[Info   :EscapeFromMeatov]      Warsport LVOA-C Handguard
+[Info   :EscapeFromMeatov]      Warsport LVOA-S Handguard
+[Info   :EscapeFromMeatov]      ZenitCo Joker 8" Handguard
+[Info   :EscapeFromMeatov]      ZenitCo Joker 11" Handguard
+[Info   :EscapeFromMeatov] MagazineParts_AR15
+[Info   :EscapeFromMeatov]      No Magazine Part
+[Info   :EscapeFromMeatov]      Ammo Band
+[Info   :EscapeFromMeatov]      Magpul Mag Assist
+[Info   :EscapeFromMeatov] MagazineEndplates_AR15USGI
+[Info   :EscapeFromMeatov]      No USGI Floorplate
+[Info   :EscapeFromMeatov]      Magpul L Plate USGI
+[Info   :EscapeFromMeatov]      Magpul Ranger Plate USGI
+[Info   :EscapeFromMeatov] MagazineEndplates_AR15PMAG
+[Info   :EscapeFromMeatov]      No PMAG Floorplate
+[Info   :EscapeFromMeatov]      Magpul Ranger Plate PMAG
+[Info   :EscapeFromMeatov]      Taran Tactical Extension
+[Info   :EscapeFromMeatov] Charging_AR15
+[Info   :EscapeFromMeatov]      No Charging Handle
+[Info   :EscapeFromMeatov]      AR15 Charging Handle
+[Info   :EscapeFromMeatov]      Aero Precision Ambi Charging Handle
+[Info   :EscapeFromMeatov]      Aero Precision Breach Large Charging Handle
+[Info   :EscapeFromMeatov]      Aero Precision Breach Small Charging Handle
+[Info   :EscapeFromMeatov]      BCM Mod4 Charging Handle
+[Info   :EscapeFromMeatov]      BCM Mod44 Charging Handle
+[Info   :EscapeFromMeatov]      Badger Ordinance Charging Handle
+[Info   :EscapeFromMeatov]      Breek Arms Warhammer Charging Handle
+[Info   :EscapeFromMeatov]      C7 Claw Charging Handle
+[Info   :EscapeFromMeatov]      CMMG Charging Handle
+[Info   :EscapeFromMeatov]      Daniel Defense Grip N' Rip Charging Handle
+[Info   :EscapeFromMeatov]      Extended AR15 Charging Handle
+[Info   :EscapeFromMeatov]      Geissele ACH Charging Handle
+[Info   :EscapeFromMeatov]      KAC SR16 Charging Handle
+[Info   :EscapeFromMeatov]      Falkor MACH15 Charging Handle
+[Info   :EscapeFromMeatov]      Radian Raptor Charging Handle
+[Info   :EscapeFromMeatov]      Radian Raptor SD SL Charging Handle
+[Info   :EscapeFromMeatov]      Rainier Arms Avalanche Charging Handle
+[Info   :EscapeFromMeatov]      Saint Edge Charging Handle
+[Info   :EscapeFromMeatov]      Skeletonized Charging Handle
+[Info   :EscapeFromMeatov]      Strike Industries Arch Charging Handle
+[Info   :EscapeFromMeatov] Uppers_AR
+[Info   :EscapeFromMeatov]      No Upper
+[Info   :EscapeFromMeatov]      AR15 Upper
+[Info   :EscapeFromMeatov]      AR15 Slick Side Upper
+[Info   :EscapeFromMeatov]      Aero Precision M4E1 Upper
+[Info   :EscapeFromMeatov]      Aeroknox AX//15 Upper
+[Info   :EscapeFromMeatov]      Billet Upper
+[Info   :EscapeFromMeatov]      Colt 723 Upper
+[Info   :EscapeFromMeatov]      Daniel Defense Upper
+[Info   :EscapeFromMeatov]      F4 Upper
+[Info   :EscapeFromMeatov]      Noveske Gen3 Upper
+[Info   :EscapeFromMeatov]      KAC Upper
+[Info   :EscapeFromMeatov]      Lone Star Upper
+[Info   :EscapeFromMeatov]      M4A1 Upper
+[Info   :EscapeFromMeatov]      M16A1 Upper
+[Info   :EscapeFromMeatov]      M16A2 Upper
+[Info   :EscapeFromMeatov]      Phase 5 Upper
+[Info   :EscapeFromMeatov]      Rainier Arms Upper
+[Info   :EscapeFromMeatov]      VLTOR MUR-1S Upper
+[Info   :EscapeFromMeatov]      VLTOR MUR-1A Upper
+[Info   :EscapeFromMeatov] Bolts_AR15
+[Info   :EscapeFromMeatov]      AR15 Bolt BCM
+[Info   :EscapeFromMeatov]      AR15 Bolt
+[Info   :EscapeFromMeatov]      AR15 Low Mass Bolt
+[Info   :EscapeFromMeatov]      AR15 Bolt JP LMOS
+[Info   :EscapeFromMeatov]      AR15 Bolt Radian
+[Info   :EscapeFromMeatov]      AR15 Bolt Slabside
+[Info   :EscapeFromMeatov]      TX15 Bolt
+[Info   :EscapeFromMeatov] Chamber_AR
+[Info   :EscapeFromMeatov]      5.56x45mm
+[Info   :EscapeFromMeatov]      .300 Blackout
+[Info   :EscapeFromMeatov]      9mm Uzi Magazines
+[Info   :EscapeFromMeatov]      7.62x39mm
+[Info   :EscapeFromMeatov] Dustcover_AR15
+[Info   :EscapeFromMeatov]      AR15 Dustcover
+[Info   :EscapeFromMeatov]      Daniel Defense Dustcover
+[Info   :EscapeFromMeatov]      Strike Industries Dustcover
+[Info   :EscapeFromMeatov] Uppers_MCX
+[Info   :EscapeFromMeatov]      MCX Virtus Upper
+[Info   :EscapeFromMeatov]      MCX LT Upper
+[Info   :EscapeFromMeatov]      MCX LT Rattler Upper
+[Info   :EscapeFromMeatov]      MCX Rattler Upper
+[Info   :EscapeFromMeatov] Charging_MCX
+[Info   :EscapeFromMeatov]      MCX Ambi
+[Info   :EscapeFromMeatov]      Fortis Hammer
+[Info   :EscapeFromMeatov]      Geissele Super Charging Handle
+[Info   :EscapeFromMeatov]      Radian Raptor
+[Info   :EscapeFromMeatov] Barrels_MCX
+[Info   :EscapeFromMeatov]      MCX Legacy 6.75" Barrel
+[Info   :EscapeFromMeatov]      MCX Legacy 9" Barrel
+[Info   :EscapeFromMeatov]      MCX Legacy 11.5" Barrel
+[Info   :EscapeFromMeatov]      MCX Legacy 16" Barrel
+[Info   :EscapeFromMeatov]      MCX 5.5" Barrel
+[Info   :EscapeFromMeatov]      MCX 6.75" Barrel
+[Info   :EscapeFromMeatov]      MCX 7.75" Barrel
+[Info   :EscapeFromMeatov]      MCX 9" Barrel
+[Info   :EscapeFromMeatov]      MCX 11.5" Barrel
+[Info   :EscapeFromMeatov]      MCX 16" Barrel
+[Info   :EscapeFromMeatov]      MCX LT 9" Barrel
+[Info   :EscapeFromMeatov]      MCX LT 11" Barrel
+[Info   :EscapeFromMeatov]      MCX LT 16" Barrel
+[Info   :EscapeFromMeatov] Chamber_MCX
+[Info   :EscapeFromMeatov]      5.56x45mm
+[Info   :EscapeFromMeatov]      .300 Blackout
+[Info   :EscapeFromMeatov] Handguards_MCX
+[Info   :EscapeFromMeatov]      MCX Virtus 8" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 10" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 10" SD Handguard
+[Info   :EscapeFromMeatov]      MCX SURG 10" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 12" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 12" SD Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 16" Handguard
+[Info   :EscapeFromMeatov]      MCX Virtus 16" SD Handguard
+[Info   :EscapeFromMeatov]      MCX Lancer 10" Handguard
+[Info   :EscapeFromMeatov]      MCX Lancer 12" Handguard
+[Info   :EscapeFromMeatov]      MCX Lancer 18" Handguard
+[Info   :EscapeFromMeatov]      MCX LT Rattler Handguard
+[Info   :EscapeFromMeatov]      MCX LT 7" Handguard
+[Info   :EscapeFromMeatov]      MCX LT 8" Handguard
+[Info   :EscapeFromMeatov]      MCX LT 10" Handguard
+[Info   :EscapeFromMeatov]      MCX LT 11.5" SD Handguard
+[Info   :EscapeFromMeatov]      MCX LT 13" Handguard
+[Info   :EscapeFromMeatov]      MCX LVAW Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries MCX 10.5" Handguard
+[Info   :EscapeFromMeatov]      Midwest Industries MCX 15" Handguard
+[Info   :EscapeFromMeatov]      MCX Rattler Handguard
+[Info   :EscapeFromMeatov]      MCX Rattler Canebrake Handguard
+[Info   :EscapeFromMeatov] Chamber_MCXLT
+[Info   :EscapeFromMeatov]      7.62x39mm
+[Info   :EscapeFromMeatov]      5.56x45mm
+[Info   :EscapeFromMeatov]      .300 Blackout
+[Info   :EscapeFromMeatov] Stocks_1913
+[Info   :EscapeFromMeatov]      No Stock
+[Info   :EscapeFromMeatov]      MCX Blockhead Stock
+[Info   :EscapeFromMeatov]      MCX LT Stock
+[Info   :EscapeFromMeatov]      MCX Buffer Tube Adapter
+[Info   :EscapeFromMeatov]      MCX Folding Buffer Tube
+[Info   :EscapeFromMeatov]      JMAC SS8-RP Stock
+[Info   :EscapeFromMeatov]      JMAC ST-6 Skeletonized Tube
+[Info   :EscapeFromMeatov]      MCX Low Profile Folding Buffer Tube
+[Info   :EscapeFromMeatov]      MCX Collapsing Stock
+[Info   :EscapeFromMeatov]      MCX Maxim Defense Stock
+[Info   :EscapeFromMeatov]      MCX Mini Skeleton Stock
+[Info   :EscapeFromMeatov]      MCX MPX Stock
+[Info   :EscapeFromMeatov]      MCX PMM ULSS
+[Info   :EscapeFromMeatov]      MCX Skeleton Stock
+[Info   :EscapeFromMeatov]      MCX Visor Stock
