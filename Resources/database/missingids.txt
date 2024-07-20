@@ -18,46 +18,10 @@
 5b3f3b0186f774021a2afef7:Armband (Green)
 5b3f3b0e86f7746752107cda:Armband (Yellow)
 
-5bfd384c0db834001a6691d3:Mosin Rifle carbine stock
-5bfd4c980db834001b73449d:Mosin Rifle carbine rear sight
-5bfd4cbe0db834001b73449f:Mosin Carbine 7.62x54R 514mm barrel
-5bfd4cc90db834001d23e846:Mosin Rifle 7.62x54R sawed-off 200mm barrel
-5bfd4cd60db834001c38f095:Mosin Rifle 7.62x54R sawed-off 220mm threaded barrel
-5cf79389d7f00c10941a0c4d:Mosin Rifle Kiba Arms 7.62x54R custom thread adapter
-5cf79599d7f00c10875d9212:Mosin Rifle Tiger Rock 7.62x51 thread adapter
-5cf67a1bd7f00c06585fb6f3:Mosin Rifle Weapon Tuning 7.62x39 thread adapter
-5d024f5cd7ad1a04a067e91a:Mosin Rifle Arbalet Patriot K+W rail mount
-5ae35b315acfc4001714e8b0:M870 Mesa Tactical LEO stock adapter
-5bfe86a20db834001d23e8f7:M870 FAB Defense AGR-870 pistol grip
-5afd7ded5acfc40017541f5e:SKS TAPCO Intrafuse chassis
-5afd7e095acfc40017541f61:SKS TAPCO Intrafuse buffer tube
-5afd7e445acfc4001637e35a:SKS TAPCO Intrafuse kit SAW-Style pistol grip
-5c5970672e221602b21d7855:SKS 7.62x39 ProMag AALVX 35-round magazine
-5d0236dad7ad1a0940739d29:SKS FAB Defense UAS chassis
-5cf67cadd7f00c065a5abab7:SKS Weapon Tuning 7.62x39 thread adapter
-5d023784d7ad1a049d4aa7f2:SKS/VZ-58 FAB Defense AG-58 pistol grip
-61695095d92c473c7702147a:SKS 7.62x39 KCI 75-round drum magazine
-5bf3e03b0db834001d2c4a9c:Kalashnikov AK-74 5.45x39 assault rifle
-5bf3e0490db83400196199af:Kalashnikov AKS-74 5.45x39 assault rifle
-5b04473a5acfc40018632f70:AKM/AK-74 FAB Defense UAS stock
-5bed61680db834001d2c45ab:AK-12 5.45x39 30-round magazine
-5beec8ea0db834001a6f9dbf:AK-12 pistol grip
-5c0548ae0db834001966a3c2:SLR-106/AK 5.56x45 Circle 10 30-round magazine
-5c17664f2e2216398b5a7e3c:AK Vltor CMRD KeyMod handguard
-5cf518cfd7f00c065b422214:AKM/AK-74 CAA AKTS buffer tube
-5cf54404d7f00c108840b2ef:AK KGB MG-47 pistol grip
-5cf656f2d7f00c06585fb6eb:AK Vezhlivyy Strelok VS-24 + VS-33c handguard & gas tube combo
-5cfe8010d7ad1a59283b14c6:AK 7.62x39 X Products X-47 50-round drum magazine
-5d15ce51d7ad1a1eff619092:AKS-74U Alfa Arms Goliaf handguard
-5d1b198cd7ad1a604869ad72:AK TDI AKM-L handguard
 5f6331e097199b7db2128dc2:AK TDI X47 tactical handguard rail system
 5e217ba4c1434648c13568cd:AKM/AK-74 Hexagon "Kocherga" stock (Anodized Red)
-5e2192a498a36665e8337386:AK KGB MG-47 pistol grip (Anodized Red)
 5e21a3c67e40bd02257a008a:AK 7.62x39 Magpul PMAG 30 GEN M3 30-round magazine (Banana)
 5e21ca18e4d47f0da15e77dd:AK CNC Warrior 5.56x45 muzzle device adapter
-5d4aaa54a4b9365392071170:AK TDI AKM-L handguard (Anodized Red)
-5d4aaa73a4b9365392071175:AK TDI AKM-L handguard (Anodized Bronze)
-5d4aab30a4b9365435358c55:AK Vezhlivyy Strelok VS-24 + VS-33c handguard & gas tube combo (White)
 5d2c76ed48f03532f2136169:AK AKademia Bastion dust cover
 5d2c770c48f0354b4a07c100:AK FAB Defense PDC dust cover
 5d2c772c48f0355d95672c25:AK TWS Dog Leg Rail dust cover

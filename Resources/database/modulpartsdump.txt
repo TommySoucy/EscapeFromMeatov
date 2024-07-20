@@ -512,3 +512,34 @@
 [Info   :EscapeFromMeatov]      MCX PMM ULSS
 [Info   :EscapeFromMeatov]      MCX Skeleton Stock
 [Info   :EscapeFromMeatov]      MCX Visor Stock
+[Info   :EscapeFromMeatov] NWAXMCUpper
+[Info   :EscapeFromMeatov]      Rail-less PRO Upper
+[Info   :EscapeFromMeatov]      Low-Profile Upper
+[Info   :EscapeFromMeatov]      30 MOA Angled Upper
+[Info   :EscapeFromMeatov]      Billet Upper-Receiver
+[Info   :EscapeFromMeatov] NWAXMCStock
+[Info   :EscapeFromMeatov]      No Stock
+[Info   :EscapeFromMeatov]      Standard Stock
+[Info   :EscapeFromMeatov]      Flat Stock Adapter
+[Info   :EscapeFromMeatov] NWAXMCGrips
+[Info   :EscapeFromMeatov]      AI AXMC Standard
+[Info   :EscapeFromMeatov]      ModulAR2 Grip
+[Info   :EscapeFromMeatov] NWAXMCBarrel
+[Info   :EscapeFromMeatov]      686mm Barrel
+[Info   :EscapeFromMeatov]      660mm Barrel
+[Info   :EscapeFromMeatov]      610mm Barrel
+[Info   :EscapeFromMeatov]      508mm Barrel
+[Info   :EscapeFromMeatov]      Custom Short Barrel
+[Info   :EscapeFromMeatov]      No Barrel
+[Info   :EscapeFromMeatov] NWAXMCChamber
+[Info   :EscapeFromMeatov]      .338 Laupa Magazines
+[Info   :EscapeFromMeatov]      .300 WIN Magazines
+[Info   :EscapeFromMeatov]      .308/7.62 NATO Magazines
+[Info   :EscapeFromMeatov] NWAXMCGuard
+[Info   :EscapeFromMeatov]      No Handguard
+[Info   :EscapeFromMeatov]      12-Slot
+[Info   :EscapeFromMeatov]      12-Slot (Rail-Angled)
+[Info   :EscapeFromMeatov]      12-Slot (Rail-Flat)
+[Info   :EscapeFromMeatov]      19-Slot
+[Info   :EscapeFromMeatov]      19-Slot (Rail-Angled)
+[Info   :EscapeFromMeatov]      19-Slot (Rail-Flat)

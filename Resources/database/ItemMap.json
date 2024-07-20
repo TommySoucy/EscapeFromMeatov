@@ -4644,6 +4644,26 @@
     "H3ID": "utgraildupe",
 	"Note": "Should be modul part of MW SKS"
   },
+  "5d0236dad7ad1a0940739d29": {
+    "H3ID": "uasstock",
+	"Note": "Should be MW"
+  },
+  "5afd7ded5acfc40017541f5e": {
+    "H3ID": "tapcointra",
+	"Note": "Should be MW"
+  },
+  "5cf67cadd7f00c065a5abab7": {
+	"Note": "Missing, SKS receiver does not need thread adapter anyway"
+  },
+  "5d023784d7ad1a049d4aa7f2": {
+	"Note": "Missing, included on uasstock"
+  },
+  "5afd7e095acfc40017541f61": {
+	"Note": "Missing, included on tapcointra"
+  },
+  "5afd7e445acfc4001637e35a": {
+	"Note": "Missing, included on tapcointra"
+  },
   "587e08ee245977446b4410cf": {
 	"Note": "Missing, included on sksbasedupe"
   },
@@ -4657,6 +4677,13 @@
   },
   "587df583245977373c4f1129": {
     "H3ID": "promag20dupe"
+  },
+  "5c5970672e221602b21d7855": {
+    "H3ID": "promag35"
+  },
+  "61695095d92c473c7702147a": {
+    "H3ID": "promag35",
+	"Note": "Should be 75 round drum mag, 35 was largest we had"
   },
   "574dad8024597745964bf05c": {
     "H3ID": "sks_strddupe",
@@ -4826,9 +4853,17 @@
     "H3ID": "ModulAK74NFactory",
 	"Note": "Should be MW"
   },
+  "5bf3e03b0db834001d2c4a9c": {
+    "H3ID": "ModulAK74NFactory",
+	"Note": "Should be AK74, modulAK only has N, which has dovetail, note ID says AK74M, but item spawned is actually AKS-74N"
+  },
   "5ab8e9fcd8ce870019439434": {
     "H3ID": "ModulAK74MDupe",
 	"Note": "Should be MW"
+  },
+  "5bf3e0490db83400196199af": {
+    "H3ID": "ModulAK74MDupe",
+	"Note": "Should be AKS74, modulAK only has N, which has dovetail, note ID says AK74M, but item spawned is actually AKS-74N"
   },
   "5abcbc27d8ce8700182eceeb": {
     "H3ID": "ModulAKMSNDupe",
@@ -4958,6 +4993,10 @@
     "H3ID": "AKStockAKM",
 	"Note": "Should be MW"
   },
+  "5b04473a5acfc40018632f70": {
+    "H3ID": "AKStockUAS",
+	"Note": "Should be MW"
+  },
   "5ac50c185acfc400163398d4": {
     "H3ID": "AKStock74m",
 	"Note": "Should be MW"
@@ -5003,12 +5042,55 @@
   "5c7951452e221644f31bfd5c": {
     "H3ID": "MuzzleVenom"
   },
+  "5c17664f2e2216398b5a7e3c": {
+    "H3ID": "AKForeCMRD",
+	"Note": "Should be MW"
+  },
+  "5cf518cfd7f00c065b422214": {
+    "H3ID": "AKStockAKTS",
+	"Note": "Should be MW"
+  },
+  "5cf54404d7f00c108840b2ef": {
+    "H3ID": "AKGripMG47Gold",
+	"Note": "Should be MW"
+  },
+  "5e2192a498a36665e8337386": {
+    "H3ID": "AKGripMG47Red",
+	"Note": "Should be MW"
+  },
+  "5cf656f2d7f00c06585fb6eb": {
+    "H3ID": "AKForeVS24",
+	"Note": "Should be MW"
+  },
+  "5d4aab30a4b9365435358c55": {
+    "H3ID": "AKForeVS24White",
+	"Note": "Should be MW"
+  },
+  "5d15ce51d7ad1a1eff619092": {
+    "H3ID": "AKSForeAlfa",
+	"Note": "Should be MW"
+  },
+  "5d1b198cd7ad1a604869ad72": {
+    "H3ID": "AKForeAKMLblk",
+	"Note": "Should be MW"
+  },
+  "5d4aaa54a4b9365392071170": {
+    "H3ID": "AKForeAKML",
+	"Note": "Should be MW"
+  },
+  "5d4aaa73a4b9365392071175": {
+    "H3ID": "AKForeAKMLgld",
+	"Note": "Should be MW"
+  },
   "5b1fd4e35acfc40018633c39": {
     "H3ID": "MagazineAKM10",
 	"Note": "Should be MagazineAKMAluminum but with a 10 round capacity"
   },
   "5b1fb3e15acfc4001637f068": {
     "H3ID": "MagazineRPKBakelite"
+  },
+  "5cfe8010d7ad1a59283b14c6": {
+    "H3ID": "MagazineX47"
   },
   "5c6175362e221600133e3b94": {
     "H3ID": "MagazineAKMDrum",
@@ -5017,6 +5099,12 @@
   "5cbdc23eae9215001136a407": {
     "H3ID": "MagazineAKMDrum",
 	"Note": "Should be AK 7.62x39 Molot 75-round drum magazine"
+  },
+  "5c0548ae0db834001966a3c2": {
+    "H3ID": "MagazineArsenalMag"
+  },
+  "5bed61680db834001d2c45ab": {
+    "H3ID": "MagazineAK12mag"
   },
   "5cbdaf89ae9215000e5b9c94": {
     "H3ID": "Magazine6L23Plum"
@@ -5188,6 +5276,10 @@
   },
   "5648b4534bdc2d3d1c8b4580": {
 	"H3ID": "AKForeB19",
+	"Note": "Should be MW"
+  },
+  "5beec8ea0db834001a6f9dbf": {
+	"H3ID": "AKGripAK12",
 	"Note": "Should be MW"
   },
   "5cf50850d7f00c056e24104c": {
@@ -5379,12 +5471,12 @@
   "5ae096d95acfc400185c2c81": {
     "H3ID": "868",
     "ModulGroup": "FSCE.Mosin.Stocks",
-    "ModulPart": "Infantry Stock"
+    "ModulPart": "Sniper Stock"
   },
   "5bfd35380db83400232fe5cc": {
     "H3ID": "868",
     "ModulGroup": "FSCE.Mosin.Stocks",
-    "ModulPart": "Infantry Carbine Stock"
+    "ModulPart": "Infantry Stock"
   },
   "5bfd36290db834001966869a": {
     "H3ID": "868",
@@ -5399,7 +5491,13 @@
   "5bfd37c80db834001d23e842": {
     "H3ID": "868",
     "ModulGroup": "FSCE.Mosin.Stocks",
-    "ModulPart": "Sniper Stock"
+    "ModulPart": "Infantry Carbine Stock",
+	"Note": "Should be Sniper carbine stock, which is same length as infantry carbine stock"
+  },
+  "5bfd384c0db834001a6691d3": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Stocks",
+    "ModulPart": "Infantry Carbine Stock"
   },
   "5bbdb870d4351e00367fb67d": {
     "H3ID": "868",
@@ -5417,6 +5515,11 @@
     "ModulGroup": "FSCE.Mosin.Ironsights",
     "ModulPart": "Default Irons"
   },
+  "5bfd4c980db834001b73449d": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Ironsights",
+    "ModulPart": "Default Irons"
+  },
   "5bbdb811d4351e45020113c7": {
     "H3ID": "868",
     "ModulGroup": "FSCE.Mosin.Ironsights",
@@ -5426,6 +5529,28 @@
     "H3ID": "868",
     "ModulGroup": "FSCE.Mosin.Ironsights",
     "ModulPart": "Rear Sight Mount"
+  },
+  "5d024f5cd7ad1a04a067e91a": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Ironsights",
+    "ModulPart": "Rear Sight Mount",
+	"Note": "Should be Mosin Rifle Arbalet Patriot K+W rail mount"
+  },
+  "5bfd4cc90db834001d23e846": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Barrels",
+    "ModulPart": "200mm Barrel"
+  },
+  "5bfd4cd60db834001c38f095": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Barrels",
+    "ModulPart": "220mm Barrel"
+  },
+  "5bfd4cbe0db834001b73449f": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Barrels",
+    "ModulPart": "550mm Barrel",
+	"Note": "Should be 514mm"
   },
   "5ae09bff5acfc4001562219d": {
     "H3ID": "868",
@@ -5446,6 +5571,24 @@
     "H3ID": "868",
     "ModulGroup": "FSCE.Mosin.Muzzles",
     "ModulPart": "Clamp-On Muzzle Brake"
+  },
+  "5cf79389d7f00c10941a0c4d": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Muzzles",
+    "ModulPart": "Thread Adapter",
+	"Note": "Should be Mosin Rifle Kiba Arms 7.62x54R custom thread adapter, but this is the only one available"
+  },
+  "5cf79599d7f00c10875d9212": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Muzzles",
+    "ModulPart": "Thread Adapter",
+	"Note": "Should be Mosin Rifle Tiger Rock 7.62x51 thread adapter, but this is the only one available"
+  },
+  "5cf67a1bd7f00c06585fb6f3": {
+    "H3ID": "868",
+    "ModulGroup": "FSCE.Mosin.Muzzles",
+    "ModulPart": "Thread Adapter",
+	"Note": "Should be Mosin Rifle Weapon Tuning 7.62x39 thread adapter, but this is the only one available"
   },
   "5a7828548dc32e5a9c28b516": {
     "H3ID": "Modul870Dupe",
@@ -5483,12 +5626,20 @@
     "H3ID": "AttDec870pump1",
 	"Note": "Should be MW"
   },
+  "5bfe86a20db834001d23e8f7": {
+    "H3ID": "AttStock870Pis",
+	"Note": "Should be MW"
+  },
   "5a7880d0c5856700142fdd9d": {
     "H3ID": "AttStock870classic3",
 	"Note": "Should be MW"
   },
   "5a78813bc5856700186c4abe": {
     "H3ID": "AttStock870magpul",
+	"Note": "Should be MW"
+  },
+  "5ae35b315acfc4001714e8b0": {
+    "H3ID": "AttStockLeo",
 	"Note": "Should be MW"
   },
   "5a788169c5856700142fdd9e": {
