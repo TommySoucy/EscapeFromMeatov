@@ -15,35 +15,13 @@
 5b3f16c486f7747c327f55f7:Armband (White)
 5b3f3ade86f7746b6b790d8e:Armband (Red)
 5b3f3af486f774679e752c1f:Armband (Blue)
+5b3f3af486f774679e752c1f:Armband (Blue)
 5b3f3b0186f774021a2afef7:Armband (Green)
 5b3f3b0e86f7746752107cda:Armband (Yellow)
 
-5b7be1125acfc4001876c0e5:SA-58 7.62x51 16 inch barrel
-5b7be1265acfc400161d0798:SA-58 7.62x51 21 inch barrel
-5b7be1ca5acfc400170e2d2f:SA-58 quad rail full length handguard
-5b7be2345acfc400196d524a:SA-58/FAL AIM Sports Universal KeyMod handguard
-5b7bebc85acfc43bca706666:SA-58/FAL AIM Sports Universal M-LOK handguard
-5b7bed205acfc400161d08cc:FAL original handguard
-5b7bedd75acfc43d825283f9:SA-58/FAL Vltor CASV-FAL handguard
-5b7bee755acfc400196d5383:SA-58/FAL Vltor CASV-FAS handguard
-5b7bef1e5acfc43d82528402:SA-58/FAL 7.62x51 10-round magazine
-5b7bef5d5acfc43bca7067a3:SA-58/FAL 7.62x51 30-round magazine
-5b7bef9c5acfc43d102852ec:SA-58/FAL 7.62x51 X Products X-FAL 50-round drum magazine
-5b7c2d1d5acfc43d1028532a:SA-58/FAL 7.62x51 MMW polymer 20-round magazine
-5b7d37845acfc400170e2f87:SA-58/FAL 7.62x51 30-round magazine
-5b7d63b75acfc400170e2f8a:SA-58/FAL Magpul PRS 2 polymer stock
-5b7d63cf5acfc4001876c8df:SA-58 folding stock
-5b7d63de5acfc400170e2f8d:SA-58 SPR stock
-5b7d64555acfc4001876c8e2:SA-58 BRS stock
-5b7d645e5acfc400170e2f90:SA-58 humpback polymer stock
-5b7d671b5acfc43d82528ddd:SA-58/FAL Belgian Style handguard
-5b7d678a5acfc4001a5c4022:SA-58 pistol grip
-5b7d679f5acfc4001a5c4024:SA-58 FAB Defense AG-FAL pistol grip
-5b7d68af5acfc400170e30c3:SA-58 Austrian Style 7.62x51 muzzle brake
-5b7d6c105acfc40015109a5f:FAL standard dust cover
-5b1fa9b25acfc40018633c01:Glock 18C 9x19 machine pistol
-5b1fa9ea5acfc40018633c0a:Glock 18C 9x19 barrel with a compensator
-5b1faa0f5acfc40dc528aeb5:Glock 18C 9x19 pistol slide
+5fc3f2d5900b1d5091531e57:TDI KRISS Vector Gen.2 9x19 submachine gun
+5fb651b52b1b027b1f50bcff:Glock .45 ACP 13-round magazine
+5fb651dc85f90547f674b6f4:Glock .45 ACP KRISS G30 MagEx 30-round magazine
 5b2389515acfc4771e1be0c0:Burris AR-P.E.P.R. 30mm ring scope mount
 5b31163c5acfc400153b71cb:SIG Sauer ROMEO sight mount
 5b363dd25acfc4001a598fd2:SilencerCo Salvo 12 12ga sound suppressor
@@ -304,7 +282,6 @@
 5d120a28d7ad1a1c8962e295:DoubleStar ACE recoil pad
 5d19cd96d7ad1a4a992c9f52:HK MP5 PTR Tri-Rail handguard
 5d1b5e94d7ad1a2b865a96b0:FLIR RS-32 2.25-9x 35mm 60Hz thermal riflescope
-5d1c702ad7ad1a632267f429:Glock FAB Defense GLR-17 stock
 5d1f819086f7744b355c219b:AR-10 Daniel Defense WAVE 7.62x51 muzzle brake
 5d25a4a98abbc30b917421a4:M700 7.62x51 AI AICS 5-round magazine
 5d25a6538abbc306c62e630d:M700 7.62x51 AI AICS 10-round magazine
@@ -533,22 +510,6 @@
 5f647d9f8499b57dc40ddb93:KS-23M 23x75 3-shell magazine cap
 5f647f31b6238e5dd066e196:23x75mm "Shrapnel-25" buckshot
 5f9949d869e2777a0e779ba5:Rivals 2020 armband
-5fb64bc92b1b027b1f50bcf2:TDI KRISS Vector Gen.2 .45 ACP submachine gun
-5fb651b52b1b027b1f50bcff:Glock .45 ACP 13-round magazine
-5fb651dc85f90547f674b6f4:Glock .45 ACP KRISS G30 MagEx 30-round magazine
-5fb65363d1409e5ca04b54f5:KRISS Vector .45 ACP 5 inch barrel
-5fb653962b1b027b1f50bd03:KRISS Vector .45 ACP 6 inch barrel
-5fb65424956329274326f316:KRISS Vector .45 ACP flash hider
-5fb6548dd1409e5ca04b54f9:KRISS Vector .45 ACP thread protection cap
-5fb6558ad6f0b2136f2d7eb7:KRISS Vector Gen.2 folding stock
-5fb655a72b1b027b1f50bd06:KRISS Vector Pistol Sling adapter
-5fb655b748c711690e3a8d5a:KRISS Vector non-folding stock adapter
-5fbb976df9986c4cff3fe5f2:KRISS Vector bottom rail
-5fbb978207e8a97d1f0902d3:KRISS Vector Mk.5 modular rail
-5fbbc3324e8a554c40648348:KRISS Vector 9x19 flash hider
-5fbbc34106bde7524f03cbe9:KRISS Vector 9x19 thread protection cap
-5fbbc366ca32ed67276c1557:KRISS Vector 9x19 5 inch barrel
-5fbbc383d5cb881a7363194a:KRISS Vector 9x19 6 inch barrel
 5fbbfabed5cb881a7363194e:MCX .300 BLK 171mm barrel
 5fbbfacda56d053a3543f799:MCX .300 BLK 229mm barrel
 5fbc210bf24b94483f726481:MCX gas block
@@ -581,7 +542,6 @@
 5fc3e466187fea44d52eda90:HK UMP .45 ACP 25-round magazine
 5fc3e4a27283c4046c5814ab:HK UMP .45 ACP 8 inch barrel
 5fc3e4ee7283c4046c5814af:HK UMP polymer stock
-5fc3f2d5900b1d5091531e57:TDI KRISS Vector Gen.2 9x19 submachine gun
 5fc4b97bab884124df0cd5e3:SilencerCo Omega 45k Piston Mount adapter
 5fc4b992187fea44d52edaa9:SilencerCo Omega 45k Direct Thread Mount adapter
 5fc4b9b17283c4046c5814d7:SilencerCo Omega 45k .45 ACP sound suppressor
@@ -662,8 +622,6 @@
 6130c43c67085e45ef1405a1:AR-10 KAC QDC 7.62x51 Muzzle Brake Kit
 6130c4d51cb55961fa0fd49f:HK UMP B&T OEM .45 ACP sound suppressor
 614451b71e5874611e2c7ae5:Bottle of Tarkovskaya vodka
-615d8da4d3a39d50044c10e8:Glock TangoDown AAM-01 ACRO mount base
-615d8dbd290d254f5e6b2ed6:Glock 17 9x19 MOS pistol slide
 615d8df08004cc50514c3236:HK MP5 B&T QD 9x19 muzzle brake
 615d8eb350224f204c1da1cf:AR-10 SureFire Warden 7.62x51 blast regulator
 615d8fd3290d254f5e6b2edc:Monstrum Tactical Vertical Fore Grip KeyMod
@@ -913,14 +871,6 @@
 62ed1921b3608410ef5a2c04:SR-2M side rail
 62ff9920fe938a24c90c10d2:SR-2M KP-SR2 reflex sight
 62ff9faffe938a24c90c10df:KP-SR2 sight shade
-63075cc5962d0247b029dc2a:Glock 19X 9x19 pistol slide
-630764fea987397c0816d219:Glock 19X 9x19 barrel
-630765777d50ff5e8a1ea718:Glock 19X front sight
-630765cb962d0247b029dc45:Glock 19X rear sight
-63076701a987397c0816d21b:Glock 9x19 19-round magazine (Coyote)
-630767c37d50ff5e8a1ea71a:Glock 9x19 "Big Stick" 31-round magazine (Coyote)
-630769c4962d0247b029dc60:Glock 9x19 "Big Stick" 24-round magazine (Coyote)
-63088377b5cd696784087147:Glock 19X 9x19 pistol
 630e1adbbd357927e4007c09:Steyr AUG 5.56x45 10-round magazine
 630e295c984633f1fb0e7c30:Steyr AUG 5.56x45 42-round magazine
 630e39c3bd357927e4007c15:Steyr AUG A3 5.56x45 16 inch barrel

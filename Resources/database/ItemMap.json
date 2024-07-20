@@ -4732,6 +4732,84 @@
     "H3ID": "NW5063Short",
 	"Note": "Should be NWFALParaFlush but the FVRObject's prefab is null? GetGameobject returns null. This is the one closest to the size we need"
   },
+  "5b7bef1e5acfc43d82528402": {
+    "H3ID": "NWFAL10"
+  },
+  "5b7d37845acfc400170e2f87": {
+    "H3ID": "NWFAL30"
+  },
+  "5b7bef5d5acfc43bca7067a3": {
+    "H3ID": "NWFAL30"
+  },
+  "5b7bef9c5acfc43d102852ec": {
+    "H3ID": "NWFAL50"
+  },
+  "5b7c2d1d5acfc43d1028532a": {
+    "H3ID": "NWFAL20P"
+  },
+  "5b7d68af5acfc400170e30c3": {
+    "H3ID": "NWAusMuzzle"
+  },
+  "5b7d6c105acfc40015109a5f": {
+    "H3ID": "NWFalDust",
+	"Note": "Should be MW"
+  },
+  "5b7d679f5acfc4001a5c4024": {
+    "H3ID": "NWFalFABGrip",
+	"Note": "Should be MW"
+  },
+  "5b7d678a5acfc4001a5c4022": {
+    "H3ID": "NWFalGrip",
+	"Note": "Should be MW"
+  },
+  "5b7d671b5acfc43d82528ddd": {
+    "H3ID": "NWBelGuardStd",
+	"Note": "Should be MW"
+  },
+  "5b7d645e5acfc400170e2f90": {
+    "H3ID": "NWFalPolyM",
+	"Note": "Should be MW"
+  },
+  "5b7d64555acfc4001876c8e2": {
+    "H3ID": "NWFALBattle",
+	"Note": "Should be MW"
+  },
+  "5b7d63de5acfc400170e2f8d": {
+    "H3ID": "NWSBRStock",
+	"Note": "Should be MW"
+  },
+  "5b7d63cf5acfc4001876c8df": {
+    "H3ID": "NWFALParaStock",
+	"Note": "Should be MW"
+  },
+  "5b7d63b75acfc400170e2f8a": {
+    "H3ID": "NWFalMagpul",
+	"Note": "Should be MW"
+  },
+  "5b7be2345acfc400196d524a": {
+    "H3ID": "NWKeymodRifle",
+	"Note": "Should be MW"
+  },
+  "5b7bed205acfc400161d08cc": {
+    "H3ID": "NWFalOG",
+	"Note": "Should be MW"
+  },
+  "5b7bedd75acfc43d825283f9": {
+    "H3ID": "NWVltorLong",
+	"Note": "Should be MW"
+  },
+  "5b7bee755acfc400196d5383": {
+    "H3ID": "NWFalVltorShort",
+	"Note": "Should be MW"
+  },
+  "5b7bebc85acfc43bca706666": {
+    "H3ID": "NWKeymodRifle",
+	"Note": "Should be M-LOK"
+  },
+  "5b7be1ca5acfc400170e2d2f": {
+    "H3ID": "NWFalQuadLong",
+	"Note": "Should be MW"
+  },
   "5b099a9d5acfc47a8607efe7": {
     "H3ID": "NWFalQuadShort",
 	"Note": "Should be MW"
@@ -4746,6 +4824,14 @@
   },
   "5b0bc22d5acfc47a8607f085": {
     "H3ID": "NWParaSight",
+	"Note": "Should be MW"
+  },
+  "5b7be1125acfc4001876c0e5": {
+    "H3ID": "NWFALParaBarrelExt",
+	"Note": "Should be MW"
+  },
+  "5b7be1265acfc400161d0798": {
+    "H3ID": "NWFALExtBarrel",
 	"Note": "Should be MW"
   },
   "5b099b965acfc400186331e6": {
@@ -7275,6 +7361,101 @@
   "59f9cabd86f7743a10721f46": {
     "H3ID": "SR1MPMag"
   },
+  "5fb64bc92b1b027b1f50bcf2": {
+    "H3ID": "ftw.vector.45dupe",
+	"Note": "Should be MW"
+  },
+  "5fb65363d1409e5ca04b54f5": {
+    "H3ID": "FTW6BarrelV",
+	"Note": "Should be 5 inch, this is 6, but its the only one we have apart from 12 inch"
+  },
+  "5fbbc366ca32ed67276c1557": {
+    "H3ID": "FTW6BarrelV",
+	"Note": "Should be 5 inch, this is 6, but its the only one we have apart from 12 inch"
+  },
+  "5fbbc383d5cb881a7363194a": {
+    "H3ID": "FTW6BarrelV",
+	"Note": "Should be MW"
+  },
+  "5fb653962b1b027b1f50bd03": {
+    "H3ID": "FTW6BarrelV",
+	"Note": "Should be MW"
+  },
+  "5fb6558ad6f0b2136f2d7eb7": {
+    "H3ID": "FTWVectStock",
+	"Note": "Should be MW"
+  },
+  "5fb655b748c711690e3a8d5a": {
+    "H3ID": "FTWBTADPTV",
+	"Note": "Should be MW"
+  },
+  "5fbb976df9986c4cff3fe5f2": {
+    "H3ID": "FTWVectorB",
+	"Note": "Should be MW"
+  },
+  "5fbb978207e8a97d1f0902d3": {
+    "H3ID": "FTWVectorMK5",
+	"Note": "Should be MW"
+  },
+  "5fb655a72b1b027b1f50bd06": {
+	"Note": "Missing, default part integrated on 5fb655b748c711690e3a8d5a/FTWBTADPTV"
+  },
+  "5fb65424956329274326f316": {
+    "H3ID": "ftw.flashhider.vector"
+  },
+  "5fbbc3324e8a554c40648348": {
+    "H3ID": "ftw.flashhider.vector"
+  },
+  "5fb6548dd1409e5ca04b54f9": {
+    "H3ID": "ftw.threadproc.vector"
+  },
+  "5fbbc34106bde7524f03cbe9": {
+    "H3ID": "ftw.threadproc.vector"
+  },
+  "63088377b5cd696784087147": {
+    "H3ID": "G19",
+	"Note": "Should be Modul"
+  },
+  "63075cc5962d0247b029dc2a": {
+	"Note": "Missing, should be included with modul 63088377b5cd696784087147/G19"
+  },
+  "630764fea987397c0816d219": {
+	"Note": "Missing, should be included with modul 63088377b5cd696784087147/G19"
+  },
+  "630765777d50ff5e8a1ea718": {
+	"Note": "Missing, should be included with modul 63088377b5cd696784087147/G19"
+  },
+  "630765cb962d0247b029dc45": {
+	"Note": "Missing, should be included with modul 63088377b5cd696784087147/G19"
+  },
+  "63076701a987397c0816d21b": {
+    "H3ID": "Magazine_Glock17_ 21Round_ Pmag_GL9.ARP",
+	"Note": "Should be Glock 9x19 19-round magazine (Coyote)"
+  },
+  "630767c37d50ff5e8a1ea71a": {
+    "H3ID": "Magazine_Glock17_ 33Round_Big_Stick.ARP",
+	"Note": "Should be Glock 9x19 \"Big Stick\" 31-round magazine (Coyote)"
+  },
+  "630769c4962d0247b029dc60": {
+    "H3ID": "Magazine_Glock17_ 21Round_ Pmag_GL9.ARP",
+	"Note": "Should be Glock 9x19 \"Big Stick\" 24-round magazine (Coyote)"
+  },
+  "5b1fa9b25acfc40018633c01": {
+    "H3ID": "ModulGlock.ARP",
+	"Note": "Should be G18C, modulGlock's G18C slide is what makes this receiver G18C in our case"
+  },
+  "5d1c702ad7ad1a632267f429": {
+    "H3ID": "StockGLR-440",
+	"Note": "Should be GLR-17, not sure there is a difference"
+  },
+  "5b1fa9ea5acfc40018633c0a": {
+    "H3ID": "Barrel_Glock_18_Compensated.ARP",
+	"Note": "Should be MW"
+  },
+  "5b1faa0f5acfc40dc528aeb5": {
+    "H3ID": "Slide_Glock_18C_STD.ARP",
+	"Note": "Should be MW"
+  },
   "5a7ae0c351dfba0017554310": {
     "H3ID": "ModulGlock.ARP",
 	"Note": "Should be MW"
@@ -7373,6 +7554,13 @@
   "5a7ad4af51dfba0013379717": {
     "H3ID": "RailAdapterHandgunShort",
 	"Note": "Should be Glock Aimtech mount base"
+  },
+  "615d8dbd290d254f5e6b2ed6": {
+    "H3ID": "Slide_Glock_17_MOS.ARP",
+	"Note": "Should be MW"
+  },
+  "615d8da4d3a39d50044c10e8": {
+	"Note": "Missing, integrated into Slide_Glock_17_MOS.ARP"
   },
   "5a718b548dc32e000d46d262": {
     "H3ID": "Magazine_Glock17_Standard.ARP"
