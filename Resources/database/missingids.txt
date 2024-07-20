@@ -18,48 +18,29 @@
 5b3f3b0186f774021a2afef7:Armband (Green)
 5b3f3b0e86f7746752107cda:Armband (Yellow)
 
-5f6331e097199b7db2128dc2:AK TDI X47 tactical handguard rail system
-5e217ba4c1434648c13568cd:AKM/AK-74 Hexagon "Kocherga" stock (Anodized Red)
-5e21a3c67e40bd02257a008a:AK 7.62x39 Magpul PMAG 30 GEN M3 30-round magazine (Banana)
-5e21ca18e4d47f0da15e77dd:AK CNC Warrior 5.56x45 muzzle device adapter
-5d2c76ed48f03532f2136169:AK AKademia Bastion dust cover
-5d2c770c48f0354b4a07c100:AK FAB Defense PDC dust cover
-5d2c772c48f0355d95672c25:AK TWS Dog Leg Rail dust cover
-5f633f68f5750b524b45f112:AKM thread type JMac Customs RRD-4C 7.62x39 muzzle brake
-5f633f791b231926f2329f13:AK-74 thread type JMac Customs RRD-4C multi-caliber muzzle brake
-5f6341043ada5942720e2dc5:AK Aeroknox Scorpius pistol grip
-628a664bccaab13006640e47:AK TangoDown Battle Grip pistol grip
-6272874a6c47bd74f92e2087:AK 7.62x39 FAB Defense Ultimag 30R 30-round magazine
-623c3be0484b5003161840dc:AK FAB Defense AGR-47 pistol grip
-619b69037b9de8162902673e:AKM/AK-74 Hera Arms CQR47 pistol grip/buttstock
-615d8e9867085e45ef1409c6:AKM 7.62x39 Kiba Arms .308 muzzle device adapter
-6087e2a5232e5a31c233d552:AKM/AK-74 ProMag Archangel OPFOR AA47 buttstock
-5efaf417aeb21837e749c7f2:AK Zenit B-30 handguard with B-31S upper handguard rail
-6087e663132d4d12c81fd96b:AK Custom Arms AGS-74 PRO + Sniper Kit pistol grip
-6130ca3fd92c473c77020dbd:AK CSS knurled charging handle
-615d8f5dd92c473c770212ef:AK Hexagon Reactor 5.45x39 muzzle brake
-615d8f8567085e45ef1409ca:AK-74 Hexagon Wafflemaker 5.45x39 sound suppressor
-628a6678ccaab13006640e49:AKM/AK-74 RD AK to M4 buffer tube adapter
-628a665a86cbd9750d2ff5e5:RD-704 dust cover
-628a7b23b0f75035732dd565:AK RD Enhanced V2 Rear Sight
-628a83c29179c324ed269508:RD-704 SLR ION Lite + Railed Gas Tube handguard & gas tube combo
-628b5638ad252a16da6dd245:SAG AK-545 5.45x39 carbine
-628b8d83717774443b15e248:AK-545 SAG Mk. 2.1 gas tube
-628b916469015a4e1711ed8d:AK-545 SAG Mk.3 handguard
-628b9471078f94059a4b9bfb:AK-545 SAG rear sight
-628b9a40717774443b15e9f2:AK-545 SAG buffer tube
-628b9be6cff66b70c002b14c:AK-545 SAG railed dust cover
-628b9c37a733087d0d7fe84b:SAG AK-545 Short 5.45x39 carbine
-628c9ab845c59e5b80768a81:AK TangoDown Battle Grip pistol grip (FDE)
-5b099a765acfc47a8607efe3:SA-58 7.62x51 11 inch barrel
-5b099a9d5acfc47a8607efe7:SA-58 quad rail handguard
-5b099ac65acfc400186331e1:SA-58/FAL 7.62x51 20-round magazine
-5b099b7d5acfc400186331e4:SA-58 3-Prong Trident 7.62x51 flash hider
-5b099b965acfc400186331e6:SA-58 SAW-style pistol grip (Black)
-5b099bb25acfc400186331e8:SA-58 Extreme Duty dust cover
-5b099bf25acfc4001637e683:SA-58 buffer tube adapter
-5b0bbe4e5acfc40dc528a72d:DS Arms SA-58 7.62x51 assault rifle
-5b0bc22d5acfc47a8607f085:SA-58 Holland Type rear sight
+5b7be1125acfc4001876c0e5:SA-58 7.62x51 16 inch barrel
+5b7be1265acfc400161d0798:SA-58 7.62x51 21 inch barrel
+5b7be1ca5acfc400170e2d2f:SA-58 quad rail full length handguard
+5b7be2345acfc400196d524a:SA-58/FAL AIM Sports Universal KeyMod handguard
+5b7bebc85acfc43bca706666:SA-58/FAL AIM Sports Universal M-LOK handguard
+5b7bed205acfc400161d08cc:FAL original handguard
+5b7bedd75acfc43d825283f9:SA-58/FAL Vltor CASV-FAL handguard
+5b7bee755acfc400196d5383:SA-58/FAL Vltor CASV-FAS handguard
+5b7bef1e5acfc43d82528402:SA-58/FAL 7.62x51 10-round magazine
+5b7bef5d5acfc43bca7067a3:SA-58/FAL 7.62x51 30-round magazine
+5b7bef9c5acfc43d102852ec:SA-58/FAL 7.62x51 X Products X-FAL 50-round drum magazine
+5b7c2d1d5acfc43d1028532a:SA-58/FAL 7.62x51 MMW polymer 20-round magazine
+5b7d37845acfc400170e2f87:SA-58/FAL 7.62x51 30-round magazine
+5b7d63b75acfc400170e2f8a:SA-58/FAL Magpul PRS 2 polymer stock
+5b7d63cf5acfc4001876c8df:SA-58 folding stock
+5b7d63de5acfc400170e2f8d:SA-58 SPR stock
+5b7d64555acfc4001876c8e2:SA-58 BRS stock
+5b7d645e5acfc400170e2f90:SA-58 humpback polymer stock
+5b7d671b5acfc43d82528ddd:SA-58/FAL Belgian Style handguard
+5b7d678a5acfc4001a5c4022:SA-58 pistol grip
+5b7d679f5acfc4001a5c4024:SA-58 FAB Defense AG-FAL pistol grip
+5b7d68af5acfc400170e30c3:SA-58 Austrian Style 7.62x51 muzzle brake
+5b7d6c105acfc40015109a5f:FAL standard dust cover
 5b1fa9b25acfc40018633c01:Glock 18C 9x19 machine pistol
 5b1fa9ea5acfc40018633c0a:Glock 18C 9x19 barrel with a compensator
 5b1faa0f5acfc40dc528aeb5:Glock 18C 9x19 pistol slide
@@ -81,33 +62,10 @@
 5b46238386f7741a693bcf9c:Kiver-M face shield
 5b4736a986f774040571e998:TROY QARS 3.2 inch rail
 5b4736b986f77405cb415c10:TROY QARS 4.2 inch rail
-5b7be1125acfc4001876c0e5:SA-58 7.62x51 16 inch barrel
-5b7be1265acfc400161d0798:SA-58 7.62x51 21 inch barrel
-5b7be1ca5acfc400170e2d2f:SA-58 quad rail full length handguard
-5b7be2345acfc400196d524a:SA-58/FAL AIM Sports Universal KeyMod handguard
 5b7be4575acfc400161d0832:Vltor CASV 2 inch rail
 5b7be4645acfc400170e2dcc:Vltor CASV 4 inch rail
 5b7be46e5acfc400170e2dcf:Vltor CASV 5 inch rail
-5b7bebc85acfc43bca706666:SA-58/FAL AIM Sports Universal M-LOK handguard
-5b7bed205acfc400161d08cc:FAL original handguard
-5b7bedd75acfc43d825283f9:SA-58/FAL Vltor CASV-FAL handguard
-5b7bee755acfc400196d5383:SA-58/FAL Vltor CASV-FAS handguard
-5b7bef1e5acfc43d82528402:SA-58/FAL 7.62x51 10-round magazine
-5b7bef5d5acfc43bca7067a3:SA-58/FAL 7.62x51 30-round magazine
-5b7bef9c5acfc43d102852ec:SA-58/FAL 7.62x51 X Products X-FAL 50-round drum magazine
-5b7c2d1d5acfc43d1028532a:SA-58/FAL 7.62x51 MMW polymer 20-round magazine
-5b7d37845acfc400170e2f87:SA-58/FAL 7.62x51 30-round magazine
-5b7d63b75acfc400170e2f8a:SA-58/FAL Magpul PRS 2 polymer stock
-5b7d63cf5acfc4001876c8df:SA-58 folding stock
-5b7d63de5acfc400170e2f8d:SA-58 SPR stock
-5b7d64555acfc4001876c8e2:SA-58 BRS stock
-5b7d645e5acfc400170e2f90:SA-58 humpback polymer stock
-5b7d671b5acfc43d82528ddd:SA-58/FAL Belgian Style handguard
-5b7d678a5acfc4001a5c4022:SA-58 pistol grip
-5b7d679f5acfc4001a5c4024:SA-58 FAB Defense AG-FAL pistol grip
-5b7d68af5acfc400170e30c3:SA-58 Austrian Style 7.62x51 muzzle brake
 5b7d693d5acfc43bca706a3d:AR-10 2A Armanent X3 7.62x51 compensator
-5b7d6c105acfc40015109a5f:FAL standard dust cover
 5b800ebc86f774394e230a90:Hexagon medium length rail
 5b800ed086f7747baf6e2f9e:Hexagon short length rail
 5b84038986f774774913b0c1:Hexagon short length rail (Anodized Red)

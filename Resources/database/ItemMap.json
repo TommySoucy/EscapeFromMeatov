@@ -4724,6 +4724,40 @@
     "H3ID": "MagazinePP91",
 	"Note": "Missing, should be 20 round mag, the only one available is 30"
   },
+  "5b0bbe4e5acfc40dc528a72d": {
+    "H3ID": "NWSA58",
+	"Note": "Should be MW"
+  },
+  "5b099a765acfc47a8607efe3": {
+    "H3ID": "NW5063Short",
+	"Note": "Should be NWFALParaFlush but the FVRObject's prefab is null? GetGameobject returns null. This is the one closest to the size we need"
+  },
+  "5b099a9d5acfc47a8607efe7": {
+    "H3ID": "NWFalQuadShort",
+	"Note": "Should be MW"
+  },
+  "5b099bb25acfc400186331e8": {
+    "H3ID": "NWDSAHeavy",
+	"Note": "Should be MW"
+  },
+  "5b099bf25acfc4001637e683": {
+    "H3ID": "NWFalBuffer",
+	"Note": "Should be MW"
+  },
+  "5b0bc22d5acfc47a8607f085": {
+    "H3ID": "NWParaSight",
+	"Note": "Should be MW"
+  },
+  "5b099b965acfc400186331e6": {
+    "H3ID": "NWFALSawGrip",
+	"Note": "Should be MW"
+  },
+  "5b099ac65acfc400186331e1": {
+    "H3ID": "NWFAL20"
+  },
+  "5b099b7d5acfc400186331e4": {
+    "H3ID": "NWTrident"
+  },
   "57dc2fa62459775949412633": {
     "H3ID": "ModulAKSDupe",
 	"Note": "Should be AKS-74U, this one is AKS-74UN which has the dovetail mount"
@@ -4849,6 +4883,29 @@
     "H3ID": "ModulAK105Factory",
 	"Note": "Should be MW"
   },
+  "628b9c37a733087d0d7fe84b": {
+    "H3ID": "ModulSAGshortFactory",
+	"Note": "Should be MW"
+  },
+  "628b5638ad252a16da6dd245": {
+    "H3ID": "ModulSAGrifleFactory",
+	"Note": "Should be MW"
+  },
+  "628b8d83717774443b15e248": {
+	"Note": "Missing, integrated in SAG receiver"
+  },
+  "628b916469015a4e1711ed8d": {
+	"Note": "Missing, integrated in SAG receiver"
+  },
+  "628b9471078f94059a4b9bfb": {
+	"Note": "Missing, integrated in SAG receiver"
+  },
+  "628b9a40717774443b15e9f2": {
+	"Note": "Missing, integrated in SAG receiver"
+  },
+  "628b9be6cff66b70c002b14c": {
+	"Note": "Missing, integrated in SAG receiver"
+  },
   "5644bd2b4bdc2d3b4c8b4572": {
     "H3ID": "ModulAK74NFactory",
 	"Note": "Should be MW"
@@ -4914,6 +4971,10 @@
   },
   "59fb375986f7741b681b81a6": {
     "H3ID": "AKForeKrebsCustom",
+	"Note": "Should be MW"
+  },
+  "628c9ab845c59e5b80768a81": {
+    "H3ID": "AKGripBattleGripFDE",
 	"Note": "Should be MW"
   },
   "5a9d6d34a2750c00141e07da": {
@@ -5050,6 +5111,10 @@
     "H3ID": "AKStockAKTS",
 	"Note": "Should be MW"
   },
+  "5e217ba4c1434648c13568cd": {
+    "H3ID": "AKStockHexRed",
+	"Note": "Should be MW"
+  },
   "5cf54404d7f00c108840b2ef": {
     "H3ID": "AKGripMG47Gold",
 	"Note": "Should be MW"
@@ -5066,6 +5131,10 @@
     "H3ID": "AKForeVS24White",
 	"Note": "Should be MW"
   },
+  "5f6331e097199b7db2128dc2": {
+    "H3ID": "AKForeX47",
+	"Note": "Should be MW"
+  },
   "5d15ce51d7ad1a1eff619092": {
     "H3ID": "AKSForeAlfa",
 	"Note": "Should be MW"
@@ -5078,19 +5147,102 @@
     "H3ID": "AKForeAKML",
 	"Note": "Should be MW"
   },
+  "5d2c770c48f0354b4a07c100": {
+    "H3ID": "AKDustcoverPDC",
+	"Note": "Should be MW"
+  },
+  "5d2c772c48f0355d95672c25": {
+    "H3ID": "AKDustcoverDogleg",
+	"Note": "Should be MW"
+  },
   "5d4aaa73a4b9365392071175": {
     "H3ID": "AKForeAKMLgld",
+	"Note": "Should be MW"
+  },
+  "5e21ca18e4d47f0da15e77dd": {
+    "H3ID": "MuzzleAK74Adapter",
+	"Note": "Should be MW"
+  },
+  "5f633f68f5750b524b45f112": {
+    "H3ID": "MuzzleRRD762",
+	"Note": "Should be MW"
+  },
+  "5f633f791b231926f2329f13": {
+    "H3ID": "MuzzleRRD545",
+	"Note": "Should be MW"
+  },
+  "5f6341043ada5942720e2dc5": {
+    "H3ID": "AKGripScorpius",
+	"Note": "Should be MW"
+  },
+  "628a664bccaab13006640e47": {
+    "H3ID": "AKGripBattleGripBlk",
+	"Note": "Should be MW"
+  },
+  "623c3be0484b5003161840dc": {
+    "H3ID": "AKGripAGR47FDE",
+	"Note": "Should be MW"
+  },
+  "619b69037b9de8162902673e": {
+    "H3ID": "AKStockCQR AK",
+	"Note": "Should be MW"
+  },
+  "615d8e9867085e45ef1409c6": {
+	"Note": "Missing, unneeded in H3"
+  },
+  "5d2c76ed48f03532f2136169": {
+    "H3ID": "AKDustcoverBastion",
+	"Note": "Should be MW"
+  },
+  "6087e2a5232e5a31c233d552": {
+    "H3ID": "AKStockAA47",
+	"Note": "Should be MW"
+  },
+  "5efaf417aeb21837e749c7f2": {
+    "H3ID": "AKForeB31c",
+	"Note": "Should be MW"
+  },
+  "6087e663132d4d12c81fd96b": {
+    "H3ID": "AKGripProGrip",
+	"Note": "Should be MW"
+  },
+  "628a6678ccaab13006640e49": {
+    "H3ID": "AKStockKrebsAdapter",
+	"Note": "Should be MW"
+  },
+  "628a665a86cbd9750d2ff5e5": {
+    "H3ID": "AKDustcoverEnhanced",
+	"Note": "Should be MW"
+  },
+  "628a7b23b0f75035732dd565": {
+	"Note": "Missing, integrated in AKDustcoverEnhanced"
+  },
+  "628a83c29179c324ed269508": {
+    "H3ID": "AKForeSLR",
+	"Note": "Should be MW"
+  },
+  "6130ca3fd92c473c77020dbd": {
+    "H3ID": "AKMiscCSS",
 	"Note": "Should be MW"
   },
   "5b1fd4e35acfc40018633c39": {
     "H3ID": "MagazineAKM10",
 	"Note": "Should be MagazineAKMAluminum but with a 10 round capacity"
   },
+  "615d8f5dd92c473c770212ef": {
+    "H3ID": "MuzzleAKHex"
+  },
   "5b1fb3e15acfc4001637f068": {
     "H3ID": "MagazineRPKBakelite"
   },
+  "6272874a6c47bd74f92e2087": {
+    "H3ID": "MagazineUltimagBlk"
+  },
   "5cfe8010d7ad1a59283b14c6": {
     "H3ID": "MagazineX47"
+  },
+  "615d8f8567085e45ef1409ca": {
+    "H3ID": "AttSuppressorAKHex"
   },
   "5c6175362e221600133e3b94": {
     "H3ID": "MagazineAKMDrum",
@@ -5099,6 +5251,9 @@
   "5cbdc23eae9215001136a407": {
     "H3ID": "MagazineAKMDrum",
 	"Note": "Should be AK 7.62x39 Molot 75-round drum magazine"
+  },
+  "5e21a3c67e40bd02257a008a": {
+    "H3ID": "MagazineBanana"
   },
   "5c0548ae0db834001966a3c2": {
     "H3ID": "MagazineArsenalMag"
