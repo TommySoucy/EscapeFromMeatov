@@ -18,26 +18,9 @@
 5b3f3af486f774679e752c1f:Armband (Blue)
 5b3f3b0186f774021a2afef7:Armband (Green)
 5b3f3b0e86f7746752107cda:Armband (Yellow)
-
-5fc3f2d5900b1d5091531e57:TDI KRISS Vector Gen.2 9x19 submachine gun
-5fb651b52b1b027b1f50bcff:Glock .45 ACP 13-round magazine
-5fb651dc85f90547f674b6f4:Glock .45 ACP KRISS G30 MagEx 30-round magazine
-5b2389515acfc4771e1be0c0:Burris AR-P.E.P.R. 30mm ring scope mount
-5b31163c5acfc400153b71cb:SIG Sauer ROMEO sight mount
-5b363dd25acfc4001a598fd2:SilencerCo Salvo 12 12ga sound suppressor
-5b363dea5acfc4771e1c5e7e:SilencerCo Salvo 12 choke adapter
-5b363e1b5acfc4771e1c5e80:SilencerCo Salvo 12 thread adapter
-5b39ffbd5acfc47a8773fb06:P226 Hogue Rubberized pistol grip
-5b3a08b25acfc4001754880c:P226 Bridge sight mount
 5b3b6e495acfc4330140bd88:Armasight Vulcan MG 3.5x Bravo night vision scope
-5b3b713c5acfc4330140bd8d:TT-33 7.62x25 TT pistol (Golden)
-5b3b99265acfc4704b4a1afb:Nightforce Magmount 30mm ring scope mount
-5b3baf8f5acfc40dc5296692:TT 7.62x25 116mm gilded barrel
-5b3cadf35acfc400194776a0:TT ornated side grips
-5b3cbc235acfc4001863ac44:Armasight Vulcan MG scope eyecup
-5b3f7c005acfc4704b4a1de8:PU 3.5x ring scope mount
-5b3f7c1c5acfc40dc5296b1d:PU 3.5x riflescope
 5b46238386f7741a693bcf9c:Kiver-M face shield
+
 5b4736a986f774040571e998:TROY QARS 3.2 inch rail
 5b4736b986f77405cb415c10:TROY QARS 4.2 inch rail
 5b7be4575acfc400161d0832:Vltor CASV 2 inch rail

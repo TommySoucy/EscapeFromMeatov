@@ -5927,6 +5927,15 @@
   "59c0ec5b86f77435b128bfca": {
     "H3ID": "SupHexagon12"
   },
+  "5b363dd25acfc4001a598fd2": {
+    "H3ID": "SupSilencerCo12"
+  },
+  "5b363dea5acfc4771e1c5e7e": {
+	"Note": "Missing integrated with 5b363dd25acfc4001a598fd2/SupSilencerCo12"
+  },
+  "5b363e1b5acfc4771e1c5e80": {
+	"Note": "Missing, not needed to attach muzzle to saiga 12"
+  },
   "58820d1224597753c90aeb13": {
     "H3ID": "12GaugeShellSlug"
   },
@@ -6183,6 +6192,16 @@
     "H3ID": "TTframedupe",
 	"Note": "Should be MW"
   },
+  "5b3b713c5acfc4330140bd8d": {
+    "H3ID": "TTframedupe",
+	"Note": "Should be TT-33 7.62x25 TT pistol (Golden)"
+  },
+  "5b3baf8f5acfc40dc5296692": {
+	"Note": "Missing, should be included with golden modul TT parts"
+  },
+  "5b3cadf35acfc400194776a0": {
+	"Note": "Missing, should be included with golden modul TT parts"
+  },
   "571a279b24597720b4066566": {
     "H3ID": "ttbarduoe",
 	"Note": "Should be MW"
@@ -6424,6 +6443,10 @@
   "5fbc22ccf24b94483f726483": {
     "H3ID": "MuzzleBrake_SRD"
   },
+  "5b3f7c1c5acfc40dc5296b1d": {
+    "H3ID": "ScopeMosinPU",
+	"Note": "Should be scope only, this means PU scope will only be compatible with mosin and not with Tokarev SVT-40 7.62x54R rifle using SVT-40 Tokarev PU mount"
+  },
   "58949fac86f77409483e16aa": {
 	"Note": "Missing, integrated into receiver, double latch only"
   },
@@ -6464,6 +6487,21 @@
 	"Note": "Missing, integrated with relevant sights"
   },
   "5aa66c72e5b5b00016327c93": {
+	"Note": "Missing, integrated with relevant sights"
+  },
+  "5b2389515acfc4771e1be0c0": {
+	"Note": "Missing, integrated with relevant sights"
+  },
+  "5b31163c5acfc400153b71cb": {
+	"Note": "Missing, integrated with relevant sights"
+  },
+  "5b3b99265acfc4704b4a1afb": {
+	"Note": "Missing, integrated with relevant sights"
+  },
+  "5b3cbc235acfc4001863ac44": {
+	"Note": "Missing, integrated with relevant sights"
+  },
+  "5b3f7c005acfc4704b4a1de8": {
 	"Note": "Missing, integrated with relevant sights"
   },
   "5a367e5dc4a282000e49738f": {
@@ -7365,6 +7403,10 @@
     "H3ID": "ftw.vector.45dupe",
 	"Note": "Should be MW"
   },
+  "5fc3f2d5900b1d5091531e57": {
+    "H3ID": "ftw.vector.v9tdupe",
+	"Note": "Should be MW"
+  },
   "5fb65363d1409e5ca04b54f5": {
     "H3ID": "FTW6BarrelV",
 	"Note": "Should be 5 inch, this is 6, but its the only one we have apart from 12 inch"
@@ -7411,6 +7453,12 @@
   },
   "5fbbc34106bde7524f03cbe9": {
     "H3ID": "ftw.threadproc.vector"
+  },
+  "5fb651b52b1b027b1f50bcff": {
+    "H3ID": "MagazineG41"
+  },
+  "5fb651dc85f90547f674b6f4": {
+    "H3ID": "ftw.mag.v45blk"
   },
   "63088377b5cd696784087147": {
     "H3ID": "G19",
@@ -7607,6 +7655,14 @@
   "56d59856d2720bd8418b456a": {
     "H3ID": "FTW.gun.p226frameDupe",
 	"Note": "Should be MW"
+  },
+  "5b39ffbd5acfc47a8773fb06": {
+    "H3ID": "FTW.gun.Houge",
+	"Note": "Should be MW"
+  },
+  "5b3a08b25acfc4001754880c": {
+    "H3ID": "RailAdapterHandgunShort",
+	"Note": "Should be P226 Bridge sight mount"
   },
   "56d59948d2720bb7418b4582": {
     "H3ID": "FTW.gun.Mag15"
