@@ -74,6 +74,16 @@
 [Info   :EscapeFromMeatov]      MCX Legacy Grip
 [Info   :EscapeFromMeatov]      MCX LT Grip
 [Info   :EscapeFromMeatov]      MCX Rattler Grip
+[Info   :EscapeFromMeatov]      M16 Standard
+[Info   :EscapeFromMeatov]      A2 Pistol-Grip
+[Info   :EscapeFromMeatov]      ES Grip
+[Info   :EscapeFromMeatov]      Tango Down 416
+[Info   :EscapeFromMeatov]      MP Grip
+[Info   :EscapeFromMeatov]      MP K2-Grip
+[Info   :EscapeFromMeatov]      FAB Ergo
+[Info   :EscapeFromMeatov]      Ergo Palm-Shelf
+[Info   :EscapeFromMeatov]      DD Grip
+[Info   :EscapeFromMeatov]      DLG 123
 [Info   :EscapeFromMeatov] Magwells_AR
 [Info   :EscapeFromMeatov]      No Magwell
 [Info   :EscapeFromMeatov]      HRF RCM
@@ -99,6 +109,42 @@
 [Info   :EscapeFromMeatov]      AR15 18" Barrel
 [Info   :EscapeFromMeatov]      AR15 20" Barrel
 [Info   :EscapeFromMeatov]      AR15 24" Barrel
+[Info   :EscapeFromMeatov]      416A5 10.6"
+[Info   :EscapeFromMeatov]      416A5 11"
+[Info   :EscapeFromMeatov]      416A5 14.5"
+[Info   :EscapeFromMeatov]      416A5 16.5"
+[Info   :EscapeFromMeatov]      416A5 20"
+[Info   :EscapeFromMeatov]      416 Compact
+[Info   :EscapeFromMeatov]      HK 14" (Gen1)
+[Info   :EscapeFromMeatov]      BRN 8" Barrel
+[Info   :EscapeFromMeatov]      BRN 10" Barrel
+[Info   :EscapeFromMeatov]      BRN 12" Barrel
+[Info   :EscapeFromMeatov]      BRN 16" Barrel
+[Info   :EscapeFromMeatov]      BRN SWAT Barrel
+[Info   :EscapeFromMeatov]      Bull 24"
+[Info   :EscapeFromMeatov]      M4 Carbine 14"
+[Info   :EscapeFromMeatov]      M4 Carbine 16"
+[Info   :EscapeFromMeatov]      CAR-15 SD Barrel
+[Info   :EscapeFromMeatov]      CAR-15 SD (Standard)
+[Info   :EscapeFromMeatov]      CAR-15 SD (Short)
+[Info   :EscapeFromMeatov]      Dissipator 16"
+[Info   :EscapeFromMeatov]      Govt 7"
+[Info   :EscapeFromMeatov]      Govt 10"
+[Info   :EscapeFromMeatov]      Govt 16"
+[Info   :EscapeFromMeatov]      Govt 20"
+[Info   :EscapeFromMeatov]      Midwest Shooter 16"
+[Info   :EscapeFromMeatov]      MK12 SPR 18"
+[Info   :EscapeFromMeatov]      Pencil 14"
+[Info   :EscapeFromMeatov]      Pencil 16"
+[Info   :EscapeFromMeatov]      Pencil 20"
+[Info   :EscapeFromMeatov]      QC9 Barrel
+[Info   :EscapeFromMeatov]      Ranger 14"
+[Info   :EscapeFromMeatov]      SOCOM 14"
+[Info   :EscapeFromMeatov]      Soyuz 8"
+[Info   :EscapeFromMeatov]      Soyuz 10.5"
+[Info   :EscapeFromMeatov]      Soyuz 12"
+[Info   :EscapeFromMeatov]      Soyuz 14"
+[Info   :EscapeFromMeatov]      Soyuz 16"
 [Info   :EscapeFromMeatov] GasBlocks_AR
 [Info   :EscapeFromMeatov]      Ballistic Advantage Gas Block
 [Info   :EscapeFromMeatov]      Daniel Defense Low Profile Gas Block
@@ -110,6 +156,16 @@
 [Info   :EscapeFromMeatov]      M4 Front Post Gas Block (No Sling)
 [Info   :EscapeFromMeatov]      TRIAD Gas Block
 [Info   :EscapeFromMeatov]      Windham Weaponry Railed Gas Block
+[Info   :EscapeFromMeatov]      C601 Gas-Block
+[Info   :EscapeFromMeatov]      Pencil Gas-Block
+[Info   :EscapeFromMeatov]      A2 Gas-Block
+[Info   :EscapeFromMeatov]      SPR Mod0
+[Info   :EscapeFromMeatov]      C7 Gas-Block
+[Info   :EscapeFromMeatov]      HK Prototype
+[Info   :EscapeFromMeatov]      AR15 Gas-Block
+[Info   :EscapeFromMeatov]      LP Gas-Block
+[Info   :EscapeFromMeatov]      LP (Pencil)
+[Info   :EscapeFromMeatov]      RANGER (Flippable)
 [Info   :EscapeFromMeatov] BufferStocks_AR
 [Info   :EscapeFromMeatov]      No Stock
 [Info   :EscapeFromMeatov]      AK12 Stock
@@ -145,6 +201,21 @@
 [Info   :EscapeFromMeatov]      UTG Pro S3 Stock
 [Info   :EscapeFromMeatov]      VLTOR EMOD Stock
 [Info   :EscapeFromMeatov]      VLTOR IMOD Stock
+[Info   :EscapeFromMeatov]      XM177 Stock
+[Info   :EscapeFromMeatov]      CAR15 Stock
+[Info   :EscapeFromMeatov]      CAR15 (Buttpad)
+[Info   :EscapeFromMeatov]      M4 "Waffle" Stock
+[Info   :EscapeFromMeatov]      SOPMOD Stock
+[Info   :EscapeFromMeatov]      CAR15 (Cut)
+[Info   :EscapeFromMeatov]      Bravo Stock
+[Info   :EscapeFromMeatov]      MP Stock
+[Info   :EscapeFromMeatov]      DD Enchanced Stock
+[Info   :EscapeFromMeatov]      USPS Stock (Fixed)
+[Info   :EscapeFromMeatov]      FAB GLCore
+[Info   :EscapeFromMeatov]      Competition Stock
+[Info   :EscapeFromMeatov]      Alex Stock
+[Info   :EscapeFromMeatov]      SI Stock
+[Info   :EscapeFromMeatov]      HK "Waffle" Stock
 [Info   :EscapeFromMeatov] BufferTubes_AR
 [Info   :EscapeFromMeatov]      No Buffertube
 [Info   :EscapeFromMeatov]      A2 Buffertube
@@ -170,6 +241,21 @@
 [Info   :EscapeFromMeatov]      Strike Industries Modular Fixed Stock
 [Info   :EscapeFromMeatov]      Strike Industries PDW Stock
 [Info   :EscapeFromMeatov]      Troy PDW Stock
+[Info   :EscapeFromMeatov]      M16 Standard Stock
+[Info   :EscapeFromMeatov]      M16A1 Stock
+[Info   :EscapeFromMeatov]      M16A2 Stock
+[Info   :EscapeFromMeatov]      C7 Stock
+[Info   :EscapeFromMeatov]      CAR15 Tube
+[Info   :EscapeFromMeatov]      Standard Buffer-Tube
+[Info   :EscapeFromMeatov]      MP PRSG3
+[Info   :EscapeFromMeatov]      CQB Stock
+[Info   :EscapeFromMeatov]      PWS Fluted
+[Info   :EscapeFromMeatov]      HK Extended
+[Info   :EscapeFromMeatov]      Soyuz Buffer-Tube
+[Info   :EscapeFromMeatov]      Colt Wire-Stock
+[Info   :EscapeFromMeatov]      Shovel.
+[Info   :EscapeFromMeatov]      VR80 Stock
+[Info   :EscapeFromMeatov]      1913 Stock Adapter
 [Info   :EscapeFromMeatov] Endplates_AR
 [Info   :EscapeFromMeatov]      AR15 Endplate
 [Info   :EscapeFromMeatov]      Daniel Defense Endplate
@@ -179,6 +265,14 @@
 [Info   :EscapeFromMeatov]      QD Endplate
 [Info   :EscapeFromMeatov]      Sling Endplate
 [Info   :EscapeFromMeatov]      Ambi Sling Endplate
+[Info   :EscapeFromMeatov]      M4 Style End-Plate
+[Info   :EscapeFromMeatov]      Soyuz Endplate
+[Info   :EscapeFromMeatov]      Block-2 Swivel Endplate
+[Info   :EscapeFromMeatov]      C7 Endplate
+[Info   :EscapeFromMeatov]      HK Dual-Ring
+[Info   :EscapeFromMeatov]      CAN Endplate
+[Info   :EscapeFromMeatov]      PWS Endplate
+[Info   :EscapeFromMeatov]      USPS Endplate
 [Info   :EscapeFromMeatov] LawFolderEndplates_AR
 [Info   :EscapeFromMeatov]      AR15 Endplate
 [Info   :EscapeFromMeatov]      Daniel Defense Endplate
@@ -187,8 +281,20 @@
 [Info   :EscapeFromMeatov]      QD Endplate
 [Info   :EscapeFromMeatov]      Sling Endplate
 [Info   :EscapeFromMeatov]      Ambi Sling Endplate
+[Info   :EscapeFromMeatov]      Block-2 Swivel Endplate
+[Info   :EscapeFromMeatov]      C7 Endplate
+[Info   :EscapeFromMeatov]      CAN Endplate
+[Info   :EscapeFromMeatov]      HK Dual-Ring
+[Info   :EscapeFromMeatov]      M4 Style End-Plate
+[Info   :EscapeFromMeatov]      PWS Endplate
+[Info   :EscapeFromMeatov]      Soyuz Endplate
+[Info   :EscapeFromMeatov]      USPS Endplate
 [Info   :EscapeFromMeatov] CastleNut_AR
 [Info   :EscapeFromMeatov]      AR15 Castle Nut
+[Info   :EscapeFromMeatov]      CAR15
+[Info   :EscapeFromMeatov]      M4 Castle-Nut
+[Info   :EscapeFromMeatov]      PWS Knurled
+[Info   :EscapeFromMeatov]      Soyuz Castle-Nut
 [Info   :EscapeFromMeatov] LawFolderBufferTubes_AR
 [Info   :EscapeFromMeatov]      No Buffertube
 [Info   :EscapeFromMeatov]      A2 Buffertube
@@ -206,6 +312,18 @@
 [Info   :EscapeFromMeatov]      Magpul UBR Gen2
 [Info   :EscapeFromMeatov]      ODIN Works Zulu Stock
 [Info   :EscapeFromMeatov]      Strike Industries Modular Fixed Stock
+[Info   :EscapeFromMeatov]      C601 Stock
+[Info   :EscapeFromMeatov]      M16 Stock
+[Info   :EscapeFromMeatov]      M16A1 Stock
+[Info   :EscapeFromMeatov]      M16A2 Stock
+[Info   :EscapeFromMeatov]      C7 Stock
+[Info   :EscapeFromMeatov]      CAR15 Tube
+[Info   :EscapeFromMeatov]      Standard Buffer-Tube
+[Info   :EscapeFromMeatov]      HK Extended
+[Info   :EscapeFromMeatov]      MP PRSG3
+[Info   :EscapeFromMeatov]      Soyuz Buffer-Tube
+[Info   :EscapeFromMeatov]      PWS Fluted
+[Info   :EscapeFromMeatov]      Shovel.
 [Info   :EscapeFromMeatov] Triggers_AR
 [Info   :EscapeFromMeatov]      AR15 Trigger
 [Info   :EscapeFromMeatov]      Airborne Compact Talon Trigger
@@ -222,6 +340,11 @@
 [Info   :EscapeFromMeatov]      Rise Armament RA-434 Trigger
 [Info   :EscapeFromMeatov]      Triggertech Flat Trigger
 [Info   :EscapeFromMeatov]      MCX LT Trigger
+[Info   :EscapeFromMeatov]      Standard Trigger
+[Info   :EscapeFromMeatov]      Geissele Flat
+[Info   :EscapeFromMeatov]      Custom Flat-Trigger
+[Info   :EscapeFromMeatov]      USPS Trigger
+[Info   :EscapeFromMeatov]      Soyuz Trigger
 [Info   :EscapeFromMeatov] Selectors_AR
 [Info   :EscapeFromMeatov]      AR15 Selector
 [Info   :EscapeFromMeatov]      Anodized Selector
@@ -236,6 +359,13 @@
 [Info   :EscapeFromMeatov]      M16 Selector
 [Info   :EscapeFromMeatov]      MCX Selector
 [Info   :EscapeFromMeatov]      MCX LT Selector
+[Info   :EscapeFromMeatov]      Standard Selector
+[Info   :EscapeFromMeatov]      Block-2 (Ambi)
+[Info   :EscapeFromMeatov]      416A5
+[Info   :EscapeFromMeatov]      Radian Talon Ambi
+[Info   :EscapeFromMeatov]      SI Strike Switch
+[Info   :EscapeFromMeatov]      BA Ambi Selector
+[Info   :EscapeFromMeatov]      Soyuz Ambi
 [Info   :EscapeFromMeatov] TriggerGuards_AR
 [Info   :EscapeFromMeatov]      Aero Precision Billet Trigger Guard
 [Info   :EscapeFromMeatov]      AR15 Trigger Guard
@@ -248,6 +378,10 @@
 [Info   :EscapeFromMeatov]      Spikes Tactical Gen II Trigger Guard
 [Info   :EscapeFromMeatov]      Strike Industries Cobra Trigger Guard
 [Info   :EscapeFromMeatov]      Strike Industries Fang Trigger Guard
+[Info   :EscapeFromMeatov]      Standard Trigger-Guard
+[Info   :EscapeFromMeatov]      A5 Trigger-Guard
+[Info   :EscapeFromMeatov]      MP Trigger-Guard
+[Info   :EscapeFromMeatov]      Geissele Supreme
 [Info   :EscapeFromMeatov] Releases_AR
 [Info   :EscapeFromMeatov]      AR15 Mag Release
 [Info   :EscapeFromMeatov]      AR15 Ambidextrous Mag Release
@@ -258,6 +392,16 @@
 [Info   :EscapeFromMeatov]      Sig Sauer Tread Mag Release
 [Info   :EscapeFromMeatov]      M16 Mag Release
 [Info   :EscapeFromMeatov]      SR16 Mag Release
+[Info   :EscapeFromMeatov]      Standard Release
+[Info   :EscapeFromMeatov]      416 Mag-Release
+[Info   :EscapeFromMeatov]      Ambi Mag-Release
+[Info   :EscapeFromMeatov]      BA Mag-Release
+[Info   :EscapeFromMeatov]      TROY Mag-Release
+[Info   :EscapeFromMeatov]      USPS Ambi Release
+[Info   :EscapeFromMeatov]      SI Mag-Release
+[Info   :EscapeFromMeatov]      SI Mag-Release (Short)
+[Info   :EscapeFromMeatov]      416A5 Release
+[Info   :EscapeFromMeatov]      VR80 Release
 [Info   :EscapeFromMeatov] Catches_AR
 [Info   :EscapeFromMeatov]      AR15 Bolt Catch
 [Info   :EscapeFromMeatov]      AR15 Bolt Catch BAD
@@ -272,6 +416,12 @@
 [Info   :EscapeFromMeatov]      Radian Extended Bolt Catch
 [Info   :EscapeFromMeatov]      Sig Sauer Tread Bolt Catch
 [Info   :EscapeFromMeatov]      AR15 Bolt Catch Strike Enhanced
+[Info   :EscapeFromMeatov]      C601
+[Info   :EscapeFromMeatov]      Standard Bolt-Release
+[Info   :EscapeFromMeatov]      HK A5 Style
+[Info   :EscapeFromMeatov]      SI Bolt-Release
+[Info   :EscapeFromMeatov]      BA Bolt-Catch
+[Info   :EscapeFromMeatov]      Soyuz Bolt-Catch
 [Info   :EscapeFromMeatov] Handguards_AR
 [Info   :EscapeFromMeatov]      No Handguard
 [Info   :EscapeFromMeatov]      ADAR 2-15 Handguard
@@ -370,6 +520,57 @@
 [Info   :EscapeFromMeatov]      Warsport LVOA-S Handguard
 [Info   :EscapeFromMeatov]      ZenitCo Joker 8" Handguard
 [Info   :EscapeFromMeatov]      ZenitCo Joker 11" Handguard
+[Info   :EscapeFromMeatov]      M16 Standard Guard
+[Info   :EscapeFromMeatov]      A2 Handguard
+[Info   :EscapeFromMeatov]      Alex Guard
+[Info   :EscapeFromMeatov]      BRN Standard
+[Info   :EscapeFromMeatov]      BRN SWAT Guard
+[Info   :EscapeFromMeatov]      C8 Handguard
+[Info   :EscapeFromMeatov]      CAR-15 Handguard
+[Info   :EscapeFromMeatov]      CAR-15 SD
+[Info   :EscapeFromMeatov]      CAR-15 SD (Quad)
+[Info   :EscapeFromMeatov]      DD MFR 6"
+[Info   :EscapeFromMeatov]      DD MFR 15"
+[Info   :EscapeFromMeatov]      (416) Compact Quad
+[Info   :EscapeFromMeatov]      (416) SI CRUX 15"
+[Info   :EscapeFromMeatov]      (416) DD Quad
+[Info   :EscapeFromMeatov]      (416) Midwest 9"
+[Info   :EscapeFromMeatov]      (416) Midwest 13"
+[Info   :EscapeFromMeatov]      (416) MRS Keymod 9" (MLOK)
+[Info   :EscapeFromMeatov]      (416) MRS Keymod 14" (MLOK)
+[Info   :EscapeFromMeatov]      (416) Quad-Rail
+[Info   :EscapeFromMeatov]      (416) A5 Quad-Rail
+[Info   :EscapeFromMeatov]      (416) Quad Extended
+[Info   :EscapeFromMeatov]      (416) Quad-Rail (Sighted)
+[Info   :EscapeFromMeatov]      (416) Geissele SMR 10"
+[Info   :EscapeFromMeatov]      (416) Geissele SMR 14"
+[Info   :EscapeFromMeatov]      (416) TROY MLOK 13"
+[Info   :EscapeFromMeatov]      JP MK3 17"
+[Info   :EscapeFromMeatov]      LSW Handguard
+[Info   :EscapeFromMeatov]      M4 Handguard
+[Info   :EscapeFromMeatov]      M4 RAS Handguard
+[Info   :EscapeFromMeatov]      M4 RIS Handguard
+[Info   :EscapeFromMeatov]      M16-RAS
+[Info   :EscapeFromMeatov]      M321 Handguard
+[Info   :EscapeFromMeatov]      MK18 Handguard
+[Info   :EscapeFromMeatov]      MP Handguard
+[Info   :EscapeFromMeatov]      QC9 Quad
+[Info   :EscapeFromMeatov]      RANGER Quad-Rail
+[Info   :EscapeFromMeatov]      SI Grid 15"
+[Info   :EscapeFromMeatov]      SI Grid (Short)
+[Info   :EscapeFromMeatov]      MK12 Gen-II
+[Info   :EscapeFromMeatov]      MK12 Gen-II (Top-Rail)
+[Info   :EscapeFromMeatov]      SPR RAS
+[Info   :EscapeFromMeatov]      SPR RAS (Top-Rail)
+[Info   :EscapeFromMeatov]      MK12 Gen-III
+[Info   :EscapeFromMeatov]      MK12 Gen-III (Top-Rail)
+[Info   :EscapeFromMeatov]      Soyuz 9"
+[Info   :EscapeFromMeatov]      Soyuz 12"
+[Info   :EscapeFromMeatov]      Soyuz 15"
+[Info   :EscapeFromMeatov]      USPS Quad
+[Info   :EscapeFromMeatov]      VR80 (No Rest)
+[Info   :EscapeFromMeatov]      VR80 Standard
+[Info   :EscapeFromMeatov]      M4 (Heatshield)
 [Info   :EscapeFromMeatov] MagazineParts_AR15
 [Info   :EscapeFromMeatov]      No Magazine Part
 [Info   :EscapeFromMeatov]      Ammo Band
@@ -405,6 +606,15 @@
 [Info   :EscapeFromMeatov]      Saint Edge Charging Handle
 [Info   :EscapeFromMeatov]      Skeletonized Charging Handle
 [Info   :EscapeFromMeatov]      Strike Industries Arch Charging Handle
+[Info   :EscapeFromMeatov]      Colt 601 Charge
+[Info   :EscapeFromMeatov]      Standard Charge
+[Info   :EscapeFromMeatov]      C7 Charge
+[Info   :EscapeFromMeatov]      M84 Charge
+[Info   :EscapeFromMeatov]      HK Extended Latch
+[Info   :EscapeFromMeatov]      MASP Ambi
+[Info   :EscapeFromMeatov]      VLTOR Charge
+[Info   :EscapeFromMeatov]      RA Dino
+[Info   :EscapeFromMeatov]      F1 Charge
 [Info   :EscapeFromMeatov] Uppers_AR
 [Info   :EscapeFromMeatov]      No Upper
 [Info   :EscapeFromMeatov]      AR15 Upper
@@ -425,6 +635,22 @@
 [Info   :EscapeFromMeatov]      Rainier Arms Upper
 [Info   :EscapeFromMeatov]      VLTOR MUR-1S Upper
 [Info   :EscapeFromMeatov]      VLTOR MUR-1A Upper
+[Info   :EscapeFromMeatov]      C601 Upper
+[Info   :EscapeFromMeatov]      M16 Upper
+[Info   :EscapeFromMeatov]      A1 Upper
+[Info   :EscapeFromMeatov]      A2 Upper
+[Info   :EscapeFromMeatov]      M321 Upper
+[Info   :EscapeFromMeatov]      Colt LSW Upper
+[Info   :EscapeFromMeatov]      Delta-Carbine
+[Info   :EscapeFromMeatov]      M4 Carbine Upper
+[Info   :EscapeFromMeatov]      CAN Flat Upper
+[Info   :EscapeFromMeatov]      Skeletonized Upper
+[Info   :EscapeFromMeatov]      Soyuz STM
+[Info   :EscapeFromMeatov]      QC9 Upper
+[Info   :EscapeFromMeatov]      (416) Standard Upper
+[Info   :EscapeFromMeatov]      (416) A5 Upper
+[Info   :EscapeFromMeatov]      (416) A5 Upper (Flat)
+[Info   :EscapeFromMeatov]      LSV Upper
 [Info   :EscapeFromMeatov] Bolts_AR15
 [Info   :EscapeFromMeatov]      AR15 Bolt BCM
 [Info   :EscapeFromMeatov]      AR15 Bolt
@@ -433,15 +659,45 @@
 [Info   :EscapeFromMeatov]      AR15 Bolt Radian
 [Info   :EscapeFromMeatov]      AR15 Bolt Slabside
 [Info   :EscapeFromMeatov]      TX15 Bolt
+[Info   :EscapeFromMeatov]      Standard BCG
+[Info   :EscapeFromMeatov]      M231-FPW BCG
+[Info   :EscapeFromMeatov]      LSW BCG
+[Info   :EscapeFromMeatov]      HK BCG
+[Info   :EscapeFromMeatov]      LANTAC Enhanced BCG
+[Info   :EscapeFromMeatov]      LMT Enhanced BCG
+[Info   :EscapeFromMeatov]      QC9 BCG
+[Info   :EscapeFromMeatov]      Soyuz BCG
+[Info   :EscapeFromMeatov]      416A5 BCG
+[Info   :EscapeFromMeatov]      BRN Micro-Bolt
 [Info   :EscapeFromMeatov] Chamber_AR
 [Info   :EscapeFromMeatov]      5.56x45mm
 [Info   :EscapeFromMeatov]      .300 Blackout
 [Info   :EscapeFromMeatov]      9mm Uzi Magazines
 [Info   :EscapeFromMeatov]      7.62x39mm
+[Info   :EscapeFromMeatov]      HK416 (Audio)
+[Info   :EscapeFromMeatov]      Modul416 (Audio)
+[Info   :EscapeFromMeatov]      QC9 Mag (9MM)
+[Info   :EscapeFromMeatov]      MP5 Mag (9MM)
+[Info   :EscapeFromMeatov]      MP7 (4.6x30)
+[Info   :EscapeFromMeatov]      Glock (9mm)
+[Info   :EscapeFromMeatov]      Glock (45ACP)
+[Info   :EscapeFromMeatov]      Glock (40SW)
+[Info   :EscapeFromMeatov]      Glock Flush (9mm)
+[Info   :EscapeFromMeatov]      Glock Flush (45ACP)
+[Info   :EscapeFromMeatov]      Glock Flush (40SW)
+[Info   :EscapeFromMeatov]      .50 Beowulf
+[Info   :EscapeFromMeatov]      .300 (Subsonic)
 [Info   :EscapeFromMeatov] Dustcover_AR15
 [Info   :EscapeFromMeatov]      AR15 Dustcover
 [Info   :EscapeFromMeatov]      Daniel Defense Dustcover
 [Info   :EscapeFromMeatov]      Strike Industries Dustcover
+[Info   :EscapeFromMeatov]      C601 Dust-Cover
+[Info   :EscapeFromMeatov]      M16 Dust-Cover
+[Info   :EscapeFromMeatov]      M4 Dust-Cover
+[Info   :EscapeFromMeatov]      No Dust-Cover
+[Info   :EscapeFromMeatov]      DD Dust-Cover
+[Info   :EscapeFromMeatov]      SI Billet
+[Info   :EscapeFromMeatov]      Fortis Carbon
 [Info   :EscapeFromMeatov] Uppers_MCX
 [Info   :EscapeFromMeatov]      MCX Virtus Upper
 [Info   :EscapeFromMeatov]      MCX LT Upper
@@ -512,6 +768,46 @@
 [Info   :EscapeFromMeatov]      MCX PMM ULSS
 [Info   :EscapeFromMeatov]      MCX Skeleton Stock
 [Info   :EscapeFromMeatov]      MCX Visor Stock
+[Info   :EscapeFromMeatov]      BRN-180 Stock
+[Info   :EscapeFromMeatov] NWSTMMagwell
+[Info   :EscapeFromMeatov]      No Magwell
+[Info   :EscapeFromMeatov]      Soyuz Magwell
+[Info   :EscapeFromMeatov] Barrels_VR80
+[Info   :EscapeFromMeatov]      VR80 5"
+[Info   :EscapeFromMeatov]      VR80 10"
+[Info   :EscapeFromMeatov]      VR80 14"
+[Info   :EscapeFromMeatov]      VR80 18.5"
+[Info   :EscapeFromMeatov] Charging_BRN180
+[Info   :EscapeFromMeatov]      BRN-180 Charge
+[Info   :EscapeFromMeatov]      Tactical Charge
+[Info   :EscapeFromMeatov] Bolts_VR80
+[Info   :EscapeFromMeatov]      Left-Handed Bolt
+[Info   :EscapeFromMeatov]      Right-Handed Bolt
+[Info   :EscapeFromMeatov]      Ambi Bolt
+[Info   :EscapeFromMeatov] NWLower_AR
+[Info   :EscapeFromMeatov]      C601 (Full-Auto)
+[Info   :EscapeFromMeatov]      SP1 (Semi-Auto)
+[Info   :EscapeFromMeatov]      M16 (Full-Auto)
+[Info   :EscapeFromMeatov]      A1 (Full-Auto)
+[Info   :EscapeFromMeatov]      A2 (Semi-Auto)
+[Info   :EscapeFromMeatov]      A2 (Burst)
+[Info   :EscapeFromMeatov]      A4 (Burst)
+[Info   :EscapeFromMeatov]      A2 (Full-Auto)
+[Info   :EscapeFromMeatov]      M231 FPW
+[Info   :EscapeFromMeatov]      416 (Full-Auto)
+[Info   :EscapeFromMeatov]      MR-556 (Semi-Auto)
+[Info   :EscapeFromMeatov]      USPS Lower
+[Info   :EscapeFromMeatov]      AA Lower (Full-Auto)
+[Info   :EscapeFromMeatov] NWChamberSTM
+[Info   :EscapeFromMeatov]      (STM) Glock 9mm
+[Info   :EscapeFromMeatov]      (STM) Glock 40SW
+[Info   :EscapeFromMeatov]      (STM) Glock 45ACP
+[Info   :EscapeFromMeatov] NWHKGasBlock
+[Info   :EscapeFromMeatov]      HK (Sighted)
+[Info   :EscapeFromMeatov]      HK Gasblock
+[Info   :EscapeFromMeatov] NWChamberQC9
+[Info   :EscapeFromMeatov]      (QC9) Standard
+[Info   :EscapeFromMeatov]      (QC9) MP5 Magazines
 [Info   :EscapeFromMeatov] NWAXMCUpper
 [Info   :EscapeFromMeatov]      Rail-less PRO Upper
 [Info   :EscapeFromMeatov]      Low-Profile Upper
