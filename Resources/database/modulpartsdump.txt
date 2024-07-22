@@ -839,3 +839,50 @@
 [Info   :EscapeFromMeatov]      19-Slot
 [Info   :EscapeFromMeatov]      19-Slot (Rail-Angled)
 [Info   :EscapeFromMeatov]      19-Slot (Rail-Flat)
+[Info   :EscapeFromMeatov] NWSVDGrips
+[Info   :EscapeFromMeatov]      SVDS Grip
+[Info   :EscapeFromMeatov]      Zenit AF Grip
+[Info   :EscapeFromMeatov] NWSVDFoldyStock
+[Info   :EscapeFromMeatov]      No Folding Stock
+[Info   :EscapeFromMeatov]      SVDS Standard
+[Info   :EscapeFromMeatov] NWSVDStocks
+[Info   :EscapeFromMeatov]      Wooden Stock
+[Info   :EscapeFromMeatov]      Type 85 Stock
+[Info   :EscapeFromMeatov]      SVDS Rear
+[Info   :EscapeFromMeatov]      Polymer (Fixed)
+[Info   :EscapeFromMeatov]      Zenit-T Stock
+[Info   :EscapeFromMeatov] NWSVDCharge
+[Info   :EscapeFromMeatov]      No Charge-Cover
+[Info   :EscapeFromMeatov]      CSS Knurled Cover
+[Info   :EscapeFromMeatov]      Zenit RP-1
+[Info   :EscapeFromMeatov] NWSVDDust
+[Info   :EscapeFromMeatov]      SVDS
+[Info   :EscapeFromMeatov]      Type 85 Dustcover
+[Info   :EscapeFromMeatov]      SVD Dustcover
+[Info   :EscapeFromMeatov] NWSVDMuzzle
+[Info   :EscapeFromMeatov]      Removed Muzzle
+[Info   :EscapeFromMeatov]      Classic Muzzle
+[Info   :EscapeFromMeatov]      SVDS Muzzle
+[Info   :EscapeFromMeatov]      SVDS (No Sight)
+[Info   :EscapeFromMeatov]      Rotor-43 Silencer
+[Info   :EscapeFromMeatov]      Rotor-43 (No Sight)
+[Info   :EscapeFromMeatov]      Zenit 1664
+[Info   :EscapeFromMeatov]      Zenit 1664 (Silenced)
+[Info   :EscapeFromMeatov] NWSVDBarrel
+[Info   :EscapeFromMeatov]      Standard Barrel
+[Info   :EscapeFromMeatov]      Zenit Barrel (STD)
+[Info   :EscapeFromMeatov]      Zenit Barrel (Ultra-Short)
+[Info   :EscapeFromMeatov]      SVDS (Shortened)
+[Info   :EscapeFromMeatov]      Zenit Barrel (Short)
+[Info   :EscapeFromMeatov] NWSVDLowRail
+[Info   :EscapeFromMeatov]      No Accessories
+[Info   :EscapeFromMeatov]      DRG (Rear)
+[Info   :EscapeFromMeatov]      DRG (Front)
+[Info   :EscapeFromMeatov] NWSVDGuard
+[Info   :EscapeFromMeatov]      Wooden Guard
+[Info   :EscapeFromMeatov]      Type 85 Guard
+[Info   :EscapeFromMeatov]      Polymer Guard
+[Info   :EscapeFromMeatov]      Zenit ACS (Short)
+[Info   :EscapeFromMeatov]      SAG Chassis System
+[Info   :EscapeFromMeatov]      DRG Quad-Rail
+[Info   :EscapeFromMeatov]      Zenit ACS

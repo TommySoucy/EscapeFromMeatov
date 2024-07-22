@@ -21,76 +21,19 @@
 5b3b6e495acfc4330140bd88:Armasight Vulcan MG 3.5x Bravo night vision scope
 5b46238386f7741a693bcf9c:Kiver-M face shield
 
-5d2f0d8048f0356c925bc3b0:HK MP5K 9x19 submachine gun
-5d2f259b48f0355a844acd74:HK MP5K polymer handguard
-5d2f25bc48f03502573e5d85:HK MP5K End Cap stock
-5d2f261548f03576f500e7b7:HK MP5K 9x19 upper receiver
-5d2f2d5748f03572ec0c0139:HK MP5K cocking handle
-5c0000c00db834001a6697fc:HK MP5 Navy Style 3-lug suppressor adapter
-615d8df08004cc50514c3236:HK MP5 B&T QD 9x19 muzzle brake
-5d2f213448f0355009199284:HK MP5 9x19 20-round magazine
-5d19cd96d7ad1a4a992c9f52:HK MP5 PTR Tri-Rail handguard
-5d010d1cd7ad1a59283b1ce7:HK MP5 CAA HX-5 handguard
-5c07c9660db834001a66b588:HK MP5 End Cap stock
-5c07c5ed0db834001b73571c:HK MP5 Noveske-style 9x19 muzzle brake-compensator
-5c0102aa0db834001b734ba1:Remington RAHG 2 inch rail
-5c0102b20db834001d23eebc:Remington RAHG 4 inch rail
-5c010e350db83400232feec7:SP-8 Survival Machete
-5c0111ab0db834001966914d:ME Cylinder 12ga muzzle adapter
-5c0126f40db834002a125382:Red Rebel ice pick
-5c012ffc0db834001d23f03f:Camper axe
-5c05295e0db834001a66acbb:Trijicon ACOG backup rear sight
-5c0558060db834001b735271:GPNVG-18 Night Vision goggles
-5c066e3a0db834001b7353f0:Armasight N-15 Night Vision Goggles
-5c0672ed0db834001b7353f3:PP-19-01 "Vityaz" 9x19 PUFGUN SG-919 30 30-round magazine
-5c0673fb0db8340023300271:PP-19-01 "Vityaz" 9x19 PUFGUN SG-919 20 20-round magazine
-5c0684e50db834002a12585a:TT Hogue-like rubber grip
-5c0695860db834001b735461:PNV-10T dovetail adapter
-5c0696830db834001d23f5da:PNV-10T Night Vision Goggles
-5c079ec50db834001966a706:TT Razor Arms rubber grip
-5c079ed60db834001a66b372:TT DLP Tactical Precision LAM-module
-5c07c60e0db834002330051f:ADAR 2-15 5.56x45 carbine
-5c07df7f0db834001b73588a:Freeman crowbar
-5c0919b50db834001b7ce3b9:Maska-1SCh face shield (Olive Drab)
-5c0a794586f77461c458f892:Secure container Boss
-5c0d56a986f774449d5de529:9x19mm RIP
-5c0d591486f7744c505b416f:12/70 RIP
-5c0d5ae286f7741e46554302:5.56x45mm Warmageddon
-5c0d5e4486f77478390952fe:5.45x39mm PPBS gs "Igolnik"
-5c0e66e2d174af02a96252f4:Ops-Core SLAAP armor helmet plate (Tan)
-5c0e842486f77443a74d2976:Maska-1SCh face shield (Killa)
-5c11046cd174af02a012e42b:Wilcox Interface for PVS-7
-5c110624d174af029e69734c:T-7 Thermal Goggles with a Night Vision mount
-5c178a942e22164bef5ceca3:Crye Precision AirFrame Chops
-5c1793902e221602b21d3de2:Crye Precision AirFrame Ears
-5c3df7d588a4501f290594e5:9x19mm Green Tracer
-5c46fbd72e2216398b5a8c9c:SVDS 7.62x54R sniper rifle
-5c471b5d2e221602b21d4e14:SVDS polymer stock
-5c471b7e2e2216152006e46c:SVDS rear sight
-5c471ba12e221602b3137d76:SVDS front sight
-5c471bd12e221602b4129c3a:SVDS dust cover
-5c471be12e221602b66cd9ac:SVDS pistol grip
-5c471bfc2e221602b21d4e17:SVDS 7.62x54R muzzle brake-compensator
-5c471c2d2e22164bef5d077f:SVDS upper band
-5c471c442e221602b542a6f8:SVD 7.62x54R 10-round magazine
-5c471c6c2e221602b66cd9ae:SVDS polymer handguard
 5c471c842e221615214259b5:SVDS gas tube
 5c471cb32e221602b177afaa:SVDS 7.62x54R 22 inch barrel
-5c488a752e221602b412af63:Desert Tech MDR 5.56x45 assault rifle
-5c48a14f2e2216152006edd7:MDR handguard (FDE)
-5c48a2852e221602b21d5923:MDR 5.56x45 16 inch barrel
-5c48a2c22e221602b313fb6c:MDR pistol grip (FDE)
-5c4ee3d62e2216152006f302:SV-98 SRVV Mk.2.0 7.62x54R muzzle brake-compensator
-5c4eec9b2e2216398b5aaba2:SV-98 7.62x54R thread adapter
-5c4eecc32e221602b412b440:SV-98 7.62x54R sound suppressor
-5c4eecde2e221602b3140418:SV-98 sound suppressor heat shield
-5c501a4d2e221602b412b540:Molot VPO-101 "Vepr-Hunter" 7.62x51 carbine
-5c5039be2e221602b177c9ff:VPO-101 "Vepr-Hunter" gas tube
-5c503ac82e221602b21d6e9a:VPO-101 "Vepr-Hunter" 7.62x51 5-round magazine
-5c503ad32e2216398b5aada2:VPO-101 "Vepr-Hunter" 7.62x51 10-round magazine
-5c503af12e221602b177ca02:VPO-101 "Vepr-Hunter" stock
-5c503b1c2e221602b21d6e9d:VPO-101 "Vepr-Hunter" rear sight
-5c503d0a2e221602b542b7ef:VPO-101 "Vepr-Hunter" dust cover
+6197b229af1f5202c57a9bea:SVDS Lynx Arms Hinge buffer tube adapter
+5e56991336989c75ab4f03f6:SVD modernization kit handguard
+5e5699df2161e06ac158df6f:SVD CAA XRS-DRG handguard
+5e569a0156edd02abe09f27d:SVD modernization kit top rail
+5e569a132642e66b0b68015c:SVD CAA DRG L-1 barrel mount rail
+5e569a2e56edd02abe09f280:SVD CAA XD RGL receiver mount
+5e01e9e273d8eb11426f5bc3:SVDS Rotor 43 thread adapter
+5dff8db859400025ea5150d4:SVD SAG low profile sidemount
+5dfcd0e547101c39625f66f9:SVD SAG MK1 chassis
+5dfce88fe9dc277128008b2e:SVDS custom cut dust cover
+5c88f24b2e22160bc12c69a6:SVD 7.62x54R 20-round magazine
 5c59529a2e221602b177d160:MPX Lancer OEM 14 inch M-LOK handguard
 5c5db5852e2216003a0fe71a:MPX 9x19 4.5 inch barrel
 5c5db5962e2216000e5e46eb:MPX 9x19 6.5 inch barrel
@@ -106,6 +49,44 @@
 5c5db6b32e221600102611a0:MPX Geissele SCH charging handle
 5c5db6ee2e221600113fba54:MPX/MCX Maxim Defense CQB telescoping stock
 5c5db6f82e2216003a0fe914:MPX/MCX PMM ULSS foldable stock
+5c0126f40db834002a125382:Red Rebel ice pick
+5c012ffc0db834001d23f03f:Camper axe
+5c05295e0db834001a66acbb:Trijicon ACOG backup rear sight
+5c0558060db834001b735271:GPNVG-18 Night Vision goggles
+5c066e3a0db834001b7353f0:Armasight N-15 Night Vision Goggles
+5c0672ed0db834001b7353f3:PP-19-01 "Vityaz" 9x19 PUFGUN SG-919 30 30-round magazine
+5c0673fb0db8340023300271:PP-19-01 "Vityaz" 9x19 PUFGUN SG-919 20 20-round magazine
+5c0695860db834001b735461:PNV-10T dovetail adapter
+5c0696830db834001d23f5da:PNV-10T Night Vision Goggles
+5c07c60e0db834002330051f:ADAR 2-15 5.56x45 carbine
+5c07df7f0db834001b73588a:Freeman crowbar
+5c0919b50db834001b7ce3b9:Maska-1SCh face shield (Olive Drab)
+5c0a794586f77461c458f892:Secure container Boss
+5c0d56a986f774449d5de529:9x19mm RIP
+5c0d5ae286f7741e46554302:5.56x45mm Warmageddon
+5c0d5e4486f77478390952fe:5.45x39mm PPBS gs "Igolnik"
+5c0e66e2d174af02a96252f4:Ops-Core SLAAP armor helmet plate (Tan)
+5c0e842486f77443a74d2976:Maska-1SCh face shield (Killa)
+5c11046cd174af02a012e42b:Wilcox Interface for PVS-7
+5c110624d174af029e69734c:T-7 Thermal Goggles with a Night Vision mount
+5c178a942e22164bef5ceca3:Crye Precision AirFrame Chops
+5c1793902e221602b21d3de2:Crye Precision AirFrame Ears
+5c3df7d588a4501f290594e5:9x19mm Green Tracer
+5c488a752e221602b412af63:Desert Tech MDR 5.56x45 assault rifle
+5c48a14f2e2216152006edd7:MDR handguard (FDE)
+5c48a2852e221602b21d5923:MDR 5.56x45 16 inch barrel
+5c48a2c22e221602b313fb6c:MDR pistol grip (FDE)
+5c4ee3d62e2216152006f302:SV-98 SRVV Mk.2.0 7.62x54R muzzle brake-compensator
+5c4eec9b2e2216398b5aaba2:SV-98 7.62x54R thread adapter
+5c4eecc32e221602b412b440:SV-98 7.62x54R sound suppressor
+5c4eecde2e221602b3140418:SV-98 sound suppressor heat shield
+5c501a4d2e221602b412b540:Molot VPO-101 "Vepr-Hunter" 7.62x51 carbine
+5c5039be2e221602b177c9ff:VPO-101 "Vepr-Hunter" gas tube
+5c503ac82e221602b21d6e9a:VPO-101 "Vepr-Hunter" 7.62x51 5-round magazine
+5c503ad32e2216398b5aada2:VPO-101 "Vepr-Hunter" 7.62x51 10-round magazine
+5c503af12e221602b177ca02:VPO-101 "Vepr-Hunter" stock
+5c503b1c2e221602b21d6e9d:VPO-101 "Vepr-Hunter" rear sight
+5c503d0a2e221602b542b7ef:VPO-101 "Vepr-Hunter" dust cover
 5c6161fb2e221600113fbde5:TOZ-106 20ga MTs 20-01 Sb.3 5-shot magazine
 5c6162682e22160010261a2b:TOZ-106 dovetail mount
 5c61627a2e22160012542c55:TOZ-106 rail scope mount
@@ -115,7 +96,6 @@
 5c82343a2e221644f31c0611:BelOMO PSO-1M2 4x24 scope
 5c86592b2e2216000e69e77c:IEA Mil-Optics KH/F 34mm one-piece magmount
 5c878e9d2e2216000f201903:AR-10 Lantac Dragon 7.62x51 muzzle brake-compensator
-5c88f24b2e22160bc12c69a6:SVD 7.62x54R 20-round magazine
 5c90c3622e221601da359851:Zenit B-13V "Klassika" dovetail rail platform
 5c99f3592e221644fc633070:TOZ-106 custom cut Mosin stock
 5ca2113f86f7740b2547e1d2:Vulkan-5 face shield
@@ -198,19 +178,6 @@
 5d6d3829a4b9361bc8618943:LShZ-2DTM face shield
 5d6d3943a4b9360dbc46d0cc:LShZ-2DTM cover (Black)
 5d6d3be5a4b9361bc73bc763:LShZ-2DTM aventail
-5d6e6772a4b936088465b17c:12/70 5.25mm buckshot
-5d6e67fba4b9361bc73bc779:12/70 6.5mm Express buckshot
-5d6e6806a4b936088465b17e:12/70 8.5mm Magnum buckshot
-5d6e6869a4b9361c140bcfde:12/70 Grizzly 40 slug
-5d6e6891a4b9361bd473feea:12/70 "Poleva-3" slug
-5d6e689ca4b9361bc8618956:12/70 "Poleva-6u" slug
-5d6e68a8a4b9360b6c0d54e2:12/70 AP-20 armor-piercing slug
-5d6e68b3a4b9361bca7e50b5:12/70 Copper Sabot Premier HP slug
-5d6e68c4a4b9361b93413f79:12/70 makeshift .50 BMG slug
-5d6e68d1a4b93622fe60e845:12/70 SuperFormance HP slug
-5d6e68dea4b9361bcc29e659:12/70 Dual Sabot slug
-5d6e68e6a4b9361c140bcfe0:12/70 FTX Custom Lite slug
-5d6e6911a4b9361bd5780d52:12/70 flechette
 5d6e695fa4b936359b35d852:20/70 5.6mm buckshot
 5d6e69b9a4b9361bc8618958:20/70 6.2mm buckshot
 5d6e69c7a4b9360b6c0d54e4:20/70 7.3mm buckshot
@@ -272,26 +239,17 @@
 5dfa3cd1b33c0951220c079b:AR-10 KAC QDC 7.62x51 Flash Suppressor Kit
 5dfa3d2b0dee1b22f862eade:KAC PRS/QDC 7.62x51 sound suppressor
 5dfa3d45dfc58d14537c20b0:AR-10 KAC Low Profile Gas Block
-5dfcd0e547101c39625f66f9:SVD SAG MK1 chassis
-5dfce88fe9dc277128008b2e:SVDS custom cut dust cover
 5dfe14f30b92095fd441edaf:ETMI-019 shotgun rail mount
 5dff77c759400025ea5150cf:Leapers UTG 25mm ring scope mount
-5dff8db859400025ea5150d4:SVD SAG low profile sidemount
 5e00903ae9dc277128008b87:B&T MP9 9x19 submachine gun
 5e0090f7e9dc277128008b93:MP9 9x19 upper receiver
 5e00cdd986f7747473332240:Team Wendy EXFIL Ballistic face shield (Black)
 5e00cfa786f77469dc6e5685:Team Wendy EXFIL Ear Covers (Black)
-5e01e9e273d8eb11426f5bc3:SVDS Rotor 43 thread adapter
 5e01ea19e9dc277128008c0b:Rotor 43 7.62x54R muzzle brake-compensator
 5e01f31d86f77465cf261343:Team Wendy EXFIL Ear Covers (Coyote Brown)
 5e01f37686f774773c6f6c15:Team Wendy EXFIL Ballistic face shield (Coyote Brown)
 5e32f56fcb6d5863cc5e5ee4:VOG-17 Khattabka improvised hand grenade
 5e340dcdcb6d5863cc5e5efb:VOG-25 Khattabka improvised hand grenade
-5e56991336989c75ab4f03f6:SVD modernization kit handguard
-5e5699df2161e06ac158df6f:SVD CAA XRS-DRG handguard
-5e569a0156edd02abe09f27d:SVD modernization kit top rail
-5e569a132642e66b0b68015c:SVD CAA DRG L-1 barrel mount rail
-5e569a2e56edd02abe09f280:SVD CAA XD RGL receiver mount
 5e81c3cbac2bb513793cdc75:Colt M1911A1 .45 ACP pistol
 5e81c4ca763d9f754677befa:M1911A1 .45 ACP 7-round magazine
 5e81c519cb2b95385c177551:M1911A1 .45 ACP 127mm barrel
@@ -400,8 +358,6 @@
 5fbcbd10ab884124df0cd563:SIG Sauer Two Port Brake 7.62x51 muzzle brake
 5fbcc1d9016cce60e8341ab3:SIG MCX .300 Blackout assault rifle
 5fbcc3e4d6fa9c00c571bb58:MCX GEN1 .300 BLK upper receiver
-5fbcc429900b1d5091531dd7:MPX/MCX telescoping stock
-5fbcc437d724d907e2077d5c:MPX/MCX lightweight stock
 5fbcc640016cce60e8341acc:MCX charging handle
 5fbe3ffdf8b6a877a729ea82:.300 Blackout BCP FMJ
 5fbe7618d6fa9c00c571bb6c:SIG Sauer SRD762Ti 7.62x51 sound suppressor
@@ -597,7 +553,6 @@
 61963a852d2c397d660036ad:HK USP Red Dot sight mount
 61965d9058ef8c428c287e0d:FN SCAR PWS SRX rail extension
 619666f4af1f5202c57a952d:FN SCAR Kinetic MREX 6.5 M-LOK rail
-6197b229af1f5202c57a9bea:SVDS Lynx Arms Hinge buffer tube adapter
 619bc61e86e01e16f839a999:Alpha armband
 619bdd8886e01e16f839a99c:BEAR armband
 619bddc6c9546643a67df6ee:DEADSKUL armband
@@ -887,7 +842,6 @@
 64b7af734b75259c590fa895:7.62x39mm SP
 64b7bbb74b75259c590fa897:9x19mm FMJ M882
 64b8725c4b75259c590fa899:.300 Blackout CBJ
-64b8ee384b75259c590fa89b:12/70 Piranha
 64b8f7968532cf95ee0a0dbf:7.62x54mm R FMJ
 64b8f7b5389d7ffd620ccba2:7.62x54mm R SP BT
 64b8f7c241772715af0f9c3d:7.62x54mm R HP BT

@@ -5721,6 +5721,49 @@
   "5a38ed75c4a28232996e40c6": {
     "H3ID": "FSCE.Mag4rndTOZ"
   },
+  "5c46fbd72e2216398b5a8c9c": {
+    "H3ID": "NWSVD"
+  },
+  "5c471c442e221602b542a6f8": {
+    "H3ID": "NWSVD10"
+  },
+  "5c471b7e2e2216152006e46c": {
+    "Note": "Missing, integrated with dustcovers"
+  },
+  "5c471c2d2e22164bef5d077f": {
+    "Note": "Missing, Not sure how this would attach"
+  },
+  "5c471ba12e221602b3137d76": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDMuzzle",
+    "ModulPart": "SVDS Muzzle",
+    "Note": "Missing, integrated with muzzles, the sight will map to the muzzle with the sight"
+  },
+  "5c471c6c2e221602b66cd9ae": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDGuard",
+    "ModulPart": "Polymer Guard"
+  },
+  "5c471bd12e221602b4129c3a": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDDust",
+    "ModulPart": "SVDS"
+  },
+  "5c471be12e221602b66cd9ac": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDGrips",
+    "ModulPart": "SVDS Grip"
+  },
+  "5c471bfc2e221602b21d4e17": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDMuzzle",
+    "ModulPart": "SVDS (No Sight)"
+  },
+  "5c471b5d2e221602b21d4e14": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDStocks",
+    "ModulPart": "SVDS Rear"
+  },
   "5bfea6e90db834001b7347f3": {
     "H3ID": "m700base",
 	"Note": "Should be MW"
@@ -6089,11 +6132,64 @@
   "5b363e1b5acfc4771e1c5e80": {
 	"Note": "Missing, not needed to attach muzzle to saiga 12"
   },
+  "5c0d591486f7744c505b416f": {
+    "H3ID": "andr3a.12GauRip"
+  },
+  "5d6e6869a4b9361c140bcfde": {
+    "H3ID": "andr3a.12GauGrizz"
+  },
+  "5d6e68a8a4b9360b6c0d54e2": {
+    "H3ID": "andr3a.12GauAP20"
+  },
+  "5d6e68b3a4b9361bca7e50b5": {
+    "H3ID": "andr3a.12GauHPCopper"
+  },
+  "5d6e68d1a4b93622fe60e845": {
+    "H3ID": "andr3a.12GauSuperPerf"
+  },
+  "5d6e68dea4b9361bcc29e659": {
+    "H3ID": "andr3a.12GauDualSabot"
+  },
+  "5d6e68c4a4b9361b93413f79": {
+    "H3ID": "andr3a.12Gau50bmg",
+	"Note": "Should probably not be tracer"
+  },
+  "64b8ee384b75259c590fa89b": {
+    "H3ID": "12GaugeShellFlechette",
+	"Note": "Should be 12/70 Piranha"
+  },
+  "5d6e6911a4b9361bd5780d52": {
+    "H3ID": "12GaugeShellFlechette"
+  },
   "58820d1224597753c90aeb13": {
     "H3ID": "12GaugeShellSlug"
   },
+  "5d6e68e6a4b9361c140bcfe0": {
+    "H3ID": "12GaugeShellSlug",
+	"Note": "Should be 12/70 FTX Custom Lite slug"
+  },
+  "5d6e6891a4b9361bd473feea": {
+    "H3ID": "12GaugeShellSlug",
+	"Note": "Should be 12/70 \"Poleva-3\" slug"
+  },
+  "5d6e689ca4b9361bc8618956": {
+    "H3ID": "12GaugeShellSlug",
+	"Note": "Should be 12/70 \"Poleva-6u\" slug"
+  },
   "560d5e524bdc2d25448b4571": {
     "H3ID": "12GaugeShellNo2Buckshot"
+  },
+  "5d6e6806a4b936088465b17e": {
+    "H3ID": "12GaugeShell00Buckshot",
+	"Note": "Should be 12/70 8.5mm Magnum buckshot"
+  },
+  "5d6e6772a4b936088465b17c": {
+    "H3ID": "12GaugeShellNo4Buckshot",
+	"Note": "Should be 12/70 5.25mm buckshot"
+  },
+  "5d6e67fba4b9361bc73bc779": {
+    "H3ID": "12GaugeShellNo2Buckshot",
+	"Note": "Should be 12/70 6.5mm Express buckshot"
   },
   "5a38ebd9c4a282000d722a5b": {
     "H3ID": "Cartridge20GaugeBuckshot"
@@ -6132,6 +6228,9 @@
   },
   "56deee15d2720bee328b4567": {
 	"Note": "Missing, it is the default part, just gets replaced by an attachment"
+  },
+  "5c0111ab0db834001966914d": {
+	"Note": "Missing, dont need adpter for muzzle or is included"
   },
   "56deeefcd2720bc8328b4568": {
     "H3ID": "AttDecMag1338",
@@ -6343,6 +6442,18 @@
   },
   "571a12c42459771f627b58a0": {
     "H3ID": "TTframedupe",
+	"Note": "Should be MW"
+  },
+  "5c079ec50db834001966a706": {
+    "H3ID": "razor",
+	"Note": "Should be MW"
+  },
+  "5c079ed60db834001a66b372": {
+    "H3ID": "DLPL",
+	"Note": "Should be MW"
+  },
+  "5c0684e50db834002a12585a": {
+    "H3ID": "hogue",
 	"Note": "Should be MW"
   },
   "5b3b713c5acfc4330140bd8d": {
@@ -6559,11 +6670,18 @@
 	"Note": "Should be MW"
   },
   "5894a05586f774094708ef75": {
-    "H3ID": "MPXMag30",
-	"Note": "Should be MW"
+    "H3ID": "MPXMag30"
+  },
+  "5fbcc429900b1d5091531dd7": {
+    "H3ID": "MCXStockTelescoping",
+	"Note": "Should be MW, MW map Stocks_1913:MCX Collapsing Stock"
+  },
+  "5fbcc437d724d907e2077d5c": {
+    "H3ID": "MCXStockSkel",
+	"Note": "Should be MW, MW map Stocks_1913:MCX Skeleton Stock"
   },
   "5894a13e86f7742405482982": {
-    "H3ID": "MCXStockTelescoping",
+    "H3ID": "MPXStockEarly",
 	"Note": "Should be MW"
   },
   "5894a2c386f77427140b8342": {
@@ -6724,7 +6842,7 @@
   "5c6d85e02e22165df16b81f4": {
     "H3ID": "868",
     "ModulGroup": "Barrels_AR15",
-    "ModulPart": "416A5 10.6""
+    "ModulPart": "416A5 10.6\""
   },
   "5bb20dcad4351e3bac1212da": {
     "Note": "Missing, integrated on barrels"
@@ -7516,6 +7634,44 @@
     "H3ID": "46x30mmCartridgeJHP",
 	"Note": "Should be 4.6x30mm JSP SX"
   },
+  "5d2f0d8048f0356c925bc3b0": {
+    "H3ID": "MP5KA4",
+	"Note": "Should be Modul"
+  },
+  "5d19cd96d7ad1a4a992c9f52": {
+    "H3ID": "MP5Fore_RIS",
+	"Note": "Should be MW"
+  },
+  "5d010d1cd7ad1a59283b1ce7": {
+    "H3ID": "MP5Fore_RIS",
+	"Note": "Should be HK MP5 CAA HX-5 handguard"
+  },
+  "5d2f259b48f0355a844acd74": {
+	"Note": "Missing, default handguard"
+  },
+  "5d2f25bc48f03502573e5d85": {
+	"Note": "Missing, should be modul part included with modul MP5"
+  },
+  "5d2f261548f03576f500e7b7": {
+	"Note": "Missing, should be modul part included with modul MP5"
+  },
+  "5d2f2d5748f03572ec0c0139": {
+	"Note": "Missing, should be modul part included with modul MP5"
+  },
+  "5c07c9660db834001a66b588": {
+	"Note": "Missing, should be modul part included with modul MP5"
+  },
+  "5c0000c00db834001a6697fc": {
+	"Note": "Missing, should be part included with modul MP5, not needed to attach supressors anyway"
+  },
+  "615d8df08004cc50514c3236": {
+    "H3ID": "AR15MuzzleKAC556",
+	"Note": "Should be HK MP5 B&T QD 9x19 muzzle brake"
+  },
+  "5d2f213448f0355009199284": {
+    "H3ID": "MagazineMp515rnd",
+	"Note": "Should be HK MP5 9x19 20-round magazine"
+  },
   "5926bb2186f7744b1c6c6e60": {
     "H3ID": "MP5A4",
 	"Note": "Should be Modul"
@@ -8066,6 +8222,9 @@
   "6388c5d19c00405f4717c0f0": {
     "H3ID": "MLokToPicRail3Slot"
   },
+  "5c0102aa0db834001b734ba1": {
+    "H3ID": "MLokToPicRail1HalfSlot"
+  },
   "6388c4478d895f557a0c6512": {
     "H3ID": "MLokToPicRail1HalfSlot"
   },
@@ -8103,6 +8262,9 @@
   },
   "5b4736a986f774040571e998": {
     "H3ID": "MLokToPicRail1HalfSlot"
+  },
+  "5c0102b20db834001d23eebc": {
+    "H3ID": "MLokToPicRail2HalfSlot"
   },
   "5b4736b986f77405cb415c10": {
     "H3ID": "MLokToPicRail2HalfSlot"
@@ -8666,6 +8828,10 @@
   "64785e7c19d732620e045e15": {
     "H3ID": "ReflexLCO"
   },
+  "5c07c5ed0db834001b73571c": {
+    "H3ID": "MuzzleBrakeOrbit",
+	"Note": "Should be HK MP5 Noveske-style 9x19 muzzle brake-compensator"
+  },
   "5b7d693d5acfc43bca706a3d": {
     "H3ID": "AR15MuzzlePCCblk",
 	"Note": "Should be AR-10 2A Armanent X3 7.62x51 compensator"
@@ -8867,6 +9033,9 @@
   "5bc9c1e2d4351e00367fbcf0": {
     "H3ID": "Hatchet",
 	"Note": "Should be antique axe"
+  },
+  "5c010e350db83400232feec7": {
+    "H3ID": "ftw.melee.sp8"
   },
   "5bead2e00db834001c062938": {
     "H3ID": "ftw.melee.mpl50"
