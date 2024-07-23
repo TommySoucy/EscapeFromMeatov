@@ -5727,11 +5727,40 @@
   "5c471c442e221602b542a6f8": {
     "H3ID": "NWSVD10"
   },
+  "5c88f24b2e22160bc12c69a6": {
+    "H3ID": "NWSVD20"
+  },
+  "5e569a2e56edd02abe09f280": {
+    "H3ID": "AKMiscB13",
+	"Note": "Should be SVD CAA XD RGL receiver mount, the side SVD mount is essentially a dovetail mount in H3"
+  },
+  "5dff8db859400025ea5150d4": {
+    "H3ID": "AKMiscAKRS",
+	"Note": "Should be SVD SAG low profile sidemount, the side SVD mount is essentially a dovetail mount in H3"
+  },
   "5c471b7e2e2216152006e46c": {
     "Note": "Missing, integrated with dustcovers"
   },
+  "5c471c842e221615214259b5": {
+    "Note": "Missing, integrated with barrels"
+  },
+  "5e01e9e273d8eb11426f5bc3": {
+    "Note": "Missing, integrated with relevant muzzle devices"
+  },
+  "5dfce88fe9dc277128008b2e": {
+    "Note": "Missing, integrated with relevant handguards"
+  },
   "5c471c2d2e22164bef5d077f": {
     "Note": "Missing, Not sure how this would attach"
+  },
+  "6197b229af1f5202c57a9bea": {
+    "Note": "Missing, should be modul part"
+  },
+  "5e56991336989c75ab4f03f6": {
+    "Note": "Missing, should be modul part"
+  },
+  "5e569a0156edd02abe09f27d": {
+    "Note": "Missing, should be modul part"
   },
   "5c471ba12e221602b3137d76": {
     "H3ID": "868",
@@ -5739,15 +5768,40 @@
     "ModulPart": "SVDS Muzzle",
     "Note": "Missing, integrated with muzzles, the sight will map to the muzzle with the sight"
   },
+  "5dfcd0e547101c39625f66f9": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDGuard",
+    "ModulPart": "SAG Chassis System"
+  },
   "5c471c6c2e221602b66cd9ae": {
     "H3ID": "868",
     "ModulGroup": "NWSVDGuard",
     "ModulPart": "Polymer Guard"
   },
+  "5e5699df2161e06ac158df6f": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDGuard",
+    "ModulPart": "DRG Quad-Rail"
+  },
   "5c471bd12e221602b4129c3a": {
     "H3ID": "868",
     "ModulGroup": "NWSVDDust",
     "ModulPart": "SVDS"
+  },
+  "5dfce88fe9dc277128008b2e": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDDust",
+    "ModulPart": ""
+  },
+  "5e569a132642e66b0b68015c": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDLowRail",
+    "ModulPart": "DRG (Rear)"
+  },
+  "5c471cb32e221602b177afaa": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDBarrel",
+    "ModulPart": "Standard Barrel"
   },
   "5c471be12e221602b66cd9ac": {
     "H3ID": "868",
@@ -6658,8 +6712,82 @@
   "599860ac86f77436b225ed1a": {
 	"H3ID": "MagazinePP19"
   },
+  "5c0672ed0db834001b7353f3": {
+	"H3ID": "MagazinePP19blk"
+  },
+  "5c0673fb0db8340023300271": {
+	"H3ID": "MagazinePP19blk20"
+  },
+  "5fbe7618d6fa9c00c571bb6c": {
+	"H3ID": "SupTI10"
+  },
+  "5fc0f9cbd6fa9c00c571bb90": {
+	"H3ID": "ForeGripBWarriorLokBlack",
+	"Note": "Should be SIG Sauer Vertical Foregrip KeyMod (Black)"
+  },
+  "5fbcbcf593164a5b6278efb2": {
+	"H3ID": "MuzzleBrake_Sig300"
+  },
+  "5fbcbd02900b1d5091531dd3": {
+	"H3ID": "MuzzleBrake_SRD"
+  },
+  "6196365d58ef8c428c287da1": {
+	"H3ID": "300BlackoutCartridgeSubSonicFMJ",
+	"Note": "Should be whisper round, despite the whisper being the faster of all .300 in tarkov, I figured a weak round would be better to be unlocked at lvl 1, considering we don't have a better option for whisper in H3"
+  },
+  "64b8725c4b75259c590fa899": {
+	"H3ID": "300BlackoutCartridgeAP",
+	"Note": "Should be CBJ round, second highest penetration and high level unlock"
+  },
+  "6196364158ef8c428c287d9f": {
+	"H3ID": "300BlackoutCartridgeJHP",
+	"Note": "Should be V-Max round, low penetration and light bleed makes JHP better suited"
+  },
+  "619636be6db0f2477964e710": {
+	"H3ID": "300BlackoutCartridgeTracer"
+  },
+  "5fd20ff893a8961fc660a954": {
+	"H3ID": "300BlackoutCartridgeAP"
+  },
+  "5fbe3ffdf8b6a877a729ea82": {
+	"H3ID": "300BlackoutCartridgeFMJ"
+  },
+  "5fbcbd10ab884124df0cd563": {
+	"H3ID": "MuzzleBrake_MCXLTCSAW",
+	"Note": "Should be SIG Sauer Two Port Brake 7.62x51 muzzle brake, this was one of the unused muzzle brakes added by modulMCX"
+  },
   "59bffc1f86f77435b128b872": {
 	"Note": "Missing, supressors don't need thread adapters, should be SilencerCo Hybrid 46 Direct Thread Mount adapter"
+  },
+  "5fbcc1d9016cce60e8341ab3": {
+    "H3ID": "ModulMCX"
+  },
+  "5fbcc3e4d6fa9c00c571bb58": {
+    "H3ID": "MCXUpperBlk",
+	"Note": "Should be MW but we are using an actual item from ModulSIG since it is available, which we have installed to have MPX, MW map Uppers_MCX:MCX Virtus Upper"
+  },
+  "5fbcc640016cce60e8341acc": {
+    "H3ID": "MCXChargeSig",
+	"Note": "Should be MW but we are using an actual item from ModulSIG since it is available, which we have installed to have MPX, MW map Charging_MCX:MCX Ambi"
+  },
+  "5fbbfabed5cb881a7363194e": {
+    "H3ID": "MCXBarrel6_75",
+	"Note": "Should be MW but we are using an actual item from ModulSIG since it is available, which we have installed to have MPX, MW map Barrels_MCX:MCX Legacy 6.75\" Barrel"
+  },
+  "5fbbfacda56d053a3543f799": {
+    "H3ID": "MCXBarrel9",
+	"Note": "Should be MW but we are using an actual item from ModulSIG since it is available, which we have installed to have MPX, MW map Barrels_MCX:MCX Legacy 9\" Barrel"
+  },
+  "5fbc226eca32ed67276c155d": {
+    "H3ID": "MCXFore8Blk",
+	"Note": "Should be MW but we are using an actual item from ModulSIG since it is available, which we have installed to have MPX, MW map Handguards_MCX:MCX Virtus 8\" Handguard"
+  },
+  "5fbc227aa56d053a3543f79e": {
+    "H3ID": "MCXFore12Blk",
+	"Note": "Should be MW but we are using an actual item from ModulSIG since it is available, which we have installed to have MPX, MW map Handguards_MCX:MCX Virtus 12\" Handguard"
+  },
+  "5fbc210bf24b94483f726481": {
+	"Note": "Missing, integrated into barrels"
   },
   "58948c8e86f77409493f7266": {
     "H3ID": "ModularMPXDupe",
@@ -6679,6 +6807,50 @@
   "5fbcc437d724d907e2077d5c": {
     "H3ID": "MCXStockSkel",
 	"Note": "Should be MW, MW map Stocks_1913:MCX Skeleton Stock"
+  },
+  "5c5db6ee2e221600113fba54": {
+    "H3ID": "MPXStockMaxim",
+	"Note": "Should be MW, MW map Stocks_1913:MCX Maxim Defense Stock"
+  },
+  "5c5db6f82e2216003a0fe914": {
+    "H3ID": "MCXStockMiniSkel",
+	"Note": "Should be PMM ULSS, this one is close enough, MW map Stocks_1913:MCX PMM ULSS"
+  },
+  "5c5db5f22e2216000e5e47e8": {
+    "H3ID": "MPXFore4.5",
+	"Note": "Should be MW"
+  },
+  "5c5db5fc2e2216000f1b2842": {
+    "H3ID": "MPXFore6.5",
+	"Note": "Should be MW"
+  },
+  "5c5db6302e2216000e5e47f0": {
+    "H3ID": "MPXFore10.5",
+	"Note": "Should be MW"
+  },
+  "5c5db63a2e2216000f1b284a": {
+    "H3ID": "MPXFore14",
+	"Note": "Should be MW"
+  },
+  "5c59529a2e221602b177d160": {
+    "H3ID": "MPXForeLancer",
+	"Note": "Should be MW"
+  },
+  "5c5db5852e2216003a0fe71a": {
+    "H3ID": "MPXBarrel114",
+	"Note": "Should be MW"
+  },
+  "5c5db5962e2216000e5e46eb": {
+    "H3ID": "MPXBarrel165",
+	"Note": "Should be MW"
+  },
+  "5c5db5b82e2216003a0fe71d": {
+    "H3ID": "MPXBarrel265",
+	"Note": "Should be MW"
+  },
+  "5c5db5c62e22160012542255": {
+    "H3ID": "MPXBarrel355",
+	"Note": "Should be MW"
   },
   "5894a13e86f7742405482982": {
     "H3ID": "MPXStockEarly",
@@ -6703,6 +6875,20 @@
   "58aeaaa886f7744fc1560f81": {
     "H3ID": "MPXBarrel165",
 	"Note": "Should be MW"
+  },
+  "5c5db6b32e221600102611a0": {
+    "H3ID": "MCXChargeSchBlk",
+	"Note": "Should be MW"
+  },
+  "5c5db6552e2216001026119d": {
+    "H3ID": "MPXMag20"
+  },
+  "5c5db6742e2216000f1b2852": {
+    "H3ID": "MPXMag50"
+  },
+  "5c5db6652e221600113fba51": {
+    "H3ID": "MPXMag40",
+	"Note": "Should be 41 rounds"
   },
   "58aeac1b86f77457c419f475": {
     "H3ID": "SupTI16",
@@ -6785,6 +6971,9 @@
   "5ba36f85d4351e0085325c81": {
 	"Note": "Missing, integrated with relevant sights"
   },
+  "5c05295e0db834001a66acbb": {
+	"Note": "Missing, integrated with relevant sights"
+  },
   "5a367e5dc4a282000e49738f": {
     "H3ID": "ModulAR10SandDupe",
 	"Note": "Should be MW, should also be Remington R11 RSASS 7.62x51 marksman rifle, while this is jsut an AR-10, which might acutally be the same thing"
@@ -6810,6 +6999,9 @@
   },
   "5bb2475ed4351e00853264e3": {
     "H3ID": "NWAR2P416A5"
+  },
+  "5c07c60e0db834002330051f": {
+    "H3ID": "ModulAR15"
   },
   "5447a9cd4bdc2dbd208b4567": {
     "H3ID": "ModulM4A1"
@@ -9039,6 +9231,15 @@
   },
   "5bead2e00db834001c062938": {
     "H3ID": "ftw.melee.mpl50"
+  },
+  "5c0126f40db834002a125382": {
+    "H3ID": "Improvised_ClimbingAxe"
+  },
+  "5c012ffc0db834001d23f03f": {
+    "H3ID": "GarageTool_HandAxe"
+  },
+  "5c07df7f0db834001b73588a": {
+    "H3ID": "Crowbar"
   },
   "5a1eaa87fcdbcb001865f75e": {
 	"Note": "Missing, waiting for next H3 release with NV and thermals"
