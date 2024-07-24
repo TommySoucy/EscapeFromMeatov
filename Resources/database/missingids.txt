@@ -28,110 +28,19 @@
 5c0919b50db834001b7ce3b9:Maska-1SCh face shield (Olive Drab)
 5c0e66e2d174af02a96252f4:Ops-Core SLAAP armor helmet plate (Tan)
 5c0e842486f77443a74d2976:Maska-1SCh face shield (Killa)
-
-5c0d56a986f774449d5de529:9x19mm RIP
-5c3df7d588a4501f290594e5:9x19mm Green Tracer
-64b7bbb74b75259c590fa897:9x19mm FMJ M882
-5efb0da7a29a85116f6ea05f:9x19mm PBP gzh
-5efb0e16aeb21837e749c7ff:9x19mm QuakeMaker
-5c0d5ae286f7741e46554302:5.56x45mm Warmageddon
-60194943740c5d77f6705eea:5.56x45mm MK 318 Mod 0 (SOST)
-601949593ae8f707c4608daa:5.56x45mm SSA AP
-5c0d5e4486f77478390952fe:5.45x39mm PPBS gs "Igolnik"
-61962b617c6c7b169525f168:5.45x39mm 7N40
 5c11046cd174af02a012e42b:Wilcox Interface for PVS-7
 5c110624d174af029e69734c:T-7 Thermal Goggles with a Night Vision mount
 5c178a942e22164bef5ceca3:Crye Precision AirFrame Chops
 5c1793902e221602b21d3de2:Crye Precision AirFrame Ears
-5c488a752e221602b412af63:Desert Tech MDR 5.56x45 assault rifle
-5c48a14f2e2216152006edd7:MDR handguard (FDE)
-5c48a2852e221602b21d5923:MDR 5.56x45 16 inch barrel
-5c48a2c22e221602b313fb6c:MDR pistol grip (FDE)
-5c4ee3d62e2216152006f302:SV-98 SRVV Mk.2.0 7.62x54R muzzle brake-compensator
-5c4eec9b2e2216398b5aaba2:SV-98 7.62x54R thread adapter
-5c4eecc32e221602b412b440:SV-98 7.62x54R sound suppressor
-5c4eecde2e221602b3140418:SV-98 sound suppressor heat shield
-5c501a4d2e221602b412b540:Molot VPO-101 "Vepr-Hunter" 7.62x51 carbine
-5c5039be2e221602b177c9ff:VPO-101 "Vepr-Hunter" gas tube
-5c503ac82e221602b21d6e9a:VPO-101 "Vepr-Hunter" 7.62x51 5-round magazine
-5c503ad32e2216398b5aada2:VPO-101 "Vepr-Hunter" 7.62x51 10-round magazine
-5c503af12e221602b177ca02:VPO-101 "Vepr-Hunter" stock
-5c503b1c2e221602b21d6e9d:VPO-101 "Vepr-Hunter" rear sight
-5c503d0a2e221602b542b7ef:VPO-101 "Vepr-Hunter" dust cover
-5c6161fb2e221600113fbde5:TOZ-106 20ga MTs 20-01 Sb.3 5-shot magazine
-5c6162682e22160010261a2b:TOZ-106 dovetail mount
-5c61627a2e22160012542c55:TOZ-106 rail scope mount
-5c7954d52e221600106f4cc7:Gemtech ONE Direct Thread Mount adapter
-5c7e8fab2e22165df16b889b:AAC Illusion 9 9x19 sound suppressor
-5c82342f2e221644f31c060e:BelOMO PSO-1 4x24 scope
-5c82343a2e221644f31c0611:BelOMO PSO-1M2 4x24 scope
-5c86592b2e2216000e69e77c:IEA Mil-Optics KH/F 34mm one-piece magmount
-5c878e9d2e2216000f201903:AR-10 Lantac Dragon 7.62x51 muzzle brake-compensator
-5c90c3622e221601da359851:Zenit B-13V "Klassika" dovetail rail platform
-5c99f3592e221644fc633070:TOZ-106 custom cut Mosin stock
 5ca2113f86f7740b2547e1d2:Vulkan-5 face shield
-5cadc190ae921500103bb3b6:Beretta M9A3 9x19 pistol
-5cadc1c6ae9215000f2775a4:M9A3 9x19 threaded barrel
-5cadc2e0ae9215051e1c21e7:M9A3 9x19 17-round magazine
-5cadc390ae921500126a77f1:M9A3 thread protection cap
-5cadc431ae921500113bb8d5:M9A3 polymer side grips
-5cadc55cae921500103bb3be:M9A3 9x19 pistol slide
-5cadd919ae921500126a77f3:M9A3 front sight
-5cadd940ae9215051e1c2316:M9A3 rear sight
-5cadd954ae921500103bb3c2:M9A3 Sight Mount rear sight rail
-5cadfbf7ae92152ac412eeef:ASh-12 12.7x55 assault rifle
-5caf1041ae92157c28402e3f:ASh-12 12.7x55 10-round magazine
-5caf1109ae9215753c44119f:ASh-12 12.7x55 20-round magazine
-5caf1691ae92152ac412efb9:ASh-12 rear sight carry handle
-5caf16a2ae92152ac412efbc:ASh-12 folding front sight
-5caf17c9ae92150b30006be1:ASh-12 12.7x55 muzzle brake-compensator
-5caf187cae92157c28402e43:ASh-12 12.7x55 sound suppressor
-5cc6ea78e4a949000e1ea3c1:FN P90 charging handle
-5cc6ea85e4a949000e1ea3c3:FN P90 K&M The Handler charging handle
-5cc70093e4a949033c734312:FN P90 5.7x28 50-round magazine
-5cc700b9e4a949000f0f0f25:FN P90 stock
-5cc700cae4a949035e43ba72:FN P90 buttpad
-5cc700d4e4a949000f0f0f28:FN P90 Damage Industries buttpad
-5cc700ede4a949033c734315:FN P90 EFFEN 90 5.7x28 upper receiver
-5cc70102e4a949035e43ba74:FN P90 5.7x28 upper receiver
-5cc7012ae4a949001252b43e:FN P90 EFFEN 90 receiver rail
-5cc70146e4a949000d73bf6b:FN P90 upper receiver side rail
-5cc7015ae4a949001152b4c6:FN P90 upper receiver top rail
-5cc701aae4a949000e1ea45c:FN P90 5.7x28 10.5 inch barrel
-5cc701d7e4a94900100ac4e7:FN P90 5.7x28 16 inch barrel
-5cc82796e24e8d000f5859a8:FN P90 5.7x28 flash hider
-5cc82d76e24e8d00134b4b83:FN P90 5.7x28 submachine gun
-5cdaa99dd7f00c002412d0b2:ASh-12 polymer handguard
-5cdd7685d7f00c000f260ed2:AR-10 Keeno Arms SHREWD 7.62x51 muzzle brake
-5cdd7693d7f00c0010373aa5:AR-10 Precision Armanent M11 Severe-Duty 7.62x51 muzzle brake
-5cde8864d7f00c0010373be1:12.7x108mm B-32
-5cdeb229d7f00c000e7ce174:NSV "Utyos" 12.7x108 heavy machine gun
-5cebec00d7f00c065c53522a:FN P90 Attenuator 5.7x28 sound suppressor
-5cebec10d7f00c065703d185:FN PS90 stock
-5cebec38d7f00c00110a652a:FN P90 Ring Sight reflex sight
-5cc9a96cd7f00c011c04e04a:AK-74 SRVV MBR Jet 5.45x39 muzzle brake
-5cc9ad73d7f00c000e2579d4:AK SRVV 7.62x39 muzzle brake-compensator
-5cf638cbd7f00c06595bc936:NPZ USP-1 "Tyulpan" 4x scope
-5cf639aad7f00c065703d455:NPZ USP-1 scope eyecup
+
 5cf6935bd7f00c06585fb791:TACCOM Carbine Brake multi-caliber muzzle brake
 5cf78496d7f00c065703d6ca:Lantac BMD Blast Mitigation Device A3 direct thread adapter
 5cf78720d7f00c06595bc93e:Lantac BMD 7.62x51 Blast Mitigation Device
-5cf7acfcd7f00c1084477cf2:FN PS90 5.7x28 upper receiver
 5cf8f3b0d7f00c00217872ef:SOK-12 12/76 MaxRounds Powermag 20-round magazine
-5cffa483d7ad1a049e54ef1c:100 rounds belt
-5d00ede1d7ad1a0940739a76:AR-10 Noveske SWS N6 10.5 inch handguard
-5d00ef6dd7ad1a0940739b16:AR-10 Noveske SWS N6 Split handguard
-5d02677ad7ad1a04a15c0f95:AR-10 Nordic Components Corvette 7.62x51 compensator
-5d026791d7ad1a04a067ea63:AR-10 Fortis RED Brake 7.62x51 muzzle brake
-5d07b91b86f7745a077a9432:Common fund stash
-5d0a29ead7ad1a0026013f27:KMZ 1P59 dovetail mount
-5d0a29fed7ad1a002769ad08:KMZ 1P69 Weaver mount
-5d0b5cd3d7ad1a3fe32ad263:KMZ 1P59 scope eyecup
 5d120a28d7ad1a1c8962e295:DoubleStar ACE recoil pad
 5d1b5e94d7ad1a2b865a96b0:FLIR RS-32 2.25-9x 35mm 60Hz thermal riflescope
-5d1f819086f7744b355c219b:AR-10 Daniel Defense WAVE 7.62x51 muzzle brake
 5d2c829448f0353a5c7d6674:WASR-10/63 CAF wooden foregrip
-5d2f2ab648f03550091993ca:12.7x108mm BZT-44M
 5d3eb3b0a4b93615055e84d2:FN Five-seveN MK2 5.7x28 pistol
 5d3eb44aa4b93650d64e4979:FN Five-seveN MK2 pistol slide
 5d3eb4aba4b93650d64e497d:FN Five-seveN MK2 rear sight
@@ -141,7 +50,6 @@
 5d3eb5eca4b9363b1f22f8e4:FN Five-seveN 5.7x28 20-round magazine
 5d3ef698a4b9361182109872:Gemtech SFN-57 5.7x28 sound suppressor
 5d43021ca4b9362eab4b5e25:Lone Star TX-15 DML 5.56x45 carbine
-5d443f8fa4b93678dd4a01aa:AR-10 Thunder Beast Arms 30CB 7.62x51 muzzle brake
 5d52cc5ba4b9367408500062:AGS-30 30x29mm automatic grenade launcher
 5d52d479a4b936793d58c76b:AGS-30 30x29 30-round box
 5d53f4b7a4b936793d58c780:PAG-17 scope
@@ -161,11 +69,6 @@
 5d6fe50986f77449d97f7463:Medical supply crate
 5d70e500a4b9364de70d38ce:30x29mm VOG-30
 5d7b6bafa4b93652786f4c76:FN Five-seveN MK2 RMR mount
-5dcbd56fdbd3d91b3e5468d5:Desert Tech MDR 7.62x51 assault rifle
-5dcbd6b46ec07c0c4347a564:MDR handguard (Black)
-5dcbd6dddbd3d91b3e5468de:MDR pistol grip (Black)
-5dcbe9431e1f4616d354987e:MDR 7.62x51 16 inch barrel
-5dcbe965e4ed22586443a79d:Desert Tech 7.62x51 flash hider
 5de652c31b7e3716273428be:Molot VPO-215 "Gornostay" .366 TKM bolt-action rifle
 5de653abf76fdc1ce94a5a2a:VPO-215 "Gornostay" .366 TKM 4-round magazine
 5de65547883dde217541644b:VPO-215 "Gornostay" .366TKM 23 inch barrel
@@ -199,17 +102,9 @@
 5df36948bb49d91fb446d5ad:ORSIS T-5000M padded handguard grip
 5df38a5fb74cd90030650cb6:ORSIS T-5000M pistol grip
 5df8ce05b11454561e39243b:Knight's Armament Company SR-25 7.62x51 marksman rifle
-5df8e053bb49d91fb446d6a6:AR-10 KAC charging handle
-5df8e085bb49d91fb446d6a8:AR-10 KAC ambidextrous charging handle
 5df8e4080b92095fd441e594:SR-25 7.62x51 upper receiver
-5df8f535bb49d91fb446d6b0:AR-10 7.62x51 KAC 10-round steel magazine
-5df8f541c41b2312ea3335e3:AR-10 7.62x51 KAC 20-round steel magazine
-5df916dfbb49d91fb446d6b9:AR-10 KAC URX 4 14.5 inch handguard
 5df917564a9f347bc92edca3:SR-25 7.62x51 16 inch barrel
 5dfa397fb11454561e39246c:SR-25 7.62x51 20 inch barrel
-5dfa3cd1b33c0951220c079b:AR-10 KAC QDC 7.62x51 Flash Suppressor Kit
-5dfa3d2b0dee1b22f862eade:KAC PRS/QDC 7.62x51 sound suppressor
-5dfa3d45dfc58d14537c20b0:AR-10 KAC Low Profile Gas Block
 5dfe14f30b92095fd441edaf:ETMI-019 shotgun rail mount
 5dff77c759400025ea5150cf:Leapers UTG 25mm ring scope mount
 5e00903ae9dc277128008b87:B&T MP9 9x19 submachine gun
@@ -310,9 +205,6 @@
 5f60bf4558eff926626a60f2:Galvion Caiman Fixed Arm Visor
 5f60c076f2bcbb675b00dac2:Galvion Caiman Hybrid Ballistic Mandible Guard
 5f60c85b58eff926626a60f7:Rys-T face shield
-5f6336bbda967c74a42e9932:AR-10 Lancer LCH7 12.5 inch M-LOK handguard
-5f63405df5750b524b45f114:VPO-101 "Vepr-Hunter" SVD-style stock
-5f63407e1b231926f2329f15:VPO-101 "Vepr-Hunter" Rotor 43 7.62x51 muzzle brake-compensator
 5f63418ef5750b524b45f116:SOK-12 Bravo-18 aluminium handguard
 5f647d9f8499b57dc40ddb93:KS-23M 23x75 3-shell magazine cap
 5f647f31b6238e5dd066e196:23x75mm "Shrapnel-25" buckshot
@@ -367,10 +259,6 @@
 606587a88900dc2d9a55b659:Mk47 Resolute 7.62x39 upper receiver
 606587bd6d0bd7580617bacc:Mk47 ambidextrous charging handle
 606587e18900dc2d9a55b65f:CMMG buffer tube
-6065880c132d4d12c81fd8da:AR-10 CMMG MK3 RML9 9 inch M-LOK handguard
-6065881d1246154cad35d637:AR-10 CMMG MK3 RML15 15 inch M-LOK handguard
-6065c6e7132d4d12c81fd8e1:AR-10 CMMG SV Brake 7.62x51 muzzle brake
-6065dc8a132d4d12c81fd8e3:AR-10 CMMG low profile gas block
 606ee5c81246154cad35d65e:MP-155 Ultima polymer forestock
 606eef46232e5a31c233d500:MP-155 Ultima pistol grip
 606eef756d0bd7580617baf8:MP-155 Ultima polymer stock
@@ -386,7 +274,6 @@
 607d5a891246154cad35d6aa:MP-155 walnut stock
 607d5aa50494a626335e12ed:MP-155 walnut forestock
 607ea812232e5a31c233d53c:MP-155 Ultima short rail
-607ffb988900dc2d9a55b6e4:AR-10 SureFire ProComp 7.62x51 muzzle brake
 6086b5392535c57a13424d70:Custom Guns handguard rail
 6086b5731246154cad35d6c7:SOK-12 Custom Guns Type-340 handguard
 6087e570b998180e9f76dc24:Superfors DB 2020 Dead Blow Hammer
@@ -405,12 +292,9 @@
 612781056f3d944a17348d60:MTs-255-12 wooden stock
 612e0d3767085e45ef14057f:AWC PSR 7.62x51 muzzle brake
 612e0d81290d254f5e6b291a:AWC PSR .338 LM muzzle brake
-612e0e3c290d254f5e6b291d:AR-10 TAA ZK-38 7.62x51 muzzle brake
 6130c3dffaa1272e43151c7d:HK UMP .45 ACP 8 inch threaded barrel
-6130c43c67085e45ef1405a1:AR-10 KAC QDC 7.62x51 Muzzle Brake Kit
 6130c4d51cb55961fa0fd49f:HK UMP B&T OEM .45 ACP sound suppressor
 614451b71e5874611e2c7ae5:Bottle of Tarkovskaya vodka
-615d8eb350224f204c1da1cf:AR-10 SureFire Warden 7.62x51 blast regulator
 615d8fd3290d254f5e6b2edc:Monstrum Tactical Vertical Fore Grip KeyMod
 61605e13ffa6e502ac5e7eef:Vortex Ranger 1500 rangefinder
 6165ac306ef05c2ce828ef74:FN SCAR-H 7.62x51 assault rifle (FDE)
@@ -426,8 +310,6 @@
 61713308d92c473c770214a0:HK Prolonged 7.62x51 flash hider
 6171367e1cb55961fa0fdb36:HK G28 B&T QD 7.62x51 sound suppressor
 61713a8fd92c473c770214a4:HK G28 7.62x51 upper receiver
-61713cc4d8e3106d9806c109:Recknagel Era-Tac 34mm ring scope mount
-6171407e50224f204c1da3c5:Recknagel Era-Tac 30mm ring scope mount
 61714b2467085e45ef140b2c:Recknagel Era-Tac Sunshade mount for Aimpoint T-1 sights
 617153016c780c1e710c9a2f:HK G28 buffer tube
 617154aa1cb55961fa0fdb3b:HK417 E2 buttstock
@@ -465,9 +347,6 @@
 618428466ef05c2ce828f218:FN SCAR-L 5.56x45 assault rifle (FDE)
 618a431df1eb8e24b8741deb:RGO hand grenade
 618a5d5852ecee1505530b2a:NPZ PK1 "Obzor" dovetail reflex sight
-618a75c9a3884f56c957ca1b:NPZ 1P78-1 dovetail mount
-618a75f0bd321d49084cd399:NPZ 1P78-1 2.8x scope
-618a760e526131765025aae3:NPZ 1P78 scope eyecup
 618b9671d14d6d5ab879c5ea:Geissele Super Precision top ring cap
 618b9682a3884f56c957ca78:Reptilia ROF-90 RMR mount for Geissele scope mounts
 618ba91477b82356f91ae0e8:Geissele Super Precision top ring cap (DDC)
@@ -529,7 +408,6 @@
 61f8024263dc1250e26eb029:MP-18 polymer handguard
 61f803b8ced75b2e852e35f8:MP-18 polymer stock
 61f804acfcba9556ea304cb8:MP-18 sight mount
-61faa91878830f069b6b7967:SV-98 wooden stock
 620109578d82e67e7911abf2:ZiD SP-81 26x75 signal pistol
 6217726288ed9f0845317459:RSP-30 reactive signal cartridge (Green)
 62178be9d0050232da3485d9:ROP-30 reactive flare cartridge (White)
@@ -572,9 +450,7 @@
 62389ba9a63f32501b1b4451:26x75mm flare cartridge (Red)
 62389bc9423ed1685422dc57:26x75mm flare cartridge (White)
 62389be94d5d474bf712e709:26x75mm flare cartridge (Yellow)
-623b2e9d11c3296b440d1638:SV-98 CNC Guns OV-SV98 chassis
 623c2f4242aee3103f1c44b7:CNC Guns KeyMod 4 inch rail
-623c3c1f37b4b31470357737:SV-98 CNC Guns OV-SV98 KeyMod handguard
 6241c316234b593b5676b637:Airsoft 6mm BB
 62444cb99f47004c781903eb:HK G36 bottom handguard rail
 62444cd3674028188b052799:HK G36 side handguard rail
@@ -601,7 +477,6 @@
 625ff3046d721f05d93bf2ee:Benelli M3 Super 90 12ga Toni System 11-shell magazine
 625ff31daaaa8c1130599f64:Benelli M3 Super 90 12ga Toni System 13-shell magazine
 6267c6396b642f77f56f5c1c:Daniel Defense 25mm accessory ring mount
-626a8ae89e664a2e2a75f409:TOZ-106 FAB Defense GPCP cheek rest
 626a9cb151cb5849f6002890:M1911 Kiba Arms Geneburn custom side grips
 6275303a9f372d6ea97f9ec7:Milkor M32A1 MSGL 40mm grenade launcher
 627bce33f21bc425b06ab967:M32A1 40mm cylinder
@@ -609,7 +484,6 @@
 62811cd7308cb521f87a8f99:AI AXMC .338 LM bolt assembly
 62811e2510e26c1f344e6554:AI AXMC pistol grip
 62811e335631d45211793c95:AI AXMC GTAC AR-type pistol grip adapter
-62811f461d5df4475f46a332:AI AX-50 34mm scope mount
 62811f828193841aca4a45c3:AI AXMC AX buttstock
 62811fa609427b40ab14e765:AI .338 LM Tactical Sound Moderator
 62811fbf09427b40ab14e767:AI AXMC upper receiver
@@ -627,7 +501,6 @@
 628393620d8524273e7eb028:Working hard drive
 6284bd5f95250a29bc628a30:Milkor M2A1 grenade launcher reflex sight
 628a60ae6b1d481ff772e9c8:Rifle Dynamics RD-704 7.62x39 assault rifle
-628a66b41d5e41750e314f34:AR-10 Dead Air Keymount 7.62x51 muzzle brake
 62e14904c2699c0ec93adc47:SR-2M "Veresk" 9x21 submachine gun
 62e153bcdb1a5c41971c1b5b:SR-2M 9x21 30-round magazine
 62e15547db1a5c41971c1b5e:SR-2M polymer handguard
@@ -681,9 +554,7 @@
 637b9c37b7e3bc41b21ce71a:SR-2M pistol grip
 637ba19df7ca6372bf2613d7:SR-2M polymer handguard (Black)
 637ba29bf7ca6372bf2613db:SR-2M pistol grip (Black)
-6386300124a1dc425c00577a:AK 100-series metal skeletonized stock
 6389c6c7dbfd5e4b95197e68:Aquapeps water purification tablets
-6389f1dfc879ce63f72fc43e:AK CNC Guns OV GP handguard
 638cbb3ba63f1b49be6a300e:Secure Flash drive
 638cbc68a63f1b49be6a3010:Registered letter
 638db77630c4240f9e06f8b6:SAG Bit low profile dovetail sidemount
@@ -708,8 +579,6 @@
 63a943cead5cc12f22161ff7:Accountant's notes
 63b35f281745dd52341e5da7:F1 Shrapnel
 63c6adcfb4ba094317063742:PM rear sight
-63d114019e35b334d82302f7:SAG AK dovetail sidemount
-63f4da90f31d4a33b87bd054:AK Mission First Tactical ENGAGE AK47 pistol grip
 63fc449f5bd61c6cf3784a88:Armasight Zeus universal base
 63fc44e2429a8a166c7f61e6:Armasight Zeus-Pro 640 2-16x50 thermal scope
 63fc4533b10b17385349b565:Armasight Zeus Pro scope eyecup
@@ -762,15 +631,6 @@
 6492efb8cfcf7c89e701abf3:PKM 7.62x54R slotted flash hider
 6492efe46cc7e29a6f03b2a0:PKM 7.62x54R muzzle brake
 6492fb8253acae0af00a29b6:PK rear sight
-6499849fc93611967b034949:Kalashnikov AK-12 5.45x39 assault rifle
-649ec107961514b22506b10c:AK-12 gas tube
-649ec127c93611967b034957:AK-12 handguard
-649ec2af961514b22506b10f:AK-12 5.45x39 muzzle brake
-649ec2cec93611967b03495e:AK-12 rear sight
-649ec2da59cbb3c813042dca:AK-12 rear sight base
-649ec2f3961514b22506b111:AK-12 dust cover
-649ec30cb013f04a700e60fb:AK-12 5.45x39 early model 30-round magazine
-649ec87d8007560a9001ab36:AK-12 buffer tube
 64abd93857958b4249003418:Interceptor OTV body armor (UCP)
 64ace9d9b5bf5e95f50a4c1d:7.62x39mm FMJ ammo pack (20 pcs)
 64ace9f9c4eda9354b0226aa:7.62x39mm PP gzh ammo pack (20 pcs)
@@ -790,10 +650,7 @@
 64b8f7968532cf95ee0a0dbf:7.62x54mm R FMJ
 64b8f7b5389d7ffd620ccba2:7.62x54mm R SP BT
 64b8f7c241772715af0f9c3d:7.62x54mm R HP BT
-64b9cf0ac12b9c38db26923a:AK 7.62x39 Magpul PMAG 20 GEN M3 20-round magazine
-64b9e265c94d0d15c5027e35:AK-74 "Saiga 545" 5.45x39 20-round magazine
 64be79c487d1510151095552:NPP KlASS Kora-Kulon body armor
 64be79e2bf8412471d0d9bcc:NPP KlASS Kora-Kulon body armor (Digital Flora)
-64c196ad26a15b84aa07132f:AK-12 5.45x39 sound suppressor
 64ca3d3954fc657e230529cc:Kalashnikov PKP 7.62x54R infantry machine gun
 64cbad529f7cf7f75c077fd5:PK pistol grip (Black)

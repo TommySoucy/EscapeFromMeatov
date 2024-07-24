@@ -84,6 +84,38 @@
 [Info   :EscapeFromMeatov]      Ergo Palm-Shelf
 [Info   :EscapeFromMeatov]      DD Grip
 [Info   :EscapeFromMeatov]      DLG 123
+[Info   :EscapeFromMeatov] pdswCombs
+[Info   :EscapeFromMeatov]      No Comb
+[Info   :EscapeFromMeatov]      FTAC H86 Cheek Rest
+[Info   :EscapeFromMeatov]      Mack 8 Ontrak
+[Info   :EscapeFromMeatov]      TV Taccomb
+[Info   :EscapeFromMeatov] pdswRails
+[Info   :EscapeFromMeatov]      Default Rail
+[Info   :EscapeFromMeatov]      GR33 Light Rail
+[Info   :EscapeFromMeatov]      Integrated Reflex Rail
+[Info   :EscapeFromMeatov] pdswRailExt
+[Info   :EscapeFromMeatov]      No Rail Extension
+[Info   :EscapeFromMeatov]      FTAC Defense 14.5"
+[Info   :EscapeFromMeatov]      Corvus Cloak 90
+[Info   :EscapeFromMeatov]      Corvus Prorange
+[Info   :EscapeFromMeatov] pdswStocks
+[Info   :EscapeFromMeatov]      Default Stock
+[Info   :EscapeFromMeatov]      CQB Stock
+[Info   :EscapeFromMeatov]      Guard Duty Stock
+[Info   :EscapeFromMeatov]      FSS Heavy Stock Pro
+[Info   :EscapeFromMeatov]      Hollow Extended Stock
+[Info   :EscapeFromMeatov] pdswBarrels
+[Info   :EscapeFromMeatov]      Default Barrel
+[Info   :EscapeFromMeatov]      FTAC Defense 14.5" Barrel
+[Info   :EscapeFromMeatov]      FTAC Series IX 14.5"
+[Info   :EscapeFromMeatov]      9.5" Duke-30
+[Info   :EscapeFromMeatov]      16" Cloak Supressed
+[Info   :EscapeFromMeatov]      18.75" Cloak Supressed
+[Info   :EscapeFromMeatov] pdswGrips
+[Info   :EscapeFromMeatov]      No Grip
+[Info   :EscapeFromMeatov]      STIP-40
+[Info   :EscapeFromMeatov]      Bruen G305 Grip Wrap
+[Info   :EscapeFromMeatov]      Bruen Q900 Wrap
 [Info   :EscapeFromMeatov] Magwells_AR
 [Info   :EscapeFromMeatov]      No Magwell
 [Info   :EscapeFromMeatov]      HRF RCM
