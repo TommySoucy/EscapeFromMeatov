@@ -4391,27 +4391,35 @@
     "H3ID": "870"
   },
   "576165642459773c7a400233": {
-    "H3ID": "Saiga12_Base",
+    "H3ID": "NWSaiga12",
 	"Note": "Should be MW"
   },
   "576169e62459773c69055191": {
-    "H3ID": "Saiga Fore",
+    "H3ID": "NWSaigaFore1",
 	"Note": "Should be MW"
   },
   "5827272a24597748c74bdeea": {
-    "H3ID": "Saiga Fore Long",
+    "H3ID": "NWMTUForeL",
 	"Note": "Should be MW"
   },
   "58272b392459774b4c7b3ccd": {
-    "H3ID": "Saiga Fore Short",
+    "H3ID": "NWMTUForeS",
+	"Note": "Should be MW"
+  },
+  "5f63418ef5750b524b45f116": {
+    "H3ID": "NWBravo18Guard",
+	"Note": "Should be MW"
+  },
+  "6086b5731246154cad35d6c7": {
+    "H3ID": "NWCGAKFore",
 	"Note": "Should be MW"
   },
   "57616c112459773cce774d66": {
-    "H3ID": "SaigaDustcover",
+    "H3ID": "NWSaiCover",
 	"Note": "Should be MW"
   },
   "57616ca52459773c69055192": {
-    "H3ID": "Saiga 12 Stock",
+    "H3ID": "NW74MPoly2",
 	"Note": "Should be MW"
   },
   "58272d7f2459774f6311ddfd": {
@@ -4422,17 +4430,20 @@
 	"Note": "Missing, should be included with Modul 576165642459773c7a400233/Saiga12"
   },
   "58272b842459774abc128d50": {
-	"Note": "Missing, should be included with Modul 576165642459773c7a400233/Saiga12"
+    "H3ID": "NWSaiCoverR",
+	"Note": "Should be just the rail, this is the entire dustcover, including rail"
   },
   "57a9b9ce2459770ee926038d": {
-	"Note": "Integrated in 576165642459773c7a400233/Saiga12_Base receiver, should probably be modul part"
+	"Note": "Integrated in 576165642459773c7a400233/NWSaiCover, should probably be modul part"
+  },
+  "5cf8f3b0d7f00c00217872ef": {
+    "H3ID": "NWPowerMag20"
   },
   "57616a9e2459773c7a400234": {
-    "H3ID": "MagazineSaiga12k5rnd"
+    "H3ID": "NWSai5"
   },
   "5a966f51a2750c00156aacf6": {
-    "H3ID": "MagazineSaiga12k12rnd",
-	"Note": "Should be 10 round mag, this one is 12"
+    "H3ID": "NWSai10"
   },
   "5aafa857e5b5b00018480968": {
     "H3ID": "FTW.Gun.m1autodupe",
@@ -5106,6 +5117,45 @@
   "649ec107961514b22506b10c": {
 	"Note": "Missing, integrated on barrels"
   },
+  "5de652c31b7e3716273428be": {
+    "H3ID": "ftw.vpo.215",
+	"Note": "Should be Modul"
+  },
+  "5de653abf76fdc1ce94a5a2a": {
+    "H3ID": "ftw.vpo.mag",
+	"Note": "Should be Modul"
+  },
+  "5de65547883dde217541644b": {
+	"Note": "Missing, should be modul part of ftw.vpo.215"
+  },
+  "5de6556a205ddc616a6bc4f7": {
+	"Note": "Missing, should be included modul ftw.vpo.215"
+  },
+  "5de6558e9f98ac2bc65950fc": {
+	"Note": "Missing, should be modul part of ftw.vpo.215"
+  },
+  "5de655be4a9f347bc92edb88": {
+	"Note": "Missing, should be modul part of ftw.vpo.215"
+  },
+  "5ea03f7400685063ec28bfa8": {
+    "H3ID": "PPSh41",
+	"Note": "Should be Modul"
+  },
+  "5ea034eb5aad6446a939737b": {
+    "H3ID": "MagazinePPSH41"
+  },
+  "5ea034f65aad6446a939737e": {
+    "H3ID": "MagazinePPSH41Drum"
+  },
+  "5ea03e9400685063ec28bfa4": {
+	"Note": "Missing, Should be Modul part of ppsh-41"
+  },
+  "5ea03e5009aa976f2e7a514b": {
+	"Note": "Missing, Should be Modul part of ppsh-41"
+  },
+  "5ea02bb600685063ec28bfa1": {
+	"Note": "Missing, Should be Modul part of ppsh-41"
+  },
   "5644bd2b4bdc2d3b4c8b4572": {
     "H3ID": "ModulAK74NFactory",
 	"Note": "Should be MW"
@@ -5164,6 +5214,10 @@
   },
   "5a0f096dfcdbcb0176308b15": {
 	"Note": "Missing, should be included with ModulAK"
+  },
+  "5d2c829448f0353a5c7d6674": {
+    "H3ID": "NWAKSharkfin",
+	"Note": "Should be MW"
   },
   "59ccfdba86f7747f2109a587": {
     "H3ID": "AKForeUltimak",
@@ -5747,6 +5801,28 @@
 	"H3ID": "ReflexKobra",
 	"Note": "Should be dovetail OKP-7, but we only have picatinny OKP-7, kobra is dovetail, figured it made more sense for now"
   },
+  "5ede4739e0350d05467f73e8": {
+    "H3ID": "Cartridge_40x46Grenade_M381",
+	"Note": "Should be 40x46mm M406 (HE) grenade"
+  },
+  "5f0c892565703e5c461894e9": {
+    "H3ID": "Cartridge_40x46Grenade_M381",
+	"Note": "Should be 40x46mm M433 (HE) grenade"
+  },
+  "5ede47405b097655935d7d16": {
+    "H3ID": "Cartridge_40x46Grenade_M381",
+	"Note": "Should be 40x46mm M441 (HE) grenade"
+  },
+  "5ede475b549eed7c6d5c18fb": {
+    "H3ID": "Cartridge_40x46Grenade_M381",
+	"Note": "Should be 40x46mm M386 (HE) grenade"
+  },
+  "5ede474b0c226a66f5402622": {
+    "H3ID": "Cartridge_40x46Grenade_M381"
+  },
+  "5ede475339ee016e8c534742": {
+    "H3ID": "Cartridge_40x46Grenade_M576"
+  },
   "5656eb674bdc2d35148b457c": {
     "H3ID": "Cartridge_40mmCaseless_HEF",
 	"Note": "Should be 40mm VOG-25 grenade"
@@ -5783,11 +5859,17 @@
     "H3ID": "VPO209.Muzz",
     "Note": "Should be MW"
   },
+  "5f0596629e22f464da6bbdd9": {
+    "H3ID": "ftw.366.ap"
+  },
   "59e655cb86f77411dc52a77b": {
     "H3ID": "ftw.366.eko"
   },
   "59e6658b86f77411d949b250": {
     "H3ID": "ftw.366.geksa"
+  },
+  "59e6542b86f77411dc52a77a": {
+    "H3ID": "ftw.366.fmj"
   },
   "5580223e4bdc2d1c128b457f": {
     "H3ID": "HammerlessLong",
@@ -5893,6 +5975,11 @@
     "ModulGroup": "NWSVDMuzzle",
     "ModulPart": "SVDS Muzzle",
     "Note": "Missing, integrated with muzzles, the sight will map to the muzzle with the sight"
+  },
+  "5e01ea19e9dc277128008c0b": {
+    "H3ID": "868",
+    "ModulGroup": "NWSVDMuzzle",
+    "ModulPart": "Rotor-43 Silencer",
   },
   "5dfcd0e547101c39625f66f9": {
     "H3ID": "868",
@@ -6196,6 +6283,92 @@
     "ModulPart": "Thread Adapter",
 	"Note": "Should be Mosin Rifle Weapon Tuning 7.62x39 thread adapter, but this is the only one available"
   },
+  "5e848cc2988a8701445df1e8": {
+    "H3ID": "KS23",
+	"Note": "Should be Modul"
+  },
+  "5e85a9a6eacf8c039e4e2ac1": {
+    "H3ID": "23x75mmR_Buckshot"
+  },
+  "5f647f31b6238e5dd066e196": {
+    "H3ID": "23x75mmR_Shrap25"
+  },
+  "5e85a9f4add9fe03027d9bf1": {
+    "H3ID": "23x75mmR_Flash"
+  },
+  "5e85aa1a988a8701445df1f5": {
+    "H3ID": "23x75mmR_Barricade"
+  },
+  "5e848d1c264f7c180b5e35a9": {
+	"Note": "Missing, should be modul part of KS23"
+  },
+  "5e848d2eea0a7c419c2f9bfd": {
+	"Note": "Missing, should be modul part of KS23"
+  },
+  "5e848d51e4dbc5266a4ec63b": {
+	"Note": "Missing, should be modul part of KS23"
+  },
+  "5e848d99865c0f329958c83b": {
+	"Note": "Missing, should be modul part of KS23"
+  },
+  "5e848db4681bea2ada00daa9": {
+	"Note": "Missing, should be modul part of KS23"
+  },
+  "5e848dc4e4dbc5266a4ec63d": {
+	"Note": "Missing, should be modul part of KS23"
+  },
+  "5f647d9f8499b57dc40ddb93": {
+	"Note": "Missing, should be modul part of KS23"
+  },
+  "5e81ebcd8e146c7080625e15": {
+	"H3ID": "RGM40_Kastet",
+	"Note": "Should be FN40GL Mk2 40mm grenade launcher"
+  },
+  "6275303a9f372d6ea97f9ec7": {
+	"H3ID": "MGLGrenadeLauncher",
+	"Note": "Should be Modul"
+  },
+  "5e870397991fd70db46995c8": {
+    "H3ID": "Modul590Dupe",
+	"Note": "Should be MW"
+  },
+  "5e87071478f43e51ca2de5e1": {
+    "H3ID": "Barrel590",
+	"Note": "Should be MW"
+  },
+  "5eeb2ff5ea4f8b73c827350b": {
+    "H3ID": "Rail590Quad",
+	"Note": "Should be MW"
+  },
+  "5e87076ce2db31558c75a11d": {
+    "H3ID": "590pump",
+	"Note": "Should be MW"
+  },
+  "5eea21647547d6330471b3c9": {
+    "H3ID": "590pumpMOE",
+	"Note": "Should be MW"
+  },
+  "5e87116b81c4ed43e83cefdd": {
+    "H3ID": "Stock590",
+	"Note": "Should be MW"
+  },
+  "5eea217fc64c5d0dfc05712a": {
+    "H3ID": "Stock590Magpul",
+	"Note": "Should be MW"
+  },
+  "5ef1b9f0c64c5d0dfc0571a1": {
+    "H3ID": "Stock590Leo",
+	"Note": "Should be MW"
+  },
+  "5e87080c81c4ed43e83cefda": {
+	"Note": "Missing, default with 590 receiver"
+  },
+  "5e8708d4ae379e67d22e0102": {
+	"Note": "Missing, intergrated into barrel"
+  },
+  "5e87114fe2db31558c75a120": {
+	"Note": "Missing, intergrated into receiver"
+  },
   "5a7828548dc32e5a9c28b516": {
     "H3ID": "Modul870Dupe",
 	"Note": "Should be MW"
@@ -6363,16 +6536,44 @@
     "H3ID": "12GaugeShell00Buckshot",
 	"Note": "Should be 12/70 8.5mm Magnum buckshot"
   },
+  "5d6e69c7a4b9360b6c0d54e4": {
+    "H3ID": "Cartridge20GaugeBuckshot",
+	"Note": "Should be 20/70 7.3mm buckshot"
+  },
   "5d6e6772a4b936088465b17c": {
     "H3ID": "12GaugeShellNo4Buckshot",
 	"Note": "Should be 12/70 5.25mm buckshot"
+  },
+  "5d6e695fa4b936359b35d852": {
+    "H3ID": "Cartridge20GaugeNo4Buckshot",
+	"Note": "Should be 20/70 5.6mm buckshot"
   },
   "5d6e67fba4b9361bc73bc779": {
     "H3ID": "12GaugeShellNo2Buckshot",
 	"Note": "Should be 12/70 6.5mm Express buckshot"
   },
+  "5d6e69b9a4b9361bc8618958": {
+    "H3ID": "Cartridge20GaugeNo2Buckshot",
+	"Note": "Should be 20/70 6.2mm buckshot"
+  },
   "5a38ebd9c4a282000d722a5b": {
     "H3ID": "Cartridge20GaugeBuckshot"
+  },
+  "5d6e6a05a4b93618084f58d0": {
+    "H3ID": "Cartridge20GaugeSlug",
+	"Note": "Should be star slug"
+  },
+  "5d6e6a42a4b9364f07165f52": {
+    "H3ID": "Cartridge20GaugeSlug",
+	"Note": "Should be poleva-6u slug"
+  },
+  "5d6e6a53a4b9361bd473feec": {
+    "H3ID": "Cartridge20GaugeSlug",
+	"Note": "Should be poleva-3 slug"
+  },
+  "5d6e6a5fa4b93614ec501745": {
+    "H3ID": "Cartridge20GaugeSlug",
+	"Note": "Should be devastator slug"
   },
   "5882163224597757561aa920": {
     "H3ID": "AttDecMag153_7",
@@ -6496,6 +6697,10 @@
     "H3ID": "M4Rail",
 	"Note": "Should be MW"
   },
+  "5dfe14f30b92095fd441edaf": {
+    "H3ID": "M2Rail",
+	"Note": "Should be MW"
+  },
   "55d48ebc4bdc2d8c2f8b456c": {
 	"Note": "Missing, should have compatible attachment point on MP-133/153, or should be modul part for them"
   },
@@ -6537,6 +6742,45 @@
   },
   "56083eab4bdc2d26448b456a": {
 	"Note": "Should be Modul part of 55801eed4bdc2d89578b4588/SV-98"
+  },
+  "5df24cf80dee1b22f862e9bc": {
+    "H3ID": "NWDVL10Silenced",
+	"Note": "Should be ORSIS T-5000M 7.62x51 bolt-action sniper rifle, but since it doesn't exist, i've decided to use the unused silenced variant of the DVL-10"
+  },
+  "5df25b6c0b92095fd441e4cf": {
+    "H3ID": "NWDVL10Mag",
+	"Note": "Should be ORSIS T-5000M 7.62x51 5-round magazine, but since it doesn't exist, i've decided to use the unused silenced variant of the DVL-10"
+  },
+  "5df35e7f2a78646d96665dd4": {
+    "H3ID": "AR15MuzzleMX1Micro",
+	"Note": "Should be ORSIS T-5000M 7.62x51 muzzle brake-compensator"
+  },
+  "5df38a5fb74cd90030650cb6": {
+	"Note": "Missing, should be modul part of ORSIS T-5000M"
+  },
+  "5df36948bb49d91fb446d5ad": {
+	"Note": "Missing, should be modul part of ORSIS T-5000M"
+  },
+  "5df35eb2b11454561e3923e2": {
+	"Note": "Missing, should be modul part of ORSIS T-5000M"
+  },
+  "5df35ea9c41b2312ea3334d8": {
+	"Note": "Missing, should be modul part of ORSIS T-5000M"
+  },
+  "5df35e970b92095fd441e4d2": {
+	"Note": "Missing, should be modul part of ORSIS T-5000M"
+  },
+  "5df35e59c41b2312ea3334d5": {
+	"Note": "Missing, should be modul part of ORSIS T-5000M"
+  },
+  "5df35ddddfc58d14537c2036": {
+	"Note": "Missing, should be modul part of ORSIS T-5000M"
+  },
+  "5df25d3bfd6b4e6e2276dc9a": {
+	"Note": "Missing, should be modul part of ORSIS T-5000M"
+  },
+  "5df256570dee1b22f862e9c4": {
+	"Note": "Missing, should be modul part of ORSIS T-5000M"
   },
   "588892092459774ac91d4b11": {
     "H3ID": "NWDVL10Rifle",
@@ -6589,6 +6833,10 @@
     "H3ID": "762x51mmCartridgeAP",
 	"Note": "7.62x51mm M61"
   },
+  "5efb0c1bd79ff02a1f5e68d9": {
+    "H3ID": "762x51mmCartridgeAPIncendiary",
+	"Note": "7.62x51mm M993"
+  },
   "5a608bf24f39f98ffc77720e": {
     "H3ID": "762x51mmCartridgeTracer",
 	"Note": "7.62x51mm M62 Tracer"
@@ -6638,6 +6886,19 @@
   "5cdeb229d7f00c000e7ce174": {
     "Note": "Not a handheld weapon, will have to implement as a turret of some kind"
   },
+  "5d52cc5ba4b9367408500062": {
+    "Note": "Not a handheld weapon, will have to implement as a turret of some kind"
+  },
+  "5d52d479a4b936793d58c76b": {
+    "Note": "Included with 5d52cc5ba4b9367408500062"
+  },
+  "5d70e500a4b9364de70d38ce": {
+    "H3ID": "Cartridge_35x32_HE",
+    "Note": "Should be 30x29mm VOG-30 to be used with 5d52cc5ba4b9367408500062"
+  },
+  "5d53f4b7a4b936793d58c780": {
+    "Note": "Missing, unused in tarkov (?)"
+  },
   "5cde8864d7f00c0010373be1": {
     "H3ID": "Cartridge127x108mmAPIncendiary"
   },
@@ -6648,9 +6909,17 @@
     "H3ID": "PinnedGrenadeM18SmokeGrenadeWhite",
 	"Note": "Should be RDG-2B smoke grenade"
   },
+  "619256e5f8af2c1a4e1f5d92": {
+    "H3ID": "CTS7290"
+  },
   "5a0c27731526d80618476ac4": {
-    "H3ID": "PinnedGrenadeXM84",
-	"Note": "Should be Zarya stun grenade, XM84 is the only stun grenade in the game"
+    "H3ID": "Zarya"
+  },
+  "5e32f56fcb6d5863cc5e5ee4": {
+    "H3ID": "VOG17"
+  },
+  "5e340dcdcb6d5863cc5e5efb": {
+    "H3ID": "VOG25"
   },
   "58d3db5386f77426186285a0": {
     "H3ID": "PinnedGrenadeM67"
@@ -6704,10 +6973,6 @@
   },
   "571a28e524597720b4066567": {
     "H3ID": "TTsil"
-  },
-  "59e6542b86f77411dc52a77a": {
-    "H3ID": "366UltraMagnumFMJ",
-	"Note": "Should be .366 TKM FMJ"
   },
   "58dd3ad986f77403051cba8f": {
     "H3ID": "762x51mmCartridgeFMJ",
@@ -7111,6 +7376,9 @@
   "59db7eed86f77461f8380365": {
 	"Note": "Missing, integrated with relevant sights"
   },
+  "5dff77c759400025ea5150cf": {
+	"H3ID": "FSCE.LPMOUNT"
+  },
   "5a37ca54c4a282000d72296a": {
 	"H3ID": "FSCE.LPMOUNT"
   },
@@ -7210,9 +7478,28 @@
   "5dcbe965e4ed22586443a79d": {
     "H3ID": "FSCE.MDRMUZZLE"
   },
+  "5df8ce05b11454561e39243b": {
+    "H3ID": "ModulSR25dupe",
+	"Note": "Should be MW"
+  },
+  "5df917564a9f347bc92edca3": {
+    "H3ID": "AR10Barrel406",
+	"Note": "Should be MW"
+  },
+  "5dfa397fb11454561e39246c": {
+    "H3ID": "AR10Barrel508",
+	"Note": "Should be MW"
+  },
+  "5df8e4080b92095fd441e594": {
+	"Note": "Missing, Should be MW modul part of SR-25, 7.62x51 modul ar receivers have integrated uppers"
+  },
   "5a367e5dc4a282000e49738f": {
     "H3ID": "ModulAR10SandDupe",
 	"Note": "Should be MW, should also be Remington R11 RSASS 7.62x51 marksman rifle, while this is jsut an AR-10, which might acutally be the same thing"
+  },
+  "5ef1ba28c64c5d0dfc0571a5": {
+    "H3ID": "AR15TubeMesa",
+	"Note": "MW map BufferTubes_AR:CAR15 Tube"
   },
   "6065880c132d4d12c81fd8da": {
     "H3ID": "AR15ForeZenitJoker8",
@@ -7300,14 +7587,52 @@
     "H3ID": "MuzzleBrakeImpact",
 	"Note": "Should be AR-10 Precision Armanent M11 Severe-Duty 7.62x51 muzzle brake"
   },
+  "5cf78496d7f00c065703d6ca": {
+	"Note": "Missing, Should be included with modul AR 10"
+  },
+  "5cf78720d7f00c06595bc93e": {
+	"Note": "Missing, Should be included with modul AR 10"
+  },
+  "5f2a9575926fd9352339381f": {
+    "H3ID": "FSCE.RFB",
+	"Note": "Should be Modul"
+  },
+  "5f2aa4559b44de6b1b4e68d1": {
+    "H3ID": "NWAntonA2Flash",
+	"Note": "Should be RFB 7.62x51 flash hider"
+  },
+  "5f2aa43ba9b91d26f20ae6d2": {
+	"Note": "Missing, should be modul part of RFB"
+  },
+  "5f2aa47a200e2c0ee46efa71": {
+	"Note": "Missing, should be modul part of RFB"
+  },
+  "5f2aa46b878ef416f538b567": {
+	"Note": "Missing, should be modul part of RFB"
+  },
+  "5f2aa49f9b44de6b1b4e68d4": {
+	"Note": "Missing, should be included with modul RFB"
+  },
+  "5f2aa493cd375f14e15eea72": {
+	"Note": "Missing, should be included with modul RFB"
+  },
+  "5f2aa4464b50c14bcf07acdb": {
+	"Note": "Missing, should be included with modul RFB"
+  },
   "5bb2475ed4351e00853264e3": {
     "H3ID": "NWAR2P416A5"
   },
   "5c07c60e0db834002330051f": {
     "H3ID": "ModulAR15"
   },
+  "5d43021ca4b9362eab4b5e25": {
+    "H3ID": "ModulTX15"
+  },
   "5447a9cd4bdc2dbd208b4567": {
     "H3ID": "ModulM4A1"
+  },
+  "5d120a28d7ad1a1c8962e295": {
+    "Note": "Missing, integrated with socom stock"
   },
   "5bb20d53d4351e4502010a69": {
     "H3ID": "868",
@@ -8157,6 +8482,63 @@
   "5cc6ea85e4a949000e1ea3c3": {
 	"Note": "Missing, should be a modul part of 5cc82d76e24e8d00134b4b83/FN P90"
   },
+  "5e00903ae9dc277128008b87": {
+    "H3ID": "NWMP9",
+	"Note": "Should be MW"
+  },
+  "5de7bd7bfd6b4e6e2276dc25": {
+    "H3ID": "NWMP9NBlack",
+	"Note": "Should be MW"
+  },
+  "5de8f237bbaf010b10528a70": {
+    "H3ID": "NWMP9SDMount",
+	"Note": "Should be MW"
+  },
+  "5de8f2d5b74cd90030650c72": {
+    "H3ID": "NWMP9SD",
+	"Note": "Should be MW"
+  },
+  "5de8fbad2fbe23140d3ee9c4": {
+    "H3ID": "NWMP9ForeB",
+	"Note": "Should be MW"
+  },
+  "5de8fbf2b74cd90030650c79": {
+    "H3ID": "NWMP9ForeRail",
+	"Note": "Should be MW"
+  },
+  "5de910da8b6c4240ba2651b5": {
+    "H3ID": "NWMP9Stock",
+	"Note": "Should be MW"
+  },
+  "5de8fb539f98ac2bc659513a": {
+	"Note": "Missing, integrated on receivers"
+  },
+  "5de922d4b11454561e39239f": {
+	"Note": "Missing, integrated on receivers"
+  },
+  "5de8fc0b205ddc616a6bc51b": {
+	"Note": "Missing, should be modul mp9 part"
+  },
+  "5de8e67c4a9f347bc92edbd7": {
+    "H3ID": "NWMP9TopFDE",
+	"Note": "Should be black, but there is already a default top rail integrated with the receivers that can be replaced by this one, so using a different color just to have variation"
+  },
+  "5e0090f7e9dc277128008b93": {
+    "H3ID": "NWMP9TopOD",
+	"Note": "Should be black, but there is already a default top rail integrated with the receivers that can be replaced by this one, so using a different color just to have variation"
+  },
+  "5de8e8dafd6b4e6e2276dc32": {
+    "H3ID": "NWMP9Magazine15"
+  },
+  "5de8ea8ffd6b4e6e2276dc35": {
+    "H3ID": "NWMP9Magazine20"
+  },
+  "5de8eaadbbaf010b10528a6d": {
+    "H3ID": "NWMP9Magazine25"
+  },
+  "5de8eac42a78646d96665d91": {
+    "H3ID": "NWMP9Magazine30"
+  },
   "5ba26383d4351e00334c93d9": {
     "H3ID": "modulmp7",
 	"Note": "Should be MW"
@@ -8442,6 +8824,26 @@
   "59f9cabd86f7743a10721f46": {
     "H3ID": "SR1MPMag"
   },
+  "5e81f423763d9f754677bf2e": {
+    "H3ID": "45ACPCartridgeFMJ",
+	"Note": "Should be .45 ACP Match FMJ"
+  },
+  "5ea2a8e200685063ec28c05a": {
+    "H3ID": "45ACPCartridge+PJHP",
+	"Note": "Should be .45 ACP RIP"
+  },
+  "5efb0fc6aeb21837e749c801": {
+    "H3ID": "45ACPCartridgeJHP",
+	"Note": "Should be .45 ACP Hydra-Shok"
+  },
+  "5efb0cabfb3e451d70735af5": {
+    "H3ID": "45ACPCartridge+PFMJ",
+	"Note": "Should be .45 ACP AP"
+  },
+  "5efb0d4f4bc50b58e81710f3": {
+    "H3ID": "45ACPCartridgeTracer",
+	"Note": "Should be .45 ACP Lasermatch FMJ"
+  },
   "5fb64bc92b1b027b1f50bcf2": {
     "H3ID": "ftw.vector.45dupe",
 	"Note": "Should be MW"
@@ -8725,6 +9127,136 @@
   },
   "5cadc2e0ae9215051e1c21e7": {
     "H3ID": "MagazineM9A3"
+  },
+  "5d3eb3b0a4b93615055e84d2": {
+    "H3ID": "NWFiveSevenBlack"
+  },
+  "5d67abc1a4b93614ec50137f": {
+    "H3ID": "NWFiveSevenBlack",
+	"Note": "Should be FDE, this is a modulworkshop weapon with no modifiable parts, it instead has a receiver skin you can change"
+  },
+  "5d3ef698a4b9361182109872": {
+	"H3ID": "NW57Sup"
+  },
+  "5d7b6bafa4b93652786f4c76": {
+	"Note": "Missing, should be MW modul part of NWFiveSevenBlack"
+  },
+  "5d3eb44aa4b93650d64e4979": {
+	"Note": "Missing, should be MW modul part of NWFiveSevenBlack"
+  },
+  "5d3eb4aba4b93650d64e497d": {
+	"Note": "Missing, should be MW modul part of NWFiveSevenBlack"
+  },
+  "5d3eb536a4b9363b1f22f8e2": {
+	"Note": "Missing, should be MW modul part of NWFiveSevenBlack"
+  },
+  "5d3eb59ea4b9361c284bb4b2": {
+	"Note": "Missing, should be MW modul part of NWFiveSevenBlack"
+  },
+  "5d3eb5b6a4b9361eab311902": {
+	"Note": "Missing, should be MW modul part of NWFiveSevenBlack"
+  },
+  "5d3eb5eca4b9363b1f22f8e4": {
+    "H3ID": "NWF7Mag"
+  },
+  "5e81c3cbac2bb513793cdc75": {
+    "H3ID": "M1911Classic",
+	"Note": "Should be Modul"
+  },
+  "5ef3448ab37dfd6af863525c": {
+    "H3ID": "MagazineM1911Tactical"
+  },
+  "5e81c4ca763d9f754677befa": {
+    "H3ID": "MagazineM1911"
+  },
+  "5f3e77b26cda304dcc634057": {
+    "H3ID": "MagazineM1911",
+	"Note": "Should be M1911A1 .45 ACP Wilson Combat 7-round magazine, this is the only mag we have of this capacity"
+  },
+  "5ef61964ec7f42238c31e0c1": {
+    "Note": "Missing, should be included with modul  M1911A1"
+  },
+  "626a9cb151cb5849f6002890": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5ef5d994dfbc9f3c660ded95": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5ef369b08cef260c0642acaf": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5ef366938cef260c0642acad": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5ef35f46382a846010715a96": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5ef35d2ac64c5d0dfc0571b0": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5ef35bc243cb350a955a7ccd": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5ef3553c43cb350a955a7ccb": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5ef32e4d1c1fd62aea6a150d": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5f3e7801153b8571434a924c": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5f3e77f59103d430b93f94c1": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5e81c519cb2b95385c177551": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5e81c539cb2b95385c177553": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5e81c550763d9f754677befd": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5e81c6a2ac2bb513793cdc7f": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5e81c6bf763d9f754677beff": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5e81edc13397a21db957f6a1": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5e81ee213397a21db957f6a6": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5e81ee4dcb2b95385c177582": {
+    "Note": "Missing, should be modul part of M1911A1"
+  },
+  "5f36a0e5fbf956000b716b65": {
+    "H3ID": "PisM45A1",
+	"Note": "Should be Modul"
+  },
+  "5f3e78a7fbf956000b716b8e": {
+	"Note": "Missing, should be modul part of M45A1"
+  },
+  "5f3e7897ddc4f03b010e204a": {
+	"Note": "Missing, should be modul part of M45A1"
+  },
+  "5f3e7823ddc4f03b010e2045": {
+	"Note": "Missing, should be modul part of M45A1"
+  },
+  "5f3e778efcd9b651187d7201": {
+	"Note": "Missing, should be modul part of M45A1"
+  },
+  "5f3e777688ca2d00ad199d25": {
+	"Note": "Missing, should be modul part of M45A1"
+  },
+  "5f3e772a670e2a7b01739a52": {
+	"Note": "Missing, should be modul part of M45A1"
+  },
+  "5f3e76d86cda304dcc634054": {
+	"Note": "Missing, should be modul part of M45A1"
   },
   "56d59856d2720bd8418b456a": {
     "H3ID": "FTW.gun.p226frameDupe",
@@ -9566,6 +10098,9 @@
     "H3ID": "MuzzleBrake_TaccomPCC"
   },
   "5d02677ad7ad1a04a15c0f95": {
+    "H3ID": "MuzzleBrake_TaccomPCC"
+  },
+  "5cf6935bd7f00c06585fb791": {
     "H3ID": "MuzzleBrake_TaccomPCC"
   },
   "5d026791d7ad1a04a067ea63": {

@@ -33,182 +33,24 @@
 5c178a942e22164bef5ceca3:Crye Precision AirFrame Chops
 5c1793902e221602b21d3de2:Crye Precision AirFrame Ears
 5ca2113f86f7740b2547e1d2:Vulkan-5 face shield
-
-5cf6935bd7f00c06585fb791:TACCOM Carbine Brake multi-caliber muzzle brake
-5cf78496d7f00c065703d6ca:Lantac BMD Blast Mitigation Device A3 direct thread adapter
-5cf78720d7f00c06595bc93e:Lantac BMD 7.62x51 Blast Mitigation Device
-5cf8f3b0d7f00c00217872ef:SOK-12 12/76 MaxRounds Powermag 20-round magazine
-5d120a28d7ad1a1c8962e295:DoubleStar ACE recoil pad
 5d1b5e94d7ad1a2b865a96b0:FLIR RS-32 2.25-9x 35mm 60Hz thermal riflescope
-5d2c829448f0353a5c7d6674:WASR-10/63 CAF wooden foregrip
-5d3eb3b0a4b93615055e84d2:FN Five-seveN MK2 5.7x28 pistol
-5d3eb44aa4b93650d64e4979:FN Five-seveN MK2 pistol slide
-5d3eb4aba4b93650d64e497d:FN Five-seveN MK2 rear sight
-5d3eb536a4b9363b1f22f8e2:FN Five-seveN MK2 front sight
-5d3eb59ea4b9361c284bb4b2:FN Five-seveN 5.7x28 threaded barrel
-5d3eb5b6a4b9361eab311902:FN Five-seveN 5.7x28 barrel
-5d3eb5eca4b9363b1f22f8e4:FN Five-seveN 5.7x28 20-round magazine
-5d3ef698a4b9361182109872:Gemtech SFN-57 5.7x28 sound suppressor
-5d43021ca4b9362eab4b5e25:Lone Star TX-15 DML 5.56x45 carbine
-5d52cc5ba4b9367408500062:AGS-30 30x29mm automatic grenade launcher
-5d52d479a4b936793d58c76b:AGS-30 30x29 30-round box
-5d53f4b7a4b936793d58c780:PAG-17 scope
-5d67abc1a4b93614ec50137f:FN Five-seveN MK2 5.7x28 pistol (FDE)
 5d6d3829a4b9361bc8618943:LShZ-2DTM face shield
 5d6d3943a4b9360dbc46d0cc:LShZ-2DTM cover (Black)
 5d6d3be5a4b9361bc73bc763:LShZ-2DTM aventail
-5d6e695fa4b936359b35d852:20/70 5.6mm buckshot
-5d6e69b9a4b9361bc8618958:20/70 6.2mm buckshot
-5d6e69c7a4b9360b6c0d54e4:20/70 7.3mm buckshot
-5d6e6a05a4b93618084f58d0:20/70 Star slug
-5d6e6a42a4b9364f07165f52:20/70 "Poleva-6u" slug
-5d6e6a53a4b9361bd473feec:20/70 "Poleva-3" slug
-5d6e6a5fa4b93614ec501745:20/70 Devastator slug
-5d6fd13186f77424ad2a8c69:Ration supply crate
-5d6fd45b86f774317075ed43:Technical supply crate
-5d6fe50986f77449d97f7463:Medical supply crate
-5d70e500a4b9364de70d38ce:30x29mm VOG-30
-5d7b6bafa4b93652786f4c76:FN Five-seveN MK2 RMR mount
-5de652c31b7e3716273428be:Molot VPO-215 "Gornostay" .366 TKM bolt-action rifle
-5de653abf76fdc1ce94a5a2a:VPO-215 "Gornostay" .366 TKM 4-round magazine
-5de65547883dde217541644b:VPO-215 "Gornostay" .366TKM 23 inch barrel
-5de6556a205ddc616a6bc4f7:VPO-215 "Gornostay" thread protection cap
-5de6558e9f98ac2bc65950fc:VPO-215 "Gornostay" scope rail mount
-5de655be4a9f347bc92edb88:VPO-215 "Gornostay" stock
-5de7bd7bfd6b4e6e2276dc25:B&T MP9-N 9x19 submachine gun
-5de8e67c4a9f347bc92edbd7:MP9-N 9x19 upper receiver
-5de8e8dafd6b4e6e2276dc32:MP9 9x19 15-round magazine
-5de8ea8ffd6b4e6e2276dc35:MP9 9x19 20-round magazine
-5de8eaadbbaf010b10528a6d:MP9 9x19 25-round magazine
-5de8eac42a78646d96665d91:MP9 9x19 30-round magazine
-5de8f237bbaf010b10528a70:MP9 9x19 sound suppressor mount
-5de8f2d5b74cd90030650c72:MP9 9x19 sound suppressor
-5de8fb539f98ac2bc659513a:MP9 rear sight
-5de8fbad2fbe23140d3ee9c4:MP9-N vertical foregrip
-5de8fbf2b74cd90030650c79:MP9 bottom rail
-5de8fc0b205ddc616a6bc51b:MP9 side rail
-5de910da8b6c4240ba2651b5:MP9 stock
-5de922d4b11454561e39239f:MP9 charging handle
-5df24cf80dee1b22f862e9bc:ORSIS T-5000M 7.62x51 bolt-action sniper rifle
-5df256570dee1b22f862e9c4:ORSIS T-5000M 7.62x51 660mm barrel
-5df25b6c0b92095fd441e4cf:ORSIS T-5000M 7.62x51 5-round magazine
-5df25d3bfd6b4e6e2276dc9a:ORSIS T-5000M handguard
-5df35ddddfc58d14537c2036:ORSIS T-5000M stock
-5df35e59c41b2312ea3334d5:ORSIS T-5000M aluminium body
-5df35e7f2a78646d96665dd4:ORSIS T-5000M 7.62x51 muzzle brake-compensator
-5df35e970b92095fd441e4d2:ORSIS T-5000M scope mount
-5df35ea9c41b2312ea3334d8:ORSIS T-5000M long length rail
-5df35eb2b11454561e3923e2:ORSIS T-5000M medium length rail
-5df36948bb49d91fb446d5ad:ORSIS T-5000M padded handguard grip
-5df38a5fb74cd90030650cb6:ORSIS T-5000M pistol grip
-5df8ce05b11454561e39243b:Knight's Armament Company SR-25 7.62x51 marksman rifle
-5df8e4080b92095fd441e594:SR-25 7.62x51 upper receiver
-5df917564a9f347bc92edca3:SR-25 7.62x51 16 inch barrel
-5dfa397fb11454561e39246c:SR-25 7.62x51 20 inch barrel
-5dfe14f30b92095fd441edaf:ETMI-019 shotgun rail mount
-5dff77c759400025ea5150cf:Leapers UTG 25mm ring scope mount
-5e00903ae9dc277128008b87:B&T MP9 9x19 submachine gun
-5e0090f7e9dc277128008b93:MP9 9x19 upper receiver
 5e00cdd986f7747473332240:Team Wendy EXFIL Ballistic face shield (Black)
 5e00cfa786f77469dc6e5685:Team Wendy EXFIL Ear Covers (Black)
-5e01ea19e9dc277128008c0b:Rotor 43 7.62x54R muzzle brake-compensator
 5e01f31d86f77465cf261343:Team Wendy EXFIL Ear Covers (Coyote Brown)
 5e01f37686f774773c6f6c15:Team Wendy EXFIL Ballistic face shield (Coyote Brown)
-5e32f56fcb6d5863cc5e5ee4:VOG-17 Khattabka improvised hand grenade
-5e340dcdcb6d5863cc5e5efb:VOG-25 Khattabka improvised hand grenade
-5e81c3cbac2bb513793cdc75:Colt M1911A1 .45 ACP pistol
-5e81c4ca763d9f754677befa:M1911A1 .45 ACP 7-round magazine
-5e81c519cb2b95385c177551:M1911A1 .45 ACP 127mm barrel
-5e81c539cb2b95385c177553:M1911A1 slide stop
-5e81c550763d9f754677befd:M1911A1 hammer
-5e81c6a2ac2bb513793cdc7f:M1911A1 trigger
-5e81c6bf763d9f754677beff:M1911A1 side grips
-5e81ebcd8e146c7080625e15:FN40GL Mk2 40mm grenade launcher
-5e81edc13397a21db957f6a1:M1911A1 .45 ACP pistol slide
-5e81ee213397a21db957f6a6:M1911A1 front sight
-5e81ee4dcb2b95385c177582:M1911A1 rear sight
-5e81f423763d9f754677bf2e:.45 ACP Match FMJ
-5e848cc2988a8701445df1e8:TOZ KS-23M 23x75mm pump-action shotgun
-5e848d1c264f7c180b5e35a9:KS-23 23x75 510mm barrel
-5e848d2eea0a7c419c2f9bfd:KS-23 23x75 700mm barrel
-5e848d51e4dbc5266a4ec63b:KS-23M forestock
-5e848d99865c0f329958c83b:KS-23M pistol grip
-5e848db4681bea2ada00daa9:KS-23 wooden stock
-5e848dc4e4dbc5266a4ec63d:KS-23M wire stock
-5e85a9a6eacf8c039e4e2ac1:23x75mm "Shrapnel-10" buckshot
-5e85a9f4add9fe03027d9bf1:23x75mm "Zvezda" flashbang round
-5e85aa1a988a8701445df1f5:23x75mm "Barrikada" slug
-5e870397991fd70db46995c8:Mossberg 590A1 12ga pump-action shotgun
-5e87071478f43e51ca2de5e1:Mossberg 590A1 12ga 20 inch barrel
-5e87076ce2db31558c75a11d:Mossberg 590A1 SpeedFeed short handguard
-5e87080c81c4ed43e83cefda:Mossberg 590A1 12ga 8-shell magazine cap
-5e8708d4ae379e67d22e0102:Mossberg 590 Ghost Ring front sight
-5e87114fe2db31558c75a120:Mossberg 590 Ghost Ring rear sight
-5e87116b81c4ed43e83cefdd:Mossberg 590A1 polymer stock
 5e99711486f7744bfc4af328:Sanitar's first aid kit
 5e99735686f7744bfc4af32c:Sanitar kit
-5ea02bb600685063ec28bfa1:PPSh-41 7.62x25 10.6 inch barrel
-5ea034eb5aad6446a939737b:PPSh-41 7.62x25 35-round magazine
-5ea034f65aad6446a939737e:PPSh-41 7.62x25 71-round drum magazine
-5ea03e5009aa976f2e7a514b:PPSh-41 dust cover
-5ea03e9400685063ec28bfa4:PPSh-41 stock
-5ea03f7400685063ec28bfa8:PPSh-41 7.62x25 submachine gun
 5ea058e01dbce517f324b3e2:Tac-Kek Heavy Trooper mask for Ops-Core-type helmets
 5ea18c84ecf1982c7712d9a2:Diamond Age Bastion helmet armor plate
-5ea2a8e200685063ec28c05a:.45 ACP RIP
-5ede4739e0350d05467f73e8:40x46mm M406 (HE) grenade
-5ede47405b097655935d7d16:40x46mm M441 (HE) grenade
-5ede474b0c226a66f5402622:40x46mm M381 (HE) grenade
-5ede475339ee016e8c534742:40x46mm M576 (MP-APERS) grenade
-5ede475b549eed7c6d5c18fb:40x46mm M386 (HE) grenade
-5eea21647547d6330471b3c9:Mossberg 590A1 Magpul MOE forestock
-5eea217fc64c5d0dfc05712a:Mossberg 590A1 Magpul SGA stock
-5eeb2ff5ea4f8b73c827350b:Mossberg 590A1 Tactical rail
-5ef1b9f0c64c5d0dfc0571a1:Mossberg 590A1 Mesa Tactical LEO gen.1 stock adapter
-5ef1ba28c64c5d0dfc0571a5:Mesa Tactical Crosshair Hydraulic buffer tube
-5ef32e4d1c1fd62aea6a150d:M1911A1 Caspian Arms Trik Trigger
-5ef3448ab37dfd6af863525c:M1911A1 .45 ACP Mec-Gar 11-round magazine
-5ef3553c43cb350a955a7ccb:M1911A1 Wilson Extended slide stop
-5ef35bc243cb350a955a7ccd:M1911A1 Wilson Ultralight skeletonized hammer
-5ef35d2ac64c5d0dfc0571b0:M1911A1 Wilson Retro Commander hammer
-5ef35f46382a846010715a96:M1911A1 STI HEX hammer
-5ef366938cef260c0642acad:M1911 Pachmayr American Legend Grip #423
-5ef369b08cef260c0642acaf:M1911A1 NcSTAR trigger guard mount
-5ef5d994dfbc9f3c660ded95:M1911A1 Weigand Weig-a-tinny rail mount
-5ef61964ec7f42238c31e0c1:M1911 Anarchy Outdoors .45 ACP muzzle brake
-5efb0c1bd79ff02a1f5e68d9:7.62x51mm M993
-5efb0cabfb3e451d70735af5:.45 ACP AP
-5efb0d4f4bc50b58e81710f3:.45 ACP Lasermatch FMJ
-5efb0fc6aeb21837e749c801:.45 ACP Hydra-Shok
-5f0596629e22f464da6bbdd9:.366 TKM AP-M
-5f0c892565703e5c461894e9:40x46mm M433 (HEDP) grenade
-5f2a9575926fd9352339381f:Kel-Tec RFB 7.62x51 rifle
-5f2aa43ba9b91d26f20ae6d2:RFB thread spacer
-5f2aa4464b50c14bcf07acdb:RFB thread protection cap
-5f2aa4559b44de6b1b4e68d1:RFB 7.62x51 flash hider
-5f2aa46b878ef416f538b567:RFB 7.62x51 18 inch barrel
-5f2aa47a200e2c0ee46efa71:RFB handguard
-5f2aa493cd375f14e15eea72:RFB handguard rail mount
-5f2aa49f9b44de6b1b4e68d4:RFB scope rail mount
-5f36a0e5fbf956000b716b65:Colt M45A1 .45 ACP pistol
-5f3e76d86cda304dcc634054:M45A1 hammer
-5f3e772a670e2a7b01739a52:M45A1 trigger
-5f3e777688ca2d00ad199d25:M45A1 slide lock
-5f3e778efcd9b651187d7201:M45A1 Mil-Tac GVT G10 side grips
-5f3e77b26cda304dcc634057:M1911A1 .45 ACP Wilson Combat 7-round magazine
-5f3e77f59103d430b93f94c1:M1911A1 .45 ACP threaded barrel
-5f3e7801153b8571434a924c:M1911A1 .45 ACP National Match barrel
-5f3e7823ddc4f03b010e2045:M45A1 .45 ACP pistol slide
-5f3e7897ddc4f03b010e204a:M45A1 Novak Lomount rear sight
-5f3e78a7fbf956000b716b8e:M45A1 Novak Lomount front sight
 5f60b85bbdb8e27dee3dc985:Galvion Caiman Hybrid Ballistic Applique
 5f60bf4558eff926626a60f2:Galvion Caiman Fixed Arm Visor
 5f60c076f2bcbb675b00dac2:Galvion Caiman Hybrid Ballistic Mandible Guard
 5f60c85b58eff926626a60f7:Rys-T face shield
-5f63418ef5750b524b45f116:SOK-12 Bravo-18 aluminium handguard
-5f647d9f8499b57dc40ddb93:KS-23M 23x75 3-shell magazine cap
-5f647f31b6238e5dd066e196:23x75mm "Shrapnel-25" buckshot
 5f9949d869e2777a0e779ba5:Rivals 2020 armband
+
 5fc0f9b5d724d907e2077d82:A3 Tactical MVF001 KeyMod vertical foregrip (Black)
 5fc22d7c187fea44d52eda44:SWORD International Mk-18 .338 LM marksman rifle
 5fc23426900b1d5091531e15:Mk-18 .338 LM 10-round magazine
@@ -221,6 +63,7 @@
 5fc382a9d724d907e2077dab:.338 Lapua Magnum AP
 5fc382b6d6fa9c00c571bbc3:.338 Lapua Magnum TAC-X
 5fc382c1016cce60e8341b20:.338 Lapua Magnum UCW
+612e0d81290d254f5e6b291a:AWC PSR .338 LM muzzle brake
 5fc3e272f8b6a877a729eac5:HK UMP .45 ACP submachine gun
 5fc3e466187fea44d52eda90:HK UMP .45 ACP 25-round magazine
 5fc3e4a27283c4046c5814ab:HK UMP .45 ACP 8 inch barrel
@@ -275,7 +118,6 @@
 607d5aa50494a626335e12ed:MP-155 walnut forestock
 607ea812232e5a31c233d53c:MP-155 Ultima short rail
 6086b5392535c57a13424d70:Custom Guns handguard rail
-6086b5731246154cad35d6c7:SOK-12 Custom Guns Type-340 handguard
 6087e570b998180e9f76dc24:Superfors DB 2020 Dead Blow Hammer
 609a4b4fe2ff132951242d04:VPO-102 Arbalet mount
 609b9e31506cf869cf3eaf41:VOMZ Pilad TargetRing reflex sight
@@ -291,7 +133,6 @@
 612368f58b401f4f51239b33:MTs-255-12 12ga 755mm barrel with rib
 612781056f3d944a17348d60:MTs-255-12 wooden stock
 612e0d3767085e45ef14057f:AWC PSR 7.62x51 muzzle brake
-612e0d81290d254f5e6b291a:AWC PSR .338 LM muzzle brake
 6130c3dffaa1272e43151c7d:HK UMP .45 ACP 8 inch threaded barrel
 6130c4d51cb55961fa0fd49f:HK UMP B&T OEM .45 ACP sound suppressor
 614451b71e5874611e2c7ae5:Bottle of Tarkovskaya vodka
@@ -352,7 +193,6 @@
 618ba91477b82356f91ae0e8:Geissele Super Precision top ring cap (DDC)
 618ba92152ecee1505530bd3:Reptilia ROF-90 RMR mount for Geissele scope mounts (DDC)
 618bab21526131765025ab3f:Geissele Super Precision 30mm ring scope mount (DDC)
-619256e5f8af2c1a4e1f5d92:Model 7290 Flash Bang grenade
 6193a720f8ee7e52e42109ed:HK USP .45 ACP pistol
 6193d3149fb0c665d5490e32:HK USP Tactical .45 ACP 12-round magazine
 6193d338de3cdf1d2614a6fc:HK USP .45 ACP 12-round magazine
@@ -477,8 +317,6 @@
 625ff3046d721f05d93bf2ee:Benelli M3 Super 90 12ga Toni System 11-shell magazine
 625ff31daaaa8c1130599f64:Benelli M3 Super 90 12ga Toni System 13-shell magazine
 6267c6396b642f77f56f5c1c:Daniel Defense 25mm accessory ring mount
-626a9cb151cb5849f6002890:M1911 Kiba Arms Geneburn custom side grips
-6275303a9f372d6ea97f9ec7:Milkor M32A1 MSGL 40mm grenade launcher
 627bce33f21bc425b06ab967:M32A1 40mm cylinder
 627e14b21713922ded6f2c15:Accuracy International AXMC .338 LM bolt-action sniper rifle
 62811cd7308cb521f87a8f99:AI AXMC .338 LM bolt assembly
