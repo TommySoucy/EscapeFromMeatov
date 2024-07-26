@@ -1,3 +1,15 @@
+[Info   :EscapeFromMeatov] MK18SWORD_Suppressor
+[Info   :EscapeFromMeatov]      No Covered
+[Info   :EscapeFromMeatov]      .338 Suppressor Covered
+[Info   :EscapeFromMeatov] MK18SWORD_DUSTCOVER
+[Info   :EscapeFromMeatov]      DustCover Tan
+[Info   :EscapeFromMeatov]      DustCover Blk
+[Info   :EscapeFromMeatov] MK18SWORD_HANDGUARD
+[Info   :EscapeFromMeatov]      HandGuard BLK
+[Info   :EscapeFromMeatov]      HandGuard TAN
+[Info   :EscapeFromMeatov] MK18SWORD_LOWER
+[Info   :EscapeFromMeatov]      Lower BLK
+[Info   :EscapeFromMeatov]      Lower TAN
 [Info   :EscapeFromMeatov] FSCE.Mosin.Ironsights
 [Info   :EscapeFromMeatov]      Default Irons
 [Info   :EscapeFromMeatov]      Tannenberg Custom Irons
@@ -84,6 +96,8 @@
 [Info   :EscapeFromMeatov]      Ergo Palm-Shelf
 [Info   :EscapeFromMeatov]      DD Grip
 [Info   :EscapeFromMeatov]      DLG 123
+[Info   :EscapeFromMeatov]      HK_bever_grip
+[Info   :EscapeFromMeatov]      HK_Pistolgrip
 [Info   :EscapeFromMeatov] pdswCombs
 [Info   :EscapeFromMeatov]      No Comb
 [Info   :EscapeFromMeatov]      FTAC H86 Cheek Rest
@@ -871,6 +885,9 @@
 [Info   :EscapeFromMeatov]      19-Slot
 [Info   :EscapeFromMeatov]      19-Slot (Rail-Angled)
 [Info   :EscapeFromMeatov]      19-Slot (Rail-Flat)
+[Info   :EscapeFromMeatov] NWMP18Furniture
+[Info   :EscapeFromMeatov]      Wooden Furniture
+[Info   :EscapeFromMeatov]      Plastic Furniture
 [Info   :EscapeFromMeatov] NWSVDGrips
 [Info   :EscapeFromMeatov]      SVDS Grip
 [Info   :EscapeFromMeatov]      Zenit AF Grip
@@ -918,3 +935,48 @@
 [Info   :EscapeFromMeatov]      SAG Chassis System
 [Info   :EscapeFromMeatov]      DRG Quad-Rail
 [Info   :EscapeFromMeatov]      Zenit ACS
+[Info   :EscapeFromMeatov] HK417_EndPlate
+[Info   :EscapeFromMeatov]      HK417 Receiver End Plate Ambi
+[Info   :EscapeFromMeatov]      HK417 Receiver End Plate Clean
+[Info   :EscapeFromMeatov]      HK417 Receiver End Plate QD
+[Info   :EscapeFromMeatov] HK417_Charging_Handel
+[Info   :EscapeFromMeatov]      HK417 Charging Handel
+[Info   :EscapeFromMeatov]      HK417 Geissele Super Charging Handle
+[Info   :EscapeFromMeatov] HK417_uppers
+[Info   :EscapeFromMeatov]      M110A1_Upper
+[Info   :EscapeFromMeatov]      HK417A1_Upper
+[Info   :EscapeFromMeatov]      G28_upper
+[Info   :EscapeFromMeatov]      HK417D_Upper
+[Info   :EscapeFromMeatov]      HK417A2_Upper
+[Info   :EscapeFromMeatov] GasBlock_HK417
+[Info   :EscapeFromMeatov]      HK417 Gas Block
+[Info   :EscapeFromMeatov]      HK417 Gas Block 5 pos
+[Info   :EscapeFromMeatov] Handguards_HK417
+[Info   :EscapeFromMeatov]      M110A1_MLOK
+[Info   :EscapeFromMeatov]      RAL8000 HANDGUARD
+[Info   :EscapeFromMeatov]      HK417_longHG_RAIL
+[Info   :EscapeFromMeatov]      HK417_ShortHG_RAIL
+[Info   :EscapeFromMeatov]      14.7" KeyMod
+[Info   :EscapeFromMeatov]      14.7" M-lok
+[Info   :EscapeFromMeatov]      M110A1_Assault_MLOK
+[Info   :EscapeFromMeatov]      Patrol HANDGUARD
+[Info   :EscapeFromMeatov] Barrels_HK417
+[Info   :EscapeFromMeatov]      HK417_Barrel_10
+[Info   :EscapeFromMeatov]      HK417_Barrel_11
+[Info   :EscapeFromMeatov]      HK417_Barrel_12.5
+[Info   :EscapeFromMeatov]      HK417_Barrel_14.5
+[Info   :EscapeFromMeatov]      HK417_Barrel_16
+[Info   :EscapeFromMeatov]      HK417_Barrel_16 Mount
+[Info   :EscapeFromMeatov]      HK417_Barrel_20
+[Info   :EscapeFromMeatov]      HK417_Barrel_20 Mount
+[Info   :EscapeFromMeatov] HK_Flip_sight
+[Info   :EscapeFromMeatov]      No_FLIP_Sight
+[Info   :EscapeFromMeatov]      HK_FLIP_Sight
+[Info   :EscapeFromMeatov] HK_Flip_sight_B
+[Info   :EscapeFromMeatov]      No_FLIP_Sight_b
+[Info   :EscapeFromMeatov]      HK_FLIP_Sight_B
+[Info   :EscapeFromMeatov] BufferTubes_HK417
+[Info   :EscapeFromMeatov]      HK stock E2
+[Info   :EscapeFromMeatov]      HK Stock RAL8000
+[Info   :EscapeFromMeatov]      HK RAL8000 STOCK
+[Info   :EscapeFromMeatov]      HK stock E1
