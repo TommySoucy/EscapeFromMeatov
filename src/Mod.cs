@@ -3057,14 +3057,11 @@ namespace EFM
             else
             {
                 // This item was caught by H3MP's instantiation patches and must be setup now
-                FVRPhysicalObject physicalObject = go.GetComponent<FVRPhysicalObject>();
-                if (physicalObject != null && physicalObject.ObjectWrapper != null)
+                MeatovItem meatovItem = go.GetComponent<MeatovItem>();
+                FVRPhysicalObject physObj = go.GetComponent<FVRPhysicalObject>();
+                if (meatovItem == null && physObj != null)
                 {
-                    // Must setup the item if it is vanilla
-                    if (!physicalObject.ObjectWrapper.ItemID.StartsWith("Meatov"))
-                    {
-                        MeatovItem.Setup(physicalObject);
-                    }
+                    MeatovItem.Setup(physObj);
                 }
                 instantiatedItem = null;
             }
